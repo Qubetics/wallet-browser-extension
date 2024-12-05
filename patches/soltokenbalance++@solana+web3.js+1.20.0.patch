@@ -1,0 +1,1074 @@
+diff --git a/node_modules/soltokenbalance/node_modules/@solana/web3.js/lib/index.browser.esm.js b/node_modules/soltokenbalance/node_modules/@solana/web3.js/lib/index.browser.esm.js
+index 52087f8..7d0db72 100644
+--- a/node_modules/soltokenbalance/node_modules/@solana/web3.js/lib/index.browser.esm.js
++++ b/node_modules/soltokenbalance/node_modules/@solana/web3.js/lib/index.browser.esm.js
+@@ -250,12 +250,12 @@ let naclLowLevel = nacl__default.lowlevel; // Check that a pubkey is on the curv
+ function is_on_curve(p) {
+   var r = [naclLowLevel.gf(), naclLowLevel.gf(), naclLowLevel.gf(), naclLowLevel.gf()];
+   var t = naclLowLevel.gf(),
+-      chk = naclLowLevel.gf(),
+-      num = naclLowLevel.gf(),
+-      den = naclLowLevel.gf(),
+-      den2 = naclLowLevel.gf(),
+-      den4 = naclLowLevel.gf(),
+-      den6 = naclLowLevel.gf();
++    chk = naclLowLevel.gf(),
++    num = naclLowLevel.gf(),
++    den = naclLowLevel.gf(),
++    den2 = naclLowLevel.gf(),
++    den4 = naclLowLevel.gf(),
++    den6 = naclLowLevel.gf();
+   naclLowLevel.set25519(r[2], gf1);
+   naclLowLevel.unpack25519(r[1], p);
+   naclLowLevel.S(num, r[1]);
+@@ -286,7 +286,7 @@ let I = naclLowLevel.gf([0xa0b0, 0x4a0e, 0x1b27, 0xc4ee, 0xe478, 0xad2f, 0x1806,
+ 
+ function neq25519(a, b) {
+   var c = new Uint8Array(32),
+-      d = new Uint8Array(32);
++    d = new Uint8Array(32);
+   naclLowLevel.pack25519(c, a);
+   naclLowLevel.pack25519(d, b);
+   return naclLowLevel.crypto_verify_32(c, 0, d, 0);
+@@ -341,10 +341,10 @@ const BPF_LOADER_DEPRECATED_PROGRAM_ID = new PublicKey('BPFLoader111111111111111
+ 
+ var global$1 = (typeof global !== "undefined" ? global :
+   typeof self !== "undefined" ? self :
+-  typeof window !== "undefined" ? window : {});
++    typeof window !== "undefined" ? window : {});
+ 
+ var inherits;
+-if (typeof Object.create === 'function'){
++if (typeof Object.create === 'function') {
+   inherits = function inherits(ctor, superCtor) {
+     // implementation from standard node.js 'util' module
+     ctor.super_ = superCtor;
+@@ -360,7 +360,7 @@ if (typeof Object.create === 'function'){
+ } else {
+   inherits = function inherits(ctor, superCtor) {
+     ctor.super_ = superCtor;
+-    var TempCtor = function () {};
++    var TempCtor = function () { };
+     TempCtor.prototype = superCtor.prototype;
+     ctor.prototype = new TempCtor();
+     ctor.prototype.constructor = ctor;
+@@ -403,19 +403,19 @@ function inspect$1(obj, opts) {
+ 
+ // http://en.wikipedia.org/wiki/ANSI_escape_code#graphics
+ inspect$1.colors = {
+-  'bold' : [1, 22],
+-  'italic' : [3, 23],
+-  'underline' : [4, 24],
+-  'inverse' : [7, 27],
+-  'white' : [37, 39],
+-  'grey' : [90, 39],
+-  'black' : [30, 39],
+-  'blue' : [34, 39],
+-  'cyan' : [36, 39],
+-  'green' : [32, 39],
+-  'magenta' : [35, 39],
+-  'red' : [31, 39],
+-  'yellow' : [33, 39]
++  'bold': [1, 22],
++  'italic': [3, 23],
++  'underline': [4, 24],
++  'inverse': [7, 27],
++  'white': [37, 39],
++  'grey': [90, 39],
++  'black': [30, 39],
++  'blue': [34, 39],
++  'cyan': [36, 39],
++  'green': [32, 39],
++  'magenta': [35, 39],
++  'red': [31, 39],
++  'yellow': [33, 39]
+ };
+ 
+ // Don't use 'blue' not visible on cmd.exe
+@@ -437,7 +437,7 @@ function stylizeWithColor(str, styleType) {
+ 
+   if (style) {
+     return '\u001b[' + inspect$1.colors[style][0] + 'm' + str +
+-           '\u001b[' + inspect$1.colors[style][1] + 'm';
++      '\u001b[' + inspect$1.colors[style][1] + 'm';
+   } else {
+     return str;
+   }
+@@ -452,7 +452,7 @@ function stylizeNoColor(str, styleType) {
+ function arrayToHash(array) {
+   var hash = {};
+ 
+-  array.forEach(function(val, idx) {
++  array.forEach(function (val, idx) {
+     hash[val] = true;
+   });
+ 
+@@ -464,12 +464,12 @@ function formatValue(ctx, value, recurseTimes) {
+   // Provide a hook for user-specified inspect functions.
+   // Check that value is an object with an inspect function on it
+   if (ctx.customInspect &&
+-      value &&
+-      isFunction(value.inspect) &&
+-      // Filter out the util module, it's inspect function is special
+-      value.inspect !== inspect$1 &&
+-      // Also filter out any prototype objects using the circular check.
+-      !(value.constructor && value.constructor.prototype === value)) {
++    value &&
++    isFunction(value.inspect) &&
++    // Filter out the util module, it's inspect function is special
++    value.inspect !== inspect$1 &&
++    // Also filter out any prototype objects using the circular check.
++    !(value.constructor && value.constructor.prototype === value)) {
+     var ret = value.inspect(recurseTimes, ctx);
+     if (!isString(ret)) {
+       ret = formatValue(ctx, ret, recurseTimes);
+@@ -494,7 +494,7 @@ function formatValue(ctx, value, recurseTimes) {
+   // IE doesn't make error fields non-enumerable
+   // http://msdn.microsoft.com/en-us/library/ie/dww52sbt(v=vs.94).aspx
+   if (isError(value)
+-      && (keys.indexOf('message') >= 0 || keys.indexOf('description') >= 0)) {
++    && (keys.indexOf('message') >= 0 || keys.indexOf('description') >= 0)) {
+     return formatError(value);
+   }
+ 
+@@ -562,7 +562,7 @@ function formatValue(ctx, value, recurseTimes) {
+   if (array) {
+     output = formatArray(ctx, value, recurseTimes, visibleKeys, keys);
+   } else {
+-    output = keys.map(function(key) {
++    output = keys.map(function (key) {
+       return formatProperty(ctx, value, recurseTimes, visibleKeys, key, array);
+     });
+   }
+@@ -578,8 +578,8 @@ function formatPrimitive(ctx, value) {
+     return ctx.stylize('undefined', 'undefined');
+   if (isString(value)) {
+     var simple = '\'' + JSON.stringify(value).replace(/^"|"$/g, '')
+-                                             .replace(/'/g, "\\'")
+-                                             .replace(/\\"/g, '"') + '\'';
++      .replace(/'/g, "\\'")
++      .replace(/\\"/g, '"') + '\'';
+     return ctx.stylize(simple, 'string');
+   }
+   if (isNumber(value))
+@@ -602,15 +602,15 @@ function formatArray(ctx, value, recurseTimes, visibleKeys, keys) {
+   for (var i = 0, l = value.length; i < l; ++i) {
+     if (hasOwnProperty$1(value, String(i))) {
+       output.push(formatProperty(ctx, value, recurseTimes, visibleKeys,
+-          String(i), true));
++        String(i), true));
+     } else {
+       output.push('');
+     }
+   }
+-  keys.forEach(function(key) {
++  keys.forEach(function (key) {
+     if (!key.match(/^\d+$/)) {
+       output.push(formatProperty(ctx, value, recurseTimes, visibleKeys,
+-          key, true));
++        key, true));
+     }
+   });
+   return output;
+@@ -643,11 +643,11 @@ function formatProperty(ctx, value, recurseTimes, visibleKeys, key, array) {
+       }
+       if (str.indexOf('\n') > -1) {
+         if (array) {
+-          str = str.split('\n').map(function(line) {
++          str = str.split('\n').map(function (line) {
+             return '  ' + line;
+           }).join('\n').substr(2);
+         } else {
+-          str = '\n' + str.split('\n').map(function(line) {
++          str = '\n' + str.split('\n').map(function (line) {
+             return '   ' + line;
+           }).join('\n');
+         }
+@@ -666,8 +666,8 @@ function formatProperty(ctx, value, recurseTimes, visibleKeys, key, array) {
+       name = ctx.stylize(name, 'name');
+     } else {
+       name = name.replace(/'/g, "\\'")
+-                 .replace(/\\"/g, '"')
+-                 .replace(/(^"|"$)/g, "'");
++        .replace(/\\"/g, '"')
++        .replace(/(^"|"$)/g, "'");
+       name = ctx.stylize(name, 'string');
+     }
+   }
+@@ -677,18 +677,18 @@ function formatProperty(ctx, value, recurseTimes, visibleKeys, key, array) {
+ 
+ 
+ function reduceToSingleString(output, base, braces) {
+-  var length = output.reduce(function(prev, cur) {
+-    if (cur.indexOf('\n') >= 0) ;
++  var length = output.reduce(function (prev, cur) {
++    if (cur.indexOf('\n') >= 0);
+     return prev + cur.replace(/\u001b\[\d\d?m/g, '').length + 1;
+   }, 0);
+ 
+   if (length > 60) {
+     return braces[0] +
+-           (base === '' ? '' : base + '\n ') +
+-           ' ' +
+-           output.join(',\n  ') +
+-           ' ' +
+-           braces[1];
++      (base === '' ? '' : base + '\n ') +
++      ' ' +
++      output.join(',\n  ') +
++      ' ' +
++      braces[1];
+   }
+ 
+   return braces[0] + base + ' ' + output.join(', ') + ' ' + braces[1];
+@@ -739,7 +739,7 @@ function isDate(d) {
+ 
+ function isError(e) {
+   return isObject(e) &&
+-      (objectToString(e) === '[object Error]' || e instanceof Error);
++    (objectToString(e) === '[object Error]' || e instanceof Error);
+ }
+ 
+ function isFunction(arg) {
+@@ -748,11 +748,11 @@ function isFunction(arg) {
+ 
+ function isPrimitive(arg) {
+   return arg === null ||
+-         typeof arg === 'boolean' ||
+-         typeof arg === 'number' ||
+-         typeof arg === 'string' ||
+-         typeof arg === 'symbol' ||  // ES6 symbol
+-         typeof arg === 'undefined';
++    typeof arg === 'boolean' ||
++    typeof arg === 'number' ||
++    typeof arg === 'string' ||
++    typeof arg === 'symbol' ||  // ES6 symbol
++    typeof arg === 'undefined';
+ }
+ 
+ function objectToString(o) {
+@@ -814,14 +814,14 @@ function functionsHaveNames() {
+     return _functionsHaveNames;
+   }
+   return _functionsHaveNames = (function () {
+-    return function foo() {}.name === 'foo';
++    return function foo() { }.name === 'foo';
+   }());
+ }
+-function pToString (obj) {
++function pToString(obj) {
+   return Object.prototype.toString.call(obj);
+ }
+ function isView(arrbuf) {
+-  if (isBuffer(arrbuf)) {
++  if (arrbuf instanceof Buffer) {
+     return false;
+   }
+   if (typeof global$1.ArrayBuffer !== 'function') {
+@@ -920,12 +920,12 @@ function inspect(something) {
+   }
+   var rawname = getName(something);
+   var name = rawname ? ': ' + rawname : '';
+-  return '[Function' +  name + ']';
++  return '[Function' + name + ']';
+ }
+ function getMessage(self) {
+   return truncate(inspect(self.actual), 128) + ' ' +
+-         self.operator + ' ' +
+-         truncate(inspect(self.expected), 128);
++    self.operator + ' ' +
++    truncate(inspect(self.expected), 128);
+ }
+ 
+ // At present only the three keys mentioned above are used and
+@@ -1000,53 +1000,53 @@ function _deepEqual(actual, expected, strict, memos) {
+   // 7.1. All identical values are equivalent, as determined by ===.
+   if (actual === expected) {
+     return true;
+-  } else if (isBuffer(actual) && isBuffer(expected)) {
++  } else if (actual instanceof Buffer && expected instanceof Buffer) {
+     return compare(actual, expected) === 0;
+ 
+-  // 7.2. If the expected value is a Date object, the actual value is
+-  // equivalent if it is also a Date object that refers to the same time.
++    // 7.2. If the expected value is a Date object, the actual value is
++    // equivalent if it is also a Date object that refers to the same time.
+   } else if (isDate(actual) && isDate(expected)) {
+     return actual.getTime() === expected.getTime();
+ 
+-  // 7.3 If the expected value is a RegExp object, the actual value is
+-  // equivalent if it is also a RegExp object with the same source and
+-  // properties (`global`, `multiline`, `lastIndex`, `ignoreCase`).
++    // 7.3 If the expected value is a RegExp object, the actual value is
++    // equivalent if it is also a RegExp object with the same source and
++    // properties (`global`, `multiline`, `lastIndex`, `ignoreCase`).
+   } else if (isRegExp(actual) && isRegExp(expected)) {
+     return actual.source === expected.source &&
+-           actual.global === expected.global &&
+-           actual.multiline === expected.multiline &&
+-           actual.lastIndex === expected.lastIndex &&
+-           actual.ignoreCase === expected.ignoreCase;
++      actual.global === expected.global &&
++      actual.multiline === expected.multiline &&
++      actual.lastIndex === expected.lastIndex &&
++      actual.ignoreCase === expected.ignoreCase;
+ 
+-  // 7.4. Other pairs that do not both pass typeof value == 'object',
+-  // equivalence is determined by ==.
++    // 7.4. Other pairs that do not both pass typeof value == 'object',
++    // equivalence is determined by ==.
+   } else if ((actual === null || typeof actual !== 'object') &&
+-             (expected === null || typeof expected !== 'object')) {
++    (expected === null || typeof expected !== 'object')) {
+     return strict ? actual === expected : actual == expected;
+ 
+-  // If both values are instances of typed arrays, wrap their underlying
+-  // ArrayBuffers in a Buffer each to increase performance
+-  // This optimization requires the arrays to have the same type as checked by
+-  // Object.prototype.toString (aka pToString). Never perform binary
+-  // comparisons for Float*Arrays, though, since e.g. +0 === -0 but their
+-  // bit patterns are not identical.
++    // If both values are instances of typed arrays, wrap their underlying
++    // ArrayBuffers in a Buffer each to increase performance
++    // This optimization requires the arrays to have the same type as checked by
++    // Object.prototype.toString (aka pToString). Never perform binary
++    // comparisons for Float*Arrays, though, since e.g. +0 === -0 but their
++    // bit patterns are not identical.
+   } else if (isView(actual) && isView(expected) &&
+-             pToString(actual) === pToString(expected) &&
+-             !(actual instanceof Float32Array ||
+-               actual instanceof Float64Array)) {
++    pToString(actual) === pToString(expected) &&
++    !(actual instanceof Float32Array ||
++      actual instanceof Float64Array)) {
+     return compare(new Uint8Array(actual.buffer),
+-                   new Uint8Array(expected.buffer)) === 0;
+-
+-  // 7.5 For all other Object pairs, including Array objects, equivalence is
+-  // determined by having the same number of owned properties (as verified
+-  // with Object.prototype.hasOwnProperty.call), the same set of keys
+-  // (although not necessarily the same order), equivalent values for every
+-  // corresponding key, and an identical 'prototype' property. Note: this
+-  // accounts for both named and indexed properties on Arrays.
+-  } else if (isBuffer(actual) !== isBuffer(expected)) {
++      new Uint8Array(expected.buffer)) === 0;
++
++    // 7.5 For all other Object pairs, including Array objects, equivalence is
++    // determined by having the same number of owned properties (as verified
++    // with Object.prototype.hasOwnProperty.call), the same set of keys
++    // (although not necessarily the same order), equivalent values for every
++    // corresponding key, and an identical 'prototype' property. Note: this
++    // accounts for both named and indexed properties on Arrays.
++  } else if (actual instanceof Buffer !== expected instanceof Buffer) {
+     return false;
+   } else {
+-    memos = memos || {actual: [], expected: []};
++    memos = memos || { actual: [], expected: [] };
+ 
+     var actualIndex = memos.actual.indexOf(actual);
+     if (actualIndex !== -1) {
+@@ -1192,7 +1192,7 @@ function _throws(shouldThrow, block, expected, message) {
+   actual = _tryBlock(block);
+ 
+   message = (expected && expected.name ? ' (' + expected.name + ').' : '.') +
+-            (message ? ' ' + message : '.');
++    (message ? ' ' + message : '.');
+ 
+   if (shouldThrow && !actual) {
+     fail(actual, expected, 'Missing expected exception' + message);
+@@ -1203,14 +1203,14 @@ function _throws(shouldThrow, block, expected, message) {
+   var isUnexpectedException = !shouldThrow && actual && !expected;
+ 
+   if ((isUnwantedException &&
+-      userProvidedMessage &&
+-      expectedException(actual, expected)) ||
+-      isUnexpectedException) {
++    userProvidedMessage &&
++    expectedException(actual, expected)) ||
++    isUnexpectedException) {
+     fail(actual, expected, 'Got unwanted exception' + message);
+   }
+ 
+   if ((shouldThrow && actual && expected &&
+-      !expectedException(actual, expected)) || (!shouldThrow && actual)) {
++    !expectedException(actual, expected)) || (!shouldThrow && actual)) {
+     throw actual;
+   }
+ }
+@@ -1300,7 +1300,7 @@ function decodeLength(bytes) {
+   let len = 0;
+   let size = 0;
+ 
+-  for (;;) {
++  for (; ;) {
+     let elem = bytes.shift();
+     len |= (elem & 0x7f) << size * 7;
+     size += 1;
+@@ -1315,7 +1315,7 @@ function decodeLength(bytes) {
+ function encodeLength(bytes, len) {
+   let rem_len = len;
+ 
+-  for (;;) {
++  for (; ;) {
+     let elem = rem_len & 0x7f;
+     rem_len >>= 7;
+ 
+@@ -1626,7 +1626,8 @@ class Transaction {
+     const accountMetas = [];
+     this.instructions.forEach(instruction => {
+       instruction.keys.forEach(accountMeta => {
+-        accountMetas.push({ ...accountMeta
++        accountMetas.push({
++          ...accountMeta
+         });
+       });
+       const programId = instruction.programId.toString();
+@@ -2246,7 +2247,7 @@ class SystemInstruction {
+   /**
+    * @internal
+    */
+-  constructor() {}
++  constructor() { }
+   /**
+    * Decode a system instruction and retrieve the instruction type.
+    */
+@@ -2583,7 +2584,7 @@ class SystemProgram {
+   /**
+    * @internal
+    */
+-  constructor() {}
++  constructor() { }
+   /**
+    * Public key that identifies the System program
+    */
+@@ -2961,7 +2962,7 @@ class Loader {
+   /**
+    * @internal
+    */
+-  constructor() {}
++  constructor() { }
+   /**
+    * Amount of program data placed in each load Transaction
+    */
+@@ -2975,9 +2976,9 @@ class Loader {
+    */
+   static getMinNumSignatures(dataLength) {
+     return 2 * ( // Every transaction requires two signatures (payer + program)
+-    Math.ceil(dataLength / Loader.chunkSize) + 1 + // Add one for Create transaction
+-    1) // Add one for Finalize transaction
+-    ;
++      Math.ceil(dataLength / Loader.chunkSize) + 1 + // Add one for Create transaction
++      1) // Add one for Finalize transaction
++      ;
+   }
+   /**
+    * Loads a generic program
+@@ -3167,9 +3168,9 @@ const regexSeparators = /[\x2E\u3002\uFF0E\uFF61]/g; // RFC 3490 separators
+ 
+ /** Error messages */
+ const errors = {
+-	'overflow': 'Overflow: input needs wider integers to process',
+-	'not-basic': 'Illegal input >= 0x80 (not a basic code point)',
+-	'invalid-input': 'Invalid input'
++  'overflow': 'Overflow: input needs wider integers to process',
++  'not-basic': 'Illegal input >= 0x80 (not a basic code point)',
++  'invalid-input': 'Invalid input'
+ };
+ 
+ /** Convenience shortcuts */
+@@ -3186,7 +3187,7 @@ const stringFromCharCode = String.fromCharCode;
+  * @returns {Error} Throws a `RangeError` with the applicable error message.
+  */
+ function error(type) {
+-	throw new RangeError(errors[type]);
++  throw new RangeError(errors[type]);
+ }
+ 
+ /**
+@@ -3198,12 +3199,12 @@ function error(type) {
+  * @returns {Array} A new array of values returned by the callback function.
+  */
+ function map$1(array, fn) {
+-	const result = [];
+-	let length = array.length;
+-	while (length--) {
+-		result[length] = fn(array[length]);
+-	}
+-	return result;
++  const result = [];
++  let length = array.length;
++  while (length--) {
++    result[length] = fn(array[length]);
++  }
++  return result;
+ }
+ 
+ /**
+@@ -3217,19 +3218,19 @@ function map$1(array, fn) {
+  * function.
+  */
+ function mapDomain(string, fn) {
+-	const parts = string.split('@');
+-	let result = '';
+-	if (parts.length > 1) {
+-		// In email addresses, only the domain name should be punycoded. Leave
+-		// the local part (i.e. everything up to `@`) intact.
+-		result = parts[0] + '@';
+-		string = parts[1];
+-	}
+-	// Avoid `split(regex)` for IE8 compatibility. See #17.
+-	string = string.replace(regexSeparators, '\x2E');
+-	const labels = string.split('.');
+-	const encoded = map$1(labels, fn).join('.');
+-	return result + encoded;
++  const parts = string.split('@');
++  let result = '';
++  if (parts.length > 1) {
++    // In email addresses, only the domain name should be punycoded. Leave
++    // the local part (i.e. everything up to `@`) intact.
++    result = parts[0] + '@';
++    string = parts[1];
++  }
++  // Avoid `split(regex)` for IE8 compatibility. See #17.
++  string = string.replace(regexSeparators, '\x2E');
++  const labels = string.split('.');
++  const encoded = map$1(labels, fn).join('.');
++  return result + encoded;
+ }
+ 
+ /**
+@@ -3246,27 +3247,27 @@ function mapDomain(string, fn) {
+  * @returns {Array} The new array of code points.
+  */
+ function ucs2decode(string) {
+-	const output = [];
+-	let counter = 0;
+-	const length = string.length;
+-	while (counter < length) {
+-		const value = string.charCodeAt(counter++);
+-		if (value >= 0xD800 && value <= 0xDBFF && counter < length) {
+-			// It's a high surrogate, and there is a next character.
+-			const extra = string.charCodeAt(counter++);
+-			if ((extra & 0xFC00) == 0xDC00) { // Low surrogate.
+-				output.push(((value & 0x3FF) << 10) + (extra & 0x3FF) + 0x10000);
+-			} else {
+-				// It's an unmatched surrogate; only append this code unit, in case the
+-				// next code unit is the high surrogate of a surrogate pair.
+-				output.push(value);
+-				counter--;
+-			}
+-		} else {
+-			output.push(value);
+-		}
+-	}
+-	return output;
++  const output = [];
++  let counter = 0;
++  const length = string.length;
++  while (counter < length) {
++    const value = string.charCodeAt(counter++);
++    if (value >= 0xD800 && value <= 0xDBFF && counter < length) {
++      // It's a high surrogate, and there is a next character.
++      const extra = string.charCodeAt(counter++);
++      if ((extra & 0xFC00) == 0xDC00) { // Low surrogate.
++        output.push(((value & 0x3FF) << 10) + (extra & 0x3FF) + 0x10000);
++      } else {
++        // It's an unmatched surrogate; only append this code unit, in case the
++        // next code unit is the high surrogate of a surrogate pair.
++        output.push(value);
++        counter--;
++      }
++    } else {
++      output.push(value);
++    }
++  }
++  return output;
+ }
+ 
+ /**
+@@ -3280,10 +3281,10 @@ function ucs2decode(string) {
+  * used; else, the lowercase form is used. The behavior is undefined
+  * if `flag` is non-zero and `digit` has no uppercase form.
+  */
+-const digitToBasic = function(digit, flag) {
+-	//  0..25 map to ASCII a..z or A..Z
+-	// 26..35 map to ASCII 0..9
+-	return digit + 22 + 75 * (digit < 26) - ((flag != 0) << 5);
++const digitToBasic = function (digit, flag) {
++  //  0..25 map to ASCII a..z or A..Z
++  // 26..35 map to ASCII 0..9
++  return digit + 22 + 75 * (digit < 26) - ((flag != 0) << 5);
+ };
+ 
+ /**
+@@ -3291,14 +3292,14 @@ const digitToBasic = function(digit, flag) {
+  * https://tools.ietf.org/html/rfc3492#section-3.4
+  * @private
+  */
+-const adapt = function(delta, numPoints, firstTime) {
+-	let k = 0;
+-	delta = firstTime ? floor(delta / damp) : delta >> 1;
+-	delta += floor(delta / numPoints);
+-	for (/* no initialization */; delta > baseMinusTMin * tMax >> 1; k += base) {
+-		delta = floor(delta / baseMinusTMin);
+-	}
+-	return floor(k + (baseMinusTMin + 1) * delta / (delta + skew));
++const adapt = function (delta, numPoints, firstTime) {
++  let k = 0;
++  delta = firstTime ? floor(delta / damp) : delta >> 1;
++  delta += floor(delta / numPoints);
++  for (/* no initialization */; delta > baseMinusTMin * tMax >> 1; k += base) {
++    delta = floor(delta / baseMinusTMin);
++  }
++  return floor(k + (baseMinusTMin + 1) * delta / (delta + skew));
+ };
+ 
+ /**
+@@ -3308,92 +3309,92 @@ const adapt = function(delta, numPoints, firstTime) {
+  * @param {String} input The string of Unicode symbols.
+  * @returns {String} The resulting Punycode string of ASCII-only symbols.
+  */
+-const encode = function(input) {
+-	const output = [];
+-
+-	// Convert the input in UCS-2 to an array of Unicode code points.
+-	input = ucs2decode(input);
+-
+-	// Cache the length.
+-	let inputLength = input.length;
+-
+-	// Initialize the state.
+-	let n = initialN;
+-	let delta = 0;
+-	let bias = initialBias;
+-
+-	// Handle the basic code points.
+-	for (const currentValue of input) {
+-		if (currentValue < 0x80) {
+-			output.push(stringFromCharCode(currentValue));
+-		}
+-	}
+-
+-	let basicLength = output.length;
+-	let handledCPCount = basicLength;
+-
+-	// `handledCPCount` is the number of code points that have been handled;
+-	// `basicLength` is the number of basic code points.
+-
+-	// Finish the basic string with a delimiter unless it's empty.
+-	if (basicLength) {
+-		output.push(delimiter);
+-	}
+-
+-	// Main encoding loop:
+-	while (handledCPCount < inputLength) {
+-
+-		// All non-basic code points < n have been handled already. Find the next
+-		// larger one:
+-		let m = maxInt;
+-		for (const currentValue of input) {
+-			if (currentValue >= n && currentValue < m) {
+-				m = currentValue;
+-			}
+-		}
+-
+-		// Increase `delta` enough to advance the decoder's <n,i> state to <m,0>,
+-		// but guard against overflow.
+-		const handledCPCountPlusOne = handledCPCount + 1;
+-		if (m - n > floor((maxInt - delta) / handledCPCountPlusOne)) {
+-			error('overflow');
+-		}
+-
+-		delta += (m - n) * handledCPCountPlusOne;
+-		n = m;
+-
+-		for (const currentValue of input) {
+-			if (currentValue < n && ++delta > maxInt) {
+-				error('overflow');
+-			}
+-			if (currentValue == n) {
+-				// Represent delta as a generalized variable-length integer.
+-				let q = delta;
+-				for (let k = base; /* no condition */; k += base) {
+-					const t = k <= bias ? tMin : (k >= bias + tMax ? tMax : k - bias);
+-					if (q < t) {
+-						break;
+-					}
+-					const qMinusT = q - t;
+-					const baseMinusT = base - t;
+-					output.push(
+-						stringFromCharCode(digitToBasic(t + qMinusT % baseMinusT, 0))
+-					);
+-					q = floor(qMinusT / baseMinusT);
+-				}
+-
+-				output.push(stringFromCharCode(digitToBasic(q, 0)));
+-				bias = adapt(delta, handledCPCountPlusOne, handledCPCount == basicLength);
+-				delta = 0;
+-				++handledCPCount;
+-			}
+-		}
+-
+-		++delta;
+-		++n;
+-
+-	}
+-	return output.join('');
++const encode = function (input) {
++  const output = [];
++
++  // Convert the input in UCS-2 to an array of Unicode code points.
++  input = ucs2decode(input);
++
++  // Cache the length.
++  let inputLength = input.length;
++
++  // Initialize the state.
++  let n = initialN;
++  let delta = 0;
++  let bias = initialBias;
++
++  // Handle the basic code points.
++  for (const currentValue of input) {
++    if (currentValue < 0x80) {
++      output.push(stringFromCharCode(currentValue));
++    }
++  }
++
++  let basicLength = output.length;
++  let handledCPCount = basicLength;
++
++  // `handledCPCount` is the number of code points that have been handled;
++  // `basicLength` is the number of basic code points.
++
++  // Finish the basic string with a delimiter unless it's empty.
++  if (basicLength) {
++    output.push(delimiter);
++  }
++
++  // Main encoding loop:
++  while (handledCPCount < inputLength) {
++
++    // All non-basic code points < n have been handled already. Find the next
++    // larger one:
++    let m = maxInt;
++    for (const currentValue of input) {
++      if (currentValue >= n && currentValue < m) {
++        m = currentValue;
++      }
++    }
++
++    // Increase `delta` enough to advance the decoder's <n,i> state to <m,0>,
++    // but guard against overflow.
++    const handledCPCountPlusOne = handledCPCount + 1;
++    if (m - n > floor((maxInt - delta) / handledCPCountPlusOne)) {
++      error('overflow');
++    }
++
++    delta += (m - n) * handledCPCountPlusOne;
++    n = m;
++
++    for (const currentValue of input) {
++      if (currentValue < n && ++delta > maxInt) {
++        error('overflow');
++      }
++      if (currentValue == n) {
++        // Represent delta as a generalized variable-length integer.
++        let q = delta;
++        for (let k = base; /* no condition */; k += base) {
++          const t = k <= bias ? tMin : (k >= bias + tMax ? tMax : k - bias);
++          if (q < t) {
++            break;
++          }
++          const qMinusT = q - t;
++          const baseMinusT = base - t;
++          output.push(
++            stringFromCharCode(digitToBasic(t + qMinusT % baseMinusT, 0))
++          );
++          q = floor(qMinusT / baseMinusT);
++        }
++
++        output.push(stringFromCharCode(digitToBasic(q, 0)));
++        bias = adapt(delta, handledCPCountPlusOne, handledCPCount == basicLength);
++        delta = 0;
++        ++handledCPCount;
++      }
++    }
++
++    ++delta;
++    ++n;
++
++  }
++  return output.join('');
+ };
+ 
+ /**
+@@ -3407,12 +3408,12 @@ const encode = function(input) {
+  * @returns {String} The Punycode representation of the given domain name or
+  * email address.
+  */
+-const toASCII = function(input) {
+-	return mapDomain(input, function(string) {
+-		return regexNonASCII.test(string)
+-			? 'xn--' + encode(string)
+-			: string;
+-	});
++const toASCII = function (input) {
++  return mapDomain(input, function (string) {
++    return regexNonASCII.test(string)
++      ? 'xn--' + encode(string)
++      : string;
++  });
+ };
+ 
+ // Copyright Joyent, Inc. and other Node contributors.
+@@ -3462,7 +3463,7 @@ function stringifyPrimitive(v) {
+   }
+ }
+ 
+-function stringify (obj, sep, eq, name) {
++function stringify(obj, sep, eq, name) {
+   sep = sep || '&';
+   eq = eq || '=';
+   if (obj === null) {
+@@ -3470,10 +3471,10 @@ function stringify (obj, sep, eq, name) {
+   }
+ 
+   if (typeof obj === 'object') {
+-    return map(objectKeys(obj), function(k) {
++    return map(objectKeys(obj), function (k) {
+       var ks = encodeURIComponent(stringifyPrimitive(k)) + eq;
+       if (isArray(obj[k])) {
+-        return map(obj[k], function(v) {
++        return map(obj[k], function (v) {
+           return ks + encodeURIComponent(stringifyPrimitive(v));
+         }).join(sep);
+       } else {
+@@ -3485,9 +3486,9 @@ function stringify (obj, sep, eq, name) {
+ 
+   if (!name) return '';
+   return encodeURIComponent(stringifyPrimitive(name)) + eq +
+-         encodeURIComponent(stringifyPrimitive(obj));
++    encodeURIComponent(stringifyPrimitive(obj));
+ }
+-function map (xs, f) {
++function map(xs, f) {
+   if (xs.map) return xs.map(f);
+   var res = [];
+   for (var i = 0; i < xs.length; i++) {
+@@ -3529,8 +3530,8 @@ function parse$1(qs, sep, eq, options) {
+ 
+   for (var i = 0; i < len; ++i) {
+     var x = qs[i].replace(regexp, '%20'),
+-        idx = x.indexOf(eq),
+-        kstr, vstr, k, v;
++      idx = x.indexOf(eq),
++      kstr, vstr, k, v;
+ 
+     if (idx >= 0) {
+       kstr = x.substr(0, idx);
+@@ -3630,7 +3631,7 @@ function urlParse(url, parseQueryString, slashesDenoteHost) {
+   u.parse(url, parseQueryString, slashesDenoteHost);
+   return u;
+ }
+-Url.prototype.parse = function(url, parseQueryString, slashesDenoteHost) {
++Url.prototype.parse = function (url, parseQueryString, slashesDenoteHost) {
+   return parse(this, url, parseQueryString, slashesDenoteHost);
+ };
+ 
+@@ -3644,7 +3645,7 @@ function parse(self, url, parseQueryString, slashesDenoteHost) {
+   // See: https://code.google.com/p/chromium/issues/detail?id=25916
+   var queryIndex = url.indexOf('?'),
+     splitter =
+-    (queryIndex !== -1 && queryIndex < url.indexOf('#')) ? '?' : '#',
++      (queryIndex !== -1 && queryIndex < url.indexOf('#')) ? '?' : '#',
+     uSplit = url.split(splitter),
+     slashRegex = /\\/g;
+   uSplit[0] = uSplit[0].replace(slashRegex, '/');
+@@ -3953,7 +3954,7 @@ function format(self) {
+   if (hash && hash.charAt(0) !== '#') hash = '#' + hash;
+   if (search && search.charAt(0) !== '?') search = '?' + search;
+ 
+-  pathname = pathname.replace(/[?#]/g, function(match) {
++  pathname = pathname.replace(/[?#]/g, function (match) {
+     return encodeURIComponent(match);
+   });
+   search = search.replace('#', '%23');
+@@ -3961,15 +3962,15 @@ function format(self) {
+   return protocol + host + pathname + search + hash;
+ }
+ 
+-Url.prototype.format = function() {
++Url.prototype.format = function () {
+   return format(this);
+ };
+ 
+-Url.prototype.resolve = function(relative) {
++Url.prototype.resolve = function (relative) {
+   return this.resolveObject(urlParse(relative, false, true)).format();
+ };
+ 
+-Url.prototype.resolveObject = function(relative) {
++Url.prototype.resolveObject = function (relative) {
+   if (isString(relative)) {
+     var rel = new Url();
+     rel.parse(relative, false, true);
+@@ -4238,7 +4239,7 @@ Url.prototype.resolveObject = function(relative) {
+   return result;
+ };
+ 
+-Url.prototype.parseHost = function() {
++Url.prototype.parseHost = function () {
+   return parseHost(this);
+ };
+ 
+@@ -4447,7 +4448,8 @@ function jsonRpcResult(schema) {
+     if ('error' in value) {
+       return value;
+     } else {
+-      return { ...value,
++      return {
++        ...value,
+         result: create(value.result, schema)
+       };
+     }
+@@ -4598,7 +4600,7 @@ function createRpcClient(url, useHttps, httpHeaders, fetchMiddleware, disableRet
+       let res;
+       let waitTime = 500;
+ 
+-      for (;;) {
++      for (; ;) {
+         if (fetchWithMiddleware) {
+           res = await fetchWithMiddleware(url, options);
+         } else {
+@@ -4606,10 +4608,10 @@ function createRpcClient(url, useHttps, httpHeaders, fetchMiddleware, disableRet
+         }
+ 
+         if (res.status !== 429
+-        /* Too many requests */
++          /* Too many requests */
+         ) {
+-            break;
+-          }
++          break;
++        }
+ 
+         if (disableRetryOnRateLimit === true) {
+           break;
+@@ -5600,7 +5602,8 @@ class Connection {
+ 
+ 
+   async getLargestAccounts(config) {
+-    const arg = { ...config,
++    const arg = {
++      ...config,
+       commitment: config && config.commitment || this.commitment
+     };
+     const args = arg.filter || arg.commitment ? [arg] : [];
+@@ -6202,7 +6205,8 @@ class Connection {
+ 
+     const result = res.result;
+     if (!result) return result;
+-    return { ...result,
++    return {
++      ...result,
+       transactions: result.transactions.map(({
+         transaction,
+         meta
+@@ -6210,7 +6214,8 @@ class Connection {
+         const message = new Message(transaction.message);
+         return {
+           meta,
+-          transaction: { ...transaction,
++          transaction: {
++            ...transaction,
+             message
+           }
+         };
+@@ -6234,8 +6239,10 @@ class Connection {
+ 
+     const result = res.result;
+     if (!result) return result;
+-    return { ...result,
+-      transaction: { ...result.transaction,
++    return {
++      ...result,
++      transaction: {
++        ...result.transaction,
+         message: new Message(result.transaction.message)
+       }
+     };
+@@ -6257,7 +6264,8 @@ class Connection {
+       throw new Error('Confirmed block ' + slot + ' not found');
+     }
+ 
+-    return { ...result,
++    return {
++      ...result,
+       transactions: result.transactions.map(({
+         transaction,
+         meta
+@@ -6309,7 +6317,8 @@ class Connection {
+       message,
+       signatures
+     } = result.transaction;
+-    return { ...result,
++    return {
++      ...result,
+       transaction: Transaction.populate(message, signatures)
+     };
+   }
+@@ -6591,7 +6600,7 @@ class Connection {
+     } else {
+       let disableCache = this._disableBlockhashCaching;
+ 
+-      for (;;) {
++      for (; ;) {
+         transaction.recentBlockhash = await this._recentBlockhash(disableCache);
+         if (!signers) break;
+         transaction.sign(...signers);
+@@ -6653,7 +6662,7 @@ class Connection {
+     } else {
+       let disableCache = this._disableBlockhashCaching;
+ 
+-      for (;;) {
++      for (; ;) {
+         transaction.recentBlockhash = await this._recentBlockhash(disableCache);
+         transaction.sign(...signers);
+ 
+@@ -6743,7 +6752,7 @@ class Connection {
+     this._rpcWebSocketConnected = true;
+     this._rpcWebSocketHeartbeat = setInterval(() => {
+       // Ping server every 5s to prevent idle timeouts
+-      this._rpcWebSocket.notify('ping').catch(() => {});
++      this._rpcWebSocket.notify('ping').catch(() => { });
+     }, 5000);
+ 
+     this._updateSubscriptions();
+@@ -7568,7 +7577,7 @@ class StakeInstruction {
+   /**
+    * @internal
+    */
+-  constructor() {}
++  constructor() { }
+   /**
+    * Decode a stake instruction and retrieve the instruction type.
+    */
+@@ -7823,7 +7832,7 @@ class StakeProgram {
+   /**
+    * @internal
+    */
+-  constructor() {}
++  constructor() { }
+   /**
+    * Public key that identifies the Stake program
+    */
+@@ -8211,7 +8220,7 @@ class Secp256k1Program {
+   /**
+    * @internal
+    */
+-  constructor() {}
++  constructor() { }
+   /**
+    * Public key that identifies the secp256k1 program
+    */

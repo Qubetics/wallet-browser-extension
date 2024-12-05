@@ -1,0 +1,673 @@
+/*global chrome*/
+
+import { v4 as uuidv4 } from 'uuid';
+const {
+  JsonRpcEngine,
+  createAsyncMiddleware,
+} = require('@metamask/json-rpc-engine');
+const engine = new JsonRpcEngine();
+import { randomBytes } from 'crypto-browserify';
+const NodeRSA = require('node-rsa');
+
+const networks = [
+  {
+    id: uuidv4(),
+    chainName: 'Ethereum',
+    chainId: '1',
+    currencyName: 'ETH',
+    currencySymbol: 'ETH',
+    currencyDecimals: 18,
+    rpcUrl: 'https://mainnet.infura.io/v3/REDACTED',
+    rpcApiKey: null,
+    blockUrl: 'https://etherscan.io',
+    default: true,
+    image: 'https://REDACTED/eth.png',
+    tokenType: 'ERC20',
+    testnet: false,
+    swap: true,
+    isEVM: true,
+    supportTokens: true,
+    coinFamily: 1,
+    slug: 'eth',
+    status: true,
+  },
+  {
+    id: uuidv4(),
+    chainName: 'BNB Smart Chain',
+    chainId: '56',
+    currencyName: 'BNB',
+    currencySymbol: 'BNB',
+    currencyDecimals: 18,
+    rpcUrl:
+      'https://bsc.fastnode.cc/FNoItXAqEKsNFDjbsHetTyFjSMrwFGykPKOjQKzlocPGvuqOYkjhxkfFsIXRWtnI/',
+    rpcApiKey: null,
+    blockUrl: 'https://bscscan.com',
+    default: false,
+    // image:
+    //   'https://REDACTED/images/bnb.png',
+    image: 'https://REDACTED/bnb.png',
+    tokenType: 'BEP20',
+    testnet: false,
+    swap: true,
+    isEVM: true,
+    supportTokens: true,
+    coinFamily: 3,
+    slug: 'bnb',
+    status: true,
+  },
+  {
+    id: uuidv4(),
+    chainName: 'Avalanche',
+    chainId: '43114',
+    currencyName: 'AVAX',
+    currencySymbol: 'AVAX',
+    currencyDecimals: 18,
+    rpcUrl: 'https://api.avax.network/ext/bc/C/rpc',
+    rpcApiKey: null,
+    blockUrl: 'https://snowtrace.io/',
+    default: false,
+    image: 'https://s2.coinmarketcap.com/static/img/coins/64x64/5805.png',
+    tokenType: 'ERC20',
+    testnet: false,
+    swap: false,
+    isEVM: true,
+    supportTokens: true,
+    coinFamily: 7,
+    slug: 'avax',
+    status: true,
+  },
+  {
+    id: uuidv4(),
+    chainName: 'Polygon',
+    chainId: '137',
+    currencyName: 'POL',
+    currencySymbol: 'POL',
+    currencyDecimals: 18,
+    rpcUrl: 'https://polygon-rpc.com/',
+    rpcApiKey: null,
+    blockUrl: 'https://polygonscan.com',
+    default: false,
+    image: 'https://REDACTED/matic.png',
+    tokenType: 'ERC20',
+    testnet: false,
+    swap: false,
+    isEVM: true,
+    supportTokens: true,
+    coinFamily: 6,
+    slug: 'matic',
+    status: true,
+  },
+  {
+    id: uuidv4(),
+    chainName: 'Cronos',
+    chainId: '25',
+    currencyName: 'CRO',
+    currencySymbol: 'CRO',
+    currencyDecimals: 18,
+    rpcUrl: 'https://evm.cronos.org',
+    rpcApiKey: null,
+    blockUrl: 'https://cronoscan.com/',
+    default: false,
+    image: 'https://REDACTED/cro.png',
+    tokenType: 'ERC20',
+    testnet: false,
+    swap: false,
+    isEVM: true,
+    supportTokens: true,
+    coinFamily: 8,
+    slug: 'cro',
+    status: true,
+  },
+  {
+    id: uuidv4(),
+    chainName: 'Solana',
+    chainId: '1399811149',
+    currencyName: 'SOL',
+    currencySymbol: 'SOL',
+    currencyDecimals: 6,
+    rpcUrl:
+      'https://sol.fastnode.cc/FNoItXAqEKsNFDjbsHetTyFjSMrwFGykPKOjQKzlocPGvuqOYkjhxkfFsIXRWtnI/',
+    rpcApiKey: null,
+    blockUrl: 'https://solscan.io/',
+    default: false,
+    image: 'https://REDACTED/sol.png',
+    tokenType: 'SPL20',
+    testnet: false,
+    swap: false,
+    isEVM: false,
+    supportTokens: true,
+    coinFamily: 4,
+    slug: 'sol',
+    status: false,
+  },
+  {
+    id: uuidv4(),
+    chainName: 'Bitcoin',
+    chainId: 'BTC0',
+    currencyName: 'BTC',
+    currencySymbol: 'BTC',
+    currencyDecimals: 8,
+    rpcUrl:
+      'https://btc.nodes.fastnode.io/mainnet/fn-dedic-4479-ad5f-3e2787e055ca/blockbook/api/',
+    rpcApiKey: 'REDACTED',
+    blockUrl: 'https://www.blockchain.com/explorer/transactions/',
+    default: false,
+    image: 'https://REDACTED/btc.png',
+    tokenType: 'BTC',
+    testnet: false,
+    swap: false,
+    isEVM: false,
+    supportTokens: false,
+    coinFamily: 2,
+    slug: 'btc',
+    status: false,
+  },
+  {
+    id: uuidv4(),
+    chainName: 'Cardano',
+    chainId: 'ADA0',
+    currencyName: 'ADA',
+    currencySymbol: 'ADA',
+    currencyDecimals: 6,
+    rpcUrl: 'https://ada.nownodes.io/v2',
+    rpcApiKey: 'REDACTED',
+    blockUrl: 'https://explorer.cardano-testnet.iohkdev.io/',
+    default: false,
+    image: 'https://REDACTED/ada.png',
+    tokenType: 'ADA',
+    testnet: false,
+    swap: false,
+    isEVM: false,
+    supportTokens: true,
+    coinFamily: 5,
+    slug: 'ada',
+    status: false,
+  },
+  {
+    id: uuidv4(),
+    chainName: 'PulseChain',
+    chainId: '369',
+    currencyName: 'PLS',
+    currencySymbol: 'PLS',
+    currencyDecimals: 18,
+    rpcUrl: 'https://rpc.pulsechain.com',
+    rpcApiKey: null,
+    blockUrl: 'https://otter.PulseChain.com',
+    default: false,
+    image: 'https://REDACTED/1694522712555_11145.png',
+    tokenType: 'ERC20',
+    testnet: false,
+    swap: false,
+    isEVM: true,
+    supportTokens: true,
+    coinFamily: 9,
+    slug: 'pls',
+    status: true,
+  },
+];
+
+const currency = {
+  name: 'USD',
+  symbol: '$',
+};
+
+let intervalId; // Declare a variable to store the interval ID
+
+class Background {
+  port;
+
+  constructor() {
+    this.storeDefaultNetworks();
+
+
+    // chrome.runtime.onConnect.addListener(function (port) {
+    //   if (port.name === 'popup') {
+    //     port.onDisconnect.addListener(async function () {
+    //       console.log('popup disconnected');
+    //       await chrome.storage.local.set({ openSidePanel: false });
+    //     });
+    //   }
+    // });
+
+    chrome.runtime.onConnect.addListener(function (externalPort) {
+      clearInterval(intervalId);
+      externalPort.onDisconnect.addListener(async function () {
+        if (intervalId) {
+          clearInterval(intervalId); // Clear the existing interval if it exists
+          intervalId = null; // Reset intervalId to ensure it's not cleared again
+        }
+
+        intervalId = setInterval(async () => {
+          await chrome.storage.session.remove(['accounts', 'password']);
+        }, 300000);
+      });
+    });
+
+    chrome.runtime.onConnect.addListener((port) => {
+      this.port = port;
+    });
+
+    chrome.runtime.onMessage.addListener(
+      async (message, sender, sendResponse) => {
+        if (message.type === 'SWITCH_CHAIN') {
+          if (message.payload.chainId) {
+            const { chains } = await chrome.storage.local.get('chains');
+
+            const updatedChains = chains.map((el) => {
+              if (el.chainId == message.payload.chainId) {
+                el.default = true;
+              } else {
+                el.default = false;
+              }
+              return el;
+            });
+
+            await chrome.storage.local.set({
+              chains: updatedChains,
+            });
+
+            sendResponse({});
+          }
+        }
+      }
+    );
+
+    chrome.alarms.create('updated_prices', {
+      delayInMinutes: 0.1,
+      periodInMinutes: 0.2,
+    });
+
+    chrome.alarms.onAlarm.addListener(async (alarms) => {
+      if (alarms.name === 'updated_prices') {
+        await this.fetchPricesFromBackend();
+      }
+    });
+
+    engine.push(
+      createAsyncMiddleware(async (req, res, next, end) => {
+        console.log(
+          '🚀 ~ file: background.js:204 ~ Background ~ createAsyncMiddleware ~ req:',
+          req
+        );
+        if (req.method === 'requestAccounts') {
+          console.log('requestAccounts');
+          try {
+            const { password } = await chrome.storage.session.get('password');
+            if (password) {
+              const { accounts } = await chrome.storage.session.get('accounts');
+              const defaultAccount = accounts.find((el) => el.default === true);
+              const account =
+                req.network === 'solana'
+                  ? defaultAccount.coinFamilyAndAddress[4]
+                  : defaultAccount.address;
+              res.result = [account];
+              res.method = req.method;
+              res.network = req.network;
+
+              const { connectedDapps } = await chrome.storage.session.get(
+                'connectedDapps'
+              );
+
+              const checkIfAlreadyThere = (connectedDapps || []).find(
+                (el) => el.url === req.url
+              );
+
+              if (!checkIfAlreadyThere) {
+                await chrome.storage.session.set({
+                  connectedDapps: [
+                    ...(connectedDapps || []),
+                    {
+                      url: req.url,
+                      image: req.image,
+                      title: req.title,
+                      time: new Date(),
+                    },
+                  ],
+                });
+              }
+            } else {
+              const response = await new Promise(async (resolve, reject) => {
+                const requestData = encodeURIComponent(JSON.stringify(req));
+                chrome.windows.create({
+                  url: `index.html?method=requestAccounts&data=${requestData}`,
+                  type: 'popup',
+                  focused: true,
+                  width: 439,
+                  height: 746,
+                });
+
+                chrome.runtime.onMessage.addListener(
+                  (message, sender, sendResponse) => {
+                    if (message.method === 'requestAccounts') {
+                      resolve(message.result);
+                    }
+                  }
+                );
+              });
+
+              if (response) {
+                res.result = response;
+                res.method = req.method;
+                res.network = req.network;
+                const { connectedDapps } = await chrome.storage.session.get(
+                  'connectedDapps'
+                );
+
+                const checkIfAlreadyThere = (connectedDapps || []).find(
+                  (el) => el.url === req.url
+                );
+
+                if (!checkIfAlreadyThere) {
+                  await chrome.storage.session.set({
+                    connectedDapps: [
+                      ...(connectedDapps || []),
+                      {
+                        url: req.url,
+                        image: req.image,
+                        title: req.title,
+                        time: new Date(),
+                      },
+                    ],
+                  });
+                }
+              } else {
+                res.result = [];
+                res.method = req.method;
+                res.error = true;
+              }
+            }
+          } catch (err) {
+            res.error = {
+              code: err.code || -1,
+              message: err.message || 'Unknown error occurred',
+              data: err.data,
+            };
+          }
+        } else if (req.method === 'signTransaction') {
+          const response = await new Promise((resolve, reject) => {
+            const requestData = encodeURIComponent(JSON.stringify(req.object));
+
+            chrome.windows.create({
+              url: `index.html?method=signTransaction&data=${requestData}`,
+              type: 'popup',
+              focused: true,
+              width: 439,
+              height: 746,
+            });
+
+            chrome.runtime.onMessage.addListener(
+              (message, sender, sendResponse) => {
+                if (message.method === 'signTransaction') {
+                  resolve(message.result);
+                }
+              }
+            );
+          });
+
+          if (response) {
+            res.result = response;
+            res.method = req.method;
+          } else {
+            res.result = null;
+            res.method = req.method;
+            res.error = true;
+          }
+        } else if (req.method === 'signRawTransaction') {
+          const response = await new Promise((resolve, reject) => {
+            const requestData = encodeURIComponent(JSON.stringify(req));
+
+            chrome.windows.create({
+              url: `index.html?method=signRawTransaction&data=${requestData}`,
+              type: 'popup',
+              focused: true,
+              width: 439,
+              height: 746,
+            });
+
+            chrome.runtime.onMessage.addListener(
+              (message, sender, sendResponse) => {
+                if (message.method === 'signRawTransaction') {
+                  resolve(message.result);
+                }
+              }
+            );
+          });
+
+          if (response) {
+            res.result = response;
+            res.method = req.method;
+            res.network = req.network;
+          } else {
+            res.result = null;
+            res.method = req.method;
+            res.error = true;
+          }
+        } else if (req.method === 'switchEthereumChain') {
+          const response = await new Promise((resolve, reject) => {
+            const requestData = encodeURIComponent(JSON.stringify(req.object));
+
+            chrome.windows.create({
+              url: `index.html?method=switchEthereumChain&data=${requestData}`,
+              type: 'popup',
+              focused: true,
+              width: 439,
+              height: 746,
+            });
+
+            chrome.runtime.onMessage.addListener(
+              (message, sender, sendResponse) => {
+                if (message.method === 'switchEthereumChain') {
+                  resolve(message.result);
+                }
+              }
+            );
+          });
+
+          if (response) {
+            const { chains } = await chrome.storage.local.get('chains');
+            const { accounts } = await chrome.storage.session.get('accounts');
+            const defaultChain = chains.find((el) => el.default);
+            const defaultAccount = accounts.find((el) => el.default);
+            res.result = null;
+            res.method = req.method;
+            res.chainId = defaultChain.chainId;
+            res.rpcUrl = defaultChain.rpcUrl;
+            res.address = defaultAccount.address;
+          } else {
+            res.result = null;
+            res.method = req.method;
+            res.chainId = null;
+            res.rpcUrl = null;
+            res.address = null;
+            res.error = true;
+          }
+        } else {
+          await next();
+        }
+      })
+    );
+
+    this.injectEthereumProvider();
+    this.handleAllEthereumEvents();
+  }
+
+
+
+  injectEthereumProvider = async () => {
+    await chrome.scripting.registerContentScripts([
+      {
+        id: 'qubetics-contentscript',
+        matches: ['file://*/*', 'http://*/*', 'https://*/*'],
+        js: ['inpage-bundle.js'],
+        runAt: 'document_start',
+        world: 'MAIN',
+        allFrames: true,
+      },
+    ]);
+  };
+
+  handleAllEthereumEvents = async () => {
+    chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+      if (sender.tab) {
+        if (message.type === 'JSON-RPC') {
+          engine.handle(message.payload, (err, result) => {
+            // console.log(err, result, "result");
+            if (err) {
+              console.error('Error handling JSON-RPC message:', err);
+            } else {
+              sendResponse({ type: 'JSON-RPC', payload: result });
+            }
+          });
+
+          return true;
+        }
+      } else if (message.type === 'OPEN_SIDE_PANEL') {
+        chrome.sidePanel
+          .setPanelBehavior({ openPanelOnActionClick: true })
+          .catch((error) => console.error(error));
+      } else if (message.type === 'CLOSE_SIDE_PANEL') {
+        chrome.sidePanel
+          .setPanelBehavior({ openPanelOnActionClick: false })
+          .catch((error) => console.error(error));
+      }
+    });
+  };
+
+  storeDefaultNetworks = () => {
+    chrome.runtime.onInstalled.addListener(function () {
+      chrome.storage.local.set(
+        {
+          chains: networks,
+          currency,
+          alerts: [],
+          deviceId: uuidv4(),
+        },
+        () => {}
+      );
+    });
+  };
+
+  fetchPricesFromBackend = async () => {
+    // console.log("UPDATING ALERTS");
+    const { alerts } = await chrome.storage.local.get('alerts');
+    const { accounts } = await chrome.storage.session.get('accounts');
+
+    if (accounts) {
+      const defaultAccount = accounts.find((account) => account.default);
+
+      const filteredAlerts = alerts.filter(
+        (alert) => alert.accountId == defaultAccount.id && !alert.sent
+      );
+
+      const randomString = randomBytes(20).toString('hex');
+
+      const publicKey = `-----BEGIN PUBLIC KEY-----
+      MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA2wzqlCphAcUFgYRe9zkL
+      zTlRlgFdg2Xjvcpd0DHV1AbccXPer26UiKxJOf0oP9MYqndYATHvEK+KhP565uBP
+      9ea+IhE7Su7xmI+yhyf3bAY9Ok6OcnkXSg2v9fxBnkWkSCxmMirW5EYFR47U/C0/
+      qtx/4/0YykFBlZ215HsgUoH7ACmzvjwQBGYw8u6EJ6E8fW0KYboTbi4NmmfulXQD
+      CAiSITsiCU913cxOFRm8m/uBlNyCPOommYyAA4fX0F3CdfCIDKJA3jK5LwKaS8PT
+      MMvOHMoMeAoXAQi0Vw3uT1j8BFB7F4uZpUdbD0x9kmT/o4PhIVvYnv8LNSdoQ/rA
+      HQIDAQAB
+      -----END PUBLIC KEY-----`;
+
+      async function encryptAndSignMessage(message) {
+        const second = new NodeRSA(publicKey);
+        second.setOptions({ encryptionScheme: 'pkcs1' });
+        const enc = second.encrypt(message, 'base64');
+        const encryptedData = {
+          data: enc,
+        };
+        return encryptedData;
+      }
+
+      for await (let alert of filteredAlerts) {
+        const encryptedData = await encryptAndSignMessage(
+          JSON.stringify({
+            id: alert.coinId,
+            fiat_currency: alert.currencyName.toUpperCase(),
+          })
+        );
+        await fetch(
+          'https://REDACTED/dev/api/v1/wallet/perticular_token_data',
+          {
+            method: 'post',
+            body: JSON.stringify(encryptedData),
+            headers: {
+              Authorization: defaultAccount.jwtToken,
+              device_id: defaultAccount.deviceId,
+              'Content-Type': 'application/json',
+              'aw-api-auth': randomString,
+            },
+          }
+        ).then(async (response) => {
+          const data = await response.json();
+          const priceInformation = data.data;
+
+          switch (alert.type) {
+            case 'above':
+              if (
+                parseFloat(alert.price) <
+                parseFloat(priceInformation.coins_market.current_price)
+              ) {
+                chrome.notifications.create('PRICE_ALERT_ABOVE', {
+                  type: 'basic',
+                  iconUrl: './logo512.png',
+                  title: 'qubetics Wallet',
+                  message: `The price of ${alert.selectedToken.coin_symbol} went above ${alert.currencySymbol}${alert.price}`,
+                  priority: 2,
+                });
+
+                let updatedAls = await alerts.map((el) => {
+                  if (alert.id === el.id) {
+                    el.sent = true;
+                    return el;
+                  } else {
+                    return el;
+                  }
+                });
+
+                await chrome.storage.local.set({
+                  alerts: updatedAls,
+                });
+                this.port.postMessage('ALERTS_UPDATED');
+              }
+              break;
+            case 'below':
+              if (
+                parseFloat(alert.price) >
+                parseFloat(priceInformation.coins_market.current_price)
+              ) {
+                chrome.notifications.create('PRICE_ALERT_BELOW', {
+                  type: 'basic',
+                  iconUrl: './logo512.png',
+                  title: 'qubetics Wallet',
+                  message: `The price of ${alert.selectedToken.coin_symbol} went below ${alert.currencySymbol}${alert.price}`,
+                  priority: 2,
+                });
+
+                let updatedAls = await alerts.map((el) => {
+                  if (alert.id === el.id) {
+                    el.sent = true;
+                    return el;
+                  } else {
+                    return el;
+                  }
+                });
+
+                await chrome.storage.local.set({
+                  alerts: updatedAls,
+                });
+                this.port.postMessage('ALERTS_UPDATED');
+              }
+              break;
+            default:
+              break;
+          }
+        });
+      }
+    }
+  };
+}
+
+new Background();

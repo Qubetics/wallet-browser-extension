@@ -1,0 +1,89 @@
+@import "../../styles/__vars.scss";
+@import "../../styles/__mixins.scss";
+
+.listItems {
+  a {
+    text-decoration: none;
+  }
+  .settingList {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px 0px;
+    border-bottom: 1px solid ;
+    @include theme() {
+      border-color: theme-get("cardBorder");
+    }
+    &__imgValue {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      p {
+        white-space: nowrap;
+        @include theme() {
+          color: theme-get("baseText");
+        }
+        font-size: 14px;
+        font-weight: bold;
+        margin-bottom: 0;
+      }
+      img {
+        height: 30px;
+        width: 30px;
+        border-radius: 15px;
+      }
+    }
+  }
+}
+.settingList {
+  .switchSec {
+    @include theme() {
+      background-color: theme-get("toggelBg") !important;
+    } 
+    &:hover {
+      @include theme() {
+        background-color: theme-get("toggelBg") !important;
+      } 
+    }
+    .ant-switch-handle::before {
+      background-color: #00c200;
+      padding: 10px;
+      top: -1px;
+    }
+
+    .ant-switch-inner {
+      position: relative;
+      &::before {
+        background-image: url("../../Assets/darkMode.svg");
+        content: "";
+        height: 14px;
+        position: absolute;
+        left: 4px;
+        background-repeat: no-repeat;
+        width: 14px;
+        top: 4px;
+        background-size: contain;
+        background-position: center;
+      }
+      &::after {
+        background-image: url("../../Assets/lightMode.svg");
+        content: "";
+        height: 14px;
+        position: absolute;
+        right: 4px;
+        background-repeat: no-repeat;
+        width: 14px;
+        top: 4px;
+        background-size: contain;
+        background-position: center;
+      }
+    }
+  }
+}
+.ant-switch {
+  .ant-switch-checked {
+    background: #d7e0eb !important;
+    &:hover {
+      background-color: #d7e0eb !important;
+    }
+  }
+}

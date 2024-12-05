@@ -1,0 +1,39 @@
+diff --git a/node_modules/react-tabs/style/react-tabs.css b/node_modules/react-tabs/style/react-tabs.css
+index eeddde5..42a122f 100644
+--- a/node_modules/react-tabs/style/react-tabs.css
++++ b/node_modules/react-tabs/style/react-tabs.css
+@@ -42,7 +42,7 @@
+   left: -4px;
+   right: -4px;
+   bottom: -5px;
+-  background: #fff;
++  background: transparent;
+ }
+ 
+ .react-tabs__tab-panel {
+diff --git a/node_modules/react-tabs/style/react-tabs.less b/node_modules/react-tabs/style/react-tabs.less
+index 73264d4..a72d09d 100644
+--- a/node_modules/react-tabs/style/react-tabs.less
++++ b/node_modules/react-tabs/style/react-tabs.less
+@@ -39,7 +39,7 @@
+         left: -4px;
+         right: -4px;
+         bottom: -5px;
+-        background: #fff;
++        background: transparent;
+       }
+     }
+   }
+diff --git a/node_modules/react-tabs/style/react-tabs.scss b/node_modules/react-tabs/style/react-tabs.scss
+index 73264d4..a72d09d 100644
+--- a/node_modules/react-tabs/style/react-tabs.scss
++++ b/node_modules/react-tabs/style/react-tabs.scss
+@@ -39,7 +39,7 @@
+         left: -4px;
+         right: -4px;
+         bottom: -5px;
+-        background: #fff;
++        background: transparent;
+       }
+     }
+   }

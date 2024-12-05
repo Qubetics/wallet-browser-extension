@@ -1,0 +1,64 @@
+@import "../../styles/__mixins.scss";
+@import "../../styles/__vars.scss";
+
+.connectesApp {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0;
+  border-bottom: 1px solid #d7e0eb;
+  cursor: pointer;
+  &:first-child {
+    padding-top: 0;
+  }
+
+  &:last-child {
+    padding-bottom: 0;
+    border-bottom: 0 ;
+  }
+  p {
+    font-size: 13px;
+    @include theme() {
+      color: theme-get("whiteblack");
+    }
+  }
+  .left {
+    display: flex;
+    gap: 10px;
+    .textSec {
+      display: flex;
+      flex-direction: column;
+      align-items: baseline;
+      h3 {
+        @include theme() {
+          color: theme-get("baseText");
+        }
+        font-size: 15px;
+        font-weight: 600;
+      }
+    }
+  }
+}
+
+.exchangePancake {
+  .topConatct {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    border-bottom: 1px solid #d7e0eb;
+    padding-bottom: 16px;
+    h2 {
+      font-size: 27px;
+      font-weight: 700;
+      @include theme() {
+        color: theme-get("baseText");
+      }
+    }
+    p {
+      font-size: 14px;
+      font-weight: 600;
+      color: $gray-6E737E;
+    }
+  }
+}

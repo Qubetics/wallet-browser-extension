@@ -1,0 +1,84 @@
+$baseColor-Text: #223f70;
+$baseText-00AEEF: #00aeef;
+$white: #ffffff;
+$black: #000000;
+$gray: #80838e;
+$gray-80838E-Dark: #80838e80;
+$gray-6E737E: #6e737e;
+$grayPlaceholder: #b5b7bc;
+$gray-80838E-Dark2: #6e737e;
+$gray-D7E0EB-light: #d7e0eb;
+$inputBg: #eef3f9;
+$border-00ADEE: #00adee;
+$border-C4D7F8: #c4d7f8;
+$red: #f6465d;
+$red-bglight: #ffeef0;
+$green: #058b56;
+$blue-D8EAF6: #d8eaf6;
+
+$themes: (
+    lightTheme: (
+    "bgcolor": #eef3f9,
+    "whiteblackBase":#FFFFFF,
+    "cardBorder":#C4D7F8,
+    "inputBg": #eef3f9,
+    "baseColor-Text": #223f70,
+    "footerBg":#EEF3F9,
+    "baseText":#223F70,
+    "inputBg1":#fff,
+    "whiteblack":#000,
+    "whiteWelcome":#223F70,
+    "gradientBg":#D8EAF6,
+    "grayWhite":#223F70,
+    "whiteBg":#D7E0EB,
+    "dotBg":#fff,
+    "dotRadius":#999CA5,
+    "modalBg":#fff,
+    "gray1":#80838E,
+    "infoGray":#80838E,
+    "toggelBg":#e0edfc,
+    "blue":#80838E,
+    "btnBg":#e5f7fd,
+    "gray2":#80838E,
+    "lighTdark":#fff,
+    "payCard":#d2e2f2,
+    "addCardBtn":#fff,
+    "billSelectbg":#D7E0EB,
+    "tabbg":#eef3f9,
+
+
+
+  ),
+  darkTheme: (
+    "bgcolor": #0e0e0e,
+    "whiteblackBase":#201F1F,
+    "cardBorder":#2D2D2D,
+    "inputBg":#0E0E0E,
+    "baseColor-Text": #367CC7,
+    "footerBg":#252836,
+    "baseText":#00AEEF,
+    "inputBg1":#0E0E0E,
+    "whiteblack":#FFFFFF,
+    "whiteWelcome":#fff,
+    "gradientBg":transparent linear-gradient(180deg, #00AEEF33 0%, #367CC733 100%) 0% 0% no-repeat padding-box,
+    "grayWhite":#8B8D97,
+    "whiteBg":#252836,
+    "dotBg":#005170,
+    "dotRadius":#00AEEF,
+    "modalBg":#252836,
+    "gray1":#fff,
+    "infoGray":#223f70,
+    "toggelBg":#3c466d,
+    "blue":#3694fb,
+    "btnBg":#367cc76e,
+    "gray2":#8B8D97,
+    "lighTdark":#000,
+    "payCard":#0e0e0e,
+    "addCardBtn":#00AEEF,
+    "billSelectbg":#0e0e0e,
+    "tabbg":#201F1F,
+
+
+
+  ),
+);

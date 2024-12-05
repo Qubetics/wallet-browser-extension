@@ -1,0 +1,49 @@
+@import "../../styles/__vars.scss";
+@import "../../styles/__mixins.scss";
+.manageList {
+  border-bottom: 1px solid ;
+  padding-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  @include theme() {
+    border-color: theme-get("cardBorder");
+  }
+
+  .networkNameNew {
+    font-size: 12px;
+    @include theme() {
+      color: theme-get("whiteblack");
+    }
+  }
+
+  &__imgcurrency {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-top: 20px;
+
+    p {
+      font-size: 16px;
+      font-weight: bold;
+      @include theme() {
+        color: theme-get("whiteblack");
+      }
+      text-align: left;
+    }
+    span {
+      font-size: 12px;
+      @include theme() {
+        color: theme-get("whiteblack");
+      }
+    }
+    img {
+      height: 30px;
+      width: 30px;
+      border-radius: 15px;
+    }
+  }
+  button {
+    margin: 0px !important;
+  }
+}

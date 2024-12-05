@@ -1,0 +1,278 @@
+import axios from 'axios';
+import { SWFT_BASE_URL } from '../config/crosschain.config';
+// import { AdaHelper } from './ada.helper';
+import { BTCHelper } from './btc.helper';
+import { getFlooredFixed } from './conversion.helper';
+import { SolanaHelper } from './solana.helper';
+import { WalletHelper } from './wallet.helper';
+import { Web3Helper } from './web3.helper';
+import { SWIFT_ERROR } from './constant';
+import { server } from '../server';
+import { store } from '..';
+
+export class CrossChainHelper {
+  axiosInstance;
+  chainId;
+
+  constructor(chainId) {
+    this.axiosInstance = axios.create({
+      baseURL: SWFT_BASE_URL,
+    });
+    this.chainId = chainId;
+  }
+
+  getQuoteAndRoute = async (fromCoinId, toCoinId, amount) => {
+    try {
+      const { account } = store.getState();
+      const response = await server.post(
+        '/swft/get_base_info',
+        {
+          deposit_coin_code: fromCoinId,
+          receive_coin_code: toCoinId,
+        },
+        {
+          headers: {
+            Authorization: account.jwtToken,
+          },
+        }
+      );
+      const exchangeRate = response.data.data.data;
+      if (exchangeRate.instantRate == 0) {
+        return false;
+      }
+
+      let instantRate = exchangeRate?.instantRate;
+      console.log(instantRate);
+      let receiveCoinFee = exchangeRate?.receiveCoinFee;
+      console.log(receiveCoinFee);
+
+      let convertedAmount = amount * instantRate;
+      console.log(convertedAmount);
+      convertedAmount = (convertedAmount * 99.7) / 100;
+      console.log(convertedAmount);
+
+      convertedAmount = convertedAmount - receiveCoinFee;
+      console.log(convertedAmount);
+
+      convertedAmount = convertedAmount <= 0 ? 0 : convertedAmount;
+      console.log(convertedAmount);
+
+      console.log({
+        pair: [fromCoinId, toCoinId],
+        outAmount: convertedAmount,
+        exchangeData: exchangeRate,
+      });
+      return {
+        pair: [fromCoinId, toCoinId],
+        outAmount: convertedAmount,
+        exchangeData: exchangeRate,
+      };
+    } catch (error) {
+      return false;
+    }
+  };
+
+  sendOrder = async (
+    fromCoin,
+    toCoin,
+    depositAmount,
+    receiveAmount,
+    walletAddress,
+    chain,
+    fee,
+    fiatValue,
+    parentCoin
+  ) => {
+    try {
+      console.log({
+        depositCoinCode: fromCoin.symbol,
+        receiveCoinCode: toCoin.symbol,
+        depositCoinAmt: getFlooredFixed(depositAmount, 8),
+        receiveCoinAmt: receiveAmount,
+        destinationAddr: toCoin.address,
+        refundAddr: walletAddress,
+        equipmentNo: walletAddress,
+        sourceType: 'ANDROID',
+        sourceFlag: 'widget',
+      });
+
+      const { account } = store.getState();
+
+      const response = await server.post(
+        'swft/account_exchange',
+        {
+          deposit_coin_code: fromCoin.symbol,
+          receive_coin_code: toCoin.symbol,
+          deposit_coin_amt: getFlooredFixed(depositAmount, 8),
+          receive_coin_amt: receiveAmount,
+          destination_addr: toCoin.address,
+          refund_addr: walletAddress,
+          equipment_no: walletAddress,
+          source_type: 'ANDROID',
+          source_flag: 'widget',
+        },
+        {
+          headers: {
+            Authorization: account.jwtToken,
+          },
+        }
+      );
+
+      console.log(
+        '🚀 ~ file: crosschain.helper.js:72 ~ CrossChainHelper ~ response:',
+        response
+      );
+
+      const orderData = response.data.data.data;
+
+      let hash = '';
+
+      if (chain.isEVM) {
+        if (fromCoin.tokenAddress) {
+          hash = await Web3Helper.generateRawTransactionForTokenAndBroadcast(
+            orderData.platformAddr,
+            walletAddress,
+            depositAmount,
+            fromCoin.id,
+            fiatValue,
+            0,
+            fromCoin.native.fiat_currency,
+            null,
+            chain.slug,
+            chain.chainId,
+            fromCoin.tokenAddress,
+            Math.pow(10, fromCoin.decimals),
+            chain.tokenType,
+            orderData.orderId,
+            'swap'
+          );
+        } else {
+          hash = await Web3Helper.generateRawTransactionForCoinAndBroadcast(
+            orderData.platformAddr,
+            walletAddress,
+            depositAmount,
+            fromCoin.id,
+            fiatValue,
+            0,
+            fromCoin.native.fiat_currency,
+            null,
+            chain.slug,
+            chain.chainId,
+            orderData.orderId,
+            'swap'
+          );
+        }
+      } else if (!chain.isEVM && chain.currencyName === 'SOL') {
+        const solanaHelper = new SolanaHelper(chain.rpcUrl);
+        if (fromCoin.tokenAddress) {
+          hash = await solanaHelper.generateRawTransactionForTokenAndBroadcast(
+            orderData.platformAddr,
+            walletAddress,
+            depositAmount,
+            fromCoin.id,
+            fiatValue,
+            0,
+            fromCoin.native.fiat_currency,
+            null,
+            chain.slug,
+            chain.chainId,
+            fromCoin.tokenAddress,
+            fromCoin.decimals,
+            chain.type,
+            fromCoin.balance,
+            orderData.orderId,
+            'swap'
+          );
+        } else {
+          hash = await solanaHelper.generateRawTransactionForCoinAndBroadcast(
+            orderData.platformAddr,
+            walletAddress,
+            depositAmount,
+            fromCoin.id,
+            fiatValue,
+            0,
+            toCoin.native.fiat_currency,
+            null,
+            chain.slug,
+            chain.chainId,
+            orderData.orderId,
+            'swap'
+          );
+        }
+      } else if (!chain.isEVM && chain.currencyName === 'BTC') {
+        const rawTransaction = await BTCHelper.generateRawTransaction(
+          walletAddress,
+          orderData.platformAddr,
+          depositAmount
+        );
+
+        hash = await BTCHelper.generateRawTransactionForCoinAndBroadcast(
+          orderData.platformAddr,
+          walletAddress,
+          depositAmount,
+          fromCoin.id,
+          fiatValue,
+          0,
+          toCoin.native.fiat_currency,
+          null,
+          chain.slug,
+          chain.chainId,
+          rawTransaction,
+          orderData.orderId,
+          'swap'
+        );
+      } else if (!chain.isEVM && chain.currencyName === 'ADA') {
+        if (fromCoin.tokenAddress) {
+          hash = null;
+          // await AdaHelper.generateRawTransactionForTokenAndBroadcast(
+          //   `addr1${orderData.platformAddr.toLowerCase()}`,
+          //   walletAddress,
+          //   depositAmount,
+          //   fromCoin.id,
+          //   fiatValue,
+          //   0,
+          //   toCoin.native.fiat_currency,
+          //   null,
+          //   chain.slug,
+          //   chain.chainId,
+          //   fromCoin.name,
+          //   fromCoin.tokenAddress,
+          //   orderData.orderId,
+          //   'swap'
+          // );
+        } else {
+          hash = null;
+          // await AdaHelper.generateRawTransactionForCoinAndBroadcast(
+          //   `addr1${orderData.platformAddr.toLowerCase()}`,
+          //   walletAddress,
+          //   depositAmount,
+          //   fromCoin.id,
+          //   fiatValue,
+          //   0,
+          //   toCoin.native.fiat_currency,
+          //   null,
+          //   chain.slug,
+          //   chain.chainId,
+          //   fee,
+          //   orderData.orderId,
+          //   'swap'
+          // );
+        }
+      }
+
+      if (!hash) {
+        return false;
+      }
+
+      await this.axiosInstance.post('/v2/modifyTxId', {
+        orderId: orderData.orderId,
+        depositTxid: hash,
+      });
+
+      return true;
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
+  };
+}

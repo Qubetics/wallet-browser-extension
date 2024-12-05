@@ -1,0 +1,65 @@
+@import "../../../styles/__vars.scss";
+@import "../../../styles/__mixins.scss";
+.restOfHeaders {
+  padding: 24px 29px;
+  border-bottom: 1px solid;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  @include theme() {
+    border-color: theme-get("cardBorder");
+  }
+  h4 {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 0;
+    @include theme() {
+      color: theme-get("baseText");
+    }
+  }
+}
+.addAccountHeader {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  @include theme() {
+    color: theme-get("baseText");
+  }
+}
+.multiBankDrawer {
+  text-align: center;
+  .innerLink {
+    display: flex;
+    gap: 40px;
+    margin-bottom: 40px;
+    align-items: center;
+  }
+  .multibankAccount {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    h4 {
+      @include theme() {
+        color: theme-get("baseText");
+      }
+      font-size: 12px;
+    }
+    p {
+      @include theme() {
+        color: theme-get("gray1");
+      }
+      font-size: 12px;
+    }
+  }
+}
+.logout_wallet {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  width: 100% !important;
+  .style_ButtonStyle__AIFXM {
+    width: 40% !important;
+  }
+}

@@ -1,0 +1,143 @@
+import { Input } from "antd";
+import React from "react";
+import EyeOpenIcon from "../../Assets/EyeOpenIcon.svg";
+import EyeCloseIcon from "../../Assets/EyeCloseIcon.svg";
+import "./InputFieldSimple.scss";
+import Scanner from "../../Assets/scanner.svg";
+import { Link } from "react-router-dom";
+
+function InputFieldSimple({ placeholder, getData, customFunction, value }) {
+  return (
+    <Input.Password
+      onChange={(e) => {
+        getData(e.target.value);
+      }}
+      onCopy={(e) => {
+        e.preventDefault();
+        return false;
+      }}
+      value={value}
+      className="inputSimple"
+      onKeyDown={(e) => e.key === "Enter" && customFunction()}
+      placeholder={placeholder}
+      iconRender={(visible) =>
+        visible ? (
+          <img src={EyeOpenIcon} width={19} height={12} />
+        ) : (
+          <img src={EyeCloseIcon} width={19} height={16} />
+        )
+      }
+    />
+  );
+}
+
+export default InputFieldSimple;
+
+export const InputField = ({
+  placeholder,
+  defaultValue,
+  label,
+  addonAfter,
+  inputSelect,
+  mb0,
+  placeholderBaseColor,
+  coloredBg,
+  readonly,
+  value,
+  getData,
+  checkForSymbols,
+  type,
+  addonBefore,
+  limit,
+  disabled,
+  maxLength,
+}) => {
+  return (
+    <div className={`${"boxStyle"} inputField ${mb0 ? "mb0" : ""}`}>
+      <label className={`${"boxStyle__label"}`}>{label}</label>
+      <Input
+        className={`${"inputField__input"} ${
+          inputSelect ? "inputField__inputSelect" : ""
+        }  ${placeholderBaseColor ? "placeholderBaseColor" : ""} ${
+          coloredBg ? "inputField__coloredBg" : ""
+        }`}
+        addonAfter={addonAfter}
+        addonBefore={addonBefore}
+        value={value}
+        title=""
+        maxLength={maxLength}
+        onKeyDown={(e) => {
+          if (type === "number") {
+            // console.log(e.key);
+            if (e.key === "e" || e.key === "+" || e.key === "-") {
+              e.preventDefault();
+            }
+          }
+        }}
+        onChange={(e) => {
+          if (!checkForSymbols) {
+            return getData(e.target.value);
+          }
+          getData(e.target.value);
+        }}
+        type={type || "text"}
+        onWheel={(e) => (type === "number" ? e.target.blur() : console.log(""))}
+        defaultValue={defaultValue}
+        placeholder={placeholder}
+        readOnly={readonly ? readonly : false}
+        disabled={disabled}
+      />
+    </div>
+  );
+};
+
+export const InputFieldOnly = ({
+  placeholder,
+  label,
+  minHeight,
+  placeholderBaseColor,
+  coloredBg,
+  getData,
+  width,
+  readonly,
+  value,
+  checkForSymbols,
+  doCheckForSymbols,
+  currencySymbol,
+}) => {
+  return (
+    <div className="boxStyle inputFieldOnly">
+      <label className="boxStyle__label">{label}</label>
+      <Input
+        onChange={(e) => {
+          if (!checkForSymbols) {
+            return getData(e.target.value);
+          }
+
+          if (doCheckForSymbols) {
+            if (currencySymbol) {
+              const format = new RegExp(`^\\${currencySymbol}?\\d*\\.?\\d*$`);
+              if (!format.test(e.target.value)) {
+                return;
+              }
+            } else {
+              const format = /^\d*\.?\d*$/;
+              if (!format.test(e.target.value)) {
+                return;
+              }
+            }
+          }
+
+          getData(e.target.value);
+        }}
+        className={`${"inputSimple"} ${
+          placeholderBaseColor ? "placeholderBaseColor" : ""
+        } ${coloredBg ? "inputField__coloredBg" : ""}`}
+        placeholder={placeholder}
+        style={{ minHeight: minHeight, width }}
+        readOnly={readonly ? readonly : false}
+        value={value}
+      />
+    </div>
+  );
+};

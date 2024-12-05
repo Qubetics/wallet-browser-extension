@@ -1,0 +1,98 @@
+@import "../../styles/__mixins.scss";
+@import "../../styles/__vars.scss";
+
+.filterHistory {
+  padding: 28px;
+  &__selctHis {
+    width: 100%;
+    padding-top: 24px;
+    &:first-child{
+        padding-top: 0;
+    }
+    .ant-select {
+      width: 100% !important;
+
+      .ant-select-selector {
+        @include theme() {
+          background-color: theme-get("inputBg1") !important;
+        }
+        border-radius: 28px !important;
+        height: 46px !important;
+      }
+      .ant-select-arrow {
+        @include theme() {
+          color: theme-get("whiteblack") !important;
+        }
+      }
+    }
+    .label{
+      @include theme() {
+        color: theme-get("whiteblack");
+      }
+        font-size: 12px;
+        font-weight: bold;
+        padding-bottom: 10px;
+        text-align: left;
+        display: flex;
+    }
+    .ant-picker{
+      @include theme() {
+        background-color: theme-get("inputBg1") !important;
+        color: theme-get("whiteblack") !important;
+        border-color: theme-get("cardBorder") !important;
+      }
+        border-radius: 28px !important;
+        height: 46px !important;
+        width: 100%;
+        &::placeholder{
+          @include theme() {
+            color: theme-get("whiteblack") !important;
+          }
+        }
+        input{
+          @include theme() {
+            color: theme-get("whiteblack") !important;
+          }
+          &::placeholder{
+            @include theme() {
+              color: theme-get("whiteblack") !important;
+            }
+          }
+        }
+    }
+    .ant-picker-separator{
+      @include theme() {
+        color: theme-get("whiteblack") !important;
+      }
+    }
+    .ant-select .ant-select-arrow {
+      margin-top: -4px;
+      right: 20px;
+  }
+  .ant-select .ant-select-selector {
+   padding: 0 11px!important;
+}
+  }
+  .dateFlex{
+    display: flex;
+    gap: 20px;
+    .ant-space-item{
+      width: 100%;
+    }
+    .ant-picker .ant-picker-suffix {
+      color: #00AEEF ;
+    }
+  }
+}
+
+.chainImage {
+  margin-right: 4px;
+  object-fit: contain;
+  width: 26px;
+  border-radius: 13px;
+}
+.borderDarkLight{
+  @include theme() {
+    border-color: theme-get("cardBorder") !important;
+  }
+}

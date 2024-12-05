@@ -1,0 +1,35 @@
+@import "../../styles/__vars.scss";
+@import "../../styles/__mixins.scss";
+
+.pushNotification {
+  &__notificationSec {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    text-align: left;
+    border-bottom: 1px solid;
+    padding: 15px 0;
+    @include theme() {
+      border-color: theme-get("cardBorder");
+    }
+    &:last-child {
+      border-bottom: 0;
+    }
+  }
+
+  &__innerNotificationSec {
+    h3 {
+      @include theme() {
+        color: theme-get("baseText");
+      }
+      font-size: 16px;
+      font-weight: bold;
+    }
+    p {
+      @include theme() {
+        color: theme-get("whiteblack");
+      }
+      font-size: 12px;
+    }
+  }
+}

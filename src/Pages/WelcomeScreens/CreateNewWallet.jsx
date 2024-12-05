@@ -1,0 +1,138 @@
+/* global chrome */
+import { message } from 'antd';
+import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
+import { useLocation, useNavigate } from 'react-router-dom';
+import ButtonComp from '../../Components/ButtonComp/ButtonComp';
+import { InputFieldOnly } from '../../Components/InputField/InputFieldSimple';
+import { DURATION } from '../../config/message.config';
+import './Welcome.scss';
+import { WalletHelper } from '../../helpers/wallet.helper';
+
+function CreateNewWallet() {
+  const { state } = useLocation();
+  const { type, createWalletMnemonics, createShuffledMnemonics } = state;
+  const { create } = useSelector((state) => state);
+
+  const navigate = useNavigate();
+  const [messageApi, contextHolder] = message.useMessage({
+    duration: DURATION,
+  });
+  const [name, setName] = useState(null);
+  const [remaining, setRemaining] = useState(25);
+  return (
+    <div className='cardWhite'>
+      {contextHolder}
+      <h2 className='cardWhite__title'>Wallet Name</h2>
+      <p className='cardWhite__subTitle' style={{ marginBottom: 24 }}>
+        You can simply identify multiple wallets and label your own wallet.
+      </p>
+      <div className='cardWhite__linkOuter'>
+        <InputFieldOnly
+          placeholder={'Enter wallet name'}
+          value={name}
+          label={'Enter Name'}
+          checkForSymbols={true}
+          placeholderBaseColor={true}
+          coloredBg={true}
+          getData={(name) => {
+            if (name.length <= 25) {
+              if (/^\s/.test(name)) {
+                setName('');
+              } else {
+                setName(name);
+              }
+            } else {
+              return;
+            }
+          }}
+        />
+        <div className='textInfoBaseColor'>
+          Max Limit: {name ? name.length : 0}/25
+        </div>
+      </div>
+      <div className='setPassword__footerbuttons'>
+        <ButtonComp
+          onClick={() => {
+            navigate(create ? '/walletListing' : '/');
+          }}
+          text={'Back'}
+          bordered={true}
+        />
+        <ButtonComp
+          onClick={async () => {
+            if (!name) {
+              return messageApi.error(
+                'Please enter a valid name for the wallet.'
+              );
+            }
+
+            if (name.trim().length === 0) {
+              return messageApi.error(
+                'Name should have a minimum of 3 characters.'
+              );
+            }
+
+            if (name.length < 3) {
+              return messageApi.error(
+                'Name should have a minimum of 3 characters.'
+              );
+            }
+
+            if (name.length > 25) {
+              return messageApi.error(
+                'Name should not have more than 25 characters.'
+              );
+            }
+
+            const { accounts } = await chrome.storage.session.get('accounts');
+
+            if (accounts) {
+              const checkIfExists = accounts.find(
+                (el) => el.name.toLowerCase() === name.toLowerCase()
+              );
+
+              if (checkIfExists) {
+                return messageApi.error(
+                  'This wallet name already exists. Use a different name.'
+                );
+              }
+            }
+
+            // const format = /[!@#$%^`&*()_+\-=\[\]{};':"\\|,.<>\/?]+/;
+
+            // if (format.test(name)) {
+            //   return messageApi.error(
+            //     "Name should not contain any special characters."
+            //   );
+            // }
+
+            await chrome.storage.session.set({
+              name: name.trim(),
+            });
+
+            let mnemonics = undefined;
+
+            mnemonics = await WalletHelper.generateNewMnemonics();
+
+            const finalData = createWalletMnemonics || mnemonics;
+            console.log('🚀 ~ onClick={ ~ finalData:', finalData);
+
+            navigate('/setPassword', {
+              state: {
+                type,
+                createWalletMnemonics: finalData,
+                createShuffledMnemonics: finalData
+                  .split(' ')
+                  .sort(() => Math.random() - 0.5),
+              },
+            });
+          }}
+          text={'Proceed'}
+        />
+      </div>
+    </div>
+  );
+}
+
+export default CreateNewWallet;

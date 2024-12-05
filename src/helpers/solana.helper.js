@@ -1,0 +1,864 @@
+/*global chrome*/
+import nacl from 'tweetnacl';
+import * as bip39 from '@scure/bip39';
+import { derivePath } from 'ed25519-hd-key';
+import {
+  Account,
+  Connection,
+  PublicKey,
+  LAMPORTS_PER_SOL,
+  Transaction,
+  SystemProgram,
+  sendAndConfirmTransaction,
+  VersionedTransaction,
+} from '@solana/web3.js';
+import { store } from '..';
+import { WalletHelper } from './wallet.helper';
+import * as splToken from '@solana/spl-token';
+import SolanaWallet, { SolanaSignTransaction } from 'solana-wallet';
+import promiseRetry from 'promise-retry';
+import { server } from '../server';
+import { getSignature } from './common.helper';
+import { Base58 } from '@ethersproject/basex';
+import BigNumber from 'bignumber.js';
+const soltokenbalance = require('soltokenbalance');
+const Buffer = require('safe-buffer').Buffer;
+
+const SEND_OPTIONS = {
+  skipPreflight: true,
+};
+export const wait = (time) =>
+  new Promise((resolve) => setTimeout(resolve, time));
+
+export class SolanaHelper {
+  connection;
+  solTokenObject;
+
+  constructor(jsonRpc) {
+    if (jsonRpc) {
+      // console.log('RPX============', jsonRpc);
+      this.connection = new Connection(jsonRpc);
+      this.solTokenObject = new soltokenbalance(jsonRpc);
+    }
+  }
+
+  static generateSolanaAddress = async (mnemonics) => {
+    const seed = await bip39.mnemonicToSeed(mnemonics);
+    const path = `m/44'/501'/0'`;
+    const derivedSeed = derivePath(path, seed).key;
+    const account = new Account(
+      nacl.sign.keyPair.fromSeed(derivedSeed).secretKey
+    );
+    return account.publicKey.toBase58();
+  };
+
+  generateSolanaAddress1 = async (mnemonics) => {
+    const seed = await bip39.mnemonicToSeed(mnemonics);
+    const path = `m/44'/501'/0'`;
+    const derivedSeed = derivePath(path, seed).key;
+    const account = new Account(
+      nacl.sign.keyPair.fromSeed(derivedSeed).secretKey
+    );
+    return account;
+  };
+
+  validateSolanaAddress = (address) => {
+    try {
+      const publicKey = new PublicKey(address);
+      return PublicKey.isOnCurve(publicKey.toBytes());
+    } catch (error) {
+      return false;
+    }
+  };
+
+  getGasPrice = () => {
+    return 0.000005;
+  };
+
+  generateRawTransactionForCoinAndBroadcast = async (
+    to,
+    from,
+    amount,
+    coinId,
+    fiatPrice,
+    networkFeeInFiat,
+    fiatType,
+    contact,
+    slug,
+    chainId,
+    orderId,
+    type
+  ) => {
+    try {
+      const { account } = store.getState();
+      // console.log('-------------account', account);
+      // const privateKey = await WalletHelper.getSolanaPrivateKey();
+      const mnemonics = await WalletHelper.getMnemonics(account.address);
+
+      if (!mnemonics) {
+        return false;
+      }
+      const myKeyPair = await this.generateSolanaAddress1(mnemonics);
+      console.log('🚀 ~ SolanaHelper ~ myKeyPair:', myKeyPair);
+
+      const lastValidBlockHeight = await this.connection.getSlot('finalized');
+
+      let blockhash = (await this.connection.getLatestBlockhash('finalized'))
+        .blockhash;
+
+      const transaction = new Transaction().add(
+        SystemProgram.transfer({
+          fromPubkey: myKeyPair.publicKey,
+          toPubkey: new PublicKey(to),
+          lamports: amount * LAMPORTS_PER_SOL,
+        })
+      );
+
+      transaction.recentBlockhash = blockhash;
+
+      transaction.sign(myKeyPair);
+      console.log(transaction);
+
+      const signature = getSignature(transaction);
+      console.log('🚀 ~ SolanaHelper ~ signature:', signature);
+      const serializedTransaction = Buffer.from(transaction.serialize());
+      console.log(
+        '🚀 ~ SolanaHelper ~ serializedTransaction:',
+        serializedTransaction
+      );
+      console.log('🚀 ~ SolanaHelper ~ blockhash:', blockhash);
+
+      console.log({
+        blockhash,
+        lastValidBlockHeight: lastValidBlockHeight,
+      });
+      const transactionResponse =
+        await this.transactionSenderAndConfirmationWaiter({
+          connection: this.connection,
+          serializedTransaction,
+          blockhashWithExpiryBlockHeight: {
+            blockhash,
+            lastValidBlockHeight: lastValidBlockHeight,
+          },
+        });
+
+      if (!transactionResponse) {
+        console.error('Transaction not confirmed');
+        return false;
+      }
+
+      if (transactionResponse.meta?.err) {
+        console.error(
+          'transactionResponse.meta:::',
+          transactionResponse.meta?.err
+        );
+        return false;
+      }
+
+      // const signature = await sendAndConfirmTransaction(
+      //   this.connection,
+      //   transaction,
+      //   [myKeyPair]
+      // );
+      // console.log('signature====', signature);
+
+      const myResponse = await server.post(
+        `${slug}/send`,
+        {
+          address_book_name: contact || '',
+          amount: parseFloat(amount),
+          coin_id: coinId,
+          fiat_price: fiatPrice.toString(),
+          fiat_type: fiatType,
+          from_address: from,
+          source_type: 'ANDROID',
+          to_address: to,
+          trnx_type: type || 'withdraw',
+          tx_id: signature,
+          order_id: orderId || undefined,
+        },
+        {
+          headers: {
+            Authorization: account.jwtToken,
+          },
+        }
+      );
+
+      return myResponse.data.tx_hash;
+    } catch (error) {
+      console.log(error, '=====eror');
+      let message = error?.message;
+      let arr = message.split(' ');
+      let findIndex = arr?.indexOf('signature');
+      if (findIndex != -1 && arr.length >= findIndex + 1) {
+        let txid = arr[findIndex + 1];
+        const { account } = store.getState();
+
+        const myResponse = await server.post(
+          `${slug}/send`,
+          {
+            address_book_name: contact || '',
+            amount: parseFloat(amount),
+            coin_id: coinId,
+            fiat_price: fiatPrice.toString(),
+            fiat_type: fiatType,
+            from_address: from,
+            source_type: 'ANDROID',
+            to_address: to,
+            trnx_type: type || 'withdraw',
+            tx_id: txid,
+            order_id: orderId || undefined,
+          },
+          {
+            headers: {
+              Authorization: account.jwtToken,
+            },
+          }
+        );
+
+        return myResponse.data.tx_hash;
+      }
+      // console.log('-----------false');
+      return false;
+    }
+  };
+
+  async createdAssociatedAccounts(toAddress, tokenAddress, myKeyPair) {
+    console.log(
+      '🚀 ~ SolanaHelper ~ createdAssociatedAccounts ~ toAddress, tokenAddress, myKeyPair:',
+      toAddress,
+      tokenAddress,
+      myKeyPair
+    );
+    const tokenMint = new PublicKey(tokenAddress);
+    const myToken = new splToken.Token(
+      this.connection,
+      tokenMint,
+      splToken.TOKEN_PROGRAM_ID,
+      myKeyPair
+    );
+
+    const fromTokenAccount = await myToken.getOrCreateAssociatedAccountInfo(
+      myKeyPair.publicKey
+    );
+    const toTokenAccount = await myToken.getOrCreateAssociatedAccountInfo(
+      new PublicKey(toAddress)
+    );
+
+    return {
+      fromTokenAccount,
+      toTokenAccount,
+    };
+  }
+
+  generateRawTransactionForTokenAndBroadcast = async (
+    to,
+    from,
+    amount,
+    coinId,
+    fiatPrice,
+    networkFeeInFiat,
+    fiatType,
+    contact,
+    slug,
+    chainId,
+    tokenAddress,
+    decimals,
+    tokenType,
+    balance,
+    orderId,
+    type
+  ) => {
+    try {
+      const { account } = store.getState();
+
+      const mnemonics = await WalletHelper.getMnemonics(account.address);
+      if (!mnemonics) {
+        return false;
+      }
+      const myKeyPair = await this.generateSolanaAddress1(mnemonics);
+      console.log('🚀 ~ SolanaHelper ~ myKeyPair:', myKeyPair);
+      const tokenBalance = balance;
+      // console.log('AMOUNT::', amount, 'TOKEN BALANCE::', tokenBalance);
+      if (amount > tokenBalance) {
+        return false;
+      }
+
+      const lastValidBlockHeight = await this.connection.getSlot('finalized');
+      console.log(
+        '🚀 ~ SolanaHelper ~ lastValidBlockHeight:',
+        lastValidBlockHeight
+      );
+
+      let blockhash = (await this.connection.getLatestBlockhash('finalized'))
+        .blockhash;
+      console.log('🚀 ~ SolanaHelper ~ blockhash:', blockhash);
+
+      const { fromTokenAccount, toTokenAccount } =
+        await this.createdAssociatedAccounts(to, tokenAddress, myKeyPair);
+      console.log('🚀 ~ SolanaHelper ~ toTokenAccount:', toTokenAccount);
+      console.log('🚀 ~ SolanaHelper ~ fromTokenAccount:', fromTokenAccount);
+
+      console.log(amount, decimals, '============amount');
+
+      console.log(
+        new BigNumber(amount).multipliedBy(new BigNumber(decimals)).toNumber(),
+        '============amount'
+      );
+
+      const transaction = new Transaction().add(
+        splToken.Token.createTransferInstruction(
+          splToken.TOKEN_PROGRAM_ID,
+          fromTokenAccount.address,
+          toTokenAccount.address,
+          myKeyPair.publicKey,
+          [myKeyPair],
+          new BigNumber(amount).multipliedBy(new BigNumber(decimals)).toNumber()
+        )
+      );
+
+      transaction.recentBlockhash = blockhash;
+      console.log('🚀 ~ SolanaHelper ~ transaction:', transaction);
+
+      transaction.sign(myKeyPair);
+      console.log(transaction);
+
+      const signature = getSignature(transaction);
+      console.log('🚀 ~ SolanaHelper ~ signature:', signature);
+      const serializedTransaction = Buffer.from(transaction.serialize());
+      console.log(
+        '🚀 ~ SolanaHelper ~ serializedTransaction:',
+        serializedTransaction
+      );
+      console.log('🚀 ~ SolanaHelper ~ blockhash:', blockhash);
+
+      console.log({
+        blockhash,
+        lastValidBlockHeight: lastValidBlockHeight,
+      });
+      const transactionResponse =
+        await this.transactionSenderAndConfirmationWaiter({
+          connection: this.connection,
+          serializedTransaction,
+          blockhashWithExpiryBlockHeight: {
+            blockhash,
+            lastValidBlockHeight: lastValidBlockHeight,
+          },
+        });
+
+      if (!transactionResponse) {
+        console.error('Transaction not confirmed');
+        return false;
+      }
+
+      if (transactionResponse.meta?.err) {
+        console.error(
+          'transactionResponse.meta:::',
+          transactionResponse.meta?.err
+        );
+        return false;
+      }
+
+      // const signature = await sendAndConfirmTransaction(
+      //   this.connection,
+      //   transaction,
+      //   [myKeyPair]
+      // );
+
+      const myResponse = await server.post(
+        `${slug}/send`,
+        {
+          address_book_name: contact || '',
+          amount: parseFloat(amount),
+          coin_id: coinId,
+          fiat_price: fiatPrice.toString(),
+          fiat_type: fiatType,
+          from_address: from,
+          source_type: 'ANDROID',
+          to_address: to,
+          trnx_type: type || 'withdraw',
+          tx_id: signature,
+          order_id: orderId || undefined,
+        },
+
+        {
+          headers: {
+            Authorization: account.jwtToken,
+          },
+        }
+      );
+
+      return myResponse.data.tx_hash;
+
+      return true;
+    } catch (error) {
+      console.log(error, '=====eror');
+      let message = error?.message;
+      let arr = message.split(' ');
+      let findIndex = arr?.indexOf('signature');
+      if (findIndex != -1 && arr.length >= findIndex + 1) {
+        let txid = arr[findIndex + 1];
+        const { account } = store.getState();
+
+        const myResponse = await server.post(
+          `${slug}/send`,
+          {
+            address_book_name: contact || '',
+            amount: parseFloat(amount),
+            coin_id: coinId,
+            fiat_price: fiatPrice.toString(),
+            fiat_type: fiatType,
+            from_address: from,
+            source_type: 'ANDROID',
+            to_address: to,
+            trnx_type: 'withdraw',
+            tx_id: txid,
+            order_id: orderId || undefined,
+          },
+          {
+            headers: {
+              Authorization: account.jwtToken,
+            },
+          }
+        );
+
+        return myResponse.data.tx_hash;
+      }
+      return false;
+    }
+  };
+
+  signRawTransaction = async (raw, instructions) => {
+    console.log(
+      '🚀 ~ SolanaHelper ~ signRawTransaction= ~ transaction:',
+      instructions
+    );
+    console.log('🚀 ~ SolanaHelper ~ signRawTransaction= ~ raw:', raw);
+
+    try {
+      const { account } = store.getState();
+
+      const mnemonics = await WalletHelper.getMnemonics(account.address);
+      console.log(
+        '🚀 ~ SolanaHelper ~ signRawTransaction= ~ mnemonics:',
+        mnemonics
+      );
+      if (!mnemonics) {
+        return false;
+      }
+      const myKeyPair = await this.generateSolanaAddress1(mnemonics);
+      console.log(
+        '🚀 ~ SolanaHelper ~ signRawTransaction= ~ myKeyPair:',
+        myKeyPair
+      );
+
+      let solanaWallet = new SolanaWallet(myKeyPair.secretKey);
+      console.log(
+        '🚀 ~ SolanaHelper ~ signRawTransaction= ~ solanaWallet:',
+        solanaWallet
+      );
+      const { signature } = await solanaWallet.signTransaction(
+        account.coinFamilyAndAddress[4],
+        { ...instructions, partialSignatures: [] }
+      );
+      console.log(
+        '🚀 ~ SolanaHelper ~ signRawTransaction= ~ signature:',
+        signature
+      );
+
+      // const result = await this.connection.sendEncodedTransaction(signature);
+      // return result;
+      return signature;
+    } catch (error) {
+      console.log('-----------error', error);
+      let message = error?.message;
+      let arr = message.split(' ');
+      let findIndex = arr?.indexOf('Signature');
+      if (findIndex != -1) {
+        const signature = arr[1];
+        return signature;
+      }
+      return false;
+    }
+  };
+
+  async transactionSenderAndConfirmationWaiter({
+    connection,
+    serializedTransaction,
+    blockhashWithExpiryBlockHeight,
+  }) {
+    const txid = await connection.sendRawTransaction(
+      serializedTransaction,
+      SEND_OPTIONS
+    );
+    console.log('txid:::>:>:>:>', txid);
+    const controller = new AbortController();
+    const abortSignal = controller.signal;
+    console.log('Here');
+    const abortableResender = async () => {
+      while (true) {
+        await wait(2_000);
+        if (abortSignal.aborted) return;
+        try {
+          await connection.sendRawTransaction(
+            serializedTransaction,
+            SEND_OPTIONS
+          );
+          console.log('Here 2');
+        } catch (e) {
+          console.warn(`Failed to resend transaction: ${e}`);
+        }
+      }
+    };
+
+    try {
+      abortableResender();
+      const lastValidBlockHeight =
+        blockhashWithExpiryBlockHeight.lastValidBlockHeight - 150;
+      console.log(
+        '🚀 ~ SolanaHelper ~ lastValidBlockHeight:',
+        lastValidBlockHeight
+      );
+
+      await Promise.race([
+        connection.confirmTransaction(
+          {
+            ...blockhashWithExpiryBlockHeight,
+            lastValidBlockHeight,
+            signature: txid,
+            abortSignal,
+          },
+          'confirmed'
+        ),
+
+        new Promise(async (resolve) => {
+          // in case ws socket died
+          while (!abortSignal.aborted) {
+            await wait(2_000);
+            const tx = await connection.getSignatureStatus(txid, {
+              searchTransactionHistory: false,
+            });
+            console.log('🚀 ~ SolanaHelper ~ newPromise ~ tx:', tx);
+            // console.log("tx:D::D:::::::", tx);
+            if (tx?.value?.confirmationStatus === 'confirmed') {
+              resolve(tx);
+            }
+          }
+        }),
+      ]);
+    } catch (e) {
+      console.log(e, 'e=====');
+      if (e) {
+        // we consume this error and getTransaction would return null
+        console.log(
+          'we consume this error and getTransaction would return null'
+        );
+        return null;
+      } else {
+        // invalid state from web3.js
+        console.log('invalid state from web3.js');
+        throw e;
+      }
+    } finally {
+      controller.abort();
+    }
+
+    // in case rpc is not synced yet, we add some retries
+    const response = promiseRetry(
+      async (retry) => {
+        const response = await connection.getTransaction(txid, {
+          commitment: 'confirmed',
+          maxSupportedTransactionVersion: 0,
+        });
+        if (!response) {
+          retry(response);
+        }
+        return response;
+      },
+      {
+        retries: 5,
+        minTimeout: 1e3,
+      }
+    );
+
+    return response;
+  }
+
+  unwrapSolana = async (amount, coinId) => {
+    try {
+      const { account } = store.getState();
+
+      const mnemonics = await WalletHelper.getMnemonics(account.address);
+      if (!mnemonics) {
+        return false;
+      }
+      const myKeyPair = await this.generateSolanaAddress1(mnemonics);
+      console.log('🚀 ~ SolanaHelper ~ unwrapSolana= ~ myKeyPair:', myKeyPair);
+
+      const { fromTokenAccount } = await this.createdAssociatedAccounts(
+        account.coinFamilyAndAddress[4],
+        'So11111111111111111111111111111111111111112',
+        myKeyPair
+      );
+
+      const lastValidBlockHeight = await this.connection.getSlot('finalized');
+
+      let blockhash = (await this.connection.getLatestBlockhash('finalized'))
+        .blockhash;
+
+      const transaction = new Transaction().add(
+        splToken.Token.createCloseAccountInstruction(
+          splToken.TOKEN_PROGRAM_ID,
+          fromTokenAccount.address,
+          myKeyPair.publicKey,
+          myKeyPair.publicKey,
+          [myKeyPair]
+        )
+      );
+
+      transaction.recentBlockhash = blockhash;
+
+      transaction.sign(myKeyPair);
+      console.log(transaction);
+
+      const signature = getSignature(transaction);
+      console.log('🚀 ~ SolanaHelper ~ signature:', signature);
+      const serializedTransaction = Buffer.from(transaction.serialize());
+      console.log(
+        '🚀 ~ SolanaHelper ~ serializedTransaction:',
+        serializedTransaction
+      );
+      console.log('🚀 ~ SolanaHelper ~ blockhash:', blockhash);
+
+      console.log({
+        blockhash,
+        lastValidBlockHeight: lastValidBlockHeight,
+      });
+      const transactionResponse =
+        await this.transactionSenderAndConfirmationWaiter({
+          connection: this.connection,
+          serializedTransaction,
+          blockhashWithExpiryBlockHeight: {
+            blockhash,
+            lastValidBlockHeight: lastValidBlockHeight,
+          },
+        });
+
+      if (!transactionResponse) {
+        console.error('Transaction not confirmed');
+        return false;
+      }
+
+      if (transactionResponse.meta?.err) {
+        console.error(
+          'transactionResponse.meta:::',
+          transactionResponse.meta?.err
+        );
+        return false;
+      }
+
+      // const signature = await sendAndConfirmTransaction(
+      //   this.connection,
+      //   transaction,
+      //   [myKeyPair],
+      //   {
+      //     skipPreflight: true,
+      //     maxRetries: 2,
+      //   }
+      // );
+
+      await server.post(
+        `/sol/send`,
+        {
+          address_book_name: '',
+          amount: parseFloat(amount),
+          coin_id: coinId,
+          fiat_price: 0,
+          fiat_type: 'usd',
+          from_address: account.coinFamilyAndAddress[4],
+          source_type: 'ANDROID',
+          to_address: 'So11111111111111111111111111111111111111112',
+          trnx_type: 'swap',
+          tx_id: signature,
+          order_id: undefined,
+        },
+        {
+          headers: {
+            Authorization: account.jwtToken,
+          },
+        }
+      );
+
+      return true;
+    } catch (error) {
+      console.log(error, '=====eror');
+
+      let message = error?.message;
+      let arr = message.split(' ');
+      let findIndex = arr?.indexOf('signature');
+      if (findIndex != -1 && arr.length >= findIndex + 1) {
+        let txid = arr[findIndex + 1];
+        const { account } = store.getState();
+
+        const myResponse = await server.post(
+          `/sol/send`,
+          {
+            address_book_name: '',
+            amount: parseFloat(amount),
+            coin_id: coinId,
+            fiat_price: 0,
+            fiat_type: 'usd',
+            from_address: account.coinFamilyAndAddress[4],
+            source_type: 'ANDROID',
+            to_address: 'So11111111111111111111111111111111111111112',
+            trnx_type: 'swap',
+            tx_id: txid,
+            order_id: undefined,
+          },
+          {
+            headers: {
+              Authorization: account.jwtToken,
+            },
+          }
+        );
+
+        return true;
+      }
+      return false;
+    }
+  };
+
+  signAndSendVersionedTransaction = async (
+    to,
+    from,
+    amount,
+    coinId,
+    swapTransaction
+  ) => {
+    try {
+      const { account } = store.getState();
+
+      const mnemonics = await WalletHelper.getMnemonics(account.address);
+      console.log('🚀 ~ SolanaHelper ~ mnemonics:', mnemonics);
+      if (!mnemonics) {
+        return false;
+      }
+      const myKeyPair = await this.generateSolanaAddress1(mnemonics);
+      console.log('🚀 ~ SolanaHelper ~ myKeyPair:', myKeyPair);
+
+      const connection = new Connection(
+        process.env.REACT_APP_SOL_RPC,
+        'confirmed'
+      );
+
+      const swapTransactionBuf = Buffer.from(
+        swapTransaction.swapTransaction,
+        'base64'
+      );
+      console.log(
+        '🚀 ~ SolanaHelper ~ swapTransactionBuf:',
+        swapTransactionBuf
+      );
+      let transaction = VersionedTransaction.deserialize(swapTransactionBuf);
+      console.log('🚀 ~ SolanaHelper ~ transaction:', transaction);
+
+      // sign the transaction
+      transaction.sign([myKeyPair]);
+      const signature = getSignature(transaction);
+      console.log('🚀 ~ SolanaHelper ~ signature:', signature);
+      const serializedTransaction = Buffer.from(transaction.serialize());
+      console.log(
+        '🚀 ~ SolanaHelper ~ serializedTransaction:',
+        serializedTransaction
+      );
+      const blockhash = transaction.message.recentBlockhash;
+      console.log('🚀 ~ SolanaHelper ~ blockhash:', blockhash);
+
+      console.log({
+        blockhash,
+        lastValidBlockHeight: swapTransaction?.lastValidBlockHeight,
+      });
+      const transactionResponse =
+        await this.transactionSenderAndConfirmationWaiter({
+          connection,
+          serializedTransaction,
+          blockhashWithExpiryBlockHeight: {
+            blockhash,
+            lastValidBlockHeight: swapTransaction?.lastValidBlockHeight,
+          },
+        });
+
+      if (!transactionResponse) {
+        console.error('Transaction not confirmed');
+        return false;
+      }
+
+      if (transactionResponse.meta?.err) {
+        console.error(
+          'transactionResponse.meta:::',
+          transactionResponse.meta?.err
+        );
+        return false;
+      }
+
+      const myResponse = await server.post(
+        `/sol/send`,
+        {
+          address_book_name: '',
+          amount: parseFloat(amount),
+          coin_id: coinId,
+          fiat_price: 0,
+          fiat_type: 'usd',
+          from_address: from,
+          source_type: 'ANDROID',
+          to_address: to,
+          trnx_type: 'swap',
+          tx_id: signature,
+          order_id: undefined,
+        },
+
+        {
+          headers: {
+            Authorization: account.jwtToken,
+          },
+        }
+      );
+
+      return myResponse.data.tx_hash;
+    } catch (error) {
+      console.log(error, '=====eror');
+      let message = error?.message;
+      let arr = message.split(' ');
+      let findIndex = arr?.indexOf('signature');
+      if (findIndex != -1 && arr.length >= findIndex + 1) {
+        let txid = arr[findIndex + 1];
+        const { account } = store.getState();
+
+        const myResponse = await server.post(
+          `/sol/send`,
+          {
+            address_book_name: '',
+            amount: parseFloat(amount),
+            coin_id: coinId,
+            fiat_price: 0,
+            fiat_type: 'usd',
+            from_address: from,
+            source_type: 'ANDROID',
+            to_address: to,
+            trnx_type: 'swap',
+            tx_id: txid,
+            order_id: undefined,
+          },
+          {
+            headers: {
+              Authorization: account.jwtToken,
+            },
+          }
+        );
+
+        return myResponse.data.tx_hash;
+      }
+      return false;
+    }
+  };
+}

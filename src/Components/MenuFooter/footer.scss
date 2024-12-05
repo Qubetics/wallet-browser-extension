@@ -1,0 +1,40 @@
+@import "../../styles/__vars.scss";
+@import "../../styles/__mixins.scss";
+.menuItems {
+  padding: 24px 28px;
+  position: sticky;
+  box-shadow: 0px 3px 8px #223f7017;
+//   border: 1px solid #c4d7f8;
+  background-color: $inputBg;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  @include theme() {
+    background-color: theme-get("inputBg");
+  }
+  &__items {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    cursor: pointer;
+    font-size: 10px;
+      font-weight: bold;
+      color: $gray;
+      text-decoration: none;
+    transition: 0.3s all;
+    &__active , &:hover{
+      > div {
+        filter: none;
+      }
+      span{
+        color: $baseText-00AEEF;
+      }
+    }
+    &__img {
+      filter: grayscale(1);
+    }
+  }
+}

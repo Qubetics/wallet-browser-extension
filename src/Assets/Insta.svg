@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="40" height="40" viewBox="0 0 40 40">
+  <defs>
+    <linearGradient id="linear-gradient" x1="0.119" y1="0.881" x2="0.83" y2="0.17" gradientUnits="objectBoundingBox">
+      <stop offset="0" stop-color="#fee411"/>
+      <stop offset="0.052" stop-color="#fedb16"/>
+      <stop offset="0.138" stop-color="#fec125"/>
+      <stop offset="0.248" stop-color="#fe983d"/>
+      <stop offset="0.376" stop-color="#fe5f5e"/>
+      <stop offset="0.5" stop-color="#fe2181"/>
+      <stop offset="1" stop-color="#9000dc"/>
+    </linearGradient>
+  </defs>
+  <g id="Group_51249" data-name="Group 51249" transform="translate(-42 -525)">
+    <circle id="Ellipse_9233" data-name="Ellipse 9233" cx="20" cy="20" r="20" transform="translate(42 525)" fill="#fec025" opacity="0.1"/>
+    <g id="Group_51252" data-name="Group 51252" transform="translate(19.042 502.042)">
+      <g id="Group_51251" data-name="Group 51251" transform="translate(30.958 30.958)">
+        <circle id="Ellipse_9234" data-name="Ellipse 9234" cx="12.5" cy="12.5" r="12.5" fill="url(#linear-gradient)"/>
+        <g id="Group_51250" data-name="Group 51250" transform="translate(5.522 5.517)">
+          <path id="Path_49565" data-name="Path 49565" d="M140.748,131h-5.335a4.315,4.315,0,0,0-4.313,4.313v5.335a4.315,4.315,0,0,0,4.313,4.313h5.335a4.315,4.315,0,0,0,4.313-4.313v-5.335A4.315,4.315,0,0,0,140.748,131Zm2.754,9.654a2.762,2.762,0,0,1-2.76,2.76h-5.335a2.762,2.762,0,0,1-2.76-2.76v-5.335a2.762,2.762,0,0,1,2.76-2.76h5.335a2.762,2.762,0,0,1,2.76,2.76Z" transform="translate(-131.1 -131)" fill="#fff"/>
+          <path id="Path_49566" data-name="Path 49566" d="M195.67,192.1a3.57,3.57,0,1,0,3.57,3.57A3.576,3.576,0,0,0,195.67,192.1Zm0,5.737a2.168,2.168,0,1,1,2.168-2.168A2.17,2.17,0,0,1,195.67,197.837Z" transform="translate(-188.692 -188.687)" fill="#fff"/>
+          <circle id="Ellipse_9235" data-name="Ellipse 9235" cx="0.603" cy="0.603" r="0.603" transform="matrix(0.987, -0.16, 0.16, 0.987, 10.031, 2.71)" fill="#fff"/>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

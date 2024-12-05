@@ -1,0 +1,106 @@
+@import "../../styles/__vars.scss";
+@import "../../styles/__mixins.scss";
+
+.inputSimple {
+  @include theme() {
+    background-color: theme-get("inputBg1") !important;
+    color: theme-get("whiteblack");
+    border-color: theme-get("cardBorder");
+  }
+  border-radius: 28px;
+  padding: 14px 16px;
+  border: 1px solid;
+  // border: 0;
+  &::placeholder {
+    @include theme() {
+      color: theme-get("gray1") !important;
+    }
+  }
+
+  input {
+    background-color: transparent;
+    font-size: 14px;
+    font-weight: normal;
+    @include theme() {
+      color: theme-get("whiteblack");
+    }
+    border: none !important;
+    &::placeholder {
+      @include theme() {
+        color: theme-get("whiteblack") !important;
+      }
+    }
+  }
+}
+.inputField {
+  &__coloredBg {
+    @include theme() {
+      background-color: theme-get("inputBg") !important  ;
+    }
+    &::placeholder {
+      @include theme() {
+        color: theme-get("gray1") !important;
+      }
+    }
+  }
+
+  &__inputSelect {
+    padding: 5px 5px 5px 16px !important;
+  }
+  &__input {
+    @include theme() {
+      background-color: theme-get("inputBg");
+      color: theme-get("whiteblack");
+      border-color: theme-get("cardBorder");
+    }
+
+    border-radius: 28px;
+    padding: 14px 16px !important;
+    border: 1px solid;
+    &::placeholder {
+      @include theme() {
+        color: theme-get("gray1");
+      }
+    }
+    .ant-input {
+      height: 30px !important;
+      border: 0;
+      @include theme() {
+        background-color: theme-get("inputBg");
+        color: theme-get("whiteblack");
+      }
+      &::placeholder {
+        @include theme() {
+          color: theme-get("gray1") !important;
+        }
+      }
+    }
+
+    .ant-input-wrapper {
+      padding: 0;
+      border: 0;
+    }
+  }
+}
+
+.boxStyle {
+  text-align: left;
+  margin-bottom: 23px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  &__label {
+    @include theme() {
+      color: theme-get("whiteblack");
+    }
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+.mb0 {
+  margin-bottom: 0;
+}

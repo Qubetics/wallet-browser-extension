@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="25.5" height="20.85" viewBox="0 0 25.5 20.85">
+  <g id="Buy_Sell" data-name="Buy/Sell" transform="translate(-4.25 -6.25)">
+    <path id="Path_48224" data-name="Path 48224" d="M21.25,23a.75.75,0,0,0,1.5,0ZM22,17l.53-.53a.75.75,0,0,0-1.061,0Zm1.47,2.53A.75.75,0,0,0,24.53,18.47Zm-4-1.061A.75.75,0,0,0,20.53,19.53ZM22.75,23V17h-1.5v6Zm-1.28-5.47,2,2L24.53,18.47l-2-2Zm0-1.061-2,2L20.53,19.53l2-2Z" transform="translate(4 3.35)" fill="#00aeef"/>
+    <path id="Path_48228" data-name="Path 48228" d="M5,13H29" transform="translate(0 1.2)" fill="none" stroke="#00aeef" stroke-linecap="round" stroke-width="1.5"/>
+    <path id="Path_48225" data-name="Path 48225" d="M29,16.675c0-4.561,0-6.841-1.406-8.258S23.925,7,19.4,7H14.6C10.075,7,7.812,7,6.406,8.417S5,12.114,5,16.675s0,6.841,1.406,8.258S10.075,26.35,14.6,26.35h4.8" fill="none" stroke="#fff" stroke-linecap="round" stroke-width="1.5"/>
+    <path id="Path_48226" data-name="Path 48226" d="M13,19H9" transform="translate(1 2.4)" fill="none" stroke="#00aeef" stroke-linecap="round" stroke-width="1.5"/>
+    <path id="Path_48227" data-name="Path 48227" d="M16,19h-.5" transform="translate(2.154 2.4)" fill="none" stroke="#fff" stroke-linecap="round" stroke-width="1.5"/>
+  </g>
+</svg>

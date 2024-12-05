@@ -1,0 +1,60 @@
+@import "../../styles/__vars.scss";
+@import "../../styles/__mixins.scss";
+.adressCard {
+  @include theme() {
+    background-color: theme-get("inputBg");
+  }
+  padding: 24px 16px;
+  border-radius: 20px;
+  margin-bottom: 20px;
+
+  &__address {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+
+    p {
+      text-align: left;
+      font-size: 14px;
+      &:first-child {
+        @include theme() {
+          color: theme-get("whiteblack");
+        }
+      }
+      &:last-child {
+        @include theme() {
+          color: theme-get("baseText");
+        }
+        font-weight: bold;
+      }
+    }
+  }
+  &__Header {
+    border-bottom: 1px solid;
+    padding-bottom: 12px;
+    display: flex;
+    align-items: center;
+    margin-top: 0;
+    justify-content: space-between;
+    @include theme() {
+      border-color: theme-get("cardBorder");
+    }
+    h2 {
+      font-size: 16px;
+      text-align: left;
+      @include theme() {
+        color: theme-get("baseText");
+      }
+    }
+    .currency {
+      p {
+        text-align: left;
+        font-size: 14px;
+        @include theme() {
+          color: theme-get("baseText");
+        }
+        font-weight: bold;
+      }
+    }
+  }
+}

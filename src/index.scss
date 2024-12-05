@@ -1,0 +1,53 @@
+@import url("https://fonts.googleapis.com/css2?family=Mulish:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;0,1000;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900;1,1000&display=swap");
+* {
+  font-family: "Mulish", sans-serif;
+  * {
+    padding: 0;
+    margin: 0;
+  }
+}
+body {
+  margin: 0;
+}
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+    monospace;
+}
+.otpDrawer {
+  .style_ButtonStyle__AIFXM {
+    padding: 9px !important;
+  }
+}
+
+.mainTanceSecModal {
+  padding: 50px 40px 0px 40px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  img {
+    width: 100px !important;
+    margin: 0 auto !important;
+  }
+}
+//Transak Modal Custom css//
+.transak_modal {
+  // position: absolute !important;
+  top: 100px !important;
+  transform: translateX(-50%) !important;
+  left: 50% !important;
+}
+
+.ButtonStyle.disabled,
+.ButtonStyle:disabled {
+  cursor: not-allowed !important;
+  opacity: 0.5 !important;
+  color: #fff !important;
+  &:hover {
+    border: 1px solid transparent !important;
+  }
+}
+.darkThemeText {
+  color: #fff;
+}
+.lightThemeText {
+  color: black;
+}

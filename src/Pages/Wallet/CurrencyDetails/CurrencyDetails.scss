@@ -1,0 +1,90 @@
+@import "../../../styles/__vars.scss";
+@import "../../../styles/__mixins.scss";
+
+.detailIcon {
+  width: 30px;
+  object-fit: contain;
+  border-radius: 50% !important;
+}
+.currDetails {
+  &__card {
+    background-color: $white;
+    padding: 16px 24px;
+    border-radius: 16px;
+    &:first-child {
+      background-image: url("../../../Assets/PNG/CardBGCurrency.png");
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: cover;
+    }
+    &__paddingOverride {
+      padding-left: 0;
+      padding-right: 0;
+    }
+    &__textLeft {
+      text-align: left;
+    }
+    &__topTexts {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+      position: relative;
+      left: 14px;
+    }
+    &__text {
+      font-size: 14px !important;
+      color: $white !important;
+      font-weight: normal;
+    }
+    &__mt0 {
+      margin-top: 0;
+    }
+  }
+  &__border {
+    background: #d7e0eb 0% 0% no-repeat padding-box;
+    height: 1px;
+    margin: 24px 0 32px;
+  }
+  &__noData {
+    font-size: 14px;
+    font-weight: 600;
+    color: #223f70bd;
+    margin-bottom: 15px;
+  }
+  &__jsonFile {
+    display: flex;
+    justify-content: center;
+  }
+  &__dataSec {
+    margin-top: 27px;
+    &__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      p {
+        @include theme() {
+          color: theme-get("baseText");
+        }
+        font-weight: 800;
+        font-size: 16px;
+      }
+    }
+    &__table {
+      max-height: 332px;
+      overflow-y: auto;
+    }
+  }
+}
+
+.box {
+  background-color: #4096ff;
+  border-radius: 10px;
+  color: #fff;
+  margin-left: 15px;
+  margin-bottom: 24px;
+  padding: 7px 32px;
+  cursor: pointer;
+}

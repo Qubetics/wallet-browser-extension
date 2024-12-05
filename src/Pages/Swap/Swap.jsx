@@ -1,0 +1,3605 @@
+/*global chrome */
+import 'react-tabs/style/react-tabs.css';
+import './Swap.scss';
+import ModalCloseIcon from '../../Assets/ModalCloseIcon.svg';
+import darkclose from '../../Assets/darkclose.svg';
+import { Drawer, message, Select, Tooltip } from 'antd';
+import {
+  EditOutlined,
+  InfoCircleOutlined,
+  SettingOutlined,
+} from '@ant-design/icons';
+import DarkLogo from '../../Assets/DarkLogo.svg';
+import Logo from '../../Assets/Logo.png';
+import React from 'react';
+import MenuRestofHeaders from '../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders';
+import { InputField } from '../../Components/InputField/InputFieldSimple';
+import BTC from '../../Assets/Coins/BTC.png';
+import DownArrowSuffix from '../../Assets/DownArrowSuffix.svg';
+import Cog from '../../Assets/cog.png';
+import Search from '../../Assets/SearchIcon.svg';
+import Edit from '../../Assets/edit.svg';
+// import Search from "../../Assets/SearchIcon.svg";
+import ETH from '../../Assets/Coins/ETH.png';
+import ADA from '../../Assets/Coins/ADA.png';
+import SwapVerticalIcon from '../../Assets/SwapVerticalIcon.svg';
+import ButtonComp from '../../Components/ButtonComp/ButtonComp';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { UniswapHelper } from '../../helpers/uniswap.helper';
+import { useEffect } from 'react';
+import { useState } from 'react';
+import { Web3Helper } from '../../helpers/web3.helper';
+import { useSelector } from 'react-redux';
+import { store } from '../..';
+import { setLoading as externalLoading } from '../../actions/loading';
+import { Loader } from '../../Components/Loader/Loader';
+import { ClipLoader } from 'react-spinners';
+import { useRef } from 'react';
+import { Tabs, TabList, Tab, TabPanel } from 'react-tabs';
+import CrossChain from '../CrossChain/CrossChain';
+import { DURATION } from '../../config/message.config';
+import BigNumber from 'bignumber.js';
+import { SolanaHelper } from '../../helpers/solana.helper';
+import { BTCHelper } from '../../helpers/btc.helper';
+import warning from '../../Assets/PNG/danger.png';
+
+import {
+  balanceToFiatConversion,
+  toFixed,
+} from '../../helpers/conversion.helper';
+import { server } from '../../server';
+import Web3 from 'web3';
+import { PancakeHelper } from '../../helpers/pancake.helper';
+import ModalCustom from '../../Components/ModalCustom/ModalCustom';
+import { setLoading as overAllLoader } from '../../actions/loading';
+import { PulseChainHelper } from '../../helpers/pulsechain.helper';
+import debounce from 'lodash.debounce';
+import { UNISWAP_NATIVE_WRAPPED_TOKEN_ADDRESSES } from '../../config/uniswap.config';
+import { PANCAKE_NATIVE_WRAPPED_TOKEN_ADDRESSES } from '../../config/pancake.config';
+import Bignumber from 'bignumber.js';
+import { generateString } from '../../helpers/common.helper';
+// import useCheckMaintanace from "../../CustomHooks/checkMaintanance";
+import { WalletHelper } from '../../helpers/wallet.helper';
+import Maintanance from '../../Components/Maintanance/Maintanance';
+import { swapDetailAc } from '../../actions/swap';
+function getFlooredFixed(v, d) {
+  return (Math.floor(v * Math.pow(10, d)) / Math.pow(10, d)).toFixed(d);
+}
+let randomString = generateString(15).trim();
+
+function addCommasToNumber(number) {
+  var parts = number.toString().split('.');
+  var integerPart = parts[0];
+  var decimalPart = parts[1] || ''; // Handle cases where there is no decimal part
+
+  // Add commas to the integer part
+  integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+  // Combine the integer and decimal parts
+  if (decimalPart !== '') {
+    return integerPart + '.' + decimalPart;
+  } else {
+    return integerPart;
+  }
+}
+
+function Swap() {
+  const [infoMessage, setInfoMessage] = useState('');
+  const { chain, account, currency, swapDetail } = useSelector(
+    (state) => state
+  );
+  let timeOutId = useRef(null);
+  let timeOutId1 = useRef(null);
+  const [availableTokens, setAvailableTokens] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [token1, setToken1] = useState(null);
+  const [token2, setToken2] = useState(null);
+  const [tradingFee, setTradingFee] = useState(0);
+  const [adminSwapFee, setAdminSwapFee] = useState(0);
+  const [balance, setBalance] = useState(0);
+  const [balance2, setBalance2] = useState(0);
+  const [slippage, setSlippage] = useState(1);
+  const [customSlippage, setCustomSlippage] = useState(null);
+  const [slippageDrawer, setSlippageDrawer] = useState(false);
+  const [disclaimer, setDisclaimer] = useState(false);
+  const navigate = useNavigate();
+  const [messageApi, contextHolder] = message.useMessage({
+    duration: DURATION,
+    maxCount: 1,
+  });
+  const [infoData, setInfoData] = useState([]);
+  const [selectedCoinFamily, setSelectedCoinFamily] = useState(null);
+  const [amount2, setAmount2] = useState(null);
+  const [isModalOpen1, setIsModalOpen1] = useState(false);
+  const [amount, setAount] = useState(null);
+  const [route, setRoute] = useState(null);
+  const [sel, setSel] = useState(0);
+  const [selected, setSelected] = useState(0);
+  const [feeAmount, setFeeAmount] = useState(0);
+  const [open, setOpen] = useState(false);
+  const [allToken, setAllTokens] = useState([]);
+  const [filteredTokens, setFilteredTokens] = useState([]);
+  const [keyword, setKeyword] = useState(null);
+  const [show, setShow] = useState(true);
+  const [selectedCF, setSelectedCF] = useState(false);
+  const [isWrap, setIsWrap] = useState(null);
+
+  const [reverse, setReverse] = useState(false);
+
+  const updateRef = useRef(true);
+  const { theme } = useSelector((state) => state);
+  const [percent, setPercent] = useState(null);
+
+  // let g = { type: "on_chain_swap", is_maintenance: 1 };
+  // let b = { type: "cross_chain_swap", is_maintenance: 0 };
+  const [onChainSwapM, setOnChainSwapM] = useState({});
+  const [crossChainM, setCrossChainM] = useState({});
+
+  const { state } = useLocation();
+  console.log(infoData, 'infoData');
+
+  useEffect(() => {
+    if (swapDetail) {
+      setSel(swapDetail?.tab);
+      if (swapDetail?.tab == 0) {
+        // setToken1(swapDetail?.token1);
+        // setToken2(swapDetail?.token2);
+        setAount(+swapDetail?.amount);
+        // setAmount2(+swapDetail?.amount2);
+        // setFeeAmount(+swapDetail?.feeAmount);
+        // setTimeout(() => {
+        //   initialInput(
+        //     +swapDetail?.amount,
+        //     swapDetail?.token1,
+        //     swapDetail?.token2
+        //   );
+        // }, 2000);
+      }
+    }
+  }, []);
+
+  // function initialInput(newAmount, tokenOne, tokenTwo) {
+  //   setAount(newAmount)
+  // }
+
+  useEffect(() => {
+    checkMaintanance();
+  }, [sel]);
+
+  const checkMaintanance = async () => {
+    // let resp = await WalletHelper.checkMaintanance();
+    // setMaintanancePage()
+    const { data } = await server.get('/wallet/check_app_maintenance', {
+      headers: {
+        Authorization: account.jwtToken,
+      },
+    });
+
+    let onChainSwap = data?.data.filter(
+      (datas) => datas.type == 'on_chain_swap'
+    );
+    if (onChainSwap.length > 0) {
+      setOnChainSwapM(onChainSwap[0]);
+    }
+
+    let crossChainSwap = data.data.filter(
+      (datas) => datas.type == 'cross_chain_swap'
+    );
+    if (crossChainSwap.length > 0) {
+      setCrossChainM(crossChainSwap[0]);
+    }
+  };
+
+  useEffect(() => {
+    if ((amount == null || amount == '') && amount2 != null) {
+      setAmount2(null);
+      setInfoData([]);
+    }
+  }, [amount]);
+
+  function showFiatConversion(amount, token1Price, amount2, token2Price) {
+    const fromAmount =
+      parseFloat(amount ? amount : 0) * parseFloat(token1Price);
+    // console.log(
+    //   "🚀 ~ file: Swap.jsx:133 ~ showFiatConversion ~ fromAmount:",
+    //   fromAmount
+    // );
+
+    const receivedAmount =
+      parseFloat(amount2 ? amount2 : 0) * parseFloat(token2Price);
+
+    // console.log(
+    //   "🚀 ~ file: Swap.jsx:137 ~ showFiatConversion ~ receivedAmount:",
+    //   receivedAmount
+    // );
+
+    let percVal =
+      (parseFloat(receivedAmount) / parseFloat(fromAmount)) * 100 || 0;
+    // console.log(
+    //   "🚀 ~ file: Swap.jsx:138 ~ showFiatConversion ~ percVal:",
+    //   percVal
+    // );
+    let diffVal = parseFloat(110) > 0 ? 110 : 0;
+    // console.log(
+    //   "🚀 ~ file: Swap.jsx:141 ~ showFiatConversion ~ diffVal:",
+    //   diffVal
+    // );
+
+    if (parseFloat(percVal) < parseFloat(diffVal) && parseFloat(percVal) > 90) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  const calculateAccordingly = async (percentage) => {
+    try {
+      store.dispatch(overAllLoader(true));
+      if (token1.tokenAddress) {
+        if (token1.coinFamily == 4) {
+          const finalAmountToSend = new BigNumber(token1.balance).multipliedBy(
+            new BigNumber(percentage).dividedBy(100)
+          );
+          setAount(
+            finalAmountToSend.toString() == 0
+              ? finalAmountToSend.toString()
+              : finalAmountToSend.toFixed(18).toString()
+          );
+          await handleInputChange(
+            token1.balance.toFixed(18).toString(),
+            token1,
+            token2,
+            true
+          );
+          return store.dispatch(overAllLoader(false));
+        }
+
+        const amountToSend = await Web3Helper.getTokenBalance(
+          token1.tokenAddress,
+          token1.address,
+          token1.rpc
+        );
+        if (amountToSend == 0) {
+          setAmount2(0);
+          setInfoData([]);
+        }
+        store.dispatch(overAllLoader(false));
+        const finalAmountToSend = new BigNumber(amountToSend).multipliedBy(
+          new BigNumber(percentage).dividedBy(100)
+        );
+        // setAount(toFixed(finalAmountToSend.toString()));
+        setAount(
+          finalAmountToSend.toString() == 0
+            ? finalAmountToSend.toString()
+            : finalAmountToSend.toFixed(18).toString()
+        );
+        setBalance(toFixed(amountToSend.toString()));
+        await handleInputChange(
+          // toFixed(finalAmountToSend.toString()),
+          finalAmountToSend.toFixed(18).toString(),
+          token1,
+          token2,
+          true
+        );
+      }
+    } catch (error) {
+      store.dispatch(overAllLoader(false));
+      return messageApi.error('Something went wrong.');
+    }
+  };
+  const init = async () => {
+    try {
+      const { data } = await server.post(
+        `/wallet/swap_coins_list`,
+        {
+          address_list: [
+            account.coinFamilyAndAddress[1],
+            account.coinFamilyAndAddress[4],
+          ],
+          fiat_currency: currency.name,
+          per_page: 4000,
+          page: 1,
+          is_active_coin: 1,
+          is_watch_only: account?.isWatchOnly ? 1 : 0,
+        },
+        {
+          headers: {
+            Authorization: account.jwtToken,
+          },
+        }
+      );
+
+      const tokens = data.data.rows.map((token) => {
+        return {
+          id: token.id,
+          coin: token,
+          coinFamily: token.coin_family,
+          iHave: token.wallet_addresses_data ? true : false,
+          symbol: token.coin_symbol.toUpperCase(),
+          name: token.coin_name,
+          tokenAddress: token.token_address,
+          image: token.coin_image
+            ? `${process.env.REACT_APP_IMAGE_BASE_URL}${token.coin_image}`
+            : null,
+          address:
+            token.coin_family == 4
+              ? account.coinFamilyAndAddress[4]
+              : account.coinFamilyAndAddress[1],
+          decimals: parseInt(token.decimals.toString().length) - 1,
+          isToken: token.token_address ? true : false,
+          price: token.coins_market
+            ? token.coins_market.current_price
+              ? token.coins_market.current_price
+              : 0
+            : 0,
+          balance: token.wallet_addresses_data
+            ? toFixed(token.wallet_addresses_data.balance)
+            : 0,
+          type:
+            token.coin_family == 9
+              ? 'PLS'
+              : token.coin_family == 4
+              ? 'SPL20'
+              : token.token_type,
+          jupiter_fee_address: token.jupiter_fee_address || null,
+          rpc:
+            token.coin_family == 1
+              ? process.env.REACT_APP_ETH_RPC
+              : token.coin_family == 9
+              ? process.env.REACT_APP_PLS_RPC
+              : token.coin_family == 4
+              ? process.env.REACT_APP_SOL_RPC
+              : process.env.REACT_APP_BNB_RPC,
+        };
+      });
+
+      setAllTokens(tokens);
+      setFilteredTokens(tokens);
+
+      let { [`uniToken1_${account.id}`]: uniToken1 } =
+        await chrome.storage.local.get(`uniToken1_${account.id}`);
+      let { [`uniToken2_${account.id}`]: uniToken2 } =
+        await chrome.storage.local.get(`uniToken2_${account.id}`);
+
+      if (!uniToken1 && !uniToken2) {
+        if (tokens.length === 0) {
+          return messageApi.error('Please enable tokens in your wallet.');
+        }
+
+        let myToken1 = tokens.find(
+          (token) => !token.tokenAddress && token.iHave && token.coinFamily == 3
+        );
+
+        if (!myToken1) {
+          myToken1 = tokens.find((token) => !token.tokenAddress);
+        }
+
+        if (!myToken1) {
+          myToken1 = tokens.find((token) => token.tokenAddress);
+        }
+
+        let myToken2 = tokens.find(
+          (token) =>
+            token.tokenAddress &&
+            token.coin.coin_family === myToken1.coin.coin_family
+        );
+
+        // console.log("🚀 ~ file: Swap.jsx:235 ~ init ~ myToken2:", myToken2);
+
+        if (!myToken2) {
+          myToken2 = tokens.find(
+            (token) =>
+              token.tokenAddress &&
+              token.coin.coin_family === myToken1.coin.coin_family
+          );
+        }
+
+        if (state && state.tokenAddress) {
+          //TODO Hit search api
+          const PayloadObj = {
+            address_list: [
+              account.coinFamilyAndAddress[1],
+              account.coinFamilyAndAddress[4],
+            ],
+            fiat_currency: currency.name,
+            per_page: 10,
+            page: 1,
+            is_active_coin: 1,
+            search: state.tokenAddress,
+            coin_family: state.coinFamily || token1?.coinFamily,
+            is_watch_only: account?.isWatchOnly ? 1 : 0,
+          };
+          if (PayloadObj.search == null || PayloadObj.search === '') {
+            delete PayloadObj.search;
+          }
+          const { data } = await server.post(
+            `/wallet/swap_coins_list`,
+            PayloadObj,
+            {
+              headers: {
+                Authorization: account.jwtToken,
+              },
+            }
+          );
+
+          //Configur ethe response like above
+
+          const newTokens = data.data.rows.map((token) => {
+            return {
+              id: token.id,
+              coin: token,
+              coinFamily: token.coin_family,
+              iHave: token.wallet_addresses_data ? true : false,
+              symbol: token.coin_symbol.toUpperCase(),
+              name: token.coin_name,
+              tokenAddress: token.token_address,
+              image: token.coin_image
+                ? `${process.env.REACT_APP_IMAGE_BASE_URL}${token.coin_image}`
+                : null,
+              address:
+                token.coin_family == 4
+                  ? account.coinFamilyAndAddress[4]
+                  : account.coinFamilyAndAddress[1],
+              decimals: parseInt(token.decimals.toString().length) - 1,
+              isToken: token.token_address ? true : false,
+              price: token.coins_market
+                ? token.coins_market.current_price
+                  ? token.coins_market.current_price
+                  : 0
+                : 0,
+              balance: token.wallet_addresses_data
+                ? toFixed(token.wallet_addresses_data.balance)
+                : 0,
+              type:
+                token.coin_family == 9
+                  ? 'PLS'
+                  : token.coin_family == 4
+                  ? 'SPL20'
+                  : token.token_type,
+              jupiter_fee_address: token.jupiter_fee_address || null,
+              rpc:
+                token.coin_family == 1
+                  ? process.env.REACT_APP_ETH_RPC
+                  : token.coin_family == 9
+                  ? process.env.REACT_APP_PLS_RPC
+                  : token.coin_family == 4
+                  ? process.env.REACT_APP_SOL_RPC
+                  : process.env.REACT_APP_BNB_RPC,
+            };
+          });
+
+          //assign the object to my state token
+          const myStateToken = newTokens[0];
+
+          if (!myStateToken) {
+            messageApi.error('Token not available for swap.');
+          }
+
+          if (myStateToken) {
+            if (state.fromOrTo == 1) {
+              if (myToken2.id != myStateToken.id) {
+                myToken1 = myStateToken;
+                // console.log(
+                //   "🚀 ~ file: Swap.jsx:348 ~ init ~ myToken1:",
+                //   myToken1
+                // );
+
+                await chrome.storage.local.set({
+                  [`uniToken1_${account.id}`]: myStateToken,
+                });
+              } else {
+                messageApi.error('Cannot set the same tokens on both sides.');
+              }
+            } else {
+              if (myToken1.id != myStateToken.id) {
+                myToken2 = myStateToken;
+
+                await chrome.storage.local.set({
+                  [`uniToken2_${account.id}`]: myStateToken,
+                });
+              } else {
+                messageApi.error('Cannot set the same tokens on both sides.');
+              }
+            }
+          }
+          if (state.coinFamily) {
+            setToken1(myToken1);
+            handleToken1Change(myStateToken);
+            setSelectedCoinFamily(myStateToken?.coinFamily);
+            setSelectedCF(true);
+          }
+        }
+
+        const balance = myToken1.balance || 0;
+        // console.log("🚀 ~ file: Swap.jsx:382 ~ init ~ balance:", balance);
+        const tokenBalance = 0;
+        // console.log(
+        //   "🚀 ~ file: Swap.jsx:384 ~ init ~ tokenBalance:",
+        //   tokenBalance
+        // );
+
+        await chrome.storage.local.set({
+          [`uniToken1_${account.id}`]: myToken1,
+        });
+
+        await chrome.storage.local.set({
+          [`uniToken2_${account.id}`]: myToken2,
+        });
+
+        setBalance(balance);
+        setBalance2(tokenBalance);
+        setAvailableTokens(tokens);
+        setToken1(myToken1);
+        setToken2(myToken2);
+        setSelectedCoinFamily(myToken1.coinFamily);
+        setLoading(false);
+      } else {
+        if (tokens.length === 0) {
+          return;
+        }
+        ///////////////////////////////////////////////////////////////////////////////////
+        let token1 = uniToken1 || null;
+
+        const PayloadObjForToken1 = {
+          address_list: [
+            account.coinFamilyAndAddress[1],
+            account.coinFamilyAndAddress[4],
+          ],
+          fiat_currency: currency.name,
+          per_page: 10,
+          page: 1,
+          coin_id_search: token1?.id,
+          is_watch_only: account?.isWatchOnly ? 1 : 0,
+        };
+
+        if (
+          PayloadObjForToken1.search == null ||
+          PayloadObjForToken1.search === ''
+        ) {
+          delete PayloadObjForToken1.search;
+        }
+        const token1Response = await server.post(
+          `/wallet/swap_coins_list`,
+          PayloadObjForToken1,
+          {
+            headers: {
+              Authorization: account.jwtToken,
+            },
+          }
+        );
+        const newTokens = token1Response.data.data.rows
+          .filter((el) => el.wallet_addresses_data)
+          .map((token) => {
+            return {
+              id: token.id,
+              coin: token,
+              coinFamily: token.coin_family,
+              iHave: token.wallet_addresses_data ? true : false,
+              symbol: token.coin_symbol.toUpperCase(),
+              name: token.coin_name,
+              tokenAddress: token.token_address,
+              image: token.coin_image
+                ? `${process.env.REACT_APP_IMAGE_BASE_URL}${token.coin_image}`
+                : null,
+              address:
+                token.coin_family == 4
+                  ? account.coinFamilyAndAddress[4]
+                  : account.coinFamilyAndAddress[1],
+              decimals: parseInt(token.decimals.toString().length) - 1,
+              isToken: token.token_address ? true : false,
+              price: token.coins_market
+                ? token.coins_market.current_price
+                  ? token.coins_market.current_price
+                  : 0
+                : 0,
+              balance: token.wallet_addresses_data
+                ? toFixed(token.wallet_addresses_data.balance)
+                : 0,
+              type:
+                token.coin_family == 9
+                  ? 'PLS'
+                  : token.coin_family == 4
+                  ? 'SPL20'
+                  : token.token_type,
+              jupiter_fee_address: token.jupiter_fee_address || null,
+              rpc:
+                token.coin_family == 1
+                  ? process.env.REACT_APP_ETH_RPC
+                  : token.coin_family == 9
+                  ? process.env.REACT_APP_PLS_RPC
+                  : token.coin_family == 4
+                  ? process.env.REACT_APP_SOL_RPC
+                  : process.env.REACT_APP_BNB_RPC,
+            };
+          });
+        token1 = newTokens[0] || null;
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        setToken1(token1);
+
+        if (!token1) {
+          setBalance(token1?.balance || 0);
+
+          setAvailableTokens(tokens);
+          setToken1(token1);
+          setToken2(null);
+
+          setSelectedCoinFamily(token1?.coinFamily);
+          setLoading(false);
+          return;
+        }
+
+        if (newTokens.length === 0) {
+          setBalance(token1?.balance || 0);
+
+          setAvailableTokens(tokens);
+          setToken1(token1);
+          setToken2(null);
+
+          setSelectedCoinFamily(token1?.coinFamily);
+          setLoading(false);
+          return;
+        }
+
+        uniToken2 = uniToken2 || null;
+
+        if (!uniToken2) {
+          setBalance(token1?.balance || 0);
+
+          setAvailableTokens(tokens);
+          setToken1(token1);
+          setToken2(null);
+
+          setSelectedCoinFamily(token1?.coinFamily);
+          setLoading(false);
+          return;
+        }
+
+        ///////////////////////////////////////////////////////////////////////////////////
+
+        const PayloadObjForToken2 = {
+          address_list: [
+            account.coinFamilyAndAddress[1],
+            account.coinFamilyAndAddress[4],
+          ],
+          fiat_currency: currency.name,
+          per_page: 10,
+          page: 1,
+          coin_id_search: uniToken2?.id,
+          is_watch_only: account?.isWatchOnly ? 1 : 0,
+        };
+
+        if (
+          PayloadObjForToken2.search == null ||
+          PayloadObjForToken2.search === ''
+        ) {
+          delete PayloadObjForToken2.search;
+        }
+        const token1Response2 = await server.post(
+          `/wallet/swap_coins_list`,
+          PayloadObjForToken2,
+          {
+            headers: {
+              Authorization: account.jwtToken,
+            },
+          }
+        );
+
+        const newTokens2 = token1Response2.data.data.rows.map((token) => {
+          return {
+            id: token.id,
+            coin: token,
+            coinFamily: token.coin_family,
+            iHave: token.wallet_addresses_data ? true : false,
+            symbol: token.coin_symbol.toUpperCase(),
+            name: token.coin_name,
+            tokenAddress: token.token_address,
+            image: token.coin_image
+              ? `${process.env.REACT_APP_IMAGE_BASE_URL}${token.coin_image}`
+              : null,
+            address:
+              token.coin_family == 4
+                ? account.coinFamilyAndAddress[4]
+                : account.coinFamilyAndAddress[1],
+            decimals: parseInt(token.decimals.toString().length) - 1,
+            isToken: token.token_address ? true : false,
+            price: token.coins_market
+              ? token.coins_market.current_price
+                ? token.coins_market.current_price
+                : 0
+              : 0,
+            balance: token.wallet_addresses_data
+              ? toFixed(token.wallet_addresses_data.balance)
+              : 0,
+            type:
+              token.coin_family == 9
+                ? 'PLS'
+                : token.coin_family == 4
+                ? 'SPL20'
+                : token.token_type,
+            jupiter_fee_address: token.jupiter_fee_address || null,
+            rpc:
+              token.coin_family == 1
+                ? process.env.REACT_APP_ETH_RPC
+                : token.coin_family == 9
+                ? process.env.REACT_APP_PLS_RPC
+                : token.coin_family == 4
+                ? process.env.REACT_APP_SOL_RPC
+                : process.env.REACT_APP_BNB_RPC,
+          };
+        });
+
+        uniToken2 = newTokens2[0] || null;
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        setToken2(uniToken2);
+
+        if (state && state.tokenAddress) {
+          //TODO Hit search api
+          const PayloadObj = {
+            address_list: [
+              account.coinFamilyAndAddress[1],
+              account.coinFamilyAndAddress[4],
+            ],
+            fiat_currency: currency.name,
+            per_page: 10,
+            page: 1,
+            is_active_coin: 1,
+            search: state.tokenAddress,
+            coin_family: state.coinFamily || token1.coinFamily,
+            is_watch_only: account?.isWatchOnly ? 1 : 0,
+          };
+          if (PayloadObj.search == null || PayloadObj.search === '') {
+            delete PayloadObj.search;
+          }
+          const { data } = await server.post(
+            `/wallet/swap_coins_list`,
+            PayloadObj,
+            {
+              headers: {
+                Authorization: account.jwtToken,
+              },
+            }
+          );
+
+          //Configur ethe response like above
+
+          const newTokens = data.data.rows.map((token) => {
+            return {
+              id: token.id,
+              coin: token,
+              coinFamily: token.coin_family,
+              iHave: token.wallet_addresses_data ? true : false,
+              symbol: token.coin_symbol.toUpperCase(),
+              name: token.coin_name,
+              tokenAddress: token.token_address,
+              image: token.coin_image
+                ? `${process.env.REACT_APP_IMAGE_BASE_URL}${token.coin_image}`
+                : null,
+              address:
+                token.coin_family == 4
+                  ? account.coinFamilyAndAddress[4]
+                  : account.coinFamilyAndAddress[1],
+              decimals: parseInt(token.decimals.toString().length) - 1,
+              isToken: token.token_address ? true : false,
+              price: token.coins_market
+                ? token.coins_market.current_price
+                  ? token.coins_market.current_price
+                  : 0
+                : 0,
+              balance: token.wallet_addresses_data
+                ? toFixed(token.wallet_addresses_data.balance)
+                : 0,
+              type: token.coin_family == 9 ? 'PLS' : token.token_type,
+              jupiter_fee_address: token.jupiter_fee_address || null,
+              rpc:
+                token.coin_family == 1
+                  ? process.env.REACT_APP_ETH_RPC
+                  : token.coin_family == 9
+                  ? process.env.REACT_APP_PLS_RPC
+                  : token.coin_family == 4
+                  ? process.env.REACT_APP_SOL_RPC
+                  : process.env.REACT_APP_BNB_RPC,
+            };
+          });
+
+          //assign the object to my state token
+          const myStateToken = newTokens[0];
+
+          if (!myStateToken) {
+            messageApi.error('Token not available for swap.');
+          }
+
+          if (myStateToken) {
+            if (state.fromOrTo == 1) {
+              if (uniToken2.id != myStateToken.id) {
+                token1 = myStateToken;
+
+                await chrome.storage.local.set({
+                  [`uniToken1_${account.id}`]: myStateToken,
+                });
+              } else {
+                messageApi.error('Cannot set the same tokens on both sides.');
+              }
+            } else {
+              if (uniToken1.id != myStateToken.id) {
+                uniToken2 = myStateToken;
+
+                await chrome.storage.local.set({
+                  [`uniToken2_${account.id}`]: myStateToken,
+                });
+              } else {
+                messageApi.error('Cannot set the same tokens on both sides.');
+              }
+            }
+          }
+          if (state.coinFamily) {
+            handleToken1Change(myStateToken);
+            setSelectedCoinFamily(myStateToken?.coinFamily);
+            setSelectedCF(true);
+          }
+        }
+
+        setBalance(token1?.balance || 0);
+
+        setAvailableTokens(tokens);
+        setToken1(token1);
+        setToken2(uniToken2);
+
+        setSelectedCoinFamily(token1?.coinFamily);
+        setLoading(false);
+      }
+
+      setLoading(false);
+    } catch (error) {
+      messageApi.error('Something went wrong.');
+      setLoading(false);
+      // navigate(-1);
+    }
+  };
+
+  useEffect(() => {
+    if (token1 && token2) {
+      if (
+        '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c' === token1.tokenAddress &&
+        !token2.tokenAddress
+      ) {
+        setIsWrap(true);
+      } else if (
+        '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2' === token1.tokenAddress &&
+        !token2.tokenAddress
+      ) {
+        setIsWrap(true);
+      } else if (
+        '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c' === token2.tokenAddress &&
+        !token1.tokenAddress
+      ) {
+        setIsWrap(true);
+      } else if (
+        '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2' === token2.tokenAddress &&
+        !token1.tokenAddress
+      ) {
+        setIsWrap(true);
+      } else {
+        setIsWrap(false);
+      }
+    }
+  }, [token1, token2]);
+
+  const uniqueList = (arr1, arr2) => {
+    const list = [...arr1, ...arr2];
+
+    const uniqueNames = new Set();
+    const result = list.filter((obj) => {
+      if (!uniqueNames.has(obj.id)) {
+        uniqueNames.add(obj.id);
+        return true;
+      }
+      return false;
+    });
+
+    return result;
+  };
+
+  const getInactiveTokens = async () => {
+    try {
+      store.dispatch(overAllLoader(true));
+      const { data } = await server.post(
+        `/wallet/swap_coins_list`,
+        {
+          address_list: [
+            account.coinFamilyAndAddress[1],
+            account.coinFamilyAndAddress[4],
+          ],
+          fiat_currency: currency.name,
+          per_page: 1000,
+          page: 1,
+          coin_family: token1.coinFamily,
+          is_watch_only: account?.isWatchOnly ? 1 : 0,
+        },
+        {
+          headers: {
+            Authorization: account.jwtToken,
+          },
+        }
+      );
+
+      const tokens = data.data.rows.map((token) => {
+        return {
+          id: token.id,
+          coin: token,
+          coinFamily: token.coin_family,
+          iHave: token.wallet_addresses_data ? true : false,
+          symbol: token.coin_symbol.toUpperCase(),
+          name: token.coin_name,
+          tokenAddress: token.token_address,
+          image: token.coin_image
+            ? `${process.env.REACT_APP_IMAGE_BASE_URL}${token.coin_image}`
+            : null,
+          address:
+            token.coin_family == 4
+              ? account.coinFamilyAndAddress[4]
+              : account.coinFamilyAndAddress[1],
+          decimals: parseInt(token.decimals.toString().length) - 1,
+          isToken: token.token_address ? true : false,
+          price: token.coins_market
+            ? token.coins_market.current_price
+              ? token.coins_market.current_price
+              : 0
+            : 0,
+          balance: token.wallet_addresses_data
+            ? toFixed(token.wallet_addresses_data.balance)
+            : 0,
+          type:
+            token.coin_family == 9
+              ? 'PLS'
+              : token.coin_family == 4
+              ? 'SPL20'
+              : token.token_type,
+          jupiter_fee_address: token.jupiter_fee_address || null,
+          rpc:
+            token.coin_family == 1
+              ? process.env.REACT_APP_ETH_RPC
+              : token.coin_family == 9
+              ? process.env.REACT_APP_PLS_RPC
+              : token.coin_family == 4
+              ? process.env.REACT_APP_SOL_RPC
+              : process.env.REACT_APP_BNB_RPC,
+        };
+      });
+
+      if (selectedCF) {
+        if (token2) {
+          if (token1?.coinFamily != token2?.coinFamily) {
+            setToken2(tokens.find((el) => el.id != token1.id));
+          }
+        } else {
+          setToken2(tokens.find((el) => el.id != token1.id));
+        }
+      }
+
+      setAllTokens(uniqueList(tokens, allToken));
+      setFilteredTokens(uniqueList(tokens, filteredTokens));
+      setAvailableTokens(uniqueList(tokens, availableTokens));
+      setSelectedCF(false);
+      store.dispatch(overAllLoader(false));
+    } catch (error) {
+      store.dispatch(overAllLoader(false));
+      console.log(error);
+      messageApi.error('Something went wrong.');
+      navigate(-1);
+    }
+  };
+
+  useEffect(() => {
+    if (selected == 2 || selectedCF) {
+      getInactiveTokens();
+    }
+  }, [selected, selectedCF]);
+
+  useEffect(() => {
+    init();
+  }, []);
+
+  const handleTokensSwapChangePosition = async () => {
+    if (token1 && token2) {
+      await handleToken1Change(token1);
+      await handleToken2Change(token2);
+    }
+  };
+
+  const calculateTradingFee = async (route, amount, reverse) => {
+    const { data } = await server.get('/wallet/get_admin_swap_fees', {
+      headers: {
+        Authorization: account.jwtToken,
+      },
+    });
+
+    console.log('Admin feeeee All : ', data);
+    const myAdminFee = data.data.find((el) =>
+      token1.coinFamily == 1
+        ? el.network === 'eth'
+        : token1.coinFamily == 9
+        ? el.network === 'pls'
+        : token1.coinFamily == 4
+        ? el.network === 'sol'
+        : el.network === 'bnb'
+    );
+    console.log('Admin feeeee : ', myAdminFee);
+
+    let finalFee = 0;
+
+    let finalGasFeeForTransaction = 0;
+
+    if (myAdminFee && myAdminFee.status == 1) {
+      const tokenPriceInUsd = amount * token1.price;
+
+      const percent = myAdminFee.swap_fees / 100; // 0.1% = 0.001
+
+      // Step 2: Multiply the original number by the decimal
+      const originalNumber = tokenPriceInUsd; // Replace this with your desired original number
+
+      const result = originalNumber * percent;
+
+      // Step 3: Add the result to the original number
+      finalFee = getFlooredFixed(
+        result / token1.coin.native_coin_market_data.current_price,
+        18
+      );
+    }
+
+    if (token1.coinFamily == 4) {
+      setAdminSwapFee(myAdminFee.swap_fees);
+      console.log('finalFee :: ', finalFee);
+      const gasPrice = 0.000005;
+      const finalFeeSol = new BigNumber(gasPrice)
+
+        .plus(new BigNumber(finalFee))
+        .toFixed();
+      finalGasFeeForTransaction = finalFeeSol;
+      setTradingFee(finalFeeSol);
+      console.log('finalFeeSol :: ', finalFeeSol);
+      return getFlooredFixed(finalFeeSol, 9);
+    }
+
+    const gasPrice = await Web3Helper.getGasPrice(
+      token1.coinFamily == 1 ? 'eth' : token1.coinFamily == 9 ? 'pls' : 'bnb',
+      token1.address,
+      token1.address,
+      0
+    );
+    if (token1.coinFamily == 1) {
+      let finalGasFee;
+      if (!isWrap) {
+        finalGasFee =
+          (gasPrice.price *
+            Math.pow(10, 9) *
+            parseInt(route.estimatedGasUsed.toString()) *
+            2) /
+          Math.pow(10, 18);
+      } else {
+        const estimate = await Web3Helper.fetchGasEstimateForWrap(
+          UNISWAP_NATIVE_WRAPPED_TOKEN_ADDRESSES[1].address,
+          token1.address,
+          token1.rpc,
+          token1.isToken ? 'withdraw' : 'deposit',
+          new BigNumber(amount).multipliedBy(
+            new BigNumber(10).pow(
+              UNISWAP_NATIVE_WRAPPED_TOKEN_ADDRESSES[1].decimals
+            )
+          )
+        );
+
+        finalGasFee =
+          (gasPrice.price * Math.pow(10, 9) * estimate * 2) / Math.pow(10, 18);
+      }
+
+      if (finalFee) {
+        if (token1.isToken) {
+          const gasPrice = await Web3Helper.getGasPrice(
+            'eth',
+            token1.address,
+            token1.address,
+            1,
+            token1.tokenAddress,
+            amount,
+            token1.type
+          );
+
+          finalGasFee +=
+            (gasPrice.price *
+              Math.pow(10, 9) *
+              (parseInt(gasPrice.estimate) + 10000)) /
+            Math.pow(10, 18);
+        } else {
+          finalGasFee +=
+            (gasPrice.price * Math.pow(10, 9) * (parseInt(21000) + 5000)) /
+            Math.pow(10, 18);
+        }
+      }
+
+      finalGasFeeForTransaction = finalGasFee;
+    } else if (token1.coinFamily == 3) {
+      let functionCall = null;
+
+      if (token1.isToken && token2.isToken) {
+        functionCall = 1;
+      } else if (!token1.isToken && token2.isToken) {
+        functionCall = 0;
+      } else if (token1.isToken && !token2.isToken) {
+        functionCall = 2;
+      }
+      const pancakeHelper = new PancakeHelper(token1.rpc);
+      let myGasEstimate;
+
+      if (isWrap) {
+        myGasEstimate = await Web3Helper.fetchGasEstimateForWrap(
+          PANCAKE_NATIVE_WRAPPED_TOKEN_ADDRESSES[56].address,
+          token1.address,
+          token1.rpc,
+          token1.isToken ? 'withdraw' : 'deposit',
+          new BigNumber(amount).multipliedBy(
+            new BigNumber(10).pow(
+              PANCAKE_NATIVE_WRAPPED_TOKEN_ADDRESSES[56].decimals
+            )
+          )
+        );
+        console.log('myGasEstimate :: ', myGasEstimate);
+        if (!myGasEstimate) {
+          myGasEstimate = 50000;
+        }
+      } else {
+        myGasEstimate = await pancakeHelper.getGasEstimate(
+          route,
+          token1.address,
+          slippage ? slippage : customSlippage
+        );
+        console.log('myGasEstimatemyGasEstimate22 ', myGasEstimate);
+      }
+
+      if (myGasEstimate.status) {
+        if (myGasEstimate.skip) {
+          let finalGasFee =
+            (gasPrice.price * Math.pow(10, 9) * parseInt(150000)) /
+            Math.pow(10, 18);
+
+          if (finalFee) {
+            if (token1.isToken) {
+              const gasPrice = await Web3Helper.getGasPrice(
+                'bnb',
+                token1.address,
+                token1.address,
+                1,
+                token1.tokenAddress,
+                amount,
+                token1.type
+              );
+
+              finalGasFee +=
+                (gasPrice.price *
+                  Math.pow(10, 9) *
+                  parseInt(gasPrice.estimate)) /
+                Math.pow(10, 18);
+
+              console.log('finalGasFee 1111 ', finalGasFee);
+            } else {
+              finalGasFee +=
+                (gasPrice.price * Math.pow(10, 9) * parseInt(31000)) /
+                Math.pow(10, 18);
+
+              console.log('finalGasFee222 ', finalGasFee);
+            }
+          }
+
+          finalGasFeeForTransaction = finalGasFee;
+          console.log(
+            'finalGasFeeForTransaction ::: ',
+            finalGasFeeForTransaction
+          );
+        } else {
+          return myGasEstimate;
+        }
+      } else {
+        let finalGasFee =
+          (gasPrice.price *
+            Math.pow(10, 9) *
+            (parseInt(myGasEstimate) + 30000)) /
+          Math.pow(10, 18);
+
+        console.log('finalGasFeeXX ', finalGasFee);
+        if (finalFee) {
+          if (token1.isToken) {
+            const gasPrice = await Web3Helper.getGasPrice(
+              'bnb',
+              token1.address,
+              token1.address,
+              1,
+              token1.tokenAddress,
+              amount,
+              token1.type
+            );
+
+            console.log('GASSS PRICE :: ', gasPrice);
+
+            finalGasFee +=
+              (gasPrice.price *
+                Math.pow(10, 9) *
+                (parseInt(gasPrice.estimate) + 10000)) /
+              Math.pow(10, 18);
+
+            console.log('GASSS PRICE finalGasFee :: ', finalGasFee);
+          } else {
+            finalGasFee +=
+              (gasPrice.price * Math.pow(10, 9) * parseInt(31000)) /
+              Math.pow(10, 18);
+
+            console.log('GASSS PRICE finalGasFee222 :: ', finalGasFee);
+          }
+        }
+
+        finalGasFeeForTransaction = finalGasFee;
+      }
+    } else if (token1.coinFamily == 9) {
+      let functionCall = null;
+
+      if (token1.isToken && token2.isToken) {
+        functionCall = 1;
+      } else if (!token1.isToken && token2.isToken) {
+        functionCall = 0;
+      } else if (token1.isToken && !token2.isToken) {
+        functionCall = 2;
+      }
+      const pancakeHelper = new PulseChainHelper(token1.rpc);
+
+      const myGasEstimate = await pancakeHelper.getGasEstimate(
+        route,
+        token1.address,
+        amount,
+        token1.decimals,
+        functionCall,
+        reverse || false
+      );
+      // console.log(
+      //   "🚀 ~ file: Swap.jsx:554 ~ calculateTradingFee ~ myGasEstimate:",
+      //   myGasEstimate
+      // );
+
+      if (myGasEstimate.status) {
+        if (myGasEstimate.skip) {
+          let finalGasFee =
+            (gasPrice.price * Math.pow(10, 9) * parseInt(150000)) /
+            Math.pow(10, 18);
+
+          if (finalFee) {
+            if (token1.isToken) {
+              const gasPrice = await Web3Helper.getGasPrice(
+                'pls',
+                token1.address,
+                token1.address,
+                1,
+                token1.tokenAddress,
+                amount,
+                token1.type
+              );
+
+              finalGasFee +=
+                (gasPrice.price *
+                  Math.pow(10, 9) *
+                  parseInt(gasPrice.estimate)) /
+                Math.pow(10, 18);
+            } else {
+              finalGasFee +=
+                (gasPrice.price * Math.pow(10, 9) * parseInt(31000)) /
+                Math.pow(10, 18);
+            }
+          }
+
+          finalGasFeeForTransaction = finalGasFee;
+        } else {
+          return myGasEstimate;
+        }
+      } else {
+        let finalGasFee =
+          (gasPrice.price *
+            Math.pow(10, 9) *
+            (parseInt(myGasEstimate) + 30000)) /
+          Math.pow(10, 18);
+
+        if (finalFee) {
+          if (token1.isToken) {
+            const gasPrice = await Web3Helper.getGasPrice(
+              'pls',
+              token1.address,
+              token1.address,
+              1,
+              token1.tokenAddress,
+              amount,
+              token1.type
+            );
+
+            // console.log(
+            //   "🚀 ~ file: Swap.jsx:464 ~ calculateTradingFee ~ gasPrice:",
+            //   gasPrice
+            // );
+
+            finalGasFee +=
+              (gasPrice.price *
+                Math.pow(10, 9) *
+                (parseInt(gasPrice.estimate) + 10000)) /
+              Math.pow(10, 18);
+          } else {
+            finalGasFee +=
+              (gasPrice.price * Math.pow(10, 9) * parseInt(31000)) /
+              Math.pow(10, 18);
+          }
+        }
+
+        finalGasFeeForTransaction = finalGasFee;
+      }
+    }
+
+    console.log(
+      'parseFloat(finalFee) finalGasFeeForTransaction ',
+      parseFloat(finalFee),
+      '   :: ',
+      finalGasFeeForTransaction
+    );
+    setTradingFee(parseFloat(finalFee) + finalGasFeeForTransaction);
+    return getFlooredFixed(parseFloat(finalFee) + finalGasFeeForTransaction, 5);
+  };
+
+  useEffect(() => {
+    handleTokensSwapChangePosition();
+    if (amount) {
+      if (timeOutId.current) {
+        clearTimeout(timeOutId);
+      }
+      timeOutId.current = setTimeout(() => {
+        handleInputChange(amount, token1, token2);
+      }, 800);
+    }
+  }, [token1, token2]);
+
+  const handleToken1Change = async (updatedToken1, isWrap) => {
+    await chrome.storage.local.set({
+      [`uniToken1_${account.id}`]: updatedToken1,
+    });
+    if (percent != 100) {
+      setBalance(updatedToken1?.balance);
+    }
+
+    if (updatedToken1?.tokenAddress) {
+      if (updatedToken1?.id != token1?.id) {
+        setAmount2(null);
+        setAount(null);
+        setPercent(null);
+        setReverse(false);
+        setInfoData([]);
+        updateRef.current = false;
+        // if (!isWrap) {
+        //   handleInputChange(amount, updatedToken1, token2);
+        // }
+      }
+    } else {
+      if (updatedToken1?.id != token1?.id) {
+        setAmount2(null);
+        setAount(null);
+        setPercent(null);
+        setReverse(false);
+        setInfoData([]);
+        updateRef.current = false;
+        // if (!isWrap) {
+        //   handleInputChange(amount, updatedToken1, token2);
+        // }
+      }
+    }
+  };
+
+  const handleToken2Change = async (updatedToken2, isWrap) => {
+    // console.log(
+    //   "🚀 ~ file: Swap.jsx:777 ~ handleToken2Change ~ updatedToken2:",
+    //   updatedToken2
+    // );
+    await chrome.storage.local.set({
+      [`uniToken2_${account.id}`]: updatedToken2,
+    });
+
+    if (updatedToken2.tokenAddress) {
+      if (updatedToken2.id != token2.id) {
+        setAmount2(null);
+        //setAount(null);
+        setPercent(null);
+        setReverse(false);
+        setInfoData([]);
+        updateRef.current = false;
+        if (!isWrap) {
+          handleInputChange(amount, token1, updatedToken2);
+        }
+      }
+    } else {
+      if (updatedToken2.id != token2.id) {
+        setAmount2(null);
+        //setAount(null);
+        setPercent(null);
+        setReverse(false);
+        setInfoData([]);
+        updateRef.current = false;
+        if (!isWrap) {
+          handleInputChange(amount, token1, updatedToken2);
+        }
+      }
+    }
+  };
+
+  const handleInputChange = async (amount, token1, token2, second) => {
+    try {
+      if (amount > 0 && token1.coinFamily == token2.coinFamily) {
+        setLoading(true);
+        if (token1.coinFamily == 1) {
+          if (isWrap) {
+            const tradingFee = await calculateTradingFee(null, amount);
+
+            setInfoData([
+              {
+                text: 'Price',
+                textVal: `1 ${token2.symbol} = 1 ${token1.symbol}`,
+              },
+              {
+                text: 'Trading Fees',
+                textVal: `${tradingFee} ETH`,
+              },
+              {
+                text: 'Slippage Tolerance',
+                textVal: `5%`,
+              },
+              {
+                text: 'Route',
+                textVal: `${token1.symbol} > ${token2.symbol}`,
+              },
+            ]);
+
+            setAmount2(amount);
+            setLoading(false);
+            return;
+          }
+
+          const uniHelper = new UniswapHelper(token1.rpc);
+          const route = await uniHelper.getQuoteAndRoute(
+            token1,
+            token2,
+            amount,
+            token1.address,
+            false,
+            slippage ? slippage : customSlippage
+          );
+
+          if (!route) {
+            setLoading(false);
+            return messageApi.error(
+              'This pair is not available for swap at the moment. Please try again later.'
+            );
+          }
+
+          const tradingFee = await calculateTradingFee(route, amount);
+          setInfoData([
+            {
+              text: 'Price',
+              textVal: `1 ${token2.symbol} = ${addCommasToNumber(
+                getFlooredFixed(
+                  parseFloat(amount) /
+                    parseFloat(route.quote.toFixed(token2.decimals)),
+                  12
+                )
+              )} ${token1.symbol}`,
+            },
+            {
+              text: 'Trading Fees',
+              textVal: `${tradingFee} ${
+                token1.coinFamily == 1 ? 'ETH' : 'BNB'
+              }`,
+            },
+            {
+              text: 'Slippage Tolerance',
+              textVal: `${slippage ? slippage : customSlippage}%`,
+            },
+            {
+              text: 'Route',
+              textVal: route.route[0].tokenPath
+                .map((el) => el.symbol)
+                .join('>'),
+            },
+          ]);
+
+          setRoute(route);
+          setAmount2(route.quote.toFixed(token2.decimals));
+
+          setLoading(false);
+        } else if (token1.coinFamily == 3) {
+          if (isWrap) {
+            const tradingFee = await calculateTradingFee(null, amount);
+
+            setInfoData([
+              {
+                text: 'Price',
+                textVal: `1 ${token2.symbol} = 1 ${token1.symbol}`,
+              },
+              {
+                text: 'Trading Fees',
+                textVal: `${tradingFee} BNB`,
+              },
+              {
+                text: 'Slippage Tolerance',
+                textVal: `5%`,
+              },
+              {
+                text: 'Route',
+                textVal: `${token1.symbol} > ${token2.symbol}`,
+              },
+            ]);
+
+            setAmount2(amount);
+            setLoading(false);
+            return;
+          }
+
+          const pancakeHelper = new PancakeHelper(token1.rpc);
+          const route = await pancakeHelper.getQuoteAndRoute(
+            token1,
+            token2,
+            amount,
+            token1.address,
+            false,
+            slippage ? slippage : customSlippage
+          );
+          if (!route) {
+            setLoading(false);
+            return messageApi.error(
+              'Unable to perform swap: 403. Please try again later.'
+            );
+          }
+          console.log(new BigNumber(route.outAmount).toFixed(token2.decimals));
+          setAmount2(new BigNumber(route.outAmount).toFixed(token2.decimals));
+          setRoute(route.route);
+          setFeeAmount(route.feeAmount);
+
+          const tradingFee = await calculateTradingFee(route.route, amount);
+          if (!tradingFee || tradingFee.status) {
+            setLoading(false);
+            setInfoData([]);
+            return messageApi.error(
+              tradingFee.status ? tradingFee.message : 'Pair not supported.'
+            );
+          }
+
+          const amountBigNumber = new BigNumber(amount);
+          const balanceBigNumber = new BigNumber(balance);
+
+          if (amountBigNumber.isGreaterThan(balanceBigNumber)) {
+            setLoading(false);
+            setInfoData([]);
+            return;
+          }
+
+          setInfoData([
+            {
+              text: 'Price',
+              textVal: `1 ${token2.symbol} = ${addCommasToNumber(
+                getFlooredFixed(
+                  parseFloat(amount) /
+                    parseFloat(
+                      new BigNumber(route.outAmount).toFixed(token2.decimals)
+                    ),
+                  12
+                )
+              )} ${token1.symbol}`,
+            },
+            {
+              text: 'Trading Fees',
+              textVal: `${tradingFee} ${
+                token1.coinFamily == 1 ? 'ETH' : 'BNB'
+              }`,
+            },
+            {
+              text: 'Slippage Tolerance',
+              textVal: `${slippage ? slippage : customSlippage}%`,
+            },
+            {
+              text: 'Route',
+              textVal:
+                route.route.routes.length === 1
+                  ? route.route.routes[0].path.map((el) => el.symbol).join('>')
+                  : 'Complex Composite Route',
+            },
+          ]);
+
+          setLoading(false);
+        } else if (token1.coinFamily == 9) {
+          const pancakeHelper = new PulseChainHelper(token1.rpc);
+          const route = await pancakeHelper.getQuoteAndRoute(
+            token1,
+            token2,
+            amount,
+            token1.address,
+            false,
+            slippage ? slippage : customSlippage
+          );
+
+          if (!route) {
+            setLoading(false);
+            return messageApi.error(
+              'This pair is not available for swap at the moment. Please try again later.'
+            );
+          }
+
+          setAmount2(route.outAmount);
+          setRoute(route.route);
+          setFeeAmount(route.feeAmount);
+
+          if (!second) {
+            if (new BigNumber(amount).isGreaterThan(new Bignumber(balance))) {
+              setInfoData([]);
+              setLoading(false);
+              return;
+            }
+          }
+
+          const tradingFee = await calculateTradingFee(route.route, amount);
+
+          if (!tradingFee || tradingFee.status) {
+            setLoading(false);
+            return messageApi.error(
+              tradingFee.status ? tradingFee.message : 'Pair not supported.'
+            );
+          }
+
+          console.log(slippage, customSlippage, 'slippage');
+
+          setInfoData([
+            {
+              text: 'Price',
+              textVal: `1 ${token2.symbol} = ${addCommasToNumber(
+                getFlooredFixed(
+                  parseFloat(amount) / parseFloat(route.outAmount),
+                  12
+                )
+              )} ${token1.symbol}`,
+            },
+            {
+              text: 'Trading Fees',
+              textVal: `${tradingFee} ${
+                token1.coinFamily == 1
+                  ? 'ETH'
+                  : token1.coinFamily == 9
+                  ? 'PLS'
+                  : 'BNB'
+              }`,
+            },
+            {
+              text: 'Slippage Tolerance',
+              textVal: `${slippage ? slippage : customSlippage}%`,
+            },
+            {
+              text: 'Route',
+              textVal: route.route.routeText,
+            },
+          ]);
+
+          setLoading(false);
+        } else if (token1.coinFamily == 4) {
+          try {
+            const response = await server.get(
+              'https://quote-api.jup.ag/v6/quote',
+              {
+                params: {
+                  amount: new BigNumber(amount)
+                    .multipliedBy(Math.pow(10, token1.decimals))
+                    .toFixed(0),
+                  inputMint:
+                    token1.tokenAddress ||
+                    'So11111111111111111111111111111111111111112',
+                  outputMint:
+                    token2.tokenAddress ||
+                    'So11111111111111111111111111111111111111112',
+                  platformFeeBps: token2.jupiter_fee_address ? 100 : 0,
+                  slippageBps: new Bignumber(
+                    slippage ? slippage : customSlippage
+                  )
+                    .multipliedBy(100)
+                    .toFixed(0),
+                },
+              }
+            );
+
+            const outAmount = new BigNumber(response.data.outAmount)
+              .dividedBy(Math.pow(10, token2.decimals))
+              .toFixed(token2.decimals);
+
+            console.log(response.data);
+            setAmount2(outAmount);
+            setRoute(response.data);
+
+            const tradingFee = await calculateTradingFee(null, amount, true);
+
+            setInfoData([
+              {
+                text: 'Price',
+                textVal: `1 ${token2.symbol} = ${addCommasToNumber(
+                  getFlooredFixed(
+                    parseFloat(amount) / parseFloat(outAmount),
+                    12
+                  )
+                )} ${token1.symbol}`,
+              },
+              {
+                text: 'Trading Fees',
+                textVal: `${tradingFee} SOL`,
+              },
+              {
+                text: 'Slippage Tolerance',
+                textVal: `${slippage ? slippage : customSlippage}%`,
+              },
+              {
+                text: 'Route',
+                textVal: response.data.routePlan
+                  .map((el) => el.swapInfo.label)
+                  .join('>'),
+              },
+            ]);
+          } catch (error) {
+            console.log(error);
+            if (error?.response?.data?.error) {
+              messageApi.error(
+                error.response.data.error ===
+                  'Query parameter amount cannot be parsed: ParseIntError { kind: PosOverflow }'
+                  ? 'Please enter a smaller amount to proceed'
+                  : error.response.data.error
+              );
+            } else {
+              messageApi.error('Something went wrong');
+            }
+          }
+        }
+        setLoading(false);
+      }
+      updateRef.current = true;
+    } catch (error) {
+      console.log('EEEEERRRRRR ', error);
+      setLoading(false);
+      updateRef.current = true;
+    }
+  };
+
+  const handleInputChangeForToToken = async (amount, token2) => {
+    try {
+      if (amount > 0) {
+        setLoading(true);
+        if (token1.coinFamily == 1) {
+          if (isWrap) {
+            const tradingFee = await calculateTradingFee(null, amount, true);
+            setInfoData([
+              {
+                text: 'Price',
+                textVal: `1 ${token2.symbol} = 1 ${token1.symbol}`,
+              },
+              {
+                text: 'Trading Fees',
+                textVal: `${tradingFee} ETH`,
+              },
+              {
+                text: 'Slippage Tolerance',
+                textVal: `5%`,
+              },
+              {
+                text: 'Route',
+                textVal: `${token1.symbol} > ${token2.symbol}`,
+              },
+            ]);
+
+            setAount(amount);
+            setLoading(false);
+            return;
+          }
+          const uniHelper = new UniswapHelper(token1.rpc);
+          const route = await uniHelper.getQuoteAndRoute(
+            token1,
+            token2,
+            amount,
+            token1.address,
+            true,
+            slippage ? slippage : customSlippage
+          );
+
+          if (!route) {
+            setLoading(false);
+            return messageApi.error(
+              'This pair is not available for swap at the moment. Please try again later.'
+            );
+          }
+
+          const tradingFee = await calculateTradingFee(
+            route,
+            route.quote.toFixed(token1.decimals),
+            true
+          );
+
+          if (!tradingFee || tradingFee.status) {
+            setLoading(false);
+            return messageApi.error(
+              tradingFee.status ? tradingFee.message : 'Pair not supported.'
+            );
+          }
+
+          setInfoData([
+            {
+              text: 'Price',
+              textVal: `1 ${token2.symbol} = ${addCommasToNumber(
+                getFlooredFixed(
+                  parseFloat(route.quote.toFixed(token1.decimals)) /
+                    parseFloat(amount),
+                  12
+                )
+              )} ${token1.symbol}`,
+            },
+            {
+              text: 'Trading Fees',
+              textVal: `${tradingFee} ${
+                token1.coinFamily == 1 ? 'ETH' : 'BNB'
+              }`,
+            },
+            {
+              text: 'Slippage Tolerance',
+              textVal: `${slippage ? slippage : customSlippage}%`,
+            },
+            {
+              text: 'Route',
+              textVal: route.route[0].tokenPath
+                .map((el) => el.symbol)
+                .join('>'),
+            },
+          ]);
+
+          setRoute(route);
+          setAount(route.quote.toFixed(token1.decimals));
+
+          setLoading(false);
+        } else if (token1.coinFamily == 3) {
+          if (isWrap) {
+            const tradingFee = await calculateTradingFee(null, amount, true);
+
+            setInfoData([
+              {
+                text: 'Price',
+                textVal: `1 ${token2.symbol} = 1 ${token1.symbol}`,
+              },
+              {
+                text: 'Trading Fees',
+                textVal: `${tradingFee} BNB`,
+              },
+              {
+                text: 'Slippage Tolerance',
+                textVal: `0%`,
+              },
+              {
+                text: 'Route',
+                textVal: `${token1.symbol} > ${token2.symbol}`,
+              },
+            ]);
+
+            setAount(amount);
+            setLoading(false);
+            return;
+          }
+          const pancakeHelper = new PancakeHelper(token1.rpc);
+          const route = await pancakeHelper.getQuoteAndRoute(
+            token1,
+            token2,
+            amount,
+            token1.address,
+            true,
+            slippage ? slippage : customSlippage
+          );
+
+          if (!route) {
+            setLoading(false);
+            return messageApi.error(
+              'Unable to perform swap: 403. Please try again later.'
+            );
+          }
+
+          const tradingFee = await calculateTradingFee(
+            route.route,
+            route.outAmount.toFixed(token1.decimals),
+            true
+          );
+          setAount(route.outAmount.toFixed(token1.decimals));
+
+          setRoute(route.route);
+          setFeeAmount(route.feeAmount);
+
+          if (!tradingFee || tradingFee.status) {
+            setLoading(false);
+            setInfoData([]);
+            return messageApi.error(
+              tradingFee.status ? tradingFee.message : 'Pair not supported.'
+            );
+          }
+
+          setInfoData([
+            {
+              text: 'Price',
+              textVal: `1 ${token2.symbol} = ${addCommasToNumber(
+                getFlooredFixed(
+                  parseFloat(route.outAmount.toFixed(token1.decimals)) /
+                    parseFloat(amount),
+                  12
+                )
+              )} ${token1.symbol}`,
+            },
+            {
+              text: 'Trading Fees',
+              textVal: `${tradingFee} ${
+                token1.coinFamily == 1 ? 'ETH' : 'BNB'
+              }`,
+            },
+            {
+              text: 'Slippage Tolerance',
+              textVal: `${slippage ? slippage : customSlippage}%`,
+            },
+            {
+              text: 'Route',
+              // textVal: route.route.routeText,
+              textVal:
+                route.route.routes.length === 1
+                  ? route.route.routes[0].path.map((el) => el.symbol).join('>')
+                  : 'Complex Composite Route',
+            },
+          ]);
+
+          setLoading(false);
+        } else if (token1.coinFamily == 9) {
+          const pancakeHelper = new PulseChainHelper(token1.rpc);
+          const route = await pancakeHelper.getQuoteAndRoute(
+            token1,
+            token2,
+            amount,
+            token1.address,
+            true,
+            slippage ? slippage : customSlippage
+          );
+
+          if (!route) {
+            setLoading(false);
+            return messageApi.error(
+              'This pair is not available for swap at the moment. Please try again later.'
+            );
+          }
+
+          const tradingFee = await calculateTradingFee(
+            route.route,
+            route.outAmount.toFixed(token1.decimals),
+            true
+          );
+
+          setAount(route.outAmount.toFixed(token1.decimals));
+
+          setRoute(route.route);
+          setFeeAmount(route.feeAmount);
+
+          if (!tradingFee || tradingFee.status) {
+            setLoading(false);
+            setInfoData([]);
+            return messageApi.error(
+              tradingFee.status ? tradingFee.message : 'Pair not supported.'
+            );
+          }
+
+          setInfoData([
+            {
+              text: 'Price',
+              textVal: `1 ${token2.symbol} = ${addCommasToNumber(
+                getFlooredFixed(
+                  parseFloat(route.outAmount.toFixed(token1.decimals)) /
+                    parseFloat(amount),
+                  12
+                )
+              )} ${token1.symbol}`,
+            },
+            {
+              text: 'Trading Fees',
+              textVal: `${tradingFee} ${
+                token1.coinFamily == 1
+                  ? 'ETH'
+                  : token1.coinFamily == 9
+                  ? 'PLS'
+                  : 'BNB'
+              }`,
+            },
+            {
+              text: 'Slippage Tolerance',
+              textVal: `${slippage ? slippage : customSlippage}%`,
+            },
+            {
+              text: 'Route',
+              textVal: route.route.routeText,
+            },
+          ]);
+
+          setLoading(false);
+        } else if (token1.coinFamily == 4) {
+          try {
+            const response = await server.get(
+              'https://quote-api.jup.ag/v6/quote',
+              {
+                params: {
+                  amount: new BigNumber(amount)
+                    .multipliedBy(Math.pow(10, token2.decimals))
+                    .toFixed(0),
+                  inputMint:
+                    token1.tokenAddress ||
+                    'So11111111111111111111111111111111111111112',
+                  outputMint:
+                    token2.tokenAddress ||
+                    'So11111111111111111111111111111111111111112',
+                  platformFeeBps: token1.jupiter_fee_address ? 100 : 0,
+                  slippageBps: new Bignumber(
+                    slippage ? slippage : customSlippage
+                  )
+                    .multipliedBy(100)
+                    .toFixed(0),
+                  swapMode: 'ExactOut',
+                },
+              }
+            );
+
+            const inAmount = new BigNumber(response.data.inAmount)
+              .dividedBy(Math.pow(10, token1.decimals))
+              .toFixed(token1.decimals);
+
+            console.log(response.data);
+            setAount(inAmount);
+            setRoute(response.data);
+
+            const tradingFee = await calculateTradingFee(null, amount, true);
+
+            setInfoData([
+              {
+                text: 'Price',
+                textVal: `1 ${token2.symbol} = ${addCommasToNumber(
+                  getFlooredFixed(parseFloat(inAmount) / parseFloat(amount), 12)
+                )} ${token1.symbol}`,
+              },
+              {
+                text: 'Trading Fees',
+                textVal: `${tradingFee} SOL`,
+              },
+              {
+                text: 'Slippage Tolerance',
+                textVal: `${slippage ? slippage : customSlippage}%`,
+              },
+              {
+                text: 'Route',
+                textVal: response.data.routePlan
+                  .map((el) => el.swapInfo.label)
+                  .join('>'),
+              },
+            ]);
+          } catch (error) {
+            console.log(error);
+            if (error?.response?.data?.error) {
+              messageApi.error(
+                error.response.data.error ===
+                  'Query parameter amount cannot be parsed: ParseIntError { kind: PosOverflow }'
+                  ? 'Please enter a smaller amount to proceed'
+                  : error.response.data.error
+              );
+            } else {
+              messageApi.error('Something went wrong');
+            }
+          }
+        }
+        setLoading(false);
+      }
+    } catch (error) {
+      setLoading(false);
+    }
+  };
+
+  const debounceTimeout = useRef(null);
+
+  function handleChangeForInput1(newAmount) {
+    // Clear the previous timeout
+    clearTimeout(debounceTimeout.current);
+
+    // Set a new timeout to execute the action after 2000 milliseconds
+    debounceTimeout.current = setTimeout(() => {
+      handleInputChange(newAmount, token1, token2);
+    }, 2000);
+  }
+
+  const debounceTimeout2 = useRef(null);
+
+  function handleChangeForInput2(newAmount) {
+    // Clear the previous timeout
+    clearTimeout(debounceTimeout2.current);
+
+    // Set a new timeout to execute the action after 2000 milliseconds
+    debounceTimeout2.current = setTimeout(() => {
+      handleInputChangeForToToken(newAmount, token2);
+    }, 2000);
+  }
+
+  // if (!token1 || !token2 || availableTokens.length === 0) {
+  //   return (
+  //     <div className={`scrollableCont`}>
+  //       {contextHolder}
+  //       <MenuRestofHeaders backTo={"/wallet"} title={"Swap"} />
+  //       <div className={`flexedContent`}>
+  //         <Loader
+  //           className="noAddress"
+  //           text={"Please wait while we load your tokens for swapping."}
+  //         />
+  //       </div>
+  //     </div>
+  //   );
+  // }
+
+  const selectAfter = (
+    <div className={'addonAfter'}>
+      {token1?.isToken ? (
+        <span
+          className='send__pasteText'
+          style={{
+            position: 'relative',
+            top: '-1px',
+            left: '-5px',
+            borderLeft: '0px',
+          }}
+          onClick={async () => {
+            await calculateAccordingly(100);
+            setPercent(100);
+          }}
+        >
+          Max
+        </span>
+      ) : null}
+
+      <Select
+        open={false}
+        suffixIcon={<img src={DownArrowSuffix} />}
+        onClick={() => {
+          if (
+            (!token1 &&
+              availableTokens.filter((token) => token.iHave).length === 0) ||
+            loading
+          )
+            return;
+          setSelected(1);
+          setOpen(true);
+        }}
+        disabled={
+          (!token1 &&
+            availableTokens.filter((token) => token.iHave).length === 0) ||
+          loading
+        }
+        value={[
+          {
+            value: token1?.id,
+            label: (
+              <span className='flexedItemSelect'>
+                {!token1?.image ? (
+                  <div
+                    style={{
+                      alignItems: 'center',
+                      backgroundColor: 'rgba(98,126,234,.2)',
+                      borderRadius: '49%',
+                      display: 'flex',
+                      height: '29px',
+                      justifyContent: 'center',
+                      width: '29px',
+                      marginRight: '15px',
+                    }}
+                  >
+                    {' '}
+                    {token1?.name.split('')[0]}
+                  </div>
+                ) : (
+                  <img
+                    style={{
+                      height: '30px',
+                      width: '30px',
+                      objectFit: 'contain',
+                      position: 'relative',
+                      borderRadius: '15px',
+                    }}
+                    alt=''
+                    src={token1?.image}
+                  />
+                )}
+
+                {token1?.symbol}
+              </span>
+            ),
+          },
+        ]}
+        // defaultValue={[
+        //   {
+        //     value: token1?.id,
+        //     label: (
+        //       <span className="flexedItemSelect">
+        //         {!token1?.image ? (
+        //           <div
+        //             style={{
+        //               alignItems: "center",
+        //               backgroundColor: "rgba(98,126,234,.2)",
+        //               borderRadius: "49%",
+        //               display: "flex",
+        //               height: "29px",
+        //               justifyContent: "center",
+        //               width: "29px",
+        //               marginRight: "15px",
+        //             }}
+        //           >
+        //             {" "}
+        //             {token1?.name.split("")[0]}
+        //           </div>
+        //         ) : (
+        //           <img
+        //             style={{
+        //               height: "30px",
+        //               width: "30px",
+        //               objectFit: "contain",
+        //               position: "relative",
+        //               borderRadius: "15px",
+        //             }}
+        //             alt=""
+        //             src={token1?.image}
+        //           />
+        //         )}
+        //         {token1?.symbol}
+        //       </span>
+        //     ),
+        //   },
+        // ]}
+        style={{
+          width: 100,
+        }}
+        onSelect={(value) => {
+          setToken1(availableTokens.find((el) => el.id == value));
+          handleToken1Change(availableTokens.find((el) => el.id == value));
+        }}
+        options={availableTokens
+          .filter((token) => token.id != token2?.id)
+          .map((token) => {
+            return {
+              value: token?.id,
+              label: (
+                <span className='flexedItemSelect'>
+                  <img
+                    style={{
+                      height: '20px',
+                      width: '20px',
+                      objectFit: 'contain',
+                      marginLeft: '20px',
+                      marginRight: '20px',
+                    }}
+                    alt=''
+                    src={token?.image}
+                  />
+                  {token?.symbol}
+                </span>
+              ),
+            };
+          })}
+      />
+    </div>
+  );
+  const selectAfterTo = (
+    <div className={'addonAfter'}>
+      <Select
+        suffixIcon={<img src={DownArrowSuffix} />}
+        style={{
+          width: 100,
+        }}
+        disabled={!token1 || !token2 || loading}
+        onClick={() => {
+          if (!token1 || !token2 || loading) return;
+          setSelected(2);
+          setOpen(true);
+        }}
+        open={false}
+        value={[
+          {
+            value: token2?.id,
+            label: (
+              <span className='flexedItemSelect'>
+                {!token2?.image ? (
+                  <div
+                    style={{
+                      alignItems: 'center',
+                      backgroundColor: 'rgba(98,126,234,.2)',
+                      borderRadius: '49%',
+                      display: 'flex',
+                      height: '29px',
+                      justifyContent: 'center',
+                      width: '29px',
+                      marginRight: '15px',
+                    }}
+                  >
+                    {' '}
+                    {token2?.name.split('')[0]}
+                  </div>
+                ) : (
+                  <img
+                    style={{
+                      height: '30px',
+                      width: '30px',
+                      objectFit: 'contain',
+                      position: 'relative',
+                      borderRadius: '15px',
+                    }}
+                    alt=''
+                    src={token2?.image}
+                  />
+                )}
+                {token2?.symbol}
+              </span>
+            ),
+          },
+        ]}
+        // defaultValue={[
+        //   {
+        //     value: token2?.id,
+        //     label: (
+        //       <span className="flexedItemSelect">
+        //         {!token2?.image ? (
+        //           <div
+        //             style={{
+        //               alignItems: "center",
+        //               backgroundColor: "rgba(98,126,234,.2)",
+        //               borderRadius: "49%",
+        //               display: "flex",
+        //               height: "29px",
+        //               justifyContent: "center",
+        //               width: "29px",
+        //               marginRight: "15px",
+        //             }}
+        //           >
+        //             {" "}
+        //             {token2?.name.split("")[0]}
+        //           </div>
+        //         ) : (
+        //           <img
+        //             style={{
+        //               height: "30px",
+        //               width: "30px",
+        //               objectFit: "contain",
+        //               position: "relative",
+        //               borderRadius: "15px",
+        //             }}
+        //             alt=""
+        //             src={token2?.image}
+        //           />
+        //         )}
+        //         {token2?.symbol}
+        //       </span>
+        //     ),
+        //   },
+        // ]}
+        onSelect={(value) => {
+          setToken2(availableTokens.find((el) => el.id == value));
+          handleToken2Change(availableTokens.find((el) => el.id == value));
+        }}
+        options={availableTokens
+          .filter((token) => token.id !== token1?.id)
+          .map((token) => {
+            return {
+              value: token?.id,
+              label: (
+                <span className='flexedItemSelect'>
+                  <img
+                    style={{
+                      height: '20px',
+                      width: '20px',
+                      objectFit: 'contain',
+                      marginLeft: '20px',
+                      marginRight: '20px',
+                    }}
+                    src={token?.image}
+                  />
+                  {token?.symbol}
+                </span>
+              ),
+            };
+          })}
+      />
+    </div>
+  );
+
+  return (
+    <div className={`scrollableCont`}>
+      {contextHolder}
+      <MenuRestofHeaders backTo={'/wallet'} title={'Swap'} />
+      <div className={`flexedContent`}>
+        <Tabs selectedIndex={sel}>
+          <TabList
+            className='swapTabList'
+            style={{
+              border: 'none',
+              borderRadius: '30px',
+              display: 'flex',
+              justifyContent: 'space-evenly',
+              listStyle: 'none',
+            }}
+          >
+            <Tab
+              className='swapTab'
+              onClick={() => {
+                if (swapDetail) {
+                  store.dispatch(swapDetailAc(null));
+                }
+                setSel(0);
+              }}
+              style={{
+                backgroundColor: sel === 0 ? '#4096ff' : 'transparent',
+                // color: sel === 0 ? "#fff" : "#fff",
+                borderRadius: '30px',
+                padding: '16px 30px',
+                fontSize: '13px',
+                flex: 1,
+                borderColor: '#4096ff',
+                fontWeight: '700',
+              }}
+            >
+              On-Chain
+            </Tab>
+            <Tab
+              className='swapTab'
+              disabled={chain.testnet}
+              onClick={() => {
+                if (chain.testnet) {
+                  return messageApi.error(
+                    'Cross chain swapping is only available in mainnet.'
+                  );
+                }
+                if (swapDetail) {
+                  store.dispatch(swapDetailAc(null));
+                }
+                setSel(1);
+              }}
+              style={{
+                backgroundColor: sel === 1 ? '#4096ff' : 'transparent',
+                // color: sel === 1 ? "#fff" : "#fff",
+                borderRadius: '30px',
+                padding: '16px 30px',
+                fontSize: '13px',
+                flex: 1,
+                borderColor: '#4096ff',
+                fontWeight: '700',
+              }}
+            >
+              Cross-Chain
+            </Tab>
+          </TabList>
+
+          <TabPanel>
+            {onChainSwapM?.is_maintenance ? (
+              <Maintanance text='On chain swap is in under maintenance' />
+            ) : (
+              <div className='swap'>
+                <InputField
+                  mb0={true}
+                  getData={(amount) => {
+                    if (percent != null) {
+                      setPercent(null);
+                    }
+
+                    const afterDecimal = amount.split('.')[1];
+
+                    // Get the maximum allowed characters before the decimal point (15 characters)
+                    const maxCharactersBeforeDecimal = 15;
+
+                    if (afterDecimal) {
+                      // Get the maximum allowed decimals for the cryptocurrency (e.g., Bitcoin has 8 decimals)
+                      const maxDecimals = token1.decimals;
+                      // Check if the entered decimal part is longer than the maximum allowed
+                      if (afterDecimal.toString().length > maxDecimals) {
+                        return; // Return if decimal part is too long
+                      }
+
+                      // Check if the characters before the decimal exceed the maximum allowed
+                      const beforeDecimal = amount.split('.')[0];
+                      if (
+                        beforeDecimal.toString().length >
+                        maxCharactersBeforeDecimal
+                      ) {
+                        return; // Return if characters before decimal exceed the maximum allowed
+                      }
+                    } else {
+                      // If there's no decimal, check the whole input length
+                      if (amount.length > maxCharactersBeforeDecimal) {
+                        return; // Return if the whole input exceeds the maximum allowed
+                      }
+                    }
+                    setAount(amount);
+
+                    handleChangeForInput1(amount);
+                  }}
+                  checkForSymbols={true}
+                  inputSelect={true}
+                  placeholder={'0.000'}
+                  label='You Pay'
+                  type={'number'}
+                  value={amount}
+                  disabled={loading}
+                  addonAfter={selectAfter}
+                />
+
+                <div className='do'>
+                  <div className='send__infoText'>
+                    = {currency.symbol}
+                    {addCommasToNumber(
+                      getFlooredFixed(
+                        parseFloat(amount ? amount : 0) *
+                          parseFloat(token1 ? token1.price : 0),
+                        2
+                      )
+                    )}
+                  </div>
+                  <div className='send__infoText'>
+                    <span
+                      style={{
+                        color: 'rgb(0, 174, 239)',
+                        position: 'relative',
+                        top: '-6px',
+                      }}
+                    >
+                      {' '}
+                      Available Balance
+                    </span>{' '}
+                    <br></br>{' '}
+                    {addCommasToNumber(
+                      parseFloat(getFlooredFixed(balance || 0, 6))
+                    )}{' '}
+                    {token1?.symbol} ~ {currency?.symbol}
+                    {balanceToFiatConversion(token1?.price || 0, balance || 0)}
+                  </div>
+                </div>
+                {token1?.isToken ? (
+                  <div
+                    className='periods'
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      marginBottom: '15px',
+                      marginTop: '15px',
+                      justifyContent: 'space-evenly',
+                    }}
+                  >
+                    <div
+                      className={percent == 25 ? 'boxActiveSwap' : 'boxSwap'}
+                      style={
+                        loading
+                          ? { pointerEvents: 'none' }
+                          : { pointerEvents: 'auto' }
+                      }
+                      onClick={() => {
+                        setPercent(25);
+                        calculateAccordingly(25);
+                      }}
+                    >
+                      25%
+                    </div>
+                    <div
+                      className={percent == 50 ? 'boxActiveSwap' : 'boxSwap'}
+                      style={
+                        loading
+                          ? { pointerEvents: 'none' }
+                          : { pointerEvents: 'auto' }
+                      }
+                      onClick={() => {
+                        setPercent(50);
+                        calculateAccordingly(50);
+                      }}
+                    >
+                      50%
+                    </div>
+                    <div
+                      className={percent == 75 ? 'boxActiveSwap' : 'boxSwap'}
+                      style={
+                        loading
+                          ? { pointerEvents: 'none' }
+                          : { pointerEvents: 'auto' }
+                      }
+                      onClick={() => {
+                        setPercent(75);
+                        calculateAccordingly(75);
+                      }}
+                    >
+                      75%
+                    </div>
+                    <div
+                      className={percent == 100 ? 'boxActiveSwap' : 'boxSwap'}
+                      style={
+                        loading
+                          ? { pointerEvents: 'none' }
+                          : { pointerEvents: 'auto' }
+                      }
+                      onClick={() => {
+                        setPercent(100);
+                        calculateAccordingly(100);
+                      }}
+                    >
+                      Max
+                    </div>
+                  </div>
+                ) : null}
+
+                <div className='swap__icon'>
+                  <img
+                    src={SwapVerticalIcon}
+                    width={44}
+                    alt=''
+                    height={44}
+                    style={
+                      loading
+                        ? { pointerEvents: 'none' }
+                        : { pointerEvents: 'auto' }
+                    }
+                    onClick={() => {
+                      if (token2?.iHave) {
+                        setToken1(token2);
+                        setToken2(token1);
+                        setAmount2(null);
+                        setAount(null);
+                        setPercent(0);
+                        setInfoData([]);
+                      } else {
+                        return messageApi.error(
+                          `Please enable ${token2?.name} in your wallet.`
+                        );
+                      }
+                    }}
+                  />
+                </div>
+                <InputField
+                  mb0={true}
+                  inputSelect={true}
+                  placeholder={'0.000'}
+                  label='You Receive'
+                  type={'number'}
+                  checkForSymbols={true}
+                  value={amount2}
+                  disabled={loading}
+                  getData={async (amount) => {
+                    if (percent != null) {
+                      setPercent(null);
+                    }
+                    const afterDecimal = amount.split('.')[1];
+
+                    // Get the maximum allowed characters before the decimal point (15 characters)
+                    const maxCharactersBeforeDecimal = 15;
+
+                    if (afterDecimal) {
+                      // Get the maximum allowed decimals for the cryptocurrency (e.g., Bitcoin has 8 decimals)
+                      const maxDecimals = token2?.decimals;
+                      // Check if the entered decimal part is longer than the maximum allowed
+                      if (afterDecimal.toString().length > maxDecimals) {
+                        return; // Return if decimal part is too long
+                      }
+
+                      // Check if the characters before the decimal exceed the maximum allowed
+                      const beforeDecimal = amount.split('.')[0];
+                      if (
+                        beforeDecimal.toString().length >
+                        maxCharactersBeforeDecimal
+                      ) {
+                        return; // Return if characters before decimal exceed the maximum allowed
+                      }
+                    } else {
+                      // If there's no decimal, check the whole input length
+                      if (amount.length > maxCharactersBeforeDecimal) {
+                        return; // Return if the whole input exceeds the maximum allowed
+                      }
+                    }
+                    setAmount2(amount);
+                    handleChangeForInput2(amount);
+                  }}
+                  addonAfter={selectAfterTo}
+                />
+                <div className='doSingle'>
+                  <div
+                    className='send__infoText'
+                    style={{
+                      position: 'relative',
+                      left: '20px',
+                    }}
+                  >
+                    {showFiatConversion(
+                      amount,
+                      token1?.price,
+                      amount2,
+                      token2?.price
+                    )
+                      ? ` = ${currency?.symbol}${addCommasToNumber(
+                          getFlooredFixed(
+                            parseFloat(amount2 ? amount2 : 0) *
+                              parseFloat(token2?.price),
+                            2
+                          )
+                        )}`
+                      : null}
+                  </div>
+                </div>
+                <div className='send__infoText'></div>
+
+                {loading ? (
+                  <div className='swap__infoText'>
+                    <ClipLoader size={20} color='#00adee' />{' '}
+                    <p
+                      style={{
+                        marginLeft: '7px',
+                      }}
+                    >
+                      Fetching the best price. Please wait...
+                    </p>
+                  </div>
+                ) : null}
+                {infoData?.length > 0 && amount2 > 0 ? (
+                  <div className={'confirmCurrency'}>
+                    <div className={'confirmCurrency__keyValuesOuter'}>
+                      {infoData.map((ele) => (
+                        <div className={'confirmCurrency__keyValues'}>
+                          <div className={'confirmCurrency__keyValues__key'}>
+                            <span className='slippageNoti'>
+                              {ele?.text == 'Trading Fees' ||
+                              ele?.text == 'Route' ||
+                              ele?.text == 'Slippage Tolerance' ? (
+                                <span
+                                  onClick={() => {
+                                    let msg =
+                                      ele?.text == 'Trading Fees'
+                                        ? 'Market Makers impose a fee of 0.05% for non-stablecoin transactions and 0.01% for stablecoin transactions within the quotes they offer.'
+                                        : ele?.text == 'Route'
+                                        ? 'Route is automatically calculated based on your  routing preference to achieve the best price  for your trade'
+                                        : 'Slippage is the price change between order placement and execution. Higher slippage helps prevent failed transactions, particularly in fast moving markets. For taxed tokens, we recommend you set slippage at least 1% above the tax rate of the token.';
+                                    setInfoMessage(msg);
+                                  }}
+                                >
+                                  {ele.text} <InfoCircleOutlined />
+                                </span>
+                              ) : (
+                                ele.text
+                              )}
+                            </span>
+                          </div>
+                          {ele.text === 'Slippage Tolerance' ? (
+                            <div
+                              className={'confirmCurrency__keyValues__value'}
+                              style={{ textAlign: 'right' }}
+                            >
+                              <div
+                                style={{ display: 'flex', textAlign: 'right' }}
+                              >
+                                {ele.textVal}
+                                {isWrap ? null : (
+                                  <img
+                                    src={Edit}
+                                    style={{
+                                      marginLeft: '10px',
+                                      cursor: 'pointer',
+                                    }}
+                                    alt=''
+                                    onClick={() => setSlippageDrawer(true)}
+                                  />
+                                )}
+                              </div>
+                            </div>
+                          ) : (
+                            <div
+                              className={'confirmCurrency__keyValues__value'}
+                              style={{ textAlign: 'right' }}
+                            >
+                              {ele.textVal}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+
+                <div style={{ width: '100%' }}>
+                  {infoData.length > 0 ? null : (
+                    <div
+                      className='slipPageSec'
+                      style={{
+                        background: theme == 'darkTheme' ? '#201f1f' : 'white',
+                      }}
+                    >
+                      <div className='innerslip'>
+                        <span
+                          style={{
+                            fontSize: '16px',
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                          }}
+                          onClick={() => {
+                            setSlippageDrawer(true);
+                          }}
+                        >
+                          {' '}
+                          SET SLIPPAGE {slippage || customSlippage}%
+                          {/* <EditOutlined /> */}
+                        </span>
+                        <SettingOutlined
+                          onClick={() => {
+                            setSlippageDrawer(true);
+                          }}
+                        />
+                      </div>
+                      <span className='slippageNoti'>
+                        {/* <Tooltip title="Slippage is the price change between order placement and execution. Higher slippage helps prevent failed transactions, particularly in fast moving markets. For taxed tokens, we recommend you set slippage at least 1% above the tax rate of the token."> */}
+                        <InfoCircleOutlined
+                          color='red'
+                          onClick={() => {
+                            setInfoMessage(
+                              'Slippage is the price change between order placement and execution. Higher slippage helps prevent failed transactions, particularly in fast moving markets. For taxed tokens, we recommend you set slippage at least 1% above the tax rate of the token.'
+                            );
+                          }}
+                        />
+                        {/* </Tooltip> */}
+                      </span>
+                    </div>
+                  )}
+
+                  <ButtonComp
+                    onClick={async () => {
+                      if (
+                        isNaN(parseFloat(amount)) ||
+                        isNaN(parseFloat(amount2))
+                      ) {
+                        return messageApi.error(
+                          'Please enter a valid amount to proceed.'
+                        );
+                      }
+
+                      if (percent != 100) {
+                        const balanceBig = new BigNumber(balance);
+                        const amountBig = new BigNumber(amount);
+                        if (balanceBig.isLessThan(amountBig)) {
+                          return messageApi.error(
+                            'Insufficient balance to proceed with the transaction.'
+                          );
+                        }
+                      }
+
+                      store.dispatch(overAllLoader(true));
+
+                      if (token1?.coinFamily == 4) {
+                        store.dispatch(overAllLoader(false));
+
+                        let swapDetailed = {
+                          route,
+                          token1,
+                          token2,
+                          amount,
+                          amount2,
+                          feeAmount: '0.000005',
+                          tab: sel,
+                          adminSwapFee,
+                        };
+
+                        store.dispatch(swapDetailAc(swapDetailed));
+                        navigate('/swapDetails', {
+                          state: swapDetailed,
+                        });
+                        store.dispatch(overAllLoader(false));
+
+                        return;
+                      }
+
+                      const getNativeBalance = await Web3Helper.getCoinBalance(
+                        token1?.address,
+                        token1?.rpc
+                      );
+
+                      // Assuming nativeBalance and tradingFee are strings or numbers
+                      const nativeBalance = new BigNumber(getNativeBalance); // Replace with your actual value
+
+                      const feeAmount = new BigNumber(tradingFee); // Replace with your actual value
+
+                      const amountToAdd = new BigNumber(
+                        token1?.tokenAddress ? 0 : amount
+                      );
+
+                      const balanceExtraToAddIfFromIsNativeCoin =
+                        feeAmount.plus(amountToAdd);
+
+                      if (
+                        balanceExtraToAddIfFromIsNativeCoin.gt(nativeBalance)
+                      ) {
+                        store.dispatch(overAllLoader(false));
+                        return messageApi.error(
+                          'Insufficient balance to proceed with the transaction.'
+                        );
+                      }
+
+                      if (token1?.coinFamily == 3) {
+                        store.dispatch(overAllLoader(true));
+                        const pancakeHelper = new PancakeHelper(token1?.rpc);
+                        const route = await pancakeHelper.getQuoteAndRoute(
+                          token1,
+                          token2,
+                          amount,
+                          token1?.address,
+                          false,
+                          slippage ? slippage : customSlippage,
+                          isWrap
+                        );
+
+                        if (!route) {
+                          store.dispatch(overAllLoader(false));
+                          return messageApi.error(
+                            'This pair is not available for swap at the moment. Please try again later.'
+                          );
+                        }
+
+                        store.dispatch(overAllLoader(false));
+                        let swapDetailed = {
+                          route: route.route,
+                          token1,
+                          token2,
+                          amount,
+                          amount2,
+                          feeAmount,
+                          slippage: slippage ? slippage : customSlippage,
+                          isWrap,
+                          tab: sel,
+                        };
+
+                        store.dispatch(swapDetailAc(swapDetailed));
+                        return navigate('/swapDetails', {
+                          state: swapDetailed,
+                        });
+                      }
+
+                      if (token1?.coinFamily == 9) {
+                        store.dispatch(overAllLoader(true));
+                        const pancakeHelper = new PulseChainHelper(token1?.rpc);
+                        const route = await pancakeHelper.getQuoteAndRoute(
+                          token1,
+                          token2,
+                          amount,
+                          token1?.address,
+                          false,
+                          slippage ? slippage : customSlippage,
+                          false
+                        );
+
+                        if (!route) {
+                          store.dispatch(overAllLoader(false));
+                          return messageApi.error(
+                            'This pair is not available for swap at the moment. Please try again later.'
+                          );
+                        }
+
+                        store.dispatch(overAllLoader(false));
+
+                        let swapDetailed = {
+                          route: route?.route,
+                          token1,
+                          token2,
+                          amount,
+                          amount2,
+                          feeAmount,
+                          tab: sel,
+                        };
+
+                        store.dispatch(swapDetailAc(swapDetailed));
+                        return navigate('/swapDetails', {
+                          state: swapDetailed,
+                        });
+                      }
+
+                      store.dispatch(overAllLoader(false));
+
+                      let swapDetailed = {
+                        route,
+                        token1,
+                        token2,
+                        amount,
+                        amount2,
+                        feeAmount,
+                        isWrap,
+                        tab: sel,
+                      };
+
+                      store.dispatch(swapDetailAc(swapDetailed));
+                      navigate('/swapDetails', {
+                        state: swapDetailed,
+                      });
+                    }}
+                    text={
+                      parseFloat(amount) > parseFloat(balance)
+                        ? 'Insufficient Balance'
+                        : token1?.id == token2?.id &&
+                          token1 != null &&
+                          token2 != null
+                        ? 'Please select a different token'
+                        : 'Swap'
+                    }
+                    maxWidth={'100%'}
+                    disabled={
+                      !amount ||
+                      !amount2 ||
+                      amount <= 0 ||
+                      amount2 <= 0 ||
+                      loading ||
+                      parseFloat(amount) > parseFloat(balance) ||
+                      infoData?.length === 0 ||
+                      token1?.id == token2?.id
+                    }
+                  />
+                  {infoData.length == 0 ? (
+                    <div style={{ marginTop: '10px' }} className='readDisclaimer'>
+                      <img
+                        src={warning}
+                        alt=''
+                        style={{ width: '20px', padding: '4px' }}
+                      />
+                      <p>
+                        Read the Qubetics Swap disclaimer{' '}
+                        <span onClick={() => setDisclaimer(true)}>Here.</span>
+                      </p>
+                    </div>
+                  ) : (
+                    ''
+                  )}
+                </div>
+              </div>
+            )}
+          </TabPanel>
+          <TabPanel>
+            {crossChainM?.is_maintenance ? (
+              <Maintanance text='Cross chain swap is in under maintenance' />
+            ) : (
+              <CrossChain />
+            )}
+          </TabPanel>
+        </Tabs>
+      </div>
+      <Drawer
+        title='Select Token'
+        placement='bottom'
+        onClose={() => {
+          setOpen(false);
+          setKeyword('');
+          setFilteredTokens(allToken);
+        }}
+        open={open}
+        // eslint-disable-next-line jsx-a11y/alt-text
+        closeIcon={
+          theme == 'darkTheme' ? (
+            <img src={darkclose} />
+          ) : (
+            <img src={ModalCloseIcon} />
+          )
+        }
+        height={500}
+      >
+        <div
+          className='contain'
+          style={{
+            height: '100%',
+            width: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+          }}
+        >
+          {show ? (
+            <div className='search' style={{ marginBottom: '30px' }}>
+              <InputField
+                placeholder={'Search name or paste address'}
+                coloredBg={'#eef3f9'}
+                value={keyword}
+                checkForSymbols={true}
+                addonBefore={
+                  <span>
+                    <img
+                      src={Search}
+                      style={{
+                        width: '17px',
+                      }}
+                      alt=''
+                    />
+                  </span>
+                }
+                getData={(value) => {
+                  setKeyword(value);
+                  if (value.trim().length === 0) {
+                    setFilteredTokens(allToken);
+                  } else {
+                    const matches = allToken.filter(
+                      (el) =>
+                        el.symbol
+                          .toLowerCase()
+                          .indexOf(value.trim().toLowerCase()) > -1 ||
+                        el.name
+                          .toLowerCase()
+                          .indexOf(value.trim().toLowerCase()) > -1 ||
+                        (el.tokenAddress &&
+                          el.tokenAddress
+                            .toLowerCase()
+                            .indexOf(value.trim().toLowerCase()) > -1)
+                    );
+
+                    setFilteredTokens(matches);
+                  }
+                }}
+              />
+            </div>
+          ) : null}
+
+          <div
+            className='right'
+            style={{
+              flex: 1,
+              overflow: 'scroll',
+            }}
+          >
+            {filteredTokens
+              .filter((el) => {
+                if (selected == 1) {
+                  if (el.iHave) {
+                    return el;
+                  }
+                } else {
+                  return el;
+                }
+              })
+              .filter((el) => {
+                if (selected == 2) {
+                  if (el.coinFamily == selectedCoinFamily) {
+                    return el;
+                  }
+                } else {
+                  return el;
+                }
+              }).length > 0 ? (
+              filteredTokens
+                .filter((el) => {
+                  if (selected == 1) {
+                    if (el.iHave) {
+                      return el;
+                    }
+                  } else {
+                    return el;
+                  }
+                })
+                .filter((el) => {
+                  if (selected == 2) {
+                    if (el.coinFamily == selectedCoinFamily) {
+                      return el;
+                    }
+                  } else {
+                    return el;
+                  }
+                })
+                .map((token) => (
+                  <div
+                    className='design'
+                    style={{
+                      width: '100%',
+                    }}
+                  >
+                    <div
+                      className='token'
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'flex-start',
+                        alignItems: 'center',
+                        marginBottom: '20px',
+                        padding: '8px',
+                        borderRadius: '30px',
+                        marginLeft: '7px',
+                        fontSize: '11px',
+                        cursor: 'pointer',
+                        width: '100%;',
+                        backgroundColor:
+                          token1?.id == token.id || token2?.id == token.id
+                            ? 'transparent'
+                            : 'transparent',
+                        color:
+                          token1?.id == token.id || token2?.id == token.id
+                            ? '#000'
+                            : '#000',
+                      }}
+                      onClick={() => {
+                        if (token1?.id == token.id || token2?.id == token.id) {
+                          setOpen(false);
+                        }
+
+                        if (selected == 1) {
+                          if (token2?.id == token.id) {
+                            setKeyword('');
+                            setFilteredTokens(allToken);
+                            return messageApi.error(
+                              'You cannot select the same tokens on both sides. Please select a different token.'
+                            );
+                          }
+
+                          let myWrap = false;
+
+                          if (
+                            token.tokenAddress ===
+                              '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c' &&
+                            !token2.tokenAddress
+                          ) {
+                            setIsWrap(true);
+                            myWrap = true;
+                          } else if (
+                            token.tokenAddress ===
+                              '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2' &&
+                            !token2.tokenAddress
+                          ) {
+                            setIsWrap(true);
+                            myWrap = true;
+                          } else {
+                            setIsWrap(0);
+                          }
+
+                          setAount(0);
+                          setAmount2(0);
+                          setToken1(token);
+                          handleToken1Change(token, myWrap);
+
+                          setSelectedCoinFamily(token.coinFamily);
+                          setSelectedCF(true);
+                        } else {
+                          if (token1?.id == token.id) {
+                            setKeyword('');
+                            setFilteredTokens(allToken);
+                            return messageApi.error(
+                              'You cannot select the same tokens on both sides. Please select a different token.'
+                            );
+                          }
+                          let myWrap = false;
+
+                          if (
+                            token.tokenAddress ===
+                              '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c' &&
+                            !token1.tokenAddress
+                          ) {
+                            setIsWrap(true);
+                            myWrap = true;
+                          } else if (
+                            token.tokenAddress ===
+                              '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2' &&
+                            !token1.tokenAddress
+                          ) {
+                            setIsWrap(true);
+                            myWrap = true;
+                          } else {
+                            setIsWrap(0);
+                          }
+
+                          setToken2(token);
+                          handleToken2Change(token, myWrap);
+                        }
+                        setFilteredTokens(allToken);
+                        setKeyword(null);
+                        setOpen(false);
+                      }}
+                    >
+                      {!token.image ? (
+                        <div
+                          style={{
+                            alignItems: 'center',
+                            backgroundColor: 'rgba(98,126,234,.2)',
+                            borderRadius: '49%',
+                            display: 'flex',
+                            height: '29px',
+                            justifyContent: 'center',
+                            width: '29px',
+                            marginRight: '15px',
+                          }}
+                        >
+                          {' '}
+                          {token.name.split('')[0]}
+                        </div>
+                      ) : (
+                        <img
+                          style={{
+                            width: '29px',
+                            marginRight: '15px',
+                          }}
+                          src={token.image}
+                          alt=''
+                        />
+                      )}
+
+                      <p>
+                        <span
+                          style={{ fontSize: '17px' }}
+                          className='noAddress'
+                        >
+                          {token.name}{' '}
+                        </span>
+                        <span
+                          className='noAddress'
+                          style={{
+                            fontSize: '11px',
+                            marginLeft: '5px',
+                          }}
+                        >
+                          {token.type ? `/ ${token.type}` : null}
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+                ))
+            ) : (
+              <div
+                style={{
+                  textAlign: 'center',
+                }}
+              >
+                <p
+                  className='noAddress'
+                  style={{
+                    marginTop: '4%',
+                    marginBottom: '15px',
+                    fontWeight: 'bold',
+                    fontSize: '15px',
+                  }}
+                >
+                  Asset not found
+                </p>
+                <ButtonComp
+                  text={'Add Tokens'}
+                  onClick={() => {
+                    if (!token1) {
+                      return messageApi.error(
+                        'Please select a blockchain/token first.'
+                      );
+                    }
+                    navigate('/add-token', {
+                      state: {
+                        swap: token1?.coinFamily,
+                        selected,
+                      },
+                    });
+                  }}
+                  maxWidth={'50%'}
+                />
+              </div>
+            )}
+          </div>
+        </div>
+      </Drawer>
+      <Drawer
+        title='Slippage Tolerance'
+        placement='bottom'
+        onClose={() => {
+          if (customSlippage == 0) {
+            return messageApi.error('Please enter a valid slippage value.');
+          }
+          setSlippageDrawer(false);
+        }}
+        open={slippageDrawer}
+        closable={true}
+        // eslint-disable-next-line jsx-a11y/alt-text
+        closeIcon={
+          theme == 'darkTheme' ? (
+            <img src={darkclose} />
+          ) : (
+            <img src={ModalCloseIcon} />
+          )
+        }
+        height={292}
+      >
+        <div
+          className='contain'
+          style={{
+            height: '100%',
+            width: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-evenly',
+              padding: '0px 15px',
+              flexWrap: 'wrap',
+            }}
+          >
+            <div className='myvalues'>
+              <p
+                className={slippage === 1 ? 'myValuesActive' : ''}
+                onClick={() => {
+                  setSlippage(1);
+                  setCustomSlippage(null);
+                }}
+              >
+                1%
+              </p>
+            </div>
+
+            <div className='myvalues'>
+              <p
+                className={slippage === 0.5 ? 'myValuesActive' : ''}
+                onClick={() => {
+                  setSlippage(0.5);
+                  setCustomSlippage(null);
+                }}
+              >
+                0.5%
+              </p>
+            </div>
+            <div className='myvalues'>
+              <p
+                className={slippage === 2 ? 'myValuesActive' : ''}
+                onClick={() => {
+                  setSlippage(2);
+                  setCustomSlippage(null);
+                }}
+              >
+                2%
+              </p>
+            </div>
+            <div className='myvalues'>
+              <p
+                className={slippage === 3 ? 'myValuesActive' : ''}
+                onClick={() => {
+                  setSlippage(3);
+                  setCustomSlippage(null);
+                }}
+              >
+                3%
+              </p>
+            </div>
+            <div className='pthel_input'>
+              <InputField
+                coloredBg={'transparent'}
+                placeholder={'Custom'}
+                value={customSlippage}
+                type='number'
+                addonBefore={
+                  <span>
+                    <img
+                      src={Search}
+                      style={{
+                        width: '17px',
+                      }}
+                      alt=''
+                    />
+                  </span>
+                }
+                getData={(value) => {
+                  if (!value || value === '') {
+                    setSlippage(1);
+                    setCustomSlippage(null);
+                  }
+
+                  if (
+                    parseFloat(value) <= 100 &&
+                    value.toString().length <= 5
+                  ) {
+                    setSlippage(null);
+                    setCustomSlippage(value);
+                  }
+                }}
+              />
+            </div>
+          </div>
+          <ButtonComp
+            text={'Done'}
+            maxWidth={'50%'}
+            alignSelf='center'
+            onClick={() => {
+              if (customSlippage == 0) {
+                return messageApi.error('Please enter a valid slippage value.');
+              }
+              setSlippageDrawer(false);
+              handleChangeForInput1(amount);
+            }}
+          />
+        </div>
+      </Drawer>
+
+      {infoMessage && (
+        <ModalCustom
+          isModalOpen={infoMessage}
+          title={''}
+          handleCancel={() => setInfoMessage('')}
+          customClass={'disclamerModalSec '}
+        >
+          <div className='mainTanceSecModal'>
+            {theme == 'darkTheme' ? <img src={DarkLogo} /> : <img src={Logo} />}
+
+            <p className={theme == 'darkTheme' ? 'lightText' : 'darkText'}>
+              {infoMessage}
+            </p>
+            <ButtonComp
+              maxWidth={'100%'}
+              marginTop={'25px'}
+              text={'Ok'}
+              onClick={() => setInfoMessage('')}
+            />
+          </div>
+        </ModalCustom>
+      )}
+      {disclaimer ? (
+        <ModalCustom
+          isModalOpen={disclaimer}
+          title={'Disclaimer'}
+          // handleOk={handleOk}
+          handleCancel={() => setDisclaimer(false)}
+          customClass={'disclamerModalSec '}
+        >
+          <div className='disclaimerModal'>
+            <div className='left' style={{ flex: 1 }}>
+              <img src={warning} alt='' style={{ width: '27px' }} />
+            </div>
+            <div className='right' style={{ flex: 7 }}>
+              {/* <img
+              src={warning}
+              alt=''
+              style={{ width: '30px', padding: '4px' }}
+            />{' '} */}
+              <p>
+                Users can import tokens from Uniswap, PancakeSwap, PulseChain
+                and Jupiter on Qubetics Wallet. While we strive for optimal routing
+                and low fees, due to decentralization, we cannot guarantee it.
+                Users must verify token numbers and gas fees before swapping and
+                assume responsibility for charges or losses. Visit our{' '}
+                <span
+                  style={{
+                    color: '#00aeef',
+                    cursor: 'pointer',
+                    textDecoration: 'underline',
+                  }}
+                  onClick={async () => {
+                    const checkUserToNavigate = await server.post(
+                      '/wallet/open_faq',
+                      {
+                        wallet_address: account.address,
+                      },
+                      {
+                        headers: {
+                          Authorization: account.jwtToken,
+                        },
+                      }
+                    );
+
+                    if (checkUserToNavigate.data.status) {
+                      let randomString = generateString(15);
+                      // window.open(`http://localhost:3000/chat/${account.address}/${randomString}`);
+                      window.open(
+                        `https://REDACTED/chat/${account.address}/${randomString}`
+                        // `http://localhost:3000/faq/${account.address}/${randomString}`
+                      );
+                    }
+                  }}
+                >
+                  Help Center
+                </span>{' '}
+                for more information.
+              </p>
+            </div>
+          </div>
+          <ButtonComp
+            text={'Back to Swap'}
+            onClick={() => setDisclaimer(false)}
+            maxWidth={'100%'}
+          />
+        </ModalCustom>
+      ) : null}
+    </div>
+  );
+}
+
+export default Swap;

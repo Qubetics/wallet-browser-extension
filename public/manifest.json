@@ -1,0 +1,63 @@
+{
+  "name": "Qubetics Wallet",
+  "description": "Connect yourself to the ethereum Dapp to realize the power of blockchain.",
+  "version": "1.0",
+  "manifest_version": 3,
+  "permissions": [
+    "storage",
+    "tabs",
+    "webNavigation",
+    "webRequest",
+    "clipboardRead",
+    "notifications",
+    "alarms",
+    "unlimitedStorage",
+    "activeTab",
+    "scripting",
+    "background",
+    "idle",
+    "sidePanel",
+    "nativeMessaging"
+  ],
+  "side_panel": {
+    "default_path": "index.html"
+  },
+  
+  "action": {
+    "default_popup": "index.html",
+    "default_title": "Qubetics Wallet"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "file://*/*",
+        "http://*/*",
+        "https://*/*",
+        "https://pancakeswap.finance/*"
+      ],
+      "js": ["contentscript-bundle.js"],
+      "run_at": "document_start",
+      "all_frames": true
+    }
+  ],
+  "host_permissions": [
+    "http://localhost:8545/",
+    "file://*/*",
+    "http://*/*",
+    "https://*/*"
+  ],
+  "background": {
+    "service_worker": "background-bundle.js"
+  },
+  "icons": {
+    "16": "16.png",
+    "48": "48.png",
+    "128": "128.png"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["logo512.png"],
+      "matches": ["https://*/*"]
+    }
+  ]
+}

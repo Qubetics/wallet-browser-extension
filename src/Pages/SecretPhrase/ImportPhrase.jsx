@@ -1,0 +1,122 @@
+/* global chrome*/
+import React, { useState } from "react";
+import MenuRestofHeaders from "../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders.jsx";
+import {
+  InputField,
+  InputFieldOnly,
+} from "../../Components/InputField/InputFieldSimple";
+import style from "./style.module.scss";
+import ButtonComp from "../../Components/ButtonComp/ButtonComp.jsx";
+import { Checkbox, Input, message } from "antd";
+import closeXicon from "../../Assets/closeXicon.svg";
+import CopyIconBlue from "../../Assets/CopyIconBlue.svg";
+import { store } from "../../index.js";
+import { setLoading } from "../../actions/loading.js";
+import { WalletHelper } from "../../helpers/wallet.helper.js";
+import { useNavigate } from "react-router-dom";
+import { DURATION } from "../../config/message.config.js";
+function ImportPhrase() {
+  const [messageApi, contextHolder] = message.useMessage({
+    duration: DURATION,
+  });
+  const navigate = useNavigate();
+  const [mnemonics, setMnemonics] = useState(null);
+  const [terms, setTerms] = useState(false);
+
+  const onChange = (e) => {
+    setTerms(e.target.checked);
+  };
+
+  return (
+    <div>
+      {contextHolder}
+      <div className={`scrollableCont`}>
+        <MenuRestofHeaders
+          backTo={"/new-name"}
+          title={"Enter Secret Phrase"}
+          mnemonics={null}
+        />
+        <div className={`flexedContent`}>
+          <div className={style.input_text}>
+            <p>Paste or type your secret Phrase.</p>
+
+            <InputField
+              placeholder={"Enter Your Secret Phrase Here"}
+              width="353px"
+              value={mnemonics}
+              getData={(phrase) => {
+                setMnemonics(phrase);
+              }}
+              checkForSymbols={true}
+              addonAfter={
+                <div className={style.token__selectStyle}>
+                  <span
+                    className={style.token__pasteText}
+                    onClick={async () => {
+                      const data = await navigator.clipboard.readText();
+                      setMnemonics(data);
+                    }}
+                  >
+                    Paste
+                  </span>
+                </div>
+              }
+            />
+            <div className={"checkboxOuter"}>
+              <Checkbox onChange={onChange} style={{}}>
+                I understand that I stand the risk of losing my funds by
+                exposing my Secret Phrase to others.
+              </Checkbox>
+            </div>
+            <ButtonComp
+              text={"Proceed"}
+              onClick={async (e) => {
+                if (!terms) {
+                  return messageApi.error(
+                    "Please accept terms and conditions."
+                  );
+                }
+
+                if (!mnemonics) {
+                  return messageApi.error("Mnemonics are required.");
+                }
+
+                store.dispatch(setLoading(true));
+
+                const checkIfThere = await WalletHelper.checkIfAlreadyThere(
+                  mnemonics
+                );
+
+                if (checkIfThere) {
+                  store.dispatch(setLoading(false));
+                  return messageApi.error(
+                    "Mnemonics already exist. Please try with a different mnemonic."
+                  );
+                }
+                const { name } = await chrome.storage.session.get("name");
+
+                const response = await WalletHelper.generateAndSetWallet(
+                  mnemonics,
+                  name
+                );
+
+                if (!response) {
+                  store.dispatch(setLoading(false));
+                  return messageApi.error(
+                    "Invalid mnemonics provided. Please check and try again."
+                  );
+                }
+
+                store.dispatch(setLoading(false));
+                navigate("/wallet");
+              }}
+              maxWidth={"100%"}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default ImportPhrase;
