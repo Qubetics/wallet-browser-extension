@@ -49,14 +49,20 @@
       text-align: left;
     }
   }
+  .main_list{
+    margin-top: 10px;
+  }
   &__listing {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px 0;
-    border-bottom: 1px solid;
+    border-radius: 16px;
+    gap: 15px;
+    margin-bottom: 10px;
+    padding: 13px 10px;
+    padding-right: 30px;
     @include theme() {
-      border-color: theme-get('cardBorder');
+      background-color: theme-get("inputBg");
     }
 
     cursor: pointer;
@@ -104,7 +110,7 @@
     p {
       color: $red;
       &:first-child {
-        margin-bottom: 20px;
+        margin-bottom: 1px;
       }
     }
   }

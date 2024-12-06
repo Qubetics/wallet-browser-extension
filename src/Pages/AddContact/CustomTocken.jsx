@@ -91,12 +91,20 @@ function AddContact() {
 
   const handleSubmit = async () => {
     try {
+      // wallet_address: account.coinFamilyAndAddress[1] 
+
+      console.log('selectedChainselectedChain ', selectedChain);
+      
       store.dispatch(setLoading(true));
       const parentCoin = await server.post(
-        '/wallet/coin/coins_market_data',
-        {
-          coin_family: selectedChain.coinFamily,
-          fiat_currency: currency.name,
+        // '/wallet/coin/coins_market_data',
+        "/user/add_address_book",
+        { 
+          "address": account?.coinFamilyAndAddress[selectedChain?.coinFamily], 
+          "wallet_name": name, 
+          "contact_name": selectedChain?.chainName, 
+          "coin_family": selectedChain?.coinFamily, 
+          "wallet_address": address
         },
         {
           headers: {
@@ -104,30 +112,32 @@ function AddContact() {
           },
         }
       );
+console.log('parentCoin----> ', parentCoin);
 
-      let response = await server.post(
-        '/wallet/save_address',
-        {
-          wallet_address: account.coinFamilyAndAddress[1],
-          name: name,
-          address: address,
-          coin_family: selectedChain.coinFamily,
-          coin_id: parentCoin.data.data.id,
-        },
-        {
-          headers: {
-            Authorization: account.jwtToken,
-          },
-        }
-      );
-
-      console.log('responseresponse ', response);
+      // let response = await server.post(
+      //   '/wallet/save_address',
+      //   {
+      //     wallet_address: account.coinFamilyAndAddress[1],
+      //     name: name,
+      //     address: address,
+      //     coin_family: selectedChain.coinFamily,
+      //     coin_id: parentCoin.data.data.id,
+      //   },
+      //   {
+      //     headers: {
+      //       Authorization: account.jwtToken,
+      //     },
+      //   }
+      // );
+ 
 
       store.dispatch(setLoading(false));
       navigate(-1);
     } catch (error) {
+      console.log('ERRR======> ', error);
+      
       store.dispatch(setLoading(false));
-      return messageApi.error(error.response.data.message);
+      return messageApi.error(error.response.message);
     }
   };
 

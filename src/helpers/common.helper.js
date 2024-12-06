@@ -1,8 +1,6 @@
 import Web3 from "web3";
 import TOKEN_ABI from "../Assets/JsonFiles/tokenContract.ABI.json";
-import base58 from "bs58"; 
-// import TOKEN_ABI from "../Assets/JsonFiles/tokenContract.ABI.json";
-// import base58 from "bs58";
+import base58 from "bs58";
 export function numberWithSpaces(x) {
   return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
 }

@@ -37,7 +37,9 @@ function WalletListing() {
   const [clickedUp, setClickedUp] = useState(false);
   const [clickedDown, setClickedDown] = useState(false);
   const [selected, setSelected] = useState(null);
-  const [messageApi, contextHolder] = message.useMessage();
+  const [messageApi, contextHolder] = message.useMessage({
+    duration: 1,
+  });
   const [password, setPassword] = useState(null);
   const [deleteModal, setDeleteModal] = useState(false);
 
@@ -99,8 +101,7 @@ function WalletListing() {
 
       let overallFinalBalance = 0;
 
-
-      console.log(accounts)
+      console.log(accounts);
 
       const finalData = accounts.map((account, index) => {
         let fiatBalance = 0;
@@ -156,17 +157,6 @@ function WalletListing() {
         account.position = index;
         return account;
       });
-      //   account.fiatValue = addCommasToNumber(getFlooredFixed(fiatBalance, 2));
-      //   overallFinalBalance += account.totalBalanceShow ? fiatBalance : 0;
-      //   account.defaultHomePage = defaultHomePage == account.id;
-      //   account.default = defaultHomePage
-      //     ? defaultHomePage == account.id
-      //       ? true
-      //       : false
-      //     : account.default;
-      //   account.position = index;
-      //   return account;
-      // });
 
       store.dispatch(
         setBalance(addCommasToNumber(getFlooredFixed(overallFinalBalance, 2)))
@@ -461,13 +451,13 @@ function WalletListing() {
         data.length > 0 &&
         data.map((el, index) => {
           return (
-            <div
-              key={index}
-              className='main_list'
-            >
-              <div className='walletListing__listing flex-item' style={{
-                position: "relative"
-              }}>
+            <div key={index} className='main_list'>
+              <div
+                className='walletListing__listing flex-item'
+                style={{
+                  position: 'relative',
+                }}
+              >
                 <div className='walletListing__listing__leftSec'>
                   <img
                     src={MyWallet}
@@ -533,10 +523,13 @@ function WalletListing() {
                     </p>
                   </div>
                 </div>
-                <div className='walletListing__listing__leftSec' style={{
-                  position: "absolute",
-                  left: "-28px"
-                }}>
+                <div
+                  className='walletListing__listing__leftSec'
+                  style={{
+                    position: 'absolute',
+                    right: '0px',
+                  }}
+                >
                   <div
                     style={{
                       cursor: 'pointer',
@@ -584,7 +577,6 @@ function WalletListing() {
                           transform='translate(15782 7374)'
                           fill='#fff'
                           stroke='#223f70'
-
                           stroke-width='1'
                           opacity='0'
                         >
@@ -651,7 +643,6 @@ function WalletListing() {
                           transform='translate(15782 7374)'
                           fill='#fff'
                           stroke='#223f70'
-
                           stroke-width='1'
                           opacity='0'
                         >
@@ -685,10 +676,10 @@ function WalletListing() {
                   className='walletListing__listing__rytSec'
                   onClick={() => handleClick(el.id)}
                   style={{
-                    display: "flex",
+                    display: 'flex',
                     flex: 1,
-                    width: "100%",
-                    justifyContent: "flex-end",
+                    width: '100%',
+                    justifyContent: 'flex-end',
                   }}
                 >
                   {balanceOut ? (
@@ -720,7 +711,7 @@ function WalletListing() {
             value={password}
             customFunction={async () => {
               if (!password) {
-                return messageApi.error('Please enter a valid password.');
+                return messageApi.error('Please enter a valid password.', 1);
               }
 
               await chrome.storage.session.set({
@@ -735,7 +726,7 @@ function WalletListing() {
               navigate('/showSecretPhrase', {
                 state: {
                   mnemonics: response,
-                  backTo: '/walletListing',
+                  backTo: '/wallet',
                 },
               });
             }}
@@ -767,7 +758,7 @@ function WalletListing() {
               navigate('/showSecretPhrase', {
                 state: {
                   mnemonics: response,
-                  backTo: '/walletListing',
+                  backTo: '/wallet',
                 },
               });
             }}

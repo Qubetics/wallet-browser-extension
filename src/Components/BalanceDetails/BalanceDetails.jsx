@@ -49,10 +49,42 @@ import { server } from '../../server';
 import { SolanaHelper } from '../../helpers/solana.helper';
 
 function BalanceDetails({ className, textLeft, mt0, coin }) {
-  const { account, currency, chain, prices, tokens, theme, balanceIn } =
-    useSelector((state) => {
+  const { account, currency, chain, tokens, theme, balanceIn } = useSelector(
+    (state) => {
       return state;
+    }
+  );
+
+  const [accounts, setAccounts] = useState([]);
+
+  const fetchAccounts = async () => {
+    const { accounts } = await chrome.storage.session.get('accounts');
+    const items = accounts.flatMap((account, index) => {
+      const accountItem = {
+        label: (
+          <Link
+            to='/'
+            onClick={async (e) => {
+              e.preventDefault();
+              await WalletHelper.setWalletPreference(account.id);
+            }}
+          >
+            {account.name}
+          </Link>
+        ),
+        key: `${index}`,
+      };
+
+      // Add a divider after each item except the last one
+      if (index < accounts.length - 1) {
+        return [accountItem, { type: 'divider' }];
+      }
+
+      return [accountItem];
     });
+
+    setAccounts(items);
+  };
 
   const [password, setPassword] = useState(null);
   const [deleteModal, setDeleteModal] = useState(false);
@@ -73,28 +105,10 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
     setOpenmodal5(false);
   };
 
-  useEffect(() => {
-    checkMaintanance();
-  }, []);
-
-  const checkMaintanance = async () => {
-    const { data } = await server.get('/wallet/check_app_maintenance', {
-      headers: {
-        Authorization: account.jwtToken,
-      },
-    });
-    // console.log("BUYSELL MAINTANANCE ", data, data.data);
-
-    let buySellCheck = data.data.filter((data) => data?.type == 'buy_sell');
-    if (buySellCheck.length > 0) {
-      setBuySellM(buySellCheck[0]);
-    }
-  };
-
   let firstPrice = 0;
 
   if (coin) {
-    firstPrice = coin.coin_data.coins_market || 0;
+    firstPrice = coin.coin.fiat_price_data || 0;
   }
 
   const [open2, setOpen2] = useState(false);
@@ -108,10 +122,9 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
     let total = 0;
 
     tokens.forEach((token) => {
-      const price = token.coin_data.coins_market || null;
+      const price = token.coin.fiat_price_data || null;
       if (price) {
-        const fiatValue =
-          parseFloat(token.balance) * parseFloat(price.current_price);
+        const fiatValue = parseFloat(token.balance) * parseFloat(price.value);
         total += fiatValue;
       }
     });
@@ -225,14 +238,13 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
   };
 
   useEffect(() => {
+    fetchAccounts();
     calculateTotal();
     init();
     if (coin) {
       try {
         // Convert the numbers to BigNumber instances
-        const myPrice = new BigNumber(
-          firstPrice ? firstPrice.current_price : 0
-        );
+        const myPrice = new BigNumber(firstPrice ? firstPrice.value : 0);
         const balance = new BigNumber(coin.balance);
 
         // Perform the multiplication
@@ -248,231 +260,6 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
       }
     }
   }, [tokens]);
-
-  const checkIfAvailableAndSendIt = async (type) => {
-    store.dispatch(setLoading(true));
-
-    let provider = [];
-
-    switch (type) {
-      case 'BUY':
-        if (coin.coin_data.on_off_ramp_coin_data.is_transak == 1) {
-          const check =
-            type === 'BUY'
-              ? coin.coin_data.on_off_ramp_coin_data.buy_transak_country
-                  ?.split(',')
-                  .includes(currency.name.toUpperCase())
-                ? currency.name.toUpperCase()
-                : null
-              : coin.coin_data.on_off_ramp_coin_data.sell_transak_country
-                  ?.split(',')
-                  .includes(currency.name.toUpperCase())
-              ? currency.name.toUpperCase()
-              : null;
-
-          if (check) {
-            provider.push('TRANSAK');
-          }
-        }
-        if (coin.coin_data.on_off_ramp_coin_data.is_mercuryo == 1) {
-          const check =
-            type === 'BUY'
-              ? coin.coin_data.on_off_ramp_coin_data.buy_mercuryo_country
-                  ?.split(',')
-                  .includes(currency.name.toUpperCase())
-                ? currency.name.toUpperCase()
-                : null
-              : coin.coin_data.on_off_ramp_coin_data.sell_mercuryo_country
-                  ?.split(',')
-                  .includes(currency.name.toUpperCase())
-              ? currency.name.toUpperCase()
-              : null;
-
-          if (check) {
-            provider.push('MERCURYO');
-          }
-        }
-        if (coin.coin_data.on_off_ramp_coin_data.is_alchemy == 1) {
-          const check =
-            type === 'BUY'
-              ? coin.coin_data.on_off_ramp_coin_data.buy_alchemy_country
-                  ?.split(',')
-                  .includes(currency.name.toUpperCase())
-                ? currency.name.toUpperCase()
-                : null
-              : coin.coin_data.on_off_ramp_coin_data.sell_alchemy_country
-                  ?.split(',')
-                  .includes(currency.name.toUpperCase())
-              ? currency.name.toUpperCase()
-              : null;
-
-          if (check) {
-            provider.push('ALCHEMY');
-          }
-        }
-        if (coin.coin_data.on_off_ramp_coin_data.is_simplex === 1) {
-          const check =
-            type === 'BUY'
-              ? coin.coin_data.on_off_ramp_coin_data.buy_simplex_country
-                  ?.split(',')
-                  .map((el) => el.toUpperCase())
-                  .includes(currency.name.toUpperCase())
-                ? currency.name.toUpperCase()
-                : null
-              : null;
-
-          if (check) {
-            provider.push('SIMPLEX');
-          }
-        }
-        break;
-      case 'SELL':
-        if (coin.coin_data.on_off_ramp_coin_data.transak_sell == 1) {
-          const check =
-            type === 'BUY'
-              ? coin.coin_data.on_off_ramp_coin_data.buy_transak_country
-                  ?.split(',')
-                  .includes(currency.name.toUpperCase())
-                ? currency.name.toUpperCase()
-                : null
-              : coin.coin_data.on_off_ramp_coin_data.sell_transak_country
-                  ?.split(',')
-                  .includes(currency.name.toUpperCase())
-              ? currency.name.toUpperCase()
-              : null;
-
-          if (check) {
-            provider.push('TRANSAK');
-          }
-        }
-        if (coin.coin_data.on_off_ramp_coin_data.mercuryo_sell == 1) {
-          const check =
-            type === 'BUY'
-              ? coin.coin_data.on_off_ramp_coin_data.buy_mercuryo_country
-                  ?.split(',')
-                  .includes(currency.name.toUpperCase())
-                ? currency.name.toUpperCase()
-                : null
-              : coin.coin_data.on_off_ramp_coin_data.sell_mercuryo_country
-                  ?.split(',')
-                  .includes(currency.name.toUpperCase())
-              ? currency.name.toUpperCase()
-              : null;
-
-          if (check) {
-            provider.push('MERCURYO');
-          }
-        }
-        if (coin.coin_data.on_off_ramp_coin_data.alchemy_sell == 1) {
-          const check =
-            type === 'BUY'
-              ? coin.coin_data.on_off_ramp_coin_data.buy_alchemy_country
-                  ?.split(',')
-                  .includes(currency.name.toUpperCase())
-                ? currency.name.toUpperCase()
-                : null
-              : coin.coin_data.on_off_ramp_coin_data.sell_alchemy_country
-                  ?.split(',')
-                  .includes(currency.name.toUpperCase())
-              ? currency.name.toUpperCase()
-              : null;
-
-          if (check) {
-            provider.push('ALCHEMY');
-          }
-        }
-        break;
-
-      default:
-        break;
-    }
-
-    const newCoin = {
-      id: coin.coin_id,
-      provider,
-      coinIcon: coin.coin_data.coin_image
-        ? process.env.REACT_APP_IMAGE_BASE_URL + `${coin.coin_data.coin_image}`
-        : null,
-      coinName: coin.coin_symbol,
-      coinSubName: coin.coin_name,
-      coin_family: coin.coin_family,
-      type:
-        coin.coin_data.coin_symbol === 'bnb'
-          ? 'BEP20'
-          : coin.coin_data.token_address
-          ? coin.coin_data.token_type
-          : '',
-      coinPrice: addCommasToNumber(
-        coin.coin_data.coins_market.current_price.toFixed(2)
-      ),
-      coinStatus: getFlooredFixed(
-        coin.coin_data.coins_market
-          ? parseFloat(
-              coin.coin_data.coins_market.price_change_percentage_24h || 0
-            ).toLocaleString()
-          : 0,
-        2
-      ),
-      simplexCoinSymbol:
-        coin.coin_data.on_off_ramp_coin_data.simplex_coin_symbol,
-      currCryptoBal: ``,
-      currDollerBal: ``,
-      coinFamily: parseInt(coin.coin_family),
-      currencyTransk:
-        type === 'BUY'
-          ? coin.coin_data.on_off_ramp_coin_data.buy_transak_country
-              ?.split(',')
-              .includes(currency.name.toUpperCase())
-            ? currency.name.toUpperCase()
-            : null
-          : coin.coin_data.on_off_ramp_coin_data.sell_transak_country
-              ?.split(',')
-              .includes(currency.name.toUpperCase())
-          ? currency.name.toUpperCase()
-          : null,
-
-      currencyMercuryo:
-        type === 'BUY'
-          ? coin.coin_data.on_off_ramp_coin_data.buy_mercuryo_country
-              ?.split(',')
-              .includes(currency.name.toUpperCase())
-            ? currency.name.toUpperCase()
-            : null
-          : coin.coin_data.on_off_ramp_coin_data.sell_mercuryo_country
-              ?.split(',')
-              .includes(currency.name.toUpperCase())
-          ? currency.name.toUpperCase()
-          : null,
-
-      currencySimplex:
-        type === 'BUY'
-          ? coin.coin_data.on_off_ramp_coin_data.buy_simplex_country
-              ?.split(',')
-              .map((el) => el.toUpperCase())
-              .includes(currency.name.toUpperCase())
-            ? currency.name.toUpperCase()
-            : null
-          : null,
-
-      currencyAlchemy:
-        type === 'BUY'
-          ? coin.coin_data.on_off_ramp_coin_data.buy_alchemy_country
-              ?.split(',')
-              .includes(currency.name.toUpperCase())
-            ? currency.name.toUpperCase()
-            : null
-          : coin.coin_data.on_off_ramp_coin_data.sell_alchemy_country
-              ?.split(',')
-              .includes(currency.name.toUpperCase())
-          ? currency.name.toUpperCase()
-          : null,
-    };
-
-    // console.log(newCoin, "newCoin");
-
-    store.dispatch(setLoading(false));
-    return newCoin;
-  };
 
   const [messageApi, contextHolder] = message.useMessage({
     duration: DURATION,
@@ -509,78 +296,6 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
     setIsModalOpen2(false);
     setPassword(null);
   };
-  const items = !account.isWatchOnly
-    ? [
-        {
-          label: <Link to='/editWalletName'>Edit</Link>,
-          key: '0',
-        },
-        {
-          type: 'divider',
-        },
-        {
-          label: (
-            <Link
-              to='/currencyPreference'
-              onClick={(e) => {
-                e.preventDefault();
-                setIsModalOpen1(true);
-              }}
-            >
-              Show Secret Phrase
-            </Link>
-          ),
-          key: '1',
-        },
-        {
-          type: 'divider',
-        },
-        {
-          label: (
-            <Link
-              to='/currencyPreference'
-              onClick={(e) => {
-                e.preventDefault();
-                navigate('/currencyPreference', {
-                  state: {
-                    backTo: '/wallet',
-                  },
-                });
-              }}
-            >
-              Set Currency
-            </Link>
-          ),
-          key: '2',
-        },
-      ]
-    : [
-        {
-          label: <Link to='/editWalletName'>Edit</Link>,
-          key: '0',
-        },
-        {
-          type: 'divider',
-        },
-        {
-          label: (
-            <Link
-              to='/currencyPreference'
-              onClick={(e) => {
-                e.preventDefault();
-                navigate('/currencyPreference', {
-                  state: {
-                    backTo: '/wallet',
-                  },
-                });
-              }}
-            >
-              Set Currency
-            </Link>
-          ),
-          key: '2',
-        },
-      ];
 
   return (
     <div
@@ -588,83 +303,17 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
       style={{ position: 'relative' }}
     >
       {contextHolder}
+
       {path !== 'currencyDetails' ? (
-        isSidePanelOpen ? (
-          <svg
-            viewBox='0 0 24 24'
-            width='21'
-            height='21'
-            fill='none'
-            xmlns='http://www.w3.org/2000/svg'
-            style={{
-              position: 'absolute',
-              right: '25px',
-              top: '15px',
-              cursor: 'pointer',
-            }}
-            onClick={async () => {
-              chrome.runtime.sendMessage({
-                type: 'CLOSE_SIDE_PANEL',
-              });
-              await chrome.storage.local.set({ openSidePanel: false });
-              setIsSidePanelOpen(false);
-              window.close();
-            }}
-          >
-            <g id='SVGRepo_bgCarrier' stroke-width='0'></g>
-            <g
-              id='SVGRepo_tracerCarrier'
-              stroke-linecap='round'
-              stroke-linejoin='round'
-            ></g>
-            <g id='SVGRepo_iconCarrier'>
-              {' '}
-              <path
-                d='M14 10L21 3M21 3H16.5M21 3V7.5M10 14L3 21M3 21H7.5M3 21L3 16.5'
-                stroke='#fff'
-                stroke-width='2'
-                stroke-linecap='round'
-                stroke-linejoin='round'
-              ></path>{' '}
-            </g>
-          </svg>
-        ) : (
-          <svg
-            width='21'
-            height='21'
-            viewBox='0 0 16 16'
-            fill='none'
-            xmlns='http://www.w3.org/2000/svg'
-            style={{
-              position: 'absolute',
-              right: '25px',
-              top: '15px',
-              cursor: 'pointer',
-            }}
-            onClick={async () => {
-              chrome.runtime.sendMessage({
-                type: 'OPEN_SIDE_PANEL',
-              });
-              let queryOptions = {
-                active: true,
-                lastFocusedWindow: true,
-              };
-              let [tab] = await chrome.tabs.query(queryOptions);
-              chrome.sidePanel.open({ windowId: tab.windowId });
-              await chrome.storage.local.set({ openSidePanel: true });
-              setIsSidePanelOpen(true);
-              window.close();
-            }}
-          >
-            <path
-              d='M10 2V14M12.6667 2H3.33333C2.97971 2 2.64057 2.14048 2.39052 2.39052C2.14048 2.64057 2 2.97971 2 3.33333V12.6667C2 13.0203 2.14048 13.3594 2.39052 13.6095C2.64057 13.8595 2.97971 14 3.33333 14H12.6667C13.0203 14 13.3594 13.8595 13.6095 13.6095C13.8595 13.3594 14 13.0203 14 12.6667V3.33333C14 2.97971 13.8595 2.64057 13.6095 2.39052C13.3594 2.14048 13.0203 2 12.6667 2Z'
-              stroke='#fff'
-              stroke-width='1.33333'
-              stroke-linecap='round'
-              stroke-linejoin='round'
-            />
-          </svg>
-        )
+        <>
+          <div className={'balanceDetails__dropdownStyle'}>
+            <Dropdown menu={{ items: accounts }} trigger={['click']}>
+              <Link onClick={(e) => e.preventDefault()}>
+                <p>{account.name}</p>
+              </Link>
+            </Dropdown>
+          </div>
+        </>
       ) : null}
 
       <div
@@ -686,14 +335,6 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
                 objectFit: 'contain',
               }}
             />
-            <div className={'balanceDetails__dropdownStyle'}>
-              <p>{account.name}</p>
-              <Dropdown menu={{ items }} trigger={['click']}>
-                <Link onClick={(e) => e.preventDefault()}>
-                  <img src={InfoIcon} />
-                </Link>
-              </Dropdown>
-            </div>
           </>
         ) : null}
 
@@ -716,7 +357,7 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
             {coin
               ? `${addCommasToNumber(
                   getFlooredFixed(coin.balance, 5)
-                )} ${coin.coin_data.coin_symbol.toUpperCase()}`
+                )} ${coin.coin.coin_symbol.toUpperCase()}`
               : balanceIn
               ? `${currency.symbol}${addCommasToNumber(
                   getFlooredFixed(total, 2)
@@ -780,62 +421,6 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
             {currency.symbol}
             {addCommasToNumber(fiatValue)}
           </h5>
-        ) : null}
-
-        {path !== 'currencyDetails' ? (
-          chain.supportTokens ? (
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <Link
-                to='/manage'
-                onClick={(e) => {
-                  e.preventDefault();
-                  if (
-                    account.isWatchOnly &&
-                    account.coinFamilies.length === 1 &&
-                    account.coinFamilies[0] == 2
-                  ) {
-                    return;
-                  }
-                  navigate('/manage');
-                }}
-                className={'balanceDetails__addTokensBTn'}
-                style={
-                  account.isWatchOnly &&
-                  account.coinFamilies.length === 1 &&
-                  account.coinFamilies[0] == 2
-                    ? { filter: 'grayscale(1) blur(1px)' }
-                    : {}
-                }
-              >
-                <img src={PlusBordredIcon} width={20} height={20} />
-                <span>Add Tokens</span>
-              </Link>
-              {account.isWatchOnly && (
-                <Link
-                  to='/watch-only-list'
-                  className={'balanceDetails__addTokensBTn'}
-                  style={
-                    account.isWatchOnly &&
-                    account.coinFamilies.length === 1 &&
-                    account.coinFamilies[0] == 2
-                      ? { filter: 'grayscale(1) blur(1px)', marginLeft: '10px' }
-                      : {
-                          marginLeft: '10px',
-                        }
-                  }
-                >
-                  <img src={PlusBordredIcon} width={20} height={20} />
-                  <span>Add Chain</span>
-                </Link>
-              )}
-            </div>
-          ) : null
         ) : null}
       </div>
       <div
@@ -951,20 +536,20 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
 
         {!coin ? (
           <Link
-            to='/buy-coins'
+            to='/buy-sell'
             onClick={(e) => {
               e.preventDefault();
               if (buySellM?.is_maintenance) {
                 return messageApi.error('Buy/Sell is under maintenance.');
               }
               if (path === 'currencyDetails') {
-                if (coin.coin_data.on_off_ramp_coin_data) {
-                  return setSelectedCoin(coin.coin_data.on_off_ramp_coin_data);
+                if (coin.coin.on_off_ramp_coin) {
+                  return setSelectedCoin(coin.coin.on_off_ramp_coin);
                 } else {
                   return messageApi.error('Coin not supported.');
                 }
               } else {
-                return navigate('/buy-coins');
+                return navigate('/buy-sell');
               }
             }}
             className={
@@ -990,22 +575,22 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
             </div>
             <span>{account.isWatchOnly ? 'Buy' : 'Buy/Sell'} </span>
           </Link>
-        ) : coin.coin_data.on_off_ramp_coin_data ? (
+        ) : coin.coin.on_off_ramp_coin ? (
           <Link
-            to='/buy-coins'
+            to='/buy-sell'
             onClick={(e) => {
               e.preventDefault();
               if (buySellM?.is_maintenance) {
                 return messageApi.error('Buy/Sell is under maintenance.');
               }
               if (path === 'currencyDetails') {
-                // if (coin.coin_data.on_off_ramp_coin_data) {
-                return setSelectedCoin(coin.coin_data.on_off_ramp_coin_data);
+                // if (coin.coin.on_off_ramp_coin) {
+                return setSelectedCoin(coin.coin.on_off_ramp_coin);
                 // } else {
                 //   return messageApi.error("Coin not supported.");
                 // }
               } else {
-                return navigate('/buy-coins');
+                return navigate('/buy-sell');
               }
             }}
             className={
@@ -1024,153 +609,66 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
                   alt=''
                 />
               ) : theme === 'darkTheme' ? (
-                <img src={Darkotherbuy} />
+                <img src={Darkotherbuy} alt='' />
               ) : (
-                <img src={Buy} height={24} width={24} />
+                <img src={Buy} height={24} width={24} alt='' />
               )}
             </div>
             <span>{account.isWatchOnly ? 'Buy' : 'Buy/Sell'} </span>
           </Link>
         ) : null}
-
-        {/* {console.log("coin:::::", coin, "chain:::::::::", chain)} */}
-
-        {/* Chnages started here*************************************** */}
-
-        {!coin ? (
-          chain.swap ? (
-            <Link
-              style={
-                account.isWatchOnly ? { filter: 'grayscale(1) blur(1px)' } : {}
-              }
-              to='/swap'
-              onClick={(e) => {
-                e.preventDefault();
-                if (account.isWatchOnly) {
-                  return;
-                }
-                navigate('/swap');
-              }}
-              className={
-                path === 'currencyDetails'
-                  ? 'balanceDetails__items__whiteText'
-                  : 'balanceDetails__items'
-              }
-            >
-              <div className={'balanceDetails__items__img'}>
-                {path === 'currencyDetails' ? (
-                  <img src={SwapIconWhite} height={24} width={24} />
-                ) : theme === 'darkTheme' ? (
-                  <img src={DarkSwapIcon} />
-                ) : (
-                  <img src={SwapIcon} height={24} width={24} />
-                )}
-              </div>
-              <span>Swap</span>
-            </Link>
-          ) : (
-            <Link
-              style={
-                account.isWatchOnly ? { filter: 'grayscale(1) blur(1px)' } : {}
-              }
-              to='/swap'
-              onClick={(e) => {
-                e.preventDefault();
-                if (account.isWatchOnly) {
-                  return;
-                }
-                navigate('/swap');
-              }}
-              className={
-                path === 'currencyDetails'
-                  ? 'balanceDetails__items__whiteText'
-                  : 'balanceDetails__items'
-              }
-            >
-              <div className={'balanceDetails__items__img'}>
-                {path === 'currencyDetails' ? (
-                  <img src={SwapIconWhite} height={24} width={24} />
-                ) : theme === 'darkTheme' ? (
-                  <img src={DarkSwapIcon} />
-                ) : (
-                  <img src={SwapIcon} height={24} width={24} />
-                )}
-              </div>
-              <span>Swap</span>
-            </Link>
-          )
-        ) : coin.coin_data.allow_swap == '1' ? (
-          <>
-            {/* {console.log("if is runnnig: swap::::::::::", coin.coin_data)} */}
-            <Link
-              style={
-                account.isWatchOnly ? { filter: 'grayscale(1) blur(1px)' } : {}
-              }
-              to='/swap'
-              onClick={(e) => {
-                e.preventDefault();
-                if (account.isWatchOnly) {
-                  return;
-                }
-                navigate('/swap', {
-                  state: {
-                    tokenAddress: coin?.coin_data?.token_address,
-                    fromOrTo: 1,
-                    coinFamily: coin?.coin_data?.coin_family,
-                  },
-                });
-              }}
-              className={
-                path === 'currencyDetails'
-                  ? 'balanceDetails__items__whiteText'
-                  : 'balanceDetails__items'
-              }
-            >
-              <div className={'balanceDetails__items__img'}>
-                {path === 'currencyDetails' ? (
-                  <img src={SwapIconWhite} height={24} width={24} />
-                ) : theme === 'darkTheme' ? (
-                  <img src={DarkSwapIcon} />
-                ) : (
-                  <img src={SwapIcon} height={24} width={24} />
-                )}
-              </div>
-              <span>Swap</span>
-            </Link>
-          </>
-        ) : coin.coin_data.coin_name == 'Wrapped SOL' && coin.balance > 0 ? (
-          <>
-            <Link
-              style={
-                account.isWatchOnly ? { filter: 'grayscale(1) blur(1px)' } : {}
-              }
-              to='/swap'
-              onClick={async (e) => {
-                e.preventDefault();
-                if (account.isWatchOnly) {
-                  return;
-                }
-                setDeleteModal(true);
-              }}
-              className={
-                path === 'currencyDetails'
-                  ? 'balanceDetails__items__whiteText'
-                  : 'balanceDetails__items'
-              }
-            >
-              <div className={'balanceDetails__items__img'}>
-                {path === 'currencyDetails' ? (
-                  <img src={SwapIconWhite} height={24} width={24} />
-                ) : theme === 'darkTheme' ? (
-                  <img src={DarkSwapIcon} />
-                ) : (
-                  <img src={SwapIcon} height={24} width={24} />
-                )}
-              </div>
-              <span>Unwrap</span>
-            </Link>
-          </>
-        ) : null}
+        {path !== 'currencyDetails' && (
+          <Link
+            onClick={(e) => {
+              e.preventDefault();
+              path === 'currencyDetails' ? showModal() : navigate('/history');
+            }}
+            to='#'
+            className={
+              path === 'currencyDetails'
+                ? 'balanceDetails__items__whiteText'
+                : 'balanceDetails__items'
+            }
+          >
+            <div className={'balanceDetails__items__img'}>
+              {path === 'currencyDetails' ? (
+                <img src={RecieveIconWhite} height={24} width={24} />
+              ) : theme === 'darkTheme' ? (
+                <img src={DarkRecieveIcon} />
+              ) : (
+                <img src={RecieveIcon} height={24} width={24} />
+              )}
+            </div>
+            <span>History</span>
+          </Link>
+        )}
+        {path !== 'currencyDetails' && (
+          <Link
+            onClick={(e) => {
+              e.preventDefault();
+              path === 'currencyDetails'
+                ? showModal()
+                : navigate('/watch-list-tokens');
+            }}
+            to='#'
+            className={
+              path === 'currencyDetails'
+                ? 'balanceDetails__items__whiteText'
+                : 'balanceDetails__items'
+            }
+          >
+            <div className={'balanceDetails__items__img'}>
+              {path === 'currencyDetails' ? (
+                <img src={RecieveIconWhite} height={24} width={24} />
+              ) : theme === 'darkTheme' ? (
+                <img src={DarkRecieveIcon} />
+              ) : (
+                <img src={RecieveIcon} height={24} width={24} />
+              )}
+            </div>
+            <span>Watch List</span>
+          </Link>
+        )}
       </div>
       {coin ? (
         <ModalCustom
@@ -1187,7 +685,7 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
                   size={230}
                   qrStyle='square'
                   eyeRadius={10}
-                  logoImage={`${process.env.REACT_APP_IMAGE_BASE_URL}${coin.coin_data.coin_image}`}
+                  logoImage={coin.coin.coin_image}
                   logoHeight={55}
                   logoWidth={55}
                   logoPadding={8}
@@ -1214,375 +712,16 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
             <div
               className={'balanceDetails__modal__wrapedText'}
               onClick={async () => {
-                await navigator.clipboard.writeText(coin.address);
+                await navigator.clipboard.writeText(coin.wallet_address);
                 messageApi.success('Address copied successfully.');
               }}
             >
               <img src={CopyIconBlue} width={15} height={16} />
-              <span>{coin.address}</span>
+              <span>{coin.wallet_address}</span>
             </div>
           </div>
         </ModalCustom>
       ) : null}
-
-      <Drawer
-        // title={"Buy/Sell"}
-        placement='bottom'
-        title='Buy/Sell'
-        onClose={() => setSelectedCoin(null)}
-        height={287}
-        open={selectedCoin}
-        closeIcon={
-          theme == 'darkTheme' ? (
-            <img src={darkclose} />
-          ) : (
-            <img src={ModalCloseIcon} />
-          )
-        }
-      >
-        {selectedCoin ? (
-          <CoinsTable
-            dataArray={[
-              {
-                coinIcon: coin.coin_data.coin_image
-                  ? process.env.REACT_APP_IMAGE_BASE_URL +
-                    `${coin?.coin_data?.coin_image}`
-                  : null,
-                coinName: coin.coin_data.coin_symbol.toUpperCase(),
-                coinSubName: coin.coin_data.coin_name,
-                coinPrice: `${currency.symbol}${
-                  parseFloat(coin.coin_data.coins_market.current_price)
-                    ? formatSmallNumber(
-                        coin.coin_data.coins_market.current_price
-                      )
-                    : '0.00'
-                }`,
-                coinStatus: getFlooredFixed(
-                  coin.coin_data.coins_market
-                    ? parseFloat(
-                        coin.coin_data.coins_market
-                          .price_change_percentage_24h || 0
-                      ).toLocaleString()
-                    : 0,
-                  2
-                ),
-                currCryptoBal: ``,
-                currDollerBal: ``,
-                routeTo: 'no-where',
-                type:
-                  coin.coin_data.coin_symbol === 'bnb'
-                    ? 'BEP20'
-                    : coin.coin_data.token_address
-                    ? coin.coin_data.token_type
-                    : '',
-                status: true,
-                coin: coin,
-                // showModal,
-              },
-            ]}
-          />
-        ) : null}
-
-        <div
-          className='buttons'
-          style={{
-            marginTop: selectedCoin ? '30px' : '0px',
-            display: 'flex',
-            width: '100%',
-            justifyContent: 'center',
-            alignItems: 'center',
-            position: 'relative',
-            top: '28px',
-          }}
-        >
-          <div
-            className='green'
-            style={{
-              padding: '12px 53px',
-              backgroundColor: 'green',
-              color: 'white',
-              fontSize: '18px',
-              borderRadius: '7px',
-              marginRight: '10px',
-              cursor: 'pointer',
-            }}
-            onClick={async () => {
-              const myNew = await checkIfAvailableAndSendIt('BUY');
-
-              if (myNew.provider.length === 0) {
-                return messageApi.error(
-                  'This coin is not supported for purchase.'
-                );
-              }
-              return navigate('/enter-price', {
-                state: {
-                  type: 'BUY',
-                  coin: myNew,
-                  balanceDetail: coin,
-                },
-              });
-            }}
-          >
-            Buy
-          </div>
-          {account.isWatchOnly ? null : (
-            <div
-              className='red'
-              style={{
-                padding: '12px 53px',
-                backgroundColor: 'red',
-                color: 'white',
-                fontSize: '18px',
-                borderRadius: '7px',
-                marginLeft: '10px',
-                cursor: 'pointer',
-              }}
-              onClick={async () => {
-                const myNew = await checkIfAvailableAndSendIt('SELL');
-
-                if (myNew.provider.length === 0) {
-                  return messageApi.error('Coin not supported for sell.');
-                }
-
-                return navigate('/enter-price', {
-                  state: {
-                    type: 'SELL',
-                    coin: myNew,
-                    balanceDetail: coin,
-                  },
-                });
-              }}
-            >
-              Sell
-            </div>
-          )}
-        </div>
-      </Drawer>
-
-      <ModalCustom
-        title={'Show Secret Phrase'}
-        handleCancel={handleCancel1}
-        isModalOpen={isModalOpen1}
-        handleOk={handleOk1}
-        customClass='customClassModal'
-      >
-        <div className={'viewphrases'}>
-          <InputFieldSimple
-            placeholder='Password'
-            getData={setPassword}
-            value={password}
-            customFunction={async () => {
-              await chrome.storage.session.set({
-                password,
-              });
-              const response = await WalletHelper.getMnemonics(
-                account.coinFamilyAndAddress[1]
-              );
-              if (!response) {
-                return messageApi.error('Please enter a valid password.');
-              }
-              navigate('/showSecretPhrase', {
-                state: {
-                  mnemonics: response,
-                  backTo: '/wallet',
-                },
-              });
-            }}
-          />
-          <div className={'viewphrases__iInner'}>
-            <img src={warning} />
-            <div>
-              <p>Do Not share your secret Phrase!</p>
-              <p>These words can be used to steal all your funds.</p>
-            </div>
-          </div>
-          <ButtonComp
-            text={'Proceed'}
-            maxWidth={'100%'}
-            onClick={async () => {
-              await chrome.storage.session.set({
-                password,
-              });
-              const response = await WalletHelper.getMnemonics(
-                account.coinFamilyAndAddress[1]
-              );
-              if (!response) {
-                return messageApi.error('Please enter a valid password.');
-              }
-              navigate('/showSecretPhrase', {
-                state: {
-                  mnemonics: response,
-                  backTo: '/wallet',
-                },
-              });
-            }}
-          />
-        </div>
-      </ModalCustom>
-
-      <ModalCustom
-        // title={"Show Secret Phrase"}
-        handleCancel={handleCancel2}
-        isModalOpen={isModalOpen2}
-        handleOk={handleOk2}
-        customClass='customClassModal'
-      >
-        <div className={'confirmationsModal'}>
-          <div className={'iInner'}>
-            {theme == 'darkTheme' ? (
-              <img src={DarkLogo} />
-            ) : (
-              <img
-                src={Logo}
-                style={{
-                  height: '100px',
-                }}
-              />
-            )}
-            <div>
-              <p>
-                Unwrap request of{' '}
-                {addCommasToNumber(getFlooredFixed(coin.balance, 5))} WSOL has
-                been processed successfully.
-              </p>
-            </div>
-          </div>
-          <ButtonComp
-            text={'OK'}
-            maxWidth={'100%'}
-            onClick={() => {
-              return navigate('/wallet');
-            }}
-          />
-        </div>
-      </ModalCustom>
-
-      <ModalCustom
-        title={'Unwrap WSOL'}
-        isModalOpen={deleteModal}
-        customClass='customClassModal'
-        handleCancel={() => {
-          setDeleteModal(false);
-        }}
-      >
-        <div className='viewphrases'>
-          <div className='viewphrases__iInner'>
-            <p
-              style={{
-                fontSize: '20px',
-              }}
-            >
-              Are you sure you want to unwrap WSOL?
-            </p>
-          </div>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginTop: '30px',
-            }}
-          >
-            <div
-              className='green'
-              style={{
-                padding: '12px 53px',
-                backgroundColor: 'green',
-                color: 'white',
-                fontSize: '18px',
-                borderRadius: '7px',
-                marginRight: '20px',
-                cursor: 'pointer',
-              }}
-              onClick={async () => {
-                setDeleteModal(false);
-                setOpenmodal5(true);
-              }}
-            >
-              Yes
-            </div>
-            <div
-              className='red'
-              style={{
-                padding: '12px 53px',
-                backgroundColor: 'red',
-                color: 'white',
-                fontSize: '18px',
-                borderRadius: '7px',
-                marginLeft: '20px',
-                cursor: 'pointer',
-              }}
-              onClick={() => {
-                setDeleteModal(false);
-              }}
-            >
-              No
-            </div>
-          </div>
-        </div>
-      </ModalCustom>
-
-      <ModalCustom
-        title={'Confirm Transaction'}
-        handleCancel={handleCancel5}
-        isModalOpen={isModalOpen5}
-        handleOk={handleOk5}
-        customClass='customClassModal'
-        closable={false}
-      >
-        <div className='viewphrases'>
-          <div
-            style={{
-              marginBottom: '36px',
-              width: '100%',
-            }}
-          >
-            <InputFieldSimple
-              placeholder='Password'
-              getData={setSessionPassword}
-              value={sessionPassword}
-            />
-          </div>
-          <ButtonComp
-            text={'Proceed'}
-            maxWidth={'100%'}
-            onClick={async () => {
-              if (!sessionPassword) {
-                return messageApi.error('Password is required.');
-              }
-
-              const { password } = await chrome.storage.session.get('password');
-              if (password !== sessionPassword) {
-                return messageApi.error('Password is incorrect.');
-              }
-
-              store.dispatch(setLoading(true));
-              const solanaHelper = new SolanaHelper(
-                process.env.REACT_APP_SOL_RPC
-              );
-
-              if (coin.balance == 0) {
-                store.dispatch(setLoading(false));
-                return messageApi.error('Insufficient balance to proceed.');
-              }
-
-              const result = await solanaHelper.unwrapSolana(
-                coin.balance,
-                coin.coin_id
-              );
-
-              if (!result) {
-                store.dispatch(setLoading(false));
-                return messageApi.error('Failed to unwrap SOL');
-              }
-
-              store.dispatch(setLoading(false));
-              setOpenmodal5(false);
-              setIsModalOpen2(true);
-            }}
-          />
-        </div>
-      </ModalCustom>
     </div>
   );
 }

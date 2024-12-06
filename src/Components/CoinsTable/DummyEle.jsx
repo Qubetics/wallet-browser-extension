@@ -31,14 +31,15 @@ const DummyEle = ({ ele }) => {
 
   return (
     <div
-      className="coinsTable__textTop"
+      className="coinsTable__textTop textElipsisStyle"
       ref={textRef}
       style={{
         maxWidth: "153px",
         justifyContent: ele.currCryptoBal === "ABOVE" || ele.currCryptoBal === "BELOW" ? "start" : "end",
       }}
     >
-      {ele.currCryptoBal} {ele.currCryptoBalSymbol}
+      <span className="overflowEllipsisAmout">{ele.currCryptoBal}</span>
+
     </div>
   );
 };

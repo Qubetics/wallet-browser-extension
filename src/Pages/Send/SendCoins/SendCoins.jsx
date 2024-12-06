@@ -19,7 +19,7 @@ import { useEffect } from 'react';
 import { SolanaHelper } from '../../../helpers/solana.helper';
 import { BTCHelper } from '../../../helpers/btc.helper';
 import { WalletHelper } from '../../../helpers/wallet.helper';
-// import { AdaHelper } from '../../../helpers/ada.helper';
+import { AdaHelper } from '../../../helpers/ada.helper';
 import { ENSHelper } from '../../../helpers/ens.helper';
 import { UnstoppableDomainHelper } from '../../../helpers/unstopable.helper';
 import Add from '../../../Assets/add.svg';
@@ -35,6 +35,7 @@ import {
   getCoinBalance,
   getTokenBalance,
 } from '../../../helpers/common.helper';
+import TransactionFeeSlider from '../../../Components/TransactionFeeSlider/TransactionFeeSlider';
 
 let inputCount = 0;
 let transactionSize = 0;
@@ -60,15 +61,23 @@ function SendCoins() {
   const [isLogoutModalOpen, setLogoutOpenmodal] = useState(false);
   const [messageApi, contextHolder] = message.useMessage({});
   const [list, setList] = useState([]);
+  const [selectedGasPrice, setSelectedGasPrice] = useState(0);
+
+  const [myGasPrice, setGasPrice] = useState({
+    estimate: 0,
+    fast: 0,
+    propose: 0,
+    safe: 0,
+  });
 
   useEffect(() => {
     init();
-    const price = coin.coin_data.coins_market || 0;
+    const price = coin.coin.fiat_price_data || 0;
 
     if (price) {
-      const value = parseFloat(coin.balance) * parseFloat(price.current_price);
+      const value = parseFloat(coin.balance) * parseFloat(price.value);
       setValue(value);
-      setPrice(price.current_price);
+      setPrice(price.value);
     }
   }, []);
 
@@ -76,15 +85,35 @@ function SendCoins() {
     try {
       setBalance(coin.balance);
       store.dispatch(setLoading(true));
+
+      const { chains } = await chrome.storage.local.get('chains');
+      const chain = chains.find(
+        (chain) => chain.coinFamily === coin.coin.coin_family
+      );
+
+      const result = await Web3Helper.getGasPrice(
+        chain.slug,
+        account.coinFamilyAndAddress[coin.coin.coin_family],
+        account.coinFamilyAndAddress[coin.coin.coin_family],
+        coin.coin.token_address ? 1 : 0,
+        coin.coin.token_address,
+        coin.coin.coin_symbol
+      );
+
+      setSelectedGasPrice(result.fast);
+      setGasPrice(result);
+
       console.log({
-        wallet_address:
-          account.coinFamilyAndAddress[coin.coin_data.coin_family],
+        wallet_address: account.coinFamilyAndAddress[coin.coin.coin_family],
       });
       const { data } = await server.post(
-        '/wallet/address_book/list',
+        '/user/address_book',
         {
-          wallet_address:
-            account.coinFamilyAndAddress[coin.coin_data.coin_family],
+          address: [account.coinFamilyAndAddress[coin.coin.coin_family]],
+          coin_family: [coin.coin.coin_family],
+          limit: 2000,
+          page: 1,
+          search: '',
         },
         {
           headers: {
@@ -92,10 +121,8 @@ function SendCoins() {
           },
         }
       );
-      setList(
-        data.data.filter((el) => el.coin_family === coin.coin_data.coin_family)
-      );
-      
+
+      setList(data.data);
       store.dispatch(setLoading(false));
     } catch (error) {
       store.dispatch(setLoading(false));
@@ -115,90 +142,37 @@ function SendCoins() {
     setLogoutOpenmodal(false);
   };
 
-  const getBlockChain = (coin_family) => {
-    switch (coin_family) {
-      case '1': {
-        return { coin: 'ETH', rpcUrl: process.env.REACT_APP_ETH_RPC };
-      }
-      case '2': {
-        return { coin: 'BTC', rpcUrl: process.env.REACT_APP_BTC_RPC };
-      }
-      case '3': {
-        return {
-          coin: 'BSC',
-          rpcUrl: 'https://bsc-dataseed1.binance.org/',
-          // process.env.REACT_APP_BNB_RPC
-        };
-      }
-      case '4': {
-        return { coin: 'SOL', rpcUrl: 'https://api.mainnet-beta.solana.com' };
-      }
-      case '5': {
-        return { coin: 'ADA', rpcUrl: '' };
-      }
-      case '6': {
-        return { coin: 'POL', rpcUrl: process.env.REACT_APP_MATIC_RPC };
-      }
-      case '7': {
-        return {
-          coin: 'AVAX',
-          rpcUrl: process.env.REACT_APP_AVAX_RPC,
-        };
-      }
-      case '8': {
-        return { coin: 'CRO', rpcUrl: '' };
-      }
-      case '9': {
-        return { coin: 'PLS', rpcUrl: process.env.REACT_APP_PLS_RPC };
-      }
-    }
-  };
   const calculatePercentageWise = async (percentage) => {
-    if (coin.coin_data.token_address) {
+    if (coin.coin.token_address) {
       let rpc;
       let amountToSend = 0;
 
-      if (coin.coin_data.coin_family != 4 && coin.coin_data.coin_family != 5) {
-        switch (coin.coin_data.coin_family) {
-          case 1:
-            rpc = process.env.REACT_APP_ETH_RPC;
-            break;
-          case 9:
-            rpc = process.env.REACT_APP_PLS_RPC;
-            break;
-          case 3:
-            rpc = process.env.REACT_APP_BNB_RPC;
-            break;
-          case 6:
-            rpc = process.env.REACT_APP_MATIC_RPC;
-            break;
-          case 7:
-            rpc = process.env.REACT_APP_AVAX_RPC;
-            break;
-          case 8:
-            rpc = process.env.REACT_APP_CRO_RPC;
-            break;
-          default:
-            rpc = process.env.REACT_APP_ETH_RPC; // Default to Ethereum RPC if no specific case matches
-        }
-        store.dispatch(setLoading(true));
-        amountToSend = await Web3Helper.getTokenBalance(
-          coin.coin_data.token_address,
-          coin.address,
-          rpc
-        );
-    
-     
-        
-        if (!amountToSend) {
-          store.dispatch(setLoading(false));
-          amountToSend = coin.balance;
-        }
-           setBalance(amountToSend)
+      switch (coin.coin.coin_family) {
+        case 1:
+          rpc = process.env.REACT_APP_BNB_RPC;
+          break;
+        case 2:
+          rpc = process.env.REACT_APP_ETH_RPC;
+          break;
+        case 4:
+          rpc = process.env.REACT_APP_MATIC_RPC;
+          break;
+        default:
+          rpc = process.env.REACT_APP_ETH_RPC;
+      }
+      store.dispatch(setLoading(true));
+      amountToSend = await Web3Helper.getTokenBalance(
+        coin.coin.token_address,
+        coin.wallet_address,
+        rpc
+      );
+
+      if (!amountToSend) {
         store.dispatch(setLoading(false));
-      } else {
         amountToSend = coin.balance;
       }
+      setBalance(amountToSend);
+      store.dispatch(setLoading(false));
 
       //setAmount without rounding off the last didgits after decimal use bignumber
       const amountToSend2 = new BigNumber(amountToSend);
@@ -216,198 +190,59 @@ function SendCoins() {
     } else {
       const { chains } = await chrome.storage.local.get('chains');
       const chain = chains.find(
-        (chain) => chain.coinFamily === coin.coin_data.coin_family
+        (chain) => chain.coinFamily === coin.coin.coin_family
       );
 
-      if (chain.isEVM) {
-        store.dispatch(setLoading(true));
-        const balance = new BigNumber(coin.balance).times(
-          coin.coin_data.decimals
-        );
+      store.dispatch(setLoading(true));
+      const balance = new BigNumber(coin.balance).times('1000000000000000000');
+      console.log(balance.toString());
+      const amountToSend = new BigNumber(balance);
+      console.log(amountToSend.toString());
+      // console.log(amountToSend.toString());
 
-        const amountToSend = new BigNumber(balance);
+      // Get the current gas price
+      const gasPrice = await Web3Helper.getGasPrice(
+        chain.slug,
+        coin.wallet_address,
+        coin.wallet_address,
+        false,
+        null,
+        coin.coin.coin_symbol
+      );
 
-        // console.log(amountToSend.toString());
-
-        // Get the current gas price
-        const gasPrice = await Web3Helper.getGasPrice(
-          chain.slug,
-          coin.address,
-          coin.address,
-          coin.coin_data.token_address ? 1 : 0,
-          coin.coin_data.token_address
-        );
-
-        if (!gasPrice) {
-          store.dispatch(setLoading(false));
-          return messageApi.error('Unable to fetch gas price at the moment.');
-        }
-
-        // Estimate the gas cost for a sample transaction
-        // const gasLimit = gasPrice.estimate * 2; // Assuming a standard transaction
-        const gasLimit = gasPrice.estimate; // Assuming a standard transaction
-        const gasCost = new BigNumber(
-          new BigNumber(gasPrice.price).times(1000000000)
-        ).times(gasLimit);
-
-        // Apply the buffer factor to the gas cost
-        const bufferedGasCost = gasCost.times(2.5);
-        // Subtract the buffered gas cost from the maximum BNB
-        const maxBNBAfterGas = new BigNumber(amountToSend).minus(
-          bufferedGasCost
-        );
-
-        if (maxBNBAfterGas.isNegative()) {
-          store.dispatch(setLoading(false));
-          return messageApi.error('Insufficient balance to cover gas fee.');
-        }
-
-        // console.log(
-        //   maxBNBAfterGas
-        //     .integerValue(BigNumber.ROUND_DOWN)
-        //     .dividedBy(coin.coin_data.decimals)
-        //     .toString()
-        // );
-        let amt = formatNumberFiat(
-          maxBNBAfterGas
-            .integerValue(BigNumber.ROUND_DOWN)
-            .dividedBy(coin.coin_data.decimals)
-            .toString()
-        );
-        setAmount(amt);
+      if (!gasPrice) {
         store.dispatch(setLoading(false));
-      } else if (!chain.isEVM && chain.currencyName === 'SOL') {
-        const solanaHelper = new SolanaHelper(chain.rpcUrl);
-
-        store.dispatch(setLoading(true));
-        let balance = coin.balance;
-        balance = (balance * 99) / 100;
-        const gasPrice = solanaHelper.getGasPrice();
-        balance = balance - 0.0015; // Added fee with some buffer values i.e 0.001495 + gas price = 0.0015
-        // balance = balance - 0.0015;
-        const amountToSend = parseFloat(balance) * (percentage / 100);
-        // console.log("amountToSend::::::::::", amountToSend);
-        if (parseFloat(amountToSend) - parseFloat(gasPrice) * 3 < 0) {
-          store.dispatch(setLoading(false));
-          return messageApi.error(
-            'You do not have enough balance to proceed with the transaction.'
-          );
-        }
-        let amt = formatNumberFiat(
-          (parseFloat(amountToSend) - parseFloat(gasPrice) * 3)
-            .toFixed(6)
-            .toString()
-        );
-        setAmount(amt);
-        store.dispatch(setLoading(false));
-      } else if (!chain.isEVM && chain.currencyName === 'BTC') {
-        try {
-          store.dispatch(setLoading(true));
-          const gasPrice = await BTCHelper.getBTCGasPrice();
-          const unspent = await BTCHelper.getUnspent(coin.address);
-          let balance = coin.balance;
-          balance = (balance * 99) / 100;
-          // console.log(
-          //   "🚀 ~ file: SendCoins.jsx:193 ~ calculatePercentageWise ~ balance:",
-          //   balance
-          // );
-
-          const amountToSend = parseFloat(balance) * (percentage / 100);
-          // console.log(
-          //   "🚀 ~ file: SendCoins.jsx:195 ~ calculatePercentageWise ~ amountToSend:",
-          //   amountToSend
-          // );
-
-          if (!unspent) {
-            store.dispatch(setLoading(false));
-            return messageApi.error('Unable to fetch unspent at the moment.');
-          }
-
-          if (unspent.length === 0) {
-            store.dispatch(setLoading(false));
-            return messageApi.error(
-              'You have a pending transaction in your account or you do not have enough balance to proceed with the transaction.'
-            );
-          }
-
-          const inputs = [];
-          let totalAmountAvailable = 0;
-
-          unspent.forEach((element) => {
-            let utxo = {};
-            utxo.satoshis = Math.floor(Number(element.value));
-            utxo.script = element.script;
-            utxo.address = coin.address;
-            utxo.txId = element.tx_hash;
-            utxo.outputIndex = element.tx_output_n;
-            totalAmountAvailable += parseFloat(utxo.satoshis);
-            inputCount += 1;
-            inputs.push(utxo);
-          });
-
-          transactionSize =
-            inputCount * 146 + outputCount * 34 + 10 - inputCount;
-          const totalFee = (
-            transactionSize *
-            gasPrice *
-            btcTosatoshiMultiplier
-          ).toFixed(8);
-          // console.log(
-          //   "🚀 ~ file: SendCoins.jsx:232 ~ calculatePercentageWise ~ totalFee:",
-          //   totalFee
-          // );
-
-          if (amountToSend - totalFee * 2.5 < 0) {
-            store.dispatch(setLoading(false));
-
-            return messageApi.error(
-              'You do not have enough balance to proceed with the transaction.'
-            );
-          }
-
-          let amt = formatNumberFiat(
-            (amountToSend - totalFee * 2.5).toString()
-          );
-          setAmount(amt);
-          store.dispatch(setLoading(false));
-        } catch (error) {
-          store.dispatch(setLoading(false));
-          return messageApi.error(error.message);
-        }
-      } else if (!chain.isEVM && chain.currencyName === 'ADA') {
-        try {
-          store.dispatch(setLoading(true));
-
-          const fee = null;
-          // await AdaHelper.getFee(coin.address, coin.address, 1);
-          let balance = coin.balance;
-          balance = (balance * 99) / 100;
-          let amountToSend = parseFloat(balance) * (percentage / 100);
-
-          // console.log(
-          //   "CALLLLLLLLLL ",
-          //   parseFloat(amountToSend) - parseFloat(fee) - 2
-          // );
-          if (parseFloat(amountToSend) - parseFloat(fee) - 2 < 0) {
-            store.dispatch(setLoading(false));
-
-            return messageApi.error(
-              'You do not have enough balance to proceed with the transaction.'
-            );
-          }
-
-          let amt = formatNumberFiat(
-            (parseFloat(amountToSend) - parseFloat(fee) - 2).toFixed(6)
-          );
-          setAmount(amt);
-          store.dispatch(setLoading(false));
-        } catch (error) {
-          console.log('ERROR assignment : ', error);
-          store.dispatch(setLoading(false));
-          setLoading(false);
-          return messageApi.error(error.message);
-        }
+        return messageApi.error('Unable to fetch gas price at the moment.');
       }
+
+      // Estimate the gas cost for a sample transaction
+      // const gasLimit = gasPrice.estimate * 2; // Assuming a standard transaction
+      const gasLimit = gasPrice.estimate; // Assuming a standard transaction
+      const gasCost = new BigNumber(
+        new BigNumber(gasPrice.fast).times(1000000000)
+      ).times(gasLimit);
+
+      // Apply the buffer factor to the gas cost
+      const bufferedGasCost = gasCost.times(2.5);
+
+      console.log(bufferedGasCost.toString());
+
+      // Subtract the buffered gas cost from the maximum BNB
+      const maxBNBAfterGas = new BigNumber(amountToSend).minus(bufferedGasCost);
+      console.log(maxBNBAfterGas.toString());
+      if (maxBNBAfterGas.isNegative()) {
+        store.dispatch(setLoading(false));
+        return messageApi.error('Insufficient balance to cover gas fee.');
+      }
+
+      let amt = formatNumberFiat(
+        maxBNBAfterGas
+          .integerValue(BigNumber.ROUND_DOWN)
+          .dividedBy(coin.coin.decimals)
+          .toString()
+      );
+      setAmount(amt);
+      store.dispatch(setLoading(false));
     }
   };
 
@@ -416,7 +251,7 @@ function SendCoins() {
       {contextHolder}
       <MenuRestofHeaders
         backTo={redirectTo ? redirectTo : '/send'}
-        title={`Send ${coin.coin_data.coin_symbol.toUpperCase()}`}
+        title={`Send ${coin.coin.coin_symbol.toUpperCase()}`}
         coin={coin}
       />
       <div className={`flexedContent`}>
@@ -486,7 +321,7 @@ function SendCoins() {
 
             if (afterDecimal) {
               // Get the maximum allowed decimals for the cryptocurrency (e.g., Bitcoin has 8 decimals)
-              const maxDecimals = coin.coin_data.decimals.toString().length - 1;
+              const maxDecimals = coin.coin.decimals.toString().length - 1;
               // Check if the entered decimal part is longer than the maximum allowed
               if (afterDecimal.toString().length > maxDecimals) {
                 return; // Return if decimal part is too long
@@ -542,10 +377,21 @@ function SendCoins() {
               Available Balance{' '}
             </span>
             <br></br> {addCommasToNumber(getFlooredFixed(myBalance, 5))}{' '}
-            {coin.coin_data.coin_symbol.toUpperCase()} ~ {currency.symbol}
+            {coin.coin.coin_symbol.toUpperCase()} ~ {currency.symbol}
             {getFlooredFixed(value, 2)}
           </div>
         </div>
+
+        {/* <ReactSlider
+          className='horizontal-slider'
+          marks={[myGasPrice.safe, myGasPrice.propose, myGasPrice.fast]}
+          markClassName='example-mark'
+          min={myGasPrice.safe}
+          max={myGasPrice.fast}
+          thumbClassName='example-thumb'
+          trackClassName='example-track'
+          renderThumb={(props, state) => <div {...props}>{state.valueNow}</div>}
+        /> */}
 
         <ButtonComp
           onClick={async () => {
@@ -553,7 +399,7 @@ function SendCoins() {
 
             const { chains } = await chrome.storage.local.get('chains');
             const chain = chains.find(
-              (chain) => chain.coinFamily === coin.coin_data.coin_family
+              (chain) => chain.coinFamily === coin.coin.coin_family
             );
 
             if (!chain.isEVM && chain.currencyName === 'ADA' && amount < 1) {
@@ -561,6 +407,16 @@ function SendCoins() {
               return messageApi.error(
                 'The minimum value must be greater than 1 or equal to 1.'
               );
+            }
+
+            if (!chain.isEVM && chain.currencyName === 'ADA') {
+              const check = await AdaHelper.checkCardanoAddressType(address);
+              store.dispatch(setLoading(false));
+              if (check !== 'Shelley-era address') {
+                return messageApi.error(
+                  "Invalid address: Only Shelley-era addresses (starting with 'addr1') are supported."
+                );
+              }
             }
 
             if (!amount) {
@@ -654,44 +510,26 @@ function SendCoins() {
                 );
               }
 
-              const nativeCoinResponse = await server.post(
-                '/wallet/get_coin_balances',
-                {
-                  wallet_address: coin.address,
-                  coin_family: coin.coin_data.coin_family,
-                  fiat_currency: currency.name,
-                },
-                {
-                  headers: {
-                    Authorization: account.jwtToken,
-                  },
-                }
+              const nativeCoinResponse = await Web3Helper.getCoinBalance(
+                myAddress,
+                coin.coin.coin_family == 1
+                  ? process.env.REACT_APP_BNB_RPC
+                  : coin.coin.coin_family == 2
+                  ? process.env.REACT_APP_ETH_RPC
+                  : process.env.REACT_APP_MATIC_RPC
               );
 
-              const gasData = await Web3Helper.getGasPrice(
-                chain.slug,
-                coin.address,
-                coin.address,
-                coin.coin_data.token_address ? 1 : 0,
-                coin?.coin_data?.token_address
-              );
+              console.log(nativeCoinResponse);
+              console.log(coin);
 
-              // console.log("GASSSS DATA : ", gasData);
-              if (!gasData) {
-                store.dispatch(setLoading(false));
-                return messageApi.error(
-                  'Unable to fetch gas price at the moment.'
-                );
-              }
-
-              const nativeCoinBalance = new BigNumber(
-                nativeCoinResponse.data.data.balance
-              );
+              const nativeCoinBalance = new BigNumber(nativeCoinResponse);
               // console.log("nativeCoinBalance DATA : ", nativeCoinBalance);
               const finalAmount = new BigNumber(amount);
               console.log('🚀 ~ finalAmount:', finalAmount.toString());
-              let gasEstimate = new BigNumber(gasData.estimate);
-              const gasPrice = new BigNumber(gasData.price).times(1000000000);
+              let gasEstimate = new BigNumber(myGasPrice.estimate);
+              const gasPrice = new BigNumber(selectedGasPrice).times(
+                1000000000
+              );
 
               const gasInEth = gasPrice
                 .times(gasEstimate)
@@ -703,7 +541,7 @@ function SendCoins() {
                 '  gasInEth :: ',
                 Number(gasInEth)
               );
-              if (coin.coin_data.token_address) {
+              if (coin.coin.token_address) {
                 if (nativeCoinBalance.isLessThan(gasInEth)) {
                   store.dispatch(setLoading(false));
                   return messageApi.error(
@@ -948,12 +786,11 @@ function SendCoins() {
               try {
                 if (coin.tokenAddress) {
                   store.dispatch(setLoading(true));
-                  const fee = null;
-                  // await AdaHelper.getFee(
-                  //   address,
-                  //   coin.address,
-                  //   amount
-                  // );
+                  const fee = await AdaHelper.getFee(
+                    address,
+                    coin.address,
+                    amount
+                  );
                   if (!fee) {
                     store.dispatch(setLoading(false));
                     return messageApi.error('Unable to fetch fee.');
@@ -987,12 +824,11 @@ function SendCoins() {
                   });
                 } else {
                   store.dispatch(setLoading(true));
-                  const fee = null;
-                  //  await AdaHelper.getFee(
-                  //   address,
-                  //   coin.address,
-                  //   amount
-                  // );
+                  const fee = await AdaHelper.getFee(
+                    address,
+                    coin.address,
+                    amount
+                  );
                   if (!fee) {
                     store.dispatch(setLoading(false));
                     return messageApi.error('Unable to fetch fee.');

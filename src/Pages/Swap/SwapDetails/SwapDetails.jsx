@@ -78,6 +78,7 @@ function SwapDetails() {
       slippage,
       isWrap,
       adminSwapFee,
+      commision
     },
   } = useLocation();
 
@@ -140,432 +141,62 @@ function SwapDetails() {
 
   const init = async () => {
     try {
-      if (token1.coinFamily == 4) {
-        console.log(feeAmount.toString(), 'feeAmount');
-        setNetworkPrice(parseFloat(feeAmount.toString()));
-        console.log('Herere');
-        setNetworkPriceFiat(
-          addCommasToNumber(
-            getFlooredFixed(
-              parseFloat(feeAmount.toString()) *
-                token1.coin.native_coin_market_data.current_price,
-              4
-            )
-          )
-        );
-        setLoading(false);
-        return true;
-      }
-
-      const { data } = await server.get('/wallet/get_admin_swap_fees', {
-        headers: {
-          Authorization: account.jwtToken,
+      const parentCoin = await server.post(
+        '/wallet/nativeCoinFiatPrice',
+        {
+          coin_family: token1.coinFamily,
+          fiat_currency: currency.name,
         },
-      });
-
-      const myAdminFee = data.data.find((el) =>
-        token1.coinFamily == 1
-          ? el.network === 'eth'
-          : token1.coinFamily == 9
-          ? el.network === 'pls'
-          : el.network === 'bnb'
+        {
+          headers: {
+            Authorization: account.jwtToken,
+          },
+        }
       );
 
       let finalFee = 0;
-      let address = null;
-
-      if (myAdminFee && myAdminFee.status == 1) {
-        const tokenPriceInUsd = amount * token1.price;
-
-        // Step 1: Convert 0.1 percent to a decimal
-        const percent = myAdminFee.swap_fees / 100; // 0.1% = 0.001
-
-        // Step 2: Multiply the original number by the decimal
-        const originalNumber = tokenPriceInUsd; // Replace this with your desired original number
-
-        const result = originalNumber * percent;
-
-        // Step 3: Add the result to the original number
-        finalFee = getFlooredFixed(
-          result / token1.coin.native_coin_market_data.current_price,
-          18
-        );
-
-        address = myAdminFee.address;
-
-        setAdminFee(finalFee);
-        setAdminAddress(address);
-      }
 
       const gasPrice = await Web3Helper.getGasPrice(
-        token1.coinFamily == 1 ? 'eth' : token1.coinFamily == 9 ? 'pls' : 'bnb',
+        token1.chain.slug,
         token1.address,
         token1.address,
-        0,
-        null,
-        null,
-        null
+        token1.isToken,
+        token1.tokenAddress,
+        token1.symbol.toLowerCase()
       );
 
-      setGasPrice(gasPrice.price);
+      setGasPrice(gasPrice.fast);
 
-      if (token1.coinFamily == 1) {
-        let estimatedGasUsed;
+      let estimatedGasUsed;
 
-        if (isWrap) {
-          estimatedGasUsed = await Web3Helper.fetchGasEstimateForWrap(
-            UNISWAP_NATIVE_WRAPPED_TOKEN_ADDRESSES[1].address,
-            token1.address,
-            token1.rpc,
-            token1.isToken ? 'withdraw' : 'deposit',
-            new BigNumber(amount).multipliedBy(
-              new BigNumber(10).pow(
-                UNISWAP_NATIVE_WRAPPED_TOKEN_ADDRESSES[1].decimals
-              )
-            )
-          );
+      // estimatedGasUsed = route.estimatedGasUsed.toString() * 2;
+      estimatedGasUsed = route.gas.toString();
+      setGasEstimate(estimatedGasUsed);
 
-          setGasEstimate(estimatedGasUsed || 50000);
-        } else {
-          // estimatedGasUsed = route.estimatedGasUsed.toString() * 2;
-          estimatedGasUsed = route.estimatedGasUsed.toString();
-          setGasEstimate(estimatedGasUsed);
-        }
+      let finalGasFee =
+        (gasPrice.fast * Math.pow(10, 9) * parseInt(estimatedGasUsed) * 1.5) /
+        Math.pow(10, 18);
 
-        let finalGasFee =
-          (gasPrice.price * Math.pow(10, 9) * parseInt(estimatedGasUsed) * 2) /
-          Math.pow(10, 18);
-
-        // (gasPrice.price * Math.pow(10, 9) * parseInt(estimatedGasUsed)) /
-        // Math.pow(10, 18);
-
-        if (finalFee) {
-          if (token1.isToken) {
-            const gasPrice = await Web3Helper.getGasPrice(
-              'eth',
-              token1.address,
-              token1.address,
-              1,
-              token1.tokenAddress,
-              amount,
-              token1.type
-            );
-
-            finalGasFee +=
-              (gasPrice.price *
-                Math.pow(10, 9) *
-                (parseInt(gasPrice.estimate) + 10000)) /
-              Math.pow(10, 18);
-
-            setAdminTransferGasFee(
-              (gasPrice.price *
-                Math.pow(10, 9) *
-                (parseInt(gasPrice.estimate) + 10000)) /
-                Math.pow(10, 18)
-            );
-          } else {
-            finalGasFee +=
-              (gasPrice.price * Math.pow(10, 9) * (parseInt(21000) + 5000)) /
-              Math.pow(10, 18);
-            setAdminTransferGasFee(finalGasFee);
-          }
-        }
-        setNetworkPrice(
-          addCommasToNumber(
-            getFlooredFixed(Number(finalGasFee) + Number(finalFee), 6)
+      setNetworkPrice(
+        addCommasToNumber(
+          getFlooredFixed(Number(finalGasFee) + Number(finalFee), 6)
+        )
+      );
+      setNetworkPriceFiat(
+        addCommasToNumber(
+          getFlooredFixed(
+            (Number(finalGasFee) + Number(finalFee)) *
+              parseFloat(parentCoin.data.data.fiatCoinPrice.value),
+            4
           )
-        );
-        setNetworkPriceFiat(
-          addCommasToNumber(
-            getFlooredFixed(
-              (Number(finalGasFee) + Number(finalFee)) *
-                parseFloat(token1.coin.native_coin_market_data.current_price),
-              4
-            )
-          )
-        );
-      } else if (token1.coinFamily == 3) {
-        let functionCall = null;
+        )
+      );
 
-        if (token1.isToken && token2.isToken) {
-          functionCall = 1;
-        } else if (!token1.isToken && token2.isToken) {
-          functionCall = 0;
-        } else if (token1.isToken && !token2.isToken) {
-          functionCall = 2;
-        }
-        const pancakeHelper = new PancakeHelper(token1.rpc);
-
-        let myGasEstimate;
-
-        if (isWrap) {
-          myGasEstimate = await Web3Helper.fetchGasEstimateForWrap(
-            PANCAKE_NATIVE_WRAPPED_TOKEN_ADDRESSES[56].address,
-            token1.address,
-            token1.rpc,
-            token1.isToken ? 'withdraw' : 'deposit',
-            new BigNumber(amount).multipliedBy(
-              new BigNumber(10).pow(
-                PANCAKE_NATIVE_WRAPPED_TOKEN_ADDRESSES[56].decimals
-              )
-            )
-          );
-
-          if (!myGasEstimate) {
-            myGasEstimate = 50000;
-          }
-
-          // console.log(myGasEstimate, "myGasEstimate=====================");
-        } else {
-          myGasEstimate = await pancakeHelper.getGasEstimate(
-            route,
-            token1.address,
-            slippage
-          );
-        }
-
-        if (myGasEstimate.status) {
-          // console.log("inside myGas status::::241 if con:::::");
-          setGasEstimate(150000);
-          let finalGasFee =
-            (gasPrice.price * Math.pow(10, 9) * parseInt(150000)) /
-            Math.pow(10, 18);
-
-          if (finalFee) {
-            // console.log("inside final fee: 248::", finalFee);
-            if (token1.isToken) {
-              // console.log(":::::::::::251:::::");
-              const gasPrice = await Web3Helper.getGasPrice(
-                'bnb',
-                token1.address,
-                token1.address,
-                1,
-                token1.tokenAddress,
-                amount,
-                token1.type
-              );
-
-              finalGasFee +=
-                (gasPrice.price *
-                  Math.pow(10, 9) *
-                  (parseInt(gasPrice.estimate) + 10000)) /
-                Math.pow(10, 18);
-
-              setAdminTransferGasFee(
-                (gasPrice.price *
-                  Math.pow(10, 9) *
-                  (parseInt(gasPrice.estimate) + 10000)) /
-                  Math.pow(10, 18)
-              );
-            } else {
-              finalGasFee +=
-                (gasPrice.price * Math.pow(10, 9) * parseInt(31000)) /
-                Math.pow(10, 18);
-
-              setAdminTransferGasFee(
-                (gasPrice.price * Math.pow(10, 9) * parseInt(31000)) /
-                  Math.pow(10, 18)
-              );
-            }
-          }
-
-          setNetworkPrice(
-            addCommasToNumber(
-              getFlooredFixed(Number(finalGasFee) + Number(finalFee), 6)
-            )
-          );
-          setNetworkPriceFiat(
-            addCommasToNumber(
-              getFlooredFixed(
-                (Number(finalGasFee) + Number(finalFee)) *
-                  parseFloat(token1.coin.native_coin_market_data.current_price),
-                4
-              )
-            )
-          );
-        } else {
-          setGasEstimate(myGasEstimate);
-          let finalGasFee =
-            (gasPrice.price *
-              Math.pow(10, 9) *
-              (parseInt(myGasEstimate) + 30000)) /
-            Math.pow(10, 18);
-
-          if (finalFee) {
-            if (token1.isToken) {
-              const gasPrice = await Web3Helper.getGasPrice(
-                'bnb',
-                token1.address,
-                token1.address,
-                1,
-                token1.tokenAddress,
-                amount,
-                token1.type
-              );
-
-              finalGasFee +=
-                (gasPrice.price *
-                  Math.pow(10, 9) *
-                  (parseInt(gasPrice.estimate) + 10000)) /
-                Math.pow(10, 18);
-            } else {
-              finalGasFee +=
-                (gasPrice.price * Math.pow(10, 9) * parseInt(31000)) /
-                Math.pow(10, 18);
-            }
-          }
-          console.log(Number(finalGasFee), Number(finalFee));
-          setNetworkPrice(
-            addCommasToNumber(
-              getFlooredFixed(Number(finalGasFee) + Number(finalFee), 6)
-            )
-          );
-          setNetworkPriceFiat(
-            addCommasToNumber(
-              getFlooredFixed(
-                (Number(finalGasFee) + Number(finalFee)) *
-                  parseFloat(token1.coin.native_coin_market_data.current_price),
-                4
-              )
-            )
-          );
-        }
-      } else if (token1.coinFamily == 9) {
-        let functionCall = null;
-
-        if (token1.isToken && token2.isToken) {
-          functionCall = 1;
-        } else if (!token1.isToken && token2.isToken) {
-          functionCall = 0;
-        } else if (token1.isToken && !token2.isToken) {
-          functionCall = 2;
-        }
-        const pancakeHelper = new PulseChainHelper(token1.rpc);
-
-        const myGasEstimate = await pancakeHelper.getGasEstimate(
-          route,
-          token1.address,
-          amount,
-          token1.decimals,
-          functionCall
-        );
-
-        if (myGasEstimate.status) {
-          setGasEstimate(150000);
-          let finalGasFee =
-            (gasPrice.price * Math.pow(10, 9) * parseInt(150000)) /
-            Math.pow(10, 18);
-
-          if (finalFee) {
-            if (token1.isToken) {
-              const gasPrice = await Web3Helper.getGasPrice(
-                'pls',
-                token1.address,
-                token1.address,
-                1,
-                token1.tokenAddress,
-                amount,
-                token1.type
-              );
-
-              finalGasFee +=
-                (gasPrice.price *
-                  Math.pow(10, 9) *
-                  (parseInt(gasPrice.estimate) + 10000)) /
-                Math.pow(10, 18);
-
-              setAdminTransferGasFee(
-                (gasPrice.price *
-                  Math.pow(10, 9) *
-                  (parseInt(gasPrice.estimate) + 10000)) /
-                  Math.pow(10, 18)
-              );
-            } else {
-              finalGasFee +=
-                (gasPrice.price * Math.pow(10, 9) * parseInt(31000)) /
-                Math.pow(10, 18);
-
-              setAdminTransferGasFee(
-                (gasPrice.price * Math.pow(10, 9) * parseInt(31000)) /
-                  Math.pow(10, 18)
-              );
-            }
-          }
-
-          setNetworkPrice(
-            addCommasToNumber(
-              getFlooredFixed(Number(finalGasFee) + Number(finalFee), 6)
-            )
-          );
-          setNetworkPriceFiat(
-            addCommasToNumber(
-              getFlooredFixed(
-                (Number(finalGasFee) + Number(finalFee)) *
-                  parseFloat(token1.coin.native_coin_market_data.current_price),
-                4
-              )
-            )
-          );
-        } else {
-          setGasEstimate(myGasEstimate);
-          let finalGasFee =
-            (gasPrice.price *
-              Math.pow(10, 9) *
-              (parseInt(myGasEstimate) + 30000)) /
-            Math.pow(10, 18);
-
-          if (finalFee) {
-            if (token1.isToken) {
-              const gasPrice = await Web3Helper.getGasPrice(
-                'pls',
-                token1.address,
-                token1.address,
-                1,
-                token1.tokenAddress,
-                amount,
-                token1.type
-              );
-
-              finalGasFee +=
-                (gasPrice.price *
-                  Math.pow(10, 9) *
-                  (parseInt(gasPrice.estimate) + 10000)) /
-                Math.pow(10, 18);
-            } else {
-              finalGasFee +=
-                (gasPrice.price * Math.pow(10, 9) * parseInt(31000)) /
-                Math.pow(10, 18);
-            }
-          }
-
-          setNetworkPrice(
-            addCommasToNumber(
-              getFlooredFixed(Number(finalGasFee) + Number(finalFee), 6)
-            )
-          );
-          setNetworkPriceFiat(
-            addCommasToNumber(
-              getFlooredFixed(
-                (Number(finalGasFee) + Number(finalFee)) *
-                  parseFloat(token1.coin.native_coin_market_data.current_price),
-                4
-              )
-            )
-          );
-        }
-      }
-
-      console.log(token1.isToken && !isWrap, 'token1.isToken && !isWrap)');
-
-      if (token1.isToken && !isWrap) {
+      if (token1.isToken) {
         const approvedAmount = await Web3Helper.checkApproval(
           token1.tokenAddress, // token add
           token1.address, // owner add
-          token1.coinFamily == 1 // spender add
-            ? UNI_MAINNET_ROUTER
-            : token1.coinFamily == 9
-            ? PULSE_MAINNET_ROUTER
-            : CAKE_MAINNET_ROUTER,
+          '0x1111111254eeb25477b68fb85ed929f73a960582',
           token1.rpc
         );
         console.log('🚀 ~ init ~ approvedAmount:', approvedAmount);
@@ -604,73 +235,21 @@ function SwapDetails() {
   };
 
   const checkTransactionStatus = async () => {
-    if (token1.coinFamily == 3) {
-      const pancakeHelper = new PancakeHelper(token1.rpc);
-      const result = await pancakeHelper.getTransactionStatusThroughHash(
-        approvalHash
-      );
-      console.log(
-        '🚀 ~ file: SwapDetails.jsx:191 ~ checkTransactionStatus ~ result:',
-        result
-      );
+    const uniswapHelper = new UniswapHelper(token1.rpc);
+    const result = await uniswapHelper.getTransactionStatusThroughHash(
+      approvalHash
+    );
 
-      if (result == false) {
-        return;
-      }
-
-      if (result == 1) {
-        setApprovalConfirmed(true);
-        setRequireApproval(false);
-      } else if (result == 0) {
-        setApprovalConfirmed(false);
-        setRequireApproval(true);
-      }
+    if (result == false) {
+      return;
     }
 
-    if (token1.coinFamily == 9) {
-      const pancakeHelper = new PulseChainHelper(token1.rpc);
-      const result = await pancakeHelper.getTransactionStatusThroughHash(
-        approvalHash
-      );
-      console.log(
-        '🚀 ~ file: SwapDetails.jsx:191 ~ checkTransactionStatus ~ result:',
-        result
-      );
-
-      if (result == false) {
-        return;
-      }
-
-      if (result == 1) {
-        setApprovalConfirmed(true);
-        setRequireApproval(false);
-      } else if (result == 0) {
-        setApprovalConfirmed(false);
-        setRequireApproval(true);
-      }
-    }
-
-    if (token1.coinFamily == 1) {
-      const uniswapHelper = new UniswapHelper(token1.rpc);
-      const result = await uniswapHelper.getTransactionStatusThroughHash(
-        approvalHash
-      );
-      console.log(
-        '🚀 ~ file: SwapDetails.jsx:191 ~ checkTransactionStatus ~ result:',
-        result
-      );
-
-      if (result == false) {
-        return;
-      }
-
-      if (result == 1) {
-        setApprovalConfirmed(true);
-        setRequireApproval(false);
-      } else if (result == 0) {
-        setApprovalConfirmed(false);
-        setRequireApproval(true);
-      }
+    if (result == 1) {
+      setApprovalConfirmed(true);
+      setRequireApproval(false);
+    } else if (result == 0) {
+      setApprovalConfirmed(false);
+      setRequireApproval(true);
     }
   };
 
@@ -692,434 +271,69 @@ function SwapDetails() {
 
   const handleSwap = async () => {
     try {
-      if (token1.coinFamily == 1) {
-        const uniHelper = new UniswapHelper(token1.rpc);
+      const uniHelper = new UniswapHelper(token1.rpc);
 
-        if (requireApproval) {
-          setLogoutOpenmodal(true);
-          const data = await uniHelper.sendForApproval(
-            token1.tokenAddress,
-            token1.address,
-            token1.coinFamily == 1
-              ? UNI_MAINNET_ROUTER
-              : token1.coinFamily == 9
-              ? PULSE_MAINNET_ROUTER
-              : CAKE_MAINNET_ROUTER,
-            token1.coin.id
-          );
-          if (!data) {
-            setSwapModal(false);
-            setLogoutOpenmodal(false);
-            return messageApi.error(
-              'Insufficient balance in wallet for gas fee.'
-            );
-          }
+      if (requireApproval) {
+        setLogoutOpenmodal(true);
+        const data = await uniHelper.sendForApproval(
+          token1.tokenAddress,
+          token1.address,
+          '0x1111111254eeb25477b68fb85ed929f73a960582',
+          token1.chain.slug,
+          token1.isToken ? token1.tokenAddress : token1.symbol.toLowerCase(),
+          token1.isToken,
+          parseInt(token1.chain.chainId)
+        );
+        if (!data) {
+          setSwapModal(false);
           setLogoutOpenmodal(false);
-          setRequireApproval(false);
-          setApprovalHash(data);
-        } else {
-          setSwapModal(true);
-
-          if (token1.isToken && !isWrap) {
-            const approval = await Web3Helper.checkApproval(
-              token1.tokenAddress,
-              token1.address,
-              UNI_MAINNET_ROUTER,
-              token1.rpc
-            );
-
-            if (
-              parseFloat(approval) <= parseFloat(amount) ||
-              approval === false
-            ) {
-              setSwapModal(false);
-              return messageApi.error(
-                'Please wait for approval to be completed.'
-              );
-            }
-          }
-
-          let rawTransaction = null;
-
-          if (adminFee) {
-            rawTransaction = await Web3Helper.generateOnlyRawTransaction(
-              adminAddress,
-              token1.address,
-              adminFee,
-              token1.coin.native_coin_market_data.coin_id,
-              0,
-              0,
-              currency.name,
-              null,
-              token1.coinFamily == 1
-                ? 'eth'
-                : token1.coinFamily == 0
-                ? 'pls'
-                : 'bnb',
-              token1.coinFamily == 1 ? 1 : token1.coinFamily == 9 ? 369 : 56,
-              null,
-              'admin_fees'
-            );
-          }
-
-          let data;
-
-          if (isWrap) {
-            data = await uniHelper.sendWrapTransaction(
-              token1.address,
-              amount,
-              token1.coin.id,
-              {
-                amount: adminFee,
-                coinId: token1.coin.native_coin_market_data.coin_id,
-                address: adminAddress,
-                raw_trnx: rawTransaction,
-              },
-              token1
-            );
-          } else {
-            data = await uniHelper.sendSwapTransaction(
-              route,
-              token1.address,
-              amount,
-              token1.coin.id,
-              {
-                amount: adminFee,
-                coinId: token1.coin.native_coin_market_data.coin_id,
-                address: adminAddress,
-                raw_trnx: rawTransaction,
-              },
-              token1
-            );
-          }
-
-          if (!data) {
-            setSwapModal(false);
-            return messageApi.error('Something went wrong.');
-          }
-          setSwapModal(false);
-          setIsModalOpen1(true);
-        }
-      }
-
-      if (token1.coinFamily == 3) {
-        const pancakeHelper = new PancakeHelper(token1.rpc);
-
-        if (requireApproval) {
-          setLogoutOpenmodal(true);
-          const data = await pancakeHelper.sendForApproval(
-            token1.tokenAddress,
-            token1.address,
-            token1.coinFamily == 1
-              ? UNI_MAINNET_ROUTER
-              : token1.coinFamily == 9
-              ? PULSE_MAINNET_ROUTER
-              : SMART_ROUTER_ADDRESSES[chainId],
-            token1.coin.id
+          return messageApi.error(
+            'Insufficient balance in wallet for gas fee.'
           );
-          if (!data) {
-            setLogoutOpenmodal(false);
+        }
+        setLogoutOpenmodal(false);
+        setRequireApproval(false);
+        setApprovalHash(data);
+      } else {
+        setSwapModal(true);
+
+        if (token1.isToken) {
+          const approval = await Web3Helper.checkApproval(
+            token1.tokenAddress, // token add
+            token1.address, // owner add
+            '0x1111111254eeb25477b68fb85ed929f73a960582',
+            token1.rpc
+          );
+
+          if (
+            parseFloat(approval) <= parseFloat(amount) ||
+            approval === false
+          ) {
+            setSwapModal(false);
             return messageApi.error(
-              'Insufficient balance in wallet for gas fee.'
+              'Please wait for approval to be completed.'
             );
           }
-          setLogoutOpenmodal(false);
-          setRequireApproval(false);
-          setApprovalHash(data);
-        } else {
-          setSwapModal(true);
-          let functionCall = null;
-
-          if (token1.isToken && token2.isToken && !isWrap) {
-            const approval = await Web3Helper.checkApproval(
-              token1.tokenAddress,
-              token1.address,
-              CAKE_MAINNET_ROUTER,
-              token1.rpc
-            );
-
-            if (
-              parseFloat(approval) <= parseFloat(amount) ||
-              approval === false
-            ) {
-              setSwapModal(false);
-
-              return messageApi.error(
-                'Please wait for approval to be completed.'
-              );
-            }
-
-            functionCall = 1;
-          } else if (!token1.isToken && token2.isToken && !isWrap) {
-            functionCall = 0;
-          } else if (token1.isToken && !token2.isToken && !isWrap) {
-            const approval = await Web3Helper.checkApproval(
-              token1.tokenAddress,
-              token1.address,
-              CAKE_MAINNET_ROUTER,
-              token1.rpc
-            );
-
-            if (
-              parseFloat(approval) <= parseFloat(amount) ||
-              approval === false
-            ) {
-              setSwapModal(false);
-
-              return messageApi.error(
-                'Please wait for approval to be completed.'
-              );
-            }
-            functionCall = 2;
-          }
-
-          let rawTransaction = null;
-
-          if (adminFee) {
-            rawTransaction = await Web3Helper.generateOnlyRawTransaction(
-              adminAddress,
-              token1.address,
-              adminFee,
-              token1.coin.native_coin_market_data.coin_id,
-              0,
-              0,
-              currency.name,
-              null,
-              token1.coinFamily == 1
-                ? 'eth'
-                : token1.coinFamily == 0
-                ? 'pls'
-                : 'bnb',
-              token1.coinFamily == 1 ? 1 : token1.coinFamily == 9 ? 369 : 56,
-              null,
-              'admin_fees'
-            );
-          }
-
-          let data;
-
-          if (!isWrap) {
-            data = await pancakeHelper.sendSwapTransaction(
-              route,
-              token1.address,
-              amount,
-              token1.coin.id,
-              token1,
-              functionCall,
-              {
-                amount: adminFee,
-                coinId: token1.coin.native_coin_market_data.coin_id,
-                address: adminAddress,
-                raw_trnx: rawTransaction,
-              },
-              slippage
-            );
-          } else {
-            data = await pancakeHelper.sendWrapTransaction(
-              token1.address,
-              amount,
-              token1.coin.id,
-              {
-                amount: adminFee,
-                coinId: token1.coin.native_coin_market_data.coin_id,
-                address: adminAddress,
-                raw_trnx: rawTransaction,
-              },
-              token1
-            );
-          }
-
-          if (data.status) {
-            setSwapModal(false);
-            return messageApi.error(data.message);
-          }
-
-          console.log(
-            '🚀 ~ file: SwapDetails.jsx:759 ~ handleSwap ~ data:',
-            data
-          );
-
-          if (!data) {
-            setSwapModal(false);
-            return messageApi.error('Something went wrong.');
-          }
-          setSwapModal(false);
-          setIsModalOpen1(true);
         }
-      }
 
-      if (token1.coinFamily == 9) {
-        const pancakeHelper = new PulseChainHelper(token1.rpc);
+        const data = await uniHelper.sendSwapTransaction(
+          route,
+          token1.address,
+          amount,
+          token1,
+          token1.chain.slug,
+          token1.symbol.toLowerCase(),
+          token1.isToken,
+          slippage,
+          commision
+        );
 
-        if (requireApproval) {
-          setLogoutOpenmodal(true);
-          const data = await pancakeHelper.sendForApproval(
-            token1.tokenAddress,
-            token1.address,
-            token1.coinFamily == 1
-              ? UNI_MAINNET_ROUTER
-              : token1.coinFamily == 9
-              ? PULSE_MAINNET_ROUTER
-              : CAKE_MAINNET_ROUTER,
-            token1.coin.id
-          );
-          if (!data) {
-            setLogoutOpenmodal(false);
-            return messageApi.error(
-              'Insufficient balance in wallet for gas fee.'
-            );
-          }
-          setLogoutOpenmodal(false);
-          setRequireApproval(false);
-          setApprovalHash(data);
-        } else {
-          setSwapModal(true);
-          let functionCall = null;
-
-          if (token1.isToken && token2.isToken) {
-            const approval = await Web3Helper.checkApproval(
-              token1.tokenAddress,
-              token1.address,
-              PULSE_MAINNET_ROUTER,
-              token1.rpc
-            );
-
-            if (
-              parseFloat(approval) <= parseFloat(amount) ||
-              approval === false
-            ) {
-              setSwapModal(false);
-
-              return messageApi.error(
-                'Please wait for approval to be completed.'
-              );
-            }
-
-            functionCall = 1;
-          } else if (!token1.isToken && token2.isToken) {
-            functionCall = 0;
-          } else if (token1.isToken && !token2.isToken) {
-            const approval = await Web3Helper.checkApproval(
-              token1.tokenAddress,
-              token1.address,
-              PULSE_MAINNET_ROUTER,
-              token1.rpc
-            );
-
-            if (
-              parseFloat(approval) <= parseFloat(amount) ||
-              approval === false
-            ) {
-              setSwapModal(false);
-
-              return messageApi.error(
-                'Please wait for approval to be completed.'
-              );
-            }
-            functionCall = 2;
-          }
-
-          let rawTransaction = null;
-
-          if (adminFee) {
-            rawTransaction = await Web3Helper.generateOnlyRawTransaction(
-              adminAddress,
-              token1.address,
-              adminFee,
-              token1.coin.native_coin_market_data.coin_id,
-              0,
-              0,
-              currency.name,
-              null,
-              token1.coinFamily == 1
-                ? 'eth'
-                : token1.coinFamily == 9
-                ? 'pls'
-                : 'bnb',
-              token1.coinFamily == 1 ? 1 : token1.coinFamily == 9 ? 369 : 56,
-              null,
-              'admin_fees'
-            );
-          }
-
-          // console.log(rawTransaction, "rawTransaction");
-
-          const data = await pancakeHelper.sendSwapTransaction(
-            route,
-            token1.address,
-            amount,
-            token1.coin.id,
-            token1,
-            functionCall,
-            {
-              amount: adminFee,
-              coinId: token1.coin.native_coin_market_data.coin_id,
-              address: adminAddress,
-              raw_trnx: rawTransaction,
-            }
-          );
-
-          if (data.status) {
-            setSwapModal(false);
-            return messageApi.error(data.message);
-          }
-
-          if (!data) {
-            setSwapModal(false);
-            return messageApi.error('Something went wrong.');
-          }
+        if (!data) {
           setSwapModal(false);
-          setIsModalOpen1(true);
+          return messageApi.error('Something went wrong.');
         }
-      }
-
-      if (token1.coinFamily == 4) {
-        try {
-          setLoading(true);
-          console.log({
-            userPublicKey: token1.address,
-            quoteResponse: route,
-          });
-          const response = await axios.post(
-            'https://quote-api.jup.ag/v6/swap',
-            {
-              userPublicKey: token1.address,
-              quoteResponse: route,
-              dynamicComputeUnitLimit: true,
-              prioritizationFeeLamports: 'auto',
-              autoMultiplier: 3,
-              priorityLevelWithMaxLamports: {
-                priorityLevel: 'high',
-                maxLamports: 100000000,
-              },
-              feeAccount:
-                route.swapMode === 'ExactIn'
-                  ? token2.jupiter_fee_address || undefined
-                  : token1.jupiter_fee_address || undefined,
-            }
-          );
-          console.log(response.data);
-          const solanaHelper = new SolanaHelper(token1.rpc);
-          const data = await solanaHelper.signAndSendVersionedTransaction(
-            token1.tokenAddress ||
-              'So11111111111111111111111111111111111111112',
-            token1.address,
-            amount,
-            token1.coin.id,
-            response.data
-          );
-
-          if (!data) {
-            setLoading(false);
-            return messageApi.error('Something went wrong');
-          }
-          setLoading(false);
-          setSwapModal(false);
-          setIsModalOpen1(true);
-        } catch (error) {
-          messageApi.error('Something went wrong');
-          setLoading(false);
-        }
+        setSwapModal(false);
+        setIsModalOpen1(true);
       }
     } catch (error) {
       console.log('Confirm transaction error : ', error);
@@ -1208,31 +422,17 @@ function SwapDetails() {
               <p className='swapDetails__keyValuesText__val'>
                 {networkPrice}{' '}
                 {token1.coinFamily == 1
+                  ? 'BNB'
+                  : token1.coinFamily == 2
                   ? 'ETH'
-                  : token1.coinFamily == 9
-                  ? 'PLS'
                   : token1.coinFamily == 4
-                  ? 'SOL'
+                  ? 'POL'
                   : 'BNB'}{' '}
                 ({currency.symbol}
                 {networkPriceFiat})
               </p>
             </div>
-            {token1.coinFamily == 4 && (
-              <div className='swapDetails__keyValuesText__inner'>
-                <p className='swapDetails__keyValuesText__key'>Swap Fee</p>
-                <p className='swapDetails__keyValuesText__val'>
-                  {adminSwapFee}%{' '}
-                  <InfoCircleOutlined
-                    onClick={() => {
-                      setInfoMessage(
-                        'This is the total combined fee charged by Qubetics/the Swap and has already been applied to the number of tokens you will receive.'
-                      );
-                    }}
-                  />
-                </p>
-              </div>
-            )}
+            
           </div>
           <ButtonComp
             onClick={() => {
@@ -1316,8 +516,7 @@ function SwapDetails() {
         handleCancel={handleCancel}
         isModalOpen={isModalOpen}
         handleOk={handleOk}
-        customClass='cusessionPasswordstomClassModal'
-        closable={false}
+        customClass='customClassModal'
       >
         <div className='viewphrases'>
           <div
@@ -1345,6 +544,13 @@ function SwapDetails() {
                 handleSwap();
               }}
             />
+            <div className='viewphrases__iInner'>
+              <img src={warning} />
+              <div>
+                <p>Do not share your password with anyone!</p>
+                <p>It can be used to steal all your funds.</p>
+              </div>
+            </div>
           </div>
           <ButtonComp
             text={'Proceed'}

@@ -53,9 +53,6 @@ import { server } from '../../server.js';
 import { generateString } from '../../helpers/common.helper.js';
 import { setAuth } from '../../actions/auth.js';
 
-
-
-
 function Setting() {
   const ZENDESK_KEY = 'REDACTED';
   const [open, setOpen] = useState(false);
@@ -80,20 +77,6 @@ function Setting() {
     return result;
   };
 
-  const init = async () => {
-    const { data } = await server.get(`/wallet/social_media_links`, {
-      headers: {
-        Authorization: account.jwtToken,
-      },
-    });
-
-    const chunkedData = chunkArray(data.data, 3);
-    setSocialIcons(chunkedData);
-  };
-
-  useEffect(() => {
-    init();
-  }, []);
 
   const onClick = () => {
     setOpenmodal(true);
@@ -158,127 +141,44 @@ function Setting() {
     }
   };
 
-  const data = !account.isWatchOnly
-    ? [
-        {
-          setinglist: 'Currency Preference',
-          to: '/currencyPreference',
-          ticketcheck: theme == 'darkTheme' ? darkCurrencyIcons : CurrencyIcons,
-          RightArow: 'true',
-        },
-        {
-          setinglist: 'Address Book',
-          to: '/address-book',
-          ticketcheck: theme == 'darkTheme' ? darkAddressBook : AddressBook,
-          RightArow: 'RightArow',
-        },
-        {
-          setinglist: 'Transactions History',
-          to: '/history',
-          ticketcheck: theme == 'darkTheme' ? darkHistoryList : HistoryList,
-          RightArow: 'RightArow',
-        },
-        {
-          setinglist: 'Change Password',
-          to: '/changePin',
-          ticketcheck: theme == 'darkTheme' ? darkChangePin : ChangePin,
-          RightArow: 'RightArow',
-        },
-        {
-          setinglist: 'Theme',
-          switchToggle: 'switchToggle',
-          ticketcheck: theme == 'darkTheme' ? darkThemeIcon : ThemeIcon,
-        },
-        // {
-        //   setinglist: "Lock",
-        //   to: "/lock",
-        //   ticketcheck: theme == "darkTheme" ? darkChangePin : ChangePin,
-        //   RightArow: "RightArow",
-        // },
-        {
-          setinglist: 'Join Community',
-          onClick: drawerOpen,
-          ticketcheck: theme == 'darkTheme' ? darkJoinCom : JoinCom,
-          RightArow: 'RightArow',
-        },
-        {
-          setinglist: 'Help Center',
-          // onClick: needHelp,
-          onClick: handleChatBot,
-          ticketcheck: theme == 'darkTheme' ? HelpDark : HelpLight,
-          RightArow: 'RightArow',
-        },
-        {
-          setinglist: 'Terms of Service',
-          ticketcheck: theme == 'darkTheme' ? darkterm : Terms,
-          RightArow: 'RightArow',
-        },
-        {
-          setinglist: 'Privacy Policy',
-          ticketcheck: theme == 'darkTheme' ? darkSecurity : Security,
-          RightArow: 'RightArow',
-        },
-        // {
-        //   setinglist: 'Legal',
-        //   to: '/legal',
-        //   ticketcheck: theme == 'darkTheme' ? darkSecurity : Security,
-        //   RightArow: 'RightArow',
-        // },
-      ]
-    : [
-        {
-          setinglist: 'Currency Preference',
-          to: '/currencyPreference',
-          ticketcheck: theme == 'darkTheme' ? darkCurrencyIcons : CurrencyIcons,
-          RightArow: 'RightArow',
-        },
-        {
-          setinglist: 'Change Password',
-          to: '/changePin',
-          ticketcheck: theme == 'darkTheme' ? darkChangePin : ChangePin,
-          RightArow: 'RightArow',
-        },
-        {
-          setinglist: 'Join Community',
-          onClick: drawerOpen,
-          ticketcheck: theme == 'darkTheme' ? darkJoinCom : JoinCom,
-          RightArow: 'RightArow',
-        },
-        {
-          setinglist: 'Help Center',
-          // onClick: drawerOpen1,
-          onClick: handleChatBot,
-          ticketcheck: theme == 'darkTheme' ? HelpDark : HelpLight,
-          RightArow: 'RightArow',
-        },
-        {
-          setinglist: 'Theme',
-          switchToggle: 'switchToggle',
-          ticketcheck: theme == 'darkTheme' ? darkThemeIcon : ThemeIcon,
-        },
-        // {
-        //   setinglist: "Lock",
-        //   to: "/lock",
-        //   ticketcheck: theme == "darkTheme" ? darkChangePin : ChangePin,
-        //   RightArow: "RightArow",
-        // },
-        {
-          setinglist: 'Terms of Service',
-          ticketcheck: theme == 'darkTheme' ? darkterm : Terms,
-          RightArow: 'RightArow',
-        },
-        {
-          setinglist: 'Privacy Policy',
-          ticketcheck: theme == 'darkTheme' ? darkSecurity : Security,
-          RightArow: 'RightArow',
-        },
-        // {
-        //   setinglist: 'Legal',
-        //   to: '/legal',
-        //   ticketcheck: theme == 'darkTheme' ? darkSecurity : Security,
-        //   RightArow: 'RightArow',
-        // },
-      ];
+  const data = [
+    {
+      setinglist: 'Manage Account',
+      to: '/manage-wallet',
+      ticketcheck: theme == 'darkTheme' ? darkCurrencyIcons : CurrencyIcons,
+      RightArow: 'true',
+    },
+    {
+      setinglist: 'Native Currency',
+      to: '/currencyPreference',
+      ticketcheck: theme == 'darkTheme' ? darkCurrencyIcons : CurrencyIcons,
+      RightArow: 'true',
+    },
+    {
+      setinglist: 'Transactions History',
+      to: '/history',
+      ticketcheck: theme == 'darkTheme' ? darkHistoryList : HistoryList,
+      RightArow: 'RightArow',
+    },
+    {
+      setinglist: 'Address Book',
+      to: '/address-book',
+      ticketcheck: theme == 'darkTheme' ? darkAddressBook : AddressBook,
+      RightArow: 'RightArow',
+    },
+    {
+      setinglist: 'Change Password',
+      to: '/changePin',
+      ticketcheck: theme == 'darkTheme' ? darkChangePin : ChangePin,
+      RightArow: 'RightArow',
+    },
+    {
+      setinglist: 'Logout',
+      to: '/logout',
+      ticketcheck: theme == 'darkTheme' ? darkChangePin : ChangePin,
+      RightArow: 'RightArow',
+    }
+  ];
   return (
     <div>
       {contextHolder}
@@ -292,48 +192,6 @@ function Setting() {
           RightArow={data.RightArow}
         />
       ))}
-
-      <div className='action_exten'>
-        {/* {
-          setinglist: "Lock",
-          to: "/lock",
-          ticketcheck: theme == "darkTheme" ? darkChangePin : ChangePin,
-          RightArow: "RightArow",
-        }, */}
-        <button
-          className='logout'
-          onClick={async () => {
-            navigate('/verify', {
-              state: {
-                lock: true,
-              },
-            });
-            await chrome.storage.session.remove(['accounts', 'password']);
-            store.dispatch(setAuth(false));
-          }}
-        >
-          {theme == 'darkTheme' ? (
-            <img src={darkChangePin} />
-          ) : (
-            <img src={ChangePin} />
-          )}
-          Lock
-        </button>
-
-        <button
-          className='logout'
-          onClick={() => {
-            onLogoutClick();
-          }}
-        >
-          {theme == 'darkTheme' ? (
-            <img src={DarkLogout} />
-          ) : (
-            <img src={LogoutIcon} />
-          )}
-          Reset
-        </button>
-      </div>
 
       <ModalCustom
         title={'Show Secret Phrase'}
@@ -416,128 +274,6 @@ function Setting() {
           />
         </div>
       </ModalCustom>
-
-      <Drawer
-        title='Join Community'
-        placement='bottom'
-        onClick={drawerOpen}
-        open={open}
-        closeIcon={
-          theme == 'darkTheme' ? (
-            <img src={darkclose} />
-          ) : (
-            <img src={ModalCloseIcon} />
-          )
-        }
-        onClose={onCloseHandle}
-      >
-        <div className='socialLink'>
-          {socialIcons.map((socialSet) => {
-            return (
-              <div className='socialLink__innerLink'>
-                {socialSet.map((socialIcon) => {
-                  return (
-                    <Link
-                      onClick={(e) => {
-                        e.preventDefault();
-                        return chrome.tabs.create({
-                          url: socialIcon.media_link,
-                        });
-                      }}
-                    >
-                      <img
-                        src={`${process.env.REACT_APP_IMAGE_BASE_URL}${socialIcon.image_url}`}
-                        alt=''
-                        style={{
-                          height: '40px',
-                          width: '40px',
-                        }}
-                      />
-                      {socialIcon.text}
-                    </Link>
-                  );
-                })}
-              </div>
-            );
-          })}
-        </div>
-      </Drawer>
-
-      <Drawer
-        title='Help Center'
-        placement='bottom'
-        onClick={drawerOpen1}
-        open={openHelp}
-        closeIcon={
-          theme == 'darkTheme' ? (
-            <img src={darkclose} />
-          ) : (
-            <img src={ModalCloseIcon} />
-          )
-        }
-        onClose={onCloseHandle1}
-        height={260}
-      >
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-evenly',
-            height: '100%',
-          }}
-        >
-          <div>
-            <p
-              style={{
-                fontWeight: 'bold',
-                fontSize: '16px',
-                marginBottom: '6px',
-              }}
-            >
-              All support will be through the official Qubetics X account
-            </p>
-            <a
-              href='https://REDACTED/'
-              onClick={(e) => {
-                e.preventDefault();
-                return chrome.tabs.create({
-                  url: 'https://twitter.com/REDACTED',
-                });
-              }}
-              style={{ color: '#00aeef', fontSize: '16px' }}
-            >
-              https://twitter.com/REDACTED
-            </a>
-          </div>
-          <div
-            style={{
-              marginTop: '30px',
-            }}
-          >
-            <p
-              style={{
-                fontWeight: 'bold',
-                fontSize: '16px',
-                marginBottom: '6px',
-              }}
-            >
-              Please refer to our FAQ's
-            </p>
-            <a
-              href='https://REDACTED/'
-              onClick={(e) => {
-                e.preventDefault();
-                return chrome.tabs.create({
-                  url: 'https://REDACTED/',
-                });
-              }}
-              style={{ color: '#00aeef', fontSize: '16px' }}
-            >
-              https://REDACTED/
-            </a>
-          </div>
-        </div>
-      </Drawer>
     </div>
   );
 }

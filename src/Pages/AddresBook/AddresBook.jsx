@@ -12,6 +12,8 @@ import { setLoading } from "../../actions/loading.js";
 function AddresBook() {
   const { account, chain } = useSelector((state) => state);
   const [messageApi, contextHolder] = message.useMessage();
+  const [editModal, setEditModal] = useState(false);
+
 
   const refresh = () => {
     init();
@@ -21,24 +23,31 @@ function AddresBook() {
   const [keyword, setKeyword] = useState(null);
 
   const init = async () => {
-    try {
+    try { 
       store.dispatch(setLoading(true));
       const { data } = await server.post(
-        "/wallet/address_book/list",
+        // "/wallet/address_book/list",
+        '/user/address_book',
+        // {
+        //   wallet_address: account.coinFamilyAndAddress[1],
+        //   search: keyword ? keyword.trim() : undefined,
+        //   per_page: 300,
+        //   order_by: "name",
+        //   order_type: "asc",
+        // },
         {
-          wallet_address: account.coinFamilyAndAddress[1],
-          search: keyword ? keyword.trim() : undefined,
-          per_page: 300,
-          order_by: "name",
-          order_type: "asc",
+          "address": Object.values(account?.coinFamilyAndAddress),
+          "coin_family": [1, 2, 4],
+          "limit": 25,
+          "page": 1,
+          "search": keyword ? keyword.trim() : undefined
         },
         {
           headers: {
             Authorization: account.jwtToken,
           },
         }
-      );
-
+      ); 
       setList(data.data);
       store.dispatch(setLoading(false));
     } catch (error) {
@@ -105,19 +114,23 @@ function AddresBook() {
             }}
           />
         </div>
-
+        
         {list.length > 0 ? (
           list.map((el, index) => (
             <AddressNetworkCard
-              heading={el.name.toUpperCase()}
-              address={el.address}
-              wallet_address={el.wallet_address}
-              currency={`${el.coin_data.coin_symbol.toUpperCase()} (${
-                el.coin_data.coin_name
-              })`}
+              heading={el?.name?.toUpperCase()}
+              address={el?.address}
+              wallet_address={el?.address}
+              // currency={`${el?.coin_data?.coin_symbol.toUpperCase()} (${el.coin_data.coin_name
+              // })`}
+              currency={`${el?.wallet_data?.coin_family} (${el.wallet_data.name})`}
               index={index}
-              id={el.id}
+              id={el?.id}
               refresh={refresh}
+              wallet_data={el.wallet_data}
+              editModal={editModal}
+              setEditModal={setEditModal}
+              inits={init}
             />
           ))
         ) : (

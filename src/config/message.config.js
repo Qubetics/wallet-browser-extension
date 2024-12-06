@@ -1,1 +1,1 @@
-export const DURATION = 2
+export const DURATION = 3

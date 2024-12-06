@@ -11,15 +11,15 @@ class SpritzHelper {
   }
 
   initializeClient = () => {
-    this.client = SpritzApiClient.initialize({
-      // environment: Environment.Staging, // stage
-      // integrationKey: process.env.REACT_APP_INTEGRATION_KEY_STAGE, //stage
-      environment: Environment.Production, // prod
-      integrationKey: process.env.REACT_APP_INTEGRATION_KEY, // prod
-      dangerouslyAllowBrowser: true,
-    });
+    // this.client = SpritzApiClient.initialize({
+    //   // environment: Environment.Staging, // stage
+    //   // integrationKey: process.env.REACT_APP_INTEGRATION_KEY_STAGE, //stage
+    //   environment: Environment.Production, // prod
+    //   integrationKey: process.env.REACT_APP_INTEGRATION_KEY, // prod
+    //   dangerouslyAllowBrowser: true,
+    // });
 
-    return true;
+    // return true;
   };
 
   setApiKey = async (apiKey) => {

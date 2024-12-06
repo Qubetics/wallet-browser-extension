@@ -1,5 +1,5 @@
 {
-  "name": "Qubetics Wallet",
+  "name": "Sky Marvel",
   "description": "Connect yourself to the ethereum Dapp to realize the power of blockchain.",
   "version": "1.0",
   "manifest_version": 3,
@@ -22,42 +22,37 @@
   "side_panel": {
     "default_path": "index.html"
   },
-  
+
   "action": {
     "default_popup": "index.html",
-    "default_title": "Qubetics Wallet"
+    "default_title": "Sky Marvel"
   },
   "content_scripts": [
     {
-      "matches": [
-        "file://*/*",
-        "http://*/*",
-        "https://*/*",
-        "https://pancakeswap.finance/*"
-      ],
+      "matches": ["https://*/*"],
       "js": ["contentscript-bundle.js"],
       "run_at": "document_start",
       "all_frames": true
     }
   ],
-  "host_permissions": [
-    "http://localhost:8545/",
-    "file://*/*",
-    "http://*/*",
-    "https://*/*"
-  ],
+  "host_permissions": ["https://*/*"],
   "background": {
     "service_worker": "background-bundle.js"
   },
   "icons": {
-    "16": "16.png",
-    "48": "48.png",
-    "128": "128.png"
+    "16": "icon16.png",
+    "32": "icon32.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
   },
+
   "web_accessible_resources": [
     {
       "resources": ["logo512.png"],
       "matches": ["https://*/*"]
     }
-  ]
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self';"
+  }
 }

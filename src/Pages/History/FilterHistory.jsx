@@ -1,3 +1,5 @@
+/*global chrome*/
+
 import { DatePicker, Select, Space } from 'antd';
 import React, { useEffect, useState } from 'react';
 import MenuRestofHeaders from '../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders';
@@ -18,6 +20,7 @@ function FilterHistory() {
   const { account, filter } = useSelector((state) => state);
 
   const [data, setData] = useState([]);
+
   const [filterValue, setFilterValue] = useState({
     coinId: filter.coinId,
     status: filter.status,
@@ -47,26 +50,7 @@ function FilterHistory() {
   const init = async () => {
     try {
       store.dispatch(setLoading(true));
-      const { data } = await server.post(
-        '/wallet/active_coins',
-        {
-          wallet_addresses: account.addressLists,
-          is_watch_only: account.isWatchOnly ? 1 : 0,
-          address_list_array: Object.keys(account.coinFamilyAndAddress).map(
-            (key) => {
-              return {
-                coin_family: key,
-                address: account.coinFamilyAndAddress[key],
-              };
-            }
-          ).filter((el) => el.address),
-        },
-        {
-          headers: {
-            Authorization: account.jwtToken,
-          },
-        }
-      );
+      const { chains } = await chrome.storage.local.get('chains');
 
       const finalData = [
         {
@@ -93,24 +77,20 @@ function FilterHistory() {
         },
       ];
 
-      data.data.forEach((el) => {
+      chains.forEach((el) => {
         finalData.push({
-          value: el.coin_family,
+          value: el.coinFamily,
           label: (
             <span className='flexedItemSelect'>
               <img
-                src={
-                  el.coin_image
-                    ? `${process.env.REACT_APP_IMAGE_BASE_URL}${el.coin_image}`
-                    : null
-                }
+                src={el.image}
                 style={{
                   width: '26px',
                   objectFit: 'contain',
                 }}
                 alt=''
               />
-              {el.coin_symbol.toUpperCase()}
+              {el.currencySymbol.toUpperCase()}
             </span>
           ),
         });

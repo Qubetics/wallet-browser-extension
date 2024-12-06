@@ -100,7 +100,7 @@ function CoinsTableDraggable({ dataArray, refresh }) {
           <div className='coinsTable1__left'>
             <div className='coinsTable1__left__icon'>
               {ele.coinIcon ? (
-                <img src={ele.coinIcon} className='detailIcon' alt='' />
+                <img src={ele.coinIcon} className='detailIcon currencyIcon' alt='' />
               ) : (
                 <div
                   className='randb extra borderDarkLight'
@@ -139,10 +139,10 @@ function CoinsTableDraggable({ dataArray, refresh }) {
                 <div className={`${'coinsTable1__grayText12'} textBold`}></div>
               </div>
               <div className='grayText1 test-class'>
-                {ele.routeTo === 'no-where' ? '' : currency.symbol}
+               <span>{ele.routeTo === 'no-where' ? '' : currency.symbol}</span> 
                 <div
                   dangerouslySetInnerHTML={{ __html: ele.coinPrice }}
-                ></div>{' '}&nbsp;|
+                ></div>{' '}<span>&nbsp;| </span>
                 <div
                   className={`${'coinsTable1__grayText12'} ${
                     ele.coinStatus <= 0 ? 'negitiveText' : 'positiveText'
@@ -199,7 +199,9 @@ function CoinsTableDraggable({ dataArray, refresh }) {
             className='coinsTable1__left__textSec'
             style={{
               position: 'absolute',
-              left: '-37px',
+              // left: '-37px',
+              right: '0px',
+
             }}
           >
             <div
@@ -208,14 +210,16 @@ function CoinsTableDraggable({ dataArray, refresh }) {
                 cursor: 'pointer',
                 display: 'flex',
                 flexDirection: 'column',
-                position: 'relative',
-                top: '-7px',
+                // position: 'relative',
+                // top: '-7px',
+                justifyContent:'space-between',
+                height: '44px'
               }}
             >
               <svg
                 xmlns='http://www.w3.org/2000/svg'
-                width='35'
-                height='35'
+                width='25'
+                height='25'
                 viewBox='0 0 24 24'
                 onClick={async (e) => {
                   e.stopPropagation();
@@ -281,8 +285,8 @@ function CoinsTableDraggable({ dataArray, refresh }) {
               </svg>
               <svg
                 xmlns='http://www.w3.org/2000/svg'
-                width='35'
-                height='35'
+                width='25'
+                height='25'
                 viewBox='0 0 24 24'
                 className='hover_only'
                 onClick={async (e) => {
@@ -354,7 +358,7 @@ function CoinsTableDraggable({ dataArray, refresh }) {
             <div>
               <DummyEle ele={ele} />
               <div
-                className='coinsTable1__grayText12'
+                className='coinsTable1__grayText12 textElipsis'
                 style={{ justifyContent: 'flex-end' }}
               >
                 {ele.currDollerBal === 'ABOVE' ||
@@ -374,9 +378,10 @@ function CoinsTableDraggable({ dataArray, refresh }) {
                 )}
                 {ele.sent === true || ele.sent === false ? (
                   <div
-                    className='coinsTable1__grayText12'
+                    className='coinsTable1__grayText12 textElipsis'
                     style={{
                       color: ele.sent ? '#058b56' : '#f6465d',
+                      paddingLeft: 0
                     }}
                   >
                     {ele.sent ? 'Completed' : 'Pending'}

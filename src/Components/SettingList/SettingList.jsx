@@ -13,6 +13,11 @@ import { store } from '../..';
 import { setTheme } from '../../actions/theme';
 import ArrowRyt from '../../Assets/ArrowRightIcon.svg';
 import { setAuth } from '../../actions/auth';
+import ModalCustom from '../ModalCustom/ModalCustom';
+import InputFieldSimple from '../InputField/InputFieldSimple';
+import { setLoading } from '../../actions/loading';
+import ButtonComp from '../ButtonComp/ButtonComp';
+import warning from '../../Assets/PNG/warning.png';
 
 function SettingList(props) {
   const {
@@ -25,9 +30,32 @@ function SettingList(props) {
     changeTheme,
     RightArow,
   } = props;
+  const [isModalOpen, setOpenmodal] = useState(false);
+  const [isLogoutModalOpen, setLogoutOpenmodal] = useState(false);
+  const [password, setPassword] = useState(null);
+
+  const handleOk = () => {
+    setOpenmodal(false);
+  };
+
+  const handleCancel = () => {
+    setOpenmodal(false);
+  };
+
+  const onLogoutClick = () => {
+    setLogoutOpenmodal(true);
+  };
+
+  const handlLogouteOk = async () => {
+    setLogoutOpenmodal(false);
+  };
+
+  const handleLogoutCancel = () => {
+    setLogoutOpenmodal(false);
+  };
 
   const { theme } = useSelector((state) => state);
-
+  const [isAutoLock, setIsAutoLock] = useState(false);
   const [messageApi, contextHolder] = message.useMessage({
     duration: DURATION,
   });
@@ -46,6 +74,10 @@ function SettingList(props) {
 
   const getTheme = async () => {
     const { appTheme } = await chrome.storage.local.get('appTheme');
+    const { autoLock } = await chrome.storage.local.get('autoLock');
+
+    setIsAutoLock(autoLock);
+
     if (!appTheme) {
       store.dispatch(setTheme('lightTheme'));
       await chrome.storage.local.set({
@@ -88,6 +120,14 @@ function SettingList(props) {
     }
   };
 
+  const toggleAutoLock = async () => {
+    const { autoLock } = await chrome.storage.local.get('autoLock');
+    await chrome.storage.local.set({
+      autoLock: !autoLock,
+    });
+    setIsAutoLock(!autoLock);
+  };
+
   const navigate = useNavigate();
 
   // const [theme, setTheme] = useState();
@@ -107,6 +147,11 @@ function SettingList(props) {
           to={to}
           onClick={async (e) => {
             e.preventDefault();
+
+
+            if(to === "/logout") {
+              return setLogoutOpenmodal(true)
+            } 
 
             if (to === '/lock') {
               await chrome.storage.session.remove(['accounts', 'password']);
@@ -189,6 +234,10 @@ function SettingList(props) {
           <div
             className='settingList'
             onClick={async () => {
+              if(to === "/logout") {
+                return setLogoutOpenmodal(true)
+              } 
+  
               if (to === '/watch-password') {
                 return navigate('/watch-password', {
                   state: {
@@ -270,16 +319,110 @@ function SettingList(props) {
                 src={theme === 'darkTheme' ? DarkArrowRightIcon : ticketcheck1}
               />
             )}
-            {switchToggle && (
+            {switchToggle === 'switchToggle' && (
               <Switch
                 className='switchSec'
                 onChange={toggleTheme}
                 checked={theme === 'darkTheme' ? false : true}
               />
             )}
+            {switchToggle === 'switchToggleAutoLock' && (
+              <div className='autoLockTogal'>
+              <Switch
+                className='switchSec2'
+                onChange={toggleAutoLock}
+                checked={isAutoLock}
+              />
+              </div>
+            )}
           </div>
         </Link>
       </div>
+
+
+
+
+      <ModalCustom
+        title={'Show Secret Phrase'}
+        handleCancel={handleCancel}
+        isModalOpen={isModalOpen}
+        handleOk={handleOk}
+        customClass='customClassModal'
+      >
+        <div className='viewphrases'>
+          <InputFieldSimple
+            placeholder='Password'
+            getData={setPassword}
+            customFunction={async () => {
+              const { password: sessionPassword } =
+                await chrome.storage.session.get('password');
+
+              if (sessionPassword !== password) {
+                return messageApi.error('Incorrect password provided.');
+              }
+
+              store.dispatch(setLoading(true));
+              await WalletHelper.logout();
+              store.dispatch(setLoading(false));
+              navigate('/', {
+                state: {
+                  logout: true,
+                },
+              });
+            }}
+          />
+          <div style={{ marginTop: '10px' }}></div>
+          <ButtonComp
+            text={'Proceed'}
+            maxWidth={'100%'}
+            onClick={async () => {
+              const { password: sessionPassword } =
+                await chrome.storage.session.get('password');
+
+              if (sessionPassword !== password) {
+                return messageApi.error('Incorrect password provided.');
+              }
+
+              store.dispatch(setLoading(true));
+              await WalletHelper.logout();
+              store.dispatch(setLoading(false));
+              navigate('/', {
+                state: {
+                  logout: true,
+                },
+              });
+            }}
+          />
+        </div>
+      </ModalCustom>
+
+      <ModalCustom
+        title={'Reset'}
+        handleCancel={handleLogoutCancel}
+        isModalOpen={isLogoutModalOpen}
+        handleOk={handlLogouteOk}
+        customClass='customClassModal'
+      >
+        <div className='viewphrases'>
+          <div className='viewphrases__iInner'>
+            <img src={warning} />
+            <div>
+              <p>
+                By resetting, all wallets you have saved within the Qubetics App
+                will be erased. Please make sure you have each wallet's 12-word
+                seed phrase written down before resetting.
+              </p>
+            </div>
+          </div>
+          <ButtonComp
+            text={'Proceed'}
+            maxWidth={'100%'}
+            onClick={async () => {
+              setOpenmodal(true);
+            }}
+          />
+        </div>
+      </ModalCustom>
     </>
   );
 }

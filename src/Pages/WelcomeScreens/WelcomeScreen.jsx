@@ -2,24 +2,19 @@
 
 import React, { useEffect, useState } from "react";
 import "./Welcome.scss";
-import PlusBordredIcon from "../../Assets/PlusBordredIcon.svg";
-import RefreshIcon from "../../Assets/RefreshIcon.svg";
-import ArrowRightIcon from "../../Assets/ArrowRightIcon.svg";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import darkclose from "../../Assets/darkclose.svg";
 import ModalCloseIcon from "../../Assets/ModalCloseIcon.svg";
-import Wallet from "../../Assets/wallet.svg";
 import AppLogo from "../../Assets/appLogo.svg";
 import DarkAppLogo from "../../Assets/darkAppLogo.svg";
 import { useSelector } from "react-redux";
 import Lottie from "react-lottie-player";
 import AttlasWallet from "../../Assets/JsonFiles/walletAnimation.json";
+
 function WelcomeScreen() {
   const navigate = useNavigate();
   const [isLegalAppear, setIsLegalAppear] = useState(true);
   const { create } = useSelector((state) => state);
-
-
 
 
   const init = async () => {
@@ -43,11 +38,6 @@ function WelcomeScreen() {
     }
     return true;
   };
-
-
-
-
-
 
   const { auth, theme } = useSelector((state) => state);
 
@@ -80,7 +70,7 @@ function WelcomeScreen() {
           <div
             className="crosIconCard"
             onClick={() => {
-              return navigate("/walletListing");
+              return navigate("/wallet");
             }}
           >
             {theme == "darkTheme" ? (
@@ -109,10 +99,10 @@ function WelcomeScreen() {
       <div className="cardWhite__linkOuter">
         <Link
           className="cardWhite__linkOuter__lytblue"
-          to={isLegalAppear ? "/legal" : "/createNewWallet"}
+          to={"/createNewWallet"}
           onClick={(e) => {
             e.preventDefault();
-            navigate(isLegalAppear ? "/legal" : "/createNewWallet", {
+            navigate("/createNewWallet", {
               state: { type: "import" },
             });
           }}
@@ -128,31 +118,14 @@ function WelcomeScreen() {
         {/* <div className="cardWhite__linkOuter__hr"></div> */}
 
         {/* <div className="cardWhite__linkOuter__hr"></div> */}
-        <Link
-          className="cardWhite__linkOuter__lytblue"
-          to={isLegalAppear ? "/legal" : "/watch-list"}
-          onClick={(e) => {
-            e.preventDefault();
-            navigate(isLegalAppear ? "/legal" : "/watch-list", {
-              state: { type: "watch-list" },
-            });
-          }}
-        >
-          <span className="cardWhite__linkOuter__linkImage">
-            {/* <img src={Wallet} width={20} height={20} /> */}
-            Watch-Only Wallet
-          </span>
-          {/* <span>
-            <img src={ArrowRightIcon} width={8} height={15} />
-          </span> */}
-        </Link>
+
 
         <Link
-          to={isLegalAppear ? "/legal" : "/createNewWallet"}
+          to={"/createNewWallet"}
           className="cardWhite__linkOuter__darkBlue"
           onClick={(e) => {
             e.preventDefault();
-            navigate(isLegalAppear ? "/legal" : "/createNewWallet", {
+            navigate("/createNewWallet", {
               state: { type: "create" },
             });
           }}

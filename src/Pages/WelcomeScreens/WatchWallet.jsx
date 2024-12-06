@@ -52,7 +52,7 @@ function WatchWallet() {
           }}
         >
           <Link
-            to={create ? '/walletListing' : '/'}
+            to={create ? '/wallet' : '/'}
             style={{
               display: 'flex',
               justifyContent: 'space-between',

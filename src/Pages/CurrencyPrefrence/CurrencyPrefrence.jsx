@@ -21,22 +21,19 @@ function CurrencyPrefrence() {
 
   const init = async () => {
     store.dispatch(setLoading(true));
-    const response = await server.get(
-      'https://REDACTED/dev/api/v1/wallet/get_fiat_currencies',
-      {
-        headers: {
-          Authorization: account.jwtToken,
-        },
-      }
-    );
+    const response = await server.get('/wallet/currencyfiatlist', {
+      headers: {
+        Authorization: account.jwtToken,
+      },
+    });
     const data = response.data.data;
 
     const final = data.map((el) => {
       return {
-        img: Unitedstate,
-        currency: el.name,
-        name: el.short_code,
-        symbol: el.symbol,
+        img: el.img,
+        currency: el.currency_name,
+        name: el.currency_code,
+        symbol: el.currency_symbol,
       };
     });
 
@@ -75,27 +72,6 @@ function CurrencyPrefrence() {
                   }}
                 >
                   <div>
-                    {/* <div
-                      style={{
-                        alignItems: "center",
-                        backgroundColor: "rgba(98,126,234,.2)",
-                        borderRadius: "49%",
-                        display: "flex",
-                        height: "40px",
-                        justifyContent: "center",
-                        width: "40px",
-                      }}
-                      onClick={async () => {
-                        await WalletHelper.setCurrencyPreference({
-                          name: data.name,
-                          symbol: data.symbol,
-                        });
-                        navigate("/wallet");
-                      }}
-                    >
-                      {" "}
-                      {data.name.split("")[0]}
-                    </div> */}
                     <p>
                       {data.name} - {data.currency}
                     </p>

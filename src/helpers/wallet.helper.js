@@ -19,7 +19,7 @@ import { derivePath } from 'ed25519-hd-key';
 import { Account } from '@solana/web3.js';
 import { BTCHelper } from './btc.helper';
 import { IS_PRODUCTION } from '../config/bitcoin.config';
-// import { AdaHelper } from './ada.helper';
+import { AdaHelper } from './ada.helper';
 import { ETHTokenArray } from '../config/eth.config';
 import { BNBTokens } from '../config/bnb.config';
 import { AVAXTokens } from '../config/avax.config';
@@ -37,6 +37,7 @@ import { spritzHelper } from './spritz.helper';
 import { spritzAccounts, spritzKyc, spritzLogin } from '../actions/spritz';
 import { setLoading } from '../actions/loading';
 const BIP84 = require('bip84');
+const privateKeyToAddress = require('ethereum-private-key-to-address');
 
 export class WalletHelper {
   static accounts = null;
@@ -50,63 +51,21 @@ export class WalletHelper {
     }
   };
 
-  static checkMaintanance = async () => {
-    const { deviceId } = await chrome.storage.local.get('deviceId');
-    let { accounts } = await chrome.storage.session.get('accounts');
+  static verifyPassword = async (password) => {
+    const { accounts } = await chrome.storage.local.get('accounts');
+    const decryptedAccounts = SecurityHelper.decrypt(accounts, password);
+    if (!decryptedAccounts) {
+      return false;
+    }
 
-    await server.get(
-      `${process.env.REACT_APP_BASE_URL}/wallet/check_app_maintenance`,
-      {
-        device_token: 'chrome',
-        is_default: 1,
-        is_watch_only: 1,
-        device_id: deviceId,
-      },
-      {
-        headers: {
-          Authorization:
-            accounts.length !== 0 ? accounts[0].jwtToken : undefined,
-        },
-      }
-    );
+    return true;
   };
+
   static unlockWallet = async (password) => {
     try {
       const { accounts } = await chrome.storage.local.get('accounts');
       const { chains } = await chrome.storage.local.get('chains');
       const { currency } = await chrome.storage.local.get('currency');
-      const { spritzData } = await chrome.storage.local.get('spritzData');
-
-      if (spritzData) {
-        const decryptedUser = JSON.parse(
-          SecurityHelper.decrypt(spritzData, password)
-        );
-        if (!decryptedUser) {
-          return false;
-        }
-
-        if (decryptedUser) {
-          await spritzHelper.setApiKey(decryptedUser.key);
-
-          await chrome.storage.session.set({
-            spritzApiKey: decryptedUser.key,
-          });
-
-          const user = await spritzHelper.getUser();
-          if (user) {
-            store.dispatch(spritzLogin(user));
-            const verificationData = await spritzHelper.getVerification();
-            const bankAccounts = await spritzHelper.getBankAccounts();
-            if (verificationData) {
-              store.dispatch(spritzKyc(verificationData.identity));
-            }
-
-            if (bankAccounts) {
-              store.dispatch(spritzAccounts(bankAccounts));
-            }
-          }
-        }
-      }
 
       const decryptedAccounts = SecurityHelper.decrypt(accounts, password);
       if (!decryptedAccounts) {
@@ -116,6 +75,7 @@ export class WalletHelper {
         (el) => el.default
       );
 
+
       await chrome.storage.session.set({
         password,
       });
@@ -123,6 +83,7 @@ export class WalletHelper {
         accounts: JSON.parse(decryptedAccounts),
       });
       store.dispatch(setAccount(defaultAccount));
+      
       store.dispatch(setChain(chains.find((el) => el.default) || chains[0]));
       store.dispatch(
         setCurrency({
@@ -131,6 +92,7 @@ export class WalletHelper {
         })
       );
       store.dispatch(setAuth());
+      await this.generateAndSetWalletToRefreshToken()
       return true;
     } catch (error) {
       console.log(error);
@@ -150,19 +112,13 @@ export class WalletHelper {
   };
 
   static getMnemonics = async (address) => {
-    console.log(
-      '🚀 ~ file: wallet.helper.js:219 ~ WalletHelper ~ getMnemonics= ~ address:'
-      // address
-    );
     try {
       const { password } = await chrome.storage.session.get('password');
       const { mnemonics } = await chrome.storage.local.get('mnemonics');
       if (mnemonics) {
         const decryptedMnemonics = SecurityHelper.decrypt(mnemonics, password);
 
-        const defaultMnemonics = JSON.parse(decryptedMnemonics).find(
-          (el) => el.address.toUpperCase() === address.toUpperCase()
-        );
+        const defaultMnemonics = JSON.parse(decryptedMnemonics)[0];
         return defaultMnemonics.phrase;
       } else {
         const { phrase } = ethers.Wallet.createRandom().mnemonic;
@@ -175,14 +131,8 @@ export class WalletHelper {
 
   static getPrivateKey = async () => {
     try {
-      const { password } = await chrome.storage.session.get('password');
-      const { mnemonics } = await chrome.storage.local.get('mnemonics');
-      const decryptedMnemonics = SecurityHelper.decrypt(mnemonics, password);
-      const defaultMnemonics = JSON.parse(decryptedMnemonics).find(
-        (el) => el.default
-      );
-      const wallet = ethers.Wallet.fromMnemonic(defaultMnemonics.phrase);
-      return wallet.privateKey;
+      const { account } = store.getState();
+      return account.privateKey
     } catch (error) {
       return false;
     }
@@ -237,7 +187,7 @@ export class WalletHelper {
       const defaultMnemonics = JSON.parse(decryptedMnemonics).find(
         (el) => el.default
       );
-      const response = null;// AdaHelper.generateWalletAddress(defaultMnemonics.phrase);
+      const response = AdaHelper.generateWalletAddress(defaultMnemonics.phrase);
       return response;
     } catch (error) {
       return false;
@@ -603,6 +553,116 @@ export class WalletHelper {
     }
   };
 
+  static generateAndSetWalletPrivateKey = async (privateKey, name) => {
+    try {
+      const { password } = await chrome.storage.session.get('password');
+      let { accounts } = await chrome.storage.session.get('accounts');
+      const { chains } = await chrome.storage.local.get('chains');
+      const { currency } = await chrome.storage.local.get('currency');
+
+      if (!accounts) {
+        accounts = [];
+      }
+
+      const address = await privateKeyToAddress(privateKey);
+
+      const { deviceId } = await chrome.storage.local.get('deviceId');
+
+      const createWallet = await server.post(
+        `${process.env.REACT_APP_BASE_URL}/user/create/wallet`,
+        {
+          device_id: deviceId,
+          wallet_address: address,
+          device_token: 'chrome',
+          wallet_name: name,
+          referral_code: '',
+          addressList: [
+            {
+              symbol: 'bnb',
+              address: address,
+              coin_family: 1,
+            },
+            {
+              symbol: 'eth',
+              address: address,
+              coin_family: 2,
+            },
+            {
+              symbol: 'matic',
+              address: address,
+              coin_family: 4,
+            },
+          ],
+        },
+        {
+          headers: {
+            Authorization:
+              accounts.length !== 0 ? accounts[0].jwtToken : undefined,
+          },
+        }
+      );
+
+      const id = uuidv4();
+
+      const finalAccounts = [
+        ...accounts,
+        {
+          id,
+          address: address,
+          isWatchOnly: false,
+          privateKey,
+          path: null,
+          name,
+          default: accounts.length === 0 ? true : false,
+          coinFamilyAndAddress: {
+            1: address,
+            2: address,
+            4: address,
+          },
+          coinFamilies: [1, 2, 4],
+          addressLists: [address, address, address],
+          jwtToken:
+            accounts.length === 0
+              ? createWallet.data.data.token
+              : accounts[0].jwtToken,
+          refreshToken:
+            accounts.length === 0
+              ? createWallet.data.data.refreshToken
+              : accounts[0].refreshToken,
+          deviceId: deviceId,
+          totalBalanceShow: true,
+          importedUsingPrivateKey: true,
+        },
+      ];
+
+      const encryptedAccounts = SecurityHelper.encrypt(finalAccounts, password);
+
+      await chrome.storage.local.set({
+        accounts: encryptedAccounts,
+        registered: true,
+      });
+
+      await chrome.storage.session.set({ accounts: finalAccounts });
+
+      store.dispatch(setAccount(finalAccounts.find((el) => el.default)));
+
+      store.dispatch(setChain(chains.find((el) => el.default)));
+
+      store.dispatch(
+        setCurrency({
+          name: currency.name,
+          symbol: currency.symbol,
+        })
+      );
+
+      store.dispatch(setAuth());
+      return id;
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
+  };
+
   static generateAndSetWallet = async (newMnemonics, name, type) => {
     try {
       const { password } = await chrome.storage.session.get('password');
@@ -611,24 +671,26 @@ export class WalletHelper {
       const { currency } = await chrome.storage.local.get('currency');
       let { mnemonics } = await chrome.storage.local.get('mnemonics');
 
-      newMnemonics = newMnemonics?.toLowerCase();
-      const { address, privateKey } = ethers.Wallet.fromMnemonic(
-        newMnemonics,
-        `m/44'/60'/0'/0/0`
-      );
-
-      const solanaAddress = await SolanaHelper.generateSolanaAddress(
-        newMnemonics
-      );
-      const bitcoinAddress = await BTCHelper.generateBitcoinAddress(
-        newMnemonics
-      );
-      const adaAddress = null;
-        // AdaHelper.generateWalletAddress(newMnemonics).baseAddress;
+      // const solanaAddress = await SolanaHelper.generateSolanaAddress(
+      //   newMnemonics
+      // );
+      // const bitcoinAddress = await BTCHelper.generateBitcoinAddress(
+      //   newMnemonics
+      // );
+      // const adaAddress =
+      //   AdaHelper.generateWalletAddress(newMnemonics).baseAddress;
 
       if (!accounts) {
         accounts = [];
       }
+
+      newMnemonics = newMnemonics?.toLowerCase();
+      const { address, privateKey } = ethers.Wallet.fromMnemonic(
+        newMnemonics,
+        `m/44'/60'/0'/0/${accounts.length}`
+      );
+
+      console.log(`m/44'/60'/0'/0/${accounts.length}`);
 
       if (!mnemonics) {
         mnemonics = [];
@@ -647,84 +709,32 @@ export class WalletHelper {
       ];
 
       const { deviceId } = await chrome.storage.local.get('deviceId');
-      console.log(
-        '🚀 ~ WalletHelper ~ staticgenerateAndSetWal ~ deviceId:',
-        deviceId
-      );
-
-      const web3 = new Web3();
-
-      let signature = await web3.eth.accounts.sign(address, privateKey);
 
       const createWallet = await server.post(
-        `${process.env.REACT_APP_BASE_URL}/wallet/create`,
+        `${process.env.REACT_APP_BASE_URL}/user/create/wallet`,
         {
+          device_id: deviceId,
           wallet_address: address,
-          address_list: [
+          device_token: 'chrome',
+          wallet_name: name,
+          referral_code: '',
+          addressList: [
             {
-              coin_symbol: 'eth',
-              coin_family: '1',
-              wallet_address: address,
+              symbol: 'bnb',
+              address: address,
+              coin_family: 1,
             },
             {
-              coin_symbol: 'bnb',
-              coin_family: '3',
-              wallet_address: address,
+              symbol: 'eth',
+              address: address,
+              coin_family: 2,
             },
             {
-              coin_symbol: 'pol',
-              coin_family: '6',
-              wallet_address: address,
-            },
-            {
-              coin_symbol: 'cro',
-              coin_family: '8',
-              wallet_address: address,
-            },
-            {
-              coin_symbol: 'avax',
-              coin_family: '7',
-              wallet_address: address,
-            },
-            {
-              coin_symbol: 'sol',
-              coin_family: '4',
-              wallet_address: solanaAddress,
-            },
-            {
-              coin_symbol: 'ada',
-              coin_family: '5',
-              wallet_address: adaAddress,
-            },
-            {
-              coin_symbol: 'btc',
-              coin_family: '2',
-              wallet_address: bitcoinAddress,
-            },
-            {
-              coin_symbol: 'egc',
-              coin_family: '3',
-              wallet_address: address,
-            },
-            {
-              coin_symbol: 'lcr',
-              coin_family: '3',
-              wallet_address: address,
-            },
-            {
-              coin_symbol: 'pls',
-              coin_family: '9',
-              wallet_address: address,
+              symbol: 'matic',
+              address: address,
+              coin_family: 4,
             },
           ],
-          wallet_name: name,
-          device_token: 'chrome',
-          is_default: 1,
-          device_type: 'android',
-          is_watch_only: 0,
-          coin_family: 1,
-          device_id: deviceId,
-          signature: `${signature?.signature}`,
         },
         {
           headers: {
@@ -734,131 +744,27 @@ export class WalletHelper {
         }
       );
 
-      const nonEvmWalletAddress = [bitcoinAddress, solanaAddress, adaAddress];
-
-      if (createWallet?.status == 200) {
-        await server.post(
-          `${process.env.REACT_APP_BASE_URL}/wallet/save_non_evm_authenticate_wallet_addresses`,
-          {
-            wallet_addresses: nonEvmWalletAddress,
-            device_type: 'WEB',
-          },
-          {
-            headers: {
-              Authorization:
-                accounts.length === 0
-                  ? createWallet.data.token
-                  : accounts[0].jwtToken,
-            },
-          }
-        );
-      }
-
-      if (type && type === 'IMPORT') {
-        await server.post(
-          '/wallet/reterive_wallet_balance',
-          {
-            address_list: [
-              {
-                coin_symbol: 'eth',
-                coin_family: '1',
-                wallet_address: address,
-              },
-              {
-                coin_symbol: 'bnb',
-                coin_family: '3',
-                wallet_address: address,
-              },
-              {
-                coin_symbol: 'pol',
-                coin_family: '6',
-                wallet_address: address,
-              },
-              {
-                coin_symbol: 'cro',
-                coin_family: '8',
-                wallet_address: address,
-              },
-              {
-                coin_symbol: 'avax',
-                coin_family: '7',
-                wallet_address: address,
-              },
-              {
-                coin_symbol: 'sol',
-                coin_family: '4',
-                wallet_address: solanaAddress,
-              },
-              {
-                coin_symbol: 'ada',
-                coin_family: '5',
-                wallet_address: adaAddress,
-              },
-              {
-                coin_symbol: 'btc',
-                coin_family: '2',
-                wallet_address: bitcoinAddress,
-              },
-              {
-                coin_symbol: 'egc',
-                coin_family: '3',
-                wallet_address: address,
-              },
-              {
-                coin_symbol: 'lcr',
-                coin_family: '3',
-                wallet_address: address,
-              },
-              {
-                coin_symbol: 'pls',
-                coin_family: '9',
-                wallet_address: address,
-              },
-            ],
-            fiat_currency: 'USD',
-            is_watch_only: 0,
-            wallet_address: address,
-          },
-          {
-            headers: {
-              Authorization:
-                accounts.length === 0
-                  ? createWallet.data.token
-                  : accounts[0].jwtToken,
-            },
-          }
-        );
-      }
+      const id = uuidv4();
 
       const finalAccounts = [
         ...accounts,
         {
-          id: uuidv4(),
+          id,
           address: address,
           isWatchOnly: false,
+          privateKey,
+          path: `m/44'/60'/0'/0/${accounts.length + 1}`,
           name,
           default: accounts.length === 0 ? true : false,
           coinFamilyAndAddress: {
             1: address,
-            2: bitcoinAddress,
-            3: address,
-            4: solanaAddress,
-            5: adaAddress,
-            6: address,
-            7: address,
-            8: address,
-            9: address,
+            2: address,
+            4: address,
           },
-          coinFamilies: [1, 2, 3, 4, 5, 6, 7, 8, 9],
-          addressLists: [address, adaAddress, bitcoinAddress, solanaAddress],
-          jwtToken:
-            accounts.length === 0
-              ? createWallet.data.token
-              : accounts[0].jwtToken,
-          refreshToken:
-            accounts.length === 0
-              ? createWallet.data.refresh_token
-              : accounts[0].refreshToken,
+          coinFamilies: [1, 2, 4],
+          addressLists: [address, address, address],
+          jwtToken: createWallet.data.data.token,
+          refreshToken: createWallet.data.data.refreshToken,
           deviceId: deviceId,
           totalBalanceShow: true,
         },
@@ -891,7 +797,7 @@ export class WalletHelper {
       );
 
       store.dispatch(setAuth());
-      return true;
+      return id;
     } catch (error) {
       console.log(error);
       return false;
@@ -908,9 +814,10 @@ export class WalletHelper {
       const defaultAccount = accounts.find((el) => el.default);
 
       const response = await server.post(
-        `/wallet/refresh_token`,
+        `/auth/authorisation`,
         {
-          refresh_token: defaultAccount.refreshToken,
+          token: defaultAccount.jwtToken,
+          refreshToken: defaultAccount.refreshToken,
         },
         {
           headers: {
@@ -919,13 +826,15 @@ export class WalletHelper {
         }
       );
 
-      console.log(response.data)
-
       const updateAccounts = accounts.map((el) => {
-        el.jwtToken = response.data.token;
-        el.refreshToken = response.data.refresh_token;
-        el.deviceId = deviceId;
-        return el;
+        if (el.id === defaultAccount.id) {
+          el.jwtToken = response.data.token;
+          el.refreshToken = response.data.refreshToken;
+          el.deviceId = deviceId;
+          return el;
+        } else {
+          return el;
+        }
       });
 
       const encryptedAccounts = SecurityHelper.encrypt(
@@ -1177,9 +1086,6 @@ export class WalletHelper {
       console.log(walletId, 'walletId');
       const { password } = await chrome.storage.session.get('password');
       const { accounts } = await chrome.storage.local.get('accounts');
-      const { mnemonics } = await chrome.storage.local.get('mnemonics');
-
-      const decryptedMnemonics = SecurityHelper.decrypt(mnemonics, password);
 
       const decryptedAccounts = SecurityHelper.decrypt(accounts, password);
 
@@ -1191,39 +1097,10 @@ export class WalletHelper {
         }
         return el;
       });
-
-      const newDefaultAddress = updatesAccounts.find(
-        (el) => el.default
-      ).address;
-
-      let updatedMnemonics;
-
-      if (decryptedMnemonics) {
-        updatedMnemonics = JSON.parse(decryptedMnemonics).map((el) => {
-          if (el.address === newDefaultAddress) {
-            el.default = true;
-          } else {
-            el.default = false;
-          }
-          return el;
-        });
-      }
-
       const encryptedAccounts = SecurityHelper.encrypt(
         updatesAccounts,
         password
       );
-
-      if (decryptedMnemonics) {
-        const encryptedMnemonics = SecurityHelper.encrypt(
-          updatedMnemonics,
-          password
-        );
-
-        await chrome.storage.local.set({
-          mnemonics: encryptedMnemonics,
-        });
-      }
 
       await chrome.storage.local.set({
         accounts: encryptedAccounts,
@@ -1243,6 +1120,7 @@ export class WalletHelper {
       store.dispatch(setTokens([]));
       await chrome.storage.session.set({ accounts: updatesAccounts });
       store.dispatch(setAccount(updatesAccounts.find((el) => el.default)));
+      await this.generateAndSetWalletToRefreshToken()
       return true;
     } catch (error) {
       console.log(error);
@@ -1252,33 +1130,12 @@ export class WalletHelper {
 
   static deleteWallet = async (id, evmAddress) => {
     const { password } = await chrome.storage.session.get('password');
-    const { mnemonics } = await chrome.storage.local.get('mnemonics');
     const { accounts } = await chrome.storage.local.get('accounts');
-    const decryptedMnemonics = SecurityHelper.decrypt(mnemonics, password);
     const decryptedAccounts = SecurityHelper.decrypt(accounts, password);
 
     const newAccounts = JSON.parse(decryptedAccounts).filter(
       (el) => el.id !== id
     );
-
-    const isWatchOnly = JSON.parse(decryptedAccounts).find(
-      (el) => el.id == id
-    ).isWatchOnly;
-
-    if (decryptedMnemonics && !isWatchOnly) {
-      const newMnemonics = JSON.parse(decryptedMnemonics).filter(
-        (el) => el.address !== evmAddress
-      );
-
-      const newMnemonicsEncrypted = SecurityHelper.encrypt(
-        newMnemonics,
-        password
-      );
-
-      await chrome.storage.local.set({
-        mnemonics: newMnemonicsEncrypted,
-      });
-    }
 
     const newAccountsEncrypted = SecurityHelper.encrypt(newAccounts, password);
 

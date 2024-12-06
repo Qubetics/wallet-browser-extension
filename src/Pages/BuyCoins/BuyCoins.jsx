@@ -1,28 +1,28 @@
-import React, { useEffect, useState } from 'react';
-import MenuRestofHeaders from '../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders';
-import CoinsTable from '../../Components/CoinsTable/CoinsTable';
-import style from './style.module.scss';
-import { useSelector } from 'react-redux';
-import { InputField } from '../../Components/InputField/InputFieldSimple';
-import { useLocation, useNavigate } from 'react-router-dom';
-import Search from '../../Assets/SearchIcon.svg';
-import BigNumber from 'bignumber.js';
+import React, { useEffect, useState } from "react";
+import MenuRestofHeaders from "../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders";
+import CoinsTable from "../../Components/CoinsTable/CoinsTable";
+import style from "./style.module.scss";
+import { useSelector } from "react-redux";
+import { InputField } from "../../Components/InputField/InputFieldSimple";
+import { useLocation, useNavigate } from "react-router-dom";
+import Search from "../../Assets/SearchIcon.svg";
+import BigNumber from "bignumber.js";
 import {
   addCommasToNumber,
   formatSmallNumber,
   getFlooredFixed,
-} from '../../helpers/conversion.helper';
-import { server } from '../../server';
-import { store } from '../..';
-import { setTokens } from '../../actions/tokens';
-import { QRCode } from 'react-qrcode-logo';
-import { Drawer, message } from 'antd';
-import { DURATION } from '../../config/message.config';
-import CopyIconBlue from '../../Assets/CopyIconBlue.svg';
-import ModalCustom from '../../Components/ModalCustom/ModalCustom';
-import ModalCloseIcon from '../../Assets/ModalCloseIcon.svg';
-import darkclose from '../../Assets/darkclose.svg';
-import { setLoading } from '../../actions/loading';
+} from "../../helpers/conversion.helper";
+import { server } from "../../server";
+import { store } from "../..";
+import { setTokens } from "../../actions/tokens";
+import { QRCode } from "react-qrcode-logo";
+import { Drawer, message } from "antd";
+import { DURATION } from "../../config/message.config";
+import CopyIconBlue from "../../Assets/CopyIconBlue.svg";
+import ModalCustom from "../../Components/ModalCustom/ModalCustom";
+import ModalCloseIcon from "../../Assets/ModalCloseIcon.svg";
+import darkclose from "../../Assets/darkclose.svg";
+import { setLoading } from "../../actions/loading";
 
 function BuyCoins() {
   const { account, tokens, currency, balanceIn } = useSelector(
@@ -58,20 +58,20 @@ function BuyCoins() {
   const init = async () => {
     store.dispatch(setLoading(true));
     const walletsList = await server.post(
-      `/on_off_ramp/supported_coins`,
+      `/wallet/buy-sell-coins`,
       {
         addresses: account.addressLists,
         coin_family: account.coinFamilies,
         fiat_currency: currency.name,
         is_watch_only: account.isWatchOnly ? 1 : 0,
-        address_list_array: Object.keys(account.coinFamilyAndAddress).map(
-          (key) => {
+        address_list_array: Object.keys(account.coinFamilyAndAddress)
+          .map((key) => {
             return {
               coin_family: key,
               address: account.coinFamilyAndAddress[key],
             };
-          }
-        ).filter((el) => el.address),
+          })
+          .filter((el) => el.address),
       },
       {
         headers: {
@@ -81,21 +81,21 @@ function BuyCoins() {
     );
 
     let rtk = walletsList.data.data.filter((el) => {
-      console.log(filterOutTheCoins(el, 'BUY'), filterOutTheCoins(el, 'SELL'));
-      if (filterOutTheCoins(el, 'BUY') || filterOutTheCoins(el, 'SELL')) {
+      console.log(filterOutTheCoins(el, "BUY"), filterOutTheCoins(el, "SELL"));
+      if (filterOutTheCoins(el, "BUY") || filterOutTheCoins(el, "SELL")) {
         return el;
       }
     });
-    console.log('walletsListwalletsList ', walletsList, rtk);
+    console.log("walletsListwalletsList ", walletsList, rtk);
 
     setMyTokens(rtk);
     setFilteredTokens(
       walletsList.data.data.filter((el) => {
         console.log(
-          filterOutTheCoins(el, 'BUY'),
-          filterOutTheCoins(el, 'SELL')
+          filterOutTheCoins(el, "BUY"),
+          filterOutTheCoins(el, "SELL")
         );
-        if (filterOutTheCoins(el, 'BUY') || filterOutTheCoins(el, 'SELL')) {
+        if (filterOutTheCoins(el, "BUY") || filterOutTheCoins(el, "SELL")) {
           return el;
         }
       })
@@ -114,66 +114,66 @@ function BuyCoins() {
     let provider = [];
 
     switch (type) {
-      case 'BUY':
+      case "BUY":
         if (selectedCoin.is_transak == 1) {
           const check =
-            type === 'BUY'
+            type === "BUY"
               ? selectedCoin.buy_transak_country
-                  ?.split(',')
+                  ?.split(",")
                   .includes(currency.name.toUpperCase())
                 ? currency.name.toUpperCase()
                 : null
               : selectedCoin.sell_transak_country
-                  ?.split(',')
+                  ?.split(",")
                   .includes(currency.name.toUpperCase())
               ? currency.name.toUpperCase()
               : null;
 
           if (check) {
-            provider.push('TRANSAK');
+            provider.push("TRANSAK");
           }
         }
         if (selectedCoin.is_mercuryo == 1) {
           const check =
-            type === 'BUY'
+            type === "BUY"
               ? selectedCoin.buy_mercuryo_country
-                  ?.split(',')
+                  ?.split(",")
                   .includes(currency.name.toUpperCase())
                 ? currency.name.toUpperCase()
                 : null
               : selectedCoin.sell_mercuryo_country
-                  ?.split(',')
+                  ?.split(",")
                   .includes(currency.name.toUpperCase())
               ? currency.name.toUpperCase()
               : null;
 
           if (check) {
-            provider.push('MERCURYO');
+            provider.push("MERCURYO");
           }
         }
         if (selectedCoin.is_alchemy == 1) {
           const check =
-            type === 'BUY'
+            type === "BUY"
               ? selectedCoin.buy_alchemy_country
-                  ?.split(',')
+                  ?.split(",")
                   .includes(currency.name.toUpperCase())
                 ? currency.name.toUpperCase()
                 : null
               : selectedCoin.sell_alchemy_country
-                  ?.split(',')
+                  ?.split(",")
                   .includes(currency.name.toUpperCase())
               ? currency.name.toUpperCase()
               : null;
 
           if (check) {
-            provider.push('ALCHEMY');
+            provider.push("ALCHEMY");
           }
         }
         if (selectedCoin.is_simplex === 1) {
           const check =
-            type === 'BUY'
+            type === "BUY"
               ? selectedCoin.buy_simplex_country
-                  ?.split(',')
+                  ?.split(",")
                   .map((el) => el.toUpperCase())
                   .includes(currency.name.toUpperCase())
                 ? currency.name.toUpperCase()
@@ -181,63 +181,63 @@ function BuyCoins() {
               : null;
 
           if (check) {
-            provider.push('SIMPLEX');
+            provider.push("SIMPLEX");
           }
         }
         break;
-      case 'SELL':
+      case "SELL":
         if (selectedCoin.transak_sell == 1) {
           const check =
-            type === 'BUY'
+            type === "BUY"
               ? selectedCoin.buy_transak_country
-                  ?.split(',')
+                  ?.split(",")
                   .includes(currency.name.toUpperCase())
                 ? currency.name.toUpperCase()
                 : null
               : selectedCoin.sell_transak_country
-                  ?.split(',')
+                  ?.split(",")
                   .includes(currency.name.toUpperCase())
               ? currency.name.toUpperCase()
               : null;
 
           if (check) {
-            provider.push('TRANSAK');
+            provider.push("TRANSAK");
           }
         }
         if (selectedCoin.mercuryo_sell == 1) {
           const check =
-            type === 'BUY'
+            type === "BUY"
               ? selectedCoin.buy_mercuryo_country
-                  ?.split(',')
+                  ?.split(",")
                   .includes(currency.name.toUpperCase())
                 ? currency.name.toUpperCase()
                 : null
               : selectedCoin.sell_mercuryo_country
-                  ?.split(',')
+                  ?.split(",")
                   .includes(currency.name.toUpperCase())
               ? currency.name.toUpperCase()
               : null;
 
           if (check) {
-            provider.push('MERCURYO');
+            provider.push("MERCURYO");
           }
         }
         if (selectedCoin.alchemy_sell == 1) {
           const check =
-            type === 'BUY'
+            type === "BUY"
               ? selectedCoin.buy_alchemy_country
-                  ?.split(',')
+                  ?.split(",")
                   .includes(currency.name.toUpperCase())
                 ? currency.name.toUpperCase()
                 : null
               : selectedCoin.sell_alchemy_country
-                  ?.split(',')
+                  ?.split(",")
                   .includes(currency.name.toUpperCase())
               ? currency.name.toUpperCase()
               : null;
 
           if (check) {
-            provider.push('ALCHEMY');
+            provider.push("ALCHEMY");
           }
         }
         break;
@@ -261,11 +261,11 @@ function BuyCoins() {
         ? selectedCoin.coin_data.wallet_addresses_data.balance
         : 0,
       type:
-        selectedCoin.coin_data.coin_symbol === 'bnb'
-          ? 'BEP20'
+        selectedCoin.coin_data.coin_symbol === "bnb"
+          ? "BEP20"
           : selectedCoin.coin_data.token_address
           ? selectedCoin.coin_data.token_type
-          : '',
+          : "",
       coinPrice: addCommasToNumber(
         selectedCoin.coin_data.coins_market.current_price.toFixed(2)
       ),
@@ -283,35 +283,35 @@ function BuyCoins() {
       coinFamily: parseInt(selectedCoin.coin_family),
       simplexCoinSymbol: selectedCoin.simplex_coin_symbol,
       currencyTransk:
-        type === 'BUY'
+        type === "BUY"
           ? selectedCoin.buy_transak_country
-              ?.split(',')
+              ?.split(",")
               .includes(currency.name.toUpperCase())
             ? currency.name.toUpperCase()
             : null
           : selectedCoin.sell_transak_country
-              ?.split(',')
+              ?.split(",")
               .includes(currency.name.toUpperCase())
           ? currency.name.toUpperCase()
           : null,
 
       currencyMercuryo:
-        type === 'BUY'
+        type === "BUY"
           ? selectedCoin.buy_mercuryo_country
-              ?.split(',')
+              ?.split(",")
               .includes(currency.name.toUpperCase())
             ? currency.name.toUpperCase()
             : null
           : selectedCoin.sell_mercuryo_country
-              ?.split(',')
+              ?.split(",")
               .includes(currency.name.toUpperCase())
           ? currency.name.toUpperCase()
           : null,
 
       currencySimplex:
-        type === 'BUY'
+        type === "BUY"
           ? selectedCoin.buy_simplex_country
-              ?.split(',')
+              ?.split(",")
               .map((el) => el.toUpperCase())
               .includes(currency.name.toUpperCase())
             ? currency.name.toUpperCase()
@@ -319,14 +319,14 @@ function BuyCoins() {
           : null,
 
       currencyAlchemy:
-        type === 'BUY'
+        type === "BUY"
           ? selectedCoin.buy_alchemy_country
-              ?.split(',')
+              ?.split(",")
               .includes(currency.name.toUpperCase())
             ? currency.name.toUpperCase()
             : null
           : selectedCoin.sell_alchemy_country
-              ?.split(',')
+              ?.split(",")
               .includes(currency.name.toUpperCase())
           ? currency.name.toUpperCase()
           : null,
@@ -340,66 +340,66 @@ function BuyCoins() {
     let provider = [];
 
     switch (type) {
-      case 'BUY':
+      case "BUY":
         if (selectedCoin.is_transak == 1) {
           const check =
-            type === 'BUY'
+            type === "BUY"
               ? selectedCoin.buy_transak_country
-                  ?.split(',')
+                  ?.split(",")
                   .includes(currency.name.toUpperCase())
                 ? currency.name.toUpperCase()
                 : null
               : selectedCoin.sell_transak_country
-                  ?.split(',')
+                  ?.split(",")
                   .includes(currency.name.toUpperCase())
               ? currency.name.toUpperCase()
               : null;
 
           if (check) {
-            provider.push('TRANSAK');
+            provider.push("TRANSAK");
           }
         }
         if (selectedCoin.is_mercuryo == 1) {
           const check =
-            type === 'BUY'
+            type === "BUY"
               ? selectedCoin.buy_mercuryo_country
-                  ?.split(',')
+                  ?.split(",")
                   .includes(currency.name.toUpperCase())
                 ? currency.name.toUpperCase()
                 : null
               : selectedCoin.sell_mercuryo_country
-                  ?.split(',')
+                  ?.split(",")
                   .includes(currency.name.toUpperCase())
               ? currency.name.toUpperCase()
               : null;
 
           if (check) {
-            provider.push('MERCURYO');
+            provider.push("MERCURYO");
           }
         }
         if (selectedCoin.is_alchemy == 1) {
           const check =
-            type === 'BUY'
+            type === "BUY"
               ? selectedCoin.buy_alchemy_country
-                  ?.split(',')
+                  ?.split(",")
                   .includes(currency.name.toUpperCase())
                 ? currency.name.toUpperCase()
                 : null
               : selectedCoin.sell_alchemy_country
-                  ?.split(',')
+                  ?.split(",")
                   .includes(currency.name.toUpperCase())
               ? currency.name.toUpperCase()
               : null;
 
           if (check) {
-            provider.push('ALCHEMY');
+            provider.push("ALCHEMY");
           }
         }
         if (selectedCoin.is_simplex === 1) {
           const check =
-            type === 'BUY'
+            type === "BUY"
               ? selectedCoin.buy_simplex_country
-                  ?.split(',')
+                  ?.split(",")
                   .map((el) => el.toUpperCase())
                   .includes(currency.name.toUpperCase())
                 ? currency.name.toUpperCase()
@@ -407,63 +407,63 @@ function BuyCoins() {
               : null;
 
           if (check) {
-            provider.push('SIMPLEX');
+            provider.push("SIMPLEX");
           }
         }
         break;
-      case 'SELL':
+      case "SELL":
         if (selectedCoin.transak_sell == 1) {
           const check =
-            type === 'BUY'
+            type === "BUY"
               ? selectedCoin.buy_transak_country
-                  ?.split(',')
+                  ?.split(",")
                   .includes(currency.name.toUpperCase())
                 ? currency.name.toUpperCase()
                 : null
               : selectedCoin.sell_transak_country
-                  ?.split(',')
+                  ?.split(",")
                   .includes(currency.name.toUpperCase())
               ? currency.name.toUpperCase()
               : null;
 
           if (check) {
-            provider.push('TRANSAK');
+            provider.push("TRANSAK");
           }
         }
         if (selectedCoin.mercuryo_sell == 1) {
           const check =
-            type === 'BUY'
+            type === "BUY"
               ? selectedCoin.buy_mercuryo_country
-                  ?.split(',')
+                  ?.split(",")
                   .includes(currency.name.toUpperCase())
                 ? currency.name.toUpperCase()
                 : null
               : selectedCoin.sell_mercuryo_country
-                  ?.split(',')
+                  ?.split(",")
                   .includes(currency.name.toUpperCase())
               ? currency.name.toUpperCase()
               : null;
 
           if (check) {
-            provider.push('MERCURYO');
+            provider.push("MERCURYO");
           }
         }
         if (selectedCoin.alchemy_sell == 1) {
           const check =
-            type === 'BUY'
+            type === "BUY"
               ? selectedCoin.buy_alchemy_country
-                  ?.split(',')
+                  ?.split(",")
                   .includes(currency.name.toUpperCase())
                 ? currency.name.toUpperCase()
                 : null
               : selectedCoin.sell_alchemy_country
-                  ?.split(',')
+                  ?.split(",")
                   .includes(currency.name.toUpperCase())
               ? currency.name.toUpperCase()
               : null;
 
           if (check) {
-            provider.push('ALCHEMY');
+            provider.push("ALCHEMY");
           }
         }
         break;
@@ -479,16 +479,16 @@ function BuyCoins() {
 
   return (
     <div className={`scrollableCont ${style.send}`}>
-      {contextHolder}
-      <MenuRestofHeaders
-        backTo={'/wallet'}
-        title={account.isWatchOnly ? 'Buy' : 'Buy/Sell'}
-        coin={state ? (state.coin ? state.coin : null) : null}
-      />
-      <div className={`flexedContent`}>
-        <div className='search' style={{ marginBottom: '20px' }}>
+      <div className="searchBarFixed">
+        {contextHolder}
+        <MenuRestofHeaders
+          backTo={"/wallet"}
+          title={account.isWatchOnly ? "Buy" : "Buy/Sell"}
+          coin={state ? (state.coin ? state.coin : null) : null}
+        />
+        <div className="search">
           <InputField
-            placeholder={'Search'}
+            placeholder={"Search"}
             value={keyword}
             checkForSymbols={true}
             getData={(value) => {
@@ -514,15 +514,16 @@ function BuyCoins() {
                 <img
                   src={Search}
                   style={{
-                    width: '17px',
+                    width: "17px",
                   }}
-                  alt=''
+                  alt=""
                 />
               </span>
             }
           />
         </div>
-
+      </div>
+      <div className={`flexedContent`}>
         {filteredTokens.length > 0 ? (
           <CoinsTable
             dataArray={filteredTokens.map((token) => {
@@ -545,7 +546,7 @@ function BuyCoins() {
                 coinPrice: `${currency.symbol}${
                   myPrice.toNumber()
                     ? formatSmallNumber(myPrice.toString())
-                    : '0.00'
+                    : "0.00"
                 }`,
                 coinStatus: getFlooredFixed(
                   price
@@ -565,32 +566,32 @@ function BuyCoins() {
                           6
                         )
                       )
-                    )} ${token.coin_symbol.toUpperCase()}`
-                  : '****',
+                    )}`
+                  : "****",
                 currDollerBal: balanceIn
                   ? `${currency.symbol}${addCommasToNumber(
                       getFlooredFixed(formattedResult, 2)
                     )}`
-                  : '****',
-                routeTo: 'no-where',
+                  : "****",
+                routeTo: "no-where",
                 type:
                   token.coin_family === 1
-                    ? 'ETH'
+                    ? "ETH"
                     : token.coin_family === 3
-                    ? 'BNB'
+                    ? "BNB"
                     : token.coin_family === 7
-                    ? 'AVAX'
+                    ? "AVAX"
                     : token.coin_family === 6
-                    ? 'POL'
+                    ? "POL"
                     : token.coin_family === 8
-                    ? 'CRO'
+                    ? "CRO"
                     : token.coin_family === 4
-                    ? 'SOL'
+                    ? "SOL"
                     : token.coin_family === 2
-                    ? 'BTC'
+                    ? "BTC"
                     : token.coin_family === 5
-                    ? 'ADA'
-                    : 'ethereum',
+                    ? "ADA"
+                    : "ethereum",
                 status: true,
                 coin: token,
                 showModal,
@@ -599,11 +600,11 @@ function BuyCoins() {
           />
         ) : (
           <p
-            className='noAddress'
+            className="noAddress"
             style={{
-              marginTop: '50%',
-              fontWeight: 'bold',
-              fontSize: '17px',
+              marginTop: "50%",
+              fontWeight: "bold",
+              fontSize: "17px",
             }}
           >
             No assets found
@@ -613,13 +614,13 @@ function BuyCoins() {
 
       <Drawer
         // title={"Buy/Sell"}
-        placement='bottom'
-        title='Buy/Sell'
+        placement="bottom"
+        title="Buy/Sell"
         onClose={() => setSelectedCoin(null)}
         height={287}
         open={selectedCoin}
         closeIcon={
-          theme == 'darkTheme' ? (
+          theme == "darkTheme" ? (
             <img src={darkclose} />
           ) : (
             <img src={ModalCloseIcon} />
@@ -640,7 +641,7 @@ function BuyCoins() {
                     ? formatSmallNumber(
                         selectedCoin.coin_data.coins_market.current_price
                       )
-                    : '0.00'
+                    : "0.00"
                 }`,
                 coinStatus: getFlooredFixed(
                   selectedCoin.coin_data.coins_market
@@ -653,25 +654,25 @@ function BuyCoins() {
                 ),
                 currCryptoBal: ``,
                 currDollerBal: ``,
-                routeTo: 'no-where',
+                routeTo: "no-where",
                 type:
                   selectedCoin.coin_family === 1
-                    ? 'ETH'
+                    ? "ETH"
                     : selectedCoin.coin_family === 3
-                    ? 'BNB'
+                    ? "BNB"
                     : selectedCoin.coin_family === 7
-                    ? 'AVAX'
+                    ? "AVAX"
                     : selectedCoin.coin_family === 6
-                    ? 'POL'
+                    ? "POL"
                     : selectedCoin.coin_family === 8
-                    ? 'CRO'
+                    ? "CRO"
                     : selectedCoin.coin_family === 4
-                    ? 'SOL'
+                    ? "SOL"
                     : selectedCoin.coin_family === 2
-                    ? 'BTC'
+                    ? "BTC"
                     : selectedCoin.coin_family === 5
-                    ? 'ADA'
-                    : 'ethereum',
+                    ? "ADA"
+                    : "ethereum",
                 status: true,
                 coin: selectedCoin,
                 showModal,
@@ -681,40 +682,40 @@ function BuyCoins() {
         ) : null}
 
         <div
-          className='buttons'
+          className="buttons"
           style={{
-            marginTop: selectedCoin ? '30px' : '0px',
-            display: 'flex',
-            width: '100%',
-            justifyContent: 'center',
-            alignItems: 'center',
-            position: 'relative',
-            top: '28px',
+            marginTop: selectedCoin ? "30px" : "0px",
+            display: "flex",
+            width: "100%",
+            justifyContent: "center",
+            alignItems: "center",
+            position: "relative",
+            top: "28px",
           }}
         >
           <div
-            className='green'
+            className="green"
             style={{
-              padding: '12px 53px',
-              backgroundColor: 'green',
-              color: 'white',
-              fontSize: '18px',
-              borderRadius: '7px',
-              marginRight: '10px',
-              cursor: 'pointer',
+              padding: "12px 53px",
+              backgroundColor: "green",
+              color: "white",
+              fontSize: "18px",
+              borderRadius: "7px",
+              marginRight: "10px",
+              cursor: "pointer",
             }}
             onClick={async () => {
-              const myNew = await checkIfAvailableAndSendIt('BUY');
-              console.log('myNewmyNewmyNewmyNewmyNewmyNewmyNew ', myNew);
+              const myNew = await checkIfAvailableAndSendIt("BUY");
+              console.log("myNewmyNewmyNewmyNewmyNewmyNewmyNew ", myNew);
 
               if (myNew.provider.length === 0) {
                 return messageApi.error(
-                  'This coin is not supported for purchase.'
+                  "This coin is not supported for purchase."
                 );
               }
-              return navigate('/enter-price', {
+              return navigate("/enter-price", {
                 state: {
-                  type: 'BUY',
+                  type: "BUY",
                   coin: myNew,
                   balanceDetail: null,
                 },
@@ -725,26 +726,26 @@ function BuyCoins() {
           </div>
           {account.isWatchOnly ? null : (
             <div
-              className='red'
+              className="red"
               style={{
-                padding: '12px 53px',
-                backgroundColor: 'red',
-                color: 'white',
-                fontSize: '18px',
-                borderRadius: '7px',
-                marginLeft: '10px',
-                cursor: 'pointer',
+                padding: "12px 53px",
+                backgroundColor: "red",
+                color: "white",
+                fontSize: "18px",
+                borderRadius: "7px",
+                marginLeft: "10px",
+                cursor: "pointer",
               }}
               onClick={async () => {
-                const myNew = await checkIfAvailableAndSendIt('SELL');
+                const myNew = await checkIfAvailableAndSendIt("SELL");
 
                 if (myNew.provider.length === 0) {
-                  return messageApi.error('Coin not supported for sell.');
+                  return messageApi.error("Coin not supported for sell.");
                 }
 
-                return navigate('/enter-price', {
+                return navigate("/enter-price", {
                   state: {
-                    type: 'SELL',
+                    type: "SELL",
                     coin: myNew,
                     balanceDetail: null,
                   },

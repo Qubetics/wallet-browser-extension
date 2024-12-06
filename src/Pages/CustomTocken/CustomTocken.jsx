@@ -14,7 +14,7 @@ import { WalletHelper } from '../../helpers/wallet.helper';
 import { store } from '../..';
 import { setLoading } from '../../actions/loading';
 import { SolanaHelper } from '../../helpers/solana.helper';
-// import { AdaHelper } from '../../helpers/ada.helper';
+import { AdaHelper } from '../../helpers/ada.helper';
 import ModalCloseIcon from '../../Assets/ModalCloseIcon.svg';
 import Copy from '../../Assets/CopyIconBlue.svg';
 import navigateiCON from '../../Assets/topnavigate.svg';
@@ -175,28 +175,13 @@ function CustomTocken() {
     try {
       store.dispatch(setLoading(true));
 
-      if (selectedChain.coinFamily == 5) {
-        const { data } = await server.post(
-          // '/wallet/assets_of_ada_by_policy_id',
-          '/ada/assets/policy_id',
-          {
-            policy_id: address,
-          },
-          {
-            headers: {
-              Authorization: account.jwtToken,
-            },
-          }
-        );
-
-        setPolicyToken(data.data);
-        setOpen(true);
-        store.dispatch(setLoading(false));
-        return;
-      }
-
-      const tokenData = await server.get(
-        `/wallet/token/search?coin_family=${selectedChain.coinFamily}&token_address=${address}`,
+      const tokenData = await server.post(
+        `/wallet/search`,
+        {
+          tokenAddress: address,
+          coinFamily: selectedChain.coinFamily,
+          coin_symbol: '',
+        },
         {
           headers: {
             Authorization: account.jwtToken,
@@ -204,15 +189,11 @@ function CustomTocken() {
         }
       );
 
-      if (selectedChain.coinFamily != 5) {
-        setTokenInfo({
-          name: tokenData.data.data.coin_name,
-          symbol: tokenData.data.data.coin_symbol,
-          decimals: tokenData.data.data.decimals,
-          image: tokenData.data.data.coin_image,
-        });
-      } else {
-      }
+      setTokenInfo({
+        name: tokenData.data.data.name,
+        symbol: tokenData.data.data.symbol,
+        decimals: tokenData.data.data.decimals,
+      });
 
       store.dispatch(setLoading(false));
     } catch (error) {
@@ -394,33 +375,20 @@ function CustomTocken() {
                     return messageApi.error('Please enter a valid policy id.');
                   }
                 }
-                if (state) {
-                  if (state.swap) {
-                    if (selectedChain.coinFamily === 1) {
-                      return setModalEth(true);
-                    }
-                    return setModal(true);
-                  }
-                }
+
 
                 store.dispatch(setLoading(true));
                 await server.post(
-                  '/wallet/token/add',
+                  '/wallet/addtoken',
                   {
+                    name: tokenInfo.name,
+                    symbol: tokenInfo.symbol,
+                    decimals: tokenInfo.decimals,
+                    token_address: tokenAddress,
                     coin_family: selectedChain.coinFamily,
-                    token_address: assetAddress ? assetAddress : tokenAddress,
-                    coin_name: tokenInfo.name,
-                    coin_symbol: tokenInfo.symbol,
-                    decimals: tokenInfo.decimals.toString(),
-                    wallet_address:
-                      account.coinFamilyAndAddress[selectedChain.coinFamily],
-                    policy_id:
-                      selectedChain.coinFamily == 5 ? tokenAddress : undefined,
-                    evm_address: account.isWatchOnly
-                      ? undefined
-                      : account.address,
-                    is_watch_only: account?.isWatchOnly ? 1 : 0,
-                    wallet_name: account?.name,
+                    wallet_address: account.coinFamilyAndAddress[selectedChain.coinFamily],
+                    wallet_name: account.name,
+                    token_type: selectedChain.tokenType,
                   },
                   {
                     headers: {
@@ -429,16 +397,6 @@ function CustomTocken() {
                   }
                 );
                 store.dispatch(setLoading(false));
-                if (state) {
-                  if (state.swap) {
-                    return navigate('/swap', {
-                      state: {
-                        tokenAddress,
-                        fromOrTo: state.selected,
-                      },
-                    });
-                  }
-                }
                 messageApi.success('Token added successfully');
                 return navigate('/wallet');
               } catch (error) {
@@ -600,7 +558,9 @@ function CustomTocken() {
               }}
               alt=''
               onClick={() => {
-                navigator.clipboard.writeText(selectURL(selectedChain.coinFamily));
+                navigator.clipboard.writeText(
+                  selectURL(selectedChain.coinFamily)
+                );
                 messageApi.success('Link Copied.');
               }}
             />
@@ -784,7 +744,9 @@ function CustomTocken() {
               alt=''
               onClick={() => {
                 console.log(selectURL(selectedChain.coinFamily));
-                navigator.clipboard.writeText(selectURL(selectedChain.coinFamily));
+                navigator.clipboard.writeText(
+                  selectURL(selectedChain.coinFamily)
+                );
                 messageApi.success('Link Copied.');
               }}
             />

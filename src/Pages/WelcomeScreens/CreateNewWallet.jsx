@@ -54,7 +54,7 @@ function CreateNewWallet() {
       <div className='setPassword__footerbuttons'>
         <ButtonComp
           onClick={() => {
-            navigate(create ? '/walletListing' : '/');
+            navigate(create ? '/wallet' : '/');
           }}
           text={'Back'}
           bordered={true}

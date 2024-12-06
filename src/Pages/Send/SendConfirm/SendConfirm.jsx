@@ -1,32 +1,32 @@
 /*global chrome*/
 
-import { message } from "antd";
-import moment from "moment";
-import React from "react";
-import { useEffect } from "react";
-import { useState } from "react";
-import { useSelector } from "react-redux";
-import { useLocation, useNavigate } from "react-router-dom";
-import { store } from "../../..";
-import { setLoading } from "../../../actions/loading";
-import MenuRestofHeaders from "../../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders";
-import ButtonComp from "../../../Components/ButtonComp/ButtonComp";
-import InputFieldSimple from "../../../Components/InputField/InputFieldSimple";
-import ModalCustom from "../../../Components/ModalCustom/ModalCustom";
-import { DURATION } from "../../../config/message.config";
-// import { AdaHelper } from "../../../helpers/ada.helper";
-import { BTCHelper } from "../../../helpers/btc.helper";
-import { SolanaHelper } from "../../../helpers/solana.helper";
-import { Web3Helper } from "../../../helpers/web3.helper";
-import "./SendConfirm.scss";
-import warning from "../../../Assets/PNG/warning.png";
-import DarkLogo from "../../../Assets/DarkLogo.svg";
-import Logo from "../../../Assets/Logo.png";
+import { message } from 'antd';
+import moment from 'moment';
+import React from 'react';
+import { useEffect } from 'react';
+import { useState } from 'react';
+import { useSelector } from 'react-redux';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { store } from '../../..';
+import { setLoading } from '../../../actions/loading';
+import MenuRestofHeaders from '../../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders';
+import ButtonComp from '../../../Components/ButtonComp/ButtonComp';
+import InputFieldSimple from '../../../Components/InputField/InputFieldSimple';
+import ModalCustom from '../../../Components/ModalCustom/ModalCustom';
+import { DURATION } from '../../../config/message.config';
+import { AdaHelper } from '../../../helpers/ada.helper';
+import { BTCHelper } from '../../../helpers/btc.helper';
+import { SolanaHelper } from '../../../helpers/solana.helper';
+import { Web3Helper } from '../../../helpers/web3.helper';
+import './SendConfirm.scss';
+import warning from '../../../Assets/PNG/warning.png';
+import DarkLogo from '../../../Assets/DarkLogo.svg';
+import Logo from '../../../Assets/Logo.png';
 import {
   addCommasToNumber,
   getFlooredFixed,
-} from "../../../helpers/conversion.helper";
-import { server } from "../../../server";
+} from '../../../helpers/conversion.helper';
+import { server } from '../../../server';
 
 function SendConfirm() {
   const {
@@ -77,17 +77,17 @@ function SendConfirm() {
   const init = async () => {
     store.dispatch(setLoading(true));
 
-    const price = coin.coin_data.coins_market || 0;
+    const price = coin.coin.fiat_price_data || 0;
 
     if (price) {
-      const value = parseFloat(amount) * parseFloat(price.current_price);
+      const value = parseFloat(amount) * parseFloat(price.value);
       setFiatCoin(value);
     }
 
     const parentCoin = await server.post(
-      "/wallet/coin/coins_market_data",
+      '/wallet/nativeCoinFiatPrice',
       {
-        coin_family: coin.coin_data.coin_family,
+        coin_family: coin.coin.coin_family,
         fiat_currency: currency.name,
       },
       {
@@ -97,11 +97,16 @@ function SendConfirm() {
       }
     );
 
-    setParentCoin(parentCoin.data.data);
-    const feePrice = parentCoin.data.data.coins_market;
+    const { chains } = await chrome.storage.local.get('chains');
+    const chain = chains.find(
+      (chain) => chain.coinFamily === coin.coin.coin_family
+    );
+
+    setParentCoin(chain);
+    const feePrice = parentCoin.data.data.fiatCoinPrice;
 
     if (feePrice) {
-      const value = parseFloat(networkFee) * parseFloat(feePrice.current_price);
+      const value = parseFloat(networkFee) * parseFloat(feePrice.value);
       setFiatGasFee(value);
     }
 
@@ -116,14 +121,14 @@ function SendConfirm() {
 
   const data = [
     {
-      text: "From",
-      textVal: `${coin.address.substring(0, 7)}.....${coin.address.substring(
-        to.length - 7,
-        to.length
-      )}`,
+      text: 'From',
+      textVal: `${coin.wallet_address.substring(
+        0,
+        7
+      )}.....${coin.wallet_address.substring(to.length - 7, to.length)}`,
     },
     {
-      text: "To",
+      text: 'To',
       textVal: toName
         ? toName
         : ENSName
@@ -131,30 +136,30 @@ function SendConfirm() {
         : `${to.substring(0, 7)}.....${to.substring(to.length - 7, to.length)}`,
     },
     {
-      text: "Network Fee",
+      text: 'Network Fee',
       textVal: `${parseFloat(getFlooredFixed(+networkFee, 8))} ${
-        parentCoin ? parentCoin.coin_symbol.toUpperCase() : ""
+        parentCoin ? parentCoin.currencySymbol.toUpperCase() : ''
       }/ ${currency.symbol}${addCommasToNumber(
         getFlooredFixed(fiatGasFee, 4)
       )}`,
     },
     {
-      text: "Total value",
-      textVal: coin.coin_data.token_address
+      text: 'Total value',
+      textVal: coin.coin.token_address
         ? `${addCommasToNumber(
             parseFloat(getFlooredFixed(amount, 8))
-          )} ${coin.coin_data.coin_symbol.toUpperCase()}/ ${
+          )} ${coin.coin.coin_symbol.toUpperCase()}/ ${
             currency.symbol
           }${addCommasToNumber(getFlooredFixed(+fiatGasFee + +fiatCoin, 2))}`
         : `${addCommasToNumber(
             parseFloat(getFlooredFixed(+amount + +networkFee, 8))
-          )} ${coin.coin_data.coin_symbol.toUpperCase()}/ ${
+          )} ${coin.coin.coin_symbol.toUpperCase()}/ ${
             currency.symbol
           }${addCommasToNumber(getFlooredFixed(+fiatGasFee + +fiatCoin, 2))}`,
     },
     {
-      text: "Date",
-      textVal: moment(new Date()).format("MM/DD/YY"),
+      text: 'Date',
+      textVal: moment(new Date()).format('MM/DD/YY'),
     },
   ];
 
@@ -162,172 +167,61 @@ function SendConfirm() {
     try {
       store.dispatch(setLoading(true));
 
-      const { chains } = await chrome.storage.local.get("chains");
+      const { chains } = await chrome.storage.local.get('chains');
       const chain = chains.find(
-        (chain) => chain.coinFamily === coin.coin_data.coin_family
+        (chain) => chain.coinFamily === coin.coin.coin_family
       );
 
       if (chain.isEVM) {
-        if (coin.coin_data.token_address) {
+        if (coin.coin.token_address) {
           const response =
             await Web3Helper.generateRawTransactionForTokenAndBroadcast(
               to,
-              coin.address,
+              coin.wallet_address,
               amount,
-              coin.coin_data.id,
+              coin.coin.oin_id,
               fiatCoin,
               fiatGasFee,
               currency.name,
               toName,
               chain.slug,
               chain.chainId,
-              coin.coin_data.token_address,
-              coin.coin_data.decimals,
-              coin.coin_data.token_type
+              coin.coin.token_address,
+              coin.coin.decimals,
+              coin.coin.token_type
             );
 
           if (!response) {
             store.dispatch(setLoading(false));
             return messageApi.error(
-              "Insufficient funds to perform transaction."
+              'Insufficient funds to perform transaction.'
             );
           }
         } else {
           const response =
             await Web3Helper.generateRawTransactionForCoinAndBroadcast(
               to,
-              coin.address,
+              coin.wallet_address,
               amount,
-              coin.coin_data.id,
-              fiatCoin,
-              fiatGasFee,
-              currency.name,
-              toName,
-              chain.slug,
-              chain.chainId
-            );
-
-          if (!response) {
-            store.dispatch(setLoading(false));
-            return messageApi.error(
-              "Insufficient funds to perform transaction."
-            );
-          }
-        }
-      } else if (!chain.isEVM && chain.currencyName === "SOL") {
-        const solanaHelper = new SolanaHelper(chain.rpcUrl);
-        if (coin.coin_data.token_address) {
-          const response =
-            await solanaHelper.generateRawTransactionForTokenAndBroadcast(
-              to,
-              coin.address,
-              amount,
-              coin.coin_data.id,
+              coin.coin.coin_id,
               fiatCoin,
               fiatGasFee,
               currency.name,
               toName,
               chain.slug,
               chain.chainId,
-              coin.coin_data.token_address,
-              coin.coin_data.decimals,
-              coin.coin_data.token_type,
-              coin.balance
+              coin.coin.coin_symbol,
+              coin.coin.coin_family == 1
+                ? process.env.REACT_APP_BNB_RPC
+                : coin.coin.coin_family == 2
+                ? process.env.REACT_APP_ETH_RPC
+                : process.env.REACT_APP_MATIC_RPC
             );
-          if (!response) {
-            store.dispatch(setLoading(false));
-            return messageApi.error(
-              "Insufficient funds to perform transaction."
-            );
-          }
-        } else {
-          const response =
-            await solanaHelper.generateRawTransactionForCoinAndBroadcast(
-              to,
-              coin.address,
-              amount,
-              coin.coin_data.id,
-              fiatCoin,
-              fiatGasFee,
-              currency.name,
-              toName,
-              chain.slug,
-              chain.chainId
-            );
-          if (!response) {
-            store.dispatch(setLoading(false));
-            return messageApi.error(
-              "Insufficient funds to perform transaction."
-            );
-          }
-        }
-      } else if (!chain.isEVM && chain.currencyName === "BTC") {
-        let tx_fee = parseFloat(getFlooredFixed(+networkFee, 8));
-        const response =
-          await BTCHelper.generateRawTransactionForCoinAndBroadcast(
-            to,
-            coin.address,
-            amount,
-            coin.coin_data.id,
-            fiatCoin,
-            fiatGasFee,
-            currency.name,
-            toName,
-            chain.slug,
-            chain.chainId,
-            rawTransaction,
-            tx_fee
-          );
-
-        if (!response) {
-          store.dispatch(setLoading(false));
-          return messageApi.error("Insufficient funds to perform transaction.");
-        }
-      } else if (!chain.isEVM && chain.currencyName === "ADA") {
-        if (coin.coin_data.token_address) {
-          const response = null;
-            // await AdaHelper.generateRawTransactionForTokenAndBroadcast(
-            //   to,
-            //   coin.address,
-            //   amount,
-            //   coin.coin_data.id,
-            //   fiatCoin,
-            //   fiatGasFee,
-            //   currency.name,
-            //   toName,
-            //   chain.slug,
-            //   chain.chainId,
-            //   networkFee,
-            //   coin.coin_data.coin_name,
-            //   coin.coin_data.token_address
-            // );
 
           if (!response) {
             store.dispatch(setLoading(false));
             return messageApi.error(
-              "Insufficient funds to perform transaction."
-            );
-          }
-        } else {
-          const response = null;
-            // await AdaHelper.generateRawTransactionForCoinAndBroadcast(
-            //   to,
-            //   coin.address,
-            //   amount,
-            //   coin.coin_data.id,
-            //   fiatCoin,
-            //   fiatGasFee,
-            //   currency.name,
-            //   toName,
-            //   chain.slug,
-            //   chain.chainId,
-            //   networkFee
-            // );
-
-          if (!response) {
-            store.dispatch(setLoading(false));
-            return messageApi.error(
-              "Insufficient funds to perform transaction."
+              'Insufficient funds to perform transaction.'
             );
           }
         }
@@ -337,7 +231,7 @@ function SendConfirm() {
       setOpenmodal(false);
       setIsModalOpen1(true);
     } catch (error) {
-      console.log("HANDLE TRANSACTION CARDANO ", error);
+      console.log('HANDLE TRANSACTION CARDANO ', error);
       setOpenmodal(false);
     }
   };
@@ -346,19 +240,19 @@ function SendConfirm() {
     <div className={`scrollableCont`}>
       {contextHolder}
       <MenuRestofHeaders
-        backTo={"/sendCurrency"}
-        title={`Send ${coin.coin_data.coin_symbol.toUpperCase()}`}
+        backTo={'/sendCurrency'}
+        title={`Send ${coin.coin.coin_symbol.toUpperCase()}`}
         coin={coin}
         amount={amount}
         address={to}
         redirectTo={redirectTo}
       />
       <div className={`flexedContent`}>
-        <div className="confirmCurrency">
+        <div className='confirmCurrency'>
           <div
-            className="confirmCurrency__card"
+            className='confirmCurrency__card'
             style={{
-              display: "flex",
+              display: 'flex',
             }}
           >
             <div
@@ -366,41 +260,41 @@ function SendConfirm() {
                 flex: 2,
               }}
             >
-              <h3 className="confirmCurrency__card__textTop">
-                {addCommasToNumber(getFlooredFixed(amount, 5))}{" "}
-                {coin.coin_data.coin_symbol.toUpperCase()}
+              <h3 className='confirmCurrency__card__textTop'>
+                {addCommasToNumber(getFlooredFixed(amount, 5))}{' '}
+                {coin.coin.coin_symbol.toUpperCase()}
               </h3>
-              <p className="confirmCurrency__card__textBtm">
+              <p className='confirmCurrency__card__textBtm'>
                 {currency.symbol}
                 {addCommasToNumber(getFlooredFixed(fiatCoin, 2))}
               </p>
             </div>
             <div
               style={{
-                display: "flex",
+                display: 'flex',
                 flex: 1,
-                justifyContent: "center",
-                alignItems: "center",
+                justifyContent: 'center',
+                alignItems: 'center',
               }}
             >
-              {coin.coin_data.coin_image ? (
+              {coin.coin.coin_image ? (
                 <img
-                  src={`${process.env.REACT_APP_IMAGE_BASE_URL}${coin.coin_data.coin_image}`}
-                  alt=""
+                  src={coin.coin.coin_image}
+                  alt=''
                   style={{
-                    width: "50px",
+                    width: '50px',
                   }}
                 />
               ) : null}
             </div>
           </div>
-          <div className="confirmCurrency__keyValuesOuter">
+          <div className='confirmCurrency__keyValuesOuter'>
             {data.map((ele) => (
-              <div className="confirmCurrency__keyValues">
-                <div className="confirmCurrency__keyValues__key">
+              <div className='confirmCurrency__keyValues'>
+                <div className='confirmCurrency__keyValues__key'>
                   {ele.text}
                 </div>
-                <div className="confirmCurrency__keyValues__value">
+                <div className='confirmCurrency__keyValues__value'>
                   {ele.textVal}
                 </div>
               </div>
@@ -410,37 +304,35 @@ function SendConfirm() {
             onClick={async () => {
               setOpenmodal(true);
             }}
-            text={"Confirm"}
-            maxWidth={"100%"}
+            text={'Confirm'}
+            maxWidth={'100%'}
           />
         </div>
       </div>
 
       <ModalCustom
-        title={"Confirm Transaction"}
+        title={'Confirm Transaction'}
         handleCancel={handleCancel}
         isModalOpen={isModalOpen}
         handleOk={handleOk}
-        customClass="customClassModal"
+        customClass='customClassModal'
       >
-        <div className="viewphrases">
+        <div className='viewphrases'>
           <InputFieldSimple
-            placeholder="Password"
+            placeholder='Password'
             getData={setPassword}
             value={sessionPassword}
-            customFunction={
-              async () => {
-                const { password } = await chrome.storage.session.get("password");
-  
-                if (sessionPassword !== password) {
-                  return messageApi.error("Incorrect password provided.");
-                }
-  
-                handleTransaction();
+            customFunction={async () => {
+              const { password } = await chrome.storage.session.get('password');
+
+              if (sessionPassword !== password) {
+                return messageApi.error('Incorrect password provided.');
               }
-            }
+
+              handleTransaction();
+            }}
           />
-          <div className="viewphrases__iInner">
+          <div className='viewphrases__iInner'>
             <img src={warning} />
             <div>
               <p>Do not share your password with anyone!</p>
@@ -448,13 +340,13 @@ function SendConfirm() {
             </div>
           </div>
           <ButtonComp
-            text={"Proceed"}
-            maxWidth={"100%"}
+            text={'Proceed'}
+            maxWidth={'100%'}
             onClick={async () => {
-              const { password } = await chrome.storage.session.get("password");
+              const { password } = await chrome.storage.session.get('password');
 
               if (sessionPassword !== password) {
-                return messageApi.error("Incorrect password provided.");
+                return messageApi.error('Incorrect password provided.');
               }
 
               handleTransaction();
@@ -468,38 +360,42 @@ function SendConfirm() {
         handleCancel={handleCancel1}
         isModalOpen={isModalOpen1}
         handleOk={handleOk1}
-        customClass="customClassModal"
+        customClass='customClassModal'
         closable={false}
       >
-        <div className={"confirmationsModal"}>
-          <div className={"iInner"}>
-            {theme == "darkTheme" ? (
-              <img src={DarkLogo} alt="" />
+        <div className={'confirmationsModal'}>
+          <div className={'iInner'}>
+            {theme == 'darkTheme' ? (
+              <img src={DarkLogo} alt='' />
             ) : (
-              <img src={Logo} alt="" style={{
-                width: "100px"
-              }} />
+              <img
+                src={Logo}
+                alt=''
+                style={{
+                  width: '100px',
+                }}
+              />
             )}
             <div>
               <p>
-                Withdraw request of{" "}
-                {addCommasToNumber(getFlooredFixed(amount, 5))}{" "}
-                {coin.coin_data.coin_symbol.toUpperCase()} has been processed
+                Withdraw request of{' '}
+                {addCommasToNumber(getFlooredFixed(amount, 5))}{' '}
+                {coin.coin.coin_symbol.toUpperCase()} has been processed
                 successfully.
               </p>
             </div>
           </div>
           <ButtonComp
-            text={"OK"}
-            maxWidth={"100%"}
+            text={'OK'}
+            maxWidth={'100%'}
             onClick={() => {
-              return navigate("/currencyDetails", {
+              return navigate('/currencyDetails', {
                 state: {
-                  symbol: coin.coin_data.coin_symbol.toUpperCase(),
-                  image: coin.coin_data.coin_image
-                    ? `${process.env.REACT_APP_IMAGE_BASE_URL}${coin.coin_data.coin_image}`
+                  symbol: coin.coin.coin_symbol.toUpperCase(),
+                  image: coin.coin.coin_image
+                    ? `${process.env.REACT_APP_IMAGE_BASE_URL}${coin.coin.coin_image}`
                     : null,
-                  type: "",
+                  type: '',
                   coin: coin,
                 },
               });

@@ -1,13 +1,13 @@
 /*global chrome*/
-import React, { useEffect, useState } from "react";
-import "./ManageCustom.scss";
+import React, { useEffect, useState } from 'react';
+import './ManageCustom.scss';
 
-import { message, Switch } from "antd";
-import { useSelector } from "react-redux";
-import { store } from "../..";
-import { setLoading } from "../../actions/loading";
-import { server } from "../../server";
-import { WalletHelper } from "../../helpers/wallet.helper";
+import { message, Switch } from 'antd';
+import { useSelector } from 'react-redux';
+import { store } from '../..';
+import { setLoading } from '../../actions/loading';
+import { server } from '../../server';
+import { WalletHelper } from '../../helpers/wallet.helper';
 
 function ManageCustom(props) {
   const [messageApi, contextHolder] = message.useMessage();
@@ -28,65 +28,51 @@ function ManageCustom(props) {
 
   const [newStatus, setStatus] = useState(null);
 
-  let network = "";
+  let network = '';
 
   switch (coin.coin_family) {
     case 1:
-      network = "ETH";
+      network = 'ETH';
       break;
     case 3:
-      network = "BNB";
+      network = 'BNB';
       break;
     case 7:
-      network = "AVAX";
+      network = 'AVAX';
       break;
     case 6:
-      network = "POL";
+      network = 'POL';
       break;
     case 8:
-      network = "CRO";
+      network = 'CRO';
       break;
     case 4:
-      network = "SOL";
+      network = 'SOL';
       break;
     case 2:
-      network = "BTC";
+      network = 'BTC';
       break;
     case 5:
-      network = "ADA";
+      network = 'ADA';
       break;
     case 9:
-      network = "PLS";
+      network = 'PLS';
       break;
     default:
-      network = "ethereum";
+      network = 'ethereum';
       break;
   }
 
   const onChange = async (checked) => {
     try {
       store.dispatch(setLoading(true));
-      const { deviceId } = chrome.storage.local.get("deviceId");
 
       await server.post(
-        "/wallet/manage_coins",
+        '/wallet/activeinactive',
         {
-          coin_id: id,
-          coin_family: coinFamily,
-          wallet_address: walletAddress,
-          is_active: checked ? 1 : 0,
-          evm_address: account.isWatchOnly
-            ? walletAddress
-            : account.coinFamilyAndAddress[1],
-          coin_type: account.isWatchOnly
-            ? "old"
-            : coin.wallet_addresses_data
-            ? "old"
-            : "new",
-          device_token: coin.wallet_addresses_data ? undefined : deviceId,
-          device_type: coin.wallet_addresses_data ? undefined : "WEB",
-          is_watch_only: account?.isWatchOnly ? 1 : 0,
-          wallet_name: account?.name
+          coinId: coin.coin_id,
+          walletAddress: walletAddress,
+          isActive: checked ? 1 : 0,
         },
         {
           headers: {
@@ -95,17 +81,11 @@ function ManageCustom(props) {
         }
       );
 
-      console.log(
-        currency.toUpperCase() === network.toUpperCase(),
-        currency,
-        network
-      );
-
       store.dispatch(setLoading(false));
       setStatus(checked);
     } catch (error) {
       store.dispatch(setLoading(false));
-      return messageApi.error("Something went wrong.");
+      return messageApi.error('Something went wrong.');
     }
   };
 
@@ -116,56 +96,56 @@ function ManageCustom(props) {
 
   return (
     <>
-      <div className="manageList">
+      <div className='manageList'>
         {contextHolder}
-        <div className="manageList__imgcurrency">
+        <div className='manageList__imgcurrency'>
           {img ? (
-            <img src={img} alt="" />
+            <img src={img} alt='' />
           ) : (
             <div
-              className="randb extra borderDarkLight"
+              className='randb extra borderDarkLight'
               style={{
-                height: "30px",
-                width: "30px",
-                background: "rgb(202, 201, 201)",
-                borderRadius: "50%",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                border: "1px solid",
+                height: '30px',
+                width: '30px',
+                background: 'rgb(202, 201, 201)',
+                borderRadius: '50%',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                border: '1px solid',
               }}
             >
-              {symbol.split("")[0].toUpperCase()}
+              {symbol.split('')[0].toUpperCase()}
             </div>
           )}
 
           <div
-            className="manageList__imgcurrency_Name"
+            className='manageList__imgcurrency_Name'
             style={{
-              textAlign: "left",
+              textAlign: 'left',
             }}
           >
             <p
               style={{
-                width: "100px",
-                textOverflow: "ellipsis",
-                overflow: "hidden",
+                width: '100px',
+                textOverflow: 'ellipsis',
+                overflow: 'hidden',
               }}
             >
               {currency}
-              {valuecurrency !== "" ? "/" : ""}
+              {valuecurrency !== '' ? '/' : ''}
               <span
                 style={{
-                  marginLeft: "10px",
+                  marginLeft: '10px',
                 }}
               >
                 {valuecurrency}
               </span>
             </p>
             <span
-              className="coinNname"
+              className='coinNname'
               style={{
-                marginTop: "10px",
+                marginTop: '10px',
               }}
             >
               {name}
@@ -174,17 +154,17 @@ function ManageCustom(props) {
         </div>
         <div
           style={{
-            display: "flex",
-            flexDirection: "column",
-            position: "relative",
-            top: "14px",
+            display: 'flex',
+            flexDirection: 'column',
+            position: 'relative',
+            top: '14px',
           }}
         >
           <Switch checked={newStatus} onChange={onChange} />
           <span
-            className="networkNameNew"
+            className='networkNameNew'
             style={{
-              marginTop: "3px",
+              marginTop: '3px',
             }}
           >
             {network}

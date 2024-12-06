@@ -71,7 +71,7 @@ function EnterPrice() {
       {contextHolder}
       <div className={`scrollableCont`}>
         <MenuRestofHeaders
-          backTo={"/buy-coins"}
+          backTo={"/buy-sell"}
           title={`Enter ${type.toLowerCase()} amount`}
           coin={balanceDetail || null}
         />

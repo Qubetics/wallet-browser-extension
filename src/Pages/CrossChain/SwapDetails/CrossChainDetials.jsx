@@ -47,10 +47,9 @@ function addCommasToNumber(number) {
 }
 
 function CrossChainDetails() {
-  const { chain, account, currency, theme, path } = useSelector(
+  const { chain, account, currency, theme } = useSelector(
     (state) => state
   );
-  const { state } = useLocation();
   const {
     state: {
       token1,
@@ -62,6 +61,8 @@ function CrossChainDetails() {
       walletAddress,
       token1Price,
       parentCoin,
+      rpc,
+      coinSymbol
     },
   } = useLocation();
 
@@ -119,7 +120,9 @@ function CrossChainDetails() {
       tokenChain,
       networkFee,
       token1Price,
-      parentCoin
+      parentCoin,
+      rpc,
+      coinSymbol
     );
 
     if (!data) {
@@ -225,7 +228,7 @@ function CrossChainDetails() {
                 {addCommasToNumber(getFlooredFixed(networkFee, 5))}{' '}
                 {tokenChain.currencySymbol} / ({currency.symbol}{' '}
                 {addCommasToNumber(
-                  getFlooredFixed(parentCoin.current_price * networkFee, 2)
+                  getFlooredFixed(parentCoin.value * networkFee, 2)
                 )}
                 )
               </p>

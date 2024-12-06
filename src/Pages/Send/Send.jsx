@@ -9,6 +9,7 @@ import Search from '../../Assets/SearchIcon.svg';
 import BigNumber from 'bignumber.js';
 import {
   addCommasToNumber,
+  exponential_to_decimal,
   formatSmallNumber,
   getFlooredFixed,
 } from '../../helpers/conversion.helper';
@@ -29,24 +30,14 @@ function Send() {
   const init = async () => {
     store.dispatch(setLoading(true));
     const walletsList = await server.post(
-      `/wallet/tokens`,
+      `/wallet/portfolio`,
       {
-        address_list: account.addressLists,
+        addressListKeys: account.addressLists,
         coin_family: account.coinFamilies,
-        fiat_currency: currency.name,
-        per_page: 2000,
+        fiat_type: currency.name,
+        limit: 2000,
         page: 1,
-        search: keyword ? keyword.trim() : undefined,
-        is_watch_only: account.isWatchOnly ? 1 : 0,
-        wallet_name: account.name,
-        address_list_array: Object.keys(account.coinFamilyAndAddress)
-          .map((key) => {
-            return {
-              coin_family: key,
-              address: account.coinFamilyAndAddress[key],
-            };
-          })
-          .filter((el) => el.address),
+        search: '',
       },
       {
         headers: {
@@ -54,6 +45,7 @@ function Send() {
         },
       }
     );
+
     store.dispatch(setTokens(walletsList.data.data));
     store.dispatch(setLoading(false));
   };
@@ -80,13 +72,13 @@ function Send() {
 
   return (
     <div className={`scrollableCont ${style.send}`}>
-      <MenuRestofHeaders
-        backTo={'/wallet'}
-        title={'Send'}
-        coin={state ? (state.coin ? state.coin : null) : null}
-      />
-      <div className={`flexedContent`}>
-        <div className='search' style={{ marginBottom: '20px' }}>
+      <div className='searchBarFixed'>
+        <MenuRestofHeaders
+          backTo={'/wallet'}
+          title={'Send'}
+          coin={state ? (state.coin ? state.coin : null) : null}
+        />
+        <div className='search'>
           <InputField
             placeholder={'Search'}
             value={keyword}
@@ -107,26 +99,29 @@ function Send() {
             }
           />
         </div>
-
+      </div>
+      <div className={`flexedContent`}>
         {tokens.filter((el) => el.balance > 0).length > 0 ? (
           <CoinsTable
             dataArray={tokens
               .filter((el) => el.balance > 0)
               .map((token) => {
-                const price = token.coin_data.coins_market || null;
-                const myPrice = new BigNumber(price ? price.current_price : 0);
+                const price = token.coin.fiat_price_data || null;
+
+                const myPrice = new BigNumber(price ? price.value : 0);
                 const balance = new BigNumber(token.balance);
                 const result = myPrice.times(balance);
                 const formattedResult = result.toString();
 
                 return {
-                  coinIcon: token.coin_data.coin_image
-                    ? `${process.env.REACT_APP_IMAGE_BASE_URL}${token.coin_data.coin_image}`
-                    : null,
-                  coinName: token.coin_data.coin_symbol.toUpperCase(),
-                  coinSubName: token.coin_data.coin_name,
+                  position: token.sort_order,
+                  coinIcon: token.coin.coin_image,
+                  coinName: token.coin.coin_symbol.toUpperCase(),
+                  coinSubName: token.coin.coin_name,
                   coinPrice: myPrice.toNumber()
-                    ? formatSmallNumber(myPrice.toString())
+                    ? formatSmallNumber(
+                        exponential_to_decimal(myPrice.toNumber())
+                      )
                     : '0.00',
                   coinStatus: getFlooredFixed(
                     price
@@ -139,20 +134,14 @@ function Send() {
                   currCryptoBal: balanceIn
                     ? `${addCommasToNumber(
                         parseFloat(getFlooredFixed(token.balance, 6))
-                      )} ${token.coin_data.coin_symbol.toUpperCase()}`
-                    : '****',
+                      )}`
+                    : `****`,
+                  currCryptoBalSymbol: token.coin.coin_symbol.toUpperCase(),
                   currDollerBal: balanceIn
                     ? addCommasToNumber(getFlooredFixed(formattedResult, 2))
                     : '****',
                   routeTo: 'sendCurrency',
-                  type:
-                    token.coin_data.coin_symbol === 'bnb'
-                      ? 'BEP20'
-                      : token.coin_data.token_address
-                      ? token.coin_data.coin_family == 4
-                        ? 'SPL20'
-                        : token.coin_data.token_type
-                      : '',
+                  type: token.coin.coin_family === 1 ? 'BEP20' : 'ERC20',
                   status: true,
                   coin: token,
                 };

@@ -14,7 +14,6 @@ import { Web3Helper } from "../../helpers/web3.helper";
 import { ethers } from "ethers";
 import { PublicKey } from "@solana/web3.js";
 import { validate, getAddressInfo } from "bitcoin-address-validation";
-// import * as CardanoWASM from "@emurgo/cardano-serialization-lib-asmjs";
 import { store } from "../..";
 import { setLoading } from "../../actions/loading";
 import { WalletHelper } from "../../helpers/wallet.helper";
@@ -222,7 +221,7 @@ function WatchAddress() {
                     }
 
                     store.dispatch(setLoading(false));
-                    navigate("/walletListing");
+                    navigate("/wallet");
                   }}
                   // onClick={() => setActiveTab("/")}
                   text={"Proceed"}

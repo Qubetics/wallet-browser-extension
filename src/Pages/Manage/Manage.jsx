@@ -13,7 +13,7 @@ import { setLoading } from '../../actions/loading.js';
 import useCurrentHeight from '../../CustomHooks/useCurrentHeight.js';
 
 function Manage() {
-  const { account, chain, loading } = useSelector((state) => state);
+  const { account, chain, loading, currency } = useSelector((state) => state);
   const [keyword, setKeyword] = useState(null);
   const [filteredTokens, setFilteredTokens] = useState([]);
   const parentRef = useRef(null);
@@ -25,23 +25,14 @@ function Manage() {
   const init = async () => {
     store.dispatch(setLoading(true));
     const coinList = await server.post(
-      `/wallet/coins`,
+      `/wallet/toggleCoinList`,
       {
-        wallet_address: account.addressLists,
-        coin_family: account.coinFamilies,
-        limit: 50,
-        pagination: currentPage,
-        search: keyword ? keyword.trim() : undefined,
-        is_watch_only: account.isWatchOnly ? 1 : 0,
-        wallet_name: account.name,
-        address_list_array: Object.keys(account.coinFamilyAndAddress).map(
-          (key) => {
-            return {
-              coin_family: key,
-              address: account.coinFamilyAndAddress[key],
-            };
-          }
-        ).filter((el) => el.address),
+        addrsListKeys: account.addressLists,
+        coinFamilyKeys: account.coinFamilies,
+        page: currentPage,
+        limit: 25,
+        currency_code: currency.name,
+        search: keyword,
       },
       {
         headers: {
@@ -91,7 +82,7 @@ function Manage() {
     const tolerance = 15; // Adjust this value as needed
     const isAtBottom = scrollTop + clientHeight >= scrollHeight - tolerance;
 
-    if (isAtBottom && !isFetchingData && currentPage < Math.ceil(total / 50)) {
+    if (isAtBottom && !isFetchingData && currentPage < Math.ceil(total / 25)) {
       // Prevent loading more data if already refreshing or reached the last page
       setIsFetchingData(true);
       // Increment the currentPage state to load the next page
@@ -102,33 +93,26 @@ function Manage() {
   return (
     <div>
       <div className={`scrollableCont`}>
-        <MenuRestofHeaders
-          backTo={'/wallet'}
-          title={'Add Tokens'}
-          addIcon={
-            !(
-              filteredTokens.length === 1 &&
-              filteredTokens[0]?.coin_symbol === 'btc' &&
-              account.isWatchOnly
-            )
-              ? '/add-token'
-              : false
-          }
-        />
-        <div
-          className={`${'flexedContent'}`}
-          ref={parentRef}
-          onScroll={handleScroll}
-          style={{
-            height: height > 600 ? '622px' : '486px',
-          }}
-        >
+        <div className='searchBarFixed'>
+          <MenuRestofHeaders
+            backTo={'/wallet'}
+            title={'Add Tokens'}
+            addIcon={
+              !(
+                filteredTokens.length === 1 &&
+                filteredTokens[0]?.coin_symbol === 'btc' &&
+                account.isWatchOnly
+              )
+                ? '/add-token'
+                : false
+            }
+          />
           {!(
             filteredTokens.length === 1 &&
             filteredTokens[0]?.coin_symbol === 'btc' &&
             account.isWatchOnly
           ) ? (
-            <div className='search' style={{ marginBottom: '20px' }}>
+            <div className='search'>
               <InputField
                 placeholder={'Search'}
                 value={keyword}
@@ -153,6 +137,45 @@ function Manage() {
               />
             </div>
           ) : null}
+        </div>
+        <div
+          className={`${'flexedContent'}`}
+          ref={parentRef}
+          onScroll={handleScroll}
+          style={{
+            height: height > 600 ? '622px' : '486px',
+          }}
+        >
+          {/* {!(
+            filteredTokens.length === 1 &&
+            filteredTokens[0]?.coin_symbol === "btc" &&
+            account.isWatchOnly
+          ) ? (
+            <div className="search" style={{ marginBottom: "20px" }}>
+              <InputField
+                placeholder={"Search"}
+                value={keyword}
+                checkForSymbols={true}
+                addonBefore={
+                  <span>
+                    <img
+                      src={Search}
+                      style={{
+                        width: "17px",
+                        position: "relative",
+                        top: "2px",
+                      }}
+                      alt=""
+                    />
+                  </span>
+                }
+                getData={(value) => {
+                  setKeyword(value);
+                  setCurrentPage(1);
+                }}
+              />
+            </div>
+          ) : null} */}
 
           <div className={style.spacingbtn}>
             {filteredTokens.length > 0 ? (
@@ -161,26 +184,12 @@ function Manage() {
                   currency={data.coin_symbol.toUpperCase()}
                   name={data.coin_name}
                   symbol={data.coin_symbol}
-                  img={
-                    data.coin_image
-                      ? `${process.env.REACT_APP_IMAGE_BASE_URL}${data.coin_image}`
-                      : null
-                  }
-                  valuecurrency={
-                    data.token_type
-                      ? data.coin_family == 4
-                        ? 'SPL20'
-                        : data.coin_family == 9 
-                        ? 'PLS'
-                        : data.token_type
-                      : data.coin_symbol === 'bnb'
-                      ? 'BEP20'
-                      : ''
-                  }
+                  img={data.coin_image}
+                  valuecurrency={data.coin_family === 1 ? 'BEP20' : 'ERC20'}
                   id={data.id}
                   coinFamily={data.coin_family}
                   walletAddress={account.coinFamilyAndAddress[data.coin_family]}
-                  status={data.wallet_addresses_data ? true : false}
+                  status={data.wallet_data?.status || false}
                   coin={data}
                 />
               ))

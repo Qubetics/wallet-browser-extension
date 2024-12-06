@@ -21,7 +21,13 @@ import FilterIcon from '../../../Assets/Filtericon.svg';
 import { store } from '../../..';
 import { setFilter } from '../../../actions/filter';
 import DarkFilterIcon from '../../../Assets/DarkFilterIcon.svg';
-import moment from 'moment';
+import * as moment from 'moment';
+import {
+  InputField,
+  InputFieldOnly,
+} from '../../../Components/InputField/InputFieldSimple';
+import CopyIcon from '../../../Assets/CopyIconBlue.svg';
+
 function CurrencyDetails() {
   const { currency, account } = useSelector((state) => state);
 
@@ -36,7 +42,7 @@ function CurrencyDetails() {
   const [price, setPrice] = useState(0);
 
   useEffect(() => {
-    setPrice(coin.coin_data.coins_market || 0);
+    setPrice(coin.coin.fiat_price_data || 0);
   }, []);
 
   const [messageApi, contextHolder] = message.useMessage({
@@ -58,60 +64,31 @@ function CurrencyDetails() {
       );
     }
 
-    console.log('FilterData', {
-      per_page: 2000,
-      page: 1,
-      address_list: [account.coinFamilyAndAddress[coin.coin_data.coin_family]],
-      type: state ? (state.type === '' ? 'all' : state.type) : 'all',
-      order_type: 'DESC',
-      order_by: 'created_at',
-      fiat_currency: currency.name && currency?.name?.toUpperCase(),
-      coin_id: coin.coin_data.id,
-      status: state
-        ? state.status === 'all'
-          ? undefined
-          : state.status
-        : undefined,
-      date_from: state
-        ? state.fromDate
-          ? moment(state.fromDate).startOf('day')
-          : undefined
-        : undefined,
-      date_to: state
-        ? state.toDate
-          ? moment(state.toDate).endOf('day')
-          : undefined
-        : undefined,
-    });
-
     const transactionList = await server.post(
       `/wallet/transaction/list`,
       {
-        per_page: 2000,
+        coin_id: coin.coin.coin_id,
+        coin_type: coin.coin.coin_symbol,
+        coin_family: [coin.coin.coin_family],
+        addrsListKeys: [coin.wallet_address],
         page: 1,
-        address_list: [
-          account.coinFamilyAndAddress[coin?.coin_data?.coin_family],
-        ],
-        type: state ? (state?.type === '' ? 'all' : state?.type) : 'all',
-        order_type: 'DESC',
-        order_by: 'created_at',
-        fiat_currency: currency?.name && currency?.name?.toUpperCase(),
-        coin_id: coin?.coin_data?.id,
+        limit: 250,
         status: state
-          ? state?.status === 'all'
+          ? state.status === 'all'
             ? undefined
-            : state?.status
+            : state.status
           : undefined,
         date_from: state
-          ? state?.fromDate
-            ? moment(state?.fromDate).startOf('day')
+          ? state.fromDate
+            ? moment(state.fromDate).startOf('day')
             : undefined
           : undefined,
         date_to: state
           ? state.toDate
-            ? moment(state?.toDate).endOf('day')
+            ? moment(state.toDate).endOf('day')
             : undefined
           : undefined,
+        trnx_type: state ? (state.type ? state.type : undefined) : undefined,
       },
       {
         headers: {
@@ -134,12 +111,8 @@ function CurrencyDetails() {
         backTo={'/wallet'}
         title={
           <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            {coin.coin_data.coin_image ? (
-              <img
-                src={`${process.env.REACT_APP_IMAGE_BASE_URL}${coin?.coin_data?.coin_image}`}
-                className='detailIcon'
-                alt=''
-              />
+            {coin.coin.coin_image ? (
+              <img src={coin?.coin?.coin_image} className='detailIcon' alt='' />
             ) : (
               <div
                 className='randb extra borderDarkLight'
@@ -154,8 +127,8 @@ function CurrencyDetails() {
                   border: '1px solid',
                 }}
               >
-                {coin?.coin_data?.coin_name &&
-                  coin?.coin_data?.coin_name?.split('')[0]?.toUpperCase()}
+                {coin?.coin?.coin_name &&
+                  coin?.coin?.coin_name?.split('')[0]?.toUpperCase()}
               </div>
             )}
             <p
@@ -166,28 +139,20 @@ function CurrencyDetails() {
               }}
             >
               {' '}
-              {coin.coin_data.coin_symbol &&
-                (coin?.coin_data?.coin_symbol?.toUpperCase() === 'BNB'
+              {coin.coin.coin_symbol &&
+                (coin?.coin?.coin_symbol?.toUpperCase() === 'BNB'
                   ? 'BNB Smart Chain'
-                  : coin?.coin_data?.coin_symbol?.toUpperCase())}
+                  : coin?.coin?.coin_symbol?.toUpperCase())}
             </p>
           </span>
         }
         chartIcon={() => {
-          if (!coin?.coin_data?.graph_pair) {
-            return messageApi.error(
-              'Trading Graph not available for the token.'
-            );
-          } else {
-            chrome.tabs.create({
-              url: `${
-                process.env.REACT_APP_TRADING_GRAPH
-              }?key=${coin?.coin_data?.graph_source?.toUpperCase()}:${
-                coin?.coin_data?.graph_pair &&
-                coin?.coin_data?.graph_pair?.toUpperCase()
-              }`,
-            });
-          }
+          chrome.tabs.create({
+            url: `https://trading.skymarvel.io?key=${coin?.coin?.coin_symbol?.toUpperCase()}`,
+          });
+        }}
+        stared={() => {
+          navigate('/watch-list-tokens');
         }}
       />
 
@@ -201,15 +166,7 @@ function CurrencyDetails() {
                   color: '#fff',
                 }}
               >
-                {coin.coin_data.token_type
-                  ? coin.coin_data.coin_family == 4
-                    ? 'SPL20'
-                    : coin.coin_data.coin_family == 9
-                    ? 'PLS'
-                    : coin.coin_data.token_type
-                  : coin.coin_data.coin_symbol === 'bnb'
-                  ? 'BEP20'
-                  : ''}
+                {coin.coin.coin_family === 1 ? 'BEP20' : 'ERC20'}
               </p>
               <p
                 className='currDetails__card__text'
@@ -221,8 +178,8 @@ function CurrencyDetails() {
                 {price
                   ? addCommasToNumber(
                       getFlooredFixed(
-                        Number(price?.current_price),
-                        parseFloat(price?.current_price) < 1 ? 12 : 2
+                        Number(price?.value),
+                        parseFloat(price?.value) < 1 ? 12 : 2
                       )
                     )
                   : '0.00'}{' '}
@@ -257,10 +214,37 @@ function CurrencyDetails() {
               textLeft='currDetails__card__textLeft'
               balance={`${addCommasToNumber(
                 parseFloat(getFlooredFixed(coin?.balance, 4))
-              )} ${coin?.coin_data?.coin_symbol}`}
+              )} ${coin?.coin?.coin_symbol}`}
               coin={coin}
             />
           </div>
+
+          {coin && (
+            <div className='editWallet__linkOuter'>
+              <InputField
+                value={account.coinFamilyAndAddress[coin.coin.coin_family]}
+                readonly={true}
+                placeholderBaseColor={true}
+                addonAfter={
+                  <img
+                    src={CopyIcon}
+                    width={14}
+                    alt=''
+                    height={16}
+                    style={{
+                      cursor: 'pointer',
+                    }}
+                    onClick={() => {
+                      navigator.clipboard.writeText(
+                        account.coinFamilyAndAddress[coin.coin.coin_family]
+                      );
+                      messageApi.success('Address copied to clipboard');
+                    }}
+                  />
+                }
+              />
+            </div>
+          )}
 
           <div className='currDetails__dataSec'>
             <div className='currDetails__dataSec__header'>
@@ -288,49 +272,22 @@ function CurrencyDetails() {
                 history.map((data) => {
                   let name = null;
 
-                  const price =
-                    data?.trxn_fiat_price_detail &&
-                    data?.trxn_fiat_price_detail.find(
-                      (el) =>
-                        el?.fiat_currency?.toUpperCase() ===
-                        currency?.name?.toUpperCase()
-                    );
+                  const price = data?.coin_data?.fiat_price_data;
 
                   let transactionType =
-                    data?.type?.toLowerCase() == 'cross-chain' ||
-                    data?.type?.toLowerCase() == 'swap'
+                    data.type === 'dapp'
+                      ? 'Smart Contract'
+                      : data.type === 'deposit'
+                      ? 'Received'
+                      : data.type === 'withdraw'
+                      ? 'Sent'
+                      : data.type.toLowerCase() === 'swap'
                       ? 'Swap'
-                      : data?.type?.toLowerCase() == 'approval'
-                      ? 'Approval'
-                      : data?.type?.toLowerCase() == 'smart_contract'
-                      ? 'Smart Contract Call'
-                      : data?.req_type == 'APP'
-                      ? data?.tx_type == 'withdraw'
-                        ? 'Withdraw'
-                        : 'Deposit'
-                      : data?.type?.toLowerCase() == 'buy' ||
-                        data?.type?.toLowerCase() == 'sell'
-                      ? data?.type
-                      : data.req_type == 'EXNG' && data.tx_type == 'deposit'
-                      ? 'deposit'
-                      : data.req_type == 'EXNG'
-                      ? data?.from_adrs?.toLowerCase() ==
-                        account?.coinFamilyAndAddress[
-                          data?.coin_family
-                        ].toLowerCase()
-                        ? 'Withdraw'
-                        : 'Deposit'
-                      : 'Deposit';
-
-                  console.log(
-                    '🚀 ~ file: CurrencyDetails.jsx:236 ~ history.map ~ transactionType:',
-                    transactionType
-                  );
+                      : 'Withdraw';
 
                   return (
                     <HistryList
                       hash={data?.tx_id}
-                      date={data?.created_at}
                       status={data?.blockchain_status?.toUpperCase()}
                       sendRecieve={transactionType}
                       coinname={data?.coin_data?.coin_symbol?.toUpperCase()}
@@ -343,7 +300,7 @@ function CurrencyDetails() {
                         getFlooredFixed(data?.amount, 5)
                       )} ${data?.coin_data?.coin_symbol?.toUpperCase()}`}
                       dollercurrency={balanceToFiatConversion(
-                        price ? price?.current_price : 0,
+                        price ? price?.value : 0,
                         data?.amount
                       )}
                       addressTo={
@@ -361,6 +318,9 @@ function CurrencyDetails() {
                       def={currency.symbol}
                       allData={data}
                       coin={coin}
+                      date={moment(data.created_at).format(
+                        'DD, MMM YYYY | hh:mm A'
+                      )}
                     />
                   );
                 })

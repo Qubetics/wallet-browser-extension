@@ -9,6 +9,7 @@ import Search from '../../Assets/SearchIcon.svg';
 import BigNumber from 'bignumber.js';
 import {
   addCommasToNumber,
+  exponential_to_decimal,
   formatSmallNumber,
   getFlooredFixed,
 } from '../../helpers/conversion.helper';
@@ -52,24 +53,14 @@ function ReceiveTokens() {
   const init = async () => {
     store.dispatch(setLoading(true));
     const walletsList = await server.post(
-      `/wallet/tokens`,
+      `/wallet/portfolio`,
       {
-        address_list: account.addressLists,
-        coin_family: state?.nft ? [1, 3] : account.coinFamilies,
-        fiat_currency: currency.name,
-        per_page: 2000,
+        addressListKeys: account.addressLists,
+        coin_family: account.coinFamilies,
+        fiat_type: currency.name,
+        limit: 2000,
         page: 1,
-        search: keyword ? keyword.trim() : undefined,
-        is_watch_only: account.isWatchOnly ? 1 : 0,
-        wallet_name: account.name,
-        address_list_array: Object.keys(account.coinFamilyAndAddress)
-          .map((key) => {
-            return {
-              coin_family: key,
-              address: account.coinFamilyAndAddress[key],
-            };
-          })
-          .filter((el) => el.address),
+        search: '',
       },
       {
         headers: {
@@ -78,23 +69,7 @@ function ReceiveTokens() {
       }
     );
 
-    console.log(
-      walletsList.data.data.filter((wallet) => !wallet.coin_data.token_address)
-    );
-
-    if (state?.nft) {
-      setList(
-        walletsList.data.data.filter(
-          (wallet) =>
-            !wallet.coin_data.token_address &&
-            (wallet.coin_data.coin_family == 1 ||
-              wallet.coin_data.coin_family == 3)
-        )
-      );
-    } else {
-      store.dispatch(setTokens(walletsList.data.data));
-    }
-
+    store.dispatch(setTokens(walletsList.data.data));
     store.dispatch(setLoading(false));
   };
 
@@ -120,17 +95,17 @@ function ReceiveTokens() {
 
   return (
     <div className={`scrollableCont send`}>
-      {contextHolder}
-      <MenuRestofHeaders
-        backTo={'/wallet'}
-        title={'Receive'}
-        redirectTo={state?.nft ? 'nft' : null}
-        coin={state ? (state.coin ? state.coin : null) : null}
-      />
+      <div className='searchBarFixed'>
+        {contextHolder}
+        <MenuRestofHeaders
+          backTo={'/wallet'}
+          title={'Receive'}
+          redirectTo={state?.nft ? 'nft' : null}
+          coin={state ? (state.coin ? state.coin : null) : null}
+        />
 
-      <div className={`flexedContent`}>
         {state?.nft ? null : (
-          <div className='search' style={{ marginBottom: '20px' }}>
+          <div className='search'>
             <InputField
               placeholder={'Search'}
               value={keyword}
@@ -152,24 +127,27 @@ function ReceiveTokens() {
             />
           </div>
         )}
-
+      </div>
+      <div className={`flexedContent`}>
         {(state?.nft ? list : tokens).length > 0 ? (
           <CoinsTable
-            dataArray={(state?.nft ? list : tokens).map((token) => {
-              const price = token.coin_data.coins_market || null;
-              const myPrice = new BigNumber(price ? price.current_price : 0);
+            dataArray={tokens.map((token) => {
+              const price = token.coin.fiat_price_data || null;
+
+              const myPrice = new BigNumber(price ? price.value : 0);
               const balance = new BigNumber(token.balance);
               const result = myPrice.times(balance);
               const formattedResult = result.toString();
 
               return {
-                coinIcon: token.coin_data.coin_image
-                  ? `${process.env.REACT_APP_IMAGE_BASE_URL}${token.coin_data.coin_image}`
-                  : null,
-                coinName: token.coin_data.coin_symbol.toUpperCase(),
-                coinSubName: token.coin_data.coin_name,
+                position: token.sort_order,
+                coinIcon: token.coin.coin_image,
+                coinName: token.coin.coin_symbol.toUpperCase(),
+                coinSubName: token.coin.coin_name,
                 coinPrice: myPrice.toNumber()
-                  ? formatSmallNumber(myPrice.toString())
+                  ? formatSmallNumber(
+                      exponential_to_decimal(myPrice.toNumber())
+                    )
                   : '0.00',
                 coinStatus: getFlooredFixed(
                   price
@@ -182,20 +160,14 @@ function ReceiveTokens() {
                 currCryptoBal: balanceIn
                   ? `${addCommasToNumber(
                       parseFloat(getFlooredFixed(token.balance, 6))
-                    )} ${token.coin_data.coin_symbol.toUpperCase()}`
-                  : '****',
+                    )}`
+                  : `****`,
+                currCryptoBalSymbol: token.coin.coin_symbol.toUpperCase(),
                 currDollerBal: balanceIn
                   ? addCommasToNumber(getFlooredFixed(formattedResult, 2))
                   : '****',
                 routeTo: 'sendCurrency',
-                type:
-                  token.coin_data.coin_symbol === 'bnb'
-                    ? 'BEP20'
-                    : token.coin_data.token_address
-                    ? token.coin_data.coin_family == 4
-                      ? 'SPL20'
-                      : token.coin_data.token_type
-                    : '',
+                type: token.coin.coin_family === 1 ? 'BEP20' : 'ERC20',
                 status: true,
                 coin: token,
                 showModal,
@@ -227,11 +199,11 @@ function ReceiveTokens() {
             <div>
               <div className='balanceDetails__modal__scanner'>
                 <QRCode
-                  value={selectedCoin.address}
+                  value={selectedCoin.wallet_address}
                   size={230}
                   qrStyle='square'
                   eyeRadius={10}
-                  logoImage={`${process.env.REACT_APP_IMAGE_BASE_URL}${selectedCoin.coin_data.coin_image}`}
+                  logoImage={selectedCoin.coin.coin_image}
                   logoHeight={55}
                   logoWidth={55}
                   logoPadding={8}
@@ -244,7 +216,7 @@ function ReceiveTokens() {
               </div>
             </div>
             <p className='balanceDetails__modal__title'>
-              Receive {selectedCoin.coin_data.coin_symbol.toUpperCase()}
+              Receive {selectedCoin.coin.coin_symbol.toUpperCase()}
             </p>
             <p
               className='modalAddres'
@@ -261,12 +233,14 @@ function ReceiveTokens() {
             <div
               className='balanceDetails__modal__wrapedText'
               onClick={async () => {
-                await navigator.clipboard.writeText(selectedCoin.address);
+                await navigator.clipboard.writeText(
+                  selectedCoin.wallet_address
+                );
                 messageApi.success('Address copied successfully.');
               }}
             >
               <img src={CopyIconBlue} width={15} height={16} alt='' />
-              <span>{selectedCoin.address}</span>
+              <span>{selectedCoin.wallet_address}</span>
             </div>
           </div>
         </ModalCustom>

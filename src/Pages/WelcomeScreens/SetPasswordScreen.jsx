@@ -415,7 +415,7 @@ function SetPasswordScreen() {
         <CongratulationsScreen>
           <ButtonComp
             onClick={async () => {
-              navigate("/walletListing");
+              navigate("/wallet");
             }}
             text={"Open Wallet"}
           />

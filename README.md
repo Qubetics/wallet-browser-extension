@@ -1,2 +1,2 @@
-# qubetics-extantion
+# qubetics-wallet
 

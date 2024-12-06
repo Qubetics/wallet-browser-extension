@@ -25,7 +25,7 @@ import useCurrentHeight from '../CustomHooks/useCurrentHeight';
 import { swapDetailAc } from '../actions/swap';
 
 function FixWidthLayout() {
-  const { balance, currency, theme, balanceOut, spritzBank, coin, swapDetail } =
+  const { balance,currency, theme, balanceOut, spritzBank, coin, swapDetail } =
     useSelector((state) => state);
   const [isSidePanelOpen, setIsSidePanelOpen] = useState(false);
 
@@ -48,8 +48,7 @@ function FixWidthLayout() {
   useEffect(() => {
     getSidePanelStatus();
   }, [isSidePanelOpen]);
-
-  // console.log("path ===XXXXXXXXXXX  ", path, state);
+const balanceLength = balance.toString().length
   // console.log("getLocation?.pathname ===XXXXXXXXXXX  ", getLocation?.pathname);
   return (
     <div className='fixedLayout'>
@@ -61,7 +60,8 @@ function FixWidthLayout() {
           maxHeight: "746px",
           maxWidth: "439px"
         }: {
-          maxWidth: "600px"
+          maxWidth: "600px",
+          minWidth:"360px"
         }}
       >
         {path === 'wallet' && (
@@ -300,7 +300,7 @@ function FixWidthLayout() {
                   }}
                 >
                   {balanceOut ? (
-                    <h3>
+                    <h3 style={{fontSize: balanceLength > 6 ? 20 : 26 }}>
                       {currency.symbol}
                       {balance}
                     </h3>
@@ -320,7 +320,7 @@ function FixWidthLayout() {
                       }}
                       style={{
                         width: '21px',
-                        marginLeft: '18px',
+                        marginLeft: '6px',
                       }}
                     />
                   ) : (

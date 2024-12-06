@@ -35,7 +35,7 @@ function EditWallet() {
       {contextHolder}
       <div className={`scrollableCont`}>
         <MenuRestofHeaders
-          backTo={state ? "/walletListing" : "/wallet"}
+          backTo={state ? "/wallet" : "/wallet"}
           title={"Edit"}
         />
         <div className={`flexedContent`}>
@@ -121,7 +121,7 @@ function EditWallet() {
                       "Unable to update name at the moment."
                     );
                   }
-                  navigate(state ? "/walletListing" : "/wallet");
+                  navigate(state ? "/wallet" : "/wallet");
                 }}
                 text={"Update"}
                 maxWidth="100%"

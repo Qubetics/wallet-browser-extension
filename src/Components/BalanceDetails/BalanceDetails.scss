@@ -1,5 +1,5 @@
-@import "../../styles/__vars.scss";
-@import "../../styles/__mixins.scss";
+@import '../../styles/__vars.scss';
+@import '../../styles/__mixins.scss';
 .balanceDetails {
   margin-bottom: 18px;
   text-align: center;
@@ -29,6 +29,9 @@
     gap: 8px;
     margin-bottom: 8px;
     margin-top: 10px;
+    position: absolute;
+    top: 10px;
+    left: 10px;
     p {
       color: $inputBg;
       font-size: 16px;
@@ -52,7 +55,7 @@
     margin-top: -4px;
     margin-bottom: 20px;
     border-radius: 0 0 30px 30px;
-    background-image: url("../../Assets/PNG/WalletBg.png");
+    background-image: url('../../Assets/PNG/WalletBg.png');
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
@@ -63,7 +66,7 @@
     margin-top: -4px;
     margin-bottom: 20px;
     border-radius: 0 0 30px 30px;
-    background-image: url("../../Assets/PNG/WalletBg.png");
+    background-image: url('../../Assets/PNG/WalletBg.png');
     background-position: center;
     background-repeat: no-repeat;
     background-size: contain;
@@ -89,7 +92,7 @@
     gap: 10px;
     font-size: 12px;
     @include theme() {
-      color: theme-get("whiteWelcome");
+      color: theme-get('whiteWelcome');
     }
     font-weight: bold;
     text-decoration: none;
@@ -154,7 +157,7 @@
         overflow: hidden;
         white-space: nowrap;
         @include theme() {
-          color: theme-get("whiteblack");
+          color: theme-get('whiteblack');
         }
         font-size: 14px;
         font-weight: bold;
@@ -193,7 +196,7 @@
 
 .change {
   @include theme() {
-    background-color: theme-get("modalBg");
+    background-color: theme-get('modalBg');
   }
   max-width: 400px;
   padding: 8px;
@@ -211,7 +214,7 @@
     p {
       color: $red;
       &:first-child {
-        margin-bottom: 20px;
+        margin-bottom: 1px;
       }
     }
   }

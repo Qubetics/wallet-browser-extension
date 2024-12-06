@@ -15,6 +15,7 @@ import { setLoading } from '../../actions/loading';
 import { setFilter } from '../../actions/filter';
 import './style.module.scss';
 import moment from 'moment';
+import HistoryListOuter from '../../Components/HistryList/HistryListOuter';
 
 function History() {
   const { account, currency, filter } = useSelector((state) => state);
@@ -45,19 +46,18 @@ function History() {
     const transactionList = await server.post(
       `/wallet/transaction/list`,
       {
-        per_page: 10,
-        page: currentPage,
-        address_list: account.addressLists,
-        type: state ? state.type : 'all',
-        order_type: 'DESC',
-        order_by: 'created_at',
-        fiat_currency: currency.name.toUpperCase(),
-
         coin_family: state
-          ? state.coinId === 'all'
-            ? undefined
-            : state.coinId
-          : undefined,
+          ? state.coinId
+            ? [state.coinId]
+            : account.coinFamilies
+          : account.coinFamilies,
+        addrsListKeys: state
+          ? state.coinId
+            ? [account.coinFamilyAndAddress[state.coinId]]
+            : account.addressLists
+          : account.addressLists,
+        page: currentPage,
+        limit: 100,
         status: state
           ? state.status === 'all'
             ? undefined
@@ -73,14 +73,16 @@ function History() {
             ? moment(state.toDate).endOf('day')
             : undefined
           : undefined,
+        trnx_type: state ? (state.type ? state.type : undefined) : undefined,
       },
       {
         headers: {
-          Authorization: account.jwtToken,
+          Authorization: account?.jwtToken,
         },
       }
     );
 
+    setHistory(transactionList?.data?.data);
     setTotal(transactionList.data.meta.total);
     setHistory([...history, ...transactionList.data.data]);
     setIsFetchingData(false);
@@ -122,67 +124,40 @@ function History() {
         history.map((data) => {
           let name = null;
 
-          const price = data.trxn_fiat_price_detail.find(
-            (el) =>
-              el.fiat_currency.toUpperCase() === currency.name.toUpperCase()
-          );
+          const price = data?.coin_data?.fiat_price_data;
 
           let transactionType =
-            data.type.toLowerCase() == 'cross-chain' ||
-            data.type.toLowerCase() == 'swap'
+            data.type === 'dapp'
+              ? 'Smart Contract'
+              : data.type === 'deposit'
+              ? 'Received'
+              : data.type === 'withdraw'
+              ? 'Sent'
+              : data.type.toLowerCase() === 'swap'
               ? 'Swap'
-              : data.type.toLowerCase() == 'approval'
-              ? 'Approval'
-              : data.type.toLowerCase() == 'smart_contract'
-              ? 'Smart Contract Call'
-              : data.req_type == 'APP'
-              ? data.tx_type == 'withdraw'
-                ? 'Withdraw'
-                : 'Deposit'
-              : data.type.toLowerCase() == 'buy' ||
-                data.type.toLowerCase() == 'sell'
-              ? data.type
-              : data.req_type == 'EXNG' && data.tx_type == 'deposit'
-              ? 'deposit'
-              : data.req_type == 'EXNG'
-              ? data.from_adrs.toLowerCase() ==
-                account.coinFamilyAndAddress[data.coin_family].toLowerCase()
-                ? 'Withdraw'
-                : 'Deposit'
-              : 'Deposit';
+              : 'Withdraw';
 
           return (
-            <HistryList
-              hash={data.tx_id}
-              date={data.created_at}
-              status={data.blockchain_status.toUpperCase()}
+            <HistoryListOuter
+              hash={data?.tx_id}
+              type={data.type}
+              status={data?.blockchain_status}
               sendRecieve={transactionType}
-              coinname={data.coin_data.coin_symbol.toUpperCase()}
-              address={`${data.from_adrs.substring(0, 5)}.....
-              ${data.from_adrs.substring(
-                data.from_adrs.length - 5,
-                data.from_adrs.length
-              )}`}
+              coinname={data?.coin_data?.coin_symbol?.toUpperCase()}
+              address={data?.from_adrs}
               valueCurrency={`${addCommasToNumber(
-                getFlooredFixed(data.amount, 5)
-              )} ${data.coin_data.coin_symbol.toUpperCase()}`}
+                getFlooredFixed(data?.amount, 5)
+              )} ${data?.coin_data?.coin_symbol?.toUpperCase()}`}
               dollercurrency={balanceToFiatConversion(
-                price ? price.current_price : 0,
-                data.amount
+                price ? price?.value : 0,
+                data?.amount
               )}
-              addressTo={
-                name
-                  ? name
-                  : `${data.to_adrs.substring(0, 5)}.....
-          ${data.to_adrs.substring(
-            data.to_adrs.length - 5,
-            data.to_adrs.length
-          )}`
-              }
+              addressTo={data?.to_adrs}
               TickIcon={transactionType === 'Deposit' ? Deposit : Sendhistry}
               def={currency.symbol}
               allData={data}
-              coin={false}
+              coin={data?.coin_data}
+              date={moment(data.created_at).format('DD, MMM YYYY | hh:mm A')}
             />
           );
         })

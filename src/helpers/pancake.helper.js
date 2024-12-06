@@ -71,114 +71,27 @@ export class PancakeHelper {
     }
   };
 
-  async getQuoteAndRoute(from, to, amount, address, reverse, slippage) {
-    console.log("🚀 ~ PancakeHelper ~ getQuoteAndRoute ~ from, to, amount, address, reverse, slippage:", from, to, amount, address, reverse, slippage)
+  async getQuoteAndRoute(chainId, src, dst, amount, fee) {
     try {
-      const swapFrom = !from?.isToken
-        ? Native.onChain(chainId)
-        : new ERC20Token(
-            ChainId.BSC,
-            from.tokenAddress,
-            from.decimals,
-            from.symbol,
-            from.name,
-            from.rpc
-          );
-      const swapTo = !to?.isToken
-        ? Native.onChain(chainId)
-        : new ERC20Token(
-            ChainId.BSC,
-            to.tokenAddress,
-            to.decimals,
-            to.symbol,
-            to.name,
-            to.rpc
-          );
-
-      const amount1 = reverse
-        ? CurrencyAmount.fromRawAmount(
-            swapTo,
-            exponential_to_decimal(
-              new BigNumber(amount).multipliedBy(
-                new BigNumber(10).pow(swapTo.decimals)
-              )
-            )
-          )
-        : CurrencyAmount.fromRawAmount(
-            swapFrom,
-            exponential_to_decimal(
-              new BigNumber(amount).multipliedBy(
-                new BigNumber(10).pow(swapFrom.decimals)
-              )
-            )
-          );
-
-      const v3SubgraphClient = new GraphQLClient(
-        "https://api.thegraph.com/subgraphs/name/pancakeswap/exchange-v3-bsc"
-      );
-      const v2SubgraphClient = new GraphQLClient(
-        "https://proxy-worker-api.pancakeswap.com/bsc-exchange"
-      );
-
-      const quoteProvider = SmartRouter.createQuoteProvider({
-        onChainProvider: () => publicClient,
-      });
-
-      const [v2Pools, v3Pools] = await Promise.all([
-        SmartRouter.getV2CandidatePools({
-          onChainProvider: () => publicClient,
-          v2SubgraphProvider: () => v2SubgraphClient,
-          v3SubgraphProvider: () => v3SubgraphClient,
-          currencyA: reverse ? swapTo : swapFrom,
-          currencyB: reverse ? swapFrom : swapTo,
-        }),
-        SmartRouter.getV3CandidatePools({
-          onChainProvider: () => publicClient,
-          subgraphProvider: () => v3SubgraphClient,
-          currencyA: reverse ? swapTo : swapFrom,
-          currencyB: reverse ? swapFrom : swapTo,
-          subgraphCacheFallback: false,
-        }),
-      ]);
-      const pools = [...v2Pools, ...v3Pools];
-      const tradeV3 = await SmartRouter.getBestTrade(
-        amount1,
-        reverse ? swapFrom : swapTo,
-        reverse ? TradeType.EXACT_OUTPUT : TradeType.EXACT_INPUT,
+      const { account } = store.getState();
+      const { data } = await server.post(
+        '/on-chain/quote',
         {
-          gasPriceWei: () => publicClient.getGasPrice(),
-          maxHops: 3,
-          maxSplits: 4,
-          poolProvider: SmartRouter.createStaticPoolProvider(pools),
-          quoteProvider,
-          quoterOptimization: true,
+          chain_id: parseInt(chainId),
+          src,
+          dst,
+          amount,
+          fee,
+        },
+        {
+          headers: {
+            Authorization: account.jwtToken,
+          },
         }
       );
-
-      let tradeObj = {
-        pair: [
-          tradeV3?.routes[0]?.path[0]?.address,
-          tradeV3?.routes[0]?.path[1]?.address,
-        ],
-        outAmount: reverse
-          ? replaceN(tradeV3?.inputAmount?.numerator) /
-            replaceN(tradeV3?.inputAmount?.decimalScale)
-          : replaceN(tradeV3?.outputAmount?.numerator) /
-            replaceN(tradeV3?.outputAmount?.decimalScale),
-        feeAmount:
-          replaceN(tradeV3?.routes[0]?.pools[0]?.token0ProtocolFee?.numerator) /
-          replaceN(
-            tradeV3?.routes[0]?.pools[0]?.token0ProtocolFee?.denominator
-          ),
-        inputAmount: amount,
-        route: tradeV3,
-        reverse,
-      };
-      console.log("🚀 ~ PancakeHelper ~ getQuoteAndRoute ~ tradeObj:", tradeObj)
-
-      return tradeObj;
+      return data.data
     } catch (error) {
-      console.log(error, "===============================");
+      console.log(error);
       return false;
     }
   }

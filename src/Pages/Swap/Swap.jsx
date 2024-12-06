@@ -107,6 +107,7 @@ function Swap() {
     duration: DURATION,
     maxCount: 1,
   });
+  const [commision, setCommision] = useState(null);
   const [infoData, setInfoData] = useState([]);
   const [selectedCoinFamily, setSelectedCoinFamily] = useState(null);
   const [amount2, setAmount2] = useState(null);
@@ -136,7 +137,6 @@ function Swap() {
   const [crossChainM, setCrossChainM] = useState({});
 
   const { state } = useLocation();
-  console.log(infoData, 'infoData');
 
   useEffect(() => {
     if (swapDetail) {
@@ -157,38 +157,6 @@ function Swap() {
       }
     }
   }, []);
-
-  // function initialInput(newAmount, tokenOne, tokenTwo) {
-  //   setAount(newAmount)
-  // }
-
-  useEffect(() => {
-    checkMaintanance();
-  }, [sel]);
-
-  const checkMaintanance = async () => {
-    // let resp = await WalletHelper.checkMaintanance();
-    // setMaintanancePage()
-    const { data } = await server.get('/wallet/check_app_maintenance', {
-      headers: {
-        Authorization: account.jwtToken,
-      },
-    });
-
-    let onChainSwap = data?.data.filter(
-      (datas) => datas.type == 'on_chain_swap'
-    );
-    if (onChainSwap.length > 0) {
-      setOnChainSwapM(onChainSwap[0]);
-    }
-
-    let crossChainSwap = data.data.filter(
-      (datas) => datas.type == 'cross_chain_swap'
-    );
-    if (crossChainSwap.length > 0) {
-      setCrossChainM(crossChainSwap[0]);
-    }
-  };
 
   useEffect(() => {
     if ((amount == null || amount == '') && amount2 != null) {
@@ -236,24 +204,6 @@ function Swap() {
     try {
       store.dispatch(overAllLoader(true));
       if (token1.tokenAddress) {
-        if (token1.coinFamily == 4) {
-          const finalAmountToSend = new BigNumber(token1.balance).multipliedBy(
-            new BigNumber(percentage).dividedBy(100)
-          );
-          setAount(
-            finalAmountToSend.toString() == 0
-              ? finalAmountToSend.toString()
-              : finalAmountToSend.toFixed(18).toString()
-          );
-          await handleInputChange(
-            token1.balance.toFixed(18).toString(),
-            token1,
-            token2,
-            true
-          );
-          return store.dispatch(overAllLoader(false));
-        }
-
         const amountToSend = await Web3Helper.getTokenBalance(
           token1.tokenAddress,
           token1.address,
@@ -267,7 +217,6 @@ function Swap() {
         const finalAmountToSend = new BigNumber(amountToSend).multipliedBy(
           new BigNumber(percentage).dividedBy(100)
         );
-        // setAount(toFixed(finalAmountToSend.toString()));
         setAount(
           finalAmountToSend.toString() == 0
             ? finalAmountToSend.toString()
@@ -275,7 +224,6 @@ function Swap() {
         );
         setBalance(toFixed(amountToSend.toString()));
         await handleInputChange(
-          // toFixed(finalAmountToSend.toString()),
           finalAmountToSend.toFixed(18).toString(),
           token1,
           token2,
@@ -288,19 +236,22 @@ function Swap() {
     }
   };
   const init = async () => {
+    const { chains } = await chrome.storage.local.get('chains');
     try {
+      const comissionData = await server.get('/on-chain/commision_data', {
+        headers: {
+          Authorization: account.jwtToken,
+        },
+      });
+
+      setCommision(comissionData.data.data)
+
       const { data } = await server.post(
-        `/wallet/swap_coins_list`,
+        `/wallet/swap_coinlist`,
         {
-          address_list: [
-            account.coinFamilyAndAddress[1],
-            account.coinFamilyAndAddress[4],
-          ],
-          fiat_currency: currency.name,
-          per_page: 4000,
-          page: 1,
-          is_active_coin: 1,
-          is_watch_only: account?.isWatchOnly ? 1 : 0,
+          addrsListKeys: account.addressLists,
+          coin_family: account.coinFamilies,
+          fiat_type: currency.name,
         },
         {
           headers: {
@@ -309,47 +260,36 @@ function Swap() {
         }
       );
 
-      const tokens = data.data.rows.map((token) => {
+      const tokens = data.data.map((token) => {
         return {
-          id: token.id,
+          id: token.coin_id,
           coin: token,
           coinFamily: token.coin_family,
-          iHave: token.wallet_addresses_data ? true : false,
+          iHave: token.wallets[0] ? true : false,
           symbol: token.coin_symbol.toUpperCase(),
           name: token.coin_name,
           tokenAddress: token.token_address,
-          image: token.coin_image
-            ? `${process.env.REACT_APP_IMAGE_BASE_URL}${token.coin_image}`
-            : null,
-          address:
-            token.coin_family == 4
-              ? account.coinFamilyAndAddress[4]
-              : account.coinFamilyAndAddress[1],
+          image: token.coin_image,
+          address: account.coinFamilyAndAddress[token.coin_family],
           decimals: parseInt(token.decimals.toString().length) - 1,
           isToken: token.token_address ? true : false,
-          price: token.coins_market
-            ? token.coins_market.current_price
-              ? token.coins_market.current_price
+          price: token.fiat_price_data
+            ? token.fiat_price_data.value
+              ? token.fiat_price_data.value
               : 0
             : 0,
-          balance: token.wallet_addresses_data
-            ? toFixed(token.wallet_addresses_data.balance)
-            : 0,
-          type:
-            token.coin_family == 9
-              ? 'PLS'
-              : token.coin_family == 4
-              ? 'SPL20'
-              : token.token_type,
-          jupiter_fee_address: token.jupiter_fee_address || null,
+          chain: chains.find(
+            (chain) => chain?.coinFamily == token?.coin_family
+          ),
+          balance: token.wallets[0] ? toFixed(token.wallets[0].balance) : 0,
+          type: token.coin_family === 1 ? 'BEP20' : 'ERC20',
+          jupiter_fee_address: null,
           rpc:
             token.coin_family == 1
+              ? process.env.REACT_APP_BNB_RPC
+              : token.coin_family == 2
               ? process.env.REACT_APP_ETH_RPC
-              : token.coin_family == 9
-              ? process.env.REACT_APP_PLS_RPC
-              : token.coin_family == 4
-              ? process.env.REACT_APP_SOL_RPC
-              : process.env.REACT_APP_BNB_RPC,
+              : process.env.REACT_APP_MATIC_RPC,
         };
       });
 
@@ -394,27 +334,15 @@ function Swap() {
           );
         }
 
-        if (state && state.tokenAddress) {
-          //TODO Hit search api
-          const PayloadObj = {
-            address_list: [
-              account.coinFamilyAndAddress[1],
-              account.coinFamilyAndAddress[4],
-            ],
-            fiat_currency: currency.name,
-            per_page: 10,
-            page: 1,
-            is_active_coin: 1,
-            search: state.tokenAddress,
-            coin_family: state.coinFamily || token1?.coinFamily,
-            is_watch_only: account?.isWatchOnly ? 1 : 0,
-          };
-          if (PayloadObj.search == null || PayloadObj.search === '') {
-            delete PayloadObj.search;
-          }
+        if (state && state.coinId) {
           const { data } = await server.post(
-            `/wallet/swap_coins_list`,
-            PayloadObj,
+            `/wallet/swap_coinlist`,
+            {
+              addrsListKeys: account.addressLists,
+              coin_family: account.coinFamilies,
+              fiat_type: currency.name,
+              coin_id_search: state.coinId,
+            },
             {
               headers: {
                 Authorization: account.jwtToken,
@@ -424,47 +352,36 @@ function Swap() {
 
           //Configur ethe response like above
 
-          const newTokens = data.data.rows.map((token) => {
+          const newTokens = data.data.map((token) => {
             return {
-              id: token.id,
+              id: token.coin_id,
               coin: token,
               coinFamily: token.coin_family,
-              iHave: token.wallet_addresses_data ? true : false,
+              iHave: token.wallets[0] ? true : false,
               symbol: token.coin_symbol.toUpperCase(),
               name: token.coin_name,
               tokenAddress: token.token_address,
-              image: token.coin_image
-                ? `${process.env.REACT_APP_IMAGE_BASE_URL}${token.coin_image}`
-                : null,
-              address:
-                token.coin_family == 4
-                  ? account.coinFamilyAndAddress[4]
-                  : account.coinFamilyAndAddress[1],
+              image: token.coin_image,
+              address: account.coinFamilyAndAddress[token.coin_family],
               decimals: parseInt(token.decimals.toString().length) - 1,
               isToken: token.token_address ? true : false,
-              price: token.coins_market
-                ? token.coins_market.current_price
-                  ? token.coins_market.current_price
+              price: token.fiat_price_data
+                ? token.fiat_price_data.value
+                  ? token.fiat_price_data.value
                   : 0
                 : 0,
-              balance: token.wallet_addresses_data
-                ? toFixed(token.wallet_addresses_data.balance)
-                : 0,
-              type:
-                token.coin_family == 9
-                  ? 'PLS'
-                  : token.coin_family == 4
-                  ? 'SPL20'
-                  : token.token_type,
-              jupiter_fee_address: token.jupiter_fee_address || null,
+              chain: chains.find(
+                (chain) => chain?.coinFamily == token?.coin_family
+              ),
+              balance: token.wallets[0] ? toFixed(token.wallets[0].balance) : 0,
+              type: token.coin_family === 1 ? 'BEP20' : 'ERC20',
+              jupiter_fee_address: null,
               rpc:
                 token.coin_family == 1
+                  ? process.env.REACT_APP_BNB_RPC
+                  : token.coin_family == 2
                   ? process.env.REACT_APP_ETH_RPC
-                  : token.coin_family == 9
-                  ? process.env.REACT_APP_PLS_RPC
-                  : token.coin_family == 4
-                  ? process.env.REACT_APP_SOL_RPC
-                  : process.env.REACT_APP_BNB_RPC,
+                  : process.env.REACT_APP_MATIC_RPC,
             };
           });
 
@@ -479,10 +396,6 @@ function Swap() {
             if (state.fromOrTo == 1) {
               if (myToken2.id != myStateToken.id) {
                 myToken1 = myStateToken;
-                // console.log(
-                //   "🚀 ~ file: Swap.jsx:348 ~ init ~ myToken1:",
-                //   myToken1
-                // );
 
                 await chrome.storage.local.set({
                   [`uniToken1_${account.id}`]: myStateToken,
@@ -511,12 +424,7 @@ function Swap() {
         }
 
         const balance = myToken1.balance || 0;
-        // console.log("🚀 ~ file: Swap.jsx:382 ~ init ~ balance:", balance);
         const tokenBalance = 0;
-        // console.log(
-        //   "🚀 ~ file: Swap.jsx:384 ~ init ~ tokenBalance:",
-        //   tokenBalance
-        // );
 
         await chrome.storage.local.set({
           [`uniToken1_${account.id}`]: myToken1,
@@ -540,78 +448,56 @@ function Swap() {
         ///////////////////////////////////////////////////////////////////////////////////
         let token1 = uniToken1 || null;
 
-        const PayloadObjForToken1 = {
-          address_list: [
-            account.coinFamilyAndAddress[1],
-            account.coinFamilyAndAddress[4],
-          ],
-          fiat_currency: currency.name,
-          per_page: 10,
-          page: 1,
-          coin_id_search: token1?.id,
-          is_watch_only: account?.isWatchOnly ? 1 : 0,
-        };
-
-        if (
-          PayloadObjForToken1.search == null ||
-          PayloadObjForToken1.search === ''
-        ) {
-          delete PayloadObjForToken1.search;
-        }
         const token1Response = await server.post(
-          `/wallet/swap_coins_list`,
-          PayloadObjForToken1,
+          `/wallet/swap_coinlist`,
+          {
+            addrsListKeys: account.addressLists,
+            coin_family: account.coinFamilies,
+            fiat_type: currency.name,
+            coin_id_search: uniToken1.id,
+          },
           {
             headers: {
               Authorization: account.jwtToken,
             },
           }
         );
-        const newTokens = token1Response.data.data.rows
-          .filter((el) => el.wallet_addresses_data)
+
+        const newTokens = token1Response.data.data
+          .filter((el) => el.wallets[0])
           .map((token) => {
             return {
-              id: token.id,
+              id: token.coin_id,
               coin: token,
               coinFamily: token.coin_family,
-              iHave: token.wallet_addresses_data ? true : false,
+              iHave: token.wallets[0] ? true : false,
               symbol: token.coin_symbol.toUpperCase(),
               name: token.coin_name,
               tokenAddress: token.token_address,
-              image: token.coin_image
-                ? `${process.env.REACT_APP_IMAGE_BASE_URL}${token.coin_image}`
-                : null,
-              address:
-                token.coin_family == 4
-                  ? account.coinFamilyAndAddress[4]
-                  : account.coinFamilyAndAddress[1],
+              image: token.coin_image,
+              address: account.coinFamilyAndAddress[token.coin_family],
               decimals: parseInt(token.decimals.toString().length) - 1,
               isToken: token.token_address ? true : false,
-              price: token.coins_market
-                ? token.coins_market.current_price
-                  ? token.coins_market.current_price
+              price: token.fiat_price_data
+                ? token.fiat_price_data.value
+                  ? token.fiat_price_data.value
                   : 0
                 : 0,
-              balance: token.wallet_addresses_data
-                ? toFixed(token.wallet_addresses_data.balance)
-                : 0,
-              type:
-                token.coin_family == 9
-                  ? 'PLS'
-                  : token.coin_family == 4
-                  ? 'SPL20'
-                  : token.token_type,
-              jupiter_fee_address: token.jupiter_fee_address || null,
+              balance: token.wallets[0] ? toFixed(token.wallets[0].balance) : 0,
+              type: token.coin_family === 1 ? 'BEP20' : 'ERC20',
+              jupiter_fee_address: null,
+              chain: chains.find(
+                (chain) => chain?.coinFamily == token?.coin_family
+              ),
               rpc:
                 token.coin_family == 1
+                  ? process.env.REACT_APP_BNB_RPC
+                  : token.coin_family == 2
                   ? process.env.REACT_APP_ETH_RPC
-                  : token.coin_family == 9
-                  ? process.env.REACT_APP_PLS_RPC
-                  : token.coin_family == 4
-                  ? process.env.REACT_APP_SOL_RPC
-                  : process.env.REACT_APP_BNB_RPC,
+                  : process.env.REACT_APP_MATIC_RPC,
             };
           });
+
         token1 = newTokens[0] || null;
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         setToken1(token1);
@@ -656,27 +542,14 @@ function Swap() {
 
         ///////////////////////////////////////////////////////////////////////////////////
 
-        const PayloadObjForToken2 = {
-          address_list: [
-            account.coinFamilyAndAddress[1],
-            account.coinFamilyAndAddress[4],
-          ],
-          fiat_currency: currency.name,
-          per_page: 10,
-          page: 1,
-          coin_id_search: uniToken2?.id,
-          is_watch_only: account?.isWatchOnly ? 1 : 0,
-        };
-
-        if (
-          PayloadObjForToken2.search == null ||
-          PayloadObjForToken2.search === ''
-        ) {
-          delete PayloadObjForToken2.search;
-        }
         const token1Response2 = await server.post(
-          `/wallet/swap_coins_list`,
-          PayloadObjForToken2,
+          `/wallet/swap_coinlist`,
+          {
+            addrsListKeys: account.addressLists,
+            coin_family: account.coinFamilies,
+            fiat_type: currency.name,
+            coin_id_search: uniToken2.id,
+          },
           {
             headers: {
               Authorization: account.jwtToken,
@@ -684,47 +557,36 @@ function Swap() {
           }
         );
 
-        const newTokens2 = token1Response2.data.data.rows.map((token) => {
+        const newTokens2 = token1Response2.data.data.map((token) => {
           return {
-            id: token.id,
+            id: token.coin_id,
             coin: token,
             coinFamily: token.coin_family,
-            iHave: token.wallet_addresses_data ? true : false,
+            iHave: token.wallets[0] ? true : false,
             symbol: token.coin_symbol.toUpperCase(),
             name: token.coin_name,
             tokenAddress: token.token_address,
-            image: token.coin_image
-              ? `${process.env.REACT_APP_IMAGE_BASE_URL}${token.coin_image}`
-              : null,
-            address:
-              token.coin_family == 4
-                ? account.coinFamilyAndAddress[4]
-                : account.coinFamilyAndAddress[1],
+            image: token.coin_image,
+            address: account.coinFamilyAndAddress[token.coin_family],
             decimals: parseInt(token.decimals.toString().length) - 1,
             isToken: token.token_address ? true : false,
-            price: token.coins_market
-              ? token.coins_market.current_price
-                ? token.coins_market.current_price
+            price: token.fiat_price_data
+              ? token.fiat_price_data.value
+                ? token.fiat_price_data.value
                 : 0
               : 0,
-            balance: token.wallet_addresses_data
-              ? toFixed(token.wallet_addresses_data.balance)
-              : 0,
-            type:
-              token.coin_family == 9
-                ? 'PLS'
-                : token.coin_family == 4
-                ? 'SPL20'
-                : token.token_type,
-            jupiter_fee_address: token.jupiter_fee_address || null,
+            chain: chains.find(
+              (chain) => chain?.coinFamily == token?.coin_family
+            ),
+            balance: token.wallets[0] ? toFixed(token.wallets[0].balance) : 0,
+            type: token.coin_family === 1 ? 'BEP20' : 'ERC20',
+            jupiter_fee_address: null,
             rpc:
               token.coin_family == 1
+                ? process.env.REACT_APP_BNB_RPC
+                : token.coin_family == 2
                 ? process.env.REACT_APP_ETH_RPC
-                : token.coin_family == 9
-                ? process.env.REACT_APP_PLS_RPC
-                : token.coin_family == 4
-                ? process.env.REACT_APP_SOL_RPC
-                : process.env.REACT_APP_BNB_RPC,
+                : process.env.REACT_APP_MATIC_RPC,
           };
         });
 
@@ -733,27 +595,15 @@ function Swap() {
 
         setToken2(uniToken2);
 
-        if (state && state.tokenAddress) {
-          //TODO Hit search api
-          const PayloadObj = {
-            address_list: [
-              account.coinFamilyAndAddress[1],
-              account.coinFamilyAndAddress[4],
-            ],
-            fiat_currency: currency.name,
-            per_page: 10,
-            page: 1,
-            is_active_coin: 1,
-            search: state.tokenAddress,
-            coin_family: state.coinFamily || token1.coinFamily,
-            is_watch_only: account?.isWatchOnly ? 1 : 0,
-          };
-          if (PayloadObj.search == null || PayloadObj.search === '') {
-            delete PayloadObj.search;
-          }
+        if (state && state.coinId) {
           const { data } = await server.post(
-            `/wallet/swap_coins_list`,
-            PayloadObj,
+            `/wallet/swap_coinlist`,
+            {
+              addrsListKeys: account.addressLists,
+              coin_family: account.coinFamilies,
+              fiat_type: currency.name,
+              coin_id_search: state.coinId,
+            },
             {
               headers: {
                 Authorization: account.jwtToken,
@@ -763,42 +613,36 @@ function Swap() {
 
           //Configur ethe response like above
 
-          const newTokens = data.data.rows.map((token) => {
+          const newTokens = data.data.map((token) => {
             return {
-              id: token.id,
+              id: token.coin_id,
               coin: token,
               coinFamily: token.coin_family,
-              iHave: token.wallet_addresses_data ? true : false,
+              iHave: token.wallets[0] ? true : false,
               symbol: token.coin_symbol.toUpperCase(),
               name: token.coin_name,
               tokenAddress: token.token_address,
-              image: token.coin_image
-                ? `${process.env.REACT_APP_IMAGE_BASE_URL}${token.coin_image}`
-                : null,
-              address:
-                token.coin_family == 4
-                  ? account.coinFamilyAndAddress[4]
-                  : account.coinFamilyAndAddress[1],
+              image: token.coin_image,
+              address: account.coinFamilyAndAddress[token.coin_family],
               decimals: parseInt(token.decimals.toString().length) - 1,
               isToken: token.token_address ? true : false,
-              price: token.coins_market
-                ? token.coins_market.current_price
-                  ? token.coins_market.current_price
+              price: token.fiat_price_data
+                ? token.fiat_price_data.value
+                  ? token.fiat_price_data.value
                   : 0
                 : 0,
-              balance: token.wallet_addresses_data
-                ? toFixed(token.wallet_addresses_data.balance)
-                : 0,
-              type: token.coin_family == 9 ? 'PLS' : token.token_type,
-              jupiter_fee_address: token.jupiter_fee_address || null,
+              balance: token.wallets[0] ? toFixed(token.wallets[0].balance) : 0,
+              type: token.coin_family === 1 ? 'BEP20' : 'ERC20',
+              jupiter_fee_address: null,
+              chain: chains.find(
+                (chain) => chain?.coinFamily == token?.coin_family
+              ),
               rpc:
                 token.coin_family == 1
+                  ? process.env.REACT_APP_BNB_RPC
+                  : token.coin_family == 2
                   ? process.env.REACT_APP_ETH_RPC
-                  : token.coin_family == 9
-                  ? process.env.REACT_APP_PLS_RPC
-                  : token.coin_family == 4
-                  ? process.env.REACT_APP_SOL_RPC
-                  : process.env.REACT_APP_BNB_RPC,
+                  : process.env.REACT_APP_MATIC_RPC,
             };
           });
 
@@ -851,6 +695,7 @@ function Swap() {
 
       setLoading(false);
     } catch (error) {
+      console.log(error);
       messageApi.error('Something went wrong.');
       setLoading(false);
       // navigate(-1);
@@ -901,20 +746,15 @@ function Swap() {
   };
 
   const getInactiveTokens = async () => {
+    const { chains } = await chrome.storage.local.get('chains');
     try {
       store.dispatch(overAllLoader(true));
       const { data } = await server.post(
-        `/wallet/swap_coins_list`,
+        `/wallet/swap_coinlist`,
         {
-          address_list: [
-            account.coinFamilyAndAddress[1],
-            account.coinFamilyAndAddress[4],
-          ],
-          fiat_currency: currency.name,
-          per_page: 1000,
-          page: 1,
-          coin_family: token1.coinFamily,
-          is_watch_only: account?.isWatchOnly ? 1 : 0,
+          addrsListKeys: [account.address],
+          coin_family: [token1.coinFamily],
+          fiat_type: currency.name,
         },
         {
           headers: {
@@ -923,47 +763,36 @@ function Swap() {
         }
       );
 
-      const tokens = data.data.rows.map((token) => {
+      const tokens = data.data.map((token) => {
         return {
-          id: token.id,
+          id: token.coin_id,
           coin: token,
           coinFamily: token.coin_family,
-          iHave: token.wallet_addresses_data ? true : false,
+          iHave: token.wallets[0] ? true : false,
           symbol: token.coin_symbol.toUpperCase(),
           name: token.coin_name,
           tokenAddress: token.token_address,
-          image: token.coin_image
-            ? `${process.env.REACT_APP_IMAGE_BASE_URL}${token.coin_image}`
-            : null,
-          address:
-            token.coin_family == 4
-              ? account.coinFamilyAndAddress[4]
-              : account.coinFamilyAndAddress[1],
+          image: token.coin_image,
+          address: account.coinFamilyAndAddress[token.coin_family],
           decimals: parseInt(token.decimals.toString().length) - 1,
           isToken: token.token_address ? true : false,
-          price: token.coins_market
-            ? token.coins_market.current_price
-              ? token.coins_market.current_price
+          price: token.fiat_price_data
+            ? token.fiat_price_data.value
+              ? token.fiat_price_data.value
               : 0
             : 0,
-          balance: token.wallet_addresses_data
-            ? toFixed(token.wallet_addresses_data.balance)
-            : 0,
-          type:
-            token.coin_family == 9
-              ? 'PLS'
-              : token.coin_family == 4
-              ? 'SPL20'
-              : token.token_type,
-          jupiter_fee_address: token.jupiter_fee_address || null,
+          balance: token.wallets[0] ? toFixed(token.wallets[0].balance) : 0,
+          type: token.coin_family === 1 ? 'BEP20' : 'ERC20',
+          jupiter_fee_address: null,
+          chain: chains.find(
+            (chain) => chain?.coinFamily == token?.coin_family
+          ),
           rpc:
             token.coin_family == 1
+              ? process.env.REACT_APP_BNB_RPC
+              : token.coin_family == 2
               ? process.env.REACT_APP_ETH_RPC
-              : token.coin_family == 9
-              ? process.env.REACT_APP_PLS_RPC
-              : token.coin_family == 4
-              ? process.env.REACT_APP_SOL_RPC
-              : process.env.REACT_APP_BNB_RPC,
+              : process.env.REACT_APP_MATIC_RPC,
         };
       });
 
@@ -1434,330 +1263,32 @@ function Swap() {
     try {
       if (amount > 0 && token1.coinFamily == token2.coinFamily) {
         setLoading(true);
-        if (token1.coinFamily == 1) {
-          if (isWrap) {
-            const tradingFee = await calculateTradingFee(null, amount);
 
-            setInfoData([
-              {
-                text: 'Price',
-                textVal: `1 ${token2.symbol} = 1 ${token1.symbol}`,
-              },
-              {
-                text: 'Trading Fees',
-                textVal: `${tradingFee} ETH`,
-              },
-              {
-                text: 'Slippage Tolerance',
-                textVal: `5%`,
-              },
-              {
-                text: 'Route',
-                textVal: `${token1.symbol} > ${token2.symbol}`,
-              },
-            ]);
+        const uniHelper = new UniswapHelper(token1.rpc);
+        const route = await uniHelper.getQuoteAndRoute(
+          token1.chain.chainId,
+          token1.tokenAddress || '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+          token2.tokenAddress || '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+          new BigNumber(amount)
+            .multipliedBy(Math.pow(10, token1.decimals))
+            .toString(),
+          commision.percentage
+        );
 
-            setAmount2(amount);
-            setLoading(false);
-            return;
-          }
-
-          const uniHelper = new UniswapHelper(token1.rpc);
-          const route = await uniHelper.getQuoteAndRoute(
-            token1,
-            token2,
-            amount,
-            token1.address,
-            false,
-            slippage ? slippage : customSlippage
-          );
-
-          if (!route) {
-            setLoading(false);
-            return messageApi.error(
-              'This pair is not available for swap at the moment. Please try again later.'
-            );
-          }
-
-          const tradingFee = await calculateTradingFee(route, amount);
-          setInfoData([
-            {
-              text: 'Price',
-              textVal: `1 ${token2.symbol} = ${addCommasToNumber(
-                getFlooredFixed(
-                  parseFloat(amount) /
-                    parseFloat(route.quote.toFixed(token2.decimals)),
-                  12
-                )
-              )} ${token1.symbol}`,
-            },
-            {
-              text: 'Trading Fees',
-              textVal: `${tradingFee} ${
-                token1.coinFamily == 1 ? 'ETH' : 'BNB'
-              }`,
-            },
-            {
-              text: 'Slippage Tolerance',
-              textVal: `${slippage ? slippage : customSlippage}%`,
-            },
-            {
-              text: 'Route',
-              textVal: route.route[0].tokenPath
-                .map((el) => el.symbol)
-                .join('>'),
-            },
-          ]);
-
-          setRoute(route);
-          setAmount2(route.quote.toFixed(token2.decimals));
-
+        if (!route) {
           setLoading(false);
-        } else if (token1.coinFamily == 3) {
-          if (isWrap) {
-            const tradingFee = await calculateTradingFee(null, amount);
-
-            setInfoData([
-              {
-                text: 'Price',
-                textVal: `1 ${token2.symbol} = 1 ${token1.symbol}`,
-              },
-              {
-                text: 'Trading Fees',
-                textVal: `${tradingFee} BNB`,
-              },
-              {
-                text: 'Slippage Tolerance',
-                textVal: `5%`,
-              },
-              {
-                text: 'Route',
-                textVal: `${token1.symbol} > ${token2.symbol}`,
-              },
-            ]);
-
-            setAmount2(amount);
-            setLoading(false);
-            return;
-          }
-
-          const pancakeHelper = new PancakeHelper(token1.rpc);
-          const route = await pancakeHelper.getQuoteAndRoute(
-            token1,
-            token2,
-            amount,
-            token1.address,
-            false,
-            slippage ? slippage : customSlippage
+          return messageApi.error(
+            'This pair is not available for swap at the moment. Please try again later.'
           );
-          if (!route) {
-            setLoading(false);
-            return messageApi.error(
-              'Unable to perform swap: 403. Please try again later.'
-            );
-          }
-          console.log(new BigNumber(route.outAmount).toFixed(token2.decimals));
-          setAmount2(new BigNumber(route.outAmount).toFixed(token2.decimals));
-          setRoute(route.route);
-          setFeeAmount(route.feeAmount);
-
-          const tradingFee = await calculateTradingFee(route.route, amount);
-          if (!tradingFee || tradingFee.status) {
-            setLoading(false);
-            setInfoData([]);
-            return messageApi.error(
-              tradingFee.status ? tradingFee.message : 'Pair not supported.'
-            );
-          }
-
-          const amountBigNumber = new BigNumber(amount);
-          const balanceBigNumber = new BigNumber(balance);
-
-          if (amountBigNumber.isGreaterThan(balanceBigNumber)) {
-            setLoading(false);
-            setInfoData([]);
-            return;
-          }
-
-          setInfoData([
-            {
-              text: 'Price',
-              textVal: `1 ${token2.symbol} = ${addCommasToNumber(
-                getFlooredFixed(
-                  parseFloat(amount) /
-                    parseFloat(
-                      new BigNumber(route.outAmount).toFixed(token2.decimals)
-                    ),
-                  12
-                )
-              )} ${token1.symbol}`,
-            },
-            {
-              text: 'Trading Fees',
-              textVal: `${tradingFee} ${
-                token1.coinFamily == 1 ? 'ETH' : 'BNB'
-              }`,
-            },
-            {
-              text: 'Slippage Tolerance',
-              textVal: `${slippage ? slippage : customSlippage}%`,
-            },
-            {
-              text: 'Route',
-              textVal:
-                route.route.routes.length === 1
-                  ? route.route.routes[0].path.map((el) => el.symbol).join('>')
-                  : 'Complex Composite Route',
-            },
-          ]);
-
-          setLoading(false);
-        } else if (token1.coinFamily == 9) {
-          const pancakeHelper = new PulseChainHelper(token1.rpc);
-          const route = await pancakeHelper.getQuoteAndRoute(
-            token1,
-            token2,
-            amount,
-            token1.address,
-            false,
-            slippage ? slippage : customSlippage
-          );
-
-          if (!route) {
-            setLoading(false);
-            return messageApi.error(
-              'This pair is not available for swap at the moment. Please try again later.'
-            );
-          }
-
-          setAmount2(route.outAmount);
-          setRoute(route.route);
-          setFeeAmount(route.feeAmount);
-
-          if (!second) {
-            if (new BigNumber(amount).isGreaterThan(new Bignumber(balance))) {
-              setInfoData([]);
-              setLoading(false);
-              return;
-            }
-          }
-
-          const tradingFee = await calculateTradingFee(route.route, amount);
-
-          if (!tradingFee || tradingFee.status) {
-            setLoading(false);
-            return messageApi.error(
-              tradingFee.status ? tradingFee.message : 'Pair not supported.'
-            );
-          }
-
-          console.log(slippage, customSlippage, 'slippage');
-
-          setInfoData([
-            {
-              text: 'Price',
-              textVal: `1 ${token2.symbol} = ${addCommasToNumber(
-                getFlooredFixed(
-                  parseFloat(amount) / parseFloat(route.outAmount),
-                  12
-                )
-              )} ${token1.symbol}`,
-            },
-            {
-              text: 'Trading Fees',
-              textVal: `${tradingFee} ${
-                token1.coinFamily == 1
-                  ? 'ETH'
-                  : token1.coinFamily == 9
-                  ? 'PLS'
-                  : 'BNB'
-              }`,
-            },
-            {
-              text: 'Slippage Tolerance',
-              textVal: `${slippage ? slippage : customSlippage}%`,
-            },
-            {
-              text: 'Route',
-              textVal: route.route.routeText,
-            },
-          ]);
-
-          setLoading(false);
-        } else if (token1.coinFamily == 4) {
-          try {
-            const response = await server.get(
-              'https://quote-api.jup.ag/v6/quote',
-              {
-                params: {
-                  amount: new BigNumber(amount)
-                    .multipliedBy(Math.pow(10, token1.decimals))
-                    .toFixed(0),
-                  inputMint:
-                    token1.tokenAddress ||
-                    'So11111111111111111111111111111111111111112',
-                  outputMint:
-                    token2.tokenAddress ||
-                    'So11111111111111111111111111111111111111112',
-                  platformFeeBps: token2.jupiter_fee_address ? 100 : 0,
-                  slippageBps: new Bignumber(
-                    slippage ? slippage : customSlippage
-                  )
-                    .multipliedBy(100)
-                    .toFixed(0),
-                },
-              }
-            );
-
-            const outAmount = new BigNumber(response.data.outAmount)
-              .dividedBy(Math.pow(10, token2.decimals))
-              .toFixed(token2.decimals);
-
-            console.log(response.data);
-            setAmount2(outAmount);
-            setRoute(response.data);
-
-            const tradingFee = await calculateTradingFee(null, amount, true);
-
-            setInfoData([
-              {
-                text: 'Price',
-                textVal: `1 ${token2.symbol} = ${addCommasToNumber(
-                  getFlooredFixed(
-                    parseFloat(amount) / parseFloat(outAmount),
-                    12
-                  )
-                )} ${token1.symbol}`,
-              },
-              {
-                text: 'Trading Fees',
-                textVal: `${tradingFee} SOL`,
-              },
-              {
-                text: 'Slippage Tolerance',
-                textVal: `${slippage ? slippage : customSlippage}%`,
-              },
-              {
-                text: 'Route',
-                textVal: response.data.routePlan
-                  .map((el) => el.swapInfo.label)
-                  .join('>'),
-              },
-            ]);
-          } catch (error) {
-            console.log(error);
-            if (error?.response?.data?.error) {
-              messageApi.error(
-                error.response.data.error ===
-                  'Query parameter amount cannot be parsed: ParseIntError { kind: PosOverflow }'
-                  ? 'Please enter a smaller amount to proceed'
-                  : error.response.data.error
-              );
-            } else {
-              messageApi.error('Something went wrong');
-            }
-          }
         }
+
+        setRoute(route);
+        setAmount2(
+          new Bignumber(route.toAmount).dividedBy(Math.pow(10, token2.decimals))
+        );
+
+        setLoading(false);
+
         setLoading(false);
       }
       updateRef.current = true;
@@ -2668,7 +2199,7 @@ function Swap() {
                   type={'number'}
                   checkForSymbols={true}
                   value={amount2}
-                  disabled={loading}
+                  disabled={true}
                   getData={async (amount) => {
                     if (percent != null) {
                       setPercent(null);
@@ -2743,7 +2274,7 @@ function Swap() {
                     </p>
                   </div>
                 ) : null}
-                {infoData?.length > 0 && amount2 > 0 ? (
+                {/* {infoData?.length > 0 && amount2 > 0 ? (
                   <div className={'confirmCurrency'}>
                     <div className={'confirmCurrency__keyValuesOuter'}>
                       {infoData.map((ele) => (
@@ -2805,7 +2336,7 @@ function Swap() {
                       ))}
                     </div>
                   </div>
-                ) : null}
+                ) : null} */}
 
                 <div style={{ width: '100%' }}>
                   {infoData.length > 0 ? null : (
@@ -2836,18 +2367,7 @@ function Swap() {
                           }}
                         />
                       </div>
-                      <span className='slippageNoti'>
-                        {/* <Tooltip title="Slippage is the price change between order placement and execution. Higher slippage helps prevent failed transactions, particularly in fast moving markets. For taxed tokens, we recommend you set slippage at least 1% above the tax rate of the token."> */}
-                        <InfoCircleOutlined
-                          color='red'
-                          onClick={() => {
-                            setInfoMessage(
-                              'Slippage is the price change between order placement and execution. Higher slippage helps prevent failed transactions, particularly in fast moving markets. For taxed tokens, we recommend you set slippage at least 1% above the tax rate of the token.'
-                            );
-                          }}
-                        />
-                        {/* </Tooltip> */}
-                      </span>
+                     
                     </div>
                   )}
 
@@ -2873,29 +2393,6 @@ function Swap() {
                       }
 
                       store.dispatch(overAllLoader(true));
-
-                      if (token1?.coinFamily == 4) {
-                        store.dispatch(overAllLoader(false));
-
-                        let swapDetailed = {
-                          route,
-                          token1,
-                          token2,
-                          amount,
-                          amount2,
-                          feeAmount: '0.000005',
-                          tab: sel,
-                          adminSwapFee,
-                        };
-
-                        store.dispatch(swapDetailAc(swapDetailed));
-                        navigate('/swapDetails', {
-                          state: swapDetailed,
-                        });
-                        store.dispatch(overAllLoader(false));
-
-                        return;
-                      }
 
                       const getNativeBalance = await Web3Helper.getCoinBalance(
                         token1?.address,
@@ -2923,83 +2420,6 @@ function Swap() {
                         );
                       }
 
-                      if (token1?.coinFamily == 3) {
-                        store.dispatch(overAllLoader(true));
-                        const pancakeHelper = new PancakeHelper(token1?.rpc);
-                        const route = await pancakeHelper.getQuoteAndRoute(
-                          token1,
-                          token2,
-                          amount,
-                          token1?.address,
-                          false,
-                          slippage ? slippage : customSlippage,
-                          isWrap
-                        );
-
-                        if (!route) {
-                          store.dispatch(overAllLoader(false));
-                          return messageApi.error(
-                            'This pair is not available for swap at the moment. Please try again later.'
-                          );
-                        }
-
-                        store.dispatch(overAllLoader(false));
-                        let swapDetailed = {
-                          route: route.route,
-                          token1,
-                          token2,
-                          amount,
-                          amount2,
-                          feeAmount,
-                          slippage: slippage ? slippage : customSlippage,
-                          isWrap,
-                          tab: sel,
-                        };
-
-                        store.dispatch(swapDetailAc(swapDetailed));
-                        return navigate('/swapDetails', {
-                          state: swapDetailed,
-                        });
-                      }
-
-                      if (token1?.coinFamily == 9) {
-                        store.dispatch(overAllLoader(true));
-                        const pancakeHelper = new PulseChainHelper(token1?.rpc);
-                        const route = await pancakeHelper.getQuoteAndRoute(
-                          token1,
-                          token2,
-                          amount,
-                          token1?.address,
-                          false,
-                          slippage ? slippage : customSlippage,
-                          false
-                        );
-
-                        if (!route) {
-                          store.dispatch(overAllLoader(false));
-                          return messageApi.error(
-                            'This pair is not available for swap at the moment. Please try again later.'
-                          );
-                        }
-
-                        store.dispatch(overAllLoader(false));
-
-                        let swapDetailed = {
-                          route: route?.route,
-                          token1,
-                          token2,
-                          amount,
-                          amount2,
-                          feeAmount,
-                          tab: sel,
-                        };
-
-                        store.dispatch(swapDetailAc(swapDetailed));
-                        return navigate('/swapDetails', {
-                          state: swapDetailed,
-                        });
-                      }
-
                       store.dispatch(overAllLoader(false));
 
                       let swapDetailed = {
@@ -3011,6 +2431,8 @@ function Swap() {
                         feeAmount,
                         isWrap,
                         tab: sel,
+                        slippage: slippage ? slippage : customSlippage,
+                        commision
                       };
 
                       store.dispatch(swapDetailAc(swapDetailed));
@@ -3019,7 +2441,9 @@ function Swap() {
                       });
                     }}
                     text={
-                      parseFloat(amount) > parseFloat(balance)
+                      new BigNumber(amount).isGreaterThan(
+                        new BigNumber(balance)
+                      )
                         ? 'Insufficient Balance'
                         : token1?.id == token2?.id &&
                           token1 != null &&
@@ -3035,25 +2459,9 @@ function Swap() {
                       amount2 <= 0 ||
                       loading ||
                       parseFloat(amount) > parseFloat(balance) ||
-                      infoData?.length === 0 ||
                       token1?.id == token2?.id
                     }
                   />
-                  {infoData.length == 0 ? (
-                    <div style={{ marginTop: '10px' }} className='readDisclaimer'>
-                      <img
-                        src={warning}
-                        alt=''
-                        style={{ width: '20px', padding: '4px' }}
-                      />
-                      <p>
-                        Read the Qubetics Swap disclaimer{' '}
-                        <span onClick={() => setDisclaimer(true)}>Here.</span>
-                      </p>
-                    </div>
-                  ) : (
-                    ''
-                  )}
                 </div>
               </div>
             )}
@@ -3430,17 +2838,6 @@ function Swap() {
 
             <div className='myvalues'>
               <p
-                className={slippage === 0.5 ? 'myValuesActive' : ''}
-                onClick={() => {
-                  setSlippage(0.5);
-                  setCustomSlippage(null);
-                }}
-              >
-                0.5%
-              </p>
-            </div>
-            <div className='myvalues'>
-              <p
                 className={slippage === 2 ? 'myValuesActive' : ''}
                 onClick={() => {
                   setSlippage(2);
@@ -3485,7 +2882,7 @@ function Swap() {
                   }
 
                   if (
-                    parseFloat(value) <= 100 &&
+                    parseFloat(value) <= 50 &&
                     value.toString().length <= 5
                   ) {
                     setSlippage(null);

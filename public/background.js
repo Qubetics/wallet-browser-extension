@@ -1,13 +1,12 @@
 /*global chrome*/
-
+// import { randomBytes } from 'crypto-browserify';
 import { v4 as uuidv4 } from 'uuid';
 const {
   JsonRpcEngine,
   createAsyncMiddleware,
 } = require('@metamask/json-rpc-engine');
 const engine = new JsonRpcEngine();
-import { randomBytes } from 'crypto-browserify';
-const NodeRSA = require('node-rsa');
+// const NodeRSA = require('node-rsa');
 
 const networks = [
   {
@@ -27,8 +26,8 @@ const networks = [
     swap: true,
     isEVM: true,
     supportTokens: true,
-    coinFamily: 1,
-    slug: 'eth',
+    coinFamily: 2,
+    slug: 'ethereum',
     status: true,
   },
   {
@@ -51,31 +50,31 @@ const networks = [
     swap: true,
     isEVM: true,
     supportTokens: true,
-    coinFamily: 3,
-    slug: 'bnb',
+    coinFamily: 1,
+    slug: 'binancesmartchain',
     status: true,
   },
-  {
-    id: uuidv4(),
-    chainName: 'Avalanche',
-    chainId: '43114',
-    currencyName: 'AVAX',
-    currencySymbol: 'AVAX',
-    currencyDecimals: 18,
-    rpcUrl: 'https://api.avax.network/ext/bc/C/rpc',
-    rpcApiKey: null,
-    blockUrl: 'https://snowtrace.io/',
-    default: false,
-    image: 'https://s2.coinmarketcap.com/static/img/coins/64x64/5805.png',
-    tokenType: 'ERC20',
-    testnet: false,
-    swap: false,
-    isEVM: true,
-    supportTokens: true,
-    coinFamily: 7,
-    slug: 'avax',
-    status: true,
-  },
+  // {
+  //   id: uuidv4(),
+  //   chainName: 'Avalanche',
+  //   chainId: '43114',
+  //   currencyName: 'AVAX',
+  //   currencySymbol: 'AVAX',
+  //   currencyDecimals: 18,
+  //   rpcUrl: 'https://api.avax.network/ext/bc/C/rpc',
+  //   rpcApiKey: null,
+  //   blockUrl: 'https://snowtrace.io/',
+  //   default: false,
+  //   image: 'https://s2.coinmarketcap.com/static/img/coins/64x64/5805.png',
+  //   tokenType: 'ERC20',
+  //   testnet: false,
+  //   swap: false,
+  //   isEVM: true,
+  //   supportTokens: true,
+  //   coinFamily: 7,
+  //   slug: 'avax',
+  //   status: true,
+  // },
   {
     id: uuidv4(),
     chainName: 'Polygon',
@@ -93,117 +92,117 @@ const networks = [
     swap: false,
     isEVM: true,
     supportTokens: true,
-    coinFamily: 6,
+    coinFamily: 4,
     slug: 'matic',
     status: true,
   },
-  {
-    id: uuidv4(),
-    chainName: 'Cronos',
-    chainId: '25',
-    currencyName: 'CRO',
-    currencySymbol: 'CRO',
-    currencyDecimals: 18,
-    rpcUrl: 'https://evm.cronos.org',
-    rpcApiKey: null,
-    blockUrl: 'https://cronoscan.com/',
-    default: false,
-    image: 'https://REDACTED/cro.png',
-    tokenType: 'ERC20',
-    testnet: false,
-    swap: false,
-    isEVM: true,
-    supportTokens: true,
-    coinFamily: 8,
-    slug: 'cro',
-    status: true,
-  },
-  {
-    id: uuidv4(),
-    chainName: 'Solana',
-    chainId: '1399811149',
-    currencyName: 'SOL',
-    currencySymbol: 'SOL',
-    currencyDecimals: 6,
-    rpcUrl:
-      'https://sol.fastnode.cc/FNoItXAqEKsNFDjbsHetTyFjSMrwFGykPKOjQKzlocPGvuqOYkjhxkfFsIXRWtnI/',
-    rpcApiKey: null,
-    blockUrl: 'https://solscan.io/',
-    default: false,
-    image: 'https://REDACTED/sol.png',
-    tokenType: 'SPL20',
-    testnet: false,
-    swap: false,
-    isEVM: false,
-    supportTokens: true,
-    coinFamily: 4,
-    slug: 'sol',
-    status: false,
-  },
-  {
-    id: uuidv4(),
-    chainName: 'Bitcoin',
-    chainId: 'BTC0',
-    currencyName: 'BTC',
-    currencySymbol: 'BTC',
-    currencyDecimals: 8,
-    rpcUrl:
-      'https://btc.nodes.fastnode.io/mainnet/fn-dedic-4479-ad5f-3e2787e055ca/blockbook/api/',
-    rpcApiKey: 'REDACTED',
-    blockUrl: 'https://www.blockchain.com/explorer/transactions/',
-    default: false,
-    image: 'https://REDACTED/btc.png',
-    tokenType: 'BTC',
-    testnet: false,
-    swap: false,
-    isEVM: false,
-    supportTokens: false,
-    coinFamily: 2,
-    slug: 'btc',
-    status: false,
-  },
-  {
-    id: uuidv4(),
-    chainName: 'Cardano',
-    chainId: 'ADA0',
-    currencyName: 'ADA',
-    currencySymbol: 'ADA',
-    currencyDecimals: 6,
-    rpcUrl: 'https://ada.nownodes.io/v2',
-    rpcApiKey: 'REDACTED',
-    blockUrl: 'https://explorer.cardano-testnet.iohkdev.io/',
-    default: false,
-    image: 'https://REDACTED/ada.png',
-    tokenType: 'ADA',
-    testnet: false,
-    swap: false,
-    isEVM: false,
-    supportTokens: true,
-    coinFamily: 5,
-    slug: 'ada',
-    status: false,
-  },
-  {
-    id: uuidv4(),
-    chainName: 'PulseChain',
-    chainId: '369',
-    currencyName: 'PLS',
-    currencySymbol: 'PLS',
-    currencyDecimals: 18,
-    rpcUrl: 'https://rpc.pulsechain.com',
-    rpcApiKey: null,
-    blockUrl: 'https://otter.PulseChain.com',
-    default: false,
-    image: 'https://REDACTED/1694522712555_11145.png',
-    tokenType: 'ERC20',
-    testnet: false,
-    swap: false,
-    isEVM: true,
-    supportTokens: true,
-    coinFamily: 9,
-    slug: 'pls',
-    status: true,
-  },
+  // {
+  //   id: uuidv4(),
+  //   chainName: 'Cronos',
+  //   chainId: '25',
+  //   currencyName: 'CRO',
+  //   currencySymbol: 'CRO',
+  //   currencyDecimals: 18,
+  //   rpcUrl: 'https://evm.cronos.org',
+  //   rpcApiKey: null,
+  //   blockUrl: 'https://cronoscan.com/',
+  //   default: false,
+  //   image: 'https://REDACTED/cro.png',
+  //   tokenType: 'ERC20',
+  //   testnet: false,
+  //   swap: false,
+  //   isEVM: true,
+  //   supportTokens: true,
+  //   coinFamily: 8,
+  //   slug: 'cro',
+  //   status: true,
+  // },
+  // {
+  //   id: uuidv4(),
+  //   chainName: 'Solana',
+  //   chainId: '1399811149',
+  //   currencyName: 'SOL',
+  //   currencySymbol: 'SOL',
+  //   currencyDecimals: 6,
+  //   rpcUrl:
+  //     'https://sol.fastnode.cc/FNoItXAqEKsNFDjbsHetTyFjSMrwFGykPKOjQKzlocPGvuqOYkjhxkfFsIXRWtnI/',
+  //   rpcApiKey: null,
+  //   blockUrl: 'https://solscan.io/',
+  //   default: false,
+  //   image: 'https://REDACTED/sol.png',
+  //   tokenType: 'SPL20',
+  //   testnet: false,
+  //   swap: false,
+  //   isEVM: false,
+  //   supportTokens: true,
+  //   coinFamily: 4,
+  //   slug: 'sol',
+  //   status: false,
+  // },
+  // {
+  //   id: uuidv4(),
+  //   chainName: 'Bitcoin',
+  //   chainId: 'BTC0',
+  //   currencyName: 'BTC',
+  //   currencySymbol: 'BTC',
+  //   currencyDecimals: 8,
+  //   rpcUrl:
+  //     'https://btc.nodes.fastnode.io/mainnet/fn-dedic-4479-ad5f-3e2787e055ca/blockbook/api/',
+  //   rpcApiKey: 'REDACTED',
+  //   blockUrl: 'https://www.blockchain.com/explorer/transactions/',
+  //   default: false,
+  //   image: 'https://REDACTED/btc.png',
+  //   tokenType: 'BTC',
+  //   testnet: false,
+  //   swap: false,
+  //   isEVM: false,
+  //   supportTokens: false,
+  //   coinFamily: 2,
+  //   slug: 'btc',
+  //   status: false,
+  // },
+  // {
+  //   id: uuidv4(),
+  //   chainName: 'Cardano',
+  //   chainId: 'ADA0',
+  //   currencyName: 'ADA',
+  //   currencySymbol: 'ADA',
+  //   currencyDecimals: 6,
+  //   rpcUrl: 'https://ada.nownodes.io/v2',
+  //   rpcApiKey: 'REDACTED',
+  //   blockUrl: 'https://explorer.cardano-testnet.iohkdev.io/',
+  //   default: false,
+  //   image: 'https://REDACTED/ada.png',
+  //   tokenType: 'ADA',
+  //   testnet: false,
+  //   swap: false,
+  //   isEVM: false,
+  //   supportTokens: true,
+  //   coinFamily: 5,
+  //   slug: 'ada',
+  //   status: false,
+  // },
+  // {
+  //   id: uuidv4(),
+  //   chainName: 'PulseChain',
+  //   chainId: '369',
+  //   currencyName: 'PLS',
+  //   currencySymbol: 'PLS',
+  //   currencyDecimals: 18,
+  //   rpcUrl: 'https://rpc.pulsechain.com',
+  //   rpcApiKey: null,
+  //   blockUrl: 'https://otter.PulseChain.com',
+  //   default: false,
+  //   image: 'https://REDACTED/1694522712555_11145.png',
+  //   tokenType: 'ERC20',
+  //   testnet: false,
+  //   swap: false,
+  //   isEVM: true,
+  //   supportTokens: true,
+  //   coinFamily: 9,
+  //   slug: 'pls',
+  //   status: true,
+  // },
 ];
 
 const currency = {
@@ -219,7 +218,6 @@ class Background {
   constructor() {
     this.storeDefaultNetworks();
 
-
     // chrome.runtime.onConnect.addListener(function (port) {
     //   if (port.name === 'popup') {
     //     port.onDisconnect.addListener(async function () {
@@ -227,6 +225,22 @@ class Background {
     //       await chrome.storage.local.set({ openSidePanel: false });
     //     });
     //   }
+    // });
+
+    // chrome.action.onClicked.addListener((tab) => {
+    //   chrome.storage.local.get('openSidePanel', (result) => {
+    //     const isSidePanelOpen = result.openSidePanel || false;
+    //     console.log("🚀 ~ Background ~ chrome.storage.local.get ~ isSidePanelOpen:", isSidePanelOpen)
+    //     if (isSidePanelOpen) {
+    //       try {
+    //         chrome.sidePanel.open({ windowId: tab.windowId });
+    //       } catch (err) {
+    //         console.error('Failed to open side panel:', err);
+    //       }
+    //     } else {
+    //       chrome.action.setPopup({ popup: 'index.html' });
+    //     }
+    //   });
     // });
 
     chrome.runtime.onConnect.addListener(function (externalPort) {
@@ -277,11 +291,11 @@ class Background {
       periodInMinutes: 0.2,
     });
 
-    chrome.alarms.onAlarm.addListener(async (alarms) => {
-      if (alarms.name === 'updated_prices') {
-        await this.fetchPricesFromBackend();
-      }
-    });
+    // chrome.alarms.onAlarm.addListener(async (alarms) => {
+    //   if (alarms.name === 'updated_prices') {
+    //     await this.fetchPricesFromBackend();
+    //   }
+    // });
 
     engine.push(
       createAsyncMiddleware(async (req, res, next, end) => {
@@ -491,8 +505,6 @@ class Background {
     this.handleAllEthereumEvents();
   }
 
-
-
   injectEthereumProvider = async () => {
     await chrome.scripting.registerContentScripts([
       {
@@ -541,133 +553,134 @@ class Background {
           currency,
           alerts: [],
           deviceId: uuidv4(),
+          autoLock: true,
         },
         () => {}
       );
     });
   };
 
-  fetchPricesFromBackend = async () => {
-    // console.log("UPDATING ALERTS");
-    const { alerts } = await chrome.storage.local.get('alerts');
-    const { accounts } = await chrome.storage.session.get('accounts');
+  // fetchPricesFromBackend = async () => {
+  //   // console.log("UPDATING ALERTS");
+  //   const { alerts } = await chrome.storage.local.get('alerts');
+  //   const { accounts } = await chrome.storage.session.get('accounts');
 
-    if (accounts) {
-      const defaultAccount = accounts.find((account) => account.default);
+  //   if (accounts) {
+  //     const defaultAccount = accounts.find((account) => account.default);
 
-      const filteredAlerts = alerts.filter(
-        (alert) => alert.accountId == defaultAccount.id && !alert.sent
-      );
+  //     const filteredAlerts = alerts.filter(
+  //       (alert) => alert.accountId == defaultAccount.id && !alert.sent
+  //     );
 
-      const randomString = randomBytes(20).toString('hex');
+  //     const randomString = randomBytes(20).toString('hex');
 
-      const publicKey = `-----BEGIN PUBLIC KEY-----
-      MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA2wzqlCphAcUFgYRe9zkL
-      zTlRlgFdg2Xjvcpd0DHV1AbccXPer26UiKxJOf0oP9MYqndYATHvEK+KhP565uBP
-      9ea+IhE7Su7xmI+yhyf3bAY9Ok6OcnkXSg2v9fxBnkWkSCxmMirW5EYFR47U/C0/
-      qtx/4/0YykFBlZ215HsgUoH7ACmzvjwQBGYw8u6EJ6E8fW0KYboTbi4NmmfulXQD
-      CAiSITsiCU913cxOFRm8m/uBlNyCPOommYyAA4fX0F3CdfCIDKJA3jK5LwKaS8PT
-      MMvOHMoMeAoXAQi0Vw3uT1j8BFB7F4uZpUdbD0x9kmT/o4PhIVvYnv8LNSdoQ/rA
-      HQIDAQAB
-      -----END PUBLIC KEY-----`;
+  //     const publicKey = `-----BEGIN PUBLIC KEY-----
+  //     MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA2wzqlCphAcUFgYRe9zkL
+  //     zTlRlgFdg2Xjvcpd0DHV1AbccXPer26UiKxJOf0oP9MYqndYATHvEK+KhP565uBP
+  //     9ea+IhE7Su7xmI+yhyf3bAY9Ok6OcnkXSg2v9fxBnkWkSCxmMirW5EYFR47U/C0/
+  //     qtx/4/0YykFBlZ215HsgUoH7ACmzvjwQBGYw8u6EJ6E8fW0KYboTbi4NmmfulXQD
+  //     CAiSITsiCU913cxOFRm8m/uBlNyCPOommYyAA4fX0F3CdfCIDKJA3jK5LwKaS8PT
+  //     MMvOHMoMeAoXAQi0Vw3uT1j8BFB7F4uZpUdbD0x9kmT/o4PhIVvYnv8LNSdoQ/rA
+  //     HQIDAQAB
+  //     -----END PUBLIC KEY-----`;
 
-      async function encryptAndSignMessage(message) {
-        const second = new NodeRSA(publicKey);
-        second.setOptions({ encryptionScheme: 'pkcs1' });
-        const enc = second.encrypt(message, 'base64');
-        const encryptedData = {
-          data: enc,
-        };
-        return encryptedData;
-      }
+  //     async function encryptAndSignMessage(message) {
+  //       const second = new NodeRSA(publicKey);
+  //       second.setOptions({ encryptionScheme: 'pkcs1' });
+  //       const enc = second.encrypt(message, 'base64');
+  //       const encryptedData = {
+  //         data: enc,
+  //       };
+  //       return encryptedData;
+  //     }
 
-      for await (let alert of filteredAlerts) {
-        const encryptedData = await encryptAndSignMessage(
-          JSON.stringify({
-            id: alert.coinId,
-            fiat_currency: alert.currencyName.toUpperCase(),
-          })
-        );
-        await fetch(
-          'https://REDACTED/dev/api/v1/wallet/perticular_token_data',
-          {
-            method: 'post',
-            body: JSON.stringify(encryptedData),
-            headers: {
-              Authorization: defaultAccount.jwtToken,
-              device_id: defaultAccount.deviceId,
-              'Content-Type': 'application/json',
-              'aw-api-auth': randomString,
-            },
-          }
-        ).then(async (response) => {
-          const data = await response.json();
-          const priceInformation = data.data;
+  //     for await (let alert of filteredAlerts) {
+  //       const encryptedData = await encryptAndSignMessage(
+  //         JSON.stringify({
+  //           id: alert.coinId,
+  //           fiat_currency: alert.currencyName.toUpperCase(),
+  //         })
+  //       );
+  //       await fetch(
+  //         'https://REDACTED/dev/api/v1/wallet/perticular_token_data',
+  //         {
+  //           method: 'post',
+  //           body: JSON.stringify(encryptedData),
+  //           headers: {
+  //             Authorization: defaultAccount.jwtToken,
+  //             device_id: defaultAccount.deviceId,
+  //             'Content-Type': 'application/json',
+  //             'aw-api-auth': randomString,
+  //           },
+  //         }
+  //       ).then(async (response) => {
+  //         const data = await response.json();
+  //         const priceInformation = data.data;
 
-          switch (alert.type) {
-            case 'above':
-              if (
-                parseFloat(alert.price) <
-                parseFloat(priceInformation.coins_market.current_price)
-              ) {
-                chrome.notifications.create('PRICE_ALERT_ABOVE', {
-                  type: 'basic',
-                  iconUrl: './logo512.png',
-                  title: 'qubetics Wallet',
-                  message: `The price of ${alert.selectedToken.coin_symbol} went above ${alert.currencySymbol}${alert.price}`,
-                  priority: 2,
-                });
+  //         switch (alert.type) {
+  //           case 'above':
+  //             if (
+  //               parseFloat(alert.price) <
+  //               parseFloat(priceInformation.coins_market.current_price)
+  //             ) {
+  //               chrome.notifications.create('PRICE_ALERT_ABOVE', {
+  //                 type: 'basic',
+  //                 iconUrl: './logo512.png',
+  //                 title: 'Qubetics Wallet',
+  //                 message: `The price of ${alert.selectedToken.coin_symbol} went above ${alert.currencySymbol}${alert.price}`,
+  //                 priority: 2,
+  //               });
 
-                let updatedAls = await alerts.map((el) => {
-                  if (alert.id === el.id) {
-                    el.sent = true;
-                    return el;
-                  } else {
-                    return el;
-                  }
-                });
+  //               let updatedAls = await alerts.map((el) => {
+  //                 if (alert.id === el.id) {
+  //                   el.sent = true;
+  //                   return el;
+  //                 } else {
+  //                   return el;
+  //                 }
+  //               });
 
-                await chrome.storage.local.set({
-                  alerts: updatedAls,
-                });
-                this.port.postMessage('ALERTS_UPDATED');
-              }
-              break;
-            case 'below':
-              if (
-                parseFloat(alert.price) >
-                parseFloat(priceInformation.coins_market.current_price)
-              ) {
-                chrome.notifications.create('PRICE_ALERT_BELOW', {
-                  type: 'basic',
-                  iconUrl: './logo512.png',
-                  title: 'qubetics Wallet',
-                  message: `The price of ${alert.selectedToken.coin_symbol} went below ${alert.currencySymbol}${alert.price}`,
-                  priority: 2,
-                });
+  //               await chrome.storage.local.set({
+  //                 alerts: updatedAls,
+  //               });
+  //               this.port.postMessage('ALERTS_UPDATED');
+  //             }
+  //             break;
+  //           case 'below':
+  //             if (
+  //               parseFloat(alert.price) >
+  //               parseFloat(priceInformation.coins_market.current_price)
+  //             ) {
+  //               chrome.notifications.create('PRICE_ALERT_BELOW', {
+  //                 type: 'basic',
+  //                 iconUrl: './logo512.png',
+  //                 title: 'Qubetics Wallet',
+  //                 message: `The price of ${alert.selectedToken.coin_symbol} went below ${alert.currencySymbol}${alert.price}`,
+  //                 priority: 2,
+  //               });
 
-                let updatedAls = await alerts.map((el) => {
-                  if (alert.id === el.id) {
-                    el.sent = true;
-                    return el;
-                  } else {
-                    return el;
-                  }
-                });
+  //               let updatedAls = await alerts.map((el) => {
+  //                 if (alert.id === el.id) {
+  //                   el.sent = true;
+  //                   return el;
+  //                 } else {
+  //                   return el;
+  //                 }
+  //               });
 
-                await chrome.storage.local.set({
-                  alerts: updatedAls,
-                });
-                this.port.postMessage('ALERTS_UPDATED');
-              }
-              break;
-            default:
-              break;
-          }
-        });
-      }
-    }
-  };
+  //               await chrome.storage.local.set({
+  //                 alerts: updatedAls,
+  //               });
+  //               this.port.postMessage('ALERTS_UPDATED');
+  //             }
+  //             break;
+  //           default:
+  //             break;
+  //         }
+  //       });
+  //     }
+  //   }
+  // };
 }
 
 new Background();

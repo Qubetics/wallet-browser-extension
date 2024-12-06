@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { SWFT_BASE_URL } from '../config/crosschain.config';
-// import { AdaHelper } from './ada.helper';
+import { AdaHelper } from './ada.helper';
 import { BTCHelper } from './btc.helper';
 import { getFlooredFixed } from './conversion.helper';
 import { SolanaHelper } from './solana.helper';
@@ -81,7 +81,9 @@ export class CrossChainHelper {
     chain,
     fee,
     fiatValue,
-    parentCoin
+    parentCoin,
+    rpc,
+    symbol
   ) => {
     try {
       console.log({
@@ -99,7 +101,7 @@ export class CrossChainHelper {
       const { account } = store.getState();
 
       const response = await server.post(
-        'swft/account_exchange',
+        '/swft/accountExchange',
         {
           deposit_coin_code: fromCoin.symbol,
           receive_coin_code: toCoin.symbol,
@@ -118,146 +120,43 @@ export class CrossChainHelper {
         }
       );
 
-      console.log(
-        '🚀 ~ file: crosschain.helper.js:72 ~ CrossChainHelper ~ response:',
-        response
-      );
-
       const orderData = response.data.data.data;
 
       let hash = '';
 
-      if (chain.isEVM) {
-        if (fromCoin.tokenAddress) {
-          hash = await Web3Helper.generateRawTransactionForTokenAndBroadcast(
-            orderData.platformAddr,
-            walletAddress,
-            depositAmount,
-            fromCoin.id,
-            fiatValue,
-            0,
-            fromCoin.native.fiat_currency,
-            null,
-            chain.slug,
-            chain.chainId,
-            fromCoin.tokenAddress,
-            Math.pow(10, fromCoin.decimals),
-            chain.tokenType,
-            orderData.orderId,
-            'swap'
-          );
-        } else {
-          hash = await Web3Helper.generateRawTransactionForCoinAndBroadcast(
-            orderData.platformAddr,
-            walletAddress,
-            depositAmount,
-            fromCoin.id,
-            fiatValue,
-            0,
-            fromCoin.native.fiat_currency,
-            null,
-            chain.slug,
-            chain.chainId,
-            orderData.orderId,
-            'swap'
-          );
-        }
-      } else if (!chain.isEVM && chain.currencyName === 'SOL') {
-        const solanaHelper = new SolanaHelper(chain.rpcUrl);
-        if (fromCoin.tokenAddress) {
-          hash = await solanaHelper.generateRawTransactionForTokenAndBroadcast(
-            orderData.platformAddr,
-            walletAddress,
-            depositAmount,
-            fromCoin.id,
-            fiatValue,
-            0,
-            fromCoin.native.fiat_currency,
-            null,
-            chain.slug,
-            chain.chainId,
-            fromCoin.tokenAddress,
-            fromCoin.decimals,
-            chain.type,
-            fromCoin.balance,
-            orderData.orderId,
-            'swap'
-          );
-        } else {
-          hash = await solanaHelper.generateRawTransactionForCoinAndBroadcast(
-            orderData.platformAddr,
-            walletAddress,
-            depositAmount,
-            fromCoin.id,
-            fiatValue,
-            0,
-            toCoin.native.fiat_currency,
-            null,
-            chain.slug,
-            chain.chainId,
-            orderData.orderId,
-            'swap'
-          );
-        }
-      } else if (!chain.isEVM && chain.currencyName === 'BTC') {
-        const rawTransaction = await BTCHelper.generateRawTransaction(
-          walletAddress,
-          orderData.platformAddr,
-          depositAmount
-        );
-
-        hash = await BTCHelper.generateRawTransactionForCoinAndBroadcast(
+      if (fromCoin.tokenAddress) {
+        hash = await Web3Helper.generateRawTransactionForTokenAndBroadcast(
           orderData.platformAddr,
           walletAddress,
           depositAmount,
           fromCoin.id,
           fiatValue,
           0,
-          toCoin.native.fiat_currency,
+          "USD",
           null,
           chain.slug,
           chain.chainId,
-          rawTransaction,
-          orderData.orderId,
+          fromCoin.tokenAddress,
+          Math.pow(10, fromCoin.decimals),
+          symbol,
           'swap'
         );
-      } else if (!chain.isEVM && chain.currencyName === 'ADA') {
-        if (fromCoin.tokenAddress) {
-          hash = null;
-          // await AdaHelper.generateRawTransactionForTokenAndBroadcast(
-          //   `addr1${orderData.platformAddr.toLowerCase()}`,
-          //   walletAddress,
-          //   depositAmount,
-          //   fromCoin.id,
-          //   fiatValue,
-          //   0,
-          //   toCoin.native.fiat_currency,
-          //   null,
-          //   chain.slug,
-          //   chain.chainId,
-          //   fromCoin.name,
-          //   fromCoin.tokenAddress,
-          //   orderData.orderId,
-          //   'swap'
-          // );
-        } else {
-          hash = null;
-          // await AdaHelper.generateRawTransactionForCoinAndBroadcast(
-          //   `addr1${orderData.platformAddr.toLowerCase()}`,
-          //   walletAddress,
-          //   depositAmount,
-          //   fromCoin.id,
-          //   fiatValue,
-          //   0,
-          //   toCoin.native.fiat_currency,
-          //   null,
-          //   chain.slug,
-          //   chain.chainId,
-          //   fee,
-          //   orderData.orderId,
-          //   'swap'
-          // );
-        }
+      } else {
+        hash = await Web3Helper.generateRawTransactionForCoinAndBroadcast(
+          orderData.platformAddr,
+          walletAddress,
+          depositAmount,
+          fromCoin.id,
+          fiatValue,
+          0,
+          "USD",
+          null,
+          chain.slug,
+          chain.chainId,
+          symbol,
+          rpc,
+          'swap'
+        );
       }
 
       if (!hash) {

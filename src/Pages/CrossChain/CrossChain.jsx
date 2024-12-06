@@ -25,7 +25,7 @@ import ModalCloseIcon from '../../Assets/ModalCloseIcon.svg';
 import Search from '../../Assets/SearchIcon.svg';
 import { SolanaHelper } from '../../helpers/solana.helper';
 import { BTCHelper } from '../../helpers/btc.helper';
-// import { AdaHelper } from '../../helpers/ada.helper';
+import { AdaHelper } from '../../helpers/ada.helper';
 import { DURATION } from '../../config/message.config';
 import BigNumber from 'bignumber.js';
 import {
@@ -240,9 +240,9 @@ function CrossChain() {
           new BigNumber(percentage).dividedBy(100)
         );
         setAount(
-          finalAmountToSend.toString() == 0
+          finalAmountToSend == 0
             ? finalAmountToSend.toString()
-            : finalAmountToSend.toFixed(18).toString()
+            : finalAmountToSend.toFixed(18).replace(/\.?0+$/, '')
         );
         updateRef.current = true;
         handleChangeForInput1(
@@ -266,9 +266,9 @@ function CrossChain() {
         );
         // setAount(toFixed(finalAmountToSend.toString()));
         setAount(
-          finalAmountToSend.toString() == 0
+          finalAmountToSend == 0
             ? finalAmountToSend.toString()
-            : finalAmountToSend.toFixed(18).toString()
+            : finalAmountToSend.toFixed(18).replace(/\.?0+$/, '')
         );
         setBalance(toFixed(amountToSend.toString()));
         updateRef.current = true;
@@ -302,7 +302,14 @@ function CrossChain() {
       const { data } = await server.post(
         '/swft/query_coin_list',
         {
-          address_list: account.addressLists,
+          address_list: Object.keys(account.coinFamilyAndAddress)
+            .map((key) => {
+              return {
+                coin_family: key,
+                address: account.coinFamilyAndAddress[key],
+              };
+            })
+            .filter((el) => el.address),
           is_active: 1,
           fiat_currency: currency.name,
           per_page: 300,
@@ -317,7 +324,14 @@ function CrossChain() {
       const inActiveTokens = await server.post(
         '/swft/query_coin_list',
         {
-          address_list: account.addressLists,
+          address_list: Object.keys(account.coinFamilyAndAddress)
+            .map((key) => {
+              return {
+                coin_family: key,
+                address: account.coinFamilyAndAddress[key],
+              };
+            })
+            .filter((el) => el.address),
           is_active: 0,
           fiat_currency: currency.name,
           per_page: 20,
@@ -334,53 +348,24 @@ function CrossChain() {
       const { chains } = await chrome.storage.local.get('chains');
 
       let tokens = data?.data?.map((token) => {
-        let network = '';
         let coinFamilyName = 'ETH';
         let tokenType = 'ERC20';
 
         switch (token?.coin_family) {
-          case 1:
+          case 2:
             coinFamilyName = 'ETH';
             tokenType = 'ERC20';
             break;
-          case 2:
-            coinFamilyName = 'BTC';
-            break;
-          case 3:
+
+          case 1:
             coinFamilyName = 'BNB';
             tokenType = 'BEP20';
-
             break;
           case 4:
-            coinFamilyName = 'SOL';
-            tokenType = 'SPL20';
-
-            break;
-          case 5:
-            coinFamilyName = 'ADA';
-            tokenType = 'NATIVE';
-
-            break;
-          case 6:
             coinFamilyName = 'POL';
             tokenType = 'ERC20';
-
             break;
-          case 7:
-            coinFamilyName = 'AVAX';
-            tokenType = 'ERC20';
 
-            break;
-          case 8:
-            coinFamilyName = 'CRO';
-            tokenType = 'CRC20';
-
-            break;
-          case 9:
-            coinFamilyName = 'PLS';
-            tokenType = 'ERC20';
-
-            break;
           default:
             break;
         }
@@ -389,13 +374,12 @@ function CrossChain() {
           id: token?.coin_id,
           symbol: token?.coin_code,
           showName: token?.coin_code_show,
+          coinSymbol: token.coin_data.coin_symbol,
           active: true,
           iHave: token?.wallet_addresses_data ? true : false,
           name: token?.coin_name,
           tokenAddress: token?.coin_data?.token_address || null,
-          image: token?.coin_image_url
-            ? `${process.env.REACT_APP_IMAGE_BASE_URL}${token?.coin_image_url}`
-            : null,
+          image: token?.coin_image_url,
           address: account?.coinFamilyAndAddress[token?.coin_family],
           isToken: token?.coin_data?.token_address ? true : false,
           coinFamilyName,
@@ -403,9 +387,9 @@ function CrossChain() {
           balance: token?.wallet_addresses_data
             ? token?.wallet_addresses_data?.balance
             : 0,
-          price: token?.coin_data?.coins_market
-            ? token?.coin_data?.coins_market?.current_price
-              ? token?.coin_data?.coins_market?.current_price
+          price: token?.coin_data?.fiat_price_data
+            ? token?.coin_data?.fiat_price_data?.value
+              ? token?.coin_data?.fiat_price_data?.value
               : 0
             : 0,
           type: token?.coin_data?.token_address ? tokenType : null,
@@ -416,18 +400,10 @@ function CrossChain() {
           decimals: parseInt(token?.coin_data?.decimals.toString().length) - 1,
           rpc:
             token.coin_family == 1
+              ? process.env.REACT_APP_BNB_RPC
+              : token.coin_family == 2
               ? process.env.REACT_APP_ETH_RPC
-              : token.coin_family == 9
-              ? process.env.REACT_APP_PLS_RPC
-              : token.coin_family == 4
-              ? process.env.REACT_APP_SOL_RPC
-              : token.coin_family == 6
-              ? process.env.REACT_APP_MATIC_RPC
-              : token.coin_family == 7
-              ? process.env.REACT_APP_AVAX_RPC
-              : token.coin_family == 8
-              ? process.env.REACT_APP_CRO_RPC
-              : process.env.REACT_APP_BNB_RPC,
+              : process.env.REACT_APP_MATIC_RPC,
         };
       });
 
@@ -436,48 +412,18 @@ function CrossChain() {
         let tokenType = 'ERC20';
 
         switch (token.coin_family) {
-          case 1:
+          case 2:
             coinFamilyName = 'ETH';
             tokenType = 'ERC20';
             break;
-          case 2:
-            coinFamilyName = 'BTC';
-            break;
-          case 3:
+
+          case 1:
             coinFamilyName = 'BNB';
             tokenType = 'BEP20';
-
             break;
           case 4:
-            coinFamilyName = 'SOL';
-            tokenType = 'SPL20';
-
-            break;
-          case 5:
-            coinFamilyName = 'ADA';
-            tokenType = 'NATIVE';
-
-            break;
-          case 6:
             coinFamilyName = 'POL';
             tokenType = 'ERC20';
-
-            break;
-          case 7:
-            coinFamilyName = 'AVAX';
-            tokenType = 'ERC20';
-
-            break;
-          case 8:
-            coinFamilyName = 'CRO';
-            tokenType = 'CRC20';
-
-            break;
-
-          case 9:
-            coinFamilyName = 'PLS';
-            tokenType = 'ERC20';
-
             break;
           default:
             break;
@@ -487,12 +433,11 @@ function CrossChain() {
           id: token.coin_id,
           symbol: token.coin_code,
           showName: token.coin_code_show,
+          coinSymbol: token.coin_data.coin_symbol,
           active: false,
           name: token.coin_name,
           tokenAddress: token.coin_data.token_address || null,
-          image: token.coin_image_url
-            ? `${process.env.REACT_APP_IMAGE_BASE_URL}${token.coin_image_url}`
-            : null,
+          image: token.coin_image_url,
           address: account.coinFamilyAndAddress[token.coin_family],
           isToken: token.coin_data.token_address ? true : false,
           coinFamilyName,
@@ -500,9 +445,9 @@ function CrossChain() {
           balance: token.wallet_addresses_data
             ? token.wallet_addresses_data.balance
             : 0,
-          price: token.coin_data.coins_market
-            ? token.coin_data.coins_market.current_price
-              ? token.coin_data.coins_market.current_price
+          price: token?.coin_data?.fiat_price_data
+            ? token?.coin_data?.fiat_price_data?.value
+              ? token?.coin_data?.fiat_price_data?.value
               : 0
             : 0,
           type: token.coin_data.token_address ? tokenType : null,
@@ -511,18 +456,10 @@ function CrossChain() {
           decimals: parseInt(token.coin_data.decimals.toString().length) - 1,
           rpc:
             token.coin_family == 1
+              ? process.env.REACT_APP_BNB_RPC
+              : token.coin_family == 2
               ? process.env.REACT_APP_ETH_RPC
-              : token.coin_family == 9
-              ? process.env.REACT_APP_PLS_RPC
-              : token.coin_family == 4
-              ? process.env.REACT_APP_SOL_RPC
-              : token.coin_family == 6
-              ? process.env.REACT_APP_MATIC_RPC
-              : token.coin_family == 7
-              ? process.env.REACT_APP_AVAX_RPC
-              : token.coin_family == 8
-              ? process.env.REACT_APP_CRO_RPC
-              : process.env.REACT_APP_BNB_RPC,
+              : process.env.REACT_APP_MATIC_RPC,
         };
       });
 
@@ -558,7 +495,6 @@ function CrossChain() {
         const myToken2 = modifiedList.find(
           (token) => !token.tokenAddress && token.coinFamily == 1
         );
-        
 
         const balance = myToken1.balance;
 
@@ -1305,26 +1241,6 @@ function CrossChain() {
         </div>
       ) : null}
 
-      {infoData.length > 0 && amount2 > 0 ? (
-        <div className='confirmCurrency'>
-          <div className='confirmCurrency__keyValuesOuter'>
-            {infoData.map((ele) => (
-              <div className='confirmCurrency__keyValues'>
-                <div className='confirmCurrency__keyValues__key'>
-                  {ele.text}
-                </div>
-                <p
-                  className='confirmCurrency__keyValues__value'
-                  style={{ wordBreak: 'break-all', textWrap: 'wrap' }}
-                >
-                  {ele.textVal}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      ) : null}
-
       <div>
         <ButtonComp
           onClick={async () => {
@@ -1356,213 +1272,63 @@ function CrossChain() {
               );
             }
 
-            if (token1.chain.isEVM) {
-              // console.log("i am IN Cross:::::::");
-              let gasEstimate = token1.tokenAddress ? 150000 : 28000;
+            const gasPrice = await Web3Helper.getGasPrice(
+              token1.chain.slug,
+              token1.address,
+              token1.address,
+              token1.isToken,
+              token1.tokenAddress,
+              token1.coinSymbol
+            );
 
-              const gasPrice = await Web3Helper.getGasPrice(
-                token1.chain.slug,
-                token1.address,
-                token1.address,
-                0
+            if (!gasPrice) {
+              store.dispatch(setLoading(false));
+
+              return messageApi.error(
+                'Unable to fetch gas price at the moment.'
               );
-
-              if (!gasPrice) {
-                store.dispatch(setLoading(false));
-
-                return messageApi.error(
-                  'Unable to fetch gas price at the moment.'
-                );
-              }
-
-              const gasInEth =
-                (gasPrice.price * Math.pow(10, 9) * gasEstimate) /
-                Math.pow(10, 18);
-              store.dispatch(setLoading(false));
-
-              // console.log(
-              //   "🚀 ~ file: CrossChain.jsx:1073 ~ onClick={ ~ gasInEth:",
-              //   gasInEth
-              // );
-
-              let swapDetailed = {
-                route,
-                token1,
-                token2,
-                amount,
-                amount2,
-                tokenChain: token1.chain,
-                networkFee: gasInEth,
-                walletAddress: token1.address,
-                token1Price: newBalanceToFiatConversion(token1.price, amount),
-                parentCoin: token1.native,
-                tab: 1,
-              };
-              store.dispatch(swapDetailAc(swapDetailed));
-              navigate('/crosschain-swapDetails', {
-                state: swapDetailed,
-              });
-            } else if (token1.chain.currencyName === 'SOL') {
-              const solanaHelper = new SolanaHelper(token1.chain.rpcUrl);
-              const gasPrice = solanaHelper.getGasPrice();
-
-              store.dispatch(setLoading(false));
-              let swapDetailed = {
-                route,
-                token1,
-                token2,
-                amount,
-                amount2,
-                tokenChain: token1.chain,
-                networkFee: gasPrice,
-                walletAddress: token1.address,
-                token1Price: newBalanceToFiatConversion(token1.price, amount),
-                parentCoin: token1.native,
-                tab: 1,
-              };
-              store.dispatch(swapDetailAc(swapDetailed));
-
-              navigate('/crosschain-swapDetails', {
-                state: swapDetailed,
-              });
-            } else if (token1.chain.currencyName === 'BTC') {
-              try {
-                const gasPrice = await BTCHelper.getBTCGasPrice();
-                let swapDetailed = {
-                  route,
-                  token1,
-                  token2,
-                  amount,
-                  amount2,
-                  tokenChain: token1.chain,
-                  networkFee: gasPrice / Math.pow(10, 8),
-                  walletAddress: token1.address,
-                  token1Price: newBalanceToFiatConversion(token1.price, amount),
-                  parentCoin: token1.native,
-                  tab: 1,
-                };
-                store.dispatch(swapDetailAc(swapDetailed));
-
-                store.dispatch(setLoading(false));
-                navigate('/crosschain-swapDetails', {
-                  state: swapDetailed,
-                });
-              } catch (error) {
-                store.dispatch(setLoading(false));
-                return messageApi.error(error.message);
-              }
-            } else if (token1.chain.currencyName === 'ADA') {
-              try {
-                if (token1.tokenAddress) {
-                  store.dispatch(setLoading(true));
-
-                  const fee = null; /*await AdaHelper.getFee(
-                    token1.address,
-                    token1.address,
-                    amount
-                  );*/
-
-                  if (!fee) {
-                    store.dispatch(setLoading(false));
-                    return messageApi.error('Unable to fetch fee.');
-                  }
-
-                  const adaBalance = token1.balance;
-
-                  if (
-                    parseFloat(adaBalance) <
-                    parseFloat(fee) + parseFloat(1)
-                  ) {
-                    store.dispatch(setLoading(false));
-                    return messageApi.error(
-                      'You do not have enough gas fee to proceed with the transaction.'
-                    );
-                  }
-
-                  const totalAmount = parseFloat(amount);
-
-                  if (totalAmount > parseFloat(balance)) {
-                    store.dispatch(setLoading(false));
-                    return messageApi.error(
-                      'You do not have enough balance to proceed with the transaction.'
-                    );
-                  }
-
-                  store.dispatch(setLoading(false));
-                  let swapDetailed = {
-                    route,
-                    token1,
-                    token2,
-                    amount,
-                    amount2,
-                    tokenChain: token1.chain,
-                    networkFee: fee,
-                    walletAddress: token1.address,
-                    token1Price: newBalanceToFiatConversion(
-                      token1.price,
-                      amount
-                    ),
-                    parentCoin: token1.native,
-                    tab: 1,
-                  };
-                  store.dispatch(swapDetailAc(swapDetailed));
-
-                  navigate('/crosschain-swapDetails', {
-                    state: swapDetailed,
-                  });
-                } else {
-                  store.dispatch(setLoading(true));
-
-                  const fee = null;
-                  // await AdaHelper.getFee(
-                  //   token1.address,
-                  //   token1.address,
-                  //   amount
-                  // );
-
-                  if (!fee) {
-                    store.dispatch(setLoading(false));
-                    return messageApi.error('Unable to fetch fee.');
-                  }
-
-                  const totalAmount = parseFloat(fee) + parseFloat(amount);
-
-                  if (totalAmount > parseFloat(balance)) {
-                    store.dispatch(setLoading(false));
-                    return messageApi.error(
-                      'You do not have enough balance to proceed with the transaction.'
-                    );
-                  }
-
-                  store.dispatch(setLoading(false));
-
-                  let swapDetailed = {
-                    route,
-                    token1,
-                    token2,
-                    amount,
-                    amount2,
-                    tokenChain: token1.chain,
-                    networkFee: fee,
-                    walletAddress: token1.address,
-                    token1Price: newBalanceToFiatConversion(
-                      token1.price,
-                      amount
-                    ),
-                    parentCoin: token1.native,
-                    tab: 1,
-                  };
-                  store.dispatch(swapDetailAc(swapDetailed));
-
-                  navigate('/crosschain-swapDetails', {
-                    state: swapDetailed,
-                  });
-                }
-              } catch (error) {
-                // console.log(error);
-                store.dispatch(setLoading(false));
-              }
             }
+
+            const gasInEth =
+              (gasPrice.fast * Math.pow(10, 9) * gasPrice.estimate) /
+              Math.pow(10, 18);
+            store.dispatch(setLoading(false));
+
+            const parentCoin = await server.post(
+              '/wallet/nativeCoinFiatPrice',
+              {
+                coin_family: token1.coinFamily,
+                fiat_currency: currency.name,
+              },
+              {
+                headers: {
+                  Authorization: account.jwtToken,
+                },
+              }
+            );
+
+
+            let swapDetailed = {
+              route,
+              token1,
+              token2,
+              amount,
+              amount2,
+              tokenChain: token1.chain,
+              networkFee: gasInEth,
+              walletAddress: token1.address,
+              token1Price: newBalanceToFiatConversion(token1.price, amount),
+              parentCoin: {
+                value: parentCoin.data.data.fiatCoinPrice.value,
+              },
+              tab: 1,
+              rpc: token1.rpc,
+              coinSymbol: token1.coinSymbol
+            };
+            store.dispatch(swapDetailAc(swapDetailed));
+            navigate('/crosschain-swapDetails', {
+              state: swapDetailed,
+            });
           }}
           text={'Swap'}
           maxWidth={'100%'}

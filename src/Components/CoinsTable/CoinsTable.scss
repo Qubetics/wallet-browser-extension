@@ -5,18 +5,30 @@
   width: 30px !important;
   object-fit: contain;
   border-radius: 50%;
+  &.currencyIcon {
+    height: 40px !important;
+    width: 40px !important;
+  }
 }
 
 .coinsTable1 {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 15px;
-  padding: 16px 0;
-  border-bottom: 1px solid #d7e0eb !important;
-  &:first-child {
-    padding-top: 0;
+  // padding: 16px 0;
+  // border-bottom: 1px solid #d7e0eb !important;
+  padding: 8px 10px ;
+  // background-color: #eef3f9;
+  padding-right: 20px ;
+  @include theme() {
+    background-color: theme-get("inputBg");
   }
+  margin-bottom: 6px;
+  border-radius: 16px;
+  // &:first-child {
+  //   padding-top: 0;
+  // }
   &:last-child {
     padding-bottom: 0;
     border-bottom: 0 !important;
@@ -62,6 +74,14 @@
     font-weight: 500;
     display: flex;
     align-items: center;
+    &.textElipsis {
+      max-width: 90px;
+      // width: 100%;
+      display: inline-block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
   }
   .grayText1 {
     display: flex;
@@ -70,6 +90,7 @@
     }
   }
 }
+
 
 .coinNname {
   display: inline-block;
@@ -87,11 +108,42 @@
   max-width: 163px;
 }
 
-
 .hover_only {
   opacity: 0;
 }
 
 .hover_only:hover {
   opacity: 1;
+}
+
+.grayText1.test-class * {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+}
+.grayText1.test-class {
+  display: flex;
+  align-items: center;
+}
+
+.overflowEllipsisAmout {
+  display: inline-block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 163px;
+}
+
+.textElipsisStyle {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 6px;
+  align-items: center;
+  span {
+    display: inline-block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 80px;
+  }
 }

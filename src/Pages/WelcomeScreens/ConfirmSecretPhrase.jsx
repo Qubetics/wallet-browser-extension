@@ -37,7 +37,7 @@ function ConfirmSecretPhrase({
     <div className='setPassword__secretPharse'>
       <p className='setPassword__secretPharse__grayText'>
         Please select each word in the correct order to verify you have written
-        down your Secret Phrase”
+        down your Secret Phrase
       </p>
       <div className='setPassword__secretPharse__confirmFieldSBg'>
         <div className='setPassword__secretPharse__confirmFieldSBgInner'>

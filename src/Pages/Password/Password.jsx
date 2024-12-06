@@ -47,7 +47,7 @@ function VerifyPassword() {
       password,
     });
     store.dispatch(setLoading(false));
-    navigate("/walletListing");
+    navigate("/wallet");
   };
 
   return (

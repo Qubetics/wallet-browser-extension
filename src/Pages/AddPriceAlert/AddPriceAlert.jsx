@@ -308,8 +308,7 @@ function AddPriceAlert() {
 
           <label
             style={{
-              position: 'relative',
-              left: '-159px',
+              display: "flex"
             }}
             className={`${'boxStyle__label'}`}
           >

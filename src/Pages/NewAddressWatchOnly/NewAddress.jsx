@@ -114,7 +114,7 @@ function NewAddressWatchOnly() {
                   }
 
                   store.dispatch(setLoading(false));
-                  navigate('/walletListing');
+                  navigate('/wallet');
                 }}
                 text={'Continue'}
                 maxWidth='100%'
