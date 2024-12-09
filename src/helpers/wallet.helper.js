@@ -36,6 +36,7 @@ import { server } from '../server';
 import { spritzHelper } from './spritz.helper';
 import { spritzAccounts, spritzKyc, spritzLogin } from '../actions/spritz';
 import { setLoading } from '../actions/loading';
+import { TronHelper } from './tron.helper';
 const BIP84 = require('bip84');
 const privateKeyToAddress = require('ethereum-private-key-to-address');
 
@@ -671,15 +672,20 @@ export class WalletHelper {
       const { currency } = await chrome.storage.local.get('currency');
       let { mnemonics } = await chrome.storage.local.get('mnemonics');
 
-      // const solanaAddress = await SolanaHelper.generateSolanaAddress(
-      //   newMnemonics
-      // );
-      // const bitcoinAddress = await BTCHelper.generateBitcoinAddress(
-      //   newMnemonics
-      // );
+      const solanaAddress = await SolanaHelper.generateSolanaAddress(
+        newMnemonics
+      );
+      const bitcoinAddress = await BTCHelper.generateBitcoinAddress(
+        newMnemonics
+      );
+
+      // const tronAddress = await TronHelper.generateTronAddress(newMnemonics);
+
       // const adaAddress =
       //   AdaHelper.generateWalletAddress(newMnemonics).baseAddress;
 
+      console.log("solanaAddress bitcoinAddress tronAddress=====> ", solanaAddress, bitcoinAddress);
+      
       if (!accounts) {
         accounts = [];
       }
@@ -730,11 +736,27 @@ export class WalletHelper {
               coin_family: 2,
             },
             {
-              symbol: 'matic',
+              symbol: 'btc',
+              address: bitcoinAddress,
+              coin_family: 3,
+            },
+            {
+              symbol: 'pol',
               address: address,
               coin_family: 4,
             },
+            {
+              symbol: 'sol',
+              address: solanaAddress,
+              coin_family: 5,
+            },
+            // {
+            //   symbol: 'trx',
+            //   address: tronAddress,
+            //   coin_family: 6,
+            // }
           ],
+          
         },
         {
           headers: {
@@ -761,8 +783,8 @@ export class WalletHelper {
             2: address,
             4: address,
           },
-          coinFamilies: [1, 2, 4],
-          addressLists: [address, address, address],
+          coinFamilies: [1, 2, 3, 4, 5],
+          addressLists: [address, address, bitcoinAddress, address, solanaAddress],
           jwtToken: createWallet.data.data.token,
           refreshToken: createWallet.data.data.refreshToken,
           deviceId: deviceId,
