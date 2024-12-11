@@ -341,7 +341,7 @@ function Swap() {
               addrsListKeys: account.addressLists,
               coin_family: account.coinFamilies,
               fiat_type: currency.name,
-              coin_id_search: state.coinId,
+              coin_id: state.coinId,
             },
             {
               headers: {
@@ -454,7 +454,7 @@ function Swap() {
             addrsListKeys: account.addressLists,
             coin_family: account.coinFamilies,
             fiat_type: currency.name,
-            coin_id_search: uniToken1.id,
+            coin_id: uniToken1.id,
           },
           {
             headers: {
@@ -548,7 +548,7 @@ function Swap() {
             addrsListKeys: account.addressLists,
             coin_family: account.coinFamilies,
             fiat_type: currency.name,
-            coin_id_search: uniToken2.id,
+            coin_id: uniToken2.id,
           },
           {
             headers: {
@@ -602,7 +602,7 @@ function Swap() {
               addrsListKeys: account.addressLists,
               coin_family: account.coinFamilies,
               fiat_type: currency.name,
-              coin_id_search: state.coinId,
+              coin_id: state.coinId,
             },
             {
               headers: {
