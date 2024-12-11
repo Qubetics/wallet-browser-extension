@@ -92,6 +92,7 @@ import SettingImportWalletPrivatekey from './Pages/SettingsImportAccountUsingPri
 import WatchList from './Pages/Watchlist/WatchList';
 import BuySell from './Pages/BuySell/BuySell';
 import AddWatchList from './Pages/Watchlist/AddWatchList';
+import { Portfolio } from './Pages/Portfolio/Portfolio';
 
 function App() {
   const [state, setState] = useState('Active');
@@ -365,6 +366,7 @@ function App() {
           <Route path='/setting' element={<Setting />} />
           <Route path='/alerts' element={<Alerts />} />
           <Route index path='/conectswapedApp' element={<ConnectedApp />} />
+          <Route path='/portfolio' element={<Portfolio/>} />
         </Route>
 
         <Route path='/' element={<NftLayout />}>

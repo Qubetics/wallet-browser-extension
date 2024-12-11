@@ -76,6 +76,21 @@ function MenuFooter() {
           </div>
           <span className='menuItems__items__title'>Settings</span>
         </Link>
+
+        <Link
+          to='/portfolio'
+          // onClick={() => setactiveLink("setting")}
+          className={`${'menuItems__items'} ${
+            path === 'portfolio' ? 'menuItems__items__active' : ''
+          }`}
+        >
+          <div className='menuItems__items__img'>
+            <img src={SettignIcon} />
+          </div>
+          <span className='menuItems__items__title'>Portfolio</span>
+        </Link>
+
+
       </div>
     </>
   );
