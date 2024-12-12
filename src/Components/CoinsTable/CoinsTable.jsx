@@ -26,9 +26,7 @@ function CoinsTable({ dataArray, showCoinPrice }) {
   const [deleteModal, setDeleteModal] = useState(false);
   const [selected, setSelected] = useState(null);
   const [positionChange, setPositionChnage] = useState(null);
-
-  console.log(dataArray, "dataArraydataArraydataArraydataArray");
-
+ 
   const handleClick = (ele) => {
 
     let routes = Object.keys(ele).includes('routeTo');

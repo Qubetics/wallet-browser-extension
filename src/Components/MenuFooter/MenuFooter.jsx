@@ -52,6 +52,20 @@ function MenuFooter() {
             DApp
           </span>
         </Link>
+
+        <Link
+          to='/portfolio'
+          // onClick={() => setactiveLink("setting")}
+          className={`${'menuItems__items'} ${
+            path === 'portfolio' ? 'menuItems__items__active' : ''
+          }`}
+        >
+          <div className='menuItems__items__img'>
+            <img src={SettignIcon} />
+          </div>
+          <span className='menuItems__items__title'>Portfolio</span>
+        </Link>
+        
         <Link
           to='/swap'
           // onClick={() => setactiveLink("defi")}
@@ -75,22 +89,7 @@ function MenuFooter() {
             <img src={SettignIcon} />
           </div>
           <span className='menuItems__items__title'>Settings</span>
-        </Link>
-
-        <Link
-          to='/portfolio'
-          // onClick={() => setactiveLink("setting")}
-          className={`${'menuItems__items'} ${
-            path === 'portfolio' ? 'menuItems__items__active' : ''
-          }`}
-        >
-          <div className='menuItems__items__img'>
-            <img src={SettignIcon} />
-          </div>
-          <span className='menuItems__items__title'>Portfolio</span>
-        </Link>
-
-
+        </Link> 
       </div>
     </>
   );

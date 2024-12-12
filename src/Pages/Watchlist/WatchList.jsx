@@ -35,7 +35,6 @@ function WatchList() {
   const [selectedCoin, setSelectedCoin] = useState(null);
   const [list, setList] = useState([]);
   const [tokens, setTokens] = useState([]);
-  console.log(tokens,"tokenstokenstokenstokens");
   const [add, setAdd] = useState(false);
   const showModal = (coin) => {
     setIsModalOpen(true);
@@ -69,7 +68,6 @@ function WatchList() {
         },
       }
     );
-    console.log(walletsList.data.data, "walletsList.data.datawalletsList.data.data");
     setTokens(walletsList.data.data);
     store.dispatch(setLoading(false));
   };
@@ -141,7 +139,6 @@ function WatchList() {
               .map((token) => {
                 const price = token.fiat_price_data || null;
                 const priceData = token?.fiat_price_data?.value || 0;
-                console.log(priceData,"priceDatapriceDatapriceDatapriceData");
                 const myPrice = new BigNumber(price ? price.value : 0);
                 const balance = new BigNumber(token.balance);
                 const result = myPrice.times(balance);

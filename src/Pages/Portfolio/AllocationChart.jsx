@@ -1,12 +1,24 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Chart from "react-apexcharts";
+import { useSelector } from "react-redux";
+import { store } from "../..";
+import { setLoading } from "../../actions/loading";
+import { server } from "../../server";
 
 const AllocationChart = () => {
-    const [chartOptions] = useState({
+    const [portfolio, setPortfolio] = useState([]);
+    const [portfolioBalace, setPortfolioBalace] = useState(0);
+    const [labels, setLabels] = useState(['ETH', 'BNB', 'SOL', 'BTC', 'POL']);
+    const [chartSeries, setChartSeries] = useState([10, 15, 25, 20, 30]);
+    const { account, currency, tokens, balanceIn, theme } = useSelector(
+        (state) => state
+    );
+
+    const [chartOptions, setChartOptions] = useState({
         chart: {
             type: "donut",
         },
-        labels: ["BTC", "Ethereum", "Solana", "Tether"],
+        labels: labels, // Initial empty array, will update later
         plotOptions: {
             pie: {
                 donut: {
@@ -28,7 +40,7 @@ const AllocationChart = () => {
         dataLabels: {
             enabled: false,
         },
-        colors: ["#FF9900", "#4E5CC4", "#6F56F9", "#23D196"],
+        colors: ["#00E396", "#FEB019", "#FF4560", "#775DD0", "#00D9E9"],
         legend: {
             show: false,
         },
@@ -43,7 +55,70 @@ const AllocationChart = () => {
         },
     });
 
-    const [chartSeries] = useState([44, 25, 15, 16]);
+    const init = async () => {
+        try {
+            store.dispatch(setLoading(true));
+
+            const { data } = await server.post(
+                `/wallet/portfolio`,
+                {
+                    page: 1,
+                    limit: 100,
+                    coin_family: account?.coinFamilies,
+                    search: '',
+                    addressListKeys: account?.addressLists,
+                    fiat_type: currency?.name,
+                },
+                {
+                    headers: {
+                        Authorization: account.jwtToken,
+                    }
+                }
+            );
+
+            const totalBalance = data?.data.reduce((acc, obj) => acc + obj?.balance, 0);
+
+            // Check if totalBalance is valid
+            if (totalBalance == 0) {
+                console.error('Total balance is zero. Cannot calculate percentages.');
+                setPortfolioBalace(0);
+                store.dispatch(setLoading(false));
+                return;
+            }
+             
+            const percentages = data?.data.map(obj => {
+                return {
+                    name: obj?.coin?.coin_symbol,
+                    percentage: ((obj?.balance / totalBalance == 0 ? 1 : totalBalance) * 100).toFixed(2),
+                };
+            });
+
+            const names = percentages.map(item => item.name.toUpperCase());
+            const percentagesArr = percentages.map(item => parseFloat(item.percentage));
+ 
+            // Update labels and series dynamically
+            setLabels(names);
+            setChartSeries(percentagesArr);
+            setPortfolioBalace(totalBalance);
+            setPortfolio(data?.data);
+
+            // Update chart options with new labels
+            setChartOptions((prevOptions) => ({
+                ...prevOptions,
+                labels: names
+            }));
+
+            store.dispatch(setLoading(false));
+
+        } catch (error) {
+            console.log('Portfolio error: ', error);
+            store.dispatch(setLoading(false));
+        }
+    };
+
+    useEffect(() => {
+        init();
+    }, []);
 
     return (
         <div className="allocation-chart" style={{ position: "relative", color: "#fff", maxWidth: "400px", margin: "0 auto" }}>
@@ -53,7 +128,7 @@ const AllocationChart = () => {
             <div
                 style={{
                     position: "absolute",
-                    top: "20%",
+                    top: "29%",
                     left: "50%",
                     transform: "translate(-50%, -50%)",
                     textAlign: "center",
@@ -67,47 +142,23 @@ const AllocationChart = () => {
             {/* Total Invested Amount */}
             <div style={{ textAlign: "center", marginTop: "20px", color: "#fff" }}>
                 <h3 style={{ fontWeight: "500", fontSize: "18px" }}>
-                    <span style={{ color: "#2ec4b6" }}> Total Invested Amount:</span> <span style={{ color: "#2ec4b6" }}>$2,36,540.00</span>
+                    <span style={{ color: "#2ec4b6" }}> Total Invested Amount:</span> <span style={{ color: "#2ec4b6" }}>
+                        {currency?.symbol} {portfolioBalace.toFixed(2)}
+                    </span>
                 </h3>
-            </div>
-
-            {/* Asset Categories */}
-            <div style={{ display: "flex", justifyContent: "space-around", marginTop: "20px", color: "#fff" }}>
-                <div style={{ color: "#FF9900", textAlign: "center" }}>
-                    <div>BTC</div>
-                </div>
-                <div style={{ color: "#4E5CC4", textAlign: "center" }}>
-                    <div>Ethereum</div>
-                </div>
-                <div style={{ color: "#6F56F9", textAlign: "center" }}>
-                    <div>Solana</div>
-                </div>
-                <div style={{ color: "#23D196", textAlign: "center" }}>
-                    <div>Tether</div>
-                </div>
             </div>
 
             {/* Asset details */}
             <div style={{ display: "flex", flexDirection: "column", marginTop: "20px", color: "#fff" }}>
-                <div style={{ color: "#FF9900", display:"flex", justifyContent:'space-between' }}>
-                    <div>BTC</div>
-                    <div>112</div>
-                </div>
-                <div style={{ color: "#4E5CC4", display:"flex", justifyContent:'space-between' }}
-                >
-                    <div>Ethereum</div>
-                    <div>521</div>
-                </div>
-                <div style={{ color: "#6F56F9", display:"flex", justifyContent:'space-between' }}
-                >
-                    <div>Solana</div>
-                    <div>1006265</div>
-                </div>
-                <div style={{ color: "#23D196", display:"flex", justifyContent:'space-between' }}
-                >
-                    <div>Tether</div>
-                    <div>54654897</div>
-                </div>
+                {portfolio && portfolio.map((itm, idx) => (
+                    <div key={idx} style={{ color: "#FF9900", display: "flex", justifyContent: 'space-between' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', margin: "20px 5px" }}>
+                            <span>{itm?.coin?.coin_symbol?.toUpperCase()}</span>
+                            <span>{((itm?.balance / (portfolioBalace === 0 ? 1 : portfolioBalace)) * 100).toFixed(2)}%</span>
+                        </div>
+                        <div>{itm?.balance}</div>
+                    </div>
+                ))}
             </div>
         </div>
     );
