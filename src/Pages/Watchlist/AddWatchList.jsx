@@ -26,7 +26,8 @@ import ButtonComp from '../../Components/ButtonComp/ButtonComp';
 
 function AddWatchList() {
   const { account, currency, balanceIn } = useSelector((state) => state);
-
+  const location = useLocation();
+  const isFromPortfolio = location.state?.isFromPortfolio ?? false;
   const [keyword, setKeyword] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [messageApi, contextHolder] = message.useMessage({
@@ -98,7 +99,7 @@ function AddWatchList() {
       <div className='searchBarFixed'>
         {contextHolder}
         <MenuRestofHeaders
-          backTo={'/watch-list-tokens'}
+          backTo={isFromPortfolio ? '/portfolio' : '/watch-list-tokens'}
           title={'Add Watch List'}
           redirectTo={state?.nft ? 'nft' : null}
           coin={state ? (state.coin ? state.coin : null) : null}
@@ -149,21 +150,21 @@ function AddWatchList() {
                 coinSubName: token.coin_name,
                 coinPrice: myPrice.toNumber()
                   ? formatSmallNumber(
-                      exponential_to_decimal(myPrice.toNumber())
-                    )
+                    exponential_to_decimal(myPrice.toNumber())
+                  )
                   : '0.00',
                 coinStatus: getFlooredFixed(
                   price
                     ? parseFloat(
-                        price.price_change_percentage_24h || 0
-                      ).toLocaleString()
+                      price.price_change_percentage_24h || 0
+                    ).toLocaleString()
                     : 0,
                   2
                 ),
                 currCryptoBal: balanceIn
                   ? `${addCommasToNumber(
-                      parseFloat(getFlooredFixed(token.balance, 6))
-                    )}`
+                    parseFloat(getFlooredFixed(token.balance, 6))
+                  )}`
                   : `****`,
                 currCryptoBalSymbol: token.coin_symbol.toUpperCase(),
                 currDollerBal: balanceIn
@@ -201,7 +202,7 @@ function AddWatchList() {
               };
             })}
           />
-        ) : ( 
+        ) : (
           <p
             className='noAddress'
             style={{

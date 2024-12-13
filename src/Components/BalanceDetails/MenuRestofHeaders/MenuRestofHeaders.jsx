@@ -89,7 +89,13 @@ function MenuRestofHeaders({
             to={backTo}
             onClick={async (e) => {
               e.preventDefault();
-
+              if (backTo === '/portfolio') {
+                return navigate('/portfolio', {
+                  state: {
+                    activeTab: 1,
+                  },
+                });
+              }
               if (backTo === '/import-wallet-name') {
                 return navigate('/import-wallet-name', {
                   state: {

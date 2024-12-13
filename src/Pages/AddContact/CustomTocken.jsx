@@ -101,8 +101,8 @@ function AddContact() {
         "/user/add_address_book",
         { 
           "address": account?.coinFamilyAndAddress[selectedChain?.coinFamily], 
-          "wallet_name": name, 
-          "contact_name": selectedChain?.chainName, 
+          "wallet_name": '', 
+          "contact_name": name,//selectedChain?.chainName, 
           "coin_family": selectedChain?.coinFamily, 
           "wallet_address": address
         },
@@ -137,7 +137,7 @@ console.log('parentCoin----> ', parentCoin);
       console.log('ERRR======> ', error);
       
       store.dispatch(setLoading(false));
-      return messageApi.error(error.response.message);
+      return messageApi.error(error?.response?.data?.message);
     }
   };
 

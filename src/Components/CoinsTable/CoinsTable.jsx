@@ -164,7 +164,7 @@ function CoinsTable({ dataArray, showCoinPrice }) {
           <div className='coinsTable1__right'>
             <div>
               {showCoinPrice ? (
-               <span>{ele.coinName}<span style={{ marginLeft: '4px' }}>{ele.currPriceValue ? ele.currPriceValue.toFixed(2) : 0}</span></span>
+               <span>{currency.symbol}<span style={{ marginLeft: '4px' }}>{ele.currPriceValue ? ele.currPriceValue.toFixed(2) : 0}</span></span>
               ) : (
                 ele.watch ? (
                   ele.isActiveInWatchList ? (

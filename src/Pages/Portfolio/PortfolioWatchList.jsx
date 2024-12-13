@@ -128,9 +128,14 @@ function PortfolioWatchList() {
                 )}
             </div>
             <div className={`flexedContent`}>
-                <Link to='/add-watch-list' style={{ marginBottom: '20px' }}>
+
+                <Link
+                    to="/add-watch-list"
+                    state={{ isFromPortfolio: true }}
+                    style={{ marginBottom: '20px' }}>
                     <ButtonComp text={'Add to Watch List'} maxWidth={'100%'} />
                 </Link>
+
                 {(state?.nft ? list : tokens.filter(token => token.watchlist_data)).length > 0 ? (
                     <CoinsTable
                         showCoinPrice={true}

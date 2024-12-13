@@ -1,17 +1,27 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import MenuRestofHeaders from "../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders";
 import AllocationChart from "./AllocationChart"
 import { Tabs, TabList, Tab, TabPanel } from 'react-tabs';
 import PortfolioWatchList from "./PortfolioWatchList";
+import { useLocation } from "react-router-dom";
 
 
 export const Portfolio = () => {
     const [sel, setSel] = useState(0);
 
+    const location = useLocation()
+
+    useEffect(()=>{
+        if(location.state?.activeTab ===1){
+            const tab  = location.state.activeTab
+            setSel(tab)
+        }
+    },[location.state])
+
     return (
         <div className={`scrollableCont`}>
           
-            <MenuRestofHeaders title={'Swap'} />
+            <MenuRestofHeaders title={'Portfolio'} backTo={'/wallet'}/>
             <div className={`flexedContent`}>
                 <Tabs selectedIndex={sel}>
                     <TabList
