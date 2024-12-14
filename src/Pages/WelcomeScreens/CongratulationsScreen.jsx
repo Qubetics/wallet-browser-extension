@@ -2,18 +2,15 @@ import React from "react";
 import "./Welcome.scss";
 import Lottie from "react-lottie-player";
 import Congratulations from "../../Assets/JsonFiles/Congratulations.json";
-
-function CongratulationsScreen({ children }) {
+import WalletCreated from "../../Assets/WalletCreated .gif";
+import ButtonComp from "../../Components/ButtonComp/ButtonComp";
+function CongratulationsScreen() {
   return (
-    <div className='setPassword__secretPharse'>
-      <div style={{ display: "flex", justifyContent: "center" }}></div>
-      <p
-        className='setPassword__secretPharse__grayText'
-        style={{ marginBottom: "36px" }}
-      >
-        Your Wallet Is Ready!
-      </p>
-      {children}
+    <div className="setPassword__secretPharse walletReady">
+      <img src={WalletCreated} alt="WalletCreated " width={"308px"} />
+      <h1>ALL DONE!</h1>
+      <p>Wallet Created Successfully</p>
+      <ButtonComp text={"Continue"} maxWidth={"100%"} />
     </div>
   );
 }
