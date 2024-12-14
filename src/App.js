@@ -93,6 +93,7 @@ import WatchList from './Pages/Watchlist/WatchList';
 import BuySell from './Pages/BuySell/BuySell';
 import AddWatchList from './Pages/Watchlist/AddWatchList';
 import { Portfolio } from './Pages/Portfolio/Portfolio';
+import TermsPolicy from './Pages/WelcomeScreens/TermsPolicy';
 
 function App() {
   const [state, setState] = useState('Active');
@@ -355,6 +356,7 @@ function App() {
           <Route path='/add-secret-phrase' element={<SecretPhrasePaste />} />
           <Route path='/createNewWallet' element={<CreateNewWallet />} />
           <Route path='/forgot-password' element={<ForgotPassword />} />
+          <Route path='/terms-policy' element={<TermsPolicy />} />
         </Route>
 
         <Route path='' element={<FixWidthLayout />}>

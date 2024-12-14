@@ -6,28 +6,37 @@ import "./InputFieldSimple.scss";
 import Scanner from "../../Assets/scanner.svg";
 import { Link } from "react-router-dom";
 
-function InputFieldSimple({ placeholder, getData, customFunction, value }) {
+function InputFieldSimple({
+  placeholder,
+  getData,
+  customFunction,
+  value,
+  label,
+}) {
   return (
-    <Input.Password
-      onChange={(e) => {
-        getData(e.target.value);
-      }}
-      onCopy={(e) => {
-        e.preventDefault();
-        return false;
-      }}
-      value={value}
-      className="inputSimple"
-      onKeyDown={(e) => e.key === "Enter" && customFunction()}
-      placeholder={placeholder}
-      iconRender={(visible) =>
-        visible ? (
-          <img src={EyeOpenIcon} width={19} height={12} />
-        ) : (
-          <img src={EyeCloseIcon} width={19} height={16} />
-        )
-      }
-    />
+    <>
+      <label className={"password-label"}>{label}</label>
+      <Input.Password
+        onChange={(e) => {
+          getData(e.target.value);
+        }}
+        onCopy={(e) => {
+          e.preventDefault();
+          return false;
+        }}
+        value={value}
+        className="inputSimple"
+        onKeyDown={(e) => e.key === "Enter" && customFunction()}
+        placeholder={placeholder}
+        iconRender={(visible) =>
+          visible ? (
+            <img src={EyeOpenIcon} width={19} height={12} />
+          ) : (
+            <img src={EyeCloseIcon} width={19} height={16} />
+          )
+        }
+      />
+    </>
   );
 }
 

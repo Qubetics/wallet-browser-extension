@@ -1,5 +1,5 @@
-@import '../../styles/__vars.scss';
-@import '../../styles/__mixins.scss';
+@import "../../styles/__vars.scss";
+@import "../../styles/__mixins.scss";
 
 .import {
   border: 0 !important;
@@ -9,20 +9,26 @@
 }
 
 .cardWhite {
-  border-radius: 30px;
-  @include theme() {
-    background-color: theme-get('whiteblackBase');
-  }
-  padding: 36px 24px 26px;
+  background-image: url("../../Assets/main-bg.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100% 100%;
+  padding: 32px 24px;
+  border: 1px solid #1d1b1e;
 
   // Welcome Screen Css Starts here//
-  &__title {
-    @include theme() {
-      color: theme-get('whiteWelcome');
+  &_mainLogo {
+    img {
+      max-width: 322px;
+      height: 322px;
+      margin: 0 auto;
     }
+  }
+  &__title {
+    color: $white;
     font-size: 24px;
     font-weight: 900;
-    margin-bottom: 16px;
+    margin: 30px 0 16px 0;
     letter-spacing: 0px;
     line-height: 36px;
     @media (max-width: 767px) {
@@ -31,7 +37,7 @@
   }
   &__subTitle {
     @include theme() {
-      color: theme-get('whiteWelcome');
+      color: theme-get("whiteWelcome");
     }
     font-size: 16px;
     font-weight: 400;
@@ -41,6 +47,7 @@
     }
   }
   &__linkOuter {
+    margin-top: 20px;
     &__hr {
       height: 1px;
       background-color: #d7e0eb;
@@ -66,31 +73,44 @@
       }
     }
     &__lytblue {
-      border-radius: 25px;
-      @include theme() {
-        background: theme-get('gradientBg');
-        color: theme-get('baseText');
-      }
-      font-size: 14px;
-      padding: 16px 32px;
+      background-color: transparent;
+      background: linear-gradient(89.94deg, #737373 -47.49%, #e5e5e5 99.95%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-size: 16px;
+      font-weight: 500;
       display: flex;
       text-align: center;
       justify-content: center;
       text-decoration: none;
-      margin-bottom: 25px;
+      margin-bottom: 16px;
     }
     &__darkBlue {
-      border-radius: 30px;
       color: $white;
-      font-size: 14px;
-      background: transparent linear-gradient(180deg, #00aeef 0%, #367cc7 100%)
-        0% 0%;
-      padding: 16px 32px;
+      font-size: 16px;
+      font-weight: 600;
+      background: linear-gradient(
+        90deg,
+        #73c9e2 0%,
+        #6c8dc5 33.83%,
+        #6456b2 67.66%,
+        #6145ea 101.48%
+      );
+      border-radius: 14px;
+      padding: 17px;
       display: flex;
       text-align: center;
       justify-content: center;
       text-decoration: none;
-      margin-bottom: 25px;
+      &:hover {
+        background: linear-gradient(
+          90deg,
+          #6145ea 0%,
+          #6145ea 33.83%,
+          #73c9e2 67.66%,
+          #6c8dc5 101.48%
+        );
+      }
     }
     &__linkImage {
       display: flex;
@@ -110,10 +130,11 @@
       justify-content: space-between;
       gap: 14px;
       margin-bottom: 24px;
+      display: none;
       &__increase {
         width: 50% !important;
       }
-      
+
       &__full {
         width: 100% !important;
       }
@@ -138,12 +159,11 @@
       }
     }
     &__title {
-      @include theme() {
-        color: theme-get('baseText');
-      }
-      font-size: 20px;
-      font-weight: 900;
-      margin-bottom: 24px;
+      color: $white;
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 17px;
+      margin: 30px 0 17px 0;
       letter-spacing: 0px;
       @media (max-width: 767px) {
         font-size: 16px;
@@ -155,17 +175,11 @@
       margin-bottom: 16px;
       p {
         margin-bottom: 13px;
-
         display: flex;
         align-items: center;
-        @include theme() {
-          color: theme-get('grayWhite');
-        }
-        font-size: 12px;
+        color: #98969b;
+        font-size: 14px;
         font-weight: normal;
-        &:last-child {
-          margin-bottom: 0;
-        }
       }
       img {
         margin-right: 7px;
@@ -180,13 +194,11 @@
     }
     &__secretPharse {
       &__grayText {
-        font-size: 16px;
-        @include theme() {
-          color: theme-get('whiteblack');
-        }
+        font-size: 14px;
+        color: #98969b;
         font-weight: normal;
-        text-align: center;
-        max-width: 341px;
+        text-align: left;
+        // max-width: 341px;
         margin: 0 auto;
       }
       &__fieldSBg {
@@ -199,88 +211,73 @@
         display: flex;
         position: relative;
         align-items: center;
-        gap: 16px;
-        justify-content: flex-start;
-        margin-bottom: 6px;
+        gap: 14px;
+        justify-content: center;
         flex-wrap: wrap;
-        span {
+        .InnerFild {
           font-size: 14px;
           text-transform: capitalize;
+          padding: 10px 20px;
+          color: $white;
           font-weight: 500;
-          line-height: 16px;
-          color: $baseColor-Text;
-          width: calc(33% - 40px);
-          @include theme() {
-            background-color: theme-get('whiteBg');
-            color: theme-get('baseText');
-          }
-          border-radius: 14px;
-          padding: 6px 15px;
+          text-align: center;
+          flex: 1;
+          background-color: #18171f;
+          white-space: nowrap;
+          line-height: 25px;
+          // max-width: 60px;
+          border-radius: 13px;
+        }
+        .innerSub {
+          color: #98969b;
+          margin-right: 3px;
         }
       }
       &__copyField {
-        max-width: 119px;
-        height: 36px;
-        border-radius: 30px;
+        background-color: transparent;
+        padding: 14px 22px;
+        border: 1px solid #9f53ff;
+        max-width: 62px;
+        width: 100%;
+        border-radius: 14px;
         display: flex;
         align-items: center;
         justify-content: center;
-        background: transparent
-          linear-gradient(180deg, #00aeef1a 0%, #367cc71a 100%) 0% 0% no-repeat
-          padding-box;
-        border: 1px solid #00aeef;
-        margin: 0 auto;
-        cursor: pointer;
-        transition: 0.3s all;
-        margin-top: 20px;
-        margin-bottom: 20px;
+        gap: 10px;
         span {
-          font-size: 12px;
-          font-weight: bold;
-          line-height: 24px;
-          color: $baseText-00AEEF;
-        }
-        &:hover {
-          border: 1px solid $baseText-00AEEF;
+          color: $white;
+          font-size: 14px;
+          font-weight: 500;
         }
       }
       &__confirmFieldSBg {
-        @include theme() {
-          background-color: theme-get('inputBg');
-        }
-        border-radius: 28px;
-        padding: 20px 16px 16px 20px;
+        background-color: transparent;
+        border-radius: 14px;
+        padding: 16px;
         margin: 20px 0px;
+        border: 1px solid #ffffff;
+        min-height: 181px;
       }
       &__confirmFieldSBgInner {
         display: flex;
         align-items: center;
-        justify-content: center;
-        gap: 16px 12px;
-        margin-bottom: 6px;
+        justify-content: flex-start;
+        gap: 12px;
         flex-wrap: wrap;
         span {
-          font-size: 13px;
-          width: calc(33% - 43px);
+          font-size: 14px;
+          width: calc(33% - 53px);
           font-weight: 500;
-          // color: $baseColor-Text;
-          padding: 5px 18px;
-          // background-color: $white;
           display: flex;
           align-items: center;
-          border-radius: 17px;
           cursor: pointer;
           text-transform: capitalize;
           justify-content: center;
-          border: 1px dashed;
-          @include theme() {
-            background-color: theme-get('footerBg');
-            color: theme-get('baseText');
-            border-color: theme-get('dotRadius');
-          }
-          img {
-            margin-left: 5px;
-          }
+          color: $white;
+          background-color: #18171f;
+          padding: 10px 20px;
+          border-radius: 13px;
+          line-height: 25px;
         }
         &__bordered {
           justify-content: space-between;
@@ -292,13 +289,13 @@
             width: calc(33% - 60px);
             justify-content: center;
             @include theme() {
-              border-color: theme-get('dotRadius');
-              color: theme-get('dotRadius');
+              border-color: theme-get("dotRadius");
+              color: theme-get("dotRadius");
             }
           }
         }
         &__bordered2 {
-          justify-content: 'center';
+          justify-content: "center";
           cursor: pointer;
           span {
             border: 1px dashed;
@@ -307,8 +304,8 @@
             width: calc(33% - 60px);
             justify-content: center;
             @include theme() {
-              border-color: theme-get('dotRadius');
-              color: theme-get('dotRadius');
+              border-color: theme-get("dotRadius");
+              color: theme-get("dotRadius");
             }
           }
         }
@@ -318,9 +315,8 @@
 }
 
 .currentItem {
-  @include theme() {
-    background-color: theme-get('dotBg') !important;
-  }
+  background-color: #15141a !important;
+  border: 14px;
 }
 
 .token {
@@ -350,12 +346,12 @@
     border-top-left-radius: 0px !important;
     border-bottom-left-radius: 0px !important;
     @include theme() {
-      background-color: theme-get('inputBg');
+      background-color: theme-get("inputBg");
     }
   }
   &__pasteTextarea {
     @include theme() {
-      background-color: theme-get('inputBg') !important;
+      background-color: theme-get("inputBg") !important;
     }
     bottom: 16px;
     left: 0;
@@ -380,11 +376,11 @@
   &__fields {
     input {
       @include theme() {
-        background-color: theme-get('inputBg1');
+        background-color: theme-get("inputBg1");
       }
       &::placeholder {
         @include theme() {
-          color: theme-get('gray1') !important;
+          color: theme-get("gray1") !important;
         }
       }
     }
@@ -405,18 +401,6 @@
   transform: translateX(-14px) !important;
 }
 
-.jsonWalletBg {
-  background-image: url('../../Assets/walletjsonBg.png');
-
-  background-repeat: no-repeat;
-  background-size: contain;
-  background-position: center;
-  height: 278px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 30px 0;
-}
 .adreesInput {
   position: relative;
   .pasteText {
@@ -441,6 +425,45 @@
   margin-bottom: 22px;
 }
 
-.ant-checkbox {
-  margin-right: 11px !important;
+.termsPolicy {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 10px;
+  height: 100%;
+  min-height: 492px;
+  &_contect {
+    margin-top: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    &_card {
+      background-color: #101010;
+      padding: 13px 16px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      justify-content: space-between;
+      &_left {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        h4 {
+          font-size: 16px;
+          font-weight: 400;
+          color: $white;
+        }
+      }
+      &_right {
+        cursor: pointer;
+      }
+    }
+  }
+}
+.welcomeScreens-text {
+  color: #98969b;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 22px;
 }

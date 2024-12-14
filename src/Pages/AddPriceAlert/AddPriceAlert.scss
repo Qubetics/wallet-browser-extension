@@ -8,8 +8,6 @@
   border-radius: 13px;
 }
 
-
-
 input:focus {
   box-shadow: none !important;
 }
@@ -55,11 +53,9 @@ input:focus {
   flex-direction: column;
   position: relative;
   &__label {
-    @include theme() {
-     color: theme-get("whiteblack") ;
-    }
+    color: $white;
     font-size: 14px;
-    font-weight: 700;
+    font-weight: 500;
     margin-bottom: 8px;
   }
   &:last-child {
@@ -83,8 +79,8 @@ input:focus {
   }
   &__infoText {
     @include theme() {
-      color: theme-get("blue") ;
-     }
+      color: theme-get("blue");
+    }
     font-size: 13px;
     font-weight: bold;
     text-align: right;
@@ -151,8 +147,8 @@ input:focus {
     border-radius: 16px;
     &__text {
       @include theme() {
-        color: theme-get("whiteblack") ;
-       }
+        color: theme-get("whiteblack");
+      }
       font-size: 16px;
       font-weight: 400;
       text-align: right;
@@ -161,15 +157,15 @@ input:focus {
     }
   }
 }
-.selctCoinText{
-  span{
+.selctCoinText {
+  span {
     @include theme() {
-      color: theme-get("whiteblack") ;
-     }
+      color: theme-get("whiteblack");
+    }
   }
-  &:last-child{
+  &:last-child {
     @include theme() {
-      color: theme-get("gray1") ;
-     }
+      color: theme-get("gray1");
+    }
   }
 }

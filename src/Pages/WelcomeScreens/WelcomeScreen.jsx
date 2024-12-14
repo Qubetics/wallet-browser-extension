@@ -10,16 +10,16 @@ import DarkAppLogo from "../../Assets/darkAppLogo.svg";
 import { useSelector } from "react-redux";
 import Lottie from "react-lottie-player";
 import AttlasWallet from "../../Assets/JsonFiles/walletAnimation.json";
+import MainLogo from "../../Assets/main-logo.gif";
 
 function WelcomeScreen() {
   const navigate = useNavigate();
   const [isLegalAppear, setIsLegalAppear] = useState(true);
   const { create } = useSelector((state) => state);
 
-
   const init = async () => {
     const tabs = await chrome.tabs.getCurrent();
-    const isSidePanelOpen = await chrome.storage.local.get('openSidePanel');
+    const isSidePanelOpen = await chrome.storage.local.get("openSidePanel");
 
     const { legalPolicy } = await chrome.storage.local.get("legalPolicy");
     // console.log("Init Legal:::",legalPolicy);
@@ -54,48 +54,11 @@ function WelcomeScreen() {
   // console.log("isLegalAppear:::", isLegalAppear);
   return (
     <div className="cardWhite">
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          position: "relative",
-        }}
-      >
-        {theme === "darkTheme" ? (
-          <img src={DarkAppLogo} />
-        ) : (
-          <img src={AppLogo} />
-        )}
-        {create ? (
-          <div
-            className="crosIconCard"
-            onClick={() => {
-              return navigate("/wallet");
-            }}
-          >
-            {theme == "darkTheme" ? (
-              <img src={darkclose} />
-            ) : (
-              <img src={ModalCloseIcon} />
-            )}
-          </div>
-        ) : null}
+      <h2 className="cardWhite__title">Welcome to Qubetics</h2>
+      <div className="cardWhite_mainLogo">
+        <img src={MainLogo} alt="logo" />
       </div>
 
-      <div className="jsonWalletBg">
-        <div style={{ display: "flex", justifyContent: "center" }}>
-          <Lottie
-            animationData={AttlasWallet}
-            style={{ width: 190, height: 160 }}
-            loop
-            play
-          />
-        </div>
-      </div>
-      <h2 className="cardWhite__title">
-        You Already Know <br />
-        How To Use It...
-      </h2>
       <div className="cardWhite__linkOuter">
         <Link
           className="cardWhite__linkOuter__lytblue"
@@ -108,24 +71,17 @@ function WelcomeScreen() {
           }}
         >
           <span className="cardWhite__linkOuter__linkImage">
-            {/* <img src={RefreshIcon} width={20} height={20} /> */}
-            Import Existing Wallet
+            I already have a wallet
           </span>
-          {/* <span>
-            <img src={ArrowRightIcon} width={8} height={15} />
-          </span> */}
         </Link>
-        {/* <div className="cardWhite__linkOuter__hr"></div> */}
-
-        {/* <div className="cardWhite__linkOuter__hr"></div> */}
-
 
         <Link
-          to={"/createNewWallet"}
+          to={"/terms-policy"}
           className="cardWhite__linkOuter__darkBlue"
           onClick={(e) => {
             e.preventDefault();
-            navigate("/createNewWallet", {
+            // navigate("/createNewWallet", {
+              navigate("/terms-policy", {
               state: { type: "create" },
             });
           }}

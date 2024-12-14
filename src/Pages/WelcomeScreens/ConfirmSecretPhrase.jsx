@@ -43,7 +43,8 @@ function ConfirmSecretPhrase({
         <div className='setPassword__secretPharse__confirmFieldSBgInner'>
           {blankArray.map((ele, index) => (
             <span onClick={() => removePhrase(ele)} key={index}>
-              {ele} <img src={closeXicon} width={7} height={7} />
+              {ele} 
+              {/* <img src={closeXicon} width={7} height={7} /> */}
             </span>
           ))}
         </div>
@@ -57,7 +58,7 @@ function ConfirmSecretPhrase({
       </div>
       <div className='setPassword__secretPhrase__latters'>
         <div
-          className={`${'setPassword__secretPharse__confirmFieldSBgInner'} ${'setPassword__secretPharse__confirmFieldSBgInner__bordered'}`}
+          className={`${'setPassword__secretPharse__confirmFieldSBgInner'} ${'setPassword__secretPharse__confirmFieldSBgInner'}`}
         >
           {phrases.map((ele, index) => (
             <span

@@ -33,29 +33,29 @@
 }
 
 
-.setPassword__secretPharse__copyField {
-  max-width: 119px;
-  height: 36px;
-  border-radius: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent
-    linear-gradient(180deg, #00aeef1a 0%, #367cc71a 100%) 0% 0% no-repeat
-    padding-box;
-  border: 1px solid #00aeef;
-  margin: 0 auto;
-  cursor: pointer;
-  transition: 0.3s all;
-  margin-top: 20px;
-  margin-bottom: 20px;
-  span {
-    font-size: 12px;
-    font-weight: bold;
-    line-height: 24px;
-    color: $baseText-00AEEF;
-  }
-  &:hover {
-    border: 1px solid $baseText-00AEEF;
-  }
-}
+// .setPassword__secretPharse__copyField {
+//   max-width: 119px;
+//   height: 36px;
+//   border-radius: 30px;
+//   display: flex;
+//   align-items: center;
+//   justify-content: center;
+//   background: transparent
+//     linear-gradient(180deg, #00aeef1a 0%, #367cc71a 100%) 0% 0% no-repeat
+//     padding-box;
+//   border: 1px solid #00aeef;
+//   margin: 0 auto;
+//   cursor: pointer;
+//   transition: 0.3s all;
+//   margin-top: 20px;
+//   margin-bottom: 20px;
+//   span {
+//     font-size: 12px;
+//     font-weight: bold;
+//     line-height: 24px;
+//     color: $baseText-00AEEF;
+//   }
+//   &:hover {
+//     border: 1px solid $baseText-00AEEF;
+//   }
+// }

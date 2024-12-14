@@ -1,13 +1,14 @@
 /* global chrome */
-import { message } from 'antd';
-import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
-import { useLocation, useNavigate } from 'react-router-dom';
-import ButtonComp from '../../Components/ButtonComp/ButtonComp';
-import { InputFieldOnly } from '../../Components/InputField/InputFieldSimple';
-import { DURATION } from '../../config/message.config';
-import './Welcome.scss';
-import { WalletHelper } from '../../helpers/wallet.helper';
+import { message } from "antd";
+import React, { useState } from "react";
+import { useSelector } from "react-redux";
+import { useLocation, useNavigate } from "react-router-dom";
+import ButtonComp from "../../Components/ButtonComp/ButtonComp";
+import { InputFieldOnly } from "../../Components/InputField/InputFieldSimple";
+import { DURATION } from "../../config/message.config";
+import "./Welcome.scss";
+import { useOutletContext } from "react-router-dom";
+import { WalletHelper } from "../../helpers/wallet.helper";
 
 function CreateNewWallet() {
   const { state } = useLocation();
@@ -20,72 +21,73 @@ function CreateNewWallet() {
   });
   const [name, setName] = useState(null);
   const [remaining, setRemaining] = useState(25);
+  const { layoutHeader } = useOutletContext();
+
   return (
-    <div className='cardWhite'>
-      {contextHolder}
-      <h2 className='cardWhite__title'>Wallet Name</h2>
-      <p className='cardWhite__subTitle' style={{ marginBottom: 24 }}>
-        You can simply identify multiple wallets and label your own wallet.
-      </p>
-      <div className='cardWhite__linkOuter'>
-        <InputFieldOnly
-          placeholder={'Enter wallet name'}
-          value={name}
-          label={'Enter Name'}
-          checkForSymbols={true}
-          placeholderBaseColor={true}
-          coloredBg={true}
-          getData={(name) => {
-            if (name.length <= 25) {
-              if (/^\s/.test(name)) {
-                setName('');
+    <div className="cardWhite termsPolicy">
+      <div>
+        {layoutHeader}
+        {contextHolder}
+        <div className="cardWhite__linkOuter">
+          <InputFieldOnly
+            placeholder={"Enter wallet name"}
+            value={name}
+            label={"Enter Name"}
+            checkForSymbols={true}
+            placeholderBaseColor={true}
+            coloredBg={true}
+            getData={(name) => {
+              if (name.length <= 25) {
+                if (/^\s/.test(name)) {
+                  setName("");
+                } else {
+                  setName(name);
+                }
               } else {
-                setName(name);
+                return;
               }
-            } else {
-              return;
-            }
-          }}
-        />
-        <div className='textInfoBaseColor'>
+            }}
+          />
+          {/* <div className="textInfoBaseColor">
           Max Limit: {name ? name.length : 0}/25
+        </div> */}
         </div>
       </div>
-      <div className='setPassword__footerbuttons'>
-        <ButtonComp
+      <div className="setPassword__footerbuttons">
+        {/* <ButtonComp
           onClick={() => {
-            navigate(create ? '/wallet' : '/');
+            navigate(create ? "/wallet" : "/");
           }}
-          text={'Back'}
+          text={"Back"}
           bordered={true}
-        />
+        /> */}
         <ButtonComp
           onClick={async () => {
             if (!name) {
               return messageApi.error(
-                'Please enter a valid name for the wallet.'
+                "Please enter a valid name for the wallet."
               );
             }
 
             if (name.trim().length === 0) {
               return messageApi.error(
-                'Name should have a minimum of 3 characters.'
+                "Name should have a minimum of 3 characters."
               );
             }
 
             if (name.length < 3) {
               return messageApi.error(
-                'Name should have a minimum of 3 characters.'
+                "Name should have a minimum of 3 characters."
               );
             }
 
             if (name.length > 25) {
               return messageApi.error(
-                'Name should not have more than 25 characters.'
+                "Name should not have more than 25 characters."
               );
             }
 
-            const { accounts } = await chrome.storage.session.get('accounts');
+            const { accounts } = await chrome.storage.session.get("accounts");
 
             if (accounts) {
               const checkIfExists = accounts.find(
@@ -94,7 +96,7 @@ function CreateNewWallet() {
 
               if (checkIfExists) {
                 return messageApi.error(
-                  'This wallet name already exists. Use a different name.'
+                  "This wallet name already exists. Use a different name."
                 );
               }
             }
@@ -116,19 +118,20 @@ function CreateNewWallet() {
             mnemonics = await WalletHelper.generateNewMnemonics();
 
             const finalData = createWalletMnemonics || mnemonics;
-            console.log('🚀 ~ onClick={ ~ finalData:', finalData);
+            console.log("🚀 ~ onClick={ ~ finalData:", finalData);
 
-            navigate('/setPassword', {
+            navigate("/setPassword", {
               state: {
                 type,
                 createWalletMnemonics: finalData,
                 createShuffledMnemonics: finalData
-                  .split(' ')
+                  .split(" ")
                   .sort(() => Math.random() - 0.5),
               },
             });
           }}
-          text={'Proceed'}
+          text={"Continue"}
+          maxWidth={"100%"}
         />
       </div>
     </div>

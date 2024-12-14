@@ -108,29 +108,34 @@ function ForgotPassword() {
       {activeTab !== "congrats" && (
         <div className="setPassword__tabs">
           <div
-            className={`${"setPassword__tabs__itself"} ${type === "import" ? "setPassword__tabs__increase" : ""
-              } ${activeTab === "setPassword" && "setPassword__tabs__itself_active"
-              }`}
+            className={`${"setPassword__tabs__itself"} ${
+              type === "import" ? "setPassword__tabs__increase" : ""
+            } ${
+              activeTab === "setPassword" && "setPassword__tabs__itself_active"
+            }`}
           ></div>
           {type === "create" ? (
             <div
-              className={`${"setPassword__tabs__itself"} ${activeTab === "secretPhrase" &&
+              className={`${"setPassword__tabs__itself"} ${
+                activeTab === "secretPhrase" &&
                 "setPassword__tabs__itself_active"
-                }`}
+              }`}
             ></div>
           ) : null}
 
           <div
-            className={`${"setPassword__tabs__itself"}  ${type === "import" ? "setPassword__tabs__increase" : ""
-              } ${activeTab === "confirmSecretPhrase" &&
+            className={`${"setPassword__tabs__itself"}  ${
+              type === "import" ? "setPassword__tabs__increase" : ""
+            } ${
+              activeTab === "confirmSecretPhrase" &&
               "setPassword__tabs__itself_active"
-              }`}
+            }`}
           ></div>
         </div>
       )}
       <h2 className="setPassword__title">
         {" "}
-        {type === "create"
+        {/* {type === "create"
           ? activeTab === "setPassword"
             ? "Set a Password"
             : activeTab === "secretPhrase"
@@ -142,7 +147,8 @@ function ForgotPassword() {
             ? "New Password"
             : activeTab === "confirmSecretPhrase"
               ? "Please enter the secret phrase used to create this wallet."
-              : "Congratulations!"}
+              : "Congratulations!"} */}
+        asdfghjkl
       </h2>
       {activeTab === "setPassword" && (
         <>
@@ -163,11 +169,11 @@ function ForgotPassword() {
             getData={setConfirmPassword}
           />
           <div className="setPassword__footerbuttons">
-            <ButtonComp
+            {/* <ButtonComp
               onClick={() => navigate("/")}
               text={"Back"}
               bordered={true}
-            />
+            /> */}
             <ButtonComp
               onClick={async () => {
                 if (!password) {
@@ -219,7 +225,8 @@ function ForgotPassword() {
                   }
                 }
               }}
-              text={"Proceed"}
+              text={"Continue"}
+              maxWidth={"100%"}
             />
           </div>
         </>
@@ -227,11 +234,11 @@ function ForgotPassword() {
       {activeTab === "secretPhrase" && (
         <SecretPhrase mnemonics={mnemonics} termsCheck={setTerms}>
           <div className="setPassword__footerbuttons">
-            <ButtonComp
+            {/* <ButtonComp
               onClick={() => setActiveTab("setPassword")}
               text={"Back"}
               bordered={true}
-            />
+            /> */}
             <ButtonComp
               onClick={() => {
                 if (!terms) {
@@ -241,7 +248,8 @@ function ForgotPassword() {
                 }
                 setActiveTab("confirmSecretPhrase");
               }}
-              text={"Proceed"}
+              text={"Continue"}
+              maxWidth={"100%"}
             />
           </div>
         </SecretPhrase>
@@ -254,11 +262,11 @@ function ForgotPassword() {
             checkIfCorrect={setCorrect}
           >
             <div className="setPassword__footerbuttons">
-              <ButtonComp
+              {/* <ButtonComp
                 onClick={() => setActiveTab("secretPhrase")}
                 text={"Back"}
                 bordered={true}
-              />
+              /> */}
               <ButtonComp
                 onClick={async () => {
                   if (correct) {
@@ -272,7 +280,8 @@ function ForgotPassword() {
                     );
                   }
                 }}
-                text={"Proceed"}
+                text={"Continue"}
+                maxWidth={"100%"}
               />
             </div>
           </ConfirmSecretPhrase>
@@ -285,11 +294,11 @@ function ForgotPassword() {
             }
           >
             <div className="setPassword__footerbuttons">
-              <ButtonComp
+              {/* <ButtonComp
                 onClick={() => setActiveTab("setPassword")}
                 text={"Back"}
                 bordered={true}
-              />
+              /> */}
               <ButtonComp
                 onClick={async () => {
                   if (!terms) {
@@ -331,7 +340,8 @@ function ForgotPassword() {
                     );
                   }
                 }}
-                text={"Proceed"}
+                text={"Continue"}
+                maxWidth={"100%"}
               />
             </div>
           </SecretPhrasePaste>

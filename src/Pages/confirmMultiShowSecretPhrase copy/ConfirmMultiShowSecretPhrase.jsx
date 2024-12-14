@@ -100,13 +100,13 @@ function ConfirmMultiShowSecretPhrase() {
                 <span>Clear</span>
               </div>
               <div className={style.setPassword__footerbuttons}>
-                <ButtonComp
+                {/* <ButtonComp
                   onClick={() => {
                     navigate("/setting");
                   }}
                   text={"Back"}
                   bordered={true}
-                />
+                /> */}
                 <ButtonComp
                   onClick={async () => {
                     if (blankArray.join(" ") === mnemonics) {
@@ -133,7 +133,8 @@ function ConfirmMultiShowSecretPhrase() {
                       );
                     }
                   }}
-                  text={"Proceed"}
+                  text={"Continue"}
+                  maxWidth={"100%"}
                 />
               </div>
             </div>

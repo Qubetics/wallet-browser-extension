@@ -5,7 +5,7 @@ import "./Welcome.scss";
 import TickIcon from "../../Assets/TickIcon.svg";
 import BorderedRoundIcon from "../../Assets/BorderedRoundIcon.svg";
 import ButtonComp from "../../Components/ButtonComp/ButtonComp";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useOutletContext } from "react-router-dom";
 import SecretPhrase from "./SecretPhrase";
 import ConfirmSecretPhrase from "./ConfirmSecretPhrase";
 import CongratulationsScreen from "./CongratulationsScreen";
@@ -82,6 +82,7 @@ function SetPasswordScreen() {
   const [shuffledMnemonics, setShuffledMnemonics] = useState(
     createShuffledMnemonics || []
   );
+  const { layoutHeader } = useOutletContext();
   const [shuffled, setShuffled] = useState(false);
   const [selectMnemonics, setSelectedMnemonics] = useState([]);
   const [terms, setTerms] = useState(false);
@@ -179,7 +180,7 @@ function SetPasswordScreen() {
           ></div>
         </div>
       )}
-      <h2 className="setPassword__title">
+      {/* <h2 className="setPassword__title">
         {" "}
         {type === "create"
           ? activeTab === "setPassword"
@@ -194,13 +195,16 @@ function SetPasswordScreen() {
           : activeTab === "confirmSecretPhrase"
           ? "Enter Secret Phrase"
           : "Congratulations!"}
-      </h2>
+      </h2> */}
+
+      {layoutHeader}
       {activeTab === "setPassword" && (
-        <>
+        <div>
           <InputFieldSimple
-            placeholder={"Password"}
+            placeholder={"Enter Password"}
             getData={handlePasswordChange}
             value={password}
+            label="Password"
           />
           <div className="setPassword__validations">
             {validations.map((ele, index) => (
@@ -211,16 +215,17 @@ function SetPasswordScreen() {
             ))}
           </div>
           <InputFieldSimple
-            placeholder={"Confirm Password"}
+            placeholder={"Enter Confirm Password"}
             getData={setConfirmPassword}
             value={confirmPassword}
+            label="Confirm Password"
           />
           <div className="setPassword__footerbuttons">
-            <ButtonComp
+            {/* <ButtonComp
               onClick={() => navigate("/")}
               text={"Back"}
               bordered={true}
-            />
+            /> */}
             <ButtonComp
               onClick={async () => {
                 if (confirmPassword !== password) {
@@ -271,14 +276,15 @@ function SetPasswordScreen() {
                 }
               }}
               text={"Proceed"}
+              maxWidth={"100%"}
             />
           </div>
-        </>
+        </div>
       )}
       {activeTab === "secretPhrase" && (
         <SecretPhrase mnemonics={mnemonics} termsCheck={setTerms}>
           <div className="setPassword__footerbuttons">
-            <ButtonComp
+            {/* <ButtonComp
               onClick={() =>
                 create
                   ? navigate("/createNewWallet", {
@@ -288,7 +294,7 @@ function SetPasswordScreen() {
               }
               text={"Back"}
               bordered={true}
-            />
+            /> */}
             <ButtonComp
               onClick={() => {
                 if (!terms) {
@@ -299,7 +305,8 @@ function SetPasswordScreen() {
                 setTerms(false);
                 setActiveTab("confirmSecretPhrase");
               }}
-              text={"Proceed"}
+              text={"Continue"}
+              maxWidth={"100%"}
             />
           </div>
         </SecretPhrase>
@@ -342,7 +349,7 @@ function SetPasswordScreen() {
             getMnemonics={setGetMnemonicsData}
           >
             <div className="setPassword__footerbuttons">
-              <ButtonComp
+              {/* <ButtonComp
                 onClick={() => {
                   setGetMnemonicsData(null);
                   create
@@ -353,7 +360,7 @@ function SetPasswordScreen() {
                 }}
                 text={"Back"}
                 bordered={true}
-              />
+              /> */}
               <ButtonComp
                 onClick={async () => {
                   try {
@@ -406,7 +413,8 @@ function SetPasswordScreen() {
                     );
                   }
                 }}
-                text={"Proceed"}
+                text={"Continue"}
+                maxWidth={"100%"}
               />
             </div>
           </SecretPhrasePaste>

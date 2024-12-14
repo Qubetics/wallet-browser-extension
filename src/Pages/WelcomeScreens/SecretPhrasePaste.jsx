@@ -2173,7 +2173,7 @@ function SecretPhrasePaste({ children, termsCheck, getMnemonics, type }) {
         {sortedWordList.length > 0 ? (
           <div className="setPassword__secretPhrase__latters">
             <div
-              className={`${"setPassword__secretPharse__confirmFieldSBgInner"} ${"setPassword__secretPharse__confirmFieldSBgInner__bordered2"}`}
+              className={`${"setPassword__secretPharse__confirmFieldSBgInner"} ${"setPassword__secretPharse__confirmFieldSBgInner"}`}
               style={{ marginBottom: "20px" }}
             >
               {sortedWordList.slice(0, visibleWordCount).map((ele, index) => (
