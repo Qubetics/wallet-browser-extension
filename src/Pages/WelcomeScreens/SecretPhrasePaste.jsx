@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import "./Welcome.scss";
 import { useNavigate } from "react-router-dom";
 import { Checkbox, Input, message } from "antd";
-import CopyIcon from "../../Assets/CopyIconBlue.svg";
+import CopyIconBlueN from "../../Assets/CopyIconBlueN.svg";
 import { InputFieldOnly } from "../../Components/InputField/InputFieldSimple";
 import { DURATION } from "../../config/message.config";
 import ButtonComp from "../../Components/ButtonComp/ButtonComp";
@@ -2137,11 +2137,19 @@ function SecretPhrasePaste({ children, termsCheck, getMnemonics, type }) {
 
   return (
     <div className="setPassword__secretPharse">
-      <p className="setPassword__secretPharse__grayText">
-        {type || "Paste or type your phrase."}
+      <h3 className="setPassword__heading">Wallet Name</h3>
+      <p className="welcomeScreens-text">
+        {type ||
+          "You can label your own wallet and manage multiple wallets here."}
       </p>
       <div>
         <div className="setPassword__secretPharse__fieldSBg">
+          <div style={{ marginTop: "16px" }}>
+            <InputFieldOnly
+              placeholder={"Enter Wallet Name here"}
+              label={"Wallet Name"}
+            />
+          </div>
           <div className="setPassword__secretPharse__fieldSBgInner textArea">
             <TextArea
               value={mnemonics}
@@ -2149,7 +2157,7 @@ function SecretPhrasePaste({ children, termsCheck, getMnemonics, type }) {
                 handleInputChange(e.target.value);
               }}
               style={{
-                height: "136px",
+                minHeight: "200px",
               }}
               ref={textAreaRef}
               placeholder={"Enter Your Secret Phrase Here"}
@@ -2157,14 +2165,14 @@ function SecretPhrasePaste({ children, termsCheck, getMnemonics, type }) {
             />
             <div className="token__selectStyle">
               <span
-                className={`${"token__pasteText"} ${"token__pasteTextarea"}`}
+                className={`${"token__pasteText"}`}
                 onClick={async () => {
                   const data = await navigator.clipboard.readText();
                   getMnemonics(data);
                   setMnemonics(data);
                 }}
               >
-                Paste
+               <img src={CopyIconBlueN} alt="paste" /> Paste
               </span>
             </div>
           </div>

@@ -1,5 +1,5 @@
-@import '../../styles/__vars.scss';
-@import '../../styles/__mixins.scss';
+@import "../../styles/__vars.scss";
+@import "../../styles/__mixins.scss";
 .wallet {
   // margin-top: 2px;
   &__heading {
@@ -9,11 +9,9 @@
     margin-bottom: 12px;
     gap: 10px;
     &__text {
-      font-size: 16px;
-      font-weight: 800;
-      @include theme() {
-        color: theme-get('whiteWelcome');
-      }
+      font-size: 18px;
+      font-weight: 500;
+      color: $white;
     }
     &__filter {
       cursor: pointer;
@@ -25,23 +23,17 @@
   }
   &__tableOuter {
     max-height: max-content;
-    height: 100%;
-    // padding: 17px 24px;
-    // border-radius: 16px;
-    // @include theme() {
-    //   background-color: theme-get("inputBg");
-    // }
+    height: 222px;
     overflow: auto;
     display: flex;
     flex-direction: column;
-    // gap: 10px;
   }
   &__tabelOuterExt {
     height: 152px;
   }
 }
 
-@import '../../styles/__vars.scss';
+@import "../../styles/__vars.scss";
 .swapDrawer {
   display: flex;
   align-items: center;
@@ -58,7 +50,7 @@
     gap: 9px;
     &__textsTop {
       @include theme() {
-        color: theme-get('baseColor-Text');
+        color: theme-get("baseColor-Text");
       }
       font-size: 14px;
       font-weight: bold;

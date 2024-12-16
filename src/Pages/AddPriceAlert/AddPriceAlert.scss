@@ -21,20 +21,21 @@ input:focus {
     display: flex;
     gap: 20px;
   }
-  &__pasteText {
-    color: $baseText-00AEEF;
-    font-size: 13px;
-    font-weight: bold;
-    text-decoration: underline;
-    cursor: pointer;
-    transition: 0.3s;
-    padding-left: 10px;
-    // border-left: 1px solid #80838e;
-    &:hover {
-      opacity: 1;
-    }
-  }
-  scrollableCont &__selectStyle {
+  // &__pasteText {
+  //   color: $baseText-00AEEF;
+  //   font-size: 13px;
+  //   font-weight: bold;
+  //   text-decoration: underline;
+  //   cursor: pointer;
+  //   transition: 0.3s;
+  //   padding-left: 10px;
+  //   // border-left: 1px solid #80838e;
+  //   &:hover {
+  //     opacity: 1;
+  //   }
+  // }
+  // scrollableCont 
+  &__selectStyle {
     display: flex;
     align-items: center;
     &__img {
@@ -64,19 +65,19 @@ input:focus {
 }
 
 .send {
-  &__pasteText {
-    color: $baseText-00AEEF;
-    font-size: 13px;
-    font-weight: bold;
-    text-decoration: underline;
-    cursor: pointer;
-    transition: 0.3s;
-    padding-left: 10px;
-    // border-left: 1px solid #80838e;
-    &:hover {
-      opacity: 1;
-    }
-  }
+  // &__pasteText {
+  //   color: $baseText-00AEEF;
+  //   font-size: 13px;
+  //   font-weight: bold;
+  //   text-decoration: underline;
+  //   cursor: pointer;
+  //   transition: 0.3s;
+  //   padding-left: 10px;
+  //   // border-left: 1px solid #80838e;
+  //   &:hover {
+  //     opacity: 1;
+  //   }
+  // }
   &__infoText {
     @include theme() {
       color: theme-get("blue");
@@ -123,8 +124,8 @@ input:focus {
     text-align: right;
   }
   &__textTop {
-    font-size: 14px;
-    color: $baseColor-Text;
+    font-size: 16px;
+    color: $white;
     font-weight: bold;
     margin-bottom: 3px;
     display: flex;
@@ -132,7 +133,7 @@ input:focus {
     word-break: break-all;
   }
   &__grayText12 {
-    font-size: 12px;
+    font-size: 14px;
     color: $gray-6E737E;
     font-weight: 500;
     display: flex;

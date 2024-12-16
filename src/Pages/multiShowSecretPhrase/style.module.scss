@@ -75,25 +75,25 @@
       // padding: 20px 16px 16px 20px;
       margin: 24px 0 36px;
     }
-    &__fieldSBgInner {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      justify-content: flex-start;
-      margin-bottom: 6px;
-      flex-wrap: wrap;
-      span {
-        font-size: 13px;
-        text-transform: capitalize;
-        font-weight: 500;
-        line-height: 16px;
-        color: $baseColor-Text;
-        width: calc(33% - 40px);
-        background-color: $gray-D7E0EB-light;
-        border-radius: 14px;
-        padding: 6px 15px;
-      }
-    }
+    // &__fieldSBgInner {
+    //   display: flex;
+    //   align-items: center;
+    //   gap: 16px;
+    //   justify-content: flex-start;
+    //   margin-bottom: 6px;
+    //   flex-wrap: wrap;
+    //   span {
+    //     font-size: 13px;
+    //     text-transform: capitalize;
+    //     font-weight: 500;
+    //     line-height: 16px;
+    //     color: $baseColor-Text;
+    //     width: calc(33% - 40px);
+    //     background-color: $gray-D7E0EB-light;
+    //     border-radius: 14px;
+    //     padding: 6px 15px;
+    //   }
+    // }
     // &__copyField {
     //   max-width: 119px;
     //   height: 36px;

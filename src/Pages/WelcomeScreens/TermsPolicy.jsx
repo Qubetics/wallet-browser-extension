@@ -46,7 +46,7 @@ function TermsPolicy() {
       <div>
         <div className={"checkboxOuter"} style={{ marginBottom: "20px" }}>
           <Checkbox>
-            <p style={{ marginLeft: "22px" }}>
+            <p>
               I accepted the <Link>Terms of Service</Link> &
               <Link> Privacy Policy</Link>
             </p>

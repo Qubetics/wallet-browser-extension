@@ -24,18 +24,18 @@ input:focus {
     display: flex;
     gap: 20px;
   }
-  &__pasteText {
-    color: $baseText-00AEEF;
-    font-size: 13px;
-    font-weight: bold;
-    text-decoration: underline;
-    cursor: pointer;
-    transition: 0.3s;
-    padding-left: 10px;
-    &:hover {
-      opacity: 0.7;
-    }
-  }scrollableCont
+  // &__pasteText {
+  //   color: $baseText-00AEEF;
+  //   font-size: 13px;
+  //   font-weight: bold;
+  //   text-decoration: underline;
+  //   cursor: pointer;
+  //   transition: 0.3s;
+  //   padding-left: 10px;
+  //   &:hover {
+  //     opacity: 0.7;
+  //   }
+  // }scrollableCont
   &__selectStyle {
     display: flex;
     align-items: center;

@@ -57,7 +57,7 @@ body::-webkit-scrollbar {
     background-color: transparent;
     border: none;
     box-shadow: none;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
     cursor: pointer;
   }
   &__heading {
@@ -480,6 +480,9 @@ body::-webkit-scrollbar {
 
 .checkboxOuter {
   margin-top: 28px;
+  span {
+    color: #fff;
+  }
   .ant-checkbox-wrapper {
     p {
       color: #fff;
@@ -574,19 +577,15 @@ input[type="number"] {
 }
 // TextArea-----------
 .textArea {
+  margin-top: 20px;
   .ant-input {
-    height: 149px;
-    @include theme() {
-      background-color: theme-get("inputBg");
-      color: theme-get("whiteblack");
-    }
-    border-radius: 28px;
-    border: 0;
-    padding: 20px;
+    background-color: transparent;
+    border-radius: 14px;
+    border: 1px solid #76747b !important;
+    padding: 16px 20px;
+    color: #fff;
     &::placeholder {
-      @include theme() {
-        color: theme-get("whiteblack");
-      }
+      color: #98969b;
     }
   }
 }
@@ -878,4 +877,23 @@ input[type="number"] {
 .viewphrases__iInner img {
   height: 40px !important;
   width: 40px !important;
+}
+.congrates-item {
+  display: none;
+}
+.balanceLeft {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  a{
+    text-decoration: none !important;
+  }
+  p{
+    text-align: left;
+  }
+  .mainNetwor {
+    color: #98969b;
+    font-size: 14px;
+    line-height: 19px;
+  }
 }

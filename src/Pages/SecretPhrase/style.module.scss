@@ -22,19 +22,19 @@
   //     display: flex;
   //     gap: 20px;
   // }
-  &__pasteText {
-    color: $baseText-00AEEF;
-    font-size: 13px;
-    font-weight: bold;
-    text-decoration: underline;
-    cursor: pointer;
-    transition: 0.3s;
-    padding-left: 10px;
-    border-left: 1px solid #80838e;
-    &:hover {
-      opacity: 0.7;
-    }
-  }
+  // &__pasteText {
+  //   color: $baseText-00AEEF;
+  //   font-size: 13px;
+  //   font-weight: bold;
+  //   text-decoration: underline;
+  //   cursor: pointer;
+  //   transition: 0.3s;
+  //   padding-left: 10px;
+  //   border-left: 1px solid #80838e;
+  //   &:hover {
+  //     opacity: 0.7;
+  //   }
+  // }
   &__selectStyle {
     display: flex;
     align-items: center;

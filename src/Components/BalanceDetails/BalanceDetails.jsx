@@ -1,52 +1,55 @@
 /*global chrome*/
-import React, { useEffect, useState } from 'react';
-import './BalanceDetails.scss';
-import SendIcon from '../../Assets/SendIcon.svg';
-import RecieveIcon from '../../Assets/RecieveIcon.svg';
-import SwapIcon from '../../Assets/SwapIcon.svg';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import ModalCustom from '../ModalCustom/ModalCustom';
-import CopyIconBlue from '../../Assets/CopyIconBlue.svg';
-import JustLogo from '../../Assets/JustLogo.svg';
-import InfoIcon from '../../Assets/InfoIcon.svg';
-import PlusBordredIcon from '../../Assets/PlusBordredIcon.svg';
-import SendIconWhite from '../../Assets/SendIconWhite.svg';
-import RecieveIconWhite from '../../Assets/RecieveIconWhite.svg';
-import BuyIconWhite from '../../Assets/other-buy.png';
-import SwapIconWhite from '../../Assets/SwapIconWhite.svg';
-import DarkSendIcon from '../../Assets/DarkSendIcon.svg';
-import DarkRecieveIcon from '../../Assets/DarkRecieveIcon.svg';
-import Darkotherbuy from '../../Assets/Darkotherbuy.svg';
-import DarkSwapIcon from '../../Assets/DarkSwapIcon.svg';
-import Buy from '../../Assets/buy-sell.png';
-import { Dropdown, message } from 'antd';
-import { WalletHelper } from '../../helpers/wallet.helper';
-import { useSelector } from 'react-redux';
-import { QRCode } from 'react-qrcode-logo';
-import { store } from '../..';
-import { Drawer } from 'antd';
-import ModalCloseIcon from '../../Assets/ModalCloseIcon.svg';
-import OpenDark from '../../Assets/open-dark.png';
-import CloseDark from '../../Assets/close-dark.png';
-import { DURATION } from '../../config/message.config';
-import { setLoading } from '../../actions/loading';
-import CoinsTable from '../CoinsTable/CoinsTable';
-import BigNumber from 'bignumber.js';
-import Logo from '../../Assets/Logo.png';
-
+import React, { useEffect, useState } from "react";
+import "./BalanceDetails.scss";
+import SendIcon from "../../Assets/SendIcon.svg";
+import RecieveIcon from "../../Assets/RecieveIcon.svg";
+import SwapIcon from "../../Assets/SwapIcon.svg";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import ModalCustom from "../ModalCustom/ModalCustom";
+import CopyIconBlue from "../../Assets/CopyIconBlue.svg";
+import JustLogo from "../../Assets/JustLogo.svg";
+import InfoIcon from "../../Assets/InfoIcon.svg";
+import PlusBordredIcon from "../../Assets/PlusBordredIcon.svg";
+import SendIconWhite from "../../Assets/SendIconWhite.svg";
+import RecieveIconWhite from "../../Assets/RecieveIconWhite.svg";
+import BuyIconWhite from "../../Assets/other-buy.png";
+import SwapIconWhite from "../../Assets/SwapIconWhite.svg";
+import DarkSendIcon from "../../Assets/DarkSendIcon.svg";
+import DarkRecieveIcon from "../../Assets/DarkRecieveIcon.svg";
+import Darkotherbuy from "../../Assets/Darkotherbuy.svg";
+import DarkSwapIcon from "../../Assets/DarkSwapIcon.svg";
+import Buy from "../../Assets/buy-sell.png";
+import { Dropdown, message } from "antd";
+import { WalletHelper } from "../../helpers/wallet.helper";
+import { useSelector } from "react-redux";
+import { QRCode } from "react-qrcode-logo";
+import { store } from "../..";
+import { Drawer } from "antd";
+import ModalCloseIcon from "../../Assets/ModalCloseIcon.svg";
+import OpenDark from "../../Assets/open-dark.png";
+import CloseDark from "../../Assets/close-dark.png";
+import { DURATION } from "../../config/message.config";
+import { setLoading } from "../../actions/loading";
+import CoinsTable from "../CoinsTable/CoinsTable";
+import BigNumber from "bignumber.js";
+import Logo from "../../Assets/Logo.png";
+import aName from "../../Assets/aName.svg";
 import {
   addCommasToNumber,
   formatSmallNumber,
   getFlooredFixed,
-} from '../../helpers/conversion.helper';
-import InputFieldSimple from '../InputField/InputFieldSimple';
-import darkclose from '../../Assets/darkclose.svg';
-import DarkLogo from '../../Assets/DarkLogo.svg';
-import warning from '../../Assets/PNG/warning.png';
-import ButtonComp from '../ButtonComp/ButtonComp';
-import { setBalancesIn } from '../../actions/balance-off-out';
-import { server } from '../../server';
-import { SolanaHelper } from '../../helpers/solana.helper';
+} from "../../helpers/conversion.helper";
+import InputFieldSimple from "../InputField/InputFieldSimple";
+import darkclose from "../../Assets/darkclose.svg";
+import DarkLogo from "../../Assets/DarkLogo.svg";
+import warning from "../../Assets/PNG/warning.png";
+import ButtonComp from "../ButtonComp/ButtonComp";
+import { setBalancesIn } from "../../actions/balance-off-out";
+import { server } from "../../server";
+import { SolanaHelper } from "../../helpers/solana.helper";
+import downeIcon from "../../Assets/downeIcon.svg";
+import history from "../../Assets/history.svg";
+import Trade from "../../Assets/Trade.svg";
 
 function BalanceDetails({ className, textLeft, mt0, coin }) {
   const { account, currency, chain, tokens, theme, balanceIn } = useSelector(
@@ -58,12 +61,12 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
   const [accounts, setAccounts] = useState([]);
 
   const fetchAccounts = async () => {
-    const { accounts } = await chrome.storage.session.get('accounts');
+    const { accounts } = await chrome.storage.session.get("accounts");
     const items = accounts.flatMap((account, index) => {
       const accountItem = {
         label: (
           <Link
-            to='/'
+            to="/"
             onClick={async (e) => {
               e.preventDefault();
               await WalletHelper.setWalletPreference(account.id);
@@ -77,7 +80,7 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
 
       // Add a divider after each item except the last one
       if (index < accounts.length - 1) {
-        return [accountItem, { type: 'divider' }];
+        return [accountItem, { type: "divider" }];
       }
 
       return [accountItem];
@@ -134,13 +137,13 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
   const navigate = useNavigate();
 
   const init = async () => {
-    const { chains } = await chrome.storage.local.get('chains');
+    const { chains } = await chrome.storage.local.get("chains");
 
     const myItems = [
       {
-        key: '0',
-        type: 'group',
-        label: 'EVM Chains',
+        key: "0",
+        type: "group",
+        label: "EVM Chains",
         children: [],
       },
     ];
@@ -152,7 +155,7 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
           myItems[0].children.push({
             label: (
               <Link
-                to='/'
+                to="/"
                 onClick={async (e) => {
                   e.preventDefault();
                   store.dispatch(setLoading(true));
@@ -160,27 +163,27 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
                   store.dispatch(setLoading(false));
                 }}
                 style={{
-                  display: 'flex',
-                  alignItems: 'center',
+                  display: "flex",
+                  alignItems: "center",
                 }}
               >
                 <div
                   style={{
-                    height: '10px',
-                    width: '10px',
-                    background: data.chainId == chain.chainId ? '#fff' : '#fff',
-                    borderRadius: '50%',
+                    height: "10px",
+                    width: "10px",
+                    background: data.chainId == chain.chainId ? "#fff" : "#fff",
+                    borderRadius: "50%",
                   }}
                 ></div>
                 <img
                   src={data.image}
-                  alt=''
+                  alt=""
                   style={{
-                    height: '30px',
-                    width: '30px',
-                    objectFit: 'contain',
-                    marginRight: '8px',
-                    marginLeft: '8px',
+                    height: "30px",
+                    width: "30px",
+                    objectFit: "contain",
+                    marginRight: "8px",
+                    marginLeft: "8px",
                   }}
                 />
                 {data.chainName}
@@ -192,7 +195,7 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
           myItems[1].children.push({
             label: (
               <Link
-                to='/'
+                to="/"
                 onClick={async (e) => {
                   e.preventDefault();
                   store.dispatch(setLoading(true));
@@ -200,28 +203,28 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
                   store.dispatch(setLoading(false));
                 }}
                 style={{
-                  display: 'flex',
-                  alignItems: 'center',
+                  display: "flex",
+                  alignItems: "center",
                 }}
               >
                 <div
                   style={{
-                    height: '10px',
-                    width: '10px',
+                    height: "10px",
+                    width: "10px",
                     background:
-                      data.chainId == chain.chainId ? 'green' : '#fff',
-                    borderRadius: '50%',
+                      data.chainId == chain.chainId ? "green" : "#fff",
+                    borderRadius: "50%",
                   }}
                 ></div>
                 <img
                   src={data.image}
-                  alt=''
+                  alt=""
                   style={{
-                    height: '30px',
-                    width: '30px',
-                    objectFit: 'contain',
-                    marginRight: '8px',
-                    marginLeft: '8px',
+                    height: "30px",
+                    width: "30px",
+                    objectFit: "contain",
+                    marginRight: "8px",
+                    marginLeft: "8px",
                   }}
                 />
                 {data.chainName}
@@ -232,7 +235,7 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
         }
       });
 
-    const isSidePanelOpen = await chrome.storage.local.get('openSidePanel');
+    const isSidePanelOpen = await chrome.storage.local.get("openSidePanel");
     setIsSidePanelOpen(isSidePanelOpen.openSidePanel);
     setChainItems(myItems);
   };
@@ -256,7 +259,7 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
         // console.log(formattedResult, "formattedResult"); // Output: "0.21"
         setFiatValue(formattedResult);
       } catch (error) {
-        console.log(error, 'error');
+        console.log(error, "error");
       }
     }
   }, [tokens]);
@@ -270,7 +273,7 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
   const [fiatValue, setFiatValue] = useState(0.0);
   const getLocation = useLocation();
 
-  const path = getLocation.pathname.replace('/', '');
+  const path = getLocation.pathname.replace("/", "");
   const showModal = () => {
     setIsModalOpen(true);
   };
@@ -299,59 +302,68 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
 
   return (
     <div
-      className={`${'balanceDetails'} ${mt0 ? mt0 : ''}`}
-      style={{ position: 'relative' }}
+      className={`${"balanceDetails"} ${mt0 ? mt0 : ""}`}
+      style={{ position: "relative" }}
     >
       {contextHolder}
 
-      {path !== 'currencyDetails' ? (
+      {path !== "currencyDetails" ? (
         <>
-          <div className={'balanceDetails__dropdownStyle'}>
-            <Dropdown menu={{ items: accounts }} trigger={['click']}>
-              <Link onClick={(e) => e.preventDefault()}>
-                <p>{account.name}</p>
-              </Link>
-            </Dropdown>
+          <div className={"balanceDetails__dropdownStyle"}>
+            <div className="balanceLeft">
+              <img src={aName} alt="icon" />
+              <div>
+                <Dropdown menu={{ items: accounts }} trigger={["click"]}>
+                  <Link onClick={(e) => e.preventDefault()}>
+                    <p>
+                      {account.name} <img src={downeIcon} alt="downeIcon" />
+                    </p>
+                  </Link>
+                </Dropdown>
+                <p className="mainNetwor"> ETH Main Network</p>
+              </div>
+            </div>
           </div>
         </>
       ) : null}
 
       <div
         className={
-          path !== 'currencyDetails'
+          path !== "currencyDetails"
             ? chain.supportTokens
-              ? 'balanceDetails__decoratedSec'
-              : 'balanceDetails__decoratedSecWithoutAddTokens'
-            : 'balanceDetails__cardCurrencyDetails'
+              ? "balanceDetails__decoratedSec"
+              : "balanceDetails__decoratedSecWithoutAddTokens"
+            : "balanceDetails__cardCurrencyDetails"
         }
       >
-        {path !== 'currencyDetails' ? (
+        {path !== "currencyDetails" ? (
           <>
-            {' '}
+            {/* {" "}
             <img
               src={JustLogo}
               style={{
-                height: '25px',
-                objectFit: 'contain',
+                height: "25px",
+                objectFit: "contain",
               }}
-            />
+            /> */}
+            <p className="totalBalance">Total Balance</p>
           </>
         ) : null}
 
         <div
           style={{
-            display: 'flex',
-            alignItems: 'center',
+            display: "flex",
+            alignItems: "center",
             justifyContent:
-              path === 'currencyDetails' ? 'flex-start' : 'center',
+              path === "currencyDetails" ? "flex-start" : "space-between",
           }}
         >
           <h3
-            className={`${'balanceDetails__title'} ${textLeft ? textLeft : ''}`}
+            className={`${"balanceDetails__title"} ${textLeft ? textLeft : ""}`}
             style={{
-              maxWidth: '290px',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
+              maxWidth: "290px",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
             }}
           >
             {coin
@@ -362,14 +374,14 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
               ? `${currency.symbol}${addCommasToNumber(
                   getFlooredFixed(total, 2)
                 )}`
-              : '****'}
+              : "****"}
           </h3>
 
-          {path !== 'currencyDetails' ? (
+          {path !== "currencyDetails" ? (
             balanceIn ? (
               <img
                 src={OpenDark}
-                alt=''
+                alt=""
                 onClick={async () => {
                   await chrome.storage.local.set({
                     balanceIn: false,
@@ -378,16 +390,16 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
                   store.dispatch(setBalancesIn(false));
                 }}
                 style={{
-                  width: '17px',
-                  marginLeft: '9px',
-                  position: 'relative',
-                  top: '-7px',
+                  width: "17px",
+                  marginLeft: "9px",
+                  position: "relative",
+                  top: "-7px",
                 }}
               />
             ) : (
               <img
                 src={CloseDark}
-                alt=''
+                alt=""
                 onClick={async () => {
                   await chrome.storage.local.set({
                     balanceIn: true,
@@ -396,10 +408,10 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
                   store.dispatch(setBalancesIn(true));
                 }}
                 style={{
-                  width: '17px',
-                  marginLeft: '9px',
-                  position: 'relative',
-                  top: '-7px',
+                  width: "17px",
+                  marginLeft: "9px",
+                  position: "relative",
+                  top: "-7px",
                 }}
               />
             )
@@ -409,14 +421,14 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
         {coin ? (
           <h5
             style={{
-              fontSize: '14px',
-              color: '#fff',
-              padding: '0px',
-              fontWeight: 'bold',
-              position: 'relative',
-              top: '-8px',
+              fontSize: "14px",
+              color: "#fff",
+              padding: "0px",
+              fontWeight: "bold",
+              position: "relative",
+              top: "-8px",
             }}
-            className={`${'balanceDetails__title'} ${textLeft ? textLeft : ''}`}
+            className={`${"balanceDetails__title"} ${textLeft ? textLeft : ""}`}
           >
             {currency.symbol}
             {addCommasToNumber(fiatValue)}
@@ -424,50 +436,50 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
         ) : null}
       </div>
       <div
-        className={`${'balanceDetails__itemsOuter'} ${
-          className ? className : ''
+        className={`${"balanceDetails__itemsOuter"} ${
+          className ? className : ""
         }`}
         style={
           coin
-            ? { justifyContent: 'center' }
-            : { justifyContent: 'space-between' }
+            ? { justifyContent: "center" }
+            : { justifyContent: "space-between" }
         }
       >
         {!coin ? (
           <Link
-            to='/send'
+            to="/send"
             onClick={(e) => {
               e.preventDefault();
               if (account.isWatchOnly) {
                 return;
               }
-              navigate('/send');
+              navigate("/send");
             }}
             style={
-              account.isWatchOnly ? { filter: 'grayscale(1) blur(1px)' } : {}
+              account.isWatchOnly ? { filter: "grayscale(1) blur(1px)" } : {}
             }
             className={
-              path === 'currencyDetails'
-                ? 'balanceDetails__items__whiteText'
-                : 'balanceDetails__items'
+              path === "currencyDetails"
+                ? "balanceDetails__items__whiteText"
+                : "balanceDetails__items"
             }
           >
-            <div className={'balanceDetails__items__img'}>
-              {path === 'currencyDetails' ? (
-                <img src={SendIconWhite} height={24} width={24} />
-              ) : theme === 'darkTheme' ? (
+            <div className={"balanceDetails__items__img"}>
+              {path === "currencyDetails" ? (
+                <img src={SendIconWhite} height={50} width={50} />
+              ) : theme === "darkTheme" ? (
                 <img src={DarkSendIcon} />
               ) : (
-                <img src={SendIcon} height={24} width={24} />
+                <img src={SendIcon} height={50} width={50} />
               )}
             </div>
             <span>Send</span>
           </Link>
         ) : (
           <Link
-            to='/sendCurrency'
+            to="/sendCurrency"
             style={
-              account.isWatchOnly ? { filter: 'grayscale(1) blur(1px)' } : {}
+              account.isWatchOnly ? { filter: "grayscale(1) blur(1px)" } : {}
             }
             onClick={(e) => {
               e.preventDefault();
@@ -476,32 +488,32 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
               }
 
               if (parseFloat(coin.balance) <= 0) {
-                return messageApi.error('Insufficient balance to proceed.');
+                return messageApi.error("Insufficient balance to proceed.");
               }
 
-              navigate('/sendCurrency', {
+              navigate("/sendCurrency", {
                 state: {
                   symbol: coin.symbol,
                   image: coin.name,
-                  type: '',
+                  type: "",
                   coin: coin,
-                  redirectTo: '/currencyDetails',
+                  redirectTo: "/currencyDetails",
                 },
               });
             }}
             className={
-              path === 'currencyDetails'
-                ? 'balanceDetails__items__whiteText'
-                : 'balanceDetails__items'
+              path === "currencyDetails"
+                ? "balanceDetails__items__whiteText"
+                : "balanceDetails__items"
             }
           >
-            <div className={'balanceDetails__items__img'}>
-              {path === 'currencyDetails' ? (
-                <img src={SendIconWhite} height={24} width={24} />
-              ) : theme === 'darkTheme' ? (
+            <div className={"balanceDetails__items__img"}>
+              {path === "currencyDetails" ? (
+                <img src={SendIconWhite} height={50} width={50} />
+              ) : theme === "darkTheme" ? (
                 <img src={DarkSendIcon} />
               ) : (
-                <img src={SendIcon} height={24} width={24} />
+                <img src={SendIcon} height={50} width={50} />
               )}
             </div>
             <span>Send</span>
@@ -511,24 +523,24 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
         <Link
           onClick={(e) => {
             e.preventDefault();
-            path === 'currencyDetails'
+            path === "currencyDetails"
               ? showModal()
-              : navigate('/receive-tokens');
+              : navigate("/receive-tokens");
           }}
-          to='#'
+          to="#"
           className={
-            path === 'currencyDetails'
-              ? 'balanceDetails__items__whiteText'
-              : 'balanceDetails__items'
+            path === "currencyDetails"
+              ? "balanceDetails__items__whiteText"
+              : "balanceDetails__items"
           }
         >
-          <div className={'balanceDetails__items__img'}>
-            {path === 'currencyDetails' ? (
-              <img src={RecieveIconWhite} height={24} width={24} />
-            ) : theme === 'darkTheme' ? (
+          <div className={"balanceDetails__items__img"}>
+            {path === "currencyDetails" ? (
+              <img src={RecieveIconWhite} height={50} width={50} />
+            ) : theme === "darkTheme" ? (
               <img src={DarkRecieveIcon} />
             ) : (
-              <img src={RecieveIcon} height={24} width={24} />
+              <img src={RecieveIcon} height={50} width={50} />
             )}
           </div>
           <span>Receive</span>
@@ -536,184 +548,197 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
 
         {!coin ? (
           <Link
-            to='/buy-sell'
+            to="/buy-sell"
             onClick={(e) => {
               e.preventDefault();
               if (buySellM?.is_maintenance) {
-                return messageApi.error('Buy/Sell is under maintenance.');
+                return messageApi.error("Buy/Sell is under maintenance.");
               }
-              if (path === 'currencyDetails') {
+              if (path === "currencyDetails") {
                 if (coin.coin.on_off_ramp_coin) {
                   return setSelectedCoin(coin.coin.on_off_ramp_coin);
                 } else {
-                  return messageApi.error('Coin not supported.');
+                  return messageApi.error("Coin not supported.");
                 }
               } else {
-                return navigate('/buy-sell');
+                return navigate("/buy-sell");
               }
             }}
             className={
-              path === 'currencyDetails'
-                ? 'balanceDetails__items__whiteText'
-                : 'balanceDetails__items'
+              path === "currencyDetails"
+                ? "balanceDetails__items__whiteText"
+                : "balanceDetails__items"
             }
           >
-            <div className={'balanceDetails__items__img'}>
-              {path === 'currencyDetails' ? (
+            <div className={"balanceDetails__items__img"}>
+              {path === "currencyDetails" ? (
                 <img
                   src={BuyIconWhite}
-                  height={24}
-                  width={24}
-                  style={{ filter: 'brightness(0) invert(1)' }}
-                  alt=''
+                  height={50}
+                  width={50}
+                  style={{ filter: "brightness(0) invert(1)" }}
+                  alt=""
                 />
-              ) : theme === 'darkTheme' ? (
+              ) : theme === "darkTheme" ? (
                 <img src={Darkotherbuy} />
               ) : (
-                <img src={Buy} height={24} width={24} />
+                <img src={Darkotherbuy} height={50} width={50} />
               )}
             </div>
-            <span>{account.isWatchOnly ? 'Buy' : 'Buy/Sell'} </span>
+            <span>{account.isWatchOnly ? "Buy" : "Buy/Sell"} </span>
           </Link>
         ) : coin.coin.on_off_ramp_coin ? (
           <Link
-            to='/buy-sell'
+            to="/buy-sell"
             onClick={(e) => {
               e.preventDefault();
               if (buySellM?.is_maintenance) {
-                return messageApi.error('Buy/Sell is under maintenance.');
+                return messageApi.error("Buy/Sell is under maintenance.");
               }
-              if (path === 'currencyDetails') {
+              if (path === "currencyDetails") {
                 // if (coin.coin.on_off_ramp_coin) {
                 return setSelectedCoin(coin.coin.on_off_ramp_coin);
                 // } else {
                 //   return messageApi.error("Coin not supported.");
                 // }
               } else {
-                return navigate('/buy-sell');
+                return navigate("/buy-sell");
               }
             }}
             className={
-              path === 'currencyDetails'
-                ? 'balanceDetails__items__whiteText'
-                : 'balanceDetails__items'
+              path === "currencyDetails"
+                ? "balanceDetails__items__whiteText"
+                : "balanceDetails__items"
             }
           >
-            <div className={'balanceDetails__items__img'}>
-              {path === 'currencyDetails' ? (
+            <div className={"balanceDetails__items__img"}>
+              {path === "currencyDetails" ? (
                 <img
-                  src={BuyIconWhite}
-                  height={24}
-                  width={24}
-                  style={{ filter: 'brightness(0) invert(1)' }}
-                  alt=''
+                  src={Darkotherbuy}
+                  height={50}
+                  width={50}
+                  style={{ filter: "brightness(0) invert(1)" }}
+                  alt=""
                 />
-              ) : theme === 'darkTheme' ? (
-                <img src={Darkotherbuy} alt='' />
+              ) : theme === "darkTheme" ? (
+                <img src={Darkotherbuy} alt="" />
               ) : (
-                <img src={Buy} height={24} width={24} alt='' />
+                <img src={Buy} height={50} width={50} alt="" />
               )}
             </div>
-            <span>{account.isWatchOnly ? 'Buy' : 'Buy/Sell'} </span>
+            <span>{account.isWatchOnly ? "Buy" : "Buy/Sell"} </span>
           </Link>
         ) : null}
-        {path !== 'currencyDetails' && (
+        <Link
+          to="#"
+          className={
+            path === "currencyDetails"
+              ? "balanceDetails__items__whiteText"
+              : "balanceDetails__items"
+          }
+        >
+          <div className={"balanceDetails__items__img"}>
+            <img src={Trade} height={50} width={50} />
+          </div>
+          <span>Trade</span>
+        </Link>
+        {path !== "currencyDetails" && (
           <Link
             onClick={(e) => {
               e.preventDefault();
-              path === 'currencyDetails' ? showModal() : navigate('/history');
+              path === "currencyDetails" ? showModal() : navigate("/history");
             }}
-            to='#'
+            to="#"
             className={
-              path === 'currencyDetails'
-                ? 'balanceDetails__items__whiteText'
-                : 'balanceDetails__items'
+              path === "currencyDetails"
+                ? "balanceDetails__items__whiteText"
+                : "balanceDetails__items"
             }
           >
-            <div className={'balanceDetails__items__img'}>
-              {path === 'currencyDetails' ? (
-                <img src={RecieveIconWhite} height={24} width={24} />
-              ) : theme === 'darkTheme' ? (
-                <img src={DarkRecieveIcon} />
+            <div className={"balanceDetails__items__img"}>
+              {path === "currencyDetails" ? (
+                <img src={history} height={50} width={50} />
+              ) : theme === "darkTheme" ? (
+                <img src={history} />
               ) : (
-                <img src={RecieveIcon} height={24} width={24} />
+                <img src={history} height={50} width={50} />
               )}
             </div>
             <span>History</span>
           </Link>
         )}
-        {path !== 'currencyDetails' && (
+        {/* {path !== "currencyDetails" && (
           <Link
             onClick={(e) => {
               e.preventDefault();
-              path === 'currencyDetails'
+              path === "currencyDetails"
                 ? showModal()
-                : navigate('/watch-list-tokens');
+                : navigate("/watch-list-tokens");
             }}
-            to='#'
+            to="#"
             className={
-              path === 'currencyDetails'
-                ? 'balanceDetails__items__whiteText'
-                : 'balanceDetails__items'
+              path === "currencyDetails"
+                ? "balanceDetails__items__whiteText"
+                : "balanceDetails__items"
             }
           >
-            <div className={'balanceDetails__items__img'}>
-              {path === 'currencyDetails' ? (
-                <img src={RecieveIconWhite} height={24} width={24} />
-              ) : theme === 'darkTheme' ? (
+            <div className={"balanceDetails__items__img"}>
+              {path === "currencyDetails" ? (
+                <img src={RecieveIconWhite} height={50} width={50} />
+              ) : theme === "darkTheme" ? (
                 <img src={DarkRecieveIcon} />
               ) : (
-                <img src={RecieveIcon} height={24} width={24} />
+                <img src={RecieveIcon} height={50} width={50} />
               )}
             </div>
             <span>Watch List</span>
           </Link>
-        )}
+        )} */}
       </div>
       {coin ? (
         <ModalCustom
           isModalOpen={isModalOpen}
           handleOk={handleOk}
           handleCancel={handleCancel}
-          customClass={'change'}
+          customClass={"change"}
         >
-          <div className={'balanceDetails__modal'}>
+          <div className={"balanceDetails__modal"}>
             <div>
-              <div className={'balanceDetails__modal__scanner'}>
+              <div className={"balanceDetails__modal__scanner"}>
                 <QRCode
                   value={coin.address}
                   size={230}
-                  qrStyle='square'
+                  qrStyle="square"
                   eyeRadius={10}
                   logoImage={coin.coin.coin_image}
                   logoHeight={55}
                   logoWidth={55}
                   logoPadding={8}
-                  logoPaddingStyle='circle'
+                  logoPaddingStyle="circle"
                   style={{
-                    borderRadius: '20px',
-                    padding: '15px',
+                    borderRadius: "20px",
+                    padding: "15px",
                   }}
                 />
               </div>
             </div>
             <p
-              className='noAddress'
+              className="noAddress"
               style={{
-                width: '100%',
-                textAlign: 'center',
-                marginBottom: '17px',
-                fontSize: '15px',
-                fontWeight: 'bold',
+                width: "100%",
+                textAlign: "center",
+                marginBottom: "17px",
+                fontSize: "15px",
+                fontWeight: "bold",
               }}
             >
               Address
             </p>
             <div
-              className={'balanceDetails__modal__wrapedText'}
+              className={"balanceDetails__modal__wrapedText"}
               onClick={async () => {
                 await navigator.clipboard.writeText(coin.wallet_address);
-                messageApi.success('Address copied successfully.');
+                messageApi.success("Address copied successfully.");
               }}
             >
               <img src={CopyIconBlue} width={15} height={16} />

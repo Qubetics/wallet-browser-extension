@@ -36,9 +36,7 @@
     }
   }
   &__subTitle {
-    @include theme() {
-      color: theme-get("whiteWelcome");
-    }
+    color: #98969b !important;
     font-size: 16px;
     font-weight: 400;
     margin-bottom: 19px;
@@ -124,6 +122,13 @@
 
   // Set Password Css Starts here //
   .setPassword {
+    &__heading {
+      font-size: 18px;
+      font-weight: 600;
+      color: $white;
+      line-height: 18px;
+      text-align: left;
+    }
     &__tabs {
       display: flex;
       align-items: center;
@@ -205,7 +210,7 @@
         // background-color: $inputBg;
         // border-radius: 28px;
         // padding: 20px 16px 16px 20px;
-        margin: 24px 0 36px;
+        margin: 20px 0;
       }
       &__fieldSBgInner {
         display: flex;
@@ -221,7 +226,7 @@
           color: $white;
           font-weight: 500;
           text-align: center;
-          flex: 1;
+          width: calc(33% - 53px);
           background-color: #18171f;
           white-space: nowrap;
           line-height: 25px;
@@ -244,6 +249,7 @@
         align-items: center;
         justify-content: center;
         gap: 10px;
+        cursor: pointer;
         span {
           color: $white;
           font-size: 14px;
@@ -325,29 +331,18 @@
   //     gap: 20px;
   // }
   &__pasteText {
-    color: $baseText-00AEEF !important;
-    font-size: 13px !important;
-    font-weight: bold !important;
-    text-decoration: underline !important;
+    color: #7db0ff !important;
+    font-size: 16px !important;
     cursor: pointer !important;
-    transition: 0.3s !important;
-    padding-left: 0px !important;
     position: absolute;
-    top: 17px;
-    right: 0px;
-    border-radius: 0px !important;
-    // width: calc(33% - 40px);
+    right: 18px;
     width: auto;
-    padding: 17px !important;
-    // left: 254px;
     left: auto;
-    top: 8px;
-    border-radius: 28px !important;
-    border-top-left-radius: 0px !important;
-    border-bottom-left-radius: 0px !important;
-    @include theme() {
-      background-color: theme-get("inputBg");
-    }
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    bottom: 29px;
+    background-color: transparent;
   }
   &__pasteTextarea {
     @include theme() {
@@ -398,7 +393,7 @@
 :where(.css-acm2ia).ant-checkbox + span {
   padding-inline-start: 8px !important;
   padding-inline-end: 8px !important;
-  transform: translateX(-14px) !important;
+  // transform: translateX(-14px) !important;
 }
 
 .adreesInput {
@@ -466,4 +461,5 @@
   font-size: 14px;
   font-weight: 400;
   line-height: 22px;
+  text-align: left;
 }

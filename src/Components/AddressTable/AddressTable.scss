@@ -14,13 +14,13 @@
   justify-content: space-between;
   gap: 15px;
   padding: 16px 0;
-  border-bottom: 1px solid #D7E0EB !important;
+  border-bottom: 1px solid #d7e0eb !important;
   &:first-child {
     padding-top: 0;
   }
   &:last-child {
     padding-bottom: 0;
-    border-bottom: 0 !important
+    border-bottom: 0 !important;
   }
   &__left {
     display: flex;
@@ -31,20 +31,18 @@
       margin-left: 9px;
     }
     &__icon {
-        display: flex;
-        
-        align-items: center;
-        justify-content: center;
+      display: flex;
+
+      align-items: center;
+      justify-content: center;
     }
   }
   &__right {
     text-align: right;
   }
   &__textTop {
-    font-size: 14px;
-    @include theme() {
-      color: theme-get("baseText");
-    }
+    font-size: 16px;
+    color: $white;
     font-weight: bold;
     margin-bottom: 3px;
     display: flex;
@@ -52,7 +50,7 @@
     word-break: break-all;
   }
   &__grayText12 {
-    font-size: 12px;
+    font-size: 14px;
     color: $gray-6E737E;
     font-weight: 500;
     display: flex;

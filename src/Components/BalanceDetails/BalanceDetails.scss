@@ -1,8 +1,11 @@
-@import '../../styles/__vars.scss';
-@import '../../styles/__mixins.scss';
+@import "../../styles/__vars.scss";
+@import "../../styles/__mixins.scss";
 .balanceDetails {
-  margin-bottom: 18px;
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  padding: 24px 24px 18px 24px;
   &__cardCurrencyDetails {
     background: transparent;
   }
@@ -27,15 +30,14 @@
     align-items: center;
     justify-content: center;
     gap: 8px;
-    margin-bottom: 8px;
-    margin-top: 10px;
-    position: absolute;
-    top: 10px;
-    left: 10px;
+
+    // position: absolute;
+    // top: 10px;
+    // left: 10px;
     p {
-      color: $inputBg;
-      font-size: 16px;
-      font-weight: normal;
+      color: #ffffff;
+      font-size: 20px;
+      font-weight: 600;
       line-height: 24px;
     }
   }
@@ -51,26 +53,20 @@
     }
   }
   &__decoratedSec {
-    padding: 20px 38px;
-    margin-top: -4px;
-    margin-bottom: 20px;
-    border-radius: 0 0 30px 30px;
-    background-image: url('../../Assets/PNG/WalletBg.png');
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover;
+    margin: 24px 0;
+    width: 100%;
   }
 
-  &__decoratedSecWithoutAddTokens {
-    padding: 59px;
-    margin-top: -4px;
-    margin-bottom: 20px;
-    border-radius: 0 0 30px 30px;
-    background-image: url('../../Assets/PNG/WalletBg.png');
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: contain;
-  }
+  // &__decoratedSecWithoutAddTokens {
+  //   padding: 59px;
+  //   margin-top: -4px;
+  //   margin-bottom: 20px;
+  //   border-radius: 0 0 30px 30px;
+  //   background-image: url("../../Assets/PNG/WalletBg.png");
+  //   background-position: center;
+  //   background-repeat: no-repeat;
+  //   background-size: contain;
+  // }
   &__title {
     font-size: 24px;
     color: $white;
@@ -82,7 +78,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 10px;
-    padding: 0 28px;
+    width: 100%;
   }
   &__items {
     display: flex;
@@ -90,11 +86,9 @@
     justify-content: center;
     align-items: center;
     gap: 10px;
-    font-size: 12px;
-    @include theme() {
-      color: theme-get('whiteWelcome');
-    }
-    font-weight: bold;
+    font-size: 14px;
+    color: #98969b;
+    font-weight: 500;
     text-decoration: none;
     cursor: pointer;
     &__whiteText {
@@ -157,7 +151,7 @@
         overflow: hidden;
         white-space: nowrap;
         @include theme() {
-          color: theme-get('whiteblack');
+          color: theme-get("whiteblack");
         }
         font-size: 14px;
         font-weight: bold;
@@ -196,7 +190,7 @@
 
 .change {
   @include theme() {
-    background-color: theme-get('modalBg');
+    background-color: theme-get("modalBg");
   }
   max-width: 400px;
   padding: 8px;
@@ -225,4 +219,10 @@
     height: 20px;
     width: 20px;
   }
+}
+.totalBalance {
+  color: $white;
+  font-size: 18px;
+  font-weight: 400;
+  margin-bottom: 10px;
 }

@@ -1,31 +1,32 @@
 /*global chrome*/
 /* eslint-disable jsx-a11y/alt-text */
-import React, { useEffect, useRef, useState } from 'react';
-import './Wallet.scss';
-import FilterIcon from '../../Assets/twoLine.svg';
-import LightManage from '../../Assets/light-manage.svg';
-import CoinsTable from '../../Components/CoinsTable/CoinsTable';
-import { Link, useLocation } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import Refresh from '../../Assets/refersh.png';
-import Reset from '../../Assets/ResetIcon.svg';
-import ResetWhite from '../../Assets/ResetIconWhite.svg';
-import { store } from '../..';
-import { setLoading } from '../../actions/loading';
-import BigNumber from 'bignumber.js';
-import { server } from '../../server';
+import React, { useEffect, useRef, useState } from "react";
+import "./Wallet.scss";
+import FilterIcon from "../../Assets/twoLine.svg";
+import LightManage from "../../Assets/light-manage.svg";
+import CoinsTable from "../../Components/CoinsTable/CoinsTable";
+import { Link, useLocation } from "react-router-dom";
+import { useSelector } from "react-redux";
+import nftIcon from "../../Assets/nftIcon.svg";
+import Reset from "../../Assets/ResetIcon.svg";
+import ResetWhite from "../../Assets/ResetIconWhite.svg";
+import { store } from "../..";
+import { setLoading } from "../../actions/loading";
+import BigNumber from "bignumber.js";
+import { server } from "../../server";
 import {
   addCommasToNumber,
   exponential_to_decimal,
   formatSmallNumber,
   getFlooredFixed,
-} from '../../helpers/conversion.helper';
-import { setTokens } from '../../actions/tokens';
-import useCurrentHeight from '../../CustomHooks/useCurrentHeight';
-import { Tab, TabList, TabPanel, Tabs } from 'react-tabs';
-import NFTappear from '../Nft/NFTappear';
-import CoinsTableDraggable from '../../Components/CoinsTable/CoinsTableDraggable';
-
+} from "../../helpers/conversion.helper";
+import { setTokens } from "../../actions/tokens";
+import useCurrentHeight from "../../CustomHooks/useCurrentHeight";
+import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
+import NFTappear from "../Nft/NFTappear";
+import CoinsTableDraggable from "../../Components/CoinsTable/CoinsTableDraggable";
+import ButtonComp from "../../Components/ButtonComp/ButtonComp";
+import UserPlusRounded from "../../Assets/UserPlusRounded.svg"
 function Wallet() {
   const { account, currency, tokens, balanceIn, theme } = useSelector(
     (state) => state
@@ -34,7 +35,7 @@ function Wallet() {
   const [isSidePanelOpen, setIsSidePanelOpen] = useState(false);
 
   const getSidePanelStatus = async () => {
-    const isSidePanelOpen = await chrome.storage.local.get('openSidePanel');
+    const isSidePanelOpen = await chrome.storage.local.get("openSidePanel");
     setIsSidePanelOpen(isSidePanelOpen.openSidePanel);
   };
 
@@ -64,7 +65,7 @@ function Wallet() {
         fiat_type: currency.name,
         limit: 2000,
         page: currentPage,
-        search: '',
+        search: "",
       },
       {
         headers: {
@@ -102,17 +103,18 @@ function Wallet() {
   };
 
   return (
-    <div className='wallet'>
-      <div className='wallet__heading'>
-        <h3 className='wallet__heading__text'>Tokens</h3>
+    <div className="wallet">
+      <div className="wallet__heading">
+        <h3 className="wallet__heading__text">Crypto’s</h3>
         <div
           style={{
-            display: 'flex',
-            alignItems: 'center',
+            display: "flex",
+            alignItems: "center",
+            gap: "11px",
           }}
         >
-          <div className='wallet__heading__filter'>
-            <Link
+          <div className="wallet__heading__filter">
+            {/* <Link
               to=''
               onClick={async (e) => {
                 e.preventDefault();
@@ -129,27 +131,30 @@ function Wallet() {
                   animation: isRefreshing ? 'spin 2s linear infinite' : 'none',
                 }}
               />
+            </Link> */}
+            <Link to="/to">
+              <img src={nftIcon} />
             </Link>
           </div>
-          <div className='wallet__heading__filter'>
-            <Link to='/manage'>
-              <img src={theme === 'darkTheme' ? LightManage : FilterIcon} />
+          <div className="wallet__heading__filter">
+            <Link to="/manage">
+              <img src={theme === "darkTheme" ? LightManage : FilterIcon} />
             </Link>
           </div>
         </div>
       </div>
       <div
-        className={`${'wallet__tableOuter'} ${
-          height <= 600 ? 'wallet__tabelOuterExt' : ''
+        className={`${"wallet__tableOuter"} ${
+          height <= 600 ? "wallet__tabelOuterExt" : ""
         }`}
         ref={parentRef}
         onScroll={handleScroll}
       >
         {tokens.length === 0 ? (
-          <p className='noAddress'>
+          <p className="noAddress">
             {loading
-              ? ''
-              : 'No token available. Please add new tokens or enable them from the manage section.'}
+              ? ""
+              : "No token available. Please add new tokens or enable them from the manage section."}
           </p>
         ) : (
           <CoinsTableDraggable
@@ -173,7 +178,7 @@ function Wallet() {
                     ? formatSmallNumber(
                         exponential_to_decimal(myPrice.toNumber())
                       )
-                    : '0.00',
+                    : "0.00",
                   coinStatus: getFlooredFixed(
                     price
                       ? parseFloat(
@@ -190,9 +195,9 @@ function Wallet() {
                   currCryptoBalSymbol: token.coin.coin_symbol.toUpperCase(),
                   currDollerBal: balanceIn
                     ? addCommasToNumber(getFlooredFixed(formattedResult, 2))
-                    : '****',
-                  routeTo: 'currencyDetails',
-                  type: token.coin.coin_family === 1 ? 'BEP20' : 'ERC20',
+                    : "****",
+                  routeTo: "currencyDetails",
+                  type: token.coin.coin_family === 1 ? "BEP20" : "ERC20",
                   status: true,
                   coin: token,
                 };
@@ -200,6 +205,17 @@ function Wallet() {
             }
           />
         )}
+      </div>
+      <div className="walletBtn">
+        <ButtonComp
+          maxWidth="190px"
+          text={
+            <span>
+              <img src={UserPlusRounded} alt="img" />
+              Address Book
+            </span>
+          }
+        />
       </div>
     </div>
   );

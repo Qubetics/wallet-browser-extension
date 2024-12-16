@@ -30,7 +30,7 @@ function MenuFooter() {
           <div className='menuItems__items__img'>
             <img src={WalletIcon} />
           </div>
-          <span className='menuItems__items__title'>Wallets</span>
+          {/* <span className='menuItems__items__title'>Wallets</span> */}
         </Link>
         <Link
           to='/conectswapedApp'
@@ -42,7 +42,7 @@ function MenuFooter() {
           <div className='menuItems__items__img'>
             <img src={Browser} />
           </div>
-          <span
+          {/* <span
             className='menuItems__items__title'
             style={{
               position: 'relative',
@@ -50,7 +50,7 @@ function MenuFooter() {
             }}
           >
             DApp
-          </span>
+          </span> */}
         </Link>
 
         <Link
@@ -63,7 +63,7 @@ function MenuFooter() {
           <div className='menuItems__items__img'>
             <img src={SettignIcon} />
           </div>
-          <span className='menuItems__items__title'>Portfolio</span>
+          {/* <span className='menuItems__items__title'>Portfolio</span> */}
         </Link>
         
         <Link
@@ -76,7 +76,7 @@ function MenuFooter() {
           <div className='menuItems__items__img'>
             <img src={AlertIcon} />
           </div>
-          <span className='menuItems__items__title'>Swap</span>
+          {/* <span className='menuItems__items__title'>Swap</span> */}
         </Link>
         <Link
           to='/setting'
@@ -88,7 +88,7 @@ function MenuFooter() {
           <div className='menuItems__items__img'>
             <img src={SettignIcon} />
           </div>
-          <span className='menuItems__items__title'>Settings</span>
+          {/* <span className='menuItems__items__title'>Settings</span> */}
         </Link> 
       </div>
     </>

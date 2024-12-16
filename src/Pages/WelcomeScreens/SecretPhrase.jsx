@@ -23,11 +23,6 @@ function SecretPhrase({ children, mnemonics, termsCheck }) {
   };
   return (
     <div className="setPassword__secretPharse">
-      <p className="setPassword__secretPharse__grayText">
-        This is your seed phrase. Write it down on a paper and keep it in a safe
-        place. You'll be asked to re-enter this phrase (in order) on the next
-        step.
-      </p>
       <div>
         <div className="setPassword__secretPharse__fieldSBg">
           <div className="setPassword__secretPharse__fieldSBgInner">
@@ -87,10 +82,7 @@ function SecretPhrase({ children, mnemonics, termsCheck }) {
           </div>
           <div className="donotShare_item">
             <img src={TickImg} alt="" />
-            <p>
-              DO NOT share your phrase to any as this gives full access to your
-              wallet!
-            </p>
+            <p>Qubetics Wallet support will NEVER reach out to ask for it</p>
           </div>
         </div>
         {/* </div> */}
@@ -108,7 +100,6 @@ function SecretPhrase({ children, mnemonics, termsCheck }) {
         <div
           className={"checkboxOuter"}
           style={{
-            marginBottom: "15px",
             textAlign: "left",
           }}
         >

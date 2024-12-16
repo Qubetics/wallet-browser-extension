@@ -26,28 +26,30 @@ function CreateNewWallet() {
   return (
     <div className="cardWhite termsPolicy">
       <div>
-        {layoutHeader}
         {contextHolder}
         <div className="cardWhite__linkOuter">
-          <InputFieldOnly
-            placeholder={"Enter wallet name"}
-            value={name}
-            label={"Enter Name"}
-            checkForSymbols={true}
-            placeholderBaseColor={true}
-            coloredBg={true}
-            getData={(name) => {
-              if (name.length <= 25) {
-                if (/^\s/.test(name)) {
-                  setName("");
+          {layoutHeader}
+          <div style={{marginTop:"16px"}}>
+            <InputFieldOnly
+              placeholder={"Enter Wallet Name here"}
+              value={name}
+              label={"Wallet Name"}
+              checkForSymbols={true}
+              placeholderBaseColor={true}
+              coloredBg={true}
+              getData={(name) => {
+                if (name.length <= 25) {
+                  if (/^\s/.test(name)) {
+                    setName("");
+                  } else {
+                    setName(name);
+                  }
                 } else {
-                  setName(name);
+                  return;
                 }
-              } else {
-                return;
-              }
-            }}
-          />
+              }}
+            />
+          </div>
           {/* <div className="textInfoBaseColor">
           Max Limit: {name ? name.length : 0}/25
         </div> */}

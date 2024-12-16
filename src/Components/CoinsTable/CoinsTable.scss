@@ -1,5 +1,5 @@
-@import '../../styles/__vars.scss';
-@import '../../styles/__mixins.scss';
+@import "../../styles/__vars.scss";
+@import "../../styles/__mixins.scss";
 .detailIcon {
   height: 30px !important;
   width: 30px !important;
@@ -16,19 +16,18 @@
   align-items: center;
   justify-content: space-between;
   gap: 15px;
-  // padding: 16px 0;
-  // border-bottom: 1px solid #d7e0eb !important;
-  padding: 8px 10px ;
-  // background-color: #eef3f9;
-  padding-right: 20px ;
-  @include theme() {
-    background-color: theme-get("inputBg");
-  }
+  padding: 14px;
+  padding-right: 20px;
+  background: linear-gradient(0deg, #101010, #101010),
+    linear-gradient(
+      74.03deg,
+      rgba(105, 218, 219, 0) 67.63%,
+      rgba(105, 218, 219, 0.1) 95%
+    ),
+    linear-gradient(0deg, #18171f, #18171f);
+
   margin-bottom: 6px;
-  border-radius: 16px;
-  // &:first-child {
-  //   padding-top: 0;
-  // }
+  border-radius: 14px;
   &:last-child {
     padding-bottom: 0;
     border-bottom: 0 !important;
@@ -55,10 +54,8 @@
     align-items: center;
   }
   &__textTop {
-    font-size: 14px;
-    @include theme() {
-      color: theme-get('whiteWelcome');
-    }
+    font-size: 16px;
+    color: #ffffff;
     font-weight: bold;
     margin-bottom: 3px;
     align-items: center;
@@ -66,11 +63,9 @@
     display: flex;
   }
   &__grayText12 {
-    font-size: 12px;
+    font-size: 14px;
     padding-left: 5px;
-    @include theme() {
-      color: theme-get('whiteblack');
-    }
+    color: $gray-6E737E;
     font-weight: 500;
     display: flex;
     align-items: center;
@@ -85,12 +80,10 @@
   }
   .grayText1 {
     display: flex;
-    @include theme() {
-      color: theme-get('whiteblack');
-    }
+    $gray-6E737E: #98969b;
+
   }
 }
-
 
 .coinNname {
   display: inline-block;
@@ -120,10 +113,12 @@
   display: flex;
   align-items: center;
   white-space: nowrap;
+  $gray-6E737E: #98969b;
 }
 .grayText1.test-class {
   display: flex;
   align-items: center;
+  $gray-6E737E: #98969b;
 }
 
 .overflowEllipsisAmout {

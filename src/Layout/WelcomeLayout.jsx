@@ -4,9 +4,9 @@ import { useSelector } from "react-redux";
 import leftImg from "../Assets/leftImg.svg";
 
 function WelcomeLayout() {
-  const { theme } = useSelector((state) => state); // Access theme from Redux
-  const location = useLocation(); // Get the current path
-  const navigate = useNavigate(); // Navigate programmatically
+  const { theme } = useSelector((state) => state);
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const path = location.pathname;
 
@@ -22,19 +22,13 @@ function WelcomeLayout() {
         "You can label your own wallet and manage multiple wallets here.",
     },
     "/setPassword": {
-      heading: "Create Password",
-    },
-    "/add-secret-phrase": {
-      heading: "Write Down Your Seed Phrase",
-      subHeading:
-        "This is your seed phrase. Write it down on a paper and keep it in a safe place. You'll be asked to re-enter this phrase (in order) on the next step.",
+      // heading: "Create Password",
     },
   };
 
   const defaultData = { heading: "", subHeading: "" };
   const { heading, subHeading } = routeData[path] || defaultData;
 
-  // Define whether the current route supports a dual theme
   const isDoubleThemeRoute = ["", "createNewWallet"].includes(
     path.split("/")[1]
   );
@@ -43,7 +37,7 @@ function WelcomeLayout() {
     <div className="WelcomeLayout__header">
       <button
         className="WelcomeLayout__back-button"
-        onClick={() => navigate(-1)} // Navigate to the previous page
+        onClick={() => navigate(-1)}
       >
         <img src={leftImg} alt="backBtn" />
       </button>
