@@ -1,41 +1,42 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /*global chrome*/
-import { message } from 'antd';
-import { ethers } from 'ethers';
-import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { store } from '../../..';
-import { setLoading } from '../../../actions/loading';
-import MenuRestofHeaders from '../../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders';
-import ButtonComp from '../../../Components/ButtonComp/ButtonComp';
-import { InputField } from '../../../Components/InputField/InputFieldSimple';
-import ModalCustom from '../../../Components/ModalCustom/ModalCustom';
-import { Web3Helper } from '../../../helpers/web3.helper';
-import style from './style.module.scss';
-import AddressBook from '../../../Assets/address-book-svgrepo-com.svg';
-import AddressTable from '../../../Components/AddressTable/AddressTable';
-import { useEffect } from 'react';
-import { SolanaHelper } from '../../../helpers/solana.helper';
-import { BTCHelper } from '../../../helpers/btc.helper';
-import { WalletHelper } from '../../../helpers/wallet.helper';
-import { AdaHelper } from '../../../helpers/ada.helper';
-import { ENSHelper } from '../../../helpers/ens.helper';
-import { UnstoppableDomainHelper } from '../../../helpers/unstopable.helper';
-import Add from '../../../Assets/add.svg';
-import BigNumber from 'bignumber.js';
-import Web3 from 'web3';
+import { message, Slider } from "antd";
+import { ethers } from "ethers";
+import React, { useState } from "react";
+import { useSelector } from "react-redux";
+import { useLocation, useNavigate } from "react-router-dom";
+import { store } from "../../..";
+import { setLoading } from "../../../actions/loading";
+import MenuRestofHeaders from "../../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders";
+import ButtonComp from "../../../Components/ButtonComp/ButtonComp";
+import { InputField } from "../../../Components/InputField/InputFieldSimple";
+import ModalCustom from "../../../Components/ModalCustom/ModalCustom";
+import { Web3Helper } from "../../../helpers/web3.helper";
+import style from "./style.module.scss";
+import AddressBook from "../../../Assets/address-book-svgrepo-com.svg";
+import AddressTable from "../../../Components/AddressTable/AddressTable";
+import { useEffect } from "react";
+import { SolanaHelper } from "../../../helpers/solana.helper";
+import { BTCHelper } from "../../../helpers/btc.helper";
+import { WalletHelper } from "../../../helpers/wallet.helper";
+import { AdaHelper } from "../../../helpers/ada.helper";
+import { ENSHelper } from "../../../helpers/ens.helper";
+import { UnstoppableDomainHelper } from "../../../helpers/unstopable.helper";
+import Add from "../../../Assets/add.svg";
+import BigNumber from "bignumber.js";
+import Web3 from "web3";
 import {
   addCommasToNumber,
   getFlooredFixed,
-} from '../../../helpers/conversion.helper';
-import { server } from '../../../server';
+} from "../../../helpers/conversion.helper";
+import { server } from "../../../server";
 import {
   formatNumberFiat,
   getCoinBalance,
   getTokenBalance,
-} from '../../../helpers/common.helper';
-import TransactionFeeSlider from '../../../Components/TransactionFeeSlider/TransactionFeeSlider';
+} from "../../../helpers/common.helper";
+import TransactionFeeSlider from "../../../Components/TransactionFeeSlider/TransactionFeeSlider";
+import ReactSlider from "react-slider";
 
 let inputCount = 0;
 let transactionSize = 0;
@@ -86,7 +87,7 @@ function SendCoins() {
       setBalance(coin.balance);
       store.dispatch(setLoading(true));
 
-      const { chains } = await chrome.storage.local.get('chains');
+      const { chains } = await chrome.storage.local.get("chains");
       const chain = chains.find(
         (chain) => chain.coinFamily === coin.coin.coin_family
       );
@@ -107,13 +108,13 @@ function SendCoins() {
         wallet_address: account.coinFamilyAndAddress[coin.coin.coin_family],
       });
       const { data } = await server.post(
-        '/user/address_book',
+        "/user/address_book",
         {
           address: [account.coinFamilyAndAddress[coin.coin.coin_family]],
           coin_family: [coin.coin.coin_family],
           limit: 2000,
           page: 1,
-          search: '',
+          search: "",
         },
         {
           headers: {
@@ -188,13 +189,13 @@ function SendCoins() {
 
       setAmount(amountString);
     } else {
-      const { chains } = await chrome.storage.local.get('chains');
+      const { chains } = await chrome.storage.local.get("chains");
       const chain = chains.find(
         (chain) => chain.coinFamily === coin.coin.coin_family
       );
 
       store.dispatch(setLoading(true));
-      const balance = new BigNumber(coin.balance).times('1000000000000000000');
+      const balance = new BigNumber(coin.balance).times("1000000000000000000");
       console.log(balance.toString());
       const amountToSend = new BigNumber(balance);
       console.log(amountToSend.toString());
@@ -212,7 +213,7 @@ function SendCoins() {
 
       if (!gasPrice) {
         store.dispatch(setLoading(false));
-        return messageApi.error('Unable to fetch gas price at the moment.');
+        return messageApi.error("Unable to fetch gas price at the moment.");
       }
 
       // Estimate the gas cost for a sample transaction
@@ -232,7 +233,7 @@ function SendCoins() {
       console.log(maxBNBAfterGas.toString());
       if (maxBNBAfterGas.isNegative()) {
         store.dispatch(setLoading(false));
-        return messageApi.error('Insufficient balance to cover gas fee.');
+        return messageApi.error("Insufficient balance to cover gas fee.");
       }
 
       let amt = formatNumberFiat(
@@ -250,14 +251,14 @@ function SendCoins() {
     <div className={`scrollableCont ${style.send}`}>
       {contextHolder}
       <MenuRestofHeaders
-        backTo={redirectTo ? redirectTo : '/send'}
+        backTo={redirectTo ? redirectTo : "/send"}
         title={`Send ${coin.coin.coin_symbol.toUpperCase()}`}
         coin={coin}
       />
       <div className={`flexedContent`}>
         <InputField
-          placeholder={'Wallet Address'}
-          label='Address'
+          placeholder={"Wallet Address"}
+          label="Address"
           value={address}
           checkForSymbols={true}
           getData={setAddress}
@@ -271,17 +272,20 @@ function SendCoins() {
                 <img
                   src={AddressBook}
                   style={{
-                    width: '25px',
-                    marginRight: '10px',
+                    width: "18px",
+                    marginRight: "10px",
+                    cursor: "pointer",
                   }}
-                  alt=''
+                  alt=""
                 />
               </span>
               <span
                 className={style.send__pasteText}
                 style={{
-                  position: 'relative',
-                  top: '-9px',
+                  position: "relative",
+                  top: "-9px",
+                  color: "#fff",
+                  cursor: "pointer",
                 }}
                 onClick={async (e) => {
                   const text = await navigator.clipboard.readText();
@@ -294,16 +298,18 @@ function SendCoins() {
           }
         />
         <InputField
-          placeholder={'Enter Amount'}
+          placeholder={"Enter Amount"}
           addonAfter={
             <>
               <span
                 className={style.send__pasteText}
                 style={{
-                  position: 'relative',
-                  top: '-1px',
-                  left: '-5px',
-                  borderLeft: '0px',
+                  position: "relative",
+                  top: "-1px",
+                  left: "-5px",
+                  borderLeft: "0px",
+                  color: "#fff",
+                  cursor: "pointer",
                 }}
                 onClick={() => {
                   calculatePercentageWise(100);
@@ -314,7 +320,7 @@ function SendCoins() {
             </>
           }
           getData={(amount) => {
-            const afterDecimal = amount.split('.')[1];
+            const afterDecimal = amount.split(".")[1];
 
             // Get the maximum allowed characters before the decimal point (15 characters)
             const maxCharactersBeforeDecimal = 15;
@@ -328,7 +334,7 @@ function SendCoins() {
               }
 
               // Check if the characters before the decimal exceed the maximum allowed
-              const beforeDecimal = amount.split('.')[0];
+              const beforeDecimal = amount.split(".")[0];
               if (
                 beforeDecimal.toString().length > maxCharactersBeforeDecimal
               ) {
@@ -343,8 +349,8 @@ function SendCoins() {
 
             setAmount(amount);
           }}
-          type={'number'}
-          label='Amount'
+          type={"number"}
+          label="Amount"
           value={amount} //  {amount}
           checkForSymbols={true}
         />
@@ -368,15 +374,16 @@ function SendCoins() {
           <div className={style.send__infoText}>
             <span
               style={{
-                color: 'rgb(0, 174, 239)',
+                color: "#6F6F6F",
                 // position: 'relative',
                 // top: '-6px',
+                marginRight: "5px",
+                fontWeight: "#6F6F6F",
               }}
             >
-              {' '}
-              Available Balance{' '}
+              Balance:
             </span>
-            <br></br> {addCommasToNumber(getFlooredFixed(myBalance, 5))}{' '}
+            {addCommasToNumber(getFlooredFixed(myBalance, 5))}{" "}
             {coin.coin.coin_symbol.toUpperCase()} ~ {currency.symbol}
             {getFlooredFixed(value, 2)}
           </div>
@@ -392,27 +399,36 @@ function SendCoins() {
           trackClassName='example-track'
           renderThumb={(props, state) => <div {...props}>{state.valueNow}</div>}
         /> */}
-
+        <div className="transactionFee">
+          <h4>Transaction Fee</h4>
+          <Slider
+            marks={{
+              0: "Low",
+              50: "Average",
+              100: "High",
+            }}
+          />
+        </div>
         <ButtonComp
           onClick={async () => {
             store.dispatch(setLoading(true));
 
-            const { chains } = await chrome.storage.local.get('chains');
+            const { chains } = await chrome.storage.local.get("chains");
             const chain = chains.find(
               (chain) => chain.coinFamily === coin.coin.coin_family
             );
 
-            if (!chain.isEVM && chain.currencyName === 'ADA' && amount < 1) {
+            if (!chain.isEVM && chain.currencyName === "ADA" && amount < 1) {
               store.dispatch(setLoading(false));
               return messageApi.error(
-                'The minimum value must be greater than 1 or equal to 1.'
+                "The minimum value must be greater than 1 or equal to 1."
               );
             }
 
-            if (!chain.isEVM && chain.currencyName === 'ADA') {
+            if (!chain.isEVM && chain.currencyName === "ADA") {
               const check = await AdaHelper.checkCardanoAddressType(address);
               store.dispatch(setLoading(false));
-              if (check !== 'Shelley-era address') {
+              if (check !== "Shelley-era address") {
                 return messageApi.error(
                   "Invalid address: Only Shelley-era addresses (starting with 'addr1') are supported."
                 );
@@ -422,7 +438,7 @@ function SendCoins() {
             if (!amount) {
               store.dispatch(setLoading(false));
               return messageApi.error(
-                'Please enter a valid amount to proceed.'
+                "Please enter a valid amount to proceed."
               );
             }
 
@@ -432,26 +448,26 @@ function SendCoins() {
             if (finalAmount.gt(balance)) {
               store.dispatch(setLoading(false));
               return messageApi.error(
-                'Insufficient balance to proceed with the transaction'
+                "Insufficient balance to proceed with the transaction"
               );
             }
 
             if (isNaN(parseFloat(amount))) {
               store.dispatch(setLoading(false));
               return messageApi.error(
-                'Please enter a valid amount to proceed.'
+                "Please enter a valid amount to proceed."
               );
             }
             if (parseFloat(amount) <= 0) {
               store.dispatch(setLoading(false));
               return messageApi.error(
-                'Please enter a valid amount to proceed.'
+                "Please enter a valid amount to proceed."
               );
             }
             if (!address) {
               store.dispatch(setLoading(false));
               return messageApi.error(
-                'Please enter a valid address to proceed.'
+                "Please enter a valid address to proceed."
               );
             }
 
@@ -459,19 +475,19 @@ function SendCoins() {
 
             if (myAddress.toLowerCase() === address.toLowerCase()) {
               store.dispatch(setLoading(false));
-              return messageApi.error('You cannot send to your own address.');
+              return messageApi.error("You cannot send to your own address.");
             }
 
             let ENSName = null;
-            const checkIfUserEnteredENS = address.split('.')[1]
-              ? address.split('.')[1].toLowerCase()
+            const checkIfUserEnteredENS = address.split(".")[1]
+              ? address.split(".")[1].toLowerCase()
               : null;
             if (checkIfUserEnteredENS) {
-              if (checkIfUserEnteredENS === 'eth') {
+              if (checkIfUserEnteredENS === "eth") {
                 const checkForENS = await ENSHelper.findAddress(address);
                 if (!checkForENS.status) {
                   store.dispatch(setLoading(false));
-                  return messageApi.error('Invalid ENS name provided.');
+                  return messageApi.error("Invalid ENS name provided.");
                 } else {
                   ENSName = address;
                   address = checkForENS.address;
@@ -483,7 +499,7 @@ function SendCoins() {
                 );
                 if (!checkForENS.status) {
                   store.dispatch(setLoading(false));
-                  return messageApi.error('Invalid domain name provided.');
+                  return messageApi.error("Invalid domain name provided.");
                 } else {
                   ENSName = address;
                   address = checkForENS.address;
@@ -499,14 +515,14 @@ function SendCoins() {
               if (!ethers.utils.isAddress(address)) {
                 store.dispatch(setLoading(false));
                 return messageApi.error(
-                  'Please provide a valid address to proceed.'
+                  "Please provide a valid address to proceed."
                 );
               }
 
               if (!amount) {
                 store.dispatch(setLoading(false));
                 return messageApi.error(
-                  'Please provide a valid amount to proceed.'
+                  "Please provide a valid amount to proceed."
                 );
               }
 
@@ -525,7 +541,7 @@ function SendCoins() {
               const nativeCoinBalance = new BigNumber(nativeCoinResponse);
               // console.log("nativeCoinBalance DATA : ", nativeCoinBalance);
               const finalAmount = new BigNumber(amount);
-              console.log('🚀 ~ finalAmount:', finalAmount.toString());
+              console.log("🚀 ~ finalAmount:", finalAmount.toString());
               let gasEstimate = new BigNumber(myGasPrice.estimate);
               const gasPrice = new BigNumber(selectedGasPrice).times(
                 1000000000
@@ -536,26 +552,26 @@ function SendCoins() {
                 .div(Math.pow(10, 18));
 
               console.log(
-                'nativeCoinBalance ::: ',
+                "nativeCoinBalance ::: ",
                 Number(nativeCoinBalance),
-                '  gasInEth :: ',
+                "  gasInEth :: ",
                 Number(gasInEth)
               );
               if (coin.coin.token_address) {
                 if (nativeCoinBalance.isLessThan(gasInEth)) {
                   store.dispatch(setLoading(false));
                   return messageApi.error(
-                    'Insufficient fee to proceed with the transaction.'
+                    "Insufficient fee to proceed with the transaction."
                   );
                 }
 
                 const tokenBalance = new BigNumber(myBalance);
-                console.log('🚀 ~ tokenBalance:', tokenBalance.toString());
+                console.log("🚀 ~ tokenBalance:", tokenBalance.toString());
 
                 if (tokenBalance.isLessThan(finalAmount)) {
                   store.dispatch(setLoading(false));
                   return messageApi.error(
-                    'Insufficient balance to proceed with the transaction'
+                    "Insufficient balance to proceed with the transaction"
                   );
                 }
               } else {
@@ -569,13 +585,13 @@ function SendCoins() {
                 ) {
                   store.dispatch(setLoading(false));
                   return messageApi.error(
-                    'Insufficient balance to proceed with the transaction'
+                    "Insufficient balance to proceed with the transaction"
                   );
                 }
               }
 
               store.dispatch(setLoading(false));
-              navigate('/confirmCurrency', {
+              navigate("/confirmCurrency", {
                 state: {
                   to: address,
                   amount: amount,
@@ -586,7 +602,7 @@ function SendCoins() {
                   redirectTo,
                 },
               });
-            } else if (!chain.isEVM && chain.currencyName === 'SOL') {
+            } else if (!chain.isEVM && chain.currencyName === "SOL") {
               const solanaHelper = new SolanaHelper(chain.rpcUrl);
 
               const gasPrice = solanaHelper.getGasPrice();
@@ -594,11 +610,11 @@ function SendCoins() {
               if (amount > parseFloat(myBalance)) {
                 store.dispatch(setLoading(false));
                 return messageApi.error(
-                  'Please provide a valid amount to proceed.'
+                  "Please provide a valid amount to proceed."
                 );
               }
               store.dispatch(setLoading(false));
-              navigate('/confirmCurrency', {
+              navigate("/confirmCurrency", {
                 state: {
                   to: address,
                   amount: amount,
@@ -607,20 +623,20 @@ function SendCoins() {
                   redirectTo,
                 },
               });
-            } else if (!chain.isEVM && chain.currencyName === 'BTC') {
+            } else if (!chain.isEVM && chain.currencyName === "BTC") {
               try {
                 const gasPrice = await BTCHelper.getBTCGasPrice();
                 const unspent = await BTCHelper.getUnspent(coin.address);
                 if (!unspent) {
                   store.dispatch(setLoading(false));
                   return messageApi.error(
-                    'Unable to fetch unspent at the moment.'
+                    "Unable to fetch unspent at the moment."
                   );
                 }
                 if (unspent.length === 0) {
                   store.dispatch(setLoading(false));
                   return messageApi.error(
-                    'You have a pending transaction in your account or you do not have enough balance to proceed with the transaction.'
+                    "You have a pending transaction in your account or you do not have enough balance to proceed with the transaction."
                   );
                 }
                 const inputs = [];
@@ -645,21 +661,21 @@ function SendCoins() {
                   btcTosatoshiMultiplier
                 ).toFixed(8);
                 console.log(
-                  '🚀 ~ file: SendCoins.jsx:591 ~ onClick={ ~ totalFee:',
+                  "🚀 ~ file: SendCoins.jsx:591 ~ onClick={ ~ totalFee:",
                   +totalFee,
                   amount
                 );
 
                 const totalAmount = +totalFee + amount;
                 console.log(
-                  '🚀 ~ file: SendCoins.jsx:594 ~ onClick={ ~ totalAmount:',
+                  "🚀 ~ file: SendCoins.jsx:594 ~ onClick={ ~ totalAmount:",
                   totalAmount
                 );
 
                 if (totalAmount > myBalance) {
                   store.dispatch(setLoading(false));
                   return messageApi.error(
-                    'Not enough balance to proceed with the transaction.'
+                    "Not enough balance to proceed with the transaction."
                   );
                 }
 
@@ -678,19 +694,19 @@ function SendCoins() {
                 ) {
                   store.dispatch(setLoading(false));
                   return messageApi.error(
-                    'Insufficient Balance to proceed with the transactions.'
+                    "Insufficient Balance to proceed with the transactions."
                   );
                 } else {
-                  const bitcore = require('bitcore-lib');
+                  const bitcore = require("bitcore-lib");
                   const transaction = new bitcore.Transaction();
                   console.log(
-                    '🚀 ~ file: SendCoins.jsx:630 ~ transaction:',
+                    "🚀 ~ file: SendCoins.jsx:630 ~ transaction:",
                     transaction
                   );
                   // console.log(inputs);
                   transaction.from(inputs);
                   console.log(
-                    '🚀 ~ file: SendCoins.jsx:632 ~ transaction:',
+                    "🚀 ~ file: SendCoins.jsx:632 ~ transaction:",
                     transaction
                   );
 
@@ -755,13 +771,13 @@ function SendCoins() {
                   if (!btcPrivateKey) {
                     store.dispatch(setLoading(false));
                     return messageApi.error(
-                      'Unable to fetch private key at the moment please try again later.'
+                      "Unable to fetch private key at the moment please try again later."
                     );
                   }
                   transaction.sign(btcPrivateKey);
                   const rawTransaction = transaction.serialize();
                   store.dispatch(setLoading(false));
-                  navigate('/confirmCurrency', {
+                  navigate("/confirmCurrency", {
                     state: {
                       rawTransaction,
                       to: address,
@@ -782,7 +798,7 @@ function SendCoins() {
                 store.dispatch(setLoading(false));
                 return messageApi.error(error.message);
               }
-            } else if (!chain.isEVM && chain.currencyName === 'ADA') {
+            } else if (!chain.isEVM && chain.currencyName === "ADA") {
               try {
                 if (coin.tokenAddress) {
                   store.dispatch(setLoading(true));
@@ -793,7 +809,7 @@ function SendCoins() {
                   );
                   if (!fee) {
                     store.dispatch(setLoading(false));
-                    return messageApi.error('Unable to fetch fee.');
+                    return messageApi.error("Unable to fetch fee.");
                   }
                   const adaBalance = myBalance;
                   if (
@@ -802,18 +818,18 @@ function SendCoins() {
                   ) {
                     store.dispatch(setLoading(false));
                     return messageApi.error(
-                      'You do not have enough gas fee to proceed with the transaction.'
+                      "You do not have enough gas fee to proceed with the transaction."
                     );
                   }
                   const totalAmount = parseFloat(amount);
                   if (totalAmount > parseFloat(myBalance)) {
                     store.dispatch(setLoading(false));
                     return messageApi.error(
-                      'You do not have enough balance to proceed with the transaction.'
+                      "You do not have enough balance to proceed with the transaction."
                     );
                   }
                   store.dispatch(setLoading(false));
-                  navigate('/confirmCurrency', {
+                  navigate("/confirmCurrency", {
                     state: {
                       to: address,
                       amount: amount,
@@ -831,17 +847,17 @@ function SendCoins() {
                   );
                   if (!fee) {
                     store.dispatch(setLoading(false));
-                    return messageApi.error('Unable to fetch fee.');
+                    return messageApi.error("Unable to fetch fee.");
                   }
                   const totalAmount = parseFloat(fee) + parseFloat(amount);
                   if (totalAmount > parseFloat(myBalance)) {
                     store.dispatch(setLoading(false));
                     return messageApi.error(
-                      'You do not have enough balance to proceed with the transaction.'
+                      "You do not have enough balance to proceed with the transaction."
                     );
                   }
                   store.dispatch(setLoading(false));
-                  navigate('/confirmCurrency', {
+                  navigate("/confirmCurrency", {
                     state: {
                       to: address,
                       amount: amount,
@@ -853,20 +869,20 @@ function SendCoins() {
                   });
                 }
               } catch (error) {
-                console.log('CATCHHHHHHHH ', error);
+                console.log("CATCHHHHHHHH ", error);
               }
             }
           }}
-          text={'Continue'}
-          maxWidth={'100%'}
+          text={"Send"}
+          maxWidth={"100%"}
         />
       </div>
       <ModalCustom
-        title={'Address Book'}
+        title={"Address Book"}
         handleCancel={handleLogoutCancel}
         isModalOpen={isLogoutModalOpen}
         handleOk={handlLogouteOk}
-        customClass='customClassModal'
+        customClass="customClassModal"
       >
         <div className={style.viewphrases}>
           {list.length > 0 ? (
@@ -886,18 +902,19 @@ function SendCoins() {
               />
               <div
                 style={{
-                  width: '100%',
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  marginTop: '10px',
+                  width: "100%",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  marginTop: "10px",
+                  color: "#fff",
                 }}
               >
                 <span
-                  style={{ cursor: 'pointer', display: 'flex' }}
+                  style={{ cursor: "pointer", display: "flex" }}
                   to={void 0}
                   onClick={() => {
-                    navigate('/add-contact', {
+                    navigate("/add-contact", {
                       state: {
                         coin,
                         redirectTo,
@@ -905,25 +922,25 @@ function SendCoins() {
                     });
                   }}
                 >
-                  <img src={Add} alt='' />
-                  <span className='noAddress'>Add Address</span>
+                  <img src={Add} alt="" />
+                  <span className="noAddress">Add Address</span>
                 </span>
               </div>
             </>
           ) : (
             <div
               style={{
-                width: '100%',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
+                width: "100%",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
               }}
             >
               <span
-                style={{ cursor: 'pointer', display: 'flex' }}
+                style={{ cursor: "pointer", display: "flex" }}
                 to={void 0}
                 onClick={() => {
-                  navigate('/add-contact', {
+                  navigate("/add-contact", {
                     state: {
                       coin,
                       redirectTo,
@@ -931,8 +948,8 @@ function SendCoins() {
                   });
                 }}
               >
-                <img src={Add} style={{ marginRight: '7px' }} alt='' />
-                <span className='noAddress'>Add Address</span>
+                <img src={Add} style={{ marginRight: "7px" }} alt="" />
+                <span className="noAddress">Add Address</span>
               </span>
             </div>
           )}

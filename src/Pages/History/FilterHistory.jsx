@@ -1,20 +1,20 @@
 /*global chrome*/
 
-import { DatePicker, Select, Space } from 'antd';
-import React, { useEffect, useState } from 'react';
-import MenuRestofHeaders from '../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders';
-import Btc from '../../Assets/Coins/BTC.png';
-import ButtonComp from '../../Components/ButtonComp/ButtonComp.jsx';
-import './FilterHistory.scss';
-import { server } from '../../server';
-import { useSelector } from 'react-redux';
-import { store } from '../..';
-import { setLoading } from '../../actions/loading';
-import style from './FilterHistory.scss';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { setFilter } from '../../actions/filter';
-import dayjs from 'dayjs';
-import moment from 'moment';
+import { DatePicker, Select, Space } from "antd";
+import React, { useEffect, useState } from "react";
+import MenuRestofHeaders from "../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders";
+import Btc from "../../Assets/Coins/BTC.png";
+import ButtonComp from "../../Components/ButtonComp/ButtonComp.jsx";
+import "./FilterHistory.scss";
+import { server } from "../../server";
+import { useSelector } from "react-redux";
+import { store } from "../..";
+import { setLoading } from "../../actions/loading";
+import style from "./FilterHistory.scss";
+import { useLocation, useNavigate } from "react-router-dom";
+import { setFilter } from "../../actions/filter";
+import dayjs from "dayjs";
+import moment from "moment";
 
 function FilterHistory() {
   const { account, filter } = useSelector((state) => state);
@@ -30,7 +30,7 @@ function FilterHistory() {
   });
 
   const disabledFromDate = (current, toDate) => {
-    const today = dayjs().endOf('day');
+    const today = dayjs().endOf("day");
     if (toDate && current) {
       return current.isAfter(toDate) || current.isAfter(today);
     }
@@ -38,7 +38,7 @@ function FilterHistory() {
   };
 
   const disabledToDate = (current, fromDate) => {
-    const today = dayjs().endOf('day');
+    const today = dayjs().endOf("day");
     if (fromDate && current) {
       return current.isBefore(fromDate) || current.isAfter(today);
     }
@@ -50,23 +50,23 @@ function FilterHistory() {
   const init = async () => {
     try {
       store.dispatch(setLoading(true));
-      const { chains } = await chrome.storage.local.get('chains');
+      const { chains } = await chrome.storage.local.get("chains");
 
       const finalData = [
         {
-          value: 'all',
+          value: "all",
           label: (
-            <span className='flexedItemSelect'>
+            <span className="flexedItemSelect">
               <div
-                className='randb  borderDarkLight'
+                className="randb  borderDarkLight"
                 style={{
-                  height: '35px',
-                  width: '35px',
-                  border: '1.5px solid',
-                  borderRadius: '50%',
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
+                  height: "35px",
+                  width: "35px",
+                  border: "1.5px solid",
+                  borderRadius: "50%",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
                 }}
               >
                 A
@@ -81,14 +81,14 @@ function FilterHistory() {
         finalData.push({
           value: el.coinFamily,
           label: (
-            <span className='flexedItemSelect'>
+            <span className="flexedItemSelect">
               <img
                 src={el.image}
                 style={{
-                  width: '26px',
-                  objectFit: 'contain',
+                  width: "26px",
+                  objectFit: "contain",
                 }}
-                alt=''
+                alt=""
               />
               {el.currencySymbol.toUpperCase()}
             </span>
@@ -114,17 +114,18 @@ function FilterHistory() {
   return (
     <div>
       <MenuRestofHeaders
-        backTo={'/history'}
-        title={'Filter'}
+        backTo={"/history"}
+        title={"Filter"}
         coin={state?.currencyDetail || null}
       />
-      <div className='filterHistory'>
-        <div className={'filterHistory__selctHis'}>
+      <div className="filterHistory">
+        <div className={"filterHistory__selctHis"}>
           {!state?.currencyDetail ? (
             <>
-              <label className='label'>Select Coin</label>
+              <label className="label">Select Coin</label>
 
               <Select
+                popupClassName="filterHistoryDropdown"
                 style={{
                   width: 120,
                 }}
@@ -136,21 +137,21 @@ function FilterHistory() {
                   });
                 }}
                 defaultValue={
-                  filter.coinId === 'all'
+                  filter.coinId === "all"
                     ? {
-                        value: 'all',
+                        value: "all",
                         label: (
-                          <span className='flexedItemSelect'>
+                          <span className="flexedItemSelect">
                             <div
-                              className='randb  borderDarkLight'
+                              className="randb  borderDarkLight"
                               style={{
-                                height: '35px',
-                                width: '35px',
-                                border: '1.5px solid',
-                                borderRadius: '50%',
-                                display: 'flex',
-                                justifyContent: 'center',
-                                alignItems: 'center',
+                                height: "35px",
+                                width: "35px",
+                                border: "1.5px solid",
+                                borderRadius: "50%",
+                                display: "flex",
+                                justifyContent: "center",
+                                alignItems: "center",
                               }}
                             >
                               A
@@ -166,16 +167,17 @@ function FilterHistory() {
             </>
           ) : null}
         </div>
-        <div className={'filterHistory__selctHis'}>
-          <label className='label'>Transaction Type</label>
+        <div className={"filterHistory__selctHis"}>
+          <label className="label">Transaction Type</label>
           <Select
+            popupClassName="filterHistoryDropdown"
             style={{
               width: 120,
             }}
             defaultValue={{
               value: filter.type,
               label: (
-                <span className='flexedItemSelect'>
+                <span className="flexedItemSelect">
                   {filter.type.charAt(0).toUpperCase() + filter.type.slice(1)}
                 </span>
               ),
@@ -185,36 +187,37 @@ function FilterHistory() {
             }}
             options={[
               {
-                value: 'all',
-                label: <span className='flexedItemSelect'>All</span>,
+                value: "all",
+                label: <span className="flexedItemSelect">All</span>,
               },
 
               {
-                value: 'buy',
-                label: <span className='flexedItemSelect'>Buy</span>,
+                value: "buy",
+                label: <span className="flexedItemSelect">Buy</span>,
               },
               {
-                value: 'sell',
-                label: <span className='flexedItemSelect'>Sell</span>,
+                value: "sell",
+                label: <span className="flexedItemSelect">Sell</span>,
               },
               {
-                value: 'swap',
-                label: <span className='flexedItemSelect'>Swap</span>,
+                value: "swap",
+                label: <span className="flexedItemSelect">Swap</span>,
               },
               {
-                value: 'withdraw',
-                label: <span className='flexedItemSelect'>Withdraw</span>,
+                value: "withdraw",
+                label: <span className="flexedItemSelect">Withdraw</span>,
               },
               {
-                value: 'deposit',
-                label: <span className='flexedItemSelect'>Deposit</span>,
+                value: "deposit",
+                label: <span className="flexedItemSelect">Deposit</span>,
               },
             ]}
           />
         </div>
-        <div className={'filterHistory__selctHis'}>
-          <label className='label'>Transaction Status</label>
+        <div className={"filterHistory__selctHis"}>
+          <label className="label">Transaction Status</label>
           <Select
+            popupClassName="filterHistoryDropdown"
             style={{
               width: 120,
             }}
@@ -224,10 +227,10 @@ function FilterHistory() {
             defaultValue={{
               value: filter.status,
               label:
-                filter.status === 'confirmed' ? (
-                  <span className='flexedItemSelect'>Completed</span>
+                filter.status === "confirmed" ? (
+                  <span className="flexedItemSelect">Completed</span>
                 ) : (
-                  <span className='flexedItemSelect'>
+                  <span className="flexedItemSelect">
                     {filter.status.charAt(0).toUpperCase() +
                       filter.status.slice(1)}
                   </span>
@@ -235,26 +238,26 @@ function FilterHistory() {
             }}
             options={[
               {
-                value: 'all',
-                label: <span className='flexedItemSelect'>All</span>,
+                value: "all",
+                label: <span className="flexedItemSelect">All</span>,
               },
               {
-                value: 'confirmed',
-                label: <span className='flexedItemSelect'>Completed</span>,
+                value: "confirmed",
+                label: <span className="flexedItemSelect">Completed</span>,
               },
               {
-                value: 'pending',
-                label: <span className='flexedItemSelect'>Pending</span>,
+                value: "pending",
+                label: <span className="flexedItemSelect">Pending</span>,
               },
               {
-                value: 'failed',
-                label: <span className='flexedItemSelect'>Failed</span>,
+                value: "failed",
+                label: <span className="flexedItemSelect">Failed</span>,
               },
             ]}
           />
         </div>
-        <div className={'filterHistory__selctHis'}>
-          <label className='label'>Date</label>
+        <div className={"filterHistory__selctHis"}>
+          <label className="label">Date</label>
           {/* {filter.toDate ? (
             <RangePicker
               defaultValue={[
@@ -282,19 +285,19 @@ function FilterHistory() {
               }}
             />
           )} */}
-          <div className='dateFlex'>
+          <div className="dateFlex">
             <DatePicker
               value={
                 filterValue.fromDate
-                  ? dayjs(filterValue.fromDate, 'YYYY-MM-DD')
+                  ? dayjs(filterValue.fromDate, "YYYY-MM-DD")
                   : null
               }
-              placeholder='From'
+              placeholder="From"
               onChange={(value) => {
-                console.log(value, 'From');
+                console.log(value, "From");
                 setFilterValue({
                   ...filterValue,
-                  fromDate: value ? value.format('YYYY-MM-DD') : null,
+                  fromDate: value ? value.format("YYYY-MM-DD") : null,
                 });
               }}
               disabledDate={(current) =>
@@ -309,10 +312,10 @@ function FilterHistory() {
               }}
             />
             <DatePicker
-              placeholder='To'
+              placeholder="To"
               value={
                 filterValue.toDate
-                  ? dayjs(filterValue.toDate, 'YYYY-MM-DD')
+                  ? dayjs(filterValue.toDate, "YYYY-MM-DD")
                   : null
               }
               onClick={() => {
@@ -322,10 +325,10 @@ function FilterHistory() {
                 });
               }}
               onChange={(value) => {
-                console.log(value, 'To');
+                console.log(value, "To");
                 setFilterValue({
                   ...filterValue,
-                  toDate: value ? value.format('YYYY-MM-DD') : null,
+                  toDate: value ? value.format("YYYY-MM-DD") : null,
                 });
               }}
               disabledDate={(current) =>
@@ -334,14 +337,14 @@ function FilterHistory() {
             />
           </div>
         </div>
-        <div className={'filterHistory__selctHis'}>
+        <div className={"filterHistory__selctHis"}>
           <ButtonComp
-            text={'Apply'}
-            maxWidth={'100%'}
+            text={"Apply"}
+            maxWidth={"100%"}
             onClick={() => {
               store.dispatch(setFilter(filterValue));
               if (state?.currencyDetail) {
-                navigate('/currencyDetails', {
+                navigate("/currencyDetails", {
                   state: {
                     ...filterValue,
                     coinId: state.currencyDetail.coin_id,
@@ -349,7 +352,7 @@ function FilterHistory() {
                   },
                 });
               } else {
-                navigate('/history', {
+                navigate("/history", {
                   state: { ...filterValue, coinId: filterValue.coinId.value },
                 });
               }

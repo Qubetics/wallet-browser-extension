@@ -120,47 +120,47 @@ randb {
 }
 
 .confirmCurrency {
-  &__card {
-    background-color: $white;
-    border-radius: 16px;
-    padding: 24px;
-    margin-bottom: 24px;
-    text-align: left;
-    &__textTop {
-      font-size: 24px;
-      font-weight: 900;
-      color: $baseColor-Text;
-      margin-bottom: 8px;
-      word-break: break-all;
-    }
-    &__textBtm {
-      font-size: 14px;
-      font-weight: 400;
-      color: $baseColor-Text;
-    }
-  }
-  &__keyValues {
-    display: flex;
-    align-items: flex-start !important;
-    justify-content: space-between;
-    gap: 15px;
-    margin-bottom: 12px;
-    &:last-child {
-      margin-bottom: 20px;
-    }
-    &__key {
-      font-size: 14px;
-      font-weight: 500;
-      color: $gray;
-      white-space: nowrap;
-    }
-    &__value {
-      font-size: 14px;
-      font-weight: bold;
-      white-space: nowrap;
-      color: $baseColor-Text;
-    }
-  }
+  // &__card {
+  //   background-color: $white;
+  //   border-radius: 16px;
+  //   padding: 24px;
+  //   margin-bottom: 24px;
+  //   text-align: left;
+  //   &__textTop {
+  //     font-size: 24px;
+  //     font-weight: 900;
+  //     color: $baseColor-Text;
+  //     margin-bottom: 8px;
+  //     word-break: break-all;
+  //   }
+  //   &__textBtm {
+  //     font-size: 14px;
+  //     font-weight: 400;
+  //     color: $baseColor-Text;
+  //   }
+  // }
+  // &__keyValues {
+  //   display: flex;
+  //   align-items: flex-start !important;
+  //   justify-content: space-between;
+  //   gap: 15px;
+  //   margin-bottom: 12px;
+  //   &:last-child {
+  //     margin-bottom: 20px;
+  //   }
+  //   &__key {
+  //     font-size: 14px;
+  //     font-weight: 500;
+  //     color: $gray;
+  //     white-space: nowrap;
+  //   }
+  //   &__value {
+  //     font-size: 14px;
+  //     font-weight: bold;
+  //     white-space: nowrap;
+  //     color: $baseColor-Text;
+  //   }
+  // }
 }
 
 .do {

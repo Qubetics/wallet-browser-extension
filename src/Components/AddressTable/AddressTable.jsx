@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import Person from "../../Assets/person-button-svgrepo-com.svg";
+import Person from "../../Assets/address-book-svgrepo-com.svg";
 import "./AddressTable.scss";
 
 function AddressTable({ dataArray, setAddress, setContact }) {

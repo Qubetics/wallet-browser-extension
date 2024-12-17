@@ -75,20 +75,17 @@ body::-webkit-scrollbar {
   .stickyHeader {
     position: sticky;
     top: 0;
-    @include theme() {
-      background-color: theme-get("whiteblackBase");
-    }
+    // @include theme() {
+    //   background-color: theme-get("whiteblackBase");
+    // }
     z-index: 9;
   }
 
   .flexedContent {
-    padding: 20px 15px 0;
+    padding: 20px 24px 0;
     overflow-y: auto;
     height: 100%;
-    background-color: $inputBg;
-    @include theme() {
-      background-color: theme-get("whiteblackBase");
-    }
+
     :where(.css-acm2ia).ant-checkbox-wrapper:not(
         .ant-checkbox-wrapper-disabled
       ):hover
@@ -314,20 +311,19 @@ body::-webkit-scrollbar {
   }
 }
 .ant-modal-title {
-  @include theme() {
-    color: theme-get("whiteblack");
-  }
+  color: #fff !important;
 }
 .customClassModal.modalCustom {
   &.ant-modal {
     &.css-dev-only-do-not-override-acm2ia {
       height: auto;
-      background-color: $white;
+      background-color: #101010;
       border-radius: 30px;
     }
 
     .ant-modal-content {
       padding-top: 20px !important;
+      background-color: #101010 !important ;
     }
   }
 }
@@ -383,11 +379,9 @@ body::-webkit-scrollbar {
   width: max-content !important;
 
   .ant-select-selector {
-    @include theme() {
-      background-color: theme-get("inputBg1") !important;
-      border-color: theme-get("cardBorder") !important;
-    }
-    border-radius: 20px !important;
+    background-color: #18171f !important;
+    color: #ffffff !important;
+    border-radius: 10px !important;
     height: 40px !important;
     padding: 0 5px !important;
   }
@@ -422,9 +416,7 @@ body::-webkit-scrollbar {
   margin-top: 5px;
   font-size: 12px;
   font-weight: bold;
-  @include theme() {
-    color: theme-get("whiteblack") !important;
-  }
+  color: $white !important;
 }
 
 .ant-select-dropdown {
@@ -436,9 +428,6 @@ body::-webkit-scrollbar {
   }
   border: 1px solid;
   .ant-select-item-option-selected:not(.ant-select-item-option-disabled) {
-    @include theme() {
-      background-color: theme-get("inputBg") !important;
-    }
   }
   .ant-select-item-option {
     border-bottom: 1px solid;
@@ -571,9 +560,7 @@ input[type="number"] {
 }
 
 .noAddress {
-  @include theme() {
-    color: theme-get("whiteblack") !important;
-  }
+  color: $white !important;
 }
 // TextArea-----------
 .textArea {
@@ -866,9 +853,7 @@ input[type="number"] {
   position: sticky;
   top: 0;
   z-index: 9;
-  @include theme() {
-    background-color: theme-get("whiteblackBase");
-  }
+  background-color: transparent;
   .search {
     padding: 10px 15px;
   }
@@ -885,15 +870,26 @@ input[type="number"] {
   display: flex;
   align-items: center;
   gap: 11px;
-  a{
+  a {
     text-decoration: none !important;
   }
-  p{
+  p {
     text-align: left;
   }
   .mainNetwor {
     color: #98969b;
     font-size: 14px;
     line-height: 19px;
+  }
+}
+.ant-drawer-wrapper-body {
+  background-color: #18171f !important;
+  .ant-drawer-title {
+    color: #fff !important;
+  }
+  .design {
+    p {
+      color: $white;
+    }
   }
 }

@@ -30,7 +30,7 @@ const TokenDrawer = ({
                 theme === 'darkTheme' ? (
                     <img src={darkclose} alt="Close Icon" />
                 ) : (
-                    <img src={ModalCloseIcon} alt="Close Icon" />
+                    <img src={darkclose} alt="Close Icon" />
                 )
             }
             height={500}

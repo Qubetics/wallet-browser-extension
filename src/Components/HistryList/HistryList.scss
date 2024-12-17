@@ -1,38 +1,16 @@
 @import "../../styles/__vars.scss";
 @import "../../styles/__mixins.scss";
 .histryList {
-  display: flex;
-  justify-content: space-between;
-  border-bottom: 1px solid;
-  padding: 25px 0px 20px;
-  padding-right: 15px;
   cursor: pointer;
-  @include theme() {
-    border-color: theme-get("cardBorder");
-  }
-  p {
-    @include theme() {
-      color: theme-get("baseText");
-    }
-    font-size: 12.4px;
-    font-weight: 600;
-    overflow-wrap: break-word;
-    span {
-      font-size: 12px;
-      @include theme() {
-        color: theme-get("whiteblack");
-      }
-    }
-    &:last-child {
-      font-size: 12px;
-      @include theme() {
-        color: theme-get("whiteblack");
-      }
-      text-overflow: ellipsis;
-      width: 140px;
-      overflow: hidden;
-      white-space: nowrap;
-    }
+  background-color: #18171f;
+  padding: 15px;
+  border-radius: 14px;
+  margin-bottom: 10px;
+  .statusCurrency {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid #dce2f5;
+    padding-bottom: 20px;
   }
   .Status {
     display: flex;
@@ -40,19 +18,24 @@
     text-align: left;
     align-items: center;
 
-    img {
-      height: 30px;
-      width: 30px;
-      object-fit: cover;
-      border-radius: 20px;
+    .sendRecieve {
+      color: $white;
+      font-size: 18px;
+      font-weight: 600;
     }
   }
-  .histryStatus{
+  .histryStatus {
     display: flex;
     justify-content: left;
     gap: 5px;
+    p {
+      color: #98969b;
+      font-weight: 14px;
+      font-weight: 400;
+      line-height: 18px;
+    }
   }
-  .curncyStatus{
+  .curncyStatus {
     display: flex;
     justify-content: flex-end;
   }
@@ -78,11 +61,18 @@
   }
 }
 
-
-
 .outer-list {
   display: flex;
   flex-direction: column;
   align-items: baseline;
-  gap: 10px;
+  .toFrom {
+    color: #98969b;
+    font-size: 14px;
+    padding-top: 10px;
+  }
+  .addressList {
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 500;
+  }
 }

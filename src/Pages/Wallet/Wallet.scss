@@ -1,7 +1,7 @@
 @import "../../styles/__vars.scss";
 @import "../../styles/__mixins.scss";
 .wallet {
-  // margin-top: 2px;
+  padding: 0 24px 10px 24px;
   &__heading {
     display: flex;
     align-items: center;

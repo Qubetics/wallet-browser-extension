@@ -6,61 +6,47 @@
   &__selctHis {
     width: 100%;
     padding-top: 24px;
-    &:first-child{
-        padding-top: 0;
+    &:first-child {
+      padding-top: 0;
     }
     .ant-select {
       width: 100% !important;
-
       .ant-select-selector {
-        @include theme() {
-          background-color: theme-get("inputBg1") !important;
-        }
-        border-radius: 28px !important;
-        height: 46px !important;
+        border-radius: 14px !important;
+        height: 50px !important;
+        background-color: #110f15 !important;
+        border: 1px solid #76747b !important;
       }
       .ant-select-arrow {
-        @include theme() {
-          color: theme-get("whiteblack") !important;
+        color: #98969b;
+      }
+    }
+    .label {
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: bold;
+      padding-bottom: 10px;
+      text-align: left;
+      display: flex;
+    }
+    .ant-picker {
+      background-color: #110f15 !important;
+      color: #98969b !important;
+      border-radius: 14px !important;
+      height: 50px !important;
+      width: 100%;
+      border: 1px solid #76747B !important;
+      &::placeholder {
+        color: #98969b !important;
+      }
+      input {
+        color: #98969b !important;
+        &::placeholder {
+          color: #98969b !important;
         }
       }
     }
-    .label{
-      @include theme() {
-        color: theme-get("whiteblack");
-      }
-        font-size: 12px;
-        font-weight: bold;
-        padding-bottom: 10px;
-        text-align: left;
-        display: flex;
-    }
-    .ant-picker{
-      @include theme() {
-        background-color: theme-get("inputBg1") !important;
-        color: theme-get("whiteblack") !important;
-        border-color: theme-get("cardBorder") !important;
-      }
-        border-radius: 28px !important;
-        height: 46px !important;
-        width: 100%;
-        &::placeholder{
-          @include theme() {
-            color: theme-get("whiteblack") !important;
-          }
-        }
-        input{
-          @include theme() {
-            color: theme-get("whiteblack") !important;
-          }
-          &::placeholder{
-            @include theme() {
-              color: theme-get("whiteblack") !important;
-            }
-          }
-        }
-    }
-    .ant-picker-separator{
+    .ant-picker-separator {
       @include theme() {
         color: theme-get("whiteblack") !important;
       }
@@ -68,19 +54,19 @@
     .ant-select .ant-select-arrow {
       margin-top: -4px;
       right: 20px;
+    }
+    .ant-select .ant-select-selector {
+      padding: 0 11px !important;
+    }
   }
-  .ant-select .ant-select-selector {
-   padding: 0 11px!important;
-}
-  }
-  .dateFlex{
+  .dateFlex {
     display: flex;
     gap: 20px;
-    .ant-space-item{
+    .ant-space-item {
       width: 100%;
     }
     .ant-picker .ant-picker-suffix {
-      color: #00AEEF ;
+      color: #98969b;
     }
   }
 }
@@ -91,8 +77,18 @@
   width: 26px;
   border-radius: 13px;
 }
-.borderDarkLight{
+.borderDarkLight {
   @include theme() {
     border-color: theme-get("cardBorder") !important;
+  }
+}
+.filterHistoryDropdown,
+.ant-select-item-option-selected {
+  background-color: #040205 !important;
+  border: 1px solid #242429 !important;
+  .ant-select-item-option-active {
+    background-color: #1a191f !important;
+    border-radius: 10px !important;
+    border: none !important;
   }
 }

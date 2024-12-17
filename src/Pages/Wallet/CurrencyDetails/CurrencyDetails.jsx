@@ -263,7 +263,7 @@ function CurrencyDetails() {
                 {theme == 'darkTheme' ? (
                   <img src={DarkFilterIcon} />
                 ) : (
-                  <img src={FilterIcon} />
+                  <img src={DarkFilterIcon} />
                 )}
               </Link>
             </div>

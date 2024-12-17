@@ -365,10 +365,10 @@ const Sell = ({ coins = [], fiats = [], loading }) => {
                 addonAfter={selectAfter}
                 value={receiveAmount}
             />
-
+{/* 
             <div className="buy_sell_des">
                 Buy/Sell digital assets are supported by Moonpay. Digital assets are high risk. Make sure you understand the risks associated with each digital asset before you invest.
-            </div>
+            </div> */}
 
             <div style={{ width: '100%' }}>
                 <ButtonComp 

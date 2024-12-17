@@ -1,27 +1,27 @@
-import React, { useEffect, useState } from 'react';
-import MenuRestofHeaders from '../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders';
-import CoinsTable from '../../Components/CoinsTable/CoinsTable';
-import './Receive.scss';
-import { useSelector } from 'react-redux';
-import { InputField } from '../../Components/InputField/InputFieldSimple';
-import { useLocation } from 'react-router-dom';
-import Search from '../../Assets/SearchIcon.svg';
-import BigNumber from 'bignumber.js';
+import React, { useEffect, useState } from "react";
+import MenuRestofHeaders from "../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders";
+import CoinsTable from "../../Components/CoinsTable/CoinsTable";
+import "./Receive.scss";
+import { useSelector } from "react-redux";
+import { InputField } from "../../Components/InputField/InputFieldSimple";
+import { useLocation } from "react-router-dom";
+import Search from "../../Assets/SearchIcon.svg";
+import BigNumber from "bignumber.js";
 import {
   addCommasToNumber,
   exponential_to_decimal,
   formatSmallNumber,
   getFlooredFixed,
-} from '../../helpers/conversion.helper';
-import { server } from '../../server';
-import { store } from '../..';
-import { setTokens } from '../../actions/tokens';
-import { QRCode } from 'react-qrcode-logo';
-import { message } from 'antd';
-import { DURATION } from '../../config/message.config';
-import CopyIconBlue from '../../Assets/CopyIconBlue.svg';
-import ModalCustom from '../../Components/ModalCustom/ModalCustom';
-import { setLoading } from '../../actions/loading';
+} from "../../helpers/conversion.helper";
+import { server } from "../../server";
+import { store } from "../..";
+import { setTokens } from "../../actions/tokens";
+import { QRCode } from "react-qrcode-logo";
+import { message } from "antd";
+import { DURATION } from "../../config/message.config";
+import CopyIconBlue from "../../Assets/CopyIconBlue.svg";
+import ModalCustom from "../../Components/ModalCustom/ModalCustom";
+import { setLoading } from "../../actions/loading";
 
 function ReceiveTokens() {
   const { account, tokens, currency, balanceIn } = useSelector(
@@ -60,7 +60,7 @@ function ReceiveTokens() {
         fiat_type: currency.name,
         limit: 2000,
         page: 1,
-        search: '',
+        search: "",
       },
       {
         headers: {
@@ -95,19 +95,19 @@ function ReceiveTokens() {
 
   return (
     <div className={`scrollableCont send`}>
-      <div className='searchBarFixed'>
+      <div className="searchBarFixed">
         {contextHolder}
         <MenuRestofHeaders
-          backTo={'/wallet'}
-          title={'Receive'}
-          redirectTo={state?.nft ? 'nft' : null}
+          backTo={"/wallet"}
+          title={"Receive"}
+          redirectTo={state?.nft ? "nft" : null}
           coin={state ? (state.coin ? state.coin : null) : null}
         />
 
         {state?.nft ? null : (
-          <div className='search'>
+          <div className="search">
             <InputField
-              placeholder={'Search'}
+              placeholder={"Search"}
               value={keyword}
               checkForSymbols={true}
               getData={(value) => {
@@ -118,9 +118,9 @@ function ReceiveTokens() {
                   <img
                     src={Search}
                     style={{
-                      width: '17px',
+                      width: "17px",
                     }}
-                    alt=''
+                    alt=""
                   />
                 </span>
               }
@@ -148,7 +148,7 @@ function ReceiveTokens() {
                   ? formatSmallNumber(
                       exponential_to_decimal(myPrice.toNumber())
                     )
-                  : '0.00',
+                  : "0.00",
                 coinStatus: getFlooredFixed(
                   price
                     ? parseFloat(
@@ -165,22 +165,22 @@ function ReceiveTokens() {
                 currCryptoBalSymbol: token.coin.coin_symbol.toUpperCase(),
                 currDollerBal: balanceIn
                   ? addCommasToNumber(getFlooredFixed(formattedResult, 2))
-                  : '****',
-                routeTo: 'sendCurrency',
-                type: token.coin.coin_family === 1 ? 'BEP20' : 'ERC20',
+                  : "****",
+                routeTo: "receive-currency",
+                type: token.coin.coin_family === 1 ? "BEP20" : "ERC20",
                 status: true,
                 coin: token,
-                showModal,
+                // showModal,
               };
             })}
           />
         ) : (
           <p
-            className='noAddress'
+            className="noAddress"
             style={{
-              marginTop: '50%',
-              fontWeight: 'bold',
-              fontSize: '17px',
+              marginTop: "50%",
+              fontWeight: "bold",
+              fontSize: "17px",
             }}
           >
             No assets found
@@ -188,63 +188,63 @@ function ReceiveTokens() {
         )}
       </div>
 
-      {selectedCoin ? (
+      {/* {selectedCoin ? (
         <ModalCustom
           isModalOpen={isModalOpen}
           handleOk={handleOk}
           handleCancel={handleCancel}
-          customClass={'change'}
+          customClass={"change"}
         >
-          <div className='balanceDetails__modal'>
+          <div className="balanceDetails__modal">
             <div>
-              <div className='balanceDetails__modal__scanner'>
+              <div className="balanceDetails__modal__scanner">
                 <QRCode
                   value={selectedCoin.wallet_address}
                   size={230}
-                  qrStyle='square'
+                  qrStyle="square"
                   eyeRadius={10}
                   logoImage={selectedCoin.coin.coin_image}
                   logoHeight={55}
                   logoWidth={55}
                   logoPadding={8}
-                  logoPaddingStyle='circle'
+                  logoPaddingStyle="circle"
                   style={{
-                    borderRadius: '20px',
-                    padding: '15px',
+                    borderRadius: "20px",
+                    padding: "15px",
                   }}
                 />
               </div>
             </div>
-            <p className='balanceDetails__modal__title'>
+            <p className="balanceDetails__modal__title">
               Receive {selectedCoin.coin.coin_symbol.toUpperCase()}
             </p>
             <p
-              className='modalAddres'
+              className="modalAddres"
               style={{
-                width: '100%',
-                textAlign: 'center',
-                marginBottom: '17px',
-                fontSize: '15px',
-                fontWeight: 'bold',
+                width: "100%",
+                textAlign: "center",
+                marginBottom: "17px",
+                fontSize: "15px",
+                fontWeight: "bold",
               }}
             >
               Address
             </p>
             <div
-              className='balanceDetails__modal__wrapedText'
+              className="balanceDetails__modal__wrapedText"
               onClick={async () => {
                 await navigator.clipboard.writeText(
                   selectedCoin.wallet_address
                 );
-                messageApi.success('Address copied successfully.');
+                messageApi.success("Address copied successfully.");
               }}
             >
-              <img src={CopyIconBlue} width={15} height={16} alt='' />
+              <img src={CopyIconBlue} width={15} height={16} alt="" />
               <span>{selectedCoin.wallet_address}</span>
             </div>
           </div>
         </ModalCustom>
-      ) : null}
+      ) : null} */}
     </div>
   );
 }

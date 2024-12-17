@@ -44,6 +44,7 @@
       padding: 12px 30px;
     }
     .wallet {
+      
       &__heading {
         margin-bottom: 0px;
       }
@@ -55,16 +56,16 @@
   }
 
   &__content {
-    padding: 20px 24px;
+    // padding: 20px 24px;
     overflow: auto;
     flex: 1 1 0%;
 
     &__paddingX {
       padding-left: 0;
       padding-right: 0;
-      @include theme() {
-        background-color: theme-get("whiteblackBase");
-      }
+      // @include theme() {
+      //   background-color: theme-get("whiteblackBase");
+      // }
     }
   }
 }

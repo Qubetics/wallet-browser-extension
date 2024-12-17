@@ -2,50 +2,50 @@
 @import "../../../styles/__mixins.scss";
 
 .confirmCurrency {
-  &__card {
-    background-image: url("https://i.ibb.co/GxQCFsm/transaction-detail-bg.png");
-    background-repeat: no-repeat;
-    border-radius: 16px;
-    padding: 24px;
-    margin-bottom: 24px;
-    text-align: left;
-    background-size: cover;
-    background-position: center;
-    &__textTop {
-      font-size: 24px;
-      font-weight: 900;
-      color: #fff;
-      margin-bottom: 8px;
-      word-break: break-all;
-    }
-    &__textBtm {
-      font-size: 14px;
-      font-weight: 400;
-      color: #fff;
-    }
-  }
-  &__keyValues {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 15px;
-    margin-bottom: 20px;
+  // &__card {
+  //   background-image: url("https://i.ibb.co/GxQCFsm/transaction-detail-bg.png");
+  //   background-repeat: no-repeat;
+  //   border-radius: 16px;
+  //   padding: 24px;
+  //   margin-bottom: 24px;
+  //   text-align: left;
+  //   background-size: cover;
+  //   background-position: center;
+  //   &__textTop {
+  //     font-size: 24px;
+  //     font-weight: 900;
+  //     color: #fff;
+  //     margin-bottom: 8px;
+  //     word-break: break-all;
+  //   }
+  //   &__textBtm {
+  //     font-size: 14px;
+  //     font-weight: 400;
+  //     color: #fff;
+  //   }
+  // }
+  // &__keyValues {
+  //   display: flex;
+  //   align-items: center;
+  //   justify-content: space-between;
+  //   gap: 15px;
+  //   margin-bottom: 20px;
     
-    &__key {
-      font-size: 14px;
-      font-weight: 500;
-      @include theme() {
-        color: theme-get("whiteblack") ;
-       }
-    }
-    &__value {
-      font-size: 14px;
-      font-weight: bold;
-      @include theme() {
-        color: theme-get("baseText") ;
-       }
-    }
-  }
+  //   &__key {
+  //     font-size: 14px;
+  //     font-weight: 500;
+  //     @include theme() {
+  //       color: theme-get("whiteblack") ;
+  //      }
+  //   }
+  //   &__value {
+  //     font-size: 14px;
+  //     font-weight: bold;
+  //     @include theme() {
+  //       color: theme-get("baseText") ;
+  //      }
+  //   }
+  // }
 }
 
 .viewphrases {

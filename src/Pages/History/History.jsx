@@ -1,21 +1,21 @@
-import React, { useEffect, useRef, useState } from 'react';
-import HistryList from '../../Components/HistryList/HistryList';
-import Sendhistry from '../../Assets/sendhistry.svg';
-import Deposit from '../../Assets/deposit.svg';
-import { useSelector } from 'react-redux';
+import React, { useEffect, useRef, useState } from "react";
+import HistryList from "../../Components/HistryList/HistryList";
+import Sendhistry from "../../Assets/sendhistry.svg";
+import Deposit from "../../Assets/deposit.svg";
+import { useSelector } from "react-redux";
 import {
   addCommasToNumber,
   balanceToFiatConversion,
   getFlooredFixed,
-} from '../../helpers/conversion.helper';
-import { server } from '../../server';
-import { useLocation } from 'react-router-dom';
-import { store } from '../..';
-import { setLoading } from '../../actions/loading';
-import { setFilter } from '../../actions/filter';
-import './style.module.scss';
-import moment from 'moment';
-import HistoryListOuter from '../../Components/HistryList/HistryListOuter';
+} from "../../helpers/conversion.helper";
+import { server } from "../../server";
+import { useLocation } from "react-router-dom";
+import { store } from "../..";
+import { setLoading } from "../../actions/loading";
+import { setFilter } from "../../actions/filter";
+import "./style.module.scss";
+import moment from "moment";
+import HistoryListOuter from "../../Components/HistryList/HistryListOuter";
 
 function History() {
   const { account, currency, filter } = useSelector((state) => state);
@@ -33,11 +33,11 @@ function History() {
     if (!state) {
       store.dispatch(
         setFilter({
-          coinId: 'all',
-          status: 'all',
+          coinId: "all",
+          status: "all",
           fromDate: null,
           toDate: null,
-          type: 'all',
+          type: "all",
         })
       );
     }
@@ -59,18 +59,18 @@ function History() {
         page: currentPage,
         limit: 100,
         status: state
-          ? state.status === 'all'
+          ? state.status === "all"
             ? undefined
             : state.status
           : undefined,
         date_from: state
           ? state.fromDate
-            ? moment(state.fromDate).startOf('day')
+            ? moment(state.fromDate).startOf("day")
             : undefined
           : undefined,
         date_to: state
           ? state.toDate
-            ? moment(state.toDate).endOf('day')
+            ? moment(state.toDate).endOf("day")
             : undefined
           : undefined,
         trnx_type: state ? (state.type ? state.type : undefined) : undefined,
@@ -112,67 +112,62 @@ function History() {
   }, [currentPage]);
 
   return (
-    <div
-      style={{
-        height: '560px',
-        overflow: 'scroll',
-      }}
-      ref={parentRef}
-      onScroll={handleScroll}
-    >
-      {history.length > 0 ? (
-        history.map((data) => {
-          let name = null;
+    <div className={`scrollableCont`}>
+      <div className={`flexedContent`} ref={parentRef} onScroll={handleScroll}>
+        {history.length > 0 ? (
+          history.map((data) => {
+            let name = null;
 
-          const price = data?.coin_data?.fiat_price_data;
+            const price = data?.coin_data?.fiat_price_data;
 
-          let transactionType =
-            data.type === 'dapp'
-              ? 'Smart Contract'
-              : data.type === 'deposit'
-              ? 'Received'
-              : data.type === 'withdraw'
-              ? 'Sent'
-              : data.type.toLowerCase() === 'swap'
-              ? 'Swap'
-              : 'Withdraw';
+            let transactionType =
+              data.type === "dapp"
+                ? "Smart Contract"
+                : data.type === "deposit"
+                ? "Received"
+                : data.type === "withdraw"
+                ? "Sent"
+                : data.type.toLowerCase() === "swap"
+                ? "Swap"
+                : "Withdraw";
 
-          return (
-            <HistoryListOuter
-              hash={data?.tx_id}
-              type={data.type}
-              status={data?.blockchain_status}
-              sendRecieve={transactionType}
-              coinname={data?.coin_data?.coin_symbol?.toUpperCase()}
-              address={data?.from_adrs}
-              valueCurrency={`${addCommasToNumber(
-                getFlooredFixed(data?.amount, 5)
-              )} ${data?.coin_data?.coin_symbol?.toUpperCase()}`}
-              dollercurrency={balanceToFiatConversion(
-                price ? price?.value : 0,
-                data?.amount
-              )}
-              addressTo={data?.to_adrs}
-              TickIcon={transactionType === 'Deposit' ? Deposit : Sendhistry}
-              def={currency.symbol}
-              allData={data}
-              coin={data?.coin_data}
-              date={moment(data.created_at).format('DD, MMM YYYY | hh:mm A')}
-            />
-          );
-        })
-      ) : (
-        <p
-          className='noAddress'
-          style={{
-            marginTop: '50%',
-            fontWeight: 'bold',
-            fontSize: '17px',
-          }}
-        >
-          No Transactions Found...
-        </p>
-      )}
+            return (
+              <HistoryListOuter
+                hash={data?.tx_id}
+                type={data.type}
+                status={data?.blockchain_status}
+                sendRecieve={transactionType}
+                coinname={data?.coin_data?.coin_symbol?.toUpperCase()}
+                address={data?.from_adrs}
+                valueCurrency={`${addCommasToNumber(
+                  getFlooredFixed(data?.amount, 5)
+                )} ${data?.coin_data?.coin_symbol?.toUpperCase()}`}
+                dollercurrency={balanceToFiatConversion(
+                  price ? price?.value : 0,
+                  data?.amount
+                )}
+                addressTo={data?.to_adrs}
+                TickIcon={transactionType === "Deposit" ? Deposit : Sendhistry}
+                def={currency.symbol}
+                allData={data}
+                coin={data?.coin_data}
+                date={moment(data.created_at).format("DD, MMM YYYY | hh:mm A")}
+              />
+            );
+          })
+        ) : (
+          <p
+            className="noAddress"
+            style={{
+              marginTop: "50%",
+              fontWeight: "bold",
+              fontSize: "17px",
+            }}
+          >
+            No Transactions Found...
+          </p>
+        )}
+      </div>
     </div>
   );
 }

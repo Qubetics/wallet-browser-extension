@@ -36,27 +36,19 @@
       display: flex;
     }
     .ant-picker {
-      @include theme() {
-        background-color: theme-get("inputBg1") !important;
-        color: theme-get("whiteblack") !important;
-        border-color: theme-get("cardBorder") !important;
-      }
-      border-radius: 28px !important;
-      height: 46px !important;
+      background-color: #110f15 !important;
+      color: #98969b !important;
+      border-radius: 14px !important;
+      height: 40px !important;
       width: 100%;
+      border: 1px solid #76747B !important;
       &::placeholder {
-        @include theme() {
-          color: theme-get("whiteblack") !important;
-        }
+        color: #98969b !important;
       }
       input {
-        @include theme() {
-          color: theme-get("whiteblack") !important;
-        }
+        color: #98969b !important;
         &::placeholder {
-          @include theme() {
-            color: theme-get("whiteblack") !important;
-          }
+          color: #98969b !important;
         }
       }
     }
@@ -80,7 +72,7 @@
       width: 100%;
     }
     .ant-picker .ant-picker-suffix {
-      color: #00aeef;
+      color: #98969b;
     }
   }
 }

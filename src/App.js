@@ -95,6 +95,7 @@ import AddWatchList from "./Pages/Watchlist/AddWatchList";
 import { Portfolio } from "./Pages/Portfolio/Portfolio";
 import TermsPolicy from "./Pages/WelcomeScreens/TermsPolicy";
 import SecretPhrase from "./Pages/WelcomeScreens/SecretPhrase";
+import ReceiveCurrency from "./Pages/ReceiveCoins/ReceiveCurrency";
 
 function App() {
   const [state, setState] = useState("Active");
@@ -298,7 +299,7 @@ function App() {
       >
         <div className="loader-main">
           <img
-            src={require("./Assets/Logo.png")}
+            src={require("./Assets/main-logo.gif")}
             style={{
               width: "100px",
             }}
@@ -381,6 +382,7 @@ function App() {
         <Route path="/" element={<OnlyContent />}>
           <Route index path="/send" element={<Send />} />
           <Route path="/receive-tokens" element={<ReceiveTokens />} />
+          <Route path="/receive-currency" element={<ReceiveCurrency />} />
           <Route path="/watch-list-tokens" element={<WatchList />} />
           <Route path="/add-watch-list" element={<AddWatchList />} />
           <Route path="/buy-coins" element={<BuyCoins />} />
