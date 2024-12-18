@@ -83,7 +83,7 @@ const balanceLength = balance.toString().length
           />
         )}
         {path === 'changePin' && (
-          <MenuRestofHeaders backTo={'/setting'} title={'Change Pin'} />
+          <MenuRestofHeaders backTo={'/setting'} title={'Reset Password'} />
         )}
         {path === 'setting' && <MenuRestofHeaders title={'Settings'} />}
         {/* {path === "emailAddress" && <MenuRestofHeaders title={"Banking"} />} */}

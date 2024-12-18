@@ -316,7 +316,7 @@ function SettingList(props) {
             </div>
             {RightArow && (
               <img
-                src={theme === 'darkTheme' ? DarkArrowRightIcon : ticketcheck1}
+                src={theme === 'darkTheme' ? DarkArrowRightIcon : DarkArrowRightIcon}
               />
             )}
             {switchToggle === 'switchToggle' && (

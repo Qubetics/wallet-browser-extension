@@ -96,6 +96,7 @@ import { Portfolio } from "./Pages/Portfolio/Portfolio";
 import TermsPolicy from "./Pages/WelcomeScreens/TermsPolicy";
 import SecretPhrase from "./Pages/WelcomeScreens/SecretPhrase";
 import ReceiveCurrency from "./Pages/ReceiveCoins/ReceiveCurrency";
+import SecuritySetting from "./Pages/Setting/SecuritySetting";
 
 function App() {
   const [state, setState] = useState("Active");
@@ -367,6 +368,7 @@ function App() {
           <Route path="/walletListing" element={<WalletListing />} />
           <Route path="/defi" element={<Defi />} />
           <Route path="/history" element={<History />} />
+          <Route path="/securitySetting" element={<SecuritySetting />} />
           <Route path="/changePin" element={<ChangePin />} />
           <Route path="/setting" element={<Setting />} />
           <Route path="/alerts" element={<Alerts />} />

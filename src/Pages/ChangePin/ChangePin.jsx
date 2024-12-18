@@ -85,7 +85,11 @@ function ChangePin() {
   return (
     <div className={`scrollableCont`}>
       {contextHolder}
-      <div className="changePinSec">
+      <p className="createPassword-text">
+        Create a password with at least 8 characters, including one uppercase
+        letter, one lowercase letter, one number, and one special character.
+      </p>
+      <div className="changePinSec flexedContent">
         <div className="inputPass">
           <InputFieldSimple
             mb0={true}
@@ -114,14 +118,14 @@ function ChangePin() {
             }}
           />
         </div>
-        <div className="setPassword__validations">
+        {/* <div className="setPassword__validations">
           {validations.map((ele, index) => (
             <p key={index}>
               <img src={ele.icon} />
               {ele.text}
             </p>
           ))}
-        </div>
+        </div> */}
         <div className="inputPass">
           <InputFieldSimple
             mb0={true}

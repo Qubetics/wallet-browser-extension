@@ -5,7 +5,7 @@ import AlertIcon from "../../Assets/Alerts.svg";
 import SettignIcon from "../../Assets/SettignIcon.svg";
 import { Link, useLocation } from "react-router-dom";
 import Browser from "../../Assets/broswer.svg";
-import portfolioIcon from "../../Assets/portfolioIcon.svg"
+import portfolioIcon from "../../Assets/portfolioIcon.svg";
 
 function MenuFooter() {
   const getLocation = useLocation();
@@ -45,6 +45,18 @@ function MenuFooter() {
           {/* <span className='menuItems__items__title'>Swap</span> */}
         </Link>
         <Link
+          to="/portfolio"
+          // onClick={() => setactiveLink("setting")}
+          className={`${"menuItems__items"} ${
+            path === "portfolio" ? "menuItems__items__active" : ""
+          }`}
+        >
+          <div className="menuItems__items__img">
+            <img src={portfolioIcon} />
+          </div>
+          {/* <span className='menuItems__items__title'>Portfolio</span> */}
+        </Link>
+        <Link
           to="/conectswapedApp"
           // onClick={() => setactiveLink("defi")}
           className={`${"menuItems__items"} ${
@@ -63,19 +75,6 @@ function MenuFooter() {
           >
             DApp
           </span> */}
-        </Link>
-
-        <Link
-          to="/portfolio"
-          // onClick={() => setactiveLink("setting")}
-          className={`${"menuItems__items"} ${
-            path === "portfolio" ? "menuItems__items__active" : ""
-          }`}
-        >
-          <div className="menuItems__items__img">
-            <img src={portfolioIcon} />
-          </div>
-          {/* <span className='menuItems__items__title'>Portfolio</span> */}
         </Link>
 
         <Link

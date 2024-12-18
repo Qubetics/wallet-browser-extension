@@ -3,10 +3,19 @@
 
 .changePinSec {
   .inputPass {
-    margin-top: 30px;
+    margin-top: 24px;
+    &:first-child {
+      margin-top: 0;
+    }
   }
 }
-
+.createPassword-text {
+  color: #98969b;
+  font-size: 14px;
+  line-height: 22px;
+  text-align: left;
+  padding: 0 24px;
+}
 // .setPassword {
 //   &__tabs {
 //     display: flex;

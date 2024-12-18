@@ -207,7 +207,7 @@ code {
         ) !important;
 
         border: none !important;
-        box-shadow: 0 0 0 3px #5ED1D2!important;
+        box-shadow: 0 0 0 3px #5ed1d2 !important;
       }
     }
 
@@ -223,8 +223,8 @@ code {
     }
 
     .ant-slider-dot {
-      background-color: #76747B;
-      border-color: #76747B;
+      background-color: #76747b;
+      border-color: #76747b;
     }
   }
 
@@ -242,5 +242,93 @@ code {
         left: 97% !important;
       }
     }
+  }
+}
+.investedAmountShow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: space-between;
+  margin-top: 12px;
+  .bitcoin {
+    border-left: 6px solid #f7931a;
+    background-color: #1b1a0e;
+  }
+  .ethereum {
+    border-left: 6px solid #e2e8ff;
+    background-color: #192225;
+  }
+  .solana {
+    border-left: 6px solid #ad50eb;
+    background-color: #141423;
+  }
+  .tether {
+    border-left: 6px solid #4eab91;
+    background-color: #0a1c1a;
+  }
+  .investedCurrency {
+    padding: 6px;
+    border-radius: 6px;
+    flex: 1;
+    p {
+      color: #fff;
+      font-size: 12px;
+      line-height: 16px;
+      text-align: center;
+    }
+  }
+}
+.portfolio__tableOuter {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  height: 285px;
+  max-height: max-content;
+  overflow: auto;
+  .coinsTable1__right {
+    display: flex;
+    flex-direction: column !important;
+    align-items: flex-end !important;
+    gap: 0 !important;
+  }
+}
+.assetsAllocation {
+  position: absolute;
+  top: 49.5%;
+  left: 50.5%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  background: linear-gradient(0deg, #101010, #101010),
+    radial-gradient(
+      95.84% 134.58% at 11.74% 109.35%,
+      rgba(105, 218, 219, 0.2) 0%,
+      rgba(105, 218, 219, 0) 70.5%
+    );
+
+  border-radius: 100%;
+  width: 120px;
+  height: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border: 1px solid #b5b5b542;
+}
+.watchList {
+  .search {
+    padding: 0 !important;
+  }
+  .inputField__input {
+    height: 50px;
+    padding: 11px 16px !important;
+  }
+}
+.currencyClick {
+  padding-bottom: 20px;
+  border-bottom: 1px solid #76747b;
+  margin-bottom: 20px;
+  p {
+    color: #ffffff !important;
   }
 }

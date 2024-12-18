@@ -9,14 +9,6 @@
       align-items: center;
       gap: 9px;
       justify-content: space-between;
-      border-bottom: 1px solid ;
-      padding: 15px 0px;
-      @include theme() {
-        border-color: theme-get("cardBorder");
-      }
-      &:first-child {
-        padding-top: 0px;
-      }
       div {
         list-style: none;
         display: flex;
@@ -26,12 +18,16 @@
           height: 30px;
           width: 30px;
         }
-        p {
-          @include theme() {
-            color: theme-get("baseText");
-          }
+        .walletName {
+          font-size: 18px;
+          font-weight: 600;
+          color: #fff;
+          margin: 0px;
+        }
+        .walletAdd {
           font-size: 14px;
-          font-weight: bold;
+          font-weight: 400;
+          color: #98969b;
           margin: 0px;
         }
       }

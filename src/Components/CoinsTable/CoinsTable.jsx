@@ -8,7 +8,7 @@ import Simplex from "../../Assets/Simplex.png";
 import Alchemy from "../../Assets/Coins/Alchemy.png";
 import EDIT from "../../Assets/edit.png";
 import Edit from "../../Assets/edit.svg";
-import bin from "../../Assets/delete.png";
+import bin from "../../Assets/DeleteIcon.svg";
 import { store } from "../..";
 import { setLoading } from "../../actions/loading";
 import { WalletHelper } from "../../helpers/wallet.helper";
@@ -17,7 +17,7 @@ import { capitalize } from "../../helpers/conversion.helper";
 import DummyEle from "./DummyEle";
 import { Draggable } from "react-drag-reorder";
 
-function CoinsTable({ dataArray, showCoinPrice }) {
+function CoinsTable({ dataArray, showCoinPrice, name }) {
   const navigate = useNavigate();
 
   const [openModal, setOpenModal] = useState(false);
@@ -166,11 +166,19 @@ function CoinsTable({ dataArray, showCoinPrice }) {
           <div className="coinsTable1__right">
             <div>
               {showCoinPrice ? (
-                <span>
+                <span
+                  style={{
+                    color: "#98969B",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "5px",
+                  }}
+                >
                   {currency.symbol}
-                  <span style={{ marginLeft: "4px" }}>
+                  <span style={{ marginLeft: "4px", color: "#98969B" }}>
                     {ele.currPriceValue ? ele.currPriceValue.toFixed(2) : 0}
                   </span>
+                  {name == "portfolio" && <img src={bin} />}
                 </span>
               ) : ele.watch ? (
                 ele.isActiveInWatchList ? (

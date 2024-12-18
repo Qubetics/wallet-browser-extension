@@ -1,27 +1,28 @@
-import React, { useEffect, useState } from 'react';
-import BSC from '../../Assets/Coins/BSC.png';
-import Unitedstate from '../../Assets/cuntry/unitedstate.svg';
-import './CurrencyPrefrence.scss';
-import Newzealand from '../../Assets/cuntry/newzealand.svg';
-import Europe from '../../Assets/cuntry/europe.svg';
-import MenuRestofHeaders from '../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders';
-import { WalletHelper } from '../../helpers/wallet.helper';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import axios from 'axios';
-import { store } from '../..';
-import { setLoading } from '../../actions/loading';
-import { server } from '../../server';
+import React, { useEffect, useState } from "react";
+import BSC from "../../Assets/Coins/BSC.png";
+import Unitedstate from "../../Assets/cuntry/unitedstate.svg";
+import "./CurrencyPrefrence.scss";
+import Newzealand from "../../Assets/cuntry/newzealand.svg";
+import Europe from "../../Assets/cuntry/europe.svg";
+import MenuRestofHeaders from "../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders";
+import { WalletHelper } from "../../helpers/wallet.helper";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import axios from "axios";
+import { store } from "../..";
+import { setLoading } from "../../actions/loading";
+import { server } from "../../server";
+import TickIcon from "../../Assets/TickIconC.svg";
 function CurrencyPrefrence() {
   const navigate = useNavigate();
   const { currency, account } = useSelector((state) => state);
 
-  console.log('account::', account);
+  console.log("account::", account);
   const [data, setData] = useState([]);
 
   const init = async () => {
     store.dispatch(setLoading(true));
-    const response = await server.get('/wallet/currencyfiatlist', {
+    const response = await server.get("/wallet/currencyfiatlist", {
       headers: {
         Authorization: account.jwtToken,
       },
@@ -54,11 +55,11 @@ function CurrencyPrefrence() {
     <>
       <div className={`scrollableCont`}>
         <MenuRestofHeaders
-          backTo={state ? (state.backTo ? '/wallet' : '/setting') : '/setting'}
-          title={'Currency Preference'}
+          backTo={state ? (state.backTo ? "/wallet" : "/setting") : "/setting"}
+          title={"Native Currency"}
         />
         <div className={`flexedContent`}>
-          <div className='listItems'>
+          {/* <div className='listItems'>
             <ul>
               {data.map((data) => (
                 <li
@@ -80,6 +81,21 @@ function CurrencyPrefrence() {
                 </li>
               ))}
             </ul>
+          </div> */}
+          <div
+            className="listItems"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "13px",
+              justifyContent: "space-between",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "13px" }}>
+              <img src={Unitedstate} alt="img" />
+              <span className="Currencyname">USD</span>
+            </div>
+            <img src={TickIcon} alt="usd" />
           </div>
         </div>
       </div>

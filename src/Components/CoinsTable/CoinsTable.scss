@@ -21,9 +21,18 @@
   background-color: #18171f;
   margin-bottom: 6px;
   border-radius: 14px;
-  &:last-child {
-    padding-bottom: 0;
-    border-bottom: 0 !important;
+  // &:last-child {
+  //   padding-bottom: 0;
+  //   border-bottom: 0 !important;
+  // }
+  .coinValue {
+    color: #98969b;
+    font-size: 14px;
+  }
+  .text-green {
+    color: #6bd99c;
+    font-size: 14px;
+    font-weight: 600;
   }
   &__left {
     display: flex;

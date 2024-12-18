@@ -2144,12 +2144,12 @@ function SecretPhrasePaste({ children, termsCheck, getMnemonics, type }) {
       </p>
       <div>
         <div className="setPassword__secretPharse__fieldSBg">
-          <div style={{ marginTop: "16px" }}>
+          {/* <div style={{ marginTop: "16px" }}>
             <InputFieldOnly
               placeholder={"Enter Wallet Name here"}
               label={"Wallet Name"}
             />
-          </div>
+          </div> */}
           <div className="setPassword__secretPharse__fieldSBgInner textArea">
             <TextArea
               value={mnemonics}
