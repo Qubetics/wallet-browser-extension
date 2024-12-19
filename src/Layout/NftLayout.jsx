@@ -41,7 +41,7 @@ function NftLayout() {
         }`}
         style={!isSidePanelOpen ? {
           maxHeight: "746px",
-          maxWidth: "439px"
+          maxWidth: "400px"
         }: {
                maxWidth: "600px"
         }}

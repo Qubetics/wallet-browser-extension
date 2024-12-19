@@ -94,16 +94,13 @@
     &__whiteText {
       min-width: 40px;
       text-decoration: none;
-      background: #367cc754 0% 0% no-repeat padding-box;
-      border-radius: 10px;
-      padding: 12px 10px;
       width: 60px;
-      font-size: 12px;
-      color: $white;
-      font-weight: bold;
+      font-size: 14px;
+      color: #98969b;
+      font-weight: 500;
       cursor: pointer;
       span {
-        color: $white;
+        color: #98969b;
       }
     }
   }

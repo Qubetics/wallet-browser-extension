@@ -1,157 +1,201 @@
-@import '../../styles/__vars.scss';
-@import '../../styles/__mixins.scss';
+@import "../../styles/__vars.scss";
+@import "../../styles/__mixins.scss";
 
-.send {
-  &__pasteText {
-    color: $baseText-00AEEF;
-    font-size: 13px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: 0.3s;
-    padding-left: 10px;
-    border-left: 1px solid #80838e;
-    &:hover {
-      opacity: 0.7;
+// .send {
+//   &__pasteText {
+//     color: $baseText-00AEEF;
+//     font-size: 13px;
+//     font-weight: bold;
+//     cursor: pointer;
+//     transition: 0.3s;
+//     padding-left: 10px;
+//     border-left: 1px solid #80838e;
+//     &:hover {
+//       opacity: 0.7;
+//     }
+//   }
+//   &__infoText {
+//     color: $gray;
+//     font-size: 13px;
+//     font-weight: bold;
+//     text-align: right;
+//     margin-top: 12px;
+//     margin-bottom: 36px;
+//   }
+// }
+
+// .nftlottie {
+//   h2 {
+//     font-size: 16px;
+//     font-weight: 800;
+//     @include theme() {
+//       color: theme-get('whiteWelcome');
+//     }
+//   }
+//   .nftJson {
+//     margin-top: 16px;
+//   }
+// }
+// .nftImgesScrool {
+//   overflow: auto;
+//   height: 251px;
+//   .nftImages {
+//     img {
+//       object-fit: cover;
+//       width: 100%;
+//     }
+//   }
+// }
+// .nftImgesScroolExt {
+//   height: 176px;
+// }
+
+// .nfDetail {
+//   height: calc(100% - 20px);
+//   display: flex;
+//   flex-direction: column;
+//   justify-content: space-between;
+//   margin-top: 20px;
+//   .nftTop {
+//     text-align: left;
+//     h2 {
+//       font-size: 18px;
+//       font-weight: 800;
+//       @include theme() {
+//         color: theme-get('baseColor-Text');
+//       }
+//       margin: 0;
+//       line-height: 20px;
+//     }
+//     p {
+//       font-size: 14px;
+//       font-weight: 600;
+//       @include theme() {
+//         color: theme-get('gray2');
+//         border-color: theme-get('cardBorder');
+//       }
+//       padding-top: 4px;
+//       line-height: 20px;
+//       padding-bottom: 16px;
+//       border-bottom: 1px solid;
+//     }
+//   }
+// }
+// .tokenNft {
+//   h3 {
+//     font-size: 18px;
+//     font-weight: 800;
+//     @include theme() {
+//       color: theme-get('baseColor-Text');
+//     }
+//     margin: 0;
+//     padding-top: 12px;
+//     text-align: left;
+//   }
+
+//   h2 {
+//     @include theme() {
+//       color: theme-get('gray2');
+//     }
+//   }
+
+//   .card_name {
+//     table {
+//       width: 100%;
+//     }
+
+//     .left {
+//       text-align: left;
+//       padding-top: 10px;
+//       font-size: 14px;
+//       font-weight: 600;
+//       white-space: nowrap;
+//       @include theme() {
+//         color: theme-get('gray2');
+//         bordere-color: theme-get('cardBorder');
+//       }
+//     }
+//     .right {
+//       text-align: right;
+//       padding-top: 10px;
+//       font-size: 14px;
+//       font-weight: 600;
+//       display: inline-block;
+//       width: 262px;
+//       white-space: nowrap;
+//       overflow: hidden;
+//       text-overflow: ellipsis;
+//       @include theme() {
+//         color: theme-get('baseText');
+//       }
+//     }
+//   }
+// }
+
+// .nftAddress {
+//   margin-top: 20px;
+//   display: flex;
+//   flex-direction: column;
+//   justify-content: space-between;
+//   height: calc(100% - 30px);
+// }
+
+// .border1 {
+//   @include theme() {
+//     background-color: theme-get('cardBorder');
+//   }
+//   height: 1px;
+//   width: 100%;
+//   margin: 12px 0;
+// }
+
+// .nftConfirmSec {
+//   display: flex;
+//   flex-direction: column;
+//   justify-content: space-between;
+//   height: 100%;
+// }
+.nftDetail {
+  padding-top: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: space-between;
+  flex-flow: wrap;
+  .nftSuper {
+    border-radius: 12.9px;
+    max-width: 166px;
+    width: 100%;
+    &_img {
+      img {
+        margin-bottom: -5px;
+        max-width: 166px;
+        width: 100%;
+      }
+    }
+    .superInfluencers {
+      background-color: #18171f;
+      padding: 10px 13px;
+      border-radius: 0 0 12.9px 12.9px;
+      h4 {
+        color: #ffffff;
+        font-size: 12px;
+        font-weight: 500;
+        text-align: left;
+        line-height: 14px;
+        margin-bottom: 0 !important;
+      }
+      &_subText {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-top: 5px;
+      }
     }
   }
-  &__infoText {
-    color: $gray;
-    font-size: 13px;
-    font-weight: bold;
-    text-align: right;
-    margin-top: 12px;
-    margin-bottom: 36px;
-  }
 }
-
-.nftlottie {
-  h2 {
-    font-size: 16px;
-    font-weight: 800;
-    @include theme() {
-      color: theme-get('whiteWelcome');
-    }
-  }
-  .nftJson {
-    margin-top: 16px;
-  }
-}
-.nftImgesScrool {
+.nftDetailList{
+  height: 575px;
   overflow: auto;
-  height: 251px;
-  .nftImages {
-    img {
-      object-fit: cover;
-      width: 100%;
-    }
-  }
-}
-.nftImgesScroolExt {
-  height: 176px;
-}
-
-.nfDetail {
-  height: calc(100% - 20px);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  margin-top: 20px;
-  .nftTop {
-    text-align: left;
-    h2 {
-      font-size: 18px;
-      font-weight: 800;
-      @include theme() {
-        color: theme-get('baseColor-Text');
-      }
-      margin: 0;
-      line-height: 20px;
-    }
-    p {
-      font-size: 14px;
-      font-weight: 600;
-      @include theme() {
-        color: theme-get('gray2');
-        border-color: theme-get('cardBorder');
-      }
-      padding-top: 4px;
-      line-height: 20px;
-      padding-bottom: 16px;
-      border-bottom: 1px solid;
-    }
-  }
-}
-.tokenNft {
-  h3 {
-    font-size: 18px;
-    font-weight: 800;
-    @include theme() {
-      color: theme-get('baseColor-Text');
-    }
-    margin: 0;
-    padding-top: 12px;
-    text-align: left;
-  }
-
-  h2 {
-    @include theme() {
-      color: theme-get('gray2');
-    }
-  }
-
-  .card_name {
-    table {
-      width: 100%;
-    }
-
-    .left {
-      text-align: left;
-      padding-top: 10px;
-      font-size: 14px;
-      font-weight: 600;
-      white-space: nowrap;
-      @include theme() {
-        color: theme-get('gray2');
-        bordere-color: theme-get('cardBorder');
-      }
-    }
-    .right {
-      text-align: right;
-      padding-top: 10px;
-      font-size: 14px;
-      font-weight: 600;
-      display: inline-block;
-      width: 262px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      @include theme() {
-        color: theme-get('baseText');
-      }
-    }
-  }
-}
-
-.nftAddress {
-  margin-top: 20px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  height: calc(100% - 30px);
-}
-
-.border1 {
-  @include theme() {
-    background-color: theme-get('cardBorder');
-  }
-  height: 1px;
-  width: 100%;
-  margin: 12px 0;
-}
-
-.nftConfirmSec {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  height: 100%;
 }

@@ -118,7 +118,7 @@ function FilterHistory() {
         title={"Filter"}
         coin={state?.currencyDetail || null}
       />
-      <div className="filterHistory">
+      <div className="filterHistory padding-Top">
         <div className={"filterHistory__selctHis"}>
           {!state?.currencyDetail ? (
             <>

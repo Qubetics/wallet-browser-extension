@@ -282,7 +282,7 @@ code {
   margin-top: 20px;
   display: flex;
   flex-direction: column;
-  height: 285px;
+  height: 270px;
   max-height: max-content;
   overflow: auto;
   .coinsTable1__right {
@@ -331,4 +331,10 @@ code {
   p {
     color: #ffffff !important;
   }
+}
+.addToken {
+  padding: 20px 24px;
+}
+.padding-Top {
+  padding-top: 0 !important;
 }

@@ -141,23 +141,23 @@ input:focus {
   }
 }
 
-.currDetails {
-  &__card {
-    background-color: $white;
-    padding: 16px 24px;
-    border-radius: 16px;
-    &__text {
-      @include theme() {
-        color: theme-get("whiteblack");
-      }
-      font-size: 16px;
-      font-weight: 400;
-      text-align: right;
-      position: relative;
-      left: -11px;
-    }
-  }
-}
+// .currDetails {
+//   &__card {
+//     background-color: $white;
+//     padding: 16px 24px;
+//     border-radius: 16px;
+//     &__text {
+//       @include theme() {
+//         color: theme-get("whiteblack");
+//       }
+//       font-size: 16px;
+//       font-weight: 400;
+//       text-align: right;
+//       position: relative;
+//       left: -11px;
+//     }
+//   }
+// }
 .selctCoinText {
   span {
     @include theme() {

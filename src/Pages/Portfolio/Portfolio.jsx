@@ -19,7 +19,11 @@ export const Portfolio = () => {
 
   return (
     <div className={`scrollableCont`}>
-      <MenuRestofHeaders title={"Portfolio"} backTo={"/wallet"} />
+      <MenuRestofHeaders
+        title={"Portfolio"}
+        backTo={"/wallet"}
+        portfolio={true}
+      />
       <div className={``}>
         <Tabs selectedIndex={sel}>
           <TabList

@@ -58,7 +58,7 @@ const balanceLength = balance.toString().length
         } ${path !== 'wallet' ? 'fixedLayout__innerBgChange' : ''}`}
         style={!isSidePanelOpen ? {
           maxHeight: "746px",
-          maxWidth: "439px"
+          maxWidth: "400px"
         }: {
           maxWidth: "600px",
           minWidth:"360px"

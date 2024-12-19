@@ -1,15 +1,14 @@
 @import "../../styles/__vars.scss";
 @import "../../styles/__mixins.scss";
 .manageList {
-  border-bottom: 1px solid ;
-  padding-bottom: 20px;
+  background-color: #18171f;
+  padding: 14px;
+  border-radius: 14px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  @include theme() {
-    border-color: theme-get("cardBorder");
-  }
-
+  gap: 10px;
+  margin-bottom: 10px;
   .networkNameNew {
     font-size: 12px;
     @include theme() {
@@ -21,21 +20,17 @@
     display: flex;
     gap: 10px;
     align-items: center;
-    margin-top: 20px;
+    // margin-top: 20px;
 
     p {
       font-size: 16px;
-      font-weight: bold;
-      @include theme() {
-        color: theme-get("whiteblack");
-      }
+      font-weight: 600;
+      color: #ffffff;
       text-align: left;
     }
     span {
       font-size: 12px;
-      @include theme() {
-        color: theme-get("whiteblack");
-      }
+      color: #98969b;
     }
     img {
       height: 30px;
@@ -45,5 +40,10 @@
   }
   button {
     margin: 0px !important;
+  }
+  .manageListSwitch {
+    .ant-switch {
+      background: #313038;
+    }
   }
 }

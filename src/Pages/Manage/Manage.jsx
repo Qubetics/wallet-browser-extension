@@ -1,16 +1,16 @@
-import React, { useEffect, useRef, useState } from 'react';
-import MenuRestofHeaders from '../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders.jsx';
-import ManageCustom from '../../Components/ManageCustomtocken/ManageCustom';
-import Search from '../../Assets/SearchIcon.svg';
-import ButtonComp from '../../Components/ButtonComp/ButtonComp.jsx';
-import style from './style.module.scss';
-import { Link } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import { InputField } from '../../Components/InputField/InputFieldSimple.jsx';
-import { server } from '../../server.js';
-import { store } from '../../index.js';
-import { setLoading } from '../../actions/loading.js';
-import useCurrentHeight from '../../CustomHooks/useCurrentHeight.js';
+import React, { useEffect, useRef, useState } from "react";
+import MenuRestofHeaders from "../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders.jsx";
+import ManageCustom from "../../Components/ManageCustomtocken/ManageCustom";
+import Search from "../../Assets/SearchIcon.svg";
+import ButtonComp from "../../Components/ButtonComp/ButtonComp.jsx";
+import style from "./style.module.scss";
+import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { InputField } from "../../Components/InputField/InputFieldSimple.jsx";
+import { server } from "../../server.js";
+import { store } from "../../index.js";
+import { setLoading } from "../../actions/loading.js";
+import useCurrentHeight from "../../CustomHooks/useCurrentHeight.js";
 
 function Manage() {
   const { account, chain, loading, currency } = useSelector((state) => state);
@@ -93,28 +93,29 @@ function Manage() {
   return (
     <div>
       <div className={`scrollableCont`}>
-        <div className='searchBarFixed'>
+        <div className="searchBarFixed">
           <MenuRestofHeaders
-            backTo={'/wallet'}
-            title={'Add Tokens'}
-            addIcon={
-              !(
-                filteredTokens.length === 1 &&
-                filteredTokens[0]?.coin_symbol === 'btc' &&
-                account.isWatchOnly
-              )
-                ? '/add-token'
-                : false
+            backTo={"/wallet"}
+            title={"Add Tokens"}
+            manageTo={
+              true
+              // !(
+              //   filteredTokens.length === 1 &&
+              //   filteredTokens[0]?.coin_symbol === "btc" &&
+              //   account.isWatchOnly
+              // )
+              //   ? "/add-token"
+              //   : false
             }
           />
           {!(
             filteredTokens.length === 1 &&
-            filteredTokens[0]?.coin_symbol === 'btc' &&
+            filteredTokens[0]?.coin_symbol === "btc" &&
             account.isWatchOnly
           ) ? (
-            <div className='search'>
+            <div className="search">
               <InputField
-                placeholder={'Search'}
+                placeholder={"Search"}
                 value={keyword}
                 checkForSymbols={true}
                 addonBefore={
@@ -122,11 +123,11 @@ function Manage() {
                     <img
                       src={Search}
                       style={{
-                        width: '17px',
-                        position: 'relative',
-                        top: '2px',
+                        width: "17px",
+                        position: "relative",
+                        top: "2px",
                       }}
-                      alt=''
+                      alt=""
                     />
                   </span>
                 }
@@ -138,15 +139,16 @@ function Manage() {
             </div>
           ) : null}
         </div>
-        <div
-          className={`${'flexedContent'}`}
-          ref={parentRef}
-          onScroll={handleScroll}
-          style={{
-            height: height > 600 ? '622px' : '486px',
-          }}
-        >
-          {/* {!(
+        <div>
+          <div
+            className={`${"flexedContent"}`}
+            ref={parentRef}
+            onScroll={handleScroll}
+            style={{
+              height: height > 600 ? "480px" : "480px",
+            }}
+          >
+            {/* {!(
             filteredTokens.length === 1 &&
             filteredTokens[0]?.coin_symbol === "btc" &&
             account.isWatchOnly
@@ -177,45 +179,50 @@ function Manage() {
             </div>
           ) : null} */}
 
-          <div className={style.spacingbtn}>
-            {filteredTokens.length > 0 ? (
-              filteredTokens.map((data) => (
-                <ManageCustom
-                  currency={data.coin_symbol.toUpperCase()}
-                  name={data.coin_name}
-                  symbol={data.coin_symbol}
-                  img={data.coin_image}
-                  valuecurrency={data.coin_family === 1 ? 'BEP20' : 'ERC20'}
-                  id={data.id}
-                  coinFamily={data.coin_family}
-                  walletAddress={account.coinFamilyAndAddress[data.coin_family]}
-                  status={data.wallet_data?.status || false}
-                  coin={data}
-                />
-              ))
-            ) : !loading ? (
-              <p
-                className='noAddress'
-                style={{
-                  fontWeight: 'bold',
-                  fontSize: '15px',
-                  marginTop: '18%',
-                }}
-              >
-                No assets found
-              </p>
-            ) : null}
-            {!(
-              filteredTokens.length === 1 &&
-              filteredTokens[0]?.coin_symbol === 'btc' &&
-              account.isWatchOnly
-            ) ? (
-              <Link to='/add-token'>
-                <ButtonComp text={'Add Custom Token'} maxWidth={'100%'} />
-              </Link>
-            ) : null}
+            <div className={style.spacingbtn}>
+              {filteredTokens.length > 0 ? (
+                filteredTokens.map((data) => (
+                  <ManageCustom
+                    currency={data.coin_symbol.toUpperCase()}
+                    name={data.coin_name}
+                    symbol={data.coin_symbol}
+                    img={data.coin_image}
+                    valuecurrency={data.coin_family === 1 ? "BEP20" : "ERC20"}
+                    id={data.id}
+                    coinFamily={data.coin_family}
+                    walletAddress={
+                      account.coinFamilyAndAddress[data.coin_family]
+                    }
+                    status={data.wallet_data?.status || false}
+                    coin={data}
+                  />
+                ))
+              ) : !loading ? (
+                <p
+                  className="noAddress"
+                  style={{
+                    fontWeight: "bold",
+                    fontSize: "15px",
+                    marginTop: "18%",
+                  }}
+                >
+                  No assets found
+                </p>
+              ) : null}
+            </div>
           </div>
         </div>
+      </div>
+      <div className="addToken">
+        {!(
+          filteredTokens.length === 1 &&
+          filteredTokens[0]?.coin_symbol === "btc" &&
+          account.isWatchOnly
+        ) ? (
+          <Link to="/add-token">
+            <ButtonComp text={"Add Custom Token"} maxWidth={"100%"} />
+          </Link>
+        ) : null}
       </div>
     </div>
   );

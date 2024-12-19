@@ -30,7 +30,7 @@ function OnlyContent() {
           !isSidePanelOpen
             ? {
                 maxHeight: '746px',
-                maxWidth: '439px',
+                maxWidth: '400px',
               }
             : {
                 maxWidth: '600px',

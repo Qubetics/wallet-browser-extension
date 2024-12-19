@@ -293,7 +293,7 @@ function App() {
         style={
           !isSidePanelOpen
             ? {
-                minWidth: "439px",
+                minWidth: "400px",
               }
             : {}
         }
@@ -318,7 +318,7 @@ function App() {
       style={
         !isSidePanelOpen
           ? {
-              minWidth: "439px",
+              minWidth: "400px",
             }
           : {}
       }
@@ -376,11 +376,11 @@ function App() {
           <Route path="/portfolio" element={<Portfolio />} />
         </Route>
 
-        <Route path="/" element={<NftLayout />}>
+        {/* <Route path="/" element={<NftLayout />}>
           <Route index path="/nftDetail" element={<NftDetail />} />
           <Route index path="/nftAddress" element={<NftAddress />} />
           <Route index path="/nftConfirm" element={<ConfirmNft />} />
-        </Route>
+        </Route> */}
         <Route path="/" element={<OnlyContent />}>
           <Route index path="/send" element={<Send />} />
           <Route path="/receive-tokens" element={<ReceiveTokens />} />
@@ -389,7 +389,6 @@ function App() {
           <Route path="/add-watch-list" element={<AddWatchList />} />
           <Route path="/buy-coins" element={<BuyCoins />} />
           <Route path="/buy-sell" element={<BuySell />} />
-
           <Route index path="/sendCurrency" element={<SendCoins />} />
           <Route path="/import-phrase" element={<ImportPhrase />} />
           <Route path="/address-book" element={<AddresBook />} />
@@ -436,6 +435,7 @@ function App() {
           <Route index path="/creditBillPay" element={<CreditBillPay />} />
           <Route index path="/billAddToken" element={<BillAddToken />} />
           <Route index path="/detail" element={<TransactionHistory />} />
+          <Route index path="/nftDetail" element={<NftDetail />} />
           <Route
             index
             path="/new-address-watch-only"
@@ -481,6 +481,7 @@ function App() {
             element={<AccountPreference />}
           />
         </Route>
+       
       </Routes>
 
       <ExternalConnection />

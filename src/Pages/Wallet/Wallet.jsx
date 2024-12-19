@@ -5,7 +5,7 @@ import "./Wallet.scss";
 import FilterIcon from "../../Assets/twoLine.svg";
 import LightManage from "../../Assets/light-manage.svg";
 import CoinsTable from "../../Components/CoinsTable/CoinsTable";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import nftIcon from "../../Assets/nftIcon.svg";
 import Reset from "../../Assets/ResetIcon.svg";
@@ -26,7 +26,7 @@ import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
 import NFTappear from "../Nft/NFTappear";
 import CoinsTableDraggable from "../../Components/CoinsTable/CoinsTableDraggable";
 import ButtonComp from "../../Components/ButtonComp/ButtonComp";
-import UserPlusRounded from "../../Assets/UserPlusRounded.svg"
+import UserPlusRounded from "../../Assets/UserPlusRounded.svg";
 function Wallet() {
   const { account, currency, tokens, balanceIn, theme } = useSelector(
     (state) => state
@@ -102,6 +102,7 @@ function Wallet() {
     }
   };
 
+  const navigate = useNavigate();
   return (
     <div className="wallet">
       <div className="wallet__heading">
@@ -132,9 +133,9 @@ function Wallet() {
                 }}
               />
             </Link> */}
-            <Link to="/to">
+            <div onClick={()=>navigate('/nftDetail',{state:{detail:{}}})}>
               <img src={nftIcon} />
-            </Link>
+            </div>
           </div>
           <div className="wallet__heading__filter">
             <Link to="/manage">
