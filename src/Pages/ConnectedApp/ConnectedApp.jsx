@@ -7,9 +7,12 @@ import { useSelector } from "react-redux";
 import DarkArrowRightIcon from "../../Assets/DarkArrowRightIcon.svg";
 import ticketcheck1 from "../../Assets/ArrowRightIcon.svg";
 import { store } from "../..";
+import search from "../../Assets/SearchIcon.svg";
 import { setCreate } from "../../actions/create";
 import { useNavigate } from "react-router-dom";
 import MyWallet from "../../Assets/myWallet.svg";
+import Jupiter from "../../Assets/Jupiter.png";
+import { InputField } from "../../Components/InputField/InputFieldSimple";
 
 function ConnectedApp() {
   const { theme } = useSelector((state) => state);
@@ -30,13 +33,58 @@ function ConnectedApp() {
   function addDefaultSrc(ev, link) {
     ev.target.src = MyWallet;
   }
-
   const navigate = useNavigate();
+
+  const data = [
+    {
+      name: "Jupiter",
+      image: Jupiter,
+      description: "Lorem ipsum dolor.",
+    },
+    {
+      name: "Parrot Finance",
+      image: Jupiter,
+      description: "Lorem ipsum dolor.",
+    },
+    {
+      name: "Solend",
+      image: Jupiter,
+      description: "Lorem ipsum dolor.",
+    },
+    {
+      name: "Larix",
+      image: Jupiter,
+      description: "Lorem ipsum dolor.",
+    },
+  ];
+  const exchangesdata = [
+    {
+      name: "Compound",
+      image: Jupiter,
+      description: "Lorem ipsum dolor.",
+    },
+    {
+      name: "PancakeSwap",
+      image: Jupiter,
+      description: "Lorem ipsum dolor.",
+    },
+    {
+      name: "Sushi",
+      image: Jupiter,
+      description: "Lorem ipsum dolor.",
+    },
+    {
+      name: "Uniswap",
+      image: Jupiter,
+      description: "Lorem ipsum dolor.",
+    },
+  ];
+
   return (
     <div>
       <div className={`scrollableCont`}>
-        {/* <MenuRestofHeaders backTo={"/wallet"} title={"Connected App"} /> */}
-        <div className={`flexedContent`}>
+        {/* <MenuRestofHeaders backTo={"/wallet"} title={"dApp"} /> */}
+        {/* <div className={`flexedContent`}>
           {connections.length > 0 ? (
             connections.map((connection) => (
               <div
@@ -88,6 +136,61 @@ function ConnectedApp() {
               No Dapps connected...
             </p>
           )}
+        </div> */}
+        <div>
+          <div className="searchBarFixed">
+            <div className="search">
+              <InputField
+                placeholder={"Search"}
+                checkForSymbols={true}
+                addonBefore={
+                  <span>
+                    <img
+                      src={search}
+                      style={{
+                        width: "17px",
+                        position: "relative",
+                        top: "2px",
+                      }}
+                      alt=""
+                    />
+                  </span>
+                }
+              />
+            </div>
+          </div>
+          <div className={`flexedContent`}>
+            <div className="dApp">
+              <h3>Finance</h3>
+              <div className="dApp_card">
+                <div className="financeCard">
+                  {data.map((item, index) => (
+                    <div key={index} className="financeCard_jupiter">
+                      <img src={item.image} alt={item.name} />
+                      <div>
+                        <h5>{item.name}</h5>
+                        <p>{item.description}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <h3 style={{ marginTop: "24px" }}>Exchanges</h3>
+              <div className="dApp_card">
+                <div className="financeCard">
+                  {exchangesdata.map((item, index) => (
+                    <div key={index} className="financeCard_jupiter">
+                      <img src={item.image} alt={item.name} />
+                      <div>
+                        <h5>{item.name}</h5>
+                        <p>{item.description}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

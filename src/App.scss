@@ -847,16 +847,6 @@ input[type="number"] {
   top: -8px;
 }
 
-.searchBarFixed {
-  position: sticky;
-  top: 0;
-  z-index: 9;
-  background-color: transparent;
-  .search {
-    padding: 10px 15px;
-  }
-}
-
 .viewphrases__iInner img {
   height: 40px !important;
   width: 40px !important;
@@ -889,5 +879,21 @@ input[type="number"] {
     p {
       color: $white;
     }
+  }
+}
+.ant-drawer-content {
+  background: #18171f !important;
+  max-width: 400px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.searchBarFixed {
+  position: sticky;
+  top: 0;
+  z-index: 9;
+  background-color: transparent;
+  .search {
+    padding: 0 24px !important;
   }
 }

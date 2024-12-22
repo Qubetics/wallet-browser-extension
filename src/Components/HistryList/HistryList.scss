@@ -22,6 +22,10 @@
       color: $white;
       font-size: 18px;
       font-weight: 600;
+      width: 180px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
     }
   }
   .histryStatus {
@@ -74,5 +78,9 @@
     color: #ffffff;
     font-size: 14px;
     font-weight: 500;
+    max-width: 297px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }

@@ -133,7 +133,9 @@ function Wallet() {
                 }}
               />
             </Link> */}
-            <div onClick={()=>navigate('/nftDetail',{state:{detail:{}}})}>
+            <div
+              onClick={() => navigate("/nftDetail", { state: { detail: {} } })}
+            >
               <img src={nftIcon} />
             </div>
           </div>
@@ -210,6 +212,9 @@ function Wallet() {
       <div className="walletBtn">
         <ButtonComp
           maxWidth="190px"
+          onClick={() => {
+            return navigate("/address-book");
+          }}
           text={
             <span>
               <img src={UserPlusRounded} alt="img" />

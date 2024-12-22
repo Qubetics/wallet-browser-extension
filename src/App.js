@@ -97,6 +97,8 @@ import TermsPolicy from "./Pages/WelcomeScreens/TermsPolicy";
 import SecretPhrase from "./Pages/WelcomeScreens/SecretPhrase";
 import ReceiveCurrency from "./Pages/ReceiveCoins/ReceiveCurrency";
 import SecuritySetting from "./Pages/Setting/SecuritySetting";
+import NftManageWallet from "./Pages/Nft/NftManageWallet";
+import NftSend from "./Pages/Nft/NftSend";
 
 function App() {
   const [state, setState] = useState("Active");
@@ -436,6 +438,8 @@ function App() {
           <Route index path="/billAddToken" element={<BillAddToken />} />
           <Route index path="/detail" element={<TransactionHistory />} />
           <Route index path="/nftDetail" element={<NftDetail />} />
+          <Route index path="/nftManage" element={<NftManageWallet />} />
+          <Route index path="/NftSend" element={<NftSend />} />
           <Route
             index
             path="/new-address-watch-only"
@@ -481,7 +485,6 @@ function App() {
             element={<AccountPreference />}
           />
         </Route>
-       
       </Routes>
 
       <ExternalConnection />

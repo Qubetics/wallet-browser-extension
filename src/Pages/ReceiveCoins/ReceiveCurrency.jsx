@@ -5,7 +5,7 @@ import { message } from "antd";
 import CopyIcon from "../../Assets/CopyIcon.svg";
 import "./Receive.scss";
 import ButtonComp from "../../Components/ButtonComp/ButtonComp";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 function ReceiveCurrency() {
   const [selectedCoin, setSelectedCoin] = useState({
@@ -16,6 +16,7 @@ function ReceiveCurrency() {
     },
   });
   const messageApi = message.useMessage()[0];
+  const location = useLocation();
 
   const copyToClipboard = async (text) => {
     try {
@@ -26,11 +27,14 @@ function ReceiveCurrency() {
     }
   };
 
+  // Check if the current path is /receive-currency
+  const isReceiveCurrencyRoute = location.state?.nftButton;
+  console.log(location,"Location")
   return (
     <div className="receiveCurrency">
       <MenuRestofHeaders backTo={"/receive-tokens"} title={"Receive BTC"} />
       <div className="receiveCurrency_content scrollableCont">
-        <div className={`flexedContent`}>
+        <div className={`flexedContent padding-Top`}>
           <div className="receiveCurrency_balanceDetails">
             <QRCode
               value={selectedCoin.wallet_address}
@@ -42,10 +46,6 @@ function ReceiveCurrency() {
               logoWidth={55}
               logoPadding={8}
               logoPaddingStyle="circle"
-              // style={{
-              //   borderRadius: "20px",
-              //   padding: "15px",
-              // }}
             />
           </div>
           <div className="receiveCurrency_copy">
@@ -69,9 +69,20 @@ function ReceiveCurrency() {
             adipiscing quis maecenas auctor.
             <br />
             <Link>Learn more </Link>
-             about ERC-20 tokens.
+            about ERC-20 tokens.
           </p>
-          <ButtonComp text={"share your address"} maxWidth={"100%"} />
+        </div>
+        <div style={{ padding: "0 24px" }}>
+          {isReceiveCurrencyRoute ? (
+            <div className="shareBtn">
+              <div className="cancelBtn">
+                <ButtonComp text={"Share"} maxWidth={"100%"} />
+              </div>
+              <ButtonComp text={"Address Book"} maxWidth={"100%"} />
+            </div>
+          ) : (
+            <ButtonComp text={"Share Your Address"} maxWidth={"100%"} />
+          )}
         </div>
       </div>
     </div>

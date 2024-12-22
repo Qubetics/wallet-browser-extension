@@ -1,7 +1,7 @@
 /*global chrome*/
 
 import React, { useState } from "react";
-import {  message } from "antd";
+import { message } from "antd";
 import "./AddressNetworkCard.scss";
 import bin from "../../Assets/delete.png";
 import EDIT from "../../Assets/edit.png";
@@ -11,28 +11,62 @@ import { useSelector } from "react-redux";
 import ModalCustom from "../ModalCustom/ModalCustom";
 import { Link, useNavigate } from "react-router-dom";
 import { server } from "../../server";
-import { useEffect } from "react"; 
-import { EditAddress } from "./EditAddress"; 
+import { useEffect } from "react";
+import { EditAddress } from "./EditAddress.jsx";
+import EditIcon from "../../Assets/edit.svg";
+import DeleteIcon from "../../Assets/delete.png";
+import DownArrowSuffix from "../../Assets/DownArrowSuffix.svg";
+import JohWick from "../../Assets/JohWick.svg";
+import { EditAddressMain } from "./EditAddressMain.jsx";
+
+const crypto = {
+  1: "BNB",
+  2: "ETH",
+  3: "BTC",
+  4: "POL",
+  5: "SOL",
+  6: "TRX",
+};
 
 function AddressNetworkCard(props) {
-  const { heading, address, currency, index, id, refresh, wallet_address, wallet_data, editModal, setEditModal, inits } =
-    props;
+  const {
+    heading,
+    address,
+    currency,
+    index,
+    id,
+    refresh,
+    wallet_address,
+    wallet_data,
+    editModal,
+    setEditModal,
+    editModalMain,
+    setEditModalMain,
+    inits,
+  } = props;
   const { chain } = useSelector((state) => state);
   const { account } = useSelector((state) => state);
   const [deleteModal, setDeleteModal] = useState(false);
   // const [editModal, setEditModal] = useState(false);
   const [editData, setEditData] = useState(null);
+  const [deleteItem, setDeleteItem] = useState(null);
+  const [deleteType, setDeleteType] = useState(null);
+  const [editDataMain, setEditDataMain] = useState(null);
+
+  const [viewAddress, setViewAddress] = useState(false);
+
   const [chains, setChains] = useState(null);
 
   const [selectedChain, setSelectedChain] = useState(null);
   const [messageApi, contextHolder] = message.useMessage();
 
-
   const init = async () => {
-    const { chains } = await chrome.storage.local.get('chains'); 
+    const { chains } = await chrome.storage.local.get("chains");
 
     if (chains && wallet_data?.length > 0) {
-      const selectedChain = chains.find((el) => el?.coinFamily == wallet_data[0]?.coin_family); 
+      const selectedChain = chains.find(
+        (el) => el?.coinFamily == wallet_data[0]?.coin_family
+      );
       setSelectedChain(selectedChain);
     }
     setChains(chains);
@@ -42,137 +76,229 @@ function AddressNetworkCard(props) {
     init();
   }, []);
 
- 
   const handleSubmit = async () => {
-    try { 
+    try {
+      if (!/^(0x){1}[0-9a-fA-F]{40}$/i.test(editData?.wallet_address)) {
+        messageApi.error("Invalid contract address");
+        return;
+      }
+
       store.dispatch(setLoading(true));
       const response = await server.post(
         // '/wallet/coin/coins_market_data',
         "/user/edit_address_book_wallet",
         {
-          "address_book_id": editData?.address_book_id,
-          "address_book_wallet_name": editData?.name,
-          "address_book_wallet_address": editData?.wallet_address,
-          "address_book_wallet_id": editData?.id
+          address_book_id: editData?.address_book_id,
+          address_book_wallet_name: editData?.name,
+          address_book_wallet_address: editData?.wallet_address,
+          address_book_wallet_id: editData?.id,
+          coin_family: editData?.coin_family,
         },
         {
           headers: {
             Authorization: account.jwtToken,
           },
         }
-      ); 
+      );
       inits();
       store.dispatch(setLoading(false));
       setEditData(null);
       setEditModal(false);
-    } catch (error) { 
+    } catch (error) {
       store.dispatch(setLoading(false));
       return messageApi.error(error.response.message);
     }
   };
- 
-  const deleteSubwallet = async (itm) => { 
-    // /user/delete_address_book_wallet_address 
+
+  const handleSubmitMain = async () => {
+    try {
+      store.dispatch(setLoading(true));
+      const response = await server.post(
+        "/user/edit_address_book_contact_name",
+        {
+          address_book_id: editDataMain?.address_book_id,
+          address_book_name: editDataMain?.address_book_name,
+          // address_book_wallet_address: editDataMain?.wallet_address
+        },
+        {
+          headers: {
+            Authorization: account.jwtToken,
+          },
+        }
+      );
+      inits();
+      store.dispatch(setLoading(false));
+      setEditDataMain(null);
+      setEditModalMain(false);
+    } catch (error) {
+      console.log("error ", error);
+      store.dispatch(setLoading(false));
+      return messageApi.error(error.response.message);
+    }
+  };
+
+  const deleteSubwallet = async (itm) => {
     try {
       store.dispatch(setLoading(true));
       const response = await server.post(
         "/user/delete_address_book_wallet_address",
         {
-          "address_book_id": itm?.address_book_id,
-          "id": itm?.id
+          address_book_id: itm?.address_book_id,
+          id: itm?.id,
         },
         {
           headers: {
             Authorization: account.jwtToken,
           },
         }
-      ); 
+      );
       inits();
       store.dispatch(setLoading(false));
-      setEditModal(false);
+      setDeleteItem(null);
+      setEditData(null);
+      setDeleteModal(false);
     } catch (error) {
-      console.log('Error ', error);
-
+      console.log("Error ", error);
+      setDeleteModal(false);
       store.dispatch(setLoading(false));
       return messageApi.error(error.response.message);
-    } 
-  }
- 
+    }
+  };
 
   return (
     <>
+      {contextHolder}
+      <div className="adressFavorites" key={index}>
+        {/* <h4>Favorites</h4> */}
+      </div>
       <div className="adressCard">
-        <div className="adressCard__Header ">
-          <h2>
-            {heading}{" "}
-            <img
-              onClick={async () => {
-                setDeleteModal(true);
-              }}
-              src={bin}
-              style={{
-                height: "16px",
-                width: "16px",
-                marginLeft: "10px",
-                cursor: "pointer",
-              }}
-              alt=""
-            />
-            {/* <span onClick={async () => {
-            setEditModal(true);
-          }}>Edit</span> */}
-          </h2>
-          <div className="currency">
-            {/* <p>Network</p> */}
-            {/* <p>{currency}</p> */}
+        <div className="addressBook">
+          <div className="bookAddress">
+            <div className="leftSec">
+              <h6> {heading.charAt(0).toUpperCase()}</h6>
+              <div>
+                <h3>{heading} </h3>
+                <span className="address">
+                  {address.substring(0, 7)}.....
+                  {address.substring(address.length - 7, address.length)}
+                </span>
+              </div>
+            </div>
+            <div className="rytSec">
+              <img
+                onClick={async () => {
+                  setDeleteModal(true);
+                  setDeleteType("main");
+                }}
+                src={DeleteIcon}
+                alt="DeleteIcon"
+                width={"15px"}
+              />
+              <span>
+                <img
+                  src={EditIcon}
+                  alt="editIcon"
+                  onClick={() => {
+                    setEditDataMain({
+                      address_book_id: id,
+                      address_book_name: heading,
+                      wallet_address: address,
+                    });
+                    setEditModalMain(true);
+                  }}
+                />
+              </span>
+              <span onClick={() => setViewAddress(!viewAddress)}>
+                <img
+                  style={{ cursor: "pointer" }}
+                  src={DownArrowSuffix}
+                  alt="DownArrowSuffix"
+                />
+              </span>
+            </div>
           </div>
         </div>
-
-        <div className="adressCard__address">
-          {/* <p>Address</p> */}
-          {/* <p>
-            {address.substring(0, 7)}.....
-            {address.substring(address.length - 7, address.length)}
-          </p> */}
-        </div>
-        {/* <div className="adressCard__address">
-          <p>Network</p>
-          <p>{currency}</p>
-        </div> */}
-        <div className="addressBook">
-          Address list
-          {Array.isArray(wallet_data) && wallet_data.map((elem, idx) => (
-            <div key={idx} style={{ display: "flex", justifyContent: "space-between", width: "100%", alignItems: "center" }}>
-              <img style={{ height: 25 }} src={elem?.coin_data?.coin_image} />
-              <span>
-                {elem?.wallet_address.substring(0, 7)}.....
-                {elem?.wallet_address.substring(elem?.wallet_address.length - 7, elem?.wallet_address.length)}
-              </span>{ }
-              <span onClick={() => deleteSubwallet(elem)}>Delete</span>
-              {/* <span onClick={() => editSubwallet(elem)}>Edit</span> */}
-              <span onClick={async () => { 
-                setEditData(elem);
-                setEditModal(true);
-              }}>Edit</span>
-            </div>
-          ))}
-        </div>
       </div>
-
+      {viewAddress && (
+        <div className="valueAddress adressCard">
+          {Array.isArray(wallet_data) &&
+            wallet_data.map((elem, idx) => (
+              <div key={idx} className="addressBook">
+                <div className="bookAddress">
+                  <div className="leftSec">
+                    <img
+                      style={{ height: 36 }}
+                      src={elem?.coin_data?.coin_image}
+                    />
+                    <div className="addressInner">
+                      <h3>{crypto[elem?.coin_family]?.toUpperCase()}</h3>
+                      <span className="address">
+                        {elem?.wallet_address.substring(0, 7)}.....
+                        {elem?.wallet_address.substring(
+                          elem?.wallet_address.length - 7,
+                          elem?.wallet_address.length
+                        )}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="rytSec">
+                    <img
+                      style={{ marginRight: "10px" }}
+                      onClick={async () => {
+                        setEditData(elem);
+                        setEditModal(true);
+                      }}
+                      src={EditIcon}
+                      alt="editIcon"
+                    />
+                    <img
+                      onClick={() => {
+                        // deleteSubwallet(elem);
+                        // setEditModal(true);
+                        setDeleteItem(elem);
+                        setDeleteModal(true);
+                        setDeleteType("sub");
+                      }}
+                      src={DeleteIcon}
+                      alt="DeleteIcon"
+                      width={"15px"}
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+        </div>
+      )}
       {/* setEditModal */}
 
-      {editData && editModal && <EditAddress editModal={editModal}
-        setEditModal={setEditModal}
-        editData={editData}
-        setEditData={setEditData}
-        handleSubmit={handleSubmit} 
-        selectedChain={selectedChain}
-        setSelectedChain={setSelectedChain}
-        chains={chains}
-        address={address}
+      {/* {editData && editModal && (
+        <EditAddress
+          editModal={editModal}
+          setEditModal={setEditModal}
+          editData={editData}
+          setEditData={setEditData}
+          handleSubmit={handleSubmit}
+          selectedChain={selectedChain}
+          setSelectedChain={setSelectedChain}
+          chains={chains}
+          address={address}
+          heading={heading}
         />
-      }
+      )} */}
 
+      {/* {editModalMain && editDataMain && (
+        <EditAddressMain
+          editModal={editModalMain}
+          setEditModal={setEditModalMain}
+          editData={editDataMain}
+          setEditData={setEditDataMain}
+          handleSubmit={handleSubmitMain}
+          selectedChain={selectedChain}
+          setSelectedChain={setSelectedChain}
+          chains={chains}
+          address={address}
+        />
+      )} */}
 
       <ModalCustom
         title={"Delete Address"}
@@ -204,7 +330,7 @@ function AddressNetworkCard(props) {
               className="green"
               style={{
                 padding: "12px 53px",
-                backgroundColor: "green",
+                backgroundColor: "rgb(213 175 34)",
                 color: "white",
                 fontSize: "18px",
                 borderRadius: "7px",
@@ -213,22 +339,28 @@ function AddressNetworkCard(props) {
               }}
               onClick={async () => {
                 store.dispatch(setLoading(true));
-                await server.post(
-                  // "/wallet/delete_address_in_book",
-                  "/user/delete_address_book",
-                  {
-                    id,
-                    // wallet_address:address,
-                  },
-                  {
-                    headers: {
-                      Authorization: account.jwtToken,
+
+                if (deleteType == "sub") {
+                  deleteSubwallet(deleteItem);
+                  store.dispatch(setLoading(false));
+                } else {
+                  await server.post(
+                    // "/wallet/delete_address_in_book",
+                    "/user/delete_address_book",
+                    {
+                      id,
+                      // wallet_address:address,
                     },
-                  }
-                );
-                store.dispatch(setLoading(false));
-                setDeleteModal(false);
-                refresh();
+                    {
+                      headers: {
+                        Authorization: account.jwtToken,
+                      },
+                    }
+                  );
+                  store.dispatch(setLoading(false));
+                  setDeleteModal(false);
+                  refresh();
+                }
               }}
             >
               Yes

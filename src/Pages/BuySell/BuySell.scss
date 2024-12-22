@@ -111,16 +111,16 @@
   left: -11px;
 }
 
-.swapTab {
-  cursor: pointer;
-  @include theme() {
-    color: theme-get("whiteblack");
-  }
+// .swapTab {
+//   cursor: pointer;
+//   @include theme() {
+//     color: theme-get("whiteblack");
+//   }
 
-  &:focus-visible {
-    outline: unset !important;
-  }
-}
+//   &:focus-visible {
+//     outline: unset !important;
+//   }
+// }
 .confirmationsModal {
   display: flex;
   flex-direction: column;
@@ -187,12 +187,12 @@
   // }
 }
 
-.swapTabList {
-  @include theme() {
-    background-color: theme-get("inputBg");
-  }
-  margin-bottom: 10px;
-}
+// .swapTabList {
+//   @include theme() {
+//     background-color: theme-get("inputBg");
+//   }
+//   margin-bottom: 10px;
+// }
 
 .myvalues {
   flex: 1;

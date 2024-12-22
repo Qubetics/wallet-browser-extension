@@ -1,42 +1,43 @@
 /*global chrome*/
 
-import './CrossChain.scss';
+import "./CrossChain.scss";
 
-import { Drawer, message, Select } from 'antd';
-import React from 'react';
-import MenuRestofHeaders from '../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders';
-import { InputField } from '../../Components/InputField/InputFieldSimple';
-import DownArrowSuffix from '../../Assets/DownArrowSuffix.svg';
-import SwapVerticalIcon from '../../Assets/SwapVerticalIcon.svg';
-import ButtonComp from '../../Components/ButtonComp/ButtonComp';
-import { useNavigate } from 'react-router-dom';
-import { UniswapHelper } from '../../helpers/uniswap.helper';
-import { useEffect } from 'react';
-import { useState } from 'react';
-import { Web3Helper } from '../../helpers/web3.helper';
-import darkclose from '../../Assets/darkclose.svg';
-import { useSelector } from 'react-redux';
-import { store } from '../..';
-import { setLoading } from '../../actions/loading';
-import { ClipLoader } from 'react-spinners';
-import { useRef } from 'react';
-import { CrossChainHelper } from '../../helpers/crosschain.helper';
-import ModalCloseIcon from '../../Assets/ModalCloseIcon.svg';
-import Search from '../../Assets/SearchIcon.svg';
-import { SolanaHelper } from '../../helpers/solana.helper';
-import { BTCHelper } from '../../helpers/btc.helper';
-import { AdaHelper } from '../../helpers/ada.helper';
-import { DURATION } from '../../config/message.config';
-import BigNumber from 'bignumber.js';
+import { Drawer, message, Select } from "antd";
+import React from "react";
+import MenuRestofHeaders from "../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders";
+import { InputField } from "../../Components/InputField/InputFieldSimple";
+import DownArrowSuffix from "../../Assets/DownArrowSuffix.svg";
+import SwapVerticalIcon from "../../Assets/SwapVerticalIcon.svg";
+import ButtonComp from "../../Components/ButtonComp/ButtonComp";
+import { useNavigate } from "react-router-dom";
+import { UniswapHelper } from "../../helpers/uniswap.helper";
+import { useEffect } from "react";
+import { useState } from "react";
+import { Web3Helper } from "../../helpers/web3.helper";
+import darkclose from "../../Assets/darkclose.svg";
+import { useSelector } from "react-redux";
+import { store } from "../..";
+import { setLoading } from "../../actions/loading";
+import { ClipLoader } from "react-spinners";
+import { useRef } from "react";
+import { CrossChainHelper } from "../../helpers/crosschain.helper";
+import ModalCloseIcon from "../../Assets/ModalCloseIcon.svg";
+import Search from "../../Assets/SearchIcon.svg";
+import { SolanaHelper } from "../../helpers/solana.helper";
+import { BTCHelper } from "../../helpers/btc.helper";
+import { AdaHelper } from "../../helpers/ada.helper";
+import { DURATION } from "../../config/message.config";
+import BigNumber from "bignumber.js";
 import {
   balanceToFiatConversion,
   exponential_to_decimal,
   newBalanceToFiatConversion,
   toFixed,
-} from '../../helpers/conversion.helper';
-import { server } from '../../server';
-import { swapDetailAc } from '../../actions/swap';
-import { setLoading as overAllLoader } from '../../actions/loading';
+} from "../../helpers/conversion.helper";
+import { server } from "../../server";
+import { swapDetailAc } from "../../actions/swap";
+import { setLoading as overAllLoader } from "../../actions/loading";
+import useCurrentHeight from "../../CustomHooks/useCurrentHeight";
 
 function getFlooredFixed(v, d) {
   return (Math.floor(v * Math.pow(10, d)) / Math.pow(10, d)).toFixed(d);
@@ -48,16 +49,16 @@ let btcTosatoshi = 100000000;
 let btcTosatoshiMultiplier = 0.00000001;
 
 function addCommasToNumber(number) {
-  var parts = number.toString().split('.');
+  var parts = number.toString().split(".");
   var integerPart = parts[0];
-  var decimalPart = parts[1] || ''; // Handle cases where there is no decimal part
+  var decimalPart = parts[1] || ""; // Handle cases where there is no decimal part
 
   // Add commas to the integer part
-  integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 
   // Combine the integer and decimal parts
-  if (decimalPart !== '') {
-    return integerPart + '.' + decimalPart;
+  if (decimalPart !== "") {
+    return integerPart + "." + decimalPart;
   } else {
     return integerPart;
   }
@@ -91,6 +92,7 @@ function CrossChain() {
   const [selectedChain, setSelectedChain] = useState(chain.chainId);
   const [selected, setSelected] = useState(null);
   const [infoData, setInfoData] = useState([]);
+  const height = useCurrentHeight();
 
   const [allToken, setAllTokens] = useState([]);
 
@@ -101,6 +103,8 @@ function CrossChain() {
 
   const [percent, setPercent] = useState(null);
   const { theme, swapDetail } = useSelector((state) => state);
+  const [activeIndex, setActiveIndex] = useState(null);
+  const percentages = [25, 50, 75, 100];
 
   useEffect(() => {
     if (swapDetail) {
@@ -133,7 +137,7 @@ function CrossChain() {
           );
 
           if (route?.status && route?.message) {
-            if (route?.status != '' || route?.message != '') {
+            if (route?.status != "" || route?.message != "") {
               setInnerLoading(false);
               return messageApi.error(route?.message);
             }
@@ -155,7 +159,7 @@ function CrossChain() {
           setInnerLoading(false);
           setInfoData([
             {
-              text: 'Estimate Rate',
+              text: "Estimate Rate",
               textVal: `1 ${tokenOne.symbol} = ${
                 route
                   ? getFlooredFixed(
@@ -166,13 +170,13 @@ function CrossChain() {
               } ${tokenTwo.symbol}`,
             },
             {
-              text: 'Service Fee',
+              text: "Service Fee",
               textVal: `${new BigNumber(route.exchangeData.depositCoinFeeRate)
                 .multipliedBy(100)
                 .toString()}%`,
             },
             {
-              text: 'Relayer Service Fee',
+              text: "Relayer Service Fee",
               textVal: `${parseFloat(
                 getFlooredFixed(
                   parseFloat(
@@ -194,13 +198,13 @@ function CrossChain() {
             //   )} ${token2.symbol}`,
             // },
             {
-              text: 'You will receive',
+              text: "You will receive",
               textVal: `${toFixed(
                 getFlooredFixed(parseFloat(route.outAmount), 6)
               )} ${tokenTwo.symbol}`,
             },
             {
-              text: 'Estimated time of receiving',
+              text: "Estimated time of receiving",
               textVal: `1~20 Minutes`,
             },
           ]);
@@ -209,26 +213,26 @@ function CrossChain() {
 
       updateRef.current = true;
     } catch (error) {
-      console.log('ERR ', error);
+      console.log("ERR ", error);
       setInnerLoading(false);
-      return messageApi.error('Pair not available for swap.');
+      return messageApi.error("Pair not available for swap.");
     }
   };
 
   const calculateAccordingly = async (percentage) => {
     if (selectedChain.isEVM) {
       account.address = account.evmAddress;
-    } else if (!selectedChain.isEVM && selectedChain.currencyName === 'SOL') {
+    } else if (!selectedChain.isEVM && selectedChain.currencyName === "SOL") {
       account.address = account.solanaAddress;
-    } else if (!selectedChain.isEVM && selectedChain.currencyName === 'BTC') {
+    } else if (!selectedChain.isEVM && selectedChain.currencyName === "BTC") {
       account.address = account.bitcoinAddress;
-    } else if (!selectedChain.isEVM && selectedChain.currencyName === 'ADA') {
+    } else if (!selectedChain.isEVM && selectedChain.currencyName === "ADA") {
       account.address = account.adaAddress;
     } else {
       account.address = account.evmAddress;
     }
 
-    console.log(selectedChain, 'selectedChain');
+    console.log(selectedChain, "selectedChain");
 
     if (token1?.tokenAddress) {
       if (
@@ -242,7 +246,7 @@ function CrossChain() {
         setAount(
           finalAmountToSend == 0
             ? finalAmountToSend.toString()
-            : finalAmountToSend.toFixed(18).replace(/\.?0+$/, '')
+            : finalAmountToSend.toFixed(18).replace(/\.?0+$/, "")
         );
         updateRef.current = true;
         handleChangeForInput1(
@@ -268,7 +272,7 @@ function CrossChain() {
         setAount(
           finalAmountToSend == 0
             ? finalAmountToSend.toString()
-            : finalAmountToSend.toFixed(18).replace(/\.?0+$/, '')
+            : finalAmountToSend.toFixed(18).replace(/\.?0+$/, "")
         );
         setBalance(toFixed(amountToSend.toString()));
         updateRef.current = true;
@@ -300,7 +304,7 @@ function CrossChain() {
   const init = async () => {
     try {
       const { data } = await server.post(
-        '/swft/query_coin_list',
+        "/swft/query_coin_list",
         {
           address_list: Object.keys(account.coinFamilyAndAddress)
             .map((key) => {
@@ -322,7 +326,7 @@ function CrossChain() {
         }
       );
       const inActiveTokens = await server.post(
-        '/swft/query_coin_list',
+        "/swft/query_coin_list",
         {
           address_list: Object.keys(account.coinFamilyAndAddress)
             .map((key) => {
@@ -345,25 +349,25 @@ function CrossChain() {
       );
 
       setTotal(inActiveTokens?.data?.meta?.total || 0);
-      const { chains } = await chrome.storage.local.get('chains');
+      const { chains } = await chrome.storage.local.get("chains");
 
       let tokens = data?.data?.map((token) => {
-        let coinFamilyName = 'ETH';
-        let tokenType = 'ERC20';
+        let coinFamilyName = "ETH";
+        let tokenType = "ERC20";
 
         switch (token?.coin_family) {
           case 2:
-            coinFamilyName = 'ETH';
-            tokenType = 'ERC20';
+            coinFamilyName = "ETH";
+            tokenType = "ERC20";
             break;
 
           case 1:
-            coinFamilyName = 'BNB';
-            tokenType = 'BEP20';
+            coinFamilyName = "BNB";
+            tokenType = "BEP20";
             break;
           case 4:
-            coinFamilyName = 'POL';
-            tokenType = 'ERC20';
+            coinFamilyName = "POL";
+            tokenType = "ERC20";
             break;
 
           default:
@@ -407,23 +411,23 @@ function CrossChain() {
         };
       });
 
-      const tokens2 = inActiveTokens.data.data.map((token) => {
-        let coinFamilyName = 'ETH';
-        let tokenType = 'ERC20';
+      const tokens2 = inActiveTokens?.data?.data.map((token) => {
+        let coinFamilyName = "ETH";
+        let tokenType = "ERC20";
 
         switch (token.coin_family) {
           case 2:
-            coinFamilyName = 'ETH';
-            tokenType = 'ERC20';
+            coinFamilyName = "ETH";
+            tokenType = "ERC20";
             break;
 
           case 1:
-            coinFamilyName = 'BNB';
-            tokenType = 'BEP20';
+            coinFamilyName = "BNB";
+            tokenType = "BEP20";
             break;
           case 4:
-            coinFamilyName = 'POL';
-            tokenType = 'ERC20';
+            coinFamilyName = "POL";
+            tokenType = "ERC20";
             break;
           default:
             break;
@@ -476,8 +480,8 @@ function CrossChain() {
       setAllTokens(modifiedList);
       setFilteredTokens(modifiedList);
 
-      let { crossToken1 } = await chrome.storage.local.get('crossToken1');
-      let { crossToken2 } = await chrome.storage.local.get('crossToken2');
+      let { crossToken1 } = await chrome.storage.local.get("crossToken1");
+      let { crossToken2 } = await chrome.storage.local.get("crossToken2");
 
       if (!crossToken1 && !crossToken2) {
         let myToken1 = modifiedList.find(
@@ -513,7 +517,7 @@ function CrossChain() {
         );
         // console.log("ROUTES:::::::592", route);
         if (route?.status && route?.message) {
-          if (route?.status != '' || route?.message != '') {
+          if (route?.status != "" || route?.message != "") {
             setInnerLoading(false);
             return messageApi.error(route?.message);
           }
@@ -545,7 +549,7 @@ function CrossChain() {
           );
           // console.log("ROUTES:::::::623", route);
           if (route?.status && route?.message) {
-            if (route?.status != '' || route?.message != '') {
+            if (route?.status != "" || route?.message != "") {
               setInnerLoading(false);
               return messageApi.error(route?.message);
               // navigate(-1);
@@ -557,10 +561,10 @@ function CrossChain() {
         setInnerLoading(false);
       }
     } catch (error) {
-      console.log('error CrossChain:::', error);
+      console.log("error CrossChain:::", error);
       setInnerLoading(false);
       messageApi.error(
-        'Unable to perform swap currently. Please try again later.'
+        "Unable to perform swap currently. Please try again later."
       );
       // navigate(-1);
     }
@@ -587,7 +591,7 @@ function CrossChain() {
       }, 2000);
     }
 
-    if (amount == '' || amount == null) {
+    if (amount == "" || amount == null) {
       setInfoData([]);
       setAmount2(null);
     }
@@ -623,7 +627,7 @@ function CrossChain() {
     );
     // console.log("ROUTES:::::::700", route);
     if (route?.status && route?.message) {
-      if (route?.status != '' || route?.message != '') {
+      if (route?.status != "" || route?.message != "") {
         return messageApi.error(route?.message);
       }
     }
@@ -652,7 +656,7 @@ function CrossChain() {
       );
       // console.log("ROUTES:::::::730", route);
       if (route?.status && route?.message) {
-        if (route?.status != '' || route?.message != '') {
+        if (route?.status != "" || route?.message != "") {
           return messageApi.error(route?.message);
         }
       }
@@ -681,7 +685,7 @@ function CrossChain() {
           );
           // console.log("ROUTES:::::::758", route);
           if (route?.status && route?.message) {
-            if (route?.status != '' || route?.message != '') {
+            if (route?.status != "" || route?.message != "") {
               setInnerLoading(false);
               return messageApi.error(route?.message);
             }
@@ -703,7 +707,7 @@ function CrossChain() {
           setInnerLoading(false);
           setInfoData([
             {
-              text: 'Estimate Rate',
+              text: "Estimate Rate",
               textVal: `1 ${token1.symbol} = ${
                 route
                   ? getFlooredFixed(
@@ -714,13 +718,13 @@ function CrossChain() {
               } ${token2.symbol}`,
             },
             {
-              text: 'Service Fee',
+              text: "Service Fee",
               textVal: `${new BigNumber(route.exchangeData.depositCoinFeeRate)
                 .multipliedBy(100)
                 .toString()}%`,
             },
             {
-              text: 'Relayer Service Fee',
+              text: "Relayer Service Fee",
               textVal: `${parseFloat(
                 getFlooredFixed(
                   parseFloat(
@@ -742,13 +746,13 @@ function CrossChain() {
             //   )} ${token2.symbol}`,
             // },
             {
-              text: 'You will receive',
+              text: "You will receive",
               textVal: `${toFixed(
                 getFlooredFixed(parseFloat(route.outAmount), 6)
               )} ${token2.symbol}`,
             },
             {
-              text: 'Estimated time of receiving',
+              text: "Estimated time of receiving",
               textVal: `1~20 Minutes`,
             },
           ]);
@@ -758,7 +762,7 @@ function CrossChain() {
       updateRef.current = true;
     } catch (error) {
       setInnerLoading(false);
-      return messageApi.error('Pair not available for swap.');
+      return messageApi.error("Pair not available for swap.");
     }
   };
 
@@ -804,15 +808,15 @@ function CrossChain() {
   // }
 
   const selectAfter = (
-    <div className={'addonAfter'}>
+    <div className={"addonAfter"}>
       {token1?.isToken ? (
         <span
-          className='send__pasteText'
+          className="send__pasteText"
           style={{
-            position: 'relative',
-            top: '-1px',
-            left: '-5px',
-            borderLeft: '0px',
+            position: "relative",
+            top: "-1px",
+            left: "-5px",
+            borderLeft: "0px",
           }}
           onClick={() => {
             calculateAccordingly(100);
@@ -829,32 +833,32 @@ function CrossChain() {
           {
             value: token1?.id,
             label: (
-              <span className='flexedItemSelect'>
+              <span className="flexedItemSelect">
                 {token1?.image ? (
                   <img
                     style={{
-                      height: '20px',
-                      width: '20px',
-                      objectFit: 'contain',
-                      position: 'relative',
-                      borderRadius: '15px',
+                      height: "20px",
+                      width: "20px",
+                      objectFit: "contain",
+                      position: "relative",
+                      borderRadius: "15px",
                     }}
                     src={token1?.image}
                   />
                 ) : (
                   <div
-                    className='randb extra'
+                    className="randb extra"
                     style={{
-                      height: '35px',
-                      width: '35px',
-                      background: 'rgb(202, 201, 201)',
-                      borderRadius: '50%',
-                      display: 'flex',
-                      justifyContent: 'center',
-                      alignItems: 'center',
+                      height: "35px",
+                      width: "35px",
+                      background: "rgb(202, 201, 201)",
+                      borderRadius: "50%",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
                     }}
                   >
-                    {token1?.symbol?.split('')[0]}
+                    {token1?.symbol?.split("")[0]}
                   </div>
                 )}
                 {token1?.symbol}
@@ -866,31 +870,31 @@ function CrossChain() {
           {
             value: token1?.id,
             label: (
-              <span className='flexedItemSelect'>
+              <span className="flexedItemSelect">
                 {token1?.image ? (
                   <img
                     style={{
-                      height: '20px',
-                      width: '20px',
-                      objectFit: 'contain',
-                      borderRadius: '15px',
+                      height: "20px",
+                      width: "20px",
+                      objectFit: "contain",
+                      borderRadius: "15px",
                     }}
                     src={token1?.image}
                   />
                 ) : (
                   <div
-                    className='randb extra'
+                    className="randb extra"
                     style={{
-                      height: '35px',
-                      width: '35px',
-                      background: 'rgb(202, 201, 201)',
-                      borderRadius: '50%',
-                      display: 'flex',
-                      justifyContent: 'center',
-                      alignItems: 'center',
+                      height: "35px",
+                      width: "35px",
+                      background: "rgb(202, 201, 201)",
+                      borderRadius: "50%",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
                     }}
                   >
-                    {token1?.symbol?.split('')[0]}
+                    {token1?.symbol?.split("")[0]}
                   </div>
                 )}
                 {token1?.symbol}
@@ -909,7 +913,7 @@ function CrossChain() {
     </div>
   );
   const selectAfterTo = (
-    <div className={'addonAfter'}>
+    <div className={"addonAfter"}>
       <Select
         open={false}
         style={{
@@ -919,32 +923,32 @@ function CrossChain() {
           {
             value: token2?.id,
             label: (
-              <span className='flexedItemSelect'>
+              <span className="flexedItemSelect">
                 {token2?.image ? (
                   <img
                     style={{
-                      height: '20px',
-                      width: '20px',
-                      objectFit: 'contain',
-                      position: 'relative',
-                      borderRadius: '15px',
+                      height: "20px",
+                      width: "20px",
+                      objectFit: "contain",
+                      position: "relative",
+                      borderRadius: "15px",
                     }}
                     src={token2?.image}
                   />
                 ) : (
                   <div
-                    className='randb extra'
+                    className="randb extra"
                     style={{
-                      height: '35px',
-                      width: '35px',
-                      background: 'rgb(202, 201, 201)',
-                      borderRadius: '50%',
-                      display: 'flex',
-                      justifyContent: 'center',
-                      alignItems: 'center',
+                      height: "35px",
+                      width: "35px",
+                      background: "rgb(202, 201, 201)",
+                      borderRadius: "50%",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
                     }}
                   >
-                    {token2?.symbol.split('')[0]}
+                    {token2?.symbol.split("")[0]}
                   </div>
                 )}
                 {token2?.symbol}
@@ -956,31 +960,31 @@ function CrossChain() {
           {
             value: token2?.id,
             label: (
-              <span className='flexedItemSelect'>
+              <span className="flexedItemSelect">
                 {token2?.image ? (
                   <img
                     style={{
-                      height: '20px',
-                      width: '20px',
-                      objectFit: 'contain',
-                      borderRadius: '15px',
+                      height: "20px",
+                      width: "20px",
+                      objectFit: "contain",
+                      borderRadius: "15px",
                     }}
                     src={token2?.image}
                   />
                 ) : (
                   <div
-                    className='randb extra'
+                    className="randb extra"
                     style={{
-                      height: '35px',
-                      width: '35px',
-                      background: 'rgb(202, 201, 201)',
-                      borderRadius: '50%',
-                      display: 'flex',
-                      justifyContent: 'center',
-                      alignItems: 'center',
+                      height: "35px",
+                      width: "35px",
+                      background: "rgb(202, 201, 201)",
+                      borderRadius: "50%",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
                     }}
                   >
-                    {token2?.symbol?.split('')[0]}
+                    {token2?.symbol?.split("")[0]}
                   </div>
                 )}
 
@@ -998,355 +1002,829 @@ function CrossChain() {
   );
 
   return (
-    <div className='swap'>
-      {contextHolder}
-      <div
-        className='send__infoText'
-        style={{
-          marginBottom: '0px',
-          position: 'relative',
-          top: '19px',
-          left: '-11px',
-        }}
-      >
-        <span
+    // <div className='swap'>
+    //
+    //   {/* <div
+    //     className='send__infoText'
+    //     style={{
+    //       marginBottom: '0px',
+    //       position: 'relative',
+    //       top: '19px',
+    //       left: '-11px',
+    //     }}
+    //   >
+    //     <span
+    //       style={{
+    //         color: 'rgb(0, 174, 239)',
+    //         position: 'relative',
+    //         top: '-6px',
+    //       }}
+    //     >
+    //       {' '}
+    //       Min-Max
+    //     </span>{' '}
+    //     <br></br>{' '}
+    //     <div
+    //       style={{ width: '100%', display: 'flex', justifyContent: 'flex-end' }}
+    //     >
+    //       {addCommasToNumber(
+    //         parseFloat(route ? route.exchangeData.depositMin : 0)
+    //       )}{' '}
+    //       -{' '}
+    //       {addCommasToNumber(
+    //         parseFloat(route ? route.exchangeData.depositMax : 0)
+    //       )}{' '}
+    //     </div>
+    //     {token1?.symbol?.toUpperCase()}
+    //   </div> */}
+    //   {/* <InputField
+    //     mb0={true}
+    //     // getData={(amount) => {
+
+    //     //   handleChangeForInput1(amount);
+    //     //   setAount(amount);
+    //     // }}
+    //     getData={(amount) => {
+    //       if (percent != null) {
+    //         setPercent(null);
+    //       }
+    //       // const afterDecimal = amount.split('.')[1];
+
+    //       // // Get the maximum allowed characters before the decimal point (15 characters)
+    //       // const maxCharactersBeforeDecimal = 15;
+
+    //       // if (afterDecimal) {
+    //       //   // Get the maximum allowed decimals for the cryptocurrency (e.g., Bitcoin has 8 decimals)
+    //       //   const maxDecimals = token1.decimals;
+    //       //   // Check if the entered decimal part is longer than the maximum allowed
+    //       //   if (afterDecimal.toString().length > maxDecimals) {
+    //       //     return; // Return if decimal part is too long
+    //       //   }
+
+    //       //   // Check if the characters before the decimal exceed the maximum allowed
+    //       //   const beforeDecimal = amount.split('.')[0];
+    //       //   if (beforeDecimal.toString().length > maxCharactersBeforeDecimal) {
+    //       //     return; // Return if characters before decimal exceed the maximum allowed
+    //       //   }
+    //       // } else {
+    //       //   // If there's no decimal, check the whole input length
+    //       //   if (amount.length > maxCharactersBeforeDecimal) {
+    //       //     return; // Return if the whole input exceeds the maximum allowed
+    //       //   }
+    //       // }
+    //       handleChangeForInput1(amount);
+    //       setAount(amount);
+    //     }}
+    //     inputSelect={true}
+    //     placeholder={'0.000'}
+    //     label='You Pay'
+    //     type={'number'}
+    //     value={amount}
+    //     addonAfter={selectAfter}
+    //     checkForSymbols={true}
+    //     disabled={loading}
+    //   /> */}
+    //   {/* <div className='do'>
+    //     <div
+    //       className='send__infoText swapYouPay'
+    //       style={{
+    //         wordBreak: 'break-all',
+    //         textWrap: 'wrap',
+    //       }}
+    //     >
+    //       = {currency.symbol}
+    //       {addCommasToNumber(
+    //         exponential_to_decimal(
+    //           parseFloat(amount ? amount : 0) * parseFloat(token1?.price || 0),
+    //           2
+    //         )
+    //         // getFlooredFixed(
+    //         //   parseFloat(amount ? amount : 0) * parseFloat(token1?.price || 0),
+    //         //   2
+    //         // )
+    //       )}
+    //     </div>
+    //     <div className='send__infoText   '>
+    //       <span
+    //         style={{
+    //           color: 'rgb(0, 174, 239)',
+    //           // position: 'relative',
+    //           // top: '-6px',
+    //         }}
+    //       >
+    //         {' '}
+    //         Available Balance
+    //       </span>{' '}
+    //       <br></br>{' '}
+    //       {addCommasToNumber(parseFloat(getFlooredFixed(balance || 0, 6)))}{' '}
+    //       {token1?.symbol} ~ {currency.symbol}
+    //       {balanceToFiatConversion(token1?.price || 0, balance || 0)}
+    //     </div>
+    //   </div> */}
+
+    //   {/* {token1?.isToken ? (
+    //     <div
+    //       className='periods'
+    //       style={{
+    //         display: 'flex',
+    //         alignItems: 'center',
+    //         marginBottom: '15px',
+    //         marginTop: '15px',
+    //         justifyContent: 'space-evenly',
+    //       }}
+    //     >
+    //       <div
+    //         className={percent == 25 ? 'boxActiveSwap' : 'boxSwap'}
+    //         onClick={() => {
+    //           setPercent(25);
+    //           calculateAccordingly(25);
+    //         }}
+    //       >
+    //         25%
+    //       </div>
+    //       <div
+    //         className={percent == 50 ? 'boxActiveSwap' : 'boxSwap'}
+    //         onClick={() => {
+    //           setPercent(50);
+    //           calculateAccordingly(50);
+    //         }}
+    //       >
+    //         50%
+    //       </div>
+    //       <div
+    //         className={percent == 75 ? 'boxActiveSwap' : 'boxSwap'}
+    //         onClick={() => {
+    //           setPercent(75);
+    //           calculateAccordingly(75);
+    //         }}
+    //       >
+    //         75%
+    //       </div>
+    //       <div
+    //         className={percent == 100 ? 'boxActiveSwap' : 'boxSwap'}
+    //         onClick={() => {
+    //           setPercent(100);
+    //           calculateAccordingly(100);
+    //         }}
+    //       >
+    //         Max
+    //       </div>
+    //     </div>
+    //   ) : null} */}
+
+    //   <div className='swap__icon'>
+    //     <img
+    //       src={SwapVerticalIcon}
+    //       width={44}
+    //       alt=''
+    //       height={44}
+    //       onClick={() => {
+    //         if (token2?.iHave) {
+    //           setToken1(token2);
+    //           setToken2(token1);
+    //           setAmount2(null);
+    //           setAount(null);
+    //         } else {
+    //           return messageApi.error(
+    //             `Please enable ${token2.name} in your wallet.`
+    //           );
+    //         }
+    //       }}
+    //     />
+    //   </div>
+    //   <InputField
+    //     mb0={true}
+    //     inputSelect={true}
+    //     placeholder={'0.000'}
+    //     label='You Receive'
+    //     readonly={true}
+    //     value={amount2}
+    //     getData={(amount) => {
+    //       setAmount2(amount);
+    //       // setAmount2(amount.toFixed(18));
+    //     }}
+    //     type={'number'}
+    //     checkForSymbols={true}
+    //     addonAfter={selectAfterTo}
+    //   />
+    //   <div className='doSingle'>
+    //     <div
+    //       className='send__infoText'
+    //       style={{
+    //         position: 'relative',
+    //         left: '20px',
+    //         wordBreak: 'break-all',
+    //         textWrap: 'wrap',
+    //       }}
+    //     >
+    //       = {currency.symbol}
+    //       {addCommasToNumber(
+    //         exponential_to_decimal(
+    //           parseFloat(amount2 ? amount2 : 0) *
+    //             parseFloat(token2?.price || 0),
+    //           2
+    //         )
+    //         // getFlooredFixed(
+    //         //   parseFloat(amount2 ? amount2 : 0) *
+    //         //     parseFloat(token2?.price || 0),
+    //         //   2
+    //         // )
+    //       )}
+    //     </div>
+    //   </div>
+    //   {loading ? (
+    //     <div className='swap__infoText'>
+    //       <ClipLoader size={20} color='#00adee' />{' '}
+    //       <p
+    //         style={{
+    //           marginLeft: '7px',
+    //         }}
+    //       >
+    //         Fetching the best price. Please wait...
+    //       </p>
+    //     </div>
+    //   ) : null}
+
+    //   <div>
+    //     <ButtonComp
+    //       onClick={async () => {
+    //         if (isNaN(parseFloat(amount)) || isNaN(parseFloat(amount2))) {
+    //           return messageApi.error(
+    //             'Please enter a valid amount to proceed.'
+    //           );
+    //         }
+
+    //         if (
+    //           parseFloat(amount) < parseFloat(route.exchangeData.depositMin)
+    //         ) {
+    //           return messageApi.error(
+    //             `The minimum deposit amount to swap is ${route.exchangeData.depositMin} ${token1.symbol}`
+    //           );
+    //         }
+
+    //         if (
+    //           parseFloat(amount) > parseFloat(route.exchangeData.depositMax)
+    //         ) {
+    //           return messageApi.error(
+    //             `The maximum deposit amount to swap is ${route.exchangeData.depositMax} ${token1.symbol}`
+    //           );
+    //         }
+
+    //         if (parseFloat(balance) < parseFloat(amount)) {
+    //           return messageApi.error(
+    //             'Insufficient balance to proceed with the transaction.'
+    //           );
+    //         }
+
+    //         const gasPrice = await Web3Helper.getGasPrice(
+    //           token1.chain.slug,
+    //           token1.address,
+    //           token1.address,
+    //           token1.isToken,
+    //           token1.tokenAddress,
+    //           token1.coinSymbol
+    //         );
+
+    //         if (!gasPrice) {
+    //           store.dispatch(setLoading(false));
+
+    //           return messageApi.error(
+    //             'Unable to fetch gas price at the moment.'
+    //           );
+    //         }
+
+    //         const gasInEth =
+    //           (gasPrice.fast * Math.pow(10, 9) * gasPrice.estimate) /
+    //           Math.pow(10, 18);
+    //         store.dispatch(setLoading(false));
+
+    //         const parentCoin = await server.post(
+    //           '/wallet/nativeCoinFiatPrice',
+    //           {
+    //             coin_family: token1.coinFamily,
+    //             fiat_currency: currency.name,
+    //           },
+    //           {
+    //             headers: {
+    //               Authorization: account.jwtToken,
+    //             },
+    //           }
+    //         );
+
+    //         let swapDetailed = {
+    //           route,
+    //           token1,
+    //           token2,
+    //           amount,
+    //           amount2,
+    //           tokenChain: token1.chain,
+    //           networkFee: gasInEth,
+    //           walletAddress: token1.address,
+    //           token1Price: newBalanceToFiatConversion(token1.price, amount),
+    //           parentCoin: {
+    //             value: parentCoin.data.data.fiatCoinPrice.value,
+    //           },
+    //           tab: 1,
+    //           rpc: token1.rpc,
+    //           coinSymbol: token1.coinSymbol
+    //         };
+    //         store.dispatch(swapDetailAc(swapDetailed));
+    //         navigate('/crosschain-swapDetails', {
+    //           state: swapDetailed,
+    //         });
+    //       }}
+    //       text={'Swap'}
+    //       maxWidth={'100%'}
+    //       disabled={
+    //         !token1 ||
+    //         !token2 ||
+    //         !amount ||
+    //         !amount2 ||
+    //         amount <= 0 ||
+    //         amount2 <= 0 ||
+    //         loading
+    //       }
+    //     />
+    //   </div>
+
+    <div
+      className={`${"fixedContent height-571"} ${
+        height <= 600 ? "fixedContentOuterExt" : ""
+      }`}
+    >
+      <div style={{ width: "100%", marginBottom: "20px" }}>
+        <div
+          className="send__infoText"
           style={{
-            color: 'rgb(0, 174, 239)',
-            position: 'relative',
-            top: '-6px',
+            marginBottom: "10px",
+            marginTop: "0",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "flex-end",
+            gap: "10px",
           }}
         >
-          {' '}
-          Min-Max
-        </span>{' '}
-        <br></br>{' '}
-        <div
-          style={{ width: '100%', display: 'flex', justifyContent: 'flex-end' }}
-        >
-          {addCommasToNumber(
-            parseFloat(route ? route.exchangeData.depositMin : 0)
-          )}{' '}
-          -{' '}
-          {addCommasToNumber(
-            parseFloat(route ? route.exchangeData.depositMax : 0)
-          )}{' '}
-        </div>
-        {token1?.symbol?.toUpperCase()}
-      </div>
-      <InputField
-        mb0={true}
-        // getData={(amount) => {
-
-        //   handleChangeForInput1(amount);
-        //   setAount(amount);
-        // }}
-        getData={(amount) => {
-          if (percent != null) {
-            setPercent(null);
-          }
-          // const afterDecimal = amount.split('.')[1];
-
-          // // Get the maximum allowed characters before the decimal point (15 characters)
-          // const maxCharactersBeforeDecimal = 15;
-
-          // if (afterDecimal) {
-          //   // Get the maximum allowed decimals for the cryptocurrency (e.g., Bitcoin has 8 decimals)
-          //   const maxDecimals = token1.decimals;
-          //   // Check if the entered decimal part is longer than the maximum allowed
-          //   if (afterDecimal.toString().length > maxDecimals) {
-          //     return; // Return if decimal part is too long
-          //   }
-
-          //   // Check if the characters before the decimal exceed the maximum allowed
-          //   const beforeDecimal = amount.split('.')[0];
-          //   if (beforeDecimal.toString().length > maxCharactersBeforeDecimal) {
-          //     return; // Return if characters before decimal exceed the maximum allowed
-          //   }
-          // } else {
-          //   // If there's no decimal, check the whole input length
-          //   if (amount.length > maxCharactersBeforeDecimal) {
-          //     return; // Return if the whole input exceeds the maximum allowed
-          //   }
-          // }
-          handleChangeForInput1(amount);
-          setAount(amount);
-        }}
-        inputSelect={true}
-        placeholder={'0.000'}
-        label='You Pay'
-        type={'number'}
-        value={amount}
-        addonAfter={selectAfter}
-        checkForSymbols={true}
-        disabled={loading}
-      />
-      <div className='do'>
-        <div
-          className='send__infoText swapYouPay'
-          style={{
-            wordBreak: 'break-all',
-            textWrap: 'wrap',
-          }}
-        >
-          = {currency.symbol}
-          {addCommasToNumber(
-            exponential_to_decimal(
-              parseFloat(amount ? amount : 0) * parseFloat(token1?.price || 0),
-              2
-            )
-            // getFlooredFixed(
-            //   parseFloat(amount ? amount : 0) * parseFloat(token1?.price || 0),
-            //   2
-            // )
-          )}
-        </div>
-        <div className='send__infoText   '>
           <span
             style={{
-              color: 'rgb(0, 174, 239)',
-              // position: 'relative',
-              // top: '-6px',
+              color: "#f5da76",
             }}
           >
-            {' '}
-            Available Balance
-          </span>{' '}
-          <br></br>{' '}
-          {addCommasToNumber(parseFloat(getFlooredFixed(balance || 0, 6)))}{' '}
-          {token1?.symbol} ~ {currency.symbol}
-          {balanceToFiatConversion(token1?.price || 0, balance || 0)}
-        </div>
-      </div>
-
-      {token1?.isToken ? (
-        <div
-          className='periods'
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            marginBottom: '15px',
-            marginTop: '15px',
-            justifyContent: 'space-evenly',
-          }}
-        >
+            {" "}
+            Min-Max
+          </span>{" "}
           <div
-            className={percent == 25 ? 'boxActiveSwap' : 'boxSwap'}
-            onClick={() => {
-              setPercent(25);
-              calculateAccordingly(25);
-            }}
-          >
-            25%
-          </div>
-          <div
-            className={percent == 50 ? 'boxActiveSwap' : 'boxSwap'}
-            onClick={() => {
-              setPercent(50);
-              calculateAccordingly(50);
-            }}
-          >
-            50%
-          </div>
-          <div
-            className={percent == 75 ? 'boxActiveSwap' : 'boxSwap'}
-            onClick={() => {
-              setPercent(75);
-              calculateAccordingly(75);
-            }}
-          >
-            75%
-          </div>
-          <div
-            className={percent == 100 ? 'boxActiveSwap' : 'boxSwap'}
-            onClick={() => {
-              setPercent(100);
-              calculateAccordingly(100);
-            }}
-          >
-            Max
-          </div>
-        </div>
-      ) : null}
-
-      <div className='swap__icon'>
-        <img
-          src={SwapVerticalIcon}
-          width={44}
-          alt=''
-          height={44}
-          onClick={() => {
-            if (token2?.iHave) {
-              setToken1(token2);
-              setToken2(token1);
-              setAmount2(null);
-              setAount(null);
-            } else {
-              return messageApi.error(
-                `Please enable ${token2.name} in your wallet.`
-              );
-            }
-          }}
-        />
-      </div>
-      <InputField
-        mb0={true}
-        inputSelect={true}
-        placeholder={'0.000'}
-        label='You Receive'
-        readonly={true}
-        value={amount2}
-        getData={(amount) => {
-          setAmount2(amount);
-          // setAmount2(amount.toFixed(18));
-        }}
-        type={'number'}
-        checkForSymbols={true}
-        addonAfter={selectAfterTo}
-      />
-      <div className='doSingle'>
-        <div
-          className='send__infoText'
-          style={{
-            position: 'relative',
-            left: '20px',
-            wordBreak: 'break-all',
-            textWrap: 'wrap',
-          }}
-        >
-          = {currency.symbol}
-          {addCommasToNumber(
-            exponential_to_decimal(
-              parseFloat(amount2 ? amount2 : 0) *
-                parseFloat(token2?.price || 0),
-              2
-            )
-            // getFlooredFixed(
-            //   parseFloat(amount2 ? amount2 : 0) *
-            //     parseFloat(token2?.price || 0),
-            //   2
-            // )
-          )}
-        </div>
-      </div>
-      {loading ? (
-        <div className='swap__infoText'>
-          <ClipLoader size={20} color='#00adee' />{' '}
-          <p
             style={{
-              marginLeft: '7px',
+              display: "flex",
+              justifyContent: "flex-end",
+              gap: "10px",
             }}
           >
-            Fetching the best price. Please wait...
-          </p>
+            {addCommasToNumber(
+              parseFloat(route ? route.exchangeData.depositMin : 0)
+            )}{" "}
+            -{" "}
+            {addCommasToNumber(
+              parseFloat(route ? route.exchangeData.depositMax : 0)
+            )}{" "}
+          </div>
+          {token1?.symbol?.toUpperCase()}
         </div>
-      ) : null}
+        {contextHolder}
+        <div style={{ width: "100%" }} className="swap ">
+          <div className="swap_onChain ">
+            <div className="swap_onChain_balance">
+              <div>
+                <input
+                  type="number"
+                  className="myInput"
+                  placeholder="0.000"
+                  onChange={({ target: { value: amount } }) => {
+                    if (percent != null) {
+                      setPercent(null);
+                    }
 
-      <div>
-        <ButtonComp
-          onClick={async () => {
-            if (isNaN(parseFloat(amount)) || isNaN(parseFloat(amount2))) {
-              return messageApi.error(
-                'Please enter a valid amount to proceed.'
-              );
-            }
+                    const afterDecimal = amount.split(".")[1];
 
-            if (
-              parseFloat(amount) < parseFloat(route.exchangeData.depositMin)
-            ) {
-              return messageApi.error(
-                `The minimum deposit amount to swap is ${route.exchangeData.depositMin} ${token1.symbol}`
-              );
-            }
+                    // Get the maximum allowed characters before the decimal point (15 characters)
+                    const maxCharactersBeforeDecimal = 15;
 
-            if (
-              parseFloat(amount) > parseFloat(route.exchangeData.depositMax)
-            ) {
-              return messageApi.error(
-                `The maximum deposit amount to swap is ${route.exchangeData.depositMax} ${token1.symbol}`
-              );
-            }
+                    if (afterDecimal) {
+                      // Get the maximum allowed decimals for the cryptocurrency (e.g., Bitcoin has 8 decimals)
+                      const maxDecimals = token1.decimals;
+                      // Check if the entered decimal part is longer than the maximum allowed
+                      if (afterDecimal.toString().length > maxDecimals) {
+                        return; // Return if decimal part is too long
+                      }
 
-            if (parseFloat(balance) < parseFloat(amount)) {
-              return messageApi.error(
-                'Insufficient balance to proceed with the transaction.'
-              );
-            }
+                      // Check if the characters before the decimal exceed the maximum allowed
+                      const beforeDecimal = amount.split(".")[0];
+                      if (
+                        beforeDecimal.toString().length >
+                        maxCharactersBeforeDecimal
+                      ) {
+                        return; // Return if characters before decimal exceed the maximum allowed
+                      }
+                    } else {
+                      // If there's no decimal, check the whole input length
+                      if (amount.length > maxCharactersBeforeDecimal) {
+                        return; // Return if the whole input exceeds the maximum allowed
+                      }
+                    }
+                    setAount(amount);
 
-            const gasPrice = await Web3Helper.getGasPrice(
-              token1.chain.slug,
-              token1.address,
-              token1.address,
-              token1.isToken,
-              token1.tokenAddress,
-              token1.coinSymbol
+                    handleChangeForInput1(amount);
+                  }}
+                  value={amount}
+                />
+                <p style={{ marginBottom: "8px" }}>
+                  {currency.symbol}
+                  {addCommasToNumber(
+                    getFlooredFixed(
+                      parseFloat(amount ? amount : 0) *
+                        parseFloat(token1 ? token1.price : 0),
+                      2
+                    )
+                  )}
+                </p>
+              </div>
+              <div>
+                <Select
+                  suffixIcon={<img src={DownArrowSuffix} />}
+                  style={{
+                    width: 100,
+                  }}
+                  disabled={!token1 || !token2 || loading}
+                  onClick={() => {
+                    if (!token1 || !token2 || loading) return;
+                    setSelected(1);
+                    setOpen(true);
+                  }}
+                  open={false}
+                  value={[
+                    {
+                      value: token1?.id,
+                      label: (
+                        <span className="flexedItemSelect">
+                          {!token1?.image ? (
+                            <div
+                              style={{
+                                alignItems: "center",
+                                backgroundColor: "rgba(98,126,234,.2)",
+                                borderRadius: "49%",
+                                display: "flex",
+                                height: "29px",
+                                justifyContent: "center",
+                                width: "29px",
+                                marginRight: "15px",
+                              }}
+                            >
+                              {token1?.name.split("")[0]}
+                            </div>
+                          ) : (
+                            <img
+                              style={{
+                                height: "30px",
+                                width: "30px",
+                                objectFit: "contain",
+                                position: "relative",
+                                borderRadius: "15px",
+                              }}
+                              alt=""
+                              src={token1?.image}
+                            />
+                          )}
+                          {token1?.symbol}
+                        </span>
+                      ),
+                    },
+                  ]}
+                  onSelect={(value) => {
+                    setToken2(availableTokens.find((el) => el.id == value));
+                    handleToken1Change(
+                      availableTokens.find((el) => el.id == value)
+                    );
+                  }}
+                  options={availableTokens
+                    .filter((token) => token.id !== token1?.id)
+                    .map((token) => {
+                      return {
+                        value: token?.id,
+                        label: (
+                          <span className="flexedItemSelect">
+                            <img
+                              style={{
+                                height: "20px",
+                                width: "20px",
+                                objectFit: "contain",
+                                marginLeft: "20px",
+                                marginRight: "20px",
+                              }}
+                              src={token?.image}
+                            />
+                            {token?.symbol}
+                          </span>
+                        ),
+                      };
+                    })}
+                />
+                <div className="swap_onChain_pay">
+                  {/* <p>You Pay</p> */}
+                  <p>
+                    Balance{" "}
+                    <span>
+                      {addCommasToNumber(
+                        parseFloat(getFlooredFixed(balance || 0, 6))
+                      )}{" "}
+                      {token1?.symbol}{" "}
+                    </span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="swap__icon">
+            <img
+              src={SwapVerticalIcon}
+              width={44}
+              alt=""
+              height={44}
+              style={
+                loading ? { pointerEvents: "none" } : { pointerEvents: "auto" }
+              }
+              onClick={() => {
+                if (token2?.iHave) {
+                  setToken1(token2);
+                  setToken2(token1);
+                  setAmount2(null);
+                  setAount(null);
+                  setPercent(0);
+                  setInfoData([]);
+                } else {
+                  return messageApi.error(
+                    `Please enable ${token2?.name} in your wallet.`
+                  );
+                }
+              }}
+            />
+          </div>
+          <div className="swap_onChain">
+            <div className="swap_onChain_balance">
+              <div>
+                <input
+                  type="number"
+                  className="myInput"
+                  readOnly={true}
+                  placeholder="0.000"
+                  value={amount2}
+                />
+                <p style={{ marginBottom: "8px" }}>
+                  {currency.symbol}
+                  {addCommasToNumber(
+                    getFlooredFixed(
+                      parseFloat(amount2 ? amount2 : 0) *
+                        parseFloat(token2 ? token2.price : 0),
+                      2
+                    )
+                  )}
+                </p>
+              </div>
+              <div>
+                <Select
+                  suffixIcon={<img src={DownArrowSuffix} />}
+                  style={{
+                    width: 100,
+                  }}
+                  disabled={!token1 || !token2 || loading}
+                  onClick={() => {
+                    if (!token1 || !token2 || loading) return;
+                    setSelected(2);
+                    setOpen(true);
+                  }}
+                  open={false}
+                  value={[
+                    {
+                      value: token2?.id,
+                      label: (
+                        <span className="flexedItemSelect">
+                          {!token2?.image ? (
+                            <div
+                              style={{
+                                alignItems: "center",
+                                backgroundColor: "rgba(98,126,234,.2)",
+                                borderRadius: "49%",
+                                display: "flex",
+                                height: "29px",
+                                justifyContent: "center",
+                                width: "29px",
+                                marginRight: "15px",
+                              }}
+                            >
+                              {token2?.name.split("")[0]}
+                            </div>
+                          ) : (
+                            <img
+                              style={{
+                                height: "30px",
+                                width: "30px",
+                                objectFit: "contain",
+                                position: "relative",
+                                borderRadius: "15px",
+                              }}
+                              alt=""
+                              src={token2?.image}
+                            />
+                          )}
+                          {token2?.symbol}
+                        </span>
+                      ),
+                    },
+                  ]}
+                  onSelect={(value) => {
+                    setToken2(availableTokens.find((el) => el.id == value));
+                    handleToken2Change(
+                      availableTokens.find((el) => el.id == value)
+                    );
+                  }}
+                  options={availableTokens
+                    .filter((token) => token.id !== token1?.id)
+                    .map((token) => {
+                      return {
+                        value: token?.id,
+                        label: (
+                          <span className="flexedItemSelect">
+                            <img
+                              style={{
+                                height: "20px",
+                                width: "20px",
+                                objectFit: "contain",
+                                marginLeft: "20px",
+                                marginRight: "20px",
+                              }}
+                              src={token?.image}
+                            />
+                            {token?.symbol}
+                          </span>
+                        ),
+                      };
+                    })}
+                />
+                <div
+                  // style={{ marginBottom: "20px" }}
+                  className="swap_onChain_pay"
+                >
+                  {/* <p>You Receive</p> */}
+                  <p>
+                    Balance{" "}
+                    <span>
+                      {addCommasToNumber(
+                        parseFloat(getFlooredFixed(token2?.balance || 0, 6))
+                      )}{" "}
+                      {token2?.symbol}{" "}
+                    </span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {token1?.isToken && (
+            <div className="swap_percentage">
+              {percentages.map((percentage, index) => (
+                <p
+                  style={{ cursor: "pointer" }}
+                  key={index}
+                  className={activeIndex === index ? "active" : ""}
+                  onClick={() => {
+                    setActiveIndex(index);
+                    setPercent(percentage);
+                    calculateAccordingly(percentage);
+                  }}
+                >
+                  {percentage}%
+                </p>
+              ))}
+            </div>
+          )}
+
+          {loading ? (
+            <div className="swap__infoText">
+              <ClipLoader size={20} color="#00adee" />{" "}
+              <p
+                style={{
+                  marginLeft: "7px",
+                }}
+              >
+                Fetching the best price. Please wait...
+              </p>
+            </div>
+          ) : null}
+        </div>
+      </div>
+      <ButtonComp
+        onClick={async () => {
+          console.log(
+            !token1 ||
+              !token2 ||
+              !amount ||
+              !amount2 ||
+              amount <= 0 ||
+              amount2 <= 0 ||
+              loading
+          );
+          if (isNaN(parseFloat(amount)) || isNaN(parseFloat(amount2))) {
+            return messageApi.error("Please enter a valid amount to proceed.");
+          }
+
+          if (parseFloat(amount) < parseFloat(route.exchangeData.depositMin)) {
+            return messageApi.error(
+              `The minimum deposit amount to swap is ${route.exchangeData.depositMin} ${token1.symbol}`
             );
+          }
 
-            if (!gasPrice) {
-              store.dispatch(setLoading(false));
+          if (parseFloat(amount) > parseFloat(route.exchangeData.depositMax)) {
+            return messageApi.error(
+              `The maximum deposit amount to swap is ${route.exchangeData.depositMax} ${token1.symbol}`
+            );
+          }
 
-              return messageApi.error(
-                'Unable to fetch gas price at the moment.'
-              );
-            }
+          if (parseFloat(balance) < parseFloat(amount)) {
+            return messageApi.error(
+              "Insufficient balance to proceed with the transaction."
+            );
+          }
 
-            const gasInEth =
-              (gasPrice.fast * Math.pow(10, 9) * gasPrice.estimate) /
-              Math.pow(10, 18);
+          const gasPrice = await Web3Helper.getGasPrice(
+            token1.chain.slug,
+            token1.address,
+            token1.address,
+            token1.isToken,
+            token1.tokenAddress,
+            token1.coinSymbol
+          );
+
+          if (!gasPrice) {
             store.dispatch(setLoading(false));
 
-            const parentCoin = await server.post(
-              '/wallet/nativeCoinFiatPrice',
-              {
-                coin_family: token1.coinFamily,
-                fiat_currency: currency.name,
-              },
-              {
-                headers: {
-                  Authorization: account.jwtToken,
-                },
-              }
-            );
-
-
-            let swapDetailed = {
-              route,
-              token1,
-              token2,
-              amount,
-              amount2,
-              tokenChain: token1.chain,
-              networkFee: gasInEth,
-              walletAddress: token1.address,
-              token1Price: newBalanceToFiatConversion(token1.price, amount),
-              parentCoin: {
-                value: parentCoin.data.data.fiatCoinPrice.value,
-              },
-              tab: 1,
-              rpc: token1.rpc,
-              coinSymbol: token1.coinSymbol
-            };
-            store.dispatch(swapDetailAc(swapDetailed));
-            navigate('/crosschain-swapDetails', {
-              state: swapDetailed,
-            });
-          }}
-          text={'Swap'}
-          maxWidth={'100%'}
-          disabled={
-            !token1 ||
-            !token2 ||
-            !amount ||
-            !amount2 ||
-            amount <= 0 ||
-            amount2 <= 0 ||
-            loading
+            return messageApi.error("Unable to fetch gas price at the moment.");
           }
-        />
-      </div>
+
+          const gasInEth =
+            (gasPrice.fast * Math.pow(10, 9) * gasPrice.estimate) /
+            Math.pow(10, 18);
+          store.dispatch(setLoading(false));
+
+          const parentCoin = await server.post(
+            "/wallet/nativeCoinFiatPrice",
+            {
+              coin_family: token1.coinFamily,
+              fiat_currency: currency.name,
+            },
+            {
+              headers: {
+                Authorization: account.jwtToken,
+              },
+            }
+          );
+
+          let swapDetailed = {
+            route,
+            token1,
+            token2,
+            amount,
+            amount2,
+            tokenChain: token1.chain,
+            networkFee: gasInEth,
+            walletAddress: token1.address,
+            token1Price: newBalanceToFiatConversion(token1.price, amount),
+            parentCoin: {
+              value: parentCoin.data.data.fiatCoinPrice.value,
+            },
+            tab: 1,
+            rpc: token1.rpc,
+            coinSymbol: token1.coinSymbol,
+          };
+          store.dispatch(swapDetailAc(swapDetailed));
+          navigate("/crosschain-swapDetails", {
+            state: swapDetailed,
+          });
+        }}
+        text={"Swap"}
+        maxWidth={"100%"}
+        disabled={
+          !token1 ||
+          !token2 ||
+          !amount ||
+          !amount2 ||
+          amount <= 0 ||
+          amount2 <= 0 ||
+          loading
+        }
+      />
 
       <Drawer
-        title='Select Token'
-        placement='bottom'
+        title="Select Token"
+        placement="bottom"
         onClose={() => {
           setOpen(false);
           setKeyword(null);
@@ -1355,7 +1833,7 @@ function CrossChain() {
         open={open}
         // eslint-disable-next-line jsx-a11y/alt-text
         closeIcon={
-          theme == 'darkTheme' ? (
+          theme == "darkTheme" ? (
             <img src={darkclose} />
           ) : (
             <img src={ModalCloseIcon} />
@@ -1364,19 +1842,19 @@ function CrossChain() {
         height={500}
       >
         <div
-          className='contain'
+          className="contain"
           style={{
-            height: '100%',
-            width: '100%',
-            display: 'flex',
-            flexDirection: 'column',
+            height: "100%",
+            width: "100%",
+            display: "flex",
+            flexDirection: "column",
           }}
         >
           {show ? (
-            <div className='search' style={{ marginBottom: '30px' }}>
+            <div className="search" style={{ marginBottom: "30px" }}>
               <InputField
-                placeholder={'Search name or paste address'}
-                coloredBg={'#eef3f9'}
+                placeholder={"Search name or paste address"}
+                coloredBg={"#eef3f9"}
                 value={keyword}
                 checkForSymbols={true}
                 getData={(value) => {
@@ -1406,9 +1884,9 @@ function CrossChain() {
                     <img
                       src={Search}
                       style={{
-                        width: '17px',
+                        width: "17px",
                       }}
-                      alt=''
+                      alt=""
                     />
                   </span>
                 }
@@ -1418,10 +1896,10 @@ function CrossChain() {
 
           <div
             ref={parentRef}
-            className='right'
+            className="right"
             style={{
               flex: 1,
-              overflow: 'scroll',
+              overflow: "scroll",
             }}
             onScroll={handleScroll}
           >
@@ -1446,32 +1924,32 @@ function CrossChain() {
                 })
                 .map((token) => (
                   <div
-                    className='design'
+                    className="design"
                     style={{
-                      width: '100%',
+                      width: "100%",
                     }}
                   >
                     <div
-                      className='token'
+                      className="token"
                       style={{
-                        display: 'flex',
-                        justifyContent: 'flex-start',
-                        alignItems: 'center',
-                        marginBottom: '20px',
-                        padding: '8px',
-                        borderRadius: '30px',
-                        marginLeft: '7px',
-                        fontSize: '11px',
-                        cursor: 'pointer',
-                        width: '100%;',
+                        display: "flex",
+                        justifyContent: "flex-start",
+                        alignItems: "center",
+                        marginBottom: "20px",
+                        padding: "8px",
+                        borderRadius: "30px",
+                        marginLeft: "7px",
+                        fontSize: "11px",
+                        cursor: "pointer",
+                        width: "100%;",
                         backgroundColor:
                           token1?.id == token?.id || token2?.id == token?.id
-                            ? 'transparent'
-                            : 'transparent',
+                            ? "transparent"
+                            : "transparent",
                         color:
                           token1?.id == token?.id || token2?.id == token?.id
-                            ? '#000'
-                            : '#000',
+                            ? "#000"
+                            : "#000",
                       }}
                       onClick={() => {
                         // console.log("token===========", token);
@@ -1483,7 +1961,7 @@ function CrossChain() {
                             setKeyword(null);
                             setFilteredTokens(allToken);
                             return messageApi.error(
-                              'You cannot select the same tokens on both sides. Please select a different token.'
+                              "You cannot select the same tokens on both sides. Please select a different token."
                             );
                           }
 
@@ -1494,7 +1972,7 @@ function CrossChain() {
                             setKeyword(null);
                             setFilteredTokens(allToken);
                             return messageApi.error(
-                              'You cannot select the same tokens on both sides. Please select a different token.'
+                              "You cannot select the same tokens on both sides. Please select a different token."
                             );
                           }
 
@@ -1509,42 +1987,42 @@ function CrossChain() {
                       {!token.image ? (
                         <div
                           style={{
-                            alignItems: 'center',
-                            backgroundColor: 'rgba(98,126,234,.2)',
-                            borderRadius: '49%',
-                            display: 'flex',
-                            height: '29px',
-                            justifyContent: 'center',
-                            width: '29px',
-                            marginRight: '15px',
+                            alignItems: "center",
+                            backgroundColor: "rgba(98,126,234,.2)",
+                            borderRadius: "49%",
+                            display: "flex",
+                            height: "29px",
+                            justifyContent: "center",
+                            width: "29px",
+                            marginRight: "15px",
                           }}
                         >
-                          {' '}
-                          {token.name.split('')[0]}
+                          {" "}
+                          {token.name.split("")[0]}
                         </div>
                       ) : (
                         <img
                           style={{
-                            width: '29px',
-                            marginRight: '15px',
+                            width: "29px",
+                            marginRight: "15px",
                           }}
                           src={token.image}
-                          alt=''
+                          alt=""
                         />
                       )}
 
                       <p>
                         <span
-                          style={{ fontSize: '17px' }}
-                          className='noAddress'
+                          style={{ fontSize: "17px" }}
+                          className="noAddress"
                         >
-                          {token.name}{' '}
+                          {token.name}{" "}
                         </span>
                         <span
-                          className='noAddress'
+                          className="noAddress"
                           style={{
-                            fontSize: '11px',
-                            marginLeft: '5px',
+                            fontSize: "11px",
+                            marginLeft: "5px",
                           }}
                         >
                           {token.type ? ` /${token.type}` : null}
@@ -1556,16 +2034,16 @@ function CrossChain() {
             ) : (
               <div
                 style={{
-                  textAlign: 'center',
+                  textAlign: "center",
                 }}
               >
                 <p
-                  className='noAddress'
+                  className="noAddress"
                   style={{
-                    marginTop: '4%',
-                    marginBottom: '15px',
-                    fontWeight: 'bold',
-                    fontSize: '15px',
+                    marginTop: "4%",
+                    marginBottom: "15px",
+                    fontWeight: "bold",
+                    fontSize: "15px",
                   }}
                 >
                   No assets found

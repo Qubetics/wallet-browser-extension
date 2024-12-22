@@ -50,6 +50,7 @@ import { SolanaHelper } from "../../helpers/solana.helper";
 import downeIcon from "../../Assets/downeIcon.svg";
 import history from "../../Assets/history.svg";
 import Trade from "../../Assets/Trade.svg";
+import Bell from "../../Assets/Bell.svg";
 
 function BalanceDetails({ className, textLeft, mt0, coin }) {
   const { account, currency, chain, tokens, theme, balanceIn } = useSelector(
@@ -323,6 +324,14 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
                 <p className="mainNetwor"> ETH Main Network</p>
               </div>
             </div>
+            <div className="balanceRight">
+              <div
+                onClick={() => navigate("/push-notification")}
+                style={{ cursor: "pointer" }}
+              >
+                <img src={Bell} alt="Bell" />
+              </div>
+            </div>
           </div>
         </>
       ) : null}
@@ -525,7 +534,7 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
             e.preventDefault();
             path === "currencyDetails"
               ? showModal()
-              : navigate("/receive-tokens");
+              : navigate("/receive-tokens", { state: { nftButton: true } });
           }}
           to="#"
           className={

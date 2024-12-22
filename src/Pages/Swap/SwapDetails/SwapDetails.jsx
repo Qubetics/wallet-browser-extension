@@ -1,43 +1,43 @@
 /* eslint-disable jsx-a11y/alt-text */
 /*global chrome*/
-import React from 'react';
-import MenuRestofHeaders from '../../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders';
-import './SwapDetails.scss';
-import BTC from '../../../Assets/Coins/BTC.png';
-import ETH from '../../../Assets/Coins/ETH.png';
-import ArrowDashedLine from '../../../Assets/ArrowDashedLine.svg';
-import ButtonComp from '../../../Components/ButtonComp/ButtonComp';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import { useEffect } from 'react';
-import { useRef } from 'react';
-import { Web3Helper } from '../../../helpers/web3.helper';
+import React from "react";
+import MenuRestofHeaders from "../../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders";
+import "./SwapDetails.scss";
+import BTC from "../../../Assets/Coins/BTC.png";
+import ETH from "../../../Assets/Coins/ETH.png";
+import ArrowDashedLine from "../../../Assets/ArrowDashedLine.svg";
+import ButtonComp from "../../../Components/ButtonComp/ButtonComp";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { useEffect } from "react";
+import { useRef } from "react";
+import { Web3Helper } from "../../../helpers/web3.helper";
 import {
   UNI_MAINNET_ROUTER,
   UNI_TESTNET_ROUTER,
-} from '../../../config/uniswap.config';
-import { message } from 'antd';
-import { useState } from 'react';
-import { UniswapHelper } from '../../../helpers/uniswap.helper';
-import ModalCustom from '../../../Components/ModalCustom/ModalCustom';
-import { ClipLoader } from 'react-spinners';
-import { Loader } from '../../../Components/Loader/Loader';
-import { DURATION } from '../../../config/message.config';
-import warning from '../../../Assets/PNG/warning.png';
-import DarkLogo from '../../../Assets/DarkLogo.svg';
-import Logo from '../../../Assets/Logo.png';
-import InputFieldSimple from '../../../Components/InputField/InputFieldSimple';
-import BigNumber from 'bignumber.js';
-import { PancakeHelper } from '../../../helpers/pancake.helper';
-import { CAKE_MAINNET_ROUTER } from '../../../config/pancake.config';
+} from "../../../config/uniswap.config";
+import { message } from "antd";
+import { useState } from "react";
+import { UniswapHelper } from "../../../helpers/uniswap.helper";
+import ModalCustom from "../../../Components/ModalCustom/ModalCustom";
+import { ClipLoader } from "react-spinners";
+import { Loader } from "../../../Components/Loader/Loader";
+import { DURATION } from "../../../config/message.config";
+import warning from "../../../Assets/PNG/warning.png";
+import DarkLogo from "../../../Assets/DarkLogo.svg";
+import Logo from "../../../Assets/Logo.png";
+import InputFieldSimple from "../../../Components/InputField/InputFieldSimple";
+import BigNumber from "bignumber.js";
+import { PancakeHelper } from "../../../helpers/pancake.helper";
+import { CAKE_MAINNET_ROUTER } from "../../../config/pancake.config";
 import {
   addCommasToNumber,
   getFlooredFixed,
-} from '../../../helpers/conversion.helper';
-import { server } from '../../../server';
-import { WalletHelper } from '../../../helpers/wallet.helper';
-import { PulseChainHelper } from '../../../helpers/pulsechain.helper';
-import { PULSE_MAINNET_ROUTER } from '../../../config/pulsechain.config';
+} from "../../../helpers/conversion.helper";
+import { server } from "../../../server";
+import { WalletHelper } from "../../../helpers/wallet.helper";
+import { PulseChainHelper } from "../../../helpers/pulsechain.helper";
+import { PULSE_MAINNET_ROUTER } from "../../../config/pulsechain.config";
 import {
   Native,
   ChainId,
@@ -45,23 +45,23 @@ import {
   TradeType,
   Percent,
   ERC20Token,
-} from '@pancakeswap/sdk';
+} from "@pancakeswap/sdk";
 import {
   SmartRouter,
   SmartRouterTrade,
   SMART_ROUTER_ADDRESSES,
   SwapRouter,
-} from '@pancakeswap/smart-router/evm';
-import { UNISWAP_NATIVE_WRAPPED_TOKEN_ADDRESSES } from '../../../config/uniswap.config';
-import { PANCAKE_NATIVE_WRAPPED_TOKEN_ADDRESSES } from '../../../config/pancake.config';
-import axios from 'axios';
-import { SolanaHelper } from '../../../helpers/solana.helper';
-import { PublicKey } from '@solana/web3.js';
+} from "@pancakeswap/smart-router/evm";
+import { UNISWAP_NATIVE_WRAPPED_TOKEN_ADDRESSES } from "../../../config/uniswap.config";
+import { PANCAKE_NATIVE_WRAPPED_TOKEN_ADDRESSES } from "../../../config/pancake.config";
+import axios from "axios";
+import { SolanaHelper } from "../../../helpers/solana.helper";
+import { PublicKey } from "@solana/web3.js";
 import {
   EditOutlined,
   InfoCircleOutlined,
   SettingOutlined,
-} from '@ant-design/icons';
+} from "@ant-design/icons";
 
 function SwapDetails() {
   const { chain, account, currency, theme } = useSelector((state) => state);
@@ -78,7 +78,7 @@ function SwapDetails() {
       slippage,
       isWrap,
       adminSwapFee,
-      commision
+      commision,
     },
   } = useLocation();
 
@@ -136,13 +136,13 @@ function SwapDetails() {
   };
   const handleCancel1 = () => {
     setIsModalOpen1(false);
-    return navigate('/wallet');
+    return navigate("/wallet");
   };
 
   const init = async () => {
     try {
       const parentCoin = await server.post(
-        '/wallet/nativeCoinFiatPrice',
+        "/wallet/nativeCoinFiatPrice",
         {
           coin_family: token1.coinFamily,
           fiat_currency: currency.name,
@@ -196,15 +196,15 @@ function SwapDetails() {
         const approvedAmount = await Web3Helper.checkApproval(
           token1.tokenAddress, // token add
           token1.address, // owner add
-          '0x1111111254eeb25477b68fb85ed929f73a960582',
+          "0x1111111254eeb25477b68fb85ed929f73a960582",
           token1.rpc
         );
-        console.log('🚀 ~ init ~ approvedAmount:', approvedAmount);
+        console.log("🚀 ~ init ~ approvedAmount:", approvedAmount);
 
         if (approvedAmount === false) {
           setLoading(false);
           return messageApi.error(
-            'Unable to fetch approval amount. Please try again later.'
+            "Unable to fetch approval amount. Please try again later."
           );
         }
 
@@ -230,7 +230,7 @@ function SwapDetails() {
     } catch (error) {
       console.log(error);
       setLoading(false);
-      return messageApi.error('Something went wrong');
+      return messageApi.error("Something went wrong");
     }
   };
 
@@ -278,7 +278,7 @@ function SwapDetails() {
         const data = await uniHelper.sendForApproval(
           token1.tokenAddress,
           token1.address,
-          '0x1111111254eeb25477b68fb85ed929f73a960582',
+          "0x1111111254eeb25477b68fb85ed929f73a960582",
           token1.chain.slug,
           token1.isToken ? token1.tokenAddress : token1.symbol.toLowerCase(),
           token1.isToken,
@@ -288,7 +288,7 @@ function SwapDetails() {
           setSwapModal(false);
           setLogoutOpenmodal(false);
           return messageApi.error(
-            'Insufficient balance in wallet for gas fee.'
+            "Insufficient balance in wallet for gas fee."
           );
         }
         setLogoutOpenmodal(false);
@@ -301,7 +301,7 @@ function SwapDetails() {
           const approval = await Web3Helper.checkApproval(
             token1.tokenAddress, // token add
             token1.address, // owner add
-            '0x1111111254eeb25477b68fb85ed929f73a960582',
+            "0x1111111254eeb25477b68fb85ed929f73a960582",
             token1.rpc
           );
 
@@ -311,7 +311,7 @@ function SwapDetails() {
           ) {
             setSwapModal(false);
             return messageApi.error(
-              'Please wait for approval to be completed.'
+              "Please wait for approval to be completed."
             );
           }
         }
@@ -330,13 +330,13 @@ function SwapDetails() {
 
         if (!data) {
           setSwapModal(false);
-          return messageApi.error('Something went wrong.');
+          return messageApi.error("Something went wrong.");
         }
         setSwapModal(false);
         setIsModalOpen1(true);
       }
     } catch (error) {
-      console.log('Confirm transaction error : ', error);
+      console.log("Confirm transaction error : ", error);
     }
   };
 
@@ -344,95 +344,107 @@ function SwapDetails() {
     <div className={`scrollableCont`}>
       {loading ? <Loader /> : null}
       {contextHolder}
-      <MenuRestofHeaders backTo={'/swap'} title={'Swap'} />
+      <MenuRestofHeaders backTo={"/swap"} title={"Confirm Swap"} />
       <div className={`flexedContent`}>
-        <div className='swapDetails'>
-          <div className='swapDetails__iconsTop'>
-            {token1.image ? (
-              <img src={token1.image} width={30} height={30} />
-            ) : (
-              <div
-                style={{
-                  alignItems: 'center',
-                  backgroundColor: 'rgba(98,126,234,.2)',
-                  borderRadius: '49%',
-                  display: 'flex',
-                  height: '29px',
-                  justifyContent: 'center',
-                  width: '29px',
-                  marginRight: '15px',
-                }}
-              >
-                {' '}
-                {token1?.symbol.split('')[0]}
-              </div>
-            )}
-            <img src={ArrowDashedLine} width={144} height={12} />
-            {token2.image ? (
-              <img src={token2.image} width={30} height={30} />
-            ) : (
-              <div
-                style={{
-                  alignItems: 'center',
-                  backgroundColor: 'rgba(98,126,234,.2)',
-                  borderRadius: '49%',
-                  display: 'flex',
-                  height: '29px',
-                  justifyContent: 'center',
-                  width: '29px',
-                  marginRight: '15px',
-                }}
-              >
-                {' '}
-                {token2?.symbol.split('')[0]}
-              </div>
-            )}
-          </div>
-          <div className='swapDetails__valueText'>
-            <p className='swapDetails__valueText__text'>
-              {addCommasToNumber(getFlooredFixed(parseFloat(amount), 8))}{' '}
-              {token1.symbol}
-            </p>
-            <p className='swapDetails__valueText__text'>
-              {addCommasToNumber(getFlooredFixed(parseFloat(amount2), 6))}{' '}
-              {token2.symbol}
-            </p>
-          </div>
-          <div className='swapDetails__border'></div>
-          <div className='swapDetails__address'>
-            <p className='swapDetails__address__key'>From</p>
-            <p className='swapDetails__address__val'>
-              <sapn> {token1.address}</sapn>
-            </p>
-          </div>
-          <div className='swapDetails__address'>
-            <p className='swapDetails__address__key'>To</p>
-            <p className='swapDetails__address__val'>
-              <sapn> {token1.address}</sapn>
-            </p>
-          </div>
-          <div className='swapDetails__border'></div>
-          <div className='swapDetails__keyValuesText'>
-            <div className='swapDetails__keyValuesText__inner'>
-              <p className='swapDetails__keyValuesText__key'>Type</p>
-              <p className='swapDetails__keyValuesText__val'>On-Chain</p>
+        <div className="swapDetails">
+          <div className="swapDetails-bg">
+            <div className="swapDetails__iconsTop">
+              {token1.image ? (
+                <img src={token1.image} width={30} height={30} />
+              ) : (
+                <div
+                  style={{
+                    alignItems: "center",
+                    backgroundColor: "rgba(98,126,234,.2)",
+                    borderRadius: "49%",
+                    display: "flex",
+                    height: "29px",
+                    justifyContent: "center",
+                    width: "29px",
+                    marginRight: "15px",
+                  }}
+                >
+                  {" "}
+                  {token1?.symbol.split("")[0]}
+                </div>
+              )}
+              <img src={ArrowDashedLine} width={144} height={12} />
+              {token2.image ? (
+                <img src={token2.image} width={30} height={30} />
+              ) : (
+                <div
+                  style={{
+                    alignItems: "center",
+                    backgroundColor: "rgba(98,126,234,.2)",
+                    borderRadius: "49%",
+                    display: "flex",
+                    height: "29px",
+                    justifyContent: "center",
+                    width: "29px",
+                    marginRight: "15px",
+                  }}
+                >
+                  {" "}
+                  {token2?.symbol.split("")[0]}
+                </div>
+              )}
             </div>
-            <div className='swapDetails__keyValuesText__inner'>
-              <p className='swapDetails__keyValuesText__key'>Total Fee</p>
-              <p className='swapDetails__keyValuesText__val'>
-                {networkPrice}{' '}
-                {token1.coinFamily == 1
-                  ? 'BNB'
-                  : token1.coinFamily == 2
-                  ? 'ETH'
-                  : token1.coinFamily == 4
-                  ? 'POL'
-                  : 'BNB'}{' '}
-                ({currency.symbol}
-                {networkPriceFiat})
+            <div className="swapDetails__valueText">
+              <p className="swapDetails__valueText__text">
+                <span>To</span>
+                <br />
+                {addCommasToNumber(getFlooredFixed(parseFloat(amount), 8))}{" "}
+                {token1.symbol}
+              </p>
+              <p className="swapDetails__valueText__text">
+                <span>From</span>
+                <br />
+                {addCommasToNumber(getFlooredFixed(parseFloat(amount2), 6))}
+                {token2.symbol}
               </p>
             </div>
-            
+          </div>
+          {/* <div className="swapDetails__border"></div> */}
+          <div style={{ marginTop: "16px" }} className="swapDetails-bg">
+            <div className="swapDetails__address">
+              <p className="swapDetails__address__key">From</p>
+              <p className="swapDetails__address__val">
+                <span> {token1.address}</span>
+              </p>
+            </div>
+            <div className="swapDetails__address">
+              <p className="swapDetails__address__key">To</p>
+              <p className="swapDetails__address__val">
+                <span> {token1.address}</span>
+              </p>
+            </div>
+          </div>
+
+          {/* <div className="swapDetails__border"></div> */}
+          <div className="swapDetails__keyValuesText">
+            <div className="swapDetails__keyValuesText__inner">
+              <p className="swapDetails__keyValuesText__key">Type</p>
+              <p className="swapDetails__keyValuesText__val">
+                <span>On-Chain</span>
+              </p>
+            </div>
+            <div className="swapDetails__keyValuesText__inner">
+              <p className="swapDetails__keyValuesText__key">Network Fee</p>
+              <p className="swapDetails__keyValuesText__val">
+                <span>
+                  {networkPrice}{" "}
+                  {token1.coinFamily == 1
+                    ? "BNB"
+                    : token1.coinFamily == 2
+                    ? "ETH"
+                    : token1.coinFamily == 4
+                    ? "POL"
+                    : "BNB"}{" "}
+                  ({currency.symbol}
+                  {networkPriceFiat})
+                </span>
+              </p>
+            </div>
           </div>
           <ButtonComp
             onClick={() => {
@@ -441,32 +453,32 @@ function SwapDetails() {
             disabled={!approvalConfirmed && approvalHash}
             text={
               requireApproval
-                ? 'Approve'
+                ? "Approve"
                 : approvalConfirmed
-                ? 'Swap'
-                : 'Approval Pending'
+                ? "Swap"
+                : "Approval Pending"
             }
-            maxWidth={'100%'}
+            maxWidth={"100%"}
           />
         </div>
       </div>
       <ModalCustom
-        title={'Approval Request'}
+        title={"Approval Request"}
         isModalOpen={isLogoutModalOpen}
-        customClass='customClassModal'
+        customClass="customClassModal"
       >
-        <div className='viewphrases'>
-          <div className='viewphrases__iInner'>
-            <ClipLoader size={65} color='#00adee' />
+        <div className="viewphrases">
+          <div className="viewphrases__iInner">
+            <ClipLoader size={65} color="#00adee" />
             <div
               style={{
-                marginTop: '20px',
-                textAlign: 'center',
+                marginTop: "20px",
+                textAlign: "center",
               }}
             >
               <p
                 style={{
-                  textAlign: 'center',
+                  textAlign: "center",
                 }}
               >
                 Approval request has been processed successfully. Waiting for
@@ -478,30 +490,30 @@ function SwapDetails() {
       </ModalCustom>
 
       <ModalCustom
-        title={'Swap Transaction'}
+        title={"Swap Transaction"}
         isModalOpen={swapModal}
-        customClass='customClassModal'
+        customClass="customClassModal"
       >
-        <div className='viewphrases'>
+        <div className="viewphrases">
           <div
-            className=''
+            className=""
             style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
             }}
           >
-            <ClipLoader size={65} color='#00adee' />
+            <ClipLoader size={65} color="#00adee" />
             <div
               style={{
-                marginTop: '20px',
-                textAlign: 'center',
+                marginTop: "20px",
+                textAlign: "center",
               }}
             >
               <p
-                className='noAddress'
+                className="noAddress"
                 style={{
-                  textAlign: 'center',
+                  textAlign: "center",
                 }}
               >
                 Swap request sent. Waiting for blockchain confirmation.
@@ -512,30 +524,30 @@ function SwapDetails() {
       </ModalCustom>
 
       <ModalCustom
-        title={'Confirm Transaction'}
+        title={"Confirm Transaction"}
         handleCancel={handleCancel}
         isModalOpen={isModalOpen}
         handleOk={handleOk}
-        customClass='customClassModal'
+        customClass="customClassModal"
       >
-        <div className='viewphrases'>
+        <div className="viewphrases">
           <div
             style={{
-              marginBottom: '36px',
-              width: '100%',
+              marginBottom: "36px",
+              width: "100%",
             }}
           >
             <InputFieldSimple
-              placeholder='Password'
+              placeholder="Password"
               getData={setPassword}
               value={sessionPassword}
               customFunction={async () => {
                 const { password } = await chrome.storage.session.get(
-                  'password'
+                  "password"
                 );
 
                 if (sessionPassword !== password) {
-                  return messageApi.error('Incorrect password provided.');
+                  return messageApi.error("Incorrect password provided.");
                 }
 
                 setOpenmodal(false);
@@ -544,7 +556,7 @@ function SwapDetails() {
                 handleSwap();
               }}
             />
-            <div className='viewphrases__iInner'>
+            <div className="viewphrases__iInner">
               <img src={warning} />
               <div>
                 <p>Do not share your password with anyone!</p>
@@ -553,13 +565,13 @@ function SwapDetails() {
             </div>
           </div>
           <ButtonComp
-            text={'Proceed'}
-            maxWidth={'100%'}
+            text={"Proceed"}
+            maxWidth={"100%"}
             onClick={async () => {
-              const { password } = await chrome.storage.session.get('password');
+              const { password } = await chrome.storage.session.get("password");
 
               if (sessionPassword !== password) {
-                return messageApi.error('Incorrect password provided.');
+                return messageApi.error("Incorrect password provided.");
               }
 
               setOpenmodal(false);
@@ -576,32 +588,32 @@ function SwapDetails() {
         handleCancel={handleCancel1}
         isModalOpen={isModalOpen1}
         handleOk={handleOk1}
-        customClass='customClassModal'
+        customClass="customClassModal"
       >
-        <div className={'confirmationsModal'}>
-          <div className={'iInner'}>
-            {theme == 'darkTheme' ? (
+        <div className={"confirmationsModal"}>
+          <div className={"iInner"}>
+            {theme == "darkTheme" ? (
               <img src={DarkLogo} />
             ) : (
               <img
                 src={Logo}
                 style={{
-                  height: '100px',
+                  height: "100px",
                 }}
               />
             )}
             <div>
               <p>
-                Swap request of {addCommasToNumber(getFlooredFixed(amount, 5))}{' '}
+                Swap request of {addCommasToNumber(getFlooredFixed(amount, 5))}{" "}
                 {token1.symbol.toUpperCase()} has been processed successfully.
               </p>
             </div>
           </div>
           <ButtonComp
-            text={'OK'}
-            maxWidth={'100%'}
+            text={"OK"}
+            maxWidth={"100%"}
             onClick={() => {
-              return navigate('/wallet');
+              return navigate("/wallet");
             }}
           />
         </div>
@@ -609,21 +621,21 @@ function SwapDetails() {
       {infoMessage && (
         <ModalCustom
           isModalOpen={infoMessage}
-          title={''}
-          handleCancel={() => setInfoMessage('')}
-          customClass={'disclamerModalSec '}
+          title={""}
+          handleCancel={() => setInfoMessage("")}
+          customClass={"disclamerModalSec "}
         >
-          <div className='mainTanceSecModal'>
-            {theme == 'darkTheme' ? <img src={DarkLogo} /> : <img src={Logo} />}
+          <div className="mainTanceSecModal">
+            {theme == "darkTheme" ? <img src={DarkLogo} /> : <img src={Logo} />}
 
-            <p className={theme == 'darkTheme' ? 'lightText' : 'darkText'}>
+            <p className={theme == "darkTheme" ? "lightText" : "darkText"}>
               {infoMessage}
             </p>
             <ButtonComp
-              maxWidth={'100%'}
-              marginTop={'25px'}
-              text={'Ok'}
-              onClick={() => setInfoMessage('')}
+              maxWidth={"100%"}
+              marginTop={"25px"}
+              text={"Ok"}
+              onClick={() => setInfoMessage("")}
             />
           </div>
         </ModalCustom>

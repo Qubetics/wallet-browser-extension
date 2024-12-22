@@ -1,55 +1,53 @@
 /* eslint-disable jsx-a11y/alt-text */
 /*global chrome*/
 
-import React from 'react';
-import MenuRestofHeaders from '../../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders';
-import './CrossChainDetials.scss';
-import ArrowDashedLine from '../../../Assets/ArrowDashedLine.svg';
-import ButtonComp from '../../../Components/ButtonComp/ButtonComp';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import { useEffect } from 'react';
-import { useRef } from 'react';
-import { Web3Helper } from '../../../helpers/web3.helper';
+import React from "react";
+import MenuRestofHeaders from "../../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders";
+import "./CrossChainDetials.scss";
+import ArrowDashedLine from "../../../Assets/ArrowDashedLine.svg";
+import ButtonComp from "../../../Components/ButtonComp/ButtonComp";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { useEffect } from "react";
+import { useRef } from "react";
+import { Web3Helper } from "../../../helpers/web3.helper";
 
-import { message } from 'antd';
-import { useState } from 'react';
-import { UniswapHelper } from '../../../helpers/uniswap.helper';
-import ModalCustom from '../../../Components/ModalCustom/ModalCustom';
-import { ClipLoader } from 'react-spinners';
-import { Loader } from '../../../Components/Loader/Loader';
-import { CrossChainHelper } from '../../../helpers/crosschain.helper';
-import { DURATION } from '../../../config/message.config';
-import warning from '../../../Assets/PNG/warning.png';
-import InputFieldSimple from '../../../Components/InputField/InputFieldSimple';
+import { message } from "antd";
+import { useState } from "react";
+import { UniswapHelper } from "../../../helpers/uniswap.helper";
+import ModalCustom from "../../../Components/ModalCustom/ModalCustom";
+import { ClipLoader } from "react-spinners";
+import { Loader } from "../../../Components/Loader/Loader";
+import { CrossChainHelper } from "../../../helpers/crosschain.helper";
+import { DURATION } from "../../../config/message.config";
+import warning from "../../../Assets/PNG/warning.png";
+import InputFieldSimple from "../../../Components/InputField/InputFieldSimple";
 
-import DarkLogo from '../../../Assets/DarkLogo.svg';
-import Logo from '../../../Assets/Logo.png';
+import DarkLogo from "../../../Assets/DarkLogo.svg";
+import Logo from "../../../Assets/Logo.png";
 
 function getFlooredFixed(v, d) {
   return (Math.floor(v * Math.pow(10, d)) / Math.pow(10, d)).toFixed(d);
 }
 
 function addCommasToNumber(number) {
-  var parts = number.toString().split('.');
+  var parts = number.toString().split(".");
   var integerPart = parts[0];
-  var decimalPart = parts[1] || ''; // Handle cases where there is no decimal part
+  var decimalPart = parts[1] || ""; // Handle cases where there is no decimal part
 
   // Add commas to the integer part
-  integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 
   // Combine the integer and decimal parts
-  if (decimalPart !== '') {
-    return integerPart + '.' + decimalPart;
+  if (decimalPart !== "") {
+    return integerPart + "." + decimalPart;
   } else {
     return integerPart;
   }
 }
 
 function CrossChainDetails() {
-  const { chain, account, currency, theme } = useSelector(
-    (state) => state
-  );
+  const { chain, account, currency, theme } = useSelector((state) => state);
   const {
     state: {
       token1,
@@ -62,7 +60,7 @@ function CrossChainDetails() {
       token1Price,
       parentCoin,
       rpc,
-      coinSymbol
+      coinSymbol,
     },
   } = useLocation();
 
@@ -128,7 +126,7 @@ function CrossChainDetails() {
     if (!data) {
       setSwapModal(false);
       return messageApi.error(
-        'Unable to process your transaction at the moment. Please try again later.'
+        "Unable to process your transaction at the moment. Please try again later."
       );
     }
     setSwapModal(false);
@@ -139,26 +137,26 @@ function CrossChainDetails() {
     <div className={`scrollableCont`}>
       {loading ? <Loader /> : null}
       {contextHolder}
-      <MenuRestofHeaders backTo={'/swap'} title={'Swap'} />
+      <MenuRestofHeaders backTo={"/swap"} title={"Swap"} />
       <div className={`flexedContent`}>
-        <div className='swapDetails'>
-          <div className='swapDetails__iconsTop'>
+        <div className="swapDetails">
+          <div className="swapDetails__iconsTop">
             {token1.image ? (
               <img src={token1.image} width={30} height={30} />
             ) : (
               <div
-                className='randb'
+                className="randb"
                 style={{
-                  height: '35px',
-                  width: '35px',
-                  background: '#fff',
-                  borderRadius: '50%',
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
+                  height: "35px",
+                  width: "35px",
+                  background: "#fff",
+                  borderRadius: "50%",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
                 }}
               >
-                {token1.symbol.split('')[0]}
+                {token1.symbol.split("")[0]}
               </div>
             )}
 
@@ -167,35 +165,44 @@ function CrossChainDetails() {
               <img src={token2.image} width={30} height={30} />
             ) : (
               <div
-                className='randb'
+                className="randb"
                 style={{
-                  height: '35px',
-                  width: '35px',
-                  background: '#fff',
-                  borderRadius: '50%',
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
+                  height: "35px",
+                  width: "35px",
+                  background: "#fff",
+                  borderRadius: "50%",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
                 }}
               >
-                {token2.symbol.split('')[0]}
+                {token2.symbol.split("")[0]}
               </div>
             )}
           </div>
-          <div className='swapDetails__valueText'>
-            <p className='swapDetails__valueText__text'>
-              {addCommasToNumber(getFlooredFixed(parseFloat(amount), 6))}{' '}
+          <div className="swapDetails__valueText">
+            <p
+              style={{ textAlign: "center" }}
+              className="swapDetails__valueText__text"
+            >
+              <span>To</span>
+              <br />
+              {addCommasToNumber(getFlooredFixed(parseFloat(amount), 6))}{" "}
               {token1.symbol}
             </p>
-            <p className='swapDetails__valueText__text'>
-              {addCommasToNumber(getFlooredFixed(parseFloat(amount2), 4))}{' '}
+            <p
+              style={{ textAlign: "center" }}
+              className="swapDetails__valueText__text"
+            >
+              <span>From</span>
+              {addCommasToNumber(getFlooredFixed(parseFloat(amount2), 4))}{" "}
               {token2.symbol}
             </p>
           </div>
-          <div className='swapDetails__border'></div>
-          <div className='swapDetails__address'>
-            <p className='swapDetails__address__key'>From</p>
-            <p className='swapDetails__address__val'>
+          <div className="swapDetails__border"></div>
+          <div className="swapDetails__address">
+            <p className="swapDetails__address__key">From</p>
+            <p className="swapDetails__address__val">
               <sapn>{`${token1.address.substring(0, 8)}.....
           ${token1.address.substring(
             token1.address.length - 8,
@@ -203,11 +210,11 @@ function CrossChainDetails() {
           )}`}</sapn>
             </p>
           </div>
-          <div className='swapDetails__address'>
-            <p className='swapDetails__address__key'>To</p>
-            <p className='swapDetails__address__val'>
+          <div className="swapDetails__address">
+            <p className="swapDetails__address__key">To</p>
+            <p className="swapDetails__address__val">
               <sapn>
-                {' '}
+                {" "}
                 {`${token2.address.substring(0, 8)}.....
           ${token2.address.substring(
             token2.address.length - 8,
@@ -216,63 +223,63 @@ function CrossChainDetails() {
               </sapn>
             </p>
           </div>
-          <div className='swapDetails__border'></div>
-          <div className='swapDetails__keyValuesText'>
-            <div className='swapDetails__keyValuesText__inner'>
-              <p className='swapDetails__keyValuesText__key'>Type</p>
-              <p className='swapDetails__keyValuesText__val'>Cross-Chain</p>
+          <div className="swapDetails__border"></div>
+          <div className="swapDetails__keyValuesText">
+            <div className="swapDetails__keyValuesText__inner">
+              <p className="swapDetails__keyValuesText__key">Type</p>
+              <p className="swapDetails__keyValuesText__val">Cross-Chain</p>
             </div>
-            <div className='swapDetails__keyValuesText__inner'>
-              <p className='swapDetails__keyValuesText__key'>Network Fee</p>
-              <p className='swapDetails__keyValuesText__val'>
-                {addCommasToNumber(getFlooredFixed(networkFee, 5))}{' '}
-                {tokenChain.currencySymbol} / ({currency.symbol}{' '}
+            <div className="swapDetails__keyValuesText__inner">
+              <p className="swapDetails__keyValuesText__key">Network Fee</p>
+              <p className="swapDetails__keyValuesText__val">
+                {addCommasToNumber(getFlooredFixed(networkFee, 5))}{" "}
+                {tokenChain.currencySymbol} / ({currency.symbol}{" "}
                 {addCommasToNumber(
                   getFlooredFixed(parentCoin.value * networkFee, 2)
                 )}
                 )
               </p>
             </div>
-            <div className='swapDetails__keyValuesText__inner'>
-              <p className='swapDetails__keyValuesText__key'>
+            <div className="swapDetails__keyValuesText__inner">
+              <p className="swapDetails__keyValuesText__key">
                 Estimated time of receiving
               </p>
-              <p className='swapDetails__keyValuesText__val'>1~20 Minutes</p>
+              <p className="swapDetails__keyValuesText__val">1~20 Minutes</p>
             </div>
           </div>
           <ButtonComp
             onClick={() => setOpenmodal(true)}
-            text={'Swap'}
-            maxWidth={'100%'}
+            text={"Swap"}
+            maxWidth={"100%"}
           />
         </div>
       </div>
 
       <ModalCustom
-        title={'Swap Transaction'}
+        title={"Swap Transaction"}
         isModalOpen={swapModal}
-        customClass='customClassModal'
+        customClass="customClassModal"
       >
-        <div className='viewphrases'>
+        <div className="viewphrases">
           <div
-            className=''
+            className=""
             style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
             }}
           >
-            <ClipLoader size={65} color='#00adee' />
+            <ClipLoader size={65} color="#00adee" />
             <div
               style={{
-                marginTop: '20px',
-                textAlign: 'center',
+                marginTop: "20px",
+                textAlign: "center",
               }}
             >
               <p
-                className='noAddress'
+                className="noAddress"
                 style={{
-                  textAlign: 'center',
+                  textAlign: "center",
                 }}
               >
                 Swap request sent. Waiting for blockchain confirmation.
@@ -283,30 +290,32 @@ function CrossChainDetails() {
       </ModalCustom>
 
       <ModalCustom
-        title={'Confirm Transaction'}
+        title={"Confirm Transaction"}
         handleCancel={handleCancel}
         isModalOpen={isModalOpen}
         handleOk={handleOk}
-        customClass='customClassModal'
+        customClass="customClassModal"
       >
-        <div className='viewphrases'>
+        <div className="viewphrases">
           <div
             style={{
-              marginBottom: '36px',
-              width: '100%',
+              marginBottom: "36px",
+              width: "100%",
             }}
           >
             <InputFieldSimple
-              placeholder='Password'
+              placeholder="Password"
               getData={setPassword}
               value={sessionPassword}
               customFunction={async () => {
-                const { password } = await chrome.storage.session.get('password');
-  
+                const { password } = await chrome.storage.session.get(
+                  "password"
+                );
+
                 if (sessionPassword !== password) {
-                  return messageApi.error('Incorrect password provided.');
+                  return messageApi.error("Incorrect password provided.");
                 }
-    
+
                 setOpenmodal(false);
                 handleSwap();
               }}
@@ -314,13 +323,13 @@ function CrossChainDetails() {
           </div>
 
           <ButtonComp
-            text={'Proceed'}
-            maxWidth={'100%'}
+            text={"Proceed"}
+            maxWidth={"100%"}
             onClick={async () => {
-              const { password } = await chrome.storage.session.get('password');
+              const { password } = await chrome.storage.session.get("password");
 
               if (sessionPassword !== password) {
-                return messageApi.error('Incorrect password provided.');
+                return messageApi.error("Incorrect password provided.");
               }
 
               setOpenmodal(false);
@@ -336,34 +345,32 @@ function CrossChainDetails() {
         handleCancel={handleCancel1}
         isModalOpen={isModalOpen1}
         handleOk={handleOk1}
-        customClass='customClassModal'
+        customClass="customClassModal"
       >
-        <div className={'confirmationsModal'}>
-          <div className={'iInner'}>
-            {theme == 'darkTheme' ? (
-              <img
-                src={DarkLogo}
-              />
+        <div className={"confirmationsModal"}>
+          <div className={"iInner"}>
+            {theme == "darkTheme" ? (
+              <img src={DarkLogo} />
             ) : (
               <img
                 src={Logo}
                 style={{
-                  height: '100px',
+                  height: "100px",
                 }}
               />
             )}
             <div>
               <p>
-                Swap request of {addCommasToNumber(getFlooredFixed(amount, 5))}{' '}
+                Swap request of {addCommasToNumber(getFlooredFixed(amount, 5))}{" "}
                 {token1.symbol.toUpperCase()} has been processed successfully.
               </p>
             </div>
           </div>
           <ButtonComp
-            text={'OK'}
-            maxWidth={'100%'}
+            text={"OK"}
+            maxWidth={"100%"}
             onClick={() => {
-              return navigate('/wallet');
+              return navigate("/wallet");
             }}
           />
         </div>

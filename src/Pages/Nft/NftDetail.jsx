@@ -172,7 +172,13 @@ function NftDetail() {
           <div className="nftDetailList">
             <div className="nftDetail">
               {nftData.map((nft) => (
-                <div className="nftSuper" key={nft.id}>
+                <div
+                  className="nftSuper"
+                  key={nft.id}
+                  onClick={() => {
+                    navigate("/nftManage");
+                  }}
+                >
                   <div className="nftSuper_img">
                     <img src={nft.imgSrc} alt="NftImg" />
                   </div>
@@ -191,9 +197,15 @@ function NftDetail() {
                 </div>
               ))}
             </div>
-          </div >
-          <div style={{marginTop:"15px"}}>
-          <ButtonComp text={"Receive"} maxWidth={"100%"} />
+          </div>
+          <div style={{ marginTop: "15px" }}>
+            <ButtonComp
+              onClick={() => {
+                navigate("/receive-currency", { state: { nftButton: true } });
+              }}
+              text={"Receive"}
+              maxWidth={"100%"}
+            />
           </div>
         </div>
       </div>

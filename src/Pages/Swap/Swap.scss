@@ -1,16 +1,17 @@
 @import "../../styles/__vars.scss";
 @import "../../styles/__mixins.scss";
 .swap {
-  // &__pasteText {
-  //   color: $baseText-00AEEF;
-  //   font-size: 13px;
-  //   font-weight: bold;
-  //   cursor: pointer;
-  //   transition: 0.3s;
-  //   &:hover {
-  //     opacity: 0.7;
-  //   }
-  // }
+  position: relative;
+  &__pasteText {
+    color: #f5da76;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+    &:hover {
+      opacity: 0.7;
+    }
+  }
   &__infoText {
     color: $gray;
     font-size: 13px;
@@ -24,29 +25,102 @@
     justify-content: flex-end;
   }
   &__icon {
-    margin-bottom: 35px;
+    // left: 50%;
+    margin: 10px 0 !important;
+    // position: absolute;
     text-align: center;
+    // top: 95px;
+    // transform: translateX(-50%);
   }
 
   .swap__icon {
     cursor: pointer;
   }
+  &_onChain {
+    background-color: #18171f;
+    padding: 16px;
+    border-radius: 14px;
+    display: block;
+    .ant-select-selector {
+      background-color: transparent !important;
+      border: none !important;
+    }
+    &_pay {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      p {
+        color: #98969b;
+        font-size: 14px;
+        text-align: right;
+        span {
+          color: #ffffff;
+        }
+      }
+    }
+    &_balance {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      h2 {
+        font-size: 20px;
+        font-weight: 700;
+        color: $white;
+      }
+      p {
+        color: #cfd3e1;
+        font-size: 14px;
+        font-weight: 400;
+        text-align: left;
+      }
+      .ant-select-arrow {
+        top: 43% !important;
+      }
+    }
+  }
+  &_percentage {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 24px;
+    p {
+      padding: 20px;
+      text-align: center;
+      color: #cfd3e1;
+      font-size: 16px;
+      font-weight: 500;
+      background: linear-gradient(
+        180deg,
+        rgba(19, 66, 157, 0.2) 0%,
+        rgba(45, 81, 203, 0.2) 105.86%
+      );
+      border-radius: 25px;
+      flex: 1;
+    }
+    .active {
+      background: linear-gradient(9.09deg, #f6db79 4.52%, #8f5322 121%);
+      color: #1d2d67;
+    }
+  }
 }
 
 .send {
-  // &__pasteText {
-  //   color: $baseText-00AEEF;
-  //   font-size: 13px;
-  //   font-weight: bold;
-  //   text-decoration: underline;
-  //   cursor: pointer;
-  //   transition: 0.3s;
-  //   padding-left: 10px;
-  //   border-left: 1px solid #80838e;
-  //   &:hover {
-  //     opacity: 0.7;
-  //   }
-  // }
+  &__pasteText {
+    color: #f5da76;
+    font-size: 13px;
+    font-weight: bold;
+    text-decoration: underline;
+    cursor: pointer;
+    transition: 0.3s;
+    padding-left: 10px;
+    border-left: 1px solid #80838e;
+    &:hover {
+      opacity: 0.7;
+    }
+  }
   &__infoText {
     color: $gray;
     font-size: 13px;
@@ -72,25 +146,23 @@
   bottom: -12px;
   left: 50%;
   transform: translateX(-50%);
-  @include theme() {
-    background-color: theme-get("cardBorder");
-  }
+  background-color: red;
 }
 
 .send {
-  // &__pasteText {
-  //   color: $baseText-00AEEF;
-  //   font-size: 13px;
-  //   font-weight: bold;
-  //   text-decoration: underline;
-  //   cursor: pointer;
-  //   transition: 0.3s;
-  //   padding-left: 10px;
-  //   border-left: 1px solid #80838e;
-  //   &:hover {
-  //     opacity: 0.7;
-  //   }
-  // }
+  &__pasteText {
+    color: #f5da76;
+    font-size: 13px;
+    font-weight: bold;
+    text-decoration: underline;
+    cursor: pointer;
+    transition: 0.3s;
+    padding-left: 10px;
+    border-left: 1px solid #80838e;
+    &:hover {
+      opacity: 0.7;
+    }
+  }
 }
 
 .do {
@@ -113,12 +185,18 @@
 
 .swapTab {
   cursor: pointer;
-  @include theme() {
-    color: theme-get("whiteblack");
-  }
-
+  color: #cfd3e1;
+  padding: 16px;
+  text-align: center;
+  flex: 1;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 14px 0 0 14px;
   &:focus-visible {
     outline: unset !important;
+  }
+  &:last-child {
+    border-radius: 0 14px 14px 0;
   }
 }
 .confirmationsModal {
@@ -128,9 +206,7 @@
   justify-content: center;
   gap: 20px;
   p {
-    @include theme() {
-      color: theme-get("whiteblack");
-    }
+    color: $white;
   }
   .iInner {
     display: flex;
@@ -141,57 +217,65 @@
     gap: 20px;
   }
 }
-.react-tabs__tab--selected {
-  color: #fff;
-}
 
-.confirmCurrency {
-  // &__card {
-  //   background-color: $white;
-  //   border-radius: 16px;
-  //   padding: 24px;
-  //   margin-bottom: 24px;
-  //   text-align: left;
-  //   &__textTop {
-  //     font-size: 24px;
-  //     font-weight: 900;
-  //     color: $white;
-  //     margin-bottom: 8px;
-  //     word-break: break-all;
-  //   }
-  //   &__textBtm {
-  //     font-size: 14px;
-  //     font-weight: 400;
-  //     color: $baseColor-Text;
-  //   }
-  // }
-  // &__keyValues {
-  //   display: flex;
-  //   align-items: center;
-  //   justify-content: space-between;
-  //   gap: 15px;
-  //   margin-bottom: 20px;
-  //   // &:last-child {
-  //   //   margin-bottom: 50px;
-  //   // }
-  //   &__key {
-  //     font-size: 14px;
-  //     font-weight: 500;
-  //     color: $gray;
-  //   }
-  //   &__value {
-  //     font-size: 14px;
-  //     font-weight: bold;
-  //     color: $baseColor-Text;
-  //   }
-  // }
-}
+// .confirmCurrency {
+//   &__card {
+//     background-color: $white;
+//     border-radius: 16px;
+//     padding: 24px;
+//     margin-bottom: 24px;
+//     text-align: left;
+//     &__textTop {
+//       font-size: 24px;
+//       font-weight: 600;
+//       color: $baseColor-Text;
+//       margin-bottom: 8px;
+//       word-break: break-all;
+//     }
+//     &__textBtm {
+//       font-size: 14px;
+//       font-weight: 400;
+//       color: $baseColor-Text;
+//     }
+//   }
+//   &__keyValues {
+//     display: flex;
+//     align-items: center;
+//     justify-content: space-between;
+//     gap: 15px;
+//     margin-bottom: 20px;
+//     // &:last-child {
+//     //   margin-bottom: 50px;
+//     // }
+//     &__key {
+//       font-size: 14px;
+//       font-weight: 500;
+//       color: $gray;
+//     }
+//     &__value {
+//       font-size: 14px;
+//       font-weight: bold;
+//       color: $baseColor-Text;
+//     }
+//   }
+// }
 
 .swapTabList {
-  @include theme() {
-    background-color: theme-get("inputBg");
+  background-color: #18171f;
+  margin-bottom: 34px;
+  height: 50px;
+  .react-tabs__tab--selected {
+    background: linear-gradient(
+      90deg,
+      #73c9e2 0%,
+      #6c8dc5 25.37%,
+      #6456b2 76.11%,
+      #6145ea 101.48%
+    );
+
+    color: #ffffff;
+    border: none !important;
   }
-  margin-bottom: 10px;
 }
 
 .myvalues {
@@ -208,10 +292,10 @@
 }
 
 .myValuesActive {
-  background-color: #00aeef;
-  border: 1px solid #00aeef;
+  background-color: #f5da76;
+  border: 1px solid #f5da76;
   width: max-content;
-  color: #fff !important;
+  color: #1d2d67 !important;
   padding: 10px 18px;
   border-radius: 20px;
 }
@@ -275,23 +359,23 @@
   align-items: center;
   justify-content: space-between;
   padding: 10px 15px;
-  background-color: #fff;
+  background-color: transparent;
   gap: 3px;
   border-radius: 22px;
   margin-bottom: 25px;
-  border: 1px solid #4798dd;
+  border: 1px solid #f5da76;
   .innerslip {
     display: flex;
     justify-content: center;
     width: 100%;
-    color: #4798dd;
+    color: #f5da76;
     align-items: center;
     gap: 6px;
     svg {
       width: 20px;
       height: 20px;
       path {
-        fill: #4798dd;
+        fill: #f5da76;
       }
     }
   }
@@ -309,6 +393,9 @@
   .inputField__input {
     padding: 5px 10px !important;
   }
+  .boxStyle__label {
+    display: none;
+  }
 }
 .lightText {
   color: white;
@@ -317,4 +404,24 @@
 .darkText {
   color: black;
   margin-top: 10px !important;
+}
+
+.myInput {
+  background-color: transparent;
+  border: none;
+  height: 28px;
+  text-align: left;
+  color: #fff;
+  font-size: 26px;
+  font-weight: 500;
+  max-width: 145px;
+}
+
+.myInput:focus-visible {
+  outline: none !important;
+}
+
+.myInput::placeholder {
+  color: #fff;
+  font-weight: 500;
 }

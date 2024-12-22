@@ -28,8 +28,9 @@
   &__dropdownStyle {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
     gap: 8px;
+    width: 100%;
 
     // position: absolute;
     // top: 10px;

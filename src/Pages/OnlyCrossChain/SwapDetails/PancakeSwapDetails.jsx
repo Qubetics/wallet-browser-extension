@@ -40,10 +40,10 @@ function PancakeSwapDetails() {
 
   const firstPrice = prices[chain.chainId]
     ? prices[chain.chainId].find(
-      (myPrice) =>
-        myPrice.symbol.toUpperCase() === chain.currencySymbol.toUpperCase() &&
-        myPrice.fiat_currency === currency.name.toLowerCase()
-    )
+        (myPrice) =>
+          myPrice.symbol.toUpperCase() === chain.currencySymbol.toUpperCase() &&
+          myPrice.fiat_currency === currency.name.toLowerCase()
+      )
     : 0;
 
   const {
@@ -66,7 +66,6 @@ function PancakeSwapDetails() {
   const [approvalHash, setApprovalHash] = useState(null);
   const [approvalConfirmed, setApprovalConfirmed] = useState(false);
   const [loading, setLoading] = useState(true);
-
 
   const [sessionPassword, setPassword] = useState(null);
   const [isModalOpen, setOpenmodal] = useState(false);
@@ -107,8 +106,8 @@ function PancakeSwapDetails() {
       token1.symbol === "BNB" && token2.symbol === "WBNB"
         ? "WRAP"
         : token1.symbol === "WBNB" && token2.symbol === "BNB"
-          ? "UNWRAP"
-          : null,
+        ? "UNWRAP"
+        : null,
       token1.tokenAddress,
       token2.tokenAddress,
       token1.decimals,
@@ -174,8 +173,6 @@ function PancakeSwapDetails() {
     init();
   }, []);
 
-
-
   const handleSwap = async () => {
     if (requireApproval) {
       setLogoutOpenmodal(true);
@@ -217,8 +214,8 @@ function PancakeSwapDetails() {
         token1.symbol === "BNB" && token2.symbol === "WBNB"
           ? "WRAP"
           : token1.symbol === "WBNB" && token2.symbol === "BNB"
-            ? "UNWRAP"
-            : null,
+          ? "UNWRAP"
+          : null,
         token1.tokenAddress,
         token2.tokenAddress,
         token1.decimals,
@@ -250,10 +247,20 @@ function PancakeSwapDetails() {
             <img src={token2.image} width={30} height={30} />
           </div>
           <div className="swapDetails__valueText">
-            <p className="swapDetails__valueText__text">
+            <p
+              style={{ textAlign: "center" }}
+              className="swapDetails__valueText__text"
+            >
+              <span>To</span>
+              <br />
               {parseFloat(amount)} {token1.symbol}
             </p>
-            <p className="swapDetails__valueText__text">
+            <p
+              style={{ textAlign: "center" }}
+              className="swapDetails__valueText__text"
+            >
+              <span>From</span>
+              <br />
               {parseFloat(amount2)} {token2.symbol}
             </p>
           </div>
@@ -277,14 +284,12 @@ function PancakeSwapDetails() {
               <p className="swapDetails__keyValuesText__val">On-Chain</p>
             </div>
             <div className="swapDetails__keyValuesText__inner">
-              <p className="swapDetails__keyValuesText__key">
-                Network Fee
-              </p>
+              <p className="swapDetails__keyValuesText__key">Network Fee</p>
               <p className="swapDetails__keyValuesText__val">
                 {parseFloat(
                   getFlooredFixed(
                     (parseFloat(gasPrice) * parseFloat(gasEstimate)) /
-                    Math.pow(10, 18),
+                      Math.pow(10, 18),
                     6
                   )
                 )}{" "}
@@ -293,7 +298,7 @@ function PancakeSwapDetails() {
                   getFlooredFixed(
                     (parseFloat(firstPrice.current_price) *
                       (parseFloat(gasPrice) * parseFloat(gasEstimate))) /
-                    Math.pow(10, 18),
+                      Math.pow(10, 18),
                     6
                   )
                 ).toLocaleString()}
@@ -303,15 +308,15 @@ function PancakeSwapDetails() {
           </div>
           <ButtonComp
             onClick={() => {
-              setOpenmodal(true)
+              setOpenmodal(true);
             }}
             disabled={!approvalConfirmed && approvalHash}
             text={
               requireApproval
                 ? "Approve"
                 : approvalConfirmed
-                  ? "Confirm"
-                  : "Approval Pending"
+                ? "Confirm"
+                : "Approval Pending"
             }
             maxWidth={"100%"}
           />
@@ -320,17 +325,20 @@ function PancakeSwapDetails() {
       <ModalCustom
         title={"Approval Request"}
         isModalOpen={isLogoutModalOpen}
-        customClass='customClassModal'
+        customClass="customClassModal"
       >
         <div className="viewphrases">
           <div className="viewphrases__iInner">
-            <ClipLoader size={65} color='#00adee' />
+            <ClipLoader size={65} color="#00adee" />
             <div
               style={{
                 marginTop: "20px",
               }}
             >
-              <p>Approval request has been processed successfully. Waiting for blockchain confirmation.</p>
+              <p>
+                Approval request has been processed successfully. Waiting for
+                blockchain confirmation.
+              </p>
             </div>
           </div>
         </div>
@@ -339,17 +347,26 @@ function PancakeSwapDetails() {
       <ModalCustom
         title={"Swap Transaction"}
         isModalOpen={swapModal}
-        customClass='customClassModal'
+        customClass="customClassModal"
       >
         <div className="viewphrases">
-          <div className=" " style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-            <ClipLoader size={65} color='#00adee' />
+          <div
+            className=" "
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+            }}
+          >
+            <ClipLoader size={65} color="#00adee" />
             <div
               style={{
                 marginTop: "20px",
               }}
             >
-              <p className="noAddress">Swap request sent. Waiting for blockchain confirmation.</p>
+              <p className="noAddress">
+                Swap request sent. Waiting for blockchain confirmation.
+              </p>
             </div>
           </div>
         </div>
@@ -360,10 +377,10 @@ function PancakeSwapDetails() {
         handleCancel={handleCancel}
         isModalOpen={isModalOpen}
         handleOk={handleOk}
-        customClass='customClassModal'
+        customClass="customClassModal"
       >
         <div className="viewphrases">
-          <InputFieldSimple placeholder='Password' getData={setPassword} />
+          <InputFieldSimple placeholder="Password" getData={setPassword} />
           <div className="viewphrases__iInner">
             <img src={warning} />
             <div>
