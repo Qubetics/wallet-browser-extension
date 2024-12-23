@@ -38,35 +38,37 @@ function EditWallet() {
           backTo={state ? "/wallet" : "/wallet"}
           title={"Edit"}
         />
-        <div className={`flexedContent`}>
-          <div className="editWalle">
-            <h2 className="editWallet__titl noAddress">Wallet Name</h2>
-            <p className="editWallet__subTitle" style={{ marginBottom: 24 }}>
-              You can simply identify multiple wallets and label your own
-              wallet.
-            </p>
-            <div className="editWallet__linkOute">
-              <InputFieldOnly
-                placeholder={account.name}
-                label="Enter Name"
-                checkForSymbols={true}
-                value={name}
-                placeholderBaseColor={true}
-                getData={(name) => {
-                  if (name.length <= 25) {
-                    if (/^\s/.test(name)) {
-                      setName("");
+        <div className={`flexedContent padding-Top`}>
+          <div className="editWalle manageWalletHeight">
+            <div>
+              <h2 className="editWallet__titl noAddress">Wallet Name</h2>
+              <p className="editWallet__subTitle" style={{ marginBottom: 24 }}>
+                You can simply identify multiple wallets and label your own
+                wallet.
+              </p>
+              <div className="editWallet__linkOute">
+                <InputFieldOnly
+                  placeholder={account.name}
+                  label="Enter Name"
+                  checkForSymbols={true}
+                  value={name}
+                  placeholderBaseColor={true}
+                  getData={(name) => {
+                    if (name.length <= 25) {
+                      if (/^\s/.test(name)) {
+                        setName("");
+                      } else {
+                        setName(name);
+                      }
                     } else {
-                      setName(name);
+                      return;
                     }
-                  } else {
-                    return;
-                  }
-                }}
-                // coloredBg={true}
-              />
-              <div className="textInfoBaseColor">
-                Max Limit: {name ? name.length : 0}/25
+                  }}
+                  // coloredBg={true}
+                />
+                <div className="textInfoBaseColor">
+                  Max Limit: {name ? name.length : 0}/25
+                </div>
               </div>
             </div>
             <div className="setPassword__footerbutton">

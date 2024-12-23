@@ -356,7 +356,9 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin }) {
                 maxWidth: "290px",
                 overflow: "hidden",
                 textOverflow: "ellipsis",
-                marginBottom:"0"
+                marginBottom: "0",
+                fontSize: "28px",
+                lineHeight: "28px",
               }}
             >
               {coin
@@ -417,6 +419,8 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin }) {
                 color: "#fff",
                 padding: "0px",
                 fontWeight: "bold",
+                lineHeight:"16px",
+                padding:"10px 0"
               }}
               className={`${"balanceDetails__title"} ${
                 textLeft ? textLeft : ""

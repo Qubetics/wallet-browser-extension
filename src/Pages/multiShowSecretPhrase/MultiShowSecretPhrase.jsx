@@ -72,8 +72,10 @@ function MultiShowSecretPhrase() {
                     style={{ marginBottom: "10px" }}
                   >
                     <Checkbox onChange={onChange}>
-                      I understand that I stand the risk of losing my funds by
-                      exposing my Secret Phrase to others.
+                      <p style={{ marginLeft: "10px", textAlign: "left" }}>
+                        I understand that I stand the risk of losing my funds by
+                        exposing my Secret Phrase to others.
+                      </p>
                     </Checkbox>
                   </div>
 

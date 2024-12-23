@@ -4,7 +4,7 @@ import CoinsTable from "../../Components/CoinsTable/CoinsTable";
 import "./Receive.scss";
 import { useSelector } from "react-redux";
 import { InputField } from "../../Components/InputField/InputFieldSimple";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import Search from "../../Assets/SearchIcon.svg";
 import BigNumber from "bignumber.js";
 import {
@@ -28,7 +28,7 @@ import DeleteIcon from "../../Assets/DeleteIcon.svg";
 
 function PortfolioWatchList() {
   const { account, currency, balanceIn } = useSelector((state) => state);
-
+  const navigate = useNavigate();
   const [keyword, setKeyword] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [messageApi, contextHolder] = message.useMessage({
@@ -96,7 +96,7 @@ function PortfolioWatchList() {
 
   return (
     <div className={`scrollableCont send watchList`}>
-      <div className="searchBarFixed  ">
+      <div style={{ marginBottom: "24px" }}>
         {contextHolder}
         {/* <MenuRestofHeaders
           backTo={'/wallet'}
@@ -129,122 +129,126 @@ function PortfolioWatchList() {
           </div>
         )}
       </div>
-      <div style={{ marginTop: "24px" }}>
-        <div className="coinsTable1 flex-item">
-          <div className="coinsTable1__left">
-            <div className="coinsTable1__left__icon">
-              <img src={GroupBtc} alt="" />
-            </div>
-            <div className="coinsTable1__left__textSec">
-              <div className="coinsTable1__textTop">
-                <span className="coinNname">BTC</span>
+      <div className="WatchlistContents">
+        <div>
+          <div className="coinsTable1 flex-item">
+            <div className="coinsTable1__left">
+              <div className="coinsTable1__left__icon">
+                <img src={GroupBtc} alt="" />
               </div>
-              <span className="coinValue">$68,090.27</span>
+              <div className="coinsTable1__left__textSec">
+                <div className="coinsTable1__textTop">
+                  <span className="coinNname">BTC</span>
+                </div>
+                <span className="coinValue">$68,090.27</span>
+              </div>
             </div>
-          </div>
-          <div className="coinsTable1__right">
-            <span className="text-green">2.46% </span>
-            <img src={DeleteIcon} alt="DeleteIcon" />
+            <div className="coinsTable1__right">
+              <span className="text-green">2.46% </span>
+              <img src={DeleteIcon} alt="DeleteIcon" />
+            </div>
           </div>
         </div>
-      </div>
-      <div>
-        {(state?.nft ? list : tokens.filter((token) => token.watchlist_data))
-          .length > 0 ? (
-          <CoinsTable
-            name="portfolio"
-            // delete={DeleteIcon}
-            showCoinPrice={true}
-            dataArray={tokens
-              .filter((token) => token.watchlist_data)
-              .map((token) => {
-                const price = token.fiat_price_data || null;
-                const priceData = token?.fiat_price_data?.value || 0;
-                const myPrice = new BigNumber(price ? price.value : 0);
-                const balance = new BigNumber(token.balance);
-                const result = myPrice.times(balance);
-                const formattedResult = result.toString();
+        <div>
+          {(state?.nft ? list : tokens.filter((token) => token.watchlist_data))
+            .length > 0 ? (
+            <CoinsTable
+              name="portfolio"
+              // delete={DeleteIcon}
+              showCoinPrice={true}
+              dataArray={tokens
+                .filter((token) => token.watchlist_data)
+                .map((token) => {
+                  const price = token.fiat_price_data || null;
+                  const priceData = token?.fiat_price_data?.value || 0;
+                  const myPrice = new BigNumber(price ? price.value : 0);
+                  const balance = new BigNumber(token.balance);
+                  const result = myPrice.times(balance);
+                  const formattedResult = result.toString();
 
-                return {
-                  position: token.sort_order,
-                  coinIcon: token.coin_image,
-                  coinName: token.coin_symbol.toUpperCase(),
-                  coinSubName: token.coin_name,
-                  coinPrice: myPrice.toNumber()
-                    ? formatSmallNumber(
-                        exponential_to_decimal(myPrice.toNumber())
-                      )
-                    : "0.00",
-                  coinStatus: getFlooredFixed(
-                    price
-                      ? parseFloat(
-                          price.price_change_percentage_24h || 0
-                        ).toLocaleString()
-                      : 0,
-                    2
-                  ),
-                  currCryptoBal: balanceIn
-                    ? `${addCommasToNumber(
-                        parseFloat(getFlooredFixed(token.balance, 6))
-                      )}`
-                    : `****`,
-                  currCryptoBalSymbol: token.coin_symbol.toUpperCase(),
-                  currDollerBal: balanceIn
-                    ? addCommasToNumber(getFlooredFixed(formattedResult, 2))
-                    : "****",
-                  routeTo: "no-where",
-                  type: token.coin_family === 1 ? "BEP20" : "ERC20",
-                  status: true,
-                  coin: token,
-                  currPriceValue: priceData,
-                  watch: async () => {
-                    try {
-                      await server.post(
-                        "wallet/updateWatchlist",
-                        {
-                          data: [
-                            {
-                              address: account.address,
-                              coin_id: token.coin_id,
-                              status: token.watchlist_data ? 0 : 1,
-                            },
-                          ],
-                        },
-                        {
-                          headers: {
-                            Authorization: account.jwtToken,
+                  return {
+                    position: token.sort_order,
+                    coinIcon: token.coin_image,
+                    coinName: token.coin_symbol.toUpperCase(),
+                    coinSubName: token.coin_name,
+                    coinPrice: myPrice.toNumber()
+                      ? formatSmallNumber(
+                          exponential_to_decimal(myPrice.toNumber())
+                        )
+                      : "0.00",
+                    coinStatus: getFlooredFixed(
+                      price
+                        ? parseFloat(
+                            price.price_change_percentage_24h || 0
+                          ).toLocaleString()
+                        : 0,
+                      2
+                    ),
+                    currCryptoBal: balanceIn
+                      ? `${addCommasToNumber(
+                          parseFloat(getFlooredFixed(token.balance, 6))
+                        )}`
+                      : `****`,
+                    currCryptoBalSymbol: token.coin_symbol.toUpperCase(),
+                    currDollerBal: balanceIn
+                      ? addCommasToNumber(getFlooredFixed(formattedResult, 2))
+                      : "****",
+                    routeTo: "no-where",
+                    type: token.coin_family === 1 ? "BEP20" : "ERC20",
+                    status: true,
+                    coin: token,
+                    currPriceValue: priceData,
+                    watch: async () => {
+                      try {
+                        await server.post(
+                          "wallet/updateWatchlist",
+                          {
+                            data: [
+                              {
+                                address: account.address,
+                                coin_id: token.coin_id,
+                                status: token.watchlist_data ? 0 : 1,
+                              },
+                            ],
                           },
-                        }
-                      );
-                      init();
-                    } catch (error) {
-                      messageApi.error("Unable to favourite the selected coin");
-                    }
-                  },
-                  isActiveInWatchList: token.watchlist_data ? true : false,
-                };
-              })}
-          />
-        ) : (
-          <p
-            className="noAddress"
-            style={{
-              marginTop: "50%",
-              fontWeight: "bold",
-              fontSize: "17px",
-            }}
-          >
-            No assets found
-          </p>
-        )}
+                          {
+                            headers: {
+                              Authorization: account.jwtToken,
+                            },
+                          }
+                        );
+                        init();
+                      } catch (error) {
+                        messageApi.error(
+                          "Unable to favourite the selected coin"
+                        );
+                      }
+                    },
+                    isActiveInWatchList: token.watchlist_data ? true : false,
+                  };
+                })}
+            />
+          ) : (
+            <p
+              className="noAddress"
+              style={{
+                marginTop: "50%",
+                fontWeight: "bold",
+                fontSize: "17px",
+              }}
+            >
+              No assets found
+            </p>
+          )}
+        </div>
       </div>
-      <Link
-        to="/add-watch-list"
-        state={{ isFromPortfolio: true }}
-        style={{ marginBottom: "20px" }}
-      >
-        <ButtonComp text={"Add Tokens"} maxWidth={"100%"} />
-      </Link>
+      <div state={{ isFromPortfolio: true }} style={{ marginTop: "15px" }}>
+        <ButtonComp
+          onClick={() => navigate("/add-watch-list")}
+          text={"Add Tokens"}
+          maxWidth={"100%"}
+        />
+      </div>
     </div>
   );
 }

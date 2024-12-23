@@ -69,10 +69,11 @@
   //   background-size: contain;
   // }
   &__title {
-    font-size: 24px;
+    font-size: 50px;
     color: $white;
-    font-weight: 900;
-    margin-bottom: 10px;
+    font-weight: 700;
+    line-height: 50px;
+    // margin-bottom: 10px;
   }
   &__itemsOuter {
     display: flex;

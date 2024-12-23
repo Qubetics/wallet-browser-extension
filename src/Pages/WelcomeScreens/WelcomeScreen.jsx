@@ -5,12 +5,13 @@ import "./Welcome.scss";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import darkclose from "../../Assets/darkclose.svg";
 import ModalCloseIcon from "../../Assets/ModalCloseIcon.svg";
-import AppLogo from "../../Assets/appLogo.svg";
-import DarkAppLogo from "../../Assets/darkAppLogo.svg";
+// import AppLogo from "../../Assets/appLogo.svg";
+// import DarkAppLogo from "../../Assets/darkAppLogo.svg";
 import { useSelector } from "react-redux";
 import Lottie from "react-lottie-player";
 import AttlasWallet from "../../Assets/JsonFiles/walletAnimation.json";
-import MainLogo from "../../Assets/main-logo.gif";
+import Logo from "../../Assets/JsonFiles/LogoV1.json"
+// import MainLogo from "../../Assets/main-logo.gif";
 
 function WelcomeScreen() {
   const navigate = useNavigate();
@@ -56,7 +57,8 @@ function WelcomeScreen() {
     <div className="cardWhite">
       <h2 className="cardWhite__title">Welcome to Qubetics</h2>
       <div className="cardWhite_mainLogo">
-        <img src={MainLogo} alt="logo" />
+        <Lottie loop animationData={Logo} play style={{ height: 280 }} />
+        {/* <img src={MainLogo} alt="logo" /> */}
       </div>
 
       <div className="cardWhite__linkOuter">
@@ -81,7 +83,7 @@ function WelcomeScreen() {
           onClick={(e) => {
             e.preventDefault();
             // navigate("/createNewWallet", {
-              navigate("/terms-policy", {
+            navigate("/terms-policy", {
               state: { type: "create" },
             });
           }}

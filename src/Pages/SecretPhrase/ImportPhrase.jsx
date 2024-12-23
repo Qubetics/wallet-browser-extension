@@ -64,8 +64,10 @@ function ImportPhrase() {
             />
             <div className={"checkboxOuter"}>
               <Checkbox onChange={onChange} style={{}}>
-                I understand that I stand the risk of losing my funds by
-                exposing my Secret Phrase to others.
+                <p style={{ marginLeft: "10px", textAlign: "left" }}>
+                  I understand that I stand the risk of losing my funds by
+                  exposing my Secret Phrase to others.
+                </p>
               </Checkbox>
             </div>
             <ButtonComp

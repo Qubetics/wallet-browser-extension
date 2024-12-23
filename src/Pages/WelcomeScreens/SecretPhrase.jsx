@@ -104,7 +104,7 @@ function SecretPhrase({ children, mnemonics, termsCheck }) {
           }}
         >
           <Checkbox onChange={onChange}>
-            <p style={{ marginLeft: "15px" }}>I understand</p>
+            <p >I understand</p>
           </Checkbox>
         </div>
       </div>

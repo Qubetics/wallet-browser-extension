@@ -226,7 +226,7 @@ function Setting() {
         ))}
 
         <ModalCustom
-          title={"Show Secret Phrase"}
+          title={"Password"}
           handleCancel={handleCancel}
           isModalOpen={isModalOpen}
           handleOk={handleOk}
@@ -280,7 +280,7 @@ function Setting() {
         </ModalCustom>
 
         <ModalCustom
-          title={"Reset"}
+          title={"Logout"}
           handleCancel={handleLogoutCancel}
           isModalOpen={isLogoutModalOpen}
           handleOk={handlLogouteOk}

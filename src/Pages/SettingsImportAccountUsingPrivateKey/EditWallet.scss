@@ -3,9 +3,7 @@
 
 .editWallet {
   &__title {
-    @include theme() {
-        color: theme-get("baseText");
-    }
+    color: #fff !important;
     font-size: 24px;
     font-weight: 900;
     margin-bottom: 16px;
@@ -13,12 +11,10 @@
     line-height: 36px;
   }
   &__subTitle {
-    @include theme() {
-      color: theme-get("whiteblack");
-    }
+    color: #98969b !important;
     font-size: 16px;
     font-weight: 400;
-    margin-bottom: 24px;
+    margin-bottom: 16px !important;
   }
   .textInfoBaseColor {
     text-align: right;
@@ -28,7 +24,7 @@
     line-height: 16px;
     margin-bottom: 10px;
   }
-  .setPassword__footerbuttons{
+  .setPassword__footerbuttons {
     margin-top: 30px;
   }
 }

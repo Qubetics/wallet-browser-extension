@@ -371,7 +371,6 @@ function App() {
           <Route path="/defi" element={<Defi />} />
           <Route path="/history" element={<History />} />
           <Route path="/securitySetting" element={<SecuritySetting />} />
-          <Route path="/changePin" element={<ChangePin />} />
           <Route path="/setting" element={<Setting />} />
           <Route path="/alerts" element={<Alerts />} />
           <Route index path="/conectswapedApp" element={<ConnectedApp />} />
@@ -384,6 +383,7 @@ function App() {
           <Route index path="/nftConfirm" element={<ConfirmNft />} />
         </Route> */}
         <Route path="/" element={<OnlyContent />}>
+          <Route path="/changePin" element={<ChangePin />} />
           <Route index path="/send" element={<Send />} />
           <Route path="/receive-tokens" element={<ReceiveTokens />} />
           <Route path="/receive-currency" element={<ReceiveCurrency />} />

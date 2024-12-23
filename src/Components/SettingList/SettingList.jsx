@@ -343,7 +343,7 @@ function SettingList(props) {
 
 
       <ModalCustom
-        title={'Show Secret Phrase'}
+        title={'Password'}
         handleCancel={handleCancel}
         isModalOpen={isModalOpen}
         handleOk={handleOk}
@@ -397,7 +397,7 @@ function SettingList(props) {
       </ModalCustom>
 
       <ModalCustom
-        title={'Reset'}
+        title={'Logout'}
         handleCancel={handleLogoutCancel}
         isModalOpen={isLogoutModalOpen}
         handleOk={handlLogouteOk}

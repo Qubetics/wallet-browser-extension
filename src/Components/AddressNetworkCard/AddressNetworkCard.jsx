@@ -166,7 +166,7 @@ function AddressNetworkCard(props) {
   };
 
   return (
-    <>
+    <div>
       {contextHolder}
       <div className="adressFavorites" key={index}>
         {/* <h4>Favorites</h4> */}
@@ -385,7 +385,7 @@ function AddressNetworkCard(props) {
           </div>
         </div>
       </ModalCustom>
-    </>
+    </div>
   );
 }
 

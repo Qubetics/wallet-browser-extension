@@ -247,66 +247,70 @@ function SendConfirm() {
         address={to}
         redirectTo={redirectTo}
       />
-      <div className={`flexedContent`}>
-        <div className="confirmCurrency">
-          <div
-            className="confirmCurrency__card"
-            style={{
-              display: "flex",
-            }}
-          >
+      <div className={`flexedContent padding-Top`}>
+        <div className="confirmCurrency manageWalletHeight">
+          <div>
             <div
+              className="confirmCurrency__card"
               style={{
                 display: "flex",
-                flex: 1,
-                justifyContent: "center",
-                alignItems: "center",
               }}
             >
-              {coin.coin.coin_image ? (
-                <img
-                  src={coin.coin.coin_image}
-                  alt=""
-                  style={{
-                    width: "50px",
-                  }}
-                />
-              ) : null}
-            </div>
-            <div
-              style={{
-                flex: 2,
-              }}
-            >
-              <p className="confirmCurrency__card__textBtm">
-                {currency.symbol}
-                {addCommasToNumber(getFlooredFixed(fiatCoin, 2))}
-              </p>
-              <h3 className="confirmCurrency__card__textTop">
-                {addCommasToNumber(getFlooredFixed(amount, 5))}{" "}
-                {coin.coin.coin_symbol.toUpperCase()}
-              </h3>
-            </div>
-          </div>
-          <div className="confirmCurrency__keyValuesOuter">
-            {data.map((ele) => (
-              <div className="confirmCurrency__keyValues">
-                <div className="confirmCurrency__keyValues__key">
-                  {ele.text}
-                </div>
-                <div className="confirmCurrency__keyValues__value">
-                  {ele.textVal}
-                </div>
+              <div
+                style={{
+                  display: "flex",
+                  flex: 1,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                {coin.coin.coin_image ? (
+                  <img
+                    src={coin.coin.coin_image}
+                    alt=""
+                    style={{
+                      width: "50px",
+                    }}
+                  />
+                ) : null}
               </div>
-            ))}
+              <div
+                style={{
+                  flex: 2,
+                }}
+              >
+                <p className="confirmCurrency__card__textBtm">
+                  {currency.symbol}
+                  {addCommasToNumber(getFlooredFixed(fiatCoin, 2))}
+                </p>
+                <h3 className="confirmCurrency__card__textTop">
+                  {addCommasToNumber(getFlooredFixed(amount, 5))}{" "}
+                  {coin.coin.coin_symbol.toUpperCase()}
+                </h3>
+              </div>
+            </div>
+            <div className="confirmCurrency__keyValuesOuter">
+              {data.map((ele) => (
+                <div className="confirmCurrency__keyValues">
+                  <div className="confirmCurrency__keyValues__key">
+                    {ele.text}
+                  </div>
+                  <div className="confirmCurrency__keyValues__value">
+                    {ele.textVal}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
-          <ButtonComp
-            onClick={async () => {
-              setOpenmodal(true);
-            }}
-            text={"Confirm"}
-            maxWidth={"100%"}
-          />
+          <div>
+            <ButtonComp
+              onClick={async () => {
+                setOpenmodal(true);
+              }}
+              text={"Confirm"}
+              maxWidth={"100%"}
+            />
+          </div>
         </div>
       </div>
 

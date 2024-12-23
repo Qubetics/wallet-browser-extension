@@ -172,6 +172,12 @@ code {
 }
 .tabContent {
   padding-top: 20px;
+  .ant-select-arrow {
+    .anticon {
+      fill: #fff !important;
+      color: #fff !important;
+    }
+  }
 }
 .transactionFee {
   h4 {
@@ -378,4 +384,28 @@ code {
   .search {
     padding: 0px 24px;
   }
+}
+.balanceAdmin {
+  ul {
+    background-color: #18171f !important;
+    .ant-dropdown-menu-title-content {
+      a {
+        color: #fff !important;
+      }
+    }
+  }
+}
+.manageWalletHeight {
+  min-height: calc(-266px + 100vh);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 20px;
+}
+.manageTabHeight {
+  min-height: calc(-330px + 100vh) !important;
+}
+.WatchlistContents {
+  height: 376px;
+  overflow: auto;
 }

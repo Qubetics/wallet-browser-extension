@@ -2172,7 +2172,7 @@ function SecretPhrasePaste({ children, termsCheck, getMnemonics, type }) {
                   setMnemonics(data);
                 }}
               >
-               <img src={CopyIconBlueN} alt="paste" /> Paste
+                <img src={CopyIconBlueN} alt="paste" /> Paste
               </span>
             </div>
           </div>
@@ -2207,8 +2207,10 @@ function SecretPhrasePaste({ children, termsCheck, getMnemonics, type }) {
         {contextHolder}
         <div className={"checkboxOuter"}>
           <Checkbox onChange={onChange}>
-            I understand that I stand the risk of losing my funds by exposing my
-            Secret Phrase to others.
+            <p style={{ marginLeft: "10px", textAlign:"left" }}>
+              I understand that I stand the risk of losing my funds by exposing
+              my Secret Phrase to others.
+            </p>
           </Checkbox>
         </div>
       </div>

@@ -289,8 +289,8 @@ function SetPasswordScreen() {
         {activeTab === "congrats" && (
           <CongratulationsScreen>
             {/* <img src={WalletCreated} alt="WalletCreated " width={"308px"} /> */}
-            <h1>ALL DONE!</h1>
-            <p>Wallet Created Successfully</p>
+            {/* <h1>ALL DONE!</h1>
+            <p>Wallet Created Successfully</p> */}
             <ButtonComp
               onClick={() => navigate("/wallet")}
               text="Open Wallet"

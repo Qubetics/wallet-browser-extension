@@ -1,396 +1,406 @@
 /*global chrome*/
-import React, { useEffect, useState } from 'react';
-import TokenDrawer from './TokenDrawer';
-import { InputField } from '../../Components/InputField/InputFieldSimple';
-import ButtonComp from '../../Components/ButtonComp/ButtonComp';
-import { Select , message } from 'antd';
-import { server } from '../../server';
-import { useSelector } from 'react-redux';
-import { DURATION } from '../../config/message.config'
+import React, { useEffect, useState } from "react";
+import TokenDrawer from "./TokenDrawer";
+import { InputField } from "../../Components/InputField/InputFieldSimple";
+import ButtonComp from "../../Components/ButtonComp/ButtonComp";
+import { Select, message } from "antd";
+import { server } from "../../server";
+import { useSelector } from "react-redux";
+import { DURATION } from "../../config/message.config";
 
 const Sell = ({ coins = [], fiats = [], loading }) => {
-    const { account ,theme } = useSelector((state) => state);
-    const [messageApi, contextHolder] = message.useMessage({
-        duration: DURATION,
-        maxCount: 1,
-    });
-    const [open, setOpen] = useState(false);
-    const [keyword, setKeyword] = useState('');
-    const [filteredTokens, setFilteredTokens] = useState([]);
-    const [amount, setAmount] = useState('');
-    const [receiveAmount, setReceiveAmount] = useState('');
-    const [selectedFiat, setSelectedFiat] = useState(null);
-    const [selectedCoin, setSelectedCoin] = useState(null);
-    const [sel, setSel] = useState(1); 
-    const [isAmountValid, setIsAmountValid] = useState(true);
+  const { account, theme } = useSelector((state) => state);
+  const [messageApi, contextHolder] = message.useMessage({
+    duration: DURATION,
+    maxCount: 1,
+  });
+  const [open, setOpen] = useState(false);
+  const [keyword, setKeyword] = useState("");
+  const [filteredTokens, setFilteredTokens] = useState([]);
+  const [amount, setAmount] = useState("");
+  const [receiveAmount, setReceiveAmount] = useState("");
+  const [selectedFiat, setSelectedFiat] = useState(null);
+  const [selectedCoin, setSelectedCoin] = useState(null);
+  const [sel, setSel] = useState(1);
+  const [isAmountValid, setIsAmountValid] = useState(true);
 
-    console.log(selectedFiat, "selectedFiat", selectedCoin, "selectedCoin", coins, "coins", fiats, "fiats", filteredTokens, "filteredTokens");
+  console.log(
+    selectedFiat,
+    "selectedFiat",
+    selectedCoin,
+    "selectedCoin",
+    coins,
+    "coins",
+    fiats,
+    "fiats",
+    filteredTokens,
+    "filteredTokens"
+  );
 
-    useEffect(()=>{
-        if(amount === ""){
-            setReceiveAmount("")
-        }
-    },[amount])
+  useEffect(() => {
+    if (amount === "") {
+      setReceiveAmount("");
+    }
+  }, [amount]);
 
-    useEffect(() => {
-        if (coins.length > 0) setSelectedCoin(coins[0]);
-        if (fiats.length > 0) setSelectedFiat(fiats[0]);
-    }, [coins, fiats]);
+  useEffect(() => {
+    if (coins.length > 0) setSelectedCoin(coins[0]);
+    if (fiats.length > 0) setSelectedFiat(fiats[0]);
+  }, [coins, fiats]);
 
-    useEffect(() => {
-        setFilteredTokens(sel === 1 ? coins : fiats);
-    }, [sel, coins, fiats]);
-    
-    const handleSearch = (searchTerm) => {
-        setKeyword(searchTerm);
-        if (sel === 1) {
-            setFilteredTokens(
-                coins.filter((coin) =>
-                    coin.coin_name?.toLowerCase().includes(searchTerm.toLowerCase())
-                )
-            );
+  useEffect(() => {
+    setFilteredTokens(sel === 1 ? coins : fiats);
+  }, [sel, coins, fiats]);
+
+  const handleSearch = (searchTerm) => {
+    setKeyword(searchTerm);
+    if (sel === 1) {
+      setFilteredTokens(
+        coins.filter((coin) =>
+          coin.coin_name?.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+      );
+    } else {
+      setFilteredTokens(
+        fiats.filter((fiat) =>
+          fiat.currency_name?.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+      );
+    }
+  };
+
+  const handleSelectToken = (token) => {
+    if (sel === 1) {
+      setSelectedCoin(token);
+    } else {
+      setSelectedFiat(token);
+    }
+    setOpen(false);
+  };
+
+  const handleAddonClick = (type) => {
+    setSel(type);
+    setFilteredTokens(type === 1 ? coins : fiats);
+    setOpen(true);
+  };
+
+  const handleFieldChange = async (amount) => {
+    setAmount(amount);
+    if (amount === "") {
+      setReceiveAmount("");
+      setIsAmountValid(true);
+      return;
+    }
+    if (selectedCoin && selectedFiat && amount) {
+      try {
+        const { data } = await server.post(
+          `/moonpay/realTimeSellQuote`,
+          {
+            crypto: selectedCoin.coin_symbol,
+            fiat: selectedFiat.currency_code,
+            cryptoAmount: amount,
+          },
+          { headers: { Authorization: account.jwtToken } }
+        );
+        setReceiveAmount(data?.quoteCurrencyAmount || "");
+        const minAmount = data?.baseCurrency?.minSellAmount;
+        const maxAmount = data?.baseCurrency?.maxSellAmount;
+
+        if (amount < minAmount || amount > maxAmount) {
+          setIsAmountValid(false);
+          messageApi.error(
+            `Amount should be between ${minAmount} and ${maxAmount}`
+          );
+          return;
         } else {
-            setFilteredTokens(
-                fiats.filter((fiat) =>
-                    fiat.currency_name?.toLowerCase().includes(searchTerm.toLowerCase())
-                )
-            );
+          setIsAmountValid(true);
         }
-    };
+      } catch (error) {
+        messageApi.error("This pair is not available for sale");
+        setAmount("");
+        setReceiveAmount("");
+        setIsAmountValid(false);
+      }
+    } else {
+      messageApi.error("This pair is not available for sale");
+      setAmount("");
+      setReceiveAmount("");
+      setIsAmountValid(false);
+    }
+  };
 
-    const handleSelectToken = (token) => {
-        if (sel === 1) {
-            setSelectedCoin(token); 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (selectedCoin && selectedFiat && amount) {
+        handleFieldChange(amount);
+      }
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [selectedCoin, selectedFiat, amount]);
+
+  const handleSell = async () => {
+    try {
+      const { data } = await server.post(
+        "/moonpay/signature",
+        {
+          flow: "sell",
+          baseCurrencyCode: selectedFiat.currency_code,
+          defaultCurrencyCode: selectedCoin.coin_symbol,
+          baseCurrencyAmount: amount,
+          walletAddress: account.address,
+        },
+
+        { headers: { Authorization: account.jwtToken } }
+      );
+
+      if (data?.data) {
+        messageApi.success("Transaction initiated successfully!");
+        setAmount("");
+        setReceiveAmount("");
+
+        if (chrome && chrome.tabs) {
+          chrome.tabs.create({ url: data.data });
         } else {
-            setSelectedFiat(token); 
+          window.open(data.data, "_blank");
         }
-        setOpen(false);
-    };
+      } else {
+        messageApi.error("No URL received from the API.");
+      }
+    } catch (error) {
+      console.error("Error initiating transaction:", error);
+      messageApi.error("Failed to initiate transaction. Please try again.");
+    }
+  };
 
-    const handleAddonClick = (type) => {
-        setSel(type); 
-        setFilteredTokens(type === 1 ? coins : fiats); 
-        setOpen(true); 
-    };
+  const selectAfter = (
+    <div className={"addonAfter"}>
+      <Select
+        open={false}
+        value={[
+          {
+            value: selectedFiat?.currency_id,
+            label: (
+              <span className="flexedItemSelect">
+                {selectedFiat?.image ? (
+                  <img
+                    style={{
+                      height: "20px",
+                      width: "20px",
+                      objectFit: "contain",
+                      position: "relative",
+                      borderRadius: "15px",
+                    }}
+                    src={selectedFiat?.image}
+                  />
+                ) : (
+                  <div
+                    className="randb extra"
+                    style={{
+                      height: "35px",
+                      width: "35px",
+                      background: "rgb(202, 201, 201)",
+                      borderRadius: "50%",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    {selectedFiat?.currency_name?.split("")[0]}
+                  </div>
+                )}
+                {selectedFiat?.currency_name}
+              </span>
+            ),
+          },
+        ]}
+        defaultValue={[
+          {
+            value: selectedFiat?.currency_id,
+            label: (
+              <span className="flexedItemSelect">
+                {selectedFiat?.image ? (
+                  <img
+                    style={{
+                      height: "20px",
+                      width: "20px",
+                      objectFit: "contain",
+                      borderRadius: "15px",
+                    }}
+                    src={selectedFiat?.image}
+                  />
+                ) : (
+                  <div
+                    className="randb extra"
+                    style={{
+                      height: "35px",
+                      width: "35px",
+                      background: "rgb(202, 201, 201)",
+                      borderRadius: "50%",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    {selectedFiat?.currency_name?.split("")[0]}
+                  </div>
+                )}
+                {selectedFiat?.currency_name}
+              </span>
+            ),
+          },
+        ]}
+        style={{
+          width: 100,
+        }}
+        onClick={() => {
+          handleAddonClick(0);
+        }}
+      />
+    </div>
+  );
 
-    const handleFieldChange = async (amount) => {
-        setAmount(amount);
-        if (amount === '') {
-            setReceiveAmount(''); 
-            setIsAmountValid(true); 
-            return;
-        }
-        if (selectedCoin && selectedFiat && amount) {
-            try {
-                const { data } = await server.post(
-                    `/moonpay/realTimeSellQuote`,
-                    {
-                        crypto: selectedCoin.coin_symbol,
-                        fiat: selectedFiat.currency_code,
-                        cryptoAmount: amount,
-                    },
-                    { headers: { Authorization: account.jwtToken } }
-                );
-                setReceiveAmount(data?.quoteCurrencyAmount || '');
-                const minAmount = data?.baseCurrency?.minSellAmount;
-                const maxAmount = data?.baseCurrency?.maxSellAmount;
+  const selectAfter2 = (
+    <div className={"addonAfter"}>
+      <Select
+        open={false}
+        value={[
+          {
+            value: selectedCoin?.coin_id,
+            label: (
+              <span className="flexedItemSelect">
+                {selectedCoin?.coin_image ? (
+                  <img
+                    style={{
+                      height: "20px",
+                      width: "20px",
+                      objectFit: "contain",
+                      position: "relative",
+                      borderRadius: "15px",
+                    }}
+                    src={selectedCoin?.coin_image}
+                  />
+                ) : (
+                  <div
+                    className="randb extra"
+                    style={{
+                      height: "35px",
+                      width: "35px",
+                      background: "rgb(202, 201, 201)",
+                      borderRadius: "50%",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    {selectedCoin?.coin_name?.split("")[0]}
+                  </div>
+                )}
+                {selectedCoin?.coin_name}
+              </span>
+            ),
+          },
+        ]}
+        defaultValue={[
+          {
+            value: selectedCoin?.coin_id,
+            label: (
+              <span className="flexedItemSelect">
+                {selectedCoin?.coin_image ? (
+                  <img
+                    style={{
+                      height: "20px",
+                      width: "20px",
+                      objectFit: "contain",
+                      borderRadius: "15px",
+                    }}
+                    src={selectedCoin?.coin_image}
+                  />
+                ) : (
+                  <div
+                    className="randb extra"
+                    style={{
+                      height: "35px",
+                      width: "35px",
+                      background: "rgb(202, 201, 201)",
+                      borderRadius: "50%",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    {selectedCoin?.coin_name?.split("")[0]}
+                  </div>
+                )}
+                {selectedCoin?.coin_name}
+              </span>
+            ),
+          },
+        ]}
+        style={{
+          width: 100,
+        }}
+        onClick={() => {
+          handleAddonClick(1);
+        }}
+      />
+    </div>
+  );
 
-                if (amount < minAmount || amount > maxAmount) {
-                    setIsAmountValid(false);
-                    messageApi.error(`Amount should be between ${minAmount} and ${maxAmount}`);
-                    return;
-                } else {
-                    setIsAmountValid(true);
-                }
-            } catch (error) {
-                messageApi.error("This pair is not available for sale");
-                setAmount("")
-                setReceiveAmount('');
-                setIsAmountValid(false);
-            }
-        } else {
-            messageApi.error("This pair is not available for sale");
-            setAmount("")
-            setReceiveAmount('');
-            setIsAmountValid(false);
-            
-        }
-    };
+  return (
+    <div className="swap manageWalletHeight manageTabHeight">
+      <div>
+        {contextHolder}
+        <InputField
+          mb0={true}
+          checkForSymbols={true}
+          inputSelect={true}
+          placeholder={"0.000"}
+          label="You Pay"
+          type="number"
+          disabled={loading}
+          addonAfter={selectAfter2}
+          getData={setAmount}
+          value={amount}
+        />
 
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            if (selectedCoin && selectedFiat && amount) {
-                handleFieldChange(amount);
-            }
-        }, 1000);
-
-        return () => clearTimeout(timer);
-    }, [selectedCoin, selectedFiat, amount]);
-
-    const handleSell = async () => {
-        try {
-
-            const { data } = await server.post(
-                '/moonpay/signature',
-                {
-                    flow: 'sell',
-                    baseCurrencyCode: selectedFiat.currency_code,
-                    defaultCurrencyCode: selectedCoin.coin_symbol,
-                    baseCurrencyAmount: amount,
-                    walletAddress: account.address,
-                },
-
-                { headers: { Authorization: account.jwtToken } }
-            );
-
-            if (data?.data) {
-                messageApi.success('Transaction initiated successfully!');
-                setAmount('');
-                setReceiveAmount('');
-    
-                if (chrome && chrome.tabs) {
-                    chrome.tabs.create({ url: data.data });
-                } else {
-                    window.open(data.data, '_blank');
-                }
-            } else {
-                messageApi.error('No URL received from the API.');
-            }
-        } catch (error) {
-            console.error('Error initiating transaction:', error);
-            messageApi.error('Failed to initiate transaction. Please try again.');
-        }
-    };
-
-
-
-    const selectAfter = (
-        <div className={'addonAfter'}>
-            <Select
-                open={false}
-                value={[
-                    {
-                        value: selectedFiat?.currency_id,
-                        label: (
-                            <span className='flexedItemSelect'>
-                                {selectedFiat?.image ? (
-                                    <img
-                                        style={{
-                                            height: '20px',
-                                            width: '20px',
-                                            objectFit: 'contain',
-                                            position: 'relative',
-                                            borderRadius: '15px',
-                                        }}
-                                        src={selectedFiat?.image}
-                                    />
-                                ) : (
-                                    <div
-                                        className='randb extra'
-                                        style={{
-                                            height: '35px',
-                                            width: '35px',
-                                            background: 'rgb(202, 201, 201)',
-                                            borderRadius: '50%',
-                                            display: 'flex',
-                                            justifyContent: 'center',
-                                            alignItems: 'center',
-                                        }}
-                                    >
-                                        {selectedFiat?.currency_name?.split('')[0]}
-                                    </div>
-                                )}
-                                {selectedFiat?.currency_name}
-                            </span>
-                        ),
-                    },
-                ]}
-                defaultValue={[
-                    {
-                        value: selectedFiat?.currency_id,
-                        label: (
-                            <span className='flexedItemSelect'>
-                                {selectedFiat?.image ? (
-                                    <img
-                                        style={{
-                                            height: '20px',
-                                            width: '20px',
-                                            objectFit: 'contain',
-                                            borderRadius: '15px',
-                                        }}
-                                        src={selectedFiat?.image}
-                                    />
-                                ) : (
-                                    <div
-                                        className='randb extra'
-                                        style={{
-                                            height: '35px',
-                                            width: '35px',
-                                            background: 'rgb(202, 201, 201)',
-                                            borderRadius: '50%',
-                                            display: 'flex',
-                                            justifyContent: 'center',
-                                            alignItems: 'center',
-                                        }}
-                                    >
-                                        {selectedFiat?.currency_name?.split('')[0]}
-                                    </div>
-                                )}
-                                {selectedFiat?.currency_name}
-                            </span>
-                        ),
-                    },
-                ]}
-                style={{
-                    width: 100,
-                }}
-                onClick={() => {
-                    handleAddonClick(0);
-                }}
-            />
-        </div>
-    );
-
-    const selectAfter2 = (
-        <div className={'addonAfter'}>
-            <Select
-                open={false}
-                value={[
-                    {
-                        value: selectedCoin?.coin_id,
-                        label: (
-                            <span className='flexedItemSelect'>
-                                {selectedCoin?.coin_image ? (
-                                    <img
-                                        style={{
-                                            height: '20px',
-                                            width: '20px',
-                                            objectFit: 'contain',
-                                            position: 'relative',
-                                            borderRadius: '15px',
-                                        }}
-                                        src={selectedCoin?.coin_image}
-                                    />
-                                ) : (
-                                    <div
-                                        className='randb extra'
-                                        style={{
-                                            height: '35px',
-                                            width: '35px',
-                                            background: 'rgb(202, 201, 201)',
-                                            borderRadius: '50%',
-                                            display: 'flex',
-                                            justifyContent: 'center',
-                                            alignItems: 'center',
-                                        }}
-                                    >
-                                        {selectedCoin?.coin_name?.split('')[0]}
-                                    </div>
-                                )}
-                                {selectedCoin?.coin_name}
-                            </span>
-                        ),
-                    },
-                ]}
-                defaultValue={[
-                    {
-                        value: selectedCoin?.coin_id,
-                        label: (
-                            <span className='flexedItemSelect'>
-                                {selectedCoin?.coin_image ? (
-                                    <img
-                                        style={{
-                                            height: '20px',
-                                            width: '20px',
-                                            objectFit: 'contain',
-                                            borderRadius: '15px',
-                                        }}
-                                        src={selectedCoin?.coin_image}
-                                    />
-                                ) : (
-                                    <div
-                                        className='randb extra'
-                                        style={{
-                                            height: '35px',
-                                            width: '35px',
-                                            background: 'rgb(202, 201, 201)',
-                                            borderRadius: '50%',
-                                            display: 'flex',
-                                            justifyContent: 'center',
-                                            alignItems: 'center',
-                                        }}
-                                    >
-                                        {selectedCoin?.coin_name?.split('')[0]}
-                                    </div>
-                                )}
-                                {selectedCoin?.coin_name}
-                            </span>
-                        ),
-                    },
-                ]}
-                style={{
-                    width: 100,
-                }}
-                onClick={() => {
-                    handleAddonClick(1);
-                }}
-            />
-        </div>
-    );
-
-    return (
-        <div className="swap">
-            {contextHolder}
-            <InputField
-                mb0={true}
-                checkForSymbols={true}
-                inputSelect={true}
-                placeholder={'0.000'}
-                label="You Pay"
-                type="number"
-                disabled={loading}
-                addonAfter={selectAfter2}
-                getData={setAmount}
-                value={amount}
-            />
-
-            <InputField
-                mb0={true}
-                inputSelect={true}
-                placeholder={'0.000'}
-                label="You Receive"
-                type="number"
-                checkForSymbols={true}
-                disabled={true}
-                addonAfter={selectAfter}
-                value={receiveAmount}
-            />
-{/* 
+        <InputField
+          mb0={true}
+          inputSelect={true}
+          placeholder={"0.000"}
+          label="You Receive"
+          type="number"
+          checkForSymbols={true}
+          disabled={true}
+          addonAfter={selectAfter}
+          value={receiveAmount}
+        />
+        {/* 
             <div className="buy_sell_des">
                 Buy/Sell digital assets are supported by Moonpay. Digital assets are high risk. Make sure you understand the risks associated with each digital asset before you invest.
             </div> */}
+      </div>
+      <div style={{ width: "100%" }}>
+        <ButtonComp
+          text="Sell"
+          maxWidth={"100%"}
+          onClick={handleSell}
+          disabled={!amount || !isAmountValid || loading}
+        />
+      </div>
 
-            <div style={{ width: '100%' }}>
-                <ButtonComp 
-                   text="Sell" 
-                   maxWidth={'100%'} 
-                   onClick={handleSell} 
-                   disabled ={!amount || !isAmountValid || loading} 
-                />
-            </div>
-
-            <TokenDrawer
-                open={open}
-                onClose={() => setOpen(false)}
-                tokens={filteredTokens}
-                keyword={keyword}
-                setKeyword={setKeyword}
-                handleSearch={handleSearch}
-                handleSelectToken={handleSelectToken}
-                theme={theme}
-            />
-        </div>
-    );
+      <TokenDrawer
+        open={open}
+        onClose={() => setOpen(false)}
+        tokens={filteredTokens}
+        keyword={keyword}
+        setKeyword={setKeyword}
+        handleSearch={handleSearch}
+        handleSelectToken={handleSelectToken}
+        theme={theme}
+      />
+    </div>
+  );
 };
 
 export default Sell;

@@ -14,7 +14,6 @@ function AddresBook() {
   const [messageApi, contextHolder] = message.useMessage();
   const [editModal, setEditModal] = useState(false);
 
-
   const refresh = () => {
     init();
   };
@@ -23,11 +22,11 @@ function AddresBook() {
   const [keyword, setKeyword] = useState(null);
 
   const init = async () => {
-    try { 
+    try {
       store.dispatch(setLoading(true));
       const { data } = await server.post(
         // "/wallet/address_book/list",
-        '/user/address_book',
+        "/user/address_book",
         // {
         //   wallet_address: account.coinFamilyAndAddress[1],
         //   search: keyword ? keyword.trim() : undefined,
@@ -36,18 +35,18 @@ function AddresBook() {
         //   order_type: "asc",
         // },
         {
-          "address": Object.values(account?.coinFamilyAndAddress),
-          "coin_family": [1, 2, 4],
-          "limit": 25,
-          "page": 1,
-          "search": keyword ? keyword.trim() : undefined
+          address: Object.values(account?.coinFamilyAndAddress),
+          coin_family: [1, 2, 4],
+          limit: 25,
+          page: 1,
+          search: keyword ? keyword.trim() : undefined,
         },
         {
           headers: {
             Authorization: account.jwtToken,
           },
         }
-      ); 
+      );
       setList(data.data);
       store.dispatch(setLoading(false));
     } catch (error) {
@@ -77,22 +76,12 @@ function AddresBook() {
 
   return (
     <div className={`scrollableCont`}>
-      <MenuRestofHeaders
-        backTo={"/setting"}
-        title={"Address Book"}
-        addIcon={"/add-contact"}
-      />
-      {contextHolder}
-
-      <div className={`flexedContent`}>
-        {/* <Link to='/add-contact'>
-          <ButtonComp
-            text={"Add Contact"}
-            maxWidth={"100%"}
-            marginBottom={"40px"}
-          />
-        </Link> */}
-
+      <div className="searchBarFixed">
+        <MenuRestofHeaders
+          backTo={"/setting"}
+          title={"Address Book"}
+          addIcon={"/add-contact"}
+        />
         <div className="search" style={{ marginBottom: "20px" }}>
           <InputField
             addonBefore={
@@ -114,7 +103,18 @@ function AddresBook() {
             }}
           />
         </div>
-        
+      </div>
+      {contextHolder}
+
+      <div className={`flexedContent padding-Top`}>
+        {/* <Link to='/add-contact'>
+          <ButtonComp
+            text={"Add Contact"}
+            maxWidth={"100%"}
+            marginBottom={"40px"}
+          />
+        </Link> */}
+
         {list.length > 0 ? (
           list.map((el, index) => (
             <AddressNetworkCard

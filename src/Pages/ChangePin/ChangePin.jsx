@@ -11,6 +11,7 @@ import BorderedRoundIcon from "../../Assets/BorderedRoundIcon.svg";
 import { message } from "antd";
 import { WalletHelper } from "../../helpers/wallet.helper";
 import { useNavigate } from "react-router-dom";
+import MenuRestofHeaders from "../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders";
 
 function ChangePin() {
   const [oldPassword, setOldPassword] = useState(null);
@@ -83,42 +84,46 @@ function ChangePin() {
   const [messageApi, contextHolder] = message.useMessage();
 
   return (
-    <div className={`scrollableCont`}>
-      {contextHolder}
-      <p className="createPassword-text">
-        Create a password with at least 8 characters, including one uppercase
-        letter, one lowercase letter, one number, and one special character.
-      </p>
-      <div className="changePinSec flexedContent">
-        <div className="inputPass">
-          <InputFieldSimple
-            mb0={true}
-            checkForSymbols={true}
-            inputSelect={true}
-            placeholder="Old Password"
-            label="Old Password"
-            type={"text"}
-            value={oldPassword}
-            getData={(password) => {
-              setOldPassword(password);
-            }}
-          />
-        </div>
-        <div className="inputPass">
-          <InputFieldSimple
-            mb0={true}
-            checkForSymbols={true}
-            inputSelect={true}
-            placeholder="New Password"
-            label="New Password"
-            type={"text"}
-            value={newPassword}
-            getData={(password) => {
-              handlePasswordChange(password);
-            }}
-          />
-        </div>
-        {/* <div className="setPassword__validations">
+    <div className={`scrollableCont `}>
+      <MenuRestofHeaders backTo={"/securitySetting"} title={"Reset Password"} />
+      <div className="flexedContent manageWalletHeight ">
+        <div>
+          {contextHolder}
+          <p className="createPassword-text">
+            Create a password with at least 8 characters, including one
+            uppercase letter, one lowercase letter, one number, and one special
+            character.
+          </p>
+          <div className="changePinSec ">
+            <div className="inputPass">
+              <InputFieldSimple
+                mb0={true}
+                checkForSymbols={true}
+                inputSelect={true}
+                placeholder="Old Password"
+                label="Old Password"
+                type={"text"}
+                value={oldPassword}
+                getData={(password) => {
+                  setOldPassword(password);
+                }}
+              />
+            </div>
+            <div className="inputPass">
+              <InputFieldSimple
+                mb0={true}
+                checkForSymbols={true}
+                inputSelect={true}
+                placeholder="New Password"
+                label="New Password"
+                type={"text"}
+                value={newPassword}
+                getData={(password) => {
+                  handlePasswordChange(password);
+                }}
+              />
+            </div>
+            {/* <div className="setPassword__validations">
           {validations.map((ele, index) => (
             <p key={index}>
               <img src={ele.icon} />
@@ -126,19 +131,21 @@ function ChangePin() {
             </p>
           ))}
         </div> */}
-        <div className="inputPass">
-          <InputFieldSimple
-            mb0={true}
-            checkForSymbols={true}
-            inputSelect={true}
-            placeholder="Confirm Password"
-            label="Confirm Password"
-            type={"text"}
-            value={confirmPassword}
-            getData={(password) => {
-              setConfirmPassword(password);
-            }}
-          />
+            <div className="inputPass">
+              <InputFieldSimple
+                mb0={true}
+                checkForSymbols={true}
+                inputSelect={true}
+                placeholder="Confirm Password"
+                label="Confirm Password"
+                type={"text"}
+                value={confirmPassword}
+                getData={(password) => {
+                  setConfirmPassword(password);
+                }}
+              />
+            </div>
+          </div>
         </div>
         <div style={{ marginTop: "50px" }}>
           <ButtonComp

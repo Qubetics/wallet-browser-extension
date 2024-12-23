@@ -3,15 +3,18 @@ import "./Welcome.scss";
 import Lottie from "react-lottie-player";
 import Congratulations from "../../Assets/JsonFiles/Congratulations.json";
 import WalletCreated from "../../Assets/WalletCreated .gif";
+import TickAnimation from "../../Assets/JsonFiles/TickAnimation.json";
 import ButtonComp from "../../Components/ButtonComp/ButtonComp";
 import { useNavigate } from "react-router-dom";
 function CongratulationsScreen() {
   const navigate = useNavigate();
   return (
     <div className="setPassword__secretPharse walletReady">
-      <img src={WalletCreated} alt="WalletCreated " width={"308px"} />
-      <h1>ALL DONE!</h1>
-      <p>Wallet Created Successfully</p>
+      {/* <img src={WalletCreated} alt="WalletCreated " width={"308px"} /> */}
+      <Lottie loop animationData={TickAnimation} play style={{ height: 308 }} />
+
+      {/* <h1>ALL DONE!</h1>
+      <p>Wallet Created Successfully</p> */}
       <ButtonComp
         text={"Continue"}
         maxWidth={"100%"}

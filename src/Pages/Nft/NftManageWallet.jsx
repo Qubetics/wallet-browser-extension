@@ -16,7 +16,7 @@ function NftManageWallet() {
     <div>
       <MenuRestofHeaders title={"Manage Wallet"}  backTo={"/wallet"} />
       <div className={`scrollableCont`}>
-        <div className={`flexedContent padding-Top`}>
+        <div className={`flexedContent manageWalletHeight`}>
           <div className="nftManage">
             <img src={ManageWalletImg} alt="img" />
             <p className="nftManage_text">

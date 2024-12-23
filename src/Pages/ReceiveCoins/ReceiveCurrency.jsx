@@ -29,11 +29,11 @@ function ReceiveCurrency() {
 
   // Check if the current path is /receive-currency
   const isReceiveCurrencyRoute = location.state?.nftButton;
-  console.log(location,"Location")
+  console.log(location, "Location");
   return (
-    <div className="receiveCurrency">
+    <div className="receiveCurrency scrollableCont">
       <MenuRestofHeaders backTo={"/receive-tokens"} title={"Receive BTC"} />
-      <div className="receiveCurrency_content scrollableCont">
+      <div className="receiveCurrency_content  manageWalletHeight">
         <div className={`flexedContent padding-Top`}>
           <div className="receiveCurrency_balanceDetails">
             <QRCode
@@ -68,7 +68,7 @@ function ReceiveCurrency() {
             pretium sit. Purus placerat vulputate in vulputate venenatis
             adipiscing quis maecenas auctor.
             <br />
-            <Link>Learn more </Link>
+            <Link style={{ textDecoration: "none" }}>Learn more </Link>
             about ERC-20 tokens.
           </p>
         </div>

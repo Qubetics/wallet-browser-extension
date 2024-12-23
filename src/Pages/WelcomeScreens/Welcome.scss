@@ -239,21 +239,42 @@
         }
       }
       &__copyField {
-        background-color: transparent;
-        padding: 14px 22px;
-        border: 1px solid #9f53ff;
-        max-width: 62px;
-        width: 100%;
-        border-radius: 14px;
+        background: transparent;
+        position: relative;
+        height: 46px !important;
+        max-width: 108px;
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 10px;
         cursor: pointer;
+        &:before {
+          content: "";
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(
+            90deg,
+            #73c9e2 0%,
+            #6c8dc5 25.37%,
+            #6456b2 76.11%,
+            #6145ea 101.48%
+          );
+          border-radius: 14px;
+          padding: 1px;
+          -webkit-mask: linear-gradient(#000 0 0) content-box,
+            linear-gradient(#000 0 0);
+          mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+          -webkit-mask-composite: destination-out;
+          mask-composite: exclude;
+          z-index: 0;
+        }
         span {
           color: $white;
           font-size: 14px;
           font-weight: 500;
+          margin-right: 8px;
         }
       }
       &__confirmFieldSBg {
@@ -267,7 +288,7 @@
       &__confirmFieldSBgInner {
         display: flex;
         align-items: center;
-        justify-content: flex-start;
+        justify-content: center;
         gap: 12px;
         flex-wrap: wrap;
         span {
@@ -391,8 +412,8 @@
 }
 
 :where(.css-acm2ia).ant-checkbox + span {
-  padding-inline-start: 8px !important;
-  padding-inline-end: 8px !important;
+  padding-inline-start: 0px !important;
+  padding-inline-end: 0px !important;
   // transform: translateX(-14px) !important;
 }
 

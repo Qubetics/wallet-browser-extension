@@ -314,7 +314,7 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
             <div className="balanceLeft">
               <img src={aName} alt="icon" />
               <div>
-                <Dropdown menu={{ items: accounts }} trigger={["click"]}>
+                <Dropdown overlayClassName="balanceAdmin" menu={{ items: accounts }} trigger={["click"]}>
                   <Link onClick={(e) => e.preventDefault()}>
                     <p>
                       {account.name} <img src={downeIcon} alt="downeIcon" />

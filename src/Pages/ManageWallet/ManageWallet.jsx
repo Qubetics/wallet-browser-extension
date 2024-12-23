@@ -83,7 +83,7 @@ function ManageWallet() {
       {contextHolder}
       <div className={`scrollableCont`}>
         <MenuRestofHeaders backTo={"/setting"} title={"Manage Wallet"} />
-        <div className={`flexedContent`}>
+        <div className={`flexedContent manageWalletHeight`}>
           <div className="listItems">
             <ul>
               {data.map((data) => (
@@ -119,13 +119,15 @@ function ManageWallet() {
               ))}
             </ul>
           </div>
-          <ButtonComp
-            onClick={async () => {
-              setIsModalOpen3(true);
-            }}
-            text={"Add Wallet"}
-            maxWidth={"100%"}
-          />
+          <div>
+            <ButtonComp
+              onClick={async () => {
+                setIsModalOpen3(true);
+              }}
+              text={"Add Wallet"}
+              maxWidth={"100%"}
+            />
+          </div>
         </div>
       </div>
 
@@ -242,15 +244,24 @@ function ManageWallet() {
         }
       >
         <div className={`flexedContent`}>
-          <div className="listItems">
+          <div className="">
             <ul>
               <li
-                className="currency_click"
+                style={{
+                  backgroundColor: "#040205",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  cursor:"pointer"
+                }}
+                className="currency_click listItems "
                 onClick={async () => {
                   navigate("/add-new-wallet");
                 }}
               >
-                <div style={{ display: "flex", alignItems: "center" }}>
+                <div
+                  style={{ display: "flex", alignItems: "center", gap: "10px" }}
+                >
                   <img src={Logo} alt="" />
                   <div
                     style={{
@@ -259,7 +270,7 @@ function ManageWallet() {
                       alignItems: "flex-start",
                     }}
                   >
-                    <p>New Account</p>
+                    <p style={{ color: "#fff" }}>New Account</p>
                   </div>
                 </div>
                 <p>
@@ -280,7 +291,7 @@ function ManageWallet() {
                       {" "}
                       <path
                         d="M10 7L15 12L10 17"
-                        stroke="#000000"
+                        stroke="#fff"
                         stroke-width="1.5"
                         stroke-linecap="round"
                         stroke-linejoin="round"
@@ -290,12 +301,21 @@ function ManageWallet() {
                 </p>
               </li>
               <li
-                className="currency_click"
+                style={{
+                  backgroundColor: "#040205",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  cursor: "pointer",
+                }}
+                className="currency_click listItems"
                 onClick={async () => {
                   navigate("/import-wallet-name");
                 }}
               >
-                <div style={{ display: "flex", alignItems: "center" }}>
+                <div
+                  style={{ display: "flex", alignItems: "center", gap: "10px" }}
+                >
                   <img src={Logo} alt="" />
                   <div
                     style={{
@@ -304,7 +324,7 @@ function ManageWallet() {
                       alignItems: "flex-start",
                     }}
                   >
-                    <p>Existing Account</p>
+                    <p style={{ color: "#fff" }}>Existing Account</p>
                   </div>
                 </div>
                 <p>
@@ -325,7 +345,7 @@ function ManageWallet() {
                       {" "}
                       <path
                         d="M10 7L15 12L10 17"
-                        stroke="#000000"
+                        stroke="#fff"
                         stroke-width="1.5"
                         stroke-linecap="round"
                         stroke-linejoin="round"

@@ -23,9 +23,9 @@ function NftSend() {
 
   return (
     <div>
-      <MenuRestofHeaders title={"Send NFT"}  backTo={"/wallet"} />
+      <MenuRestofHeaders title={"Send NFT"} backTo={"/wallet"} />
       <div className="scrollableCont">
-        <div className="flexedContent padding-Top">
+        <div className="flexedContent manageWalletHeight ">
           <div className="nftSend">
             <div className="nftSend_superInfluencers">
               <img src={SendNFTimg} alt="Send NFT" />
