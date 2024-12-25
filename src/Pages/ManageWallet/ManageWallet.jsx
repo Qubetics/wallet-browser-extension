@@ -21,6 +21,8 @@ import WalletIBtn from "../../Assets/WalletIBtn.svg";
 import DarkArrowRightIcon from "../../Assets/DarkArrowRightIcon.svg";
 function ManageWallet() {
   const [data, setData] = useState([]);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [deleteModal, setDeleteModal] = useState(false);
   const [drawer, setDrawer] = useState(false);
   const { theme } = useSelector((state) => state);
   const { account } = useSelector((state) => state);
@@ -44,6 +46,7 @@ function ManageWallet() {
   };
   const handleCancel2 = () => {
     setIsModalOpen3(false);
+    setIsModalOpen2(false);
     setPassword(null);
   };
 
@@ -59,6 +62,8 @@ function ManageWallet() {
 
   const [selectedAccount, setSelectedAccount] = useState(null);
 
+
+  
   const init = async () => {
     store.dispatch(setLoading(true));
     let { accounts } = await chrome.storage.session.get("accounts");
@@ -86,12 +91,14 @@ function ManageWallet() {
         <div className={`flexedContent manageWalletHeight`}>
           <div className="listItems">
             <ul>
-              {data.map((data) => (
+              {data.map((data, idx) => (
                 <li
+                  key={idx}
                   className="currency_click"
                   onClick={async () => {
                     setDrawer(true);
                     setSelectedAccount(data);
+                    setName(data?.name);
                   }}
                 >
                   <div style={{ display: "flex", alignItems: "center" }}>
@@ -212,6 +219,143 @@ function ManageWallet() {
           </div>
 
           <ButtonComp
+
+            onClick={async () => {
+
+              if (!name) {
+
+                return messageApi.error(
+
+                  "Please enter a valid name to proceed."
+
+                );
+
+              }
+
+
+
+              if (name.trim().length === 0) {
+
+                return messageApi.error(
+
+                  "Name should have a minimum of 3 characters."
+
+                );
+
+              }
+
+
+
+              if (name.length < 3) {
+
+                return messageApi.error(
+
+                  "Name should have a minimum of 3 characters."
+
+                );
+
+              }
+
+
+
+              if (name.length > 25) {
+
+                return messageApi.error(
+
+                  "Name should not have more than 25 characters."
+
+                );
+
+              }
+
+
+
+              const { accounts } = await chrome.storage.session.get(
+
+                "accounts"
+
+              );
+
+
+
+              if (accounts) {
+
+                const checkIfExists = accounts.find(
+
+                  (el) => el.name.toLowerCase() === name.toLowerCase()
+
+                );
+
+
+
+                if (checkIfExists) {
+
+                  return messageApi.error(
+
+                    "This wallet name already exists. Use a different name."
+
+                  );
+
+                }
+
+              }
+
+
+
+              const updating = await WalletHelper.updateWalletName(
+
+                name.trim(),
+
+                state ? state.id : selectedAccount.id
+
+              );
+
+              if (!updating) {
+
+                return messageApi.error(
+
+                  "Unable to update name at the moment."
+
+                );
+
+              }
+
+              setDrawer(false);
+
+              init();
+
+            }}
+
+
+
+            text={"Update Wallet"}
+
+            maxWidth={"352px"}
+
+            marginBottom={"10px"}
+
+          />
+
+          <ButtonComp
+
+            onClick={async () => {
+
+              if (account.id === selectedAccount.id) {
+
+                return messageApi.error("Unable to delete default wallet");
+
+              }
+
+              setDeleteModal(true);
+
+            }}
+
+            text={"Delete Wallet"}
+
+            maxWidth={"100%"}
+
+          />
+          {/* <ButtonComp
             onClick={async () => {
               if (account.id === selectedAccount.id) {
                 return messageApi.error("Unable to delete default wallet");
@@ -226,7 +370,7 @@ function ManageWallet() {
             }}
             text={"Delete Wallet"}
             maxWidth={"100%"}
-          />
+          /> */}
         </div>
       </Drawer>
 
@@ -252,7 +396,7 @@ function ManageWallet() {
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
-                  cursor:"pointer"
+                  cursor: "pointer"
                 }}
                 className="currency_click listItems "
                 onClick={async () => {
@@ -358,6 +502,165 @@ function ManageWallet() {
           </div>
         </div>
       </Drawer>
+
+      <ModalCustom
+
+        title={"Delete Address"}
+
+        isModalOpen={deleteModal}
+
+        customClass="customClassModal"
+
+        handleCancel={() => {
+
+          setDeleteModal(false);
+
+        }}
+
+      >
+
+        <div className="viewphrases">
+
+          <div className="viewphrases__iInner">
+
+            <p
+
+              style={{
+
+                fontSize: "20px",
+
+                color: "white"
+
+              }}
+
+            >
+
+              Are you sure you want to delete this wallet?
+
+            </p>
+
+          </div>
+
+          <div
+
+            style={{
+
+              display: "flex",
+
+              alignItems: "center",
+
+              justifyContent: "center",
+
+              marginTop: "30px",
+
+            }}
+
+          >
+
+            <div
+
+              className="green"
+
+              style={{
+
+                padding: "12px 53px",
+
+                backgroundColor: "rgb(213 175 34)",
+
+                color: "white",
+
+                fontSize: "18px",
+
+                borderRadius: "25px",
+
+                marginRight: "20px",
+
+                cursor: "pointer",
+
+              }}
+
+              onClick={async () => {
+
+                try {
+
+                  store.dispatch(setLoading(true));
+
+                  await WalletHelper.deleteWallet(
+
+                    selectedAccount.id,
+
+                    account.address
+
+                  );
+
+                  setDrawer(false);
+
+                  init();
+
+                  store.dispatch(setLoading(false));
+
+                  setDeleteModal(false);
+
+                } catch (e) {
+
+                  store.dispatch(setLoading(false));
+
+                }
+
+              }
+
+              }
+
+            >
+
+              Yes
+
+            </div>
+
+            <div
+
+              className="red"
+
+              style={{
+
+                padding: "12px 53px",
+
+                color: "#F5DA76",
+
+                fontSize: "18px",
+
+                borderRadius: "25px",
+
+                marginLeft: "20px",
+
+                cursor: "pointer",
+
+                border: "1px solid #F5DA76"
+
+                // border: 1px solid #F5DA76,
+
+                // bo
+
+              }}
+
+              onClick={() => {
+
+                setDeleteModal(false);
+
+              }}
+
+            >
+
+              No
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </ModalCustom>
+
 
       <ModalCustom
         title={"Show Secret Phrase"}

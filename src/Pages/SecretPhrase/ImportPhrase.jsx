@@ -72,7 +72,7 @@ function ImportPhrase() {
             </div>
             <ButtonComp
               text={"Proceed"}
-              onClick={async (e) => {
+              onClick={async (e) => { 
                 if (!terms) {
                   return messageApi.error(
                     "Please accept terms and conditions."

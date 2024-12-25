@@ -209,7 +209,8 @@ export class WalletHelper {
       'legalPolicy',
     ]);
     await chrome.storage.session.remove(['accounts', 'password']);
-    await chrome.runtime.reload();
+    // await chrome.runtime.reload(true);
+    window.location.reload(true);
   };
 
   static checkIfAlreadyThere = async (newMnemonics) => {

@@ -1,5 +1,5 @@
-import React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import "./Welcome.scss";
 import PrivacyPolicy from "../../Assets/PrivacyPolicy.svg";
 import TermsOfService from "../../Assets/TermsOfService.svg";
@@ -7,7 +7,10 @@ import rightImg from "../../Assets/rightImg.svg";
 import { useOutletContext } from "react-router-dom";
 import Checkbox from "antd/es/checkbox/Checkbox";
 import ButtonComp from "../../Components/ButtonComp/ButtonComp";
+import { message } from "antd";
 function TermsPolicy() {
+  const { state } = useLocation(); 
+  const [accr, setAccr] = useState(false);
   const { layoutHeader } = useOutletContext();
   const navigate = useNavigate();
   const termsData = [
@@ -25,9 +28,13 @@ function TermsPolicy() {
     },
   ];
 
+  const [messageApi, contextHolder] = message.useMessage();
+
   return (
     <div className="cardWhite termsPolicy">
+
       <div>
+        {contextHolder}
         {layoutHeader}
         <div className="termsPolicy_contect">
           {termsData.map((item) => (
@@ -45,7 +52,7 @@ function TermsPolicy() {
       </div>
       <div>
         <div className={"checkboxOuter"} style={{ marginBottom: "20px" }}>
-          <Checkbox>
+          <Checkbox onChange={(e) => setAccr(e.target.checked)}>
             <p>
               I accepted the <Link>Terms of Service</Link> &
               <Link> Privacy Policy</Link>
@@ -55,9 +62,13 @@ function TermsPolicy() {
         <ButtonComp
           onClick={(e) => {
             e.preventDefault();
-            navigate("/createNewWallet", {
-              state: { type: "create" },
-            });
+            if (accr) {
+              navigate("/createNewWallet", {
+                state: { type: state?.type },
+              });
+            }else{
+              messageApi.error('Please accept terms and condations')
+            }
           }}
           text={"Continue"}
           maxWidth={"100%"}

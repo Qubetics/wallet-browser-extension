@@ -25,6 +25,8 @@ function Legal() {
   };
   // console.log("terms:::::", terms);
   const verifyLegalPolicy = async () => {
+    console.log('statestatestatestate ', state);
+    
     if (!terms) {
       return messageApi.error('Please accept terms and conditions.');
     } else {

@@ -124,6 +124,7 @@ function SetPasswordScreen() {
 
   const handleImportSecretPhrase = async () => {
     try {
+      
       if (!terms) {
         return popError("Please accept the terms and conditions.");
       }
@@ -140,6 +141,7 @@ function SetPasswordScreen() {
 
       if (isValid) {
         const { name } = await chrome.storage.session.get("name");
+        store.dispatch(setLoading(true));
         await WalletHelper.generateAndSetWallet(
           getMnemonicsData.trim(),
           name,
@@ -147,9 +149,12 @@ function SetPasswordScreen() {
         );
         setActiveTab("congrats");
       } else {
+        store.dispatch(setLoading(false));
         popError("Invalid mnemonics. Please try again.");
       }
+      store.dispatch(setLoading(false));
     } catch {
+      store.dispatch(setLoading(false));
       popError("An error occurred. Please try again.");
     }
   };
@@ -248,7 +253,7 @@ function SetPasswordScreen() {
         <SecretPhrase mnemonics={mnemonics} termsCheck={setTerms}>
           <div className="setPassword__footerbuttons">
             <ButtonComp
-              onClick={() => setActiveTab("confirmSecretPhrase")}
+              onClick={() => {if(terms){ setActiveTab("confirmSecretPhrase")}}}
               text="Continue"
               maxWidth="100%"
             />

@@ -110,60 +110,118 @@ function AddressNetworkCard(props) {
     }
   };
 
-  const handleSubmitMain = async () => {
-    try {
-      store.dispatch(setLoading(true));
-      const response = await server.post(
-        "/user/edit_address_book_contact_name",
-        {
-          address_book_id: editDataMain?.address_book_id,
-          address_book_name: editDataMain?.address_book_name,
-          // address_book_wallet_address: editDataMain?.wallet_address
-        },
-        {
-          headers: {
-            Authorization: account.jwtToken,
-          },
-        }
-      );
-      inits();
-      store.dispatch(setLoading(false));
-      setEditDataMain(null);
-      setEditModalMain(false);
-    } catch (error) {
-      console.log("error ", error);
-      store.dispatch(setLoading(false));
-      return messageApi.error(error.response.message);
-    }
-  };
+  
 
-  const deleteSubwallet = async (itm) => {
-    try {
-      store.dispatch(setLoading(true));
-      const response = await server.post(
-        "/user/delete_address_book_wallet_address",
-        {
-          address_book_id: itm?.address_book_id,
-          id: itm?.id,
+const handleSubmitMain = async () => {
+
+  try {
+
+    store.dispatch(setLoading(true));
+
+    const response = await server.post(
+
+      "/user/edit_address_book_contact_name",
+
+      {
+
+        address_book_id: editDataMain?.address_book_id,
+
+        address_book_name: editDataMain?.address_book_name,
+
+        // address_book_wallet_address: editDataMain?.wallet_address
+
+      },
+
+      {
+
+        headers: {
+
+          Authorization: account.jwtToken,
+
         },
-        {
-          headers: {
-            Authorization: account.jwtToken,
-          },
-        }
-      );
-      inits();
-      store.dispatch(setLoading(false));
-      setDeleteItem(null);
-      setEditData(null);
-      setDeleteModal(false);
-    } catch (error) {
-      console.log("Error ", error);
-      setDeleteModal(false);
-      store.dispatch(setLoading(false));
-      return messageApi.error(error.response.message);
-    }
-  };
+
+      }
+
+    );
+
+    inits();
+
+    store.dispatch(setLoading(false));
+
+    setEditDataMain(null);
+
+    setEditModalMain(false);
+
+  } catch (error) {
+
+    console.log("error ", error);
+
+    store.dispatch(setLoading(false));
+
+    return messageApi.error(error.response.message);
+
+  }
+
+};
+
+
+
+ 
+
+const deleteSubwallet = async (itm) => {
+
+  try {
+
+    store.dispatch(setLoading(true));
+
+    const response = await server.post(
+
+      "/user/delete_address_book_wallet_address",
+
+      {
+
+        address_book_id: itm?.address_book_id,
+
+        id: itm?.id,
+
+      },
+
+      {
+
+        headers: {
+
+          Authorization: account.jwtToken,
+
+        },
+
+      }
+
+    );
+
+    inits();
+
+    store.dispatch(setLoading(false));
+
+    setDeleteItem(null);
+
+    setEditData(null);
+
+    setDeleteModal(false);
+
+  } catch (error) {
+
+    console.log("Error ", error);
+
+    setDeleteModal(false);
+
+    store.dispatch(setLoading(false));
+
+    return messageApi.error(error.response.message);
+
+  }
+
+};
+
 
   return (
     <div>
@@ -271,7 +329,7 @@ function AddressNetworkCard(props) {
       )}
       {/* setEditModal */}
 
-      {/* {editData && editModal && (
+      {editData && editModal && (
         <EditAddress
           editModal={editModal}
           setEditModal={setEditModal}
@@ -284,9 +342,9 @@ function AddressNetworkCard(props) {
           address={address}
           heading={heading}
         />
-      )} */}
+      )}
 
-      {/* {editModalMain && editDataMain && (
+      {editModalMain && editDataMain && (
         <EditAddressMain
           editModal={editModalMain}
           setEditModal={setEditModalMain}
@@ -298,7 +356,7 @@ function AddressNetworkCard(props) {
           chains={chains}
           address={address}
         />
-      )} */}
+      )}
 
       <ModalCustom
         title={"Delete Address"}

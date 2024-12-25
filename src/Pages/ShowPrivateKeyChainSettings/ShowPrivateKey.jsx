@@ -33,6 +33,24 @@ function ShowPrivateKey() {
     messageApi.success('Private key copied to clipboard');
   }
 
+  const coin = {
+
+    1: "BNB",
+
+    2: "ETH",
+
+    3: "BTC",
+
+    4: "POL",
+
+    5: "SOL",
+
+    6: "TRX",
+
+  };
+
+
+
   return (
     <div>
       {contextHolder}
@@ -41,7 +59,7 @@ function ShowPrivateKey() {
           backTo={'/manage-wallet'}
           title={'Private key'}
         />
-        <div className={`flexedContent`}>
+        {/* <div className={`flexedContent`}>
           <div className='editWallet'>
             <h2 className='editWallet__title'>Private Key</h2>
             <p
@@ -67,6 +85,100 @@ function ShowPrivateKey() {
                 <span>Copy</span>
               </div>
             </div>
+          </div>
+        </div> */}
+        <div className={`flexedContent`}>
+
+          <div className="editWallet privateWallet">
+
+            <h2>Keep your private key safe!</h2>
+
+            {account &&
+
+              address &&
+
+              account?.coinFamilies.map((data, idx) => (
+
+                <div
+
+                  className="editWallet__linkOuter"
+
+                  key={idx}
+
+                  style={{ display: "flex", alignItems: "center" }}
+
+                >
+
+                  <span style={{ color: "white" }}>
+
+                    {address?.slice(0, 15)}...{coin?.[data]}
+
+                  </span>
+
+                  <div className="secretkeyss">
+
+                    <span style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+
+                      <span style={{ color: "white" }}>{coin?.[data]}</span>
+
+
+
+                      <img
+
+                        src={CopyIcon}
+
+                        width={14}
+
+                        height={16}
+
+                        onClick={copyToClipboard}
+
+                      />
+
+                    </span>
+
+                  </div>
+
+
+
+                  {/* <InputFieldOnly
+
+        placeholder={"Private Key"}
+
+        label="Keep your private key safe!"
+
+        value={address}
+
+        readonly={true}
+
+        placeholderBaseColor={true}
+
+        getData={(address) => {
+
+          setAddress(address);
+
+        }}
+
+      /> */}
+
+                  {/* <div
+
+        onClick={copyToClipboard}
+
+        className="setPassword__secretPharse__copyField"
+
+      >
+
+        <img src={CopyIcon} width={14} height={16} />
+
+        <span>Copy</span>
+
+      </div> */}
+
+                </div>
+
+              ))}
+
           </div>
         </div>
       </div>

@@ -8,11 +8,15 @@ import { InputField } from "../../Components/InputField/InputFieldSimple.jsx";
 import Search from "../../Assets/SearchIcon.svg";
 import { store } from "../../index.js";
 import { setLoading } from "../../actions/loading.js";
+import { useLocation, useNavigate } from "react-router-dom";
 
 function AddresBook() {
   const { account, chain } = useSelector((state) => state);
   const [messageApi, contextHolder] = message.useMessage();
   const [editModal, setEditModal] = useState(false);
+  const [editModalMain, setEditModalMain] = useState(false);
+  const location = useLocation();
+
 
   const refresh = () => {
     init();
@@ -74,11 +78,18 @@ function AddresBook() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [keyword]);
 
+
+  const navigate = useNavigate();
+  const handleAddAddress = () => {
+
+    navigate("/add-contact");
+
+  };
   return (
     <div className={`scrollableCont`}>
       <div className="searchBarFixed">
         <MenuRestofHeaders
-          backTo={"/setting"}
+          backTo={location?.state?.path ? location?.state?.path : "/setting"}
           title={"Address Book"}
           addIcon={"/add-contact"}
         />
@@ -118,20 +129,22 @@ function AddresBook() {
         {list.length > 0 ? (
           list.map((el, index) => (
             <AddressNetworkCard
-              heading={el?.name?.toUpperCase()}
-              address={el?.address}
-              wallet_address={el?.address}
-              // currency={`${el?.coin_data?.coin_symbol.toUpperCase()} (${el.coin_data.coin_name
-              // })`}
-              currency={`${el?.wallet_data?.coin_family} (${el.wallet_data.name})`}
-              index={index}
-              id={el?.id}
-              refresh={refresh}
-              wallet_data={el.wallet_data}
-              editModal={editModal}
-              setEditModal={setEditModal}
-              inits={init}
-            />
+                heading={el?.name?.toUpperCase()}
+                address={el?.address}
+                wallet_address={el?.address}
+                // currency={`${el?.coin_data?.coin_symbol.toUpperCase()} (${el.coin_data.coin_name
+                // })`}
+                currency={`${el?.wallet_data?.coin_family} (${el.wallet_data.name})`}
+                index={index}
+                id={el?.id}
+                refresh={refresh}
+                wallet_data={el.wallet_data}
+                editModal={editModal}
+                setEditModal={setEditModal}
+                editModalMain={editModalMain}
+                setEditModalMain={setEditModalMain}
+                inits={init}
+              />
           ))
         ) : (
           <p

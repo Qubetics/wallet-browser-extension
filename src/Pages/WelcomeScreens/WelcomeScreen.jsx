@@ -64,10 +64,10 @@ function WelcomeScreen() {
       <div className="cardWhite__linkOuter">
         <Link
           className="cardWhite__linkOuter__lytblue"
-          to={"/createNewWallet"}
+          to={"/terms-policy"}
           onClick={(e) => {
             e.preventDefault();
-            navigate("/createNewWallet", {
+            navigate("/terms-policy", {
               state: { type: "import" },
             });
           }}
@@ -76,7 +76,7 @@ function WelcomeScreen() {
             I already have a wallet
           </span>
         </Link>
-
+{/* //    genre swim struggle survey craft empty ghost monster orient play hobby exercise */}
         <Link
           to={"/terms-policy"}
           className="cardWhite__linkOuter__darkBlue"

@@ -2128,7 +2128,7 @@ function SecretPhrasePaste({ children, termsCheck, getMnemonics, type }) {
     }
   };
 
-  const onChange = (e) => {
+  const onChange = (e) => { 
     termsCheck(e.target.checked);
   };
   const { TextArea } = Input;

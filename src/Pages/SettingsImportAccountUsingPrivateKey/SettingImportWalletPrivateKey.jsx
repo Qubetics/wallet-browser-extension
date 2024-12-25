@@ -56,6 +56,7 @@ function SettingImportWalletPrivatekey() {
             <div className="setPassword__footerbutton">
               <ButtonComp
                 onClick={async () => {
+                  store.dispatch(setLoading(false));
                   const walletName = state.name;
                   if (!name) {
                     return messageApi.error("Please enter a valid private key");
@@ -74,8 +75,7 @@ function SettingImportWalletPrivatekey() {
                       "Account with this private key already exists."
                     );
                   }
-
-                  store.dispatch(setLoading(true));
+ 
                   const res = await WalletHelper.generateAndSetWalletPrivateKey(
                     name,
                     walletName

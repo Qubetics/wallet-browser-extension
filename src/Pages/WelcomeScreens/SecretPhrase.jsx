@@ -19,6 +19,8 @@ function SecretPhrase({ children, mnemonics, termsCheck }) {
     messageApi.success("Phrase Copied");
   }
   const onChange = (e) => {
+    console.log('CCCCCCCCCCCCCCCC ', e.target.checked);
+    
     termsCheck(e.target.checked);
   };
   return (
