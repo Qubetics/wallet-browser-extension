@@ -324,14 +324,14 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
                 <p className="mainNetwor"> ETH Main Network</p>
               </div>
             </div>
-            <div className="balanceRight">
+            {/* <div className="balanceRight">
               <div
                 onClick={() => navigate("/push-notification")}
                 style={{ cursor: "pointer" }}
               >
                 <img src={Bell} alt="Bell" />
               </div>
-            </div>
+            </div> */}
           </div>
         </>
       ) : null}

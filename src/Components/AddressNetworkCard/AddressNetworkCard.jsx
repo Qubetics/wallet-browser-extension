@@ -252,7 +252,7 @@ const deleteSubwallet = async (itm) => {
                 alt="DeleteIcon"
                 width={"15px"}
               />
-              <span>
+              {/* <span>
                 <img
                   src={EditIcon}
                   alt="editIcon"
@@ -265,7 +265,7 @@ const deleteSubwallet = async (itm) => {
                     setEditModalMain(true);
                   }}
                 />
-              </span>
+              </span> */}
               <span onClick={() => setViewAddress(!viewAddress)}>
                 <img
                   style={{ cursor: "pointer" }}
@@ -300,7 +300,7 @@ const deleteSubwallet = async (itm) => {
                     </div>
                   </div>
                   <div className="rytSec">
-                    <img
+                    {/* <img
                       style={{ marginRight: "10px" }}
                       onClick={async () => {
                         setEditData(elem);
@@ -308,7 +308,7 @@ const deleteSubwallet = async (itm) => {
                       }}
                       src={EditIcon}
                       alt="editIcon"
-                    />
+                    /> */}
                     <img
                       onClick={() => {
                         // deleteSubwallet(elem);

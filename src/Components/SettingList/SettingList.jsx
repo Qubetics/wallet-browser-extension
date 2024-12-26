@@ -265,15 +265,15 @@ function SettingList(props) {
               }
 
               if (setinglist === 'Privacy Policy') {
-                return chrome.tabs.create({
-                  url: 'https://REDACTED/privacy-policy-2/',
-                });
+                // return chrome.tabs.create({
+                //   url: 'https://REDACTED/privacy-policy-2/',
+                // });
               }
 
               if (setinglist === 'Terms of Service') {
-                return chrome.tabs.create({
-                  url: 'https://REDACTED/terms-of-service-2/',
-                });
+                // return chrome.tabs.create({
+                //   url: 'https://REDACTED/terms-of-service-2/',
+                // });
               }
 
               if (setinglist === 'Import Wallet') {

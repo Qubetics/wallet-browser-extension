@@ -191,12 +191,12 @@ function Setting() {
       ticketcheck: theme == "darkTheme" ? AddressBook : AddressBook,
       RightArow: "RightArow",
     },
-    {
-      setinglist: "Preference",
-      to: "/",
-      ticketcheck: theme == "darkTheme" ? Preference : Preference,
-      RightArow: "RightArow",
-    },
+    // {
+    //   setinglist: "Preference",
+    //   to: "/",
+    //   ticketcheck: theme == "darkTheme" ? Preference : Preference,
+    //   RightArow: "RightArow",
+    // },
     // {
     //   setinglist: "Change Password",
     //   to: "/changePin",

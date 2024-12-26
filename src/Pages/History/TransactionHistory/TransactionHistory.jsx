@@ -38,30 +38,70 @@ function TransactionHistory() {
   let explorer = '';
   let transactionHash = allData.tx_id; // Replace this with the actual transaction hash
 
-  switch (allData.coin_family) {
+  // switch (allData.coin_family) {
+  //   case 1:
+  //     coinFamily = 'ETH';
+  //     explorer = `https://etherscan.io/tx/${transactionHash}`;
+  //     break;
+  //   case 2:
+  //     coinFamily = 'BTC';
+  //     explorer = `https://www.blockchain.com/explorer/transactions/btc/${transactionHash}`;
+  //     break;
+  //   case 3:
+  //     coinFamily = 'BNB';
+  //     explorer = `https://bscscan.com/tx/${transactionHash}`;
+  //     break;
+  //   case 4:
+  //     coinFamily = 'SOL';
+  //     explorer = `https://explorer.solana.com/tx/${transactionHash}`;
+  //     break;
+  //   case 5:
+  //     coinFamily = 'ADA';
+  //     explorer = `https://cardanoscan.io/transaction/${transactionHash}`;
+  //     break;
+  //   case 6:
+  //     coinFamily = 'POL';
+  //     explorer = `https://polygonscan.com/tx/${transactionHash}`;
+  //     break;
+  //   case 7:
+  //     coinFamily = 'AVAX';
+  //     explorer = `https://snowtrace.io/tx/${transactionHash}`;
+  //     break;
+  //   case 8:
+  //     coinFamily = 'CRO';
+  //     explorer = `https://cronoscan.com/tx/${transactionHash}`;
+  //     break;
+  //   case 9:
+  //     coinFamily = 'PLS';
+  //     explorer = `https://scan.mypinata.cloud/ipfs/bafybeih3olry3is4e4lzm7rus5l3h6zrphcal5a7ayfkhzm5oivjro2cp4/#/tx/${transactionHash}`;
+  //     break;
+  //   default:
+  //     break;
+  // }
+  switch (allData?.coin_family) {
     case 1:
-      coinFamily = 'ETH';
-      explorer = `https://etherscan.io/tx/${transactionHash}`;
-      break;
-    case 2:
-      coinFamily = 'BTC';
-      explorer = `https://www.blockchain.com/explorer/transactions/btc/${transactionHash}`;
-      break;
-    case 3:
       coinFamily = 'BNB';
       explorer = `https://bscscan.com/tx/${transactionHash}`;
       break;
+    case 2:
+      coinFamily = 'ETH';
+      explorer = `https://etherscan.io/tx/${transactionHash}`;
+      break;
+    case 3:
+      coinFamily = 'BTC';
+      explorer = `https://www.blockchain.com/explorer/transactions/btc/${transactionHash}`;
+      break;
     case 4:
+      coinFamily = 'POL';
+      explorer = `https://polygonscan.com/tx/${transactionHash}`;
+      break;
+    case 5:
       coinFamily = 'SOL';
       explorer = `https://explorer.solana.com/tx/${transactionHash}`;
       break;
-    case 5:
+    case 6:
       coinFamily = 'ADA';
       explorer = `https://cardanoscan.io/transaction/${transactionHash}`;
-      break;
-    case 6:
-      coinFamily = 'POL';
-      explorer = `https://polygonscan.com/tx/${transactionHash}`;
       break;
     case 7:
       coinFamily = 'AVAX';

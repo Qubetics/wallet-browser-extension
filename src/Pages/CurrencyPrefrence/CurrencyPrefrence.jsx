@@ -31,7 +31,7 @@ function CurrencyPrefrence() {
 
     const final = data.map((el) => {
       return {
-        img: el.img,
+        img: el.image,
         currency: el.currency_name,
         name: el.currency_code,
         symbol: el.currency_symbol,
@@ -85,17 +85,29 @@ function CurrencyPrefrence() {
           <div
             className="listItems"
             style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "13px",
-              justifyContent: "space-between",
+              display: "flex", 
+              flexDirection: 'column'
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: "13px" }}>
-              <img src={Unitedstate} alt="img" />
-              <span className="Currencyname">USD</span>
-            </div>
-            <img src={TickIcon} alt="usd" />
+            {data.map((data) => (
+              <div  style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "13px",
+                justifyContent: "space-between",
+              }}>
+                <div onClick={async () => {
+                    await WalletHelper.setCurrencyPreference({
+                      name: data.name,
+                      symbol: data.symbol,
+                    });
+                    navigate('/wallet');
+                  }} style={{ display: "flex", alignItems: "center", gap: "13px" }}>
+                  <img src={data?.img} alt="img" />
+                  <span className="Currencyname">{data?.name}</span>
+                </div>
+                {data.name === currency.name ? <img src={TickIcon} alt="usd" /> : ''}
+                </div>))}
           </div>
         </div>
       </div>

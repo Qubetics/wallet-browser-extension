@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import MenuRestofHeaders from "../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders";
 import { QRCode } from "react-qrcode-logo";
 import { message } from "antd";
@@ -15,8 +15,29 @@ function ReceiveCurrency() {
       coin_symbol: "BTC", // Replace with actual coin symbol
     },
   });
-  const messageApi = message.useMessage()[0];
+  const [messageApi, contextHolder] = message.useMessage();
   const location = useLocation();
+
+
+  useEffect(()=>{ 
+
+    const coin = {wallet_address: location?.state?.coin?.wallet_address, // Replace with actual address or dynamic data
+
+      coin: {
+
+        coin_image: location?.state?.coin?.coin?.coin_image, // Replace with actual coin image
+
+        coin_symbol: location?.state?.symbol, // Replace with actual coin symbol
+
+      }}
+
+    setSelectedCoin(coin);
+
+  },[])
+
+
+
+
 
   const copyToClipboard = async (text) => {
     try {
@@ -30,9 +51,16 @@ function ReceiveCurrency() {
   // Check if the current path is /receive-currency
   const isReceiveCurrencyRoute = location.state?.nftButton;
   console.log(location, "Location");
+
+
+  function goToBack(address) {
+    navigator.clipboard.writeText(address);
+    messageApi.success("Address copied successfully.");
+  }
   return (
     <div className="receiveCurrency scrollableCont">
-      <MenuRestofHeaders backTo={"/receive-tokens"} title={"Receive BTC"} />
+      {contextHolder}
+      <MenuRestofHeaders backTo={"/receive-tokens"}  title={`Receive ${location?.state?.symbol?.toUpperCase()}`} />
       <div className="receiveCurrency_content  manageWalletHeight">
         <div className={`flexedContent padding-Top`}>
           <div className="receiveCurrency_balanceDetails">
@@ -51,9 +79,10 @@ function ReceiveCurrency() {
           <div className="receiveCurrency_copy">
             <div>
               <p>Your Qubetics Address</p>
-              <h5>bnb1fwfhpkmhcsh4vzaaax</h5>
+              <h5>{selectedCoin.wallet_address}</h5>
             </div>
             <ButtonComp
+            onClick={()=>goToBack(selectedCoin.wallet_address)} 
               text={
                 <span className="copyText">
                   Copy <img src={CopyIcon} alt="copy" />
@@ -69,7 +98,7 @@ function ReceiveCurrency() {
             adipiscing quis maecenas auctor.
             <br />
             <Link style={{ textDecoration: "none" }}>Learn more </Link>
-            about ERC-20 tokens.
+            about {`${location?.state?.symbol?.toUpperCase()}`} tokens.
           </p>
         </div>
         <div style={{ padding: "0 24px" }}>

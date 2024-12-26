@@ -13,6 +13,8 @@ import DarkLogout from "../../../Assets/settings/darkLogout.svg";
 import LogoutIcon from "../../../Assets/settings/logout.svg";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import SettignIcon from "../../../Assets/SettignIcon.svg";
+import blackStar from "../../../Assets/blackStar.svg";
+import blueStar from "../../../Assets/blueStar.svg";
 import Filtericon from "../../../Assets/Filtericon.svg";
 import ChartIcon from "../../../Assets/ChartIcon.svg";
 import Add from "../../../Assets/PlusBordredIcon2.svg";
@@ -63,6 +65,7 @@ function MenuRestofHeaders({
   stared,
   portfolio,
   manageTo,
+  isStared,
 }) {
   const { theme, spritzFilter, billPayFilter, spritzTab } = useSelector(
     (state) => state
@@ -377,7 +380,18 @@ function MenuRestofHeaders({
             to={void 0}
             onClick={stared}
           >
-            <img src={manageStart} alt="Start" />
+            
+            {isStared ? (
+              <img
+                src={blueStar}
+                alt='StarIconFilled'
+                style={{ marginLeft: '8px', width: "24px" }}
+              />
+            ) : (
+              <img src={blackStar} alt="Start" />
+            )}
+
+
           </span>
         )}
         {addIcon && (

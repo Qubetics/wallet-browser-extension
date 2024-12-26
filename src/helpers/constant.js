@@ -1,3 +1,14 @@
+
+export const BL_CODE = {
+ 1: "BNB",
+ 2: "ETH",
+ 3: "BTC",
+ 4: "POL",
+ 5: "SOL",
+ 6: "TRX"
+}
+
+
 export const SWIFT_ERROR = {
   201: 'The equipment source does not exist',
   202: 'Decimal digits of deposit amount are too long',

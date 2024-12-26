@@ -147,9 +147,8 @@ function Wallet() {
         </div>
       </div>
       <div
-        className={`${"wallet__tableOuter"} ${
-          height <= 600 ? "wallet__tabelOuterExt" : ""
-        }`}
+        className={`${"wallet__tableOuter"} ${height <= 600 ? "wallet__tabelOuterExt" : ""
+          }`}
         ref={parentRef}
         onScroll={handleScroll}
       >
@@ -179,28 +178,29 @@ function Wallet() {
                   coinSubName: token.coin.coin_name,
                   coinPrice: myPrice.toNumber()
                     ? formatSmallNumber(
-                        exponential_to_decimal(myPrice.toNumber())
-                      )
+                      exponential_to_decimal(myPrice.toNumber())
+                    )
                     : "0.00",
                   coinStatus: getFlooredFixed(
                     price
                       ? parseFloat(
-                          price.price_change_percentage_24h || 0
-                        ).toLocaleString()
+                        price.price_change_percentage_24h || 0
+                      ).toLocaleString()
                       : 0,
                     2
                   ),
                   currCryptoBal: balanceIn
                     ? `${addCommasToNumber(
-                        parseFloat(getFlooredFixed(token.balance, 6))
-                      )}`
+                      parseFloat(getFlooredFixed(token.balance, 6))
+                    )}`
                     : `****`,
                   currCryptoBalSymbol: token.coin.coin_symbol.toUpperCase(),
                   currDollerBal: balanceIn
                     ? addCommasToNumber(getFlooredFixed(formattedResult, 2))
                     : "****",
                   routeTo: "currencyDetails",
-                  type: token.coin.coin_family === 1 ? "BEP20" : "ERC20",
+                  // type: token.coin.coin_family === 1 ? "BEP20" : "ERC20",
+                  type: token.coin.coin_family === 1 ? "BEP20" : token.coin.coin_family === 2 ? "ERC20" : token.coin.coin_family === 4 ? "ERC20" : token.coin.coin_family === 5 ? "SPL" : token.coin.coin_family === 6 ? "TRC20" : "",
                   status: true,
                   coin: token,
                 };
@@ -213,12 +213,12 @@ function Wallet() {
         <ButtonComp
           maxWidth="190px"
           onClick={() => {
-            return navigate("/address-book");
+            return navigate('/manage');
           }}
           text={
             <span>
-              <img src={UserPlusRounded} alt="img" />
-              Address Book
+              {/* <img src={UserPlusRounded} alt="img" /> */}
+              Add Token
             </span>
           }
         />

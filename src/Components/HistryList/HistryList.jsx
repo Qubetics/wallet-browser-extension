@@ -34,12 +34,72 @@ function HistryList(props) {
     duration: DURATION,
   });
 
+
+
+  const viewOnExplorer = (e) => {
+    e.preventDefault(); 
+    e.preventDefault();
+    let coinFamily = 'ETH';
+    let explorer = '';
+    let transactionHash = allData.tx_id;
+    switch (allData?.coin_family) {
+      case 1:
+        coinFamily = 'BNB';
+        explorer = `https://bscscan.com/tx/${transactionHash}`;
+        break;
+      case 2:
+        coinFamily = 'ETH';
+        explorer = `https://etherscan.io/tx/${transactionHash}`;
+        break;
+      case 3:
+        coinFamily = 'BTC';
+        explorer = `https://www.blockchain.com/explorer/transactions/btc/${transactionHash}`;
+        break;
+      case 4:
+        coinFamily = 'POL';
+        explorer = `https://polygonscan.com/tx/${transactionHash}`;
+        break;
+      case 5:
+        coinFamily = 'SOL';
+        explorer = `https://explorer.solana.com/tx/${transactionHash}`;
+        break;
+      case 6:
+        coinFamily = 'ADA';
+        explorer = `https://cardanoscan.io/transaction/${transactionHash}`;
+        break;
+      case 7:
+        coinFamily = 'AVAX';
+        explorer = `https://snowtrace.io/tx/${transactionHash}`;
+        break;
+      case 8:
+        coinFamily = 'CRO';
+        explorer = `https://cronoscan.com/tx/${transactionHash}`;
+        break;
+      case 9:
+        coinFamily = 'PLS';
+        explorer = `https://scan.mypinata.cloud/ipfs/bafybeih3olry3is4e4lzm7rus5l3h6zrphcal5a7ayfkhzm5oivjro2cp4/#/tx/${transactionHash}`;
+        break;
+      default:
+        break;
+    }
+
+
+    if (!allData.tx_id) {
+      return messageApi.error('Please wait for transaction hash.');
+    }
+    chrome.tabs.create({
+      url: explorer,
+    });
+  }
+
+
   return (
     <>
       {contextHolder}
       <div
         className="histryList"
-        onClick={() => {
+        onClick={(e) => {
+          viewOnExplorer(e);
           // if (!spritz) {
           //   navigate('/detail', {
           //     state: {
@@ -63,8 +123,8 @@ function HistryList(props) {
               {sendRecieve === "WITHDRAW"
                 ? "Send"
                 : sendRecieve === "DEPOSIT"
-                ? "Receive"
-                : capitalize(sendRecieve)}
+                  ? "Receive"
+                  : capitalize(sendRecieve)}
               <span>/{coinname}</span>
             </p>
             <div className="histryStatus">

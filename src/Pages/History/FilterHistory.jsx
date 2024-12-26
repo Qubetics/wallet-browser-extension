@@ -1,6 +1,6 @@
 /*global chrome*/
 
-import { DatePicker, Select, Space } from "antd";
+import { DatePicker, message, Select, Space } from "antd";
 import React, { useEffect, useState } from "react";
 import MenuRestofHeaders from "../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders";
 import Btc from "../../Assets/Coins/BTC.png";
@@ -18,7 +18,7 @@ import moment from "moment";
 
 function FilterHistory() {
   const { account, filter } = useSelector((state) => state);
-
+  const [messageApi, contextHolder] = message.useMessage();
   const [data, setData] = useState([]);
 
   const [filterValue, setFilterValue] = useState({
@@ -113,6 +113,7 @@ function FilterHistory() {
   const { RangePicker } = DatePicker;
   return (
     <div>
+      {contextHolder}
       <MenuRestofHeaders
         backTo={"/history"}
         title={"Filter"}
@@ -344,6 +345,13 @@ function FilterHistory() {
             text={"Apply"}
             maxWidth={"100%"}
             onClick={() => {
+              if(filterValue.fromDate && !filterValue.toDate){
+                return messageApi.error('Please select the to date.');
+               }
+ 
+               if(!filterValue.fromDate && filterValue.toDate){
+                return messageApi.error('Please select the from date.');
+               }
               store.dispatch(setFilter(filterValue));
               if (state?.currencyDetail) {
                 navigate("/currencyDetails", {

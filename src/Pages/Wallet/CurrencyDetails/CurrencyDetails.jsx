@@ -34,19 +34,65 @@ import CurrencyBalanceDetails from "./CurrencyBalance";
 function CurrencyDetails() {
   const { currency, account } = useSelector((state) => state);
 
+  
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const getLocation = useLocation();
+
+  const path = getLocation.pathname.replace('/', '');
+
   const navigate = useNavigate();
 
+  const { state } = useLocation();
   const {
     state: { coin },
   } = useLocation();
 
-  const { state } = useLocation();
+  // const { state } = useLocation();
 
   const [price, setPrice] = useState(0);
 
   useEffect(() => {
     setPrice(coin.coin.fiat_price_data || 0);
   }, []);
+
+  const showModal = () => {
+
+    setIsModalOpen(true);
+
+  };
+
+  const handleOk = () => {
+
+    setIsModalOpen(false);
+
+  };
+
+  const handleCancel = () => {
+
+    setIsModalOpen(false);
+
+  };
+
+
+
+
+
+
+
+  const [isStared, setIsStared] = useState(
+
+    coin.coin.watchlist_data && coin.coin.watchlist_data.status === '1'
+
+      ? true
+
+      : false
+
+  );
+
+
+
+
 
   const [messageApi, contextHolder] = message.useMessage({
     duration: DURATION,
@@ -154,12 +200,43 @@ function CurrencyDetails() {
             url: `https://trading.skymarvel.io?key=${coin?.coin?.coin_symbol?.toUpperCase()}`,
           });
         }}
-        stared={() => {
-          navigate("/watch-list-tokens");
+        // stared={() => {
+        //   navigate("/watch-list-tokens");
+        // }}
+        stared={async () => {
+          try {
+            await server.post(
+              'wallet/updateWatchlist',
+              {
+                data: [
+                  {
+                    address: account.address,
+                    coin_id: coin.coin.coin_id,
+                    status:coin?.coin?.watchlist_data?.status == '1'
+                        ? 0
+                        : 1,
+                  },
+                ],
+              },
+              {
+                headers: {
+                  Authorization: account.jwtToken,
+                },
+              }
+            );
+            console.log('accountaccountaccount ', account);
+            console.log('coincoincoincoincoin ', coin);
+            
+            setIsStared(!isStared)
+          } catch (error) {
+            messageApi.error('Unable to favourite the selected coin');
+          }
         }}
+        isStared={isStared}
       />
 
       <div className={`flexedContent padding-Top`}>
+        {/* <span onClick={()=>  navigate("/watch-list-tokens")}>Watch</span> */}
         <div className="currDetails currencyCard">
           <div className="currDetails__card">
             <div className="currDetails__card__topTexts">
@@ -169,7 +246,7 @@ function CurrencyDetails() {
                   color: "#fff",
                 }}
               >
-                {coin.coin.coin_family === 1 ? "BEP20" : "ERC20"}
+                {coin.coin.coin_family === 1 ? "BEP20" : coin.coin.coin_family === 2 ? "ERC20":coin.coin.coin_family === 4 ?"ERC20":coin.coin.coin_family === 5 ?"SPL":coin.coin.coin_family === 6 ?"TRC20":""}
               </p>
               <p
                 className="currDetails__card__text"
@@ -236,6 +313,8 @@ function CurrencyDetails() {
 
           {coin && (
             <div className="editWallet__linkOuter">
+              {console.log('CMCBCMNCBMCBCM ',account.coinFamilyAndAddress)}
+              {console.log('CCCCCCCCCCCCCCCCC',coin.coin.coin_family)}
               <InputField
                 value={account.coinFamilyAndAddress[coin.coin.coin_family]}
                 readonly={true}

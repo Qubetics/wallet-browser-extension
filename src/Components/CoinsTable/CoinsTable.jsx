@@ -28,6 +28,8 @@ function CoinsTable({ dataArray, showCoinPrice, name }) {
   const [deleteModal, setDeleteModal] = useState(false);
   const [selected, setSelected] = useState(null);
   const [positionChange, setPositionChnage] = useState(null);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [selectedCoin, setSelectedCoin] = useState(null);
 
   const handleClick = (ele) => {
     let routes = Object.keys(ele).includes("routeTo");
@@ -56,8 +58,7 @@ function CoinsTable({ dataArray, showCoinPrice, name }) {
             account: ele.account,
           },
         });
-      }
-
+      } 
       navigate(`/${ele.routeTo}`, {
         state: {
           symbol: ele.coinName,
@@ -72,6 +73,19 @@ function CoinsTable({ dataArray, showCoinPrice, name }) {
       }
       setOpenModal(ele.openModal());
     }
+  };
+
+
+  const showDeleteModal = (coin) => {
+    setSelectedCoin(coin);
+    setIsModalVisible(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (selectedCoin && selectedCoin.watch) {
+      selectedCoin.watch(); 
+    }
+    setIsModalVisible(false);
   };
 
   return (
@@ -180,13 +194,13 @@ function CoinsTable({ dataArray, showCoinPrice, name }) {
                   <span style={{ marginLeft: "4px", color: "#98969B" }}>
                     {ele.currPriceValue ? ele.currPriceValue.toFixed(2) : 0}
                   </span>
-                  {name == "portfolio" && <img src={bin} />}
+                  {name == "portfolio" && <img onClick={() => showDeleteModal(ele)} src={bin} />}
                 </span>
               ) : ele.watch ? (
                 ele.isActiveInWatchList ? (
-                  <img src={blueStar} alt="star" />
+                  <img onClick={()=>ele.watch()} src={blueStar} alt="star" />
                 ) : (
-                  <img src={blackStar} alt="star" />
+                  <img onClick={()=>ele.watch()} src={blackStar} alt="star" />
                 )
               ) : (
                 <DummyEle ele={ele} />
@@ -310,6 +324,69 @@ function CoinsTable({ dataArray, showCoinPrice, name }) {
               }}
               onClick={() => {
                 setDeleteModal(false);
+              }}
+            >
+              No
+            </div>
+          </div>
+        </div>
+      </ModalCustom>
+
+      <ModalCustom
+        title={"Confirm Deletion"}
+        isModalOpen={isModalVisible}
+        customClass='customClassModal'
+        handleCancel={() => {
+          setIsModalVisible(false);
+        }}
+      >
+       <div className='viewphrases'>
+          <div className='viewphrases__iInner'>
+            <p
+              style={{
+                fontSize: '20px',
+                color: "white"
+              }}
+            >
+              Are you sure you want to Delete from Watchlist ?
+            </p>
+          </div>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginTop: '30px',
+            }}
+          >
+            <div
+              className='green'
+              style={{
+                padding: '12px 53px',
+                backgroundColor: 'rgb(213, 175, 34)',
+                color: 'white',
+                fontSize: '18px',
+                borderRadius: '7px',
+                marginRight: '20px',
+                cursor: 'pointer',
+              }}
+              onClick={handleConfirmDelete}
+            >
+              Yes
+            </div>
+            <div
+              className='red'
+              style={{
+                padding: '12px 53px',
+                backgroundColor: 'red',
+                color: 'white',
+                fontSize: '18px',
+                borderRadius: '7px',
+                marginLeft: '20px',
+                cursor: 'pointer',
+              }}
+              onClick={() => {
+                setIsModalVisible(false);
               }}
             >
               No

@@ -130,7 +130,7 @@ function PortfolioWatchList() {
         )}
       </div>
       <div className="WatchlistContents">
-        <div>
+        {/* <div>
           <div className="coinsTable1 flex-item">
             <div className="coinsTable1__left">
               <div className="coinsTable1__left__icon">
@@ -148,7 +148,7 @@ function PortfolioWatchList() {
               <img src={DeleteIcon} alt="DeleteIcon" />
             </div>
           </div>
-        </div>
+        </div> */}
         <div>
           {(state?.nft ? list : tokens.filter((token) => token.watchlist_data))
             .length > 0 ? (
@@ -194,7 +194,8 @@ function PortfolioWatchList() {
                       ? addCommasToNumber(getFlooredFixed(formattedResult, 2))
                       : "****",
                     routeTo: "no-where",
-                    type: token.coin_family === 1 ? "BEP20" : "ERC20",
+                    // type: token.coin_family === 1 ? "BEP20" : "ERC20",
+                    type:token.coin_family === 1 ? "BEP20" : token.coin_family === 2 ? "ERC20":token.coin_family === 4 ?"ERC20":token.coin_family === 5 ?"SPL":token.coin_family === 6 ?"TRC20":"",
                     status: true,
                     coin: token,
                     currPriceValue: priceData,
@@ -242,9 +243,9 @@ function PortfolioWatchList() {
           )}
         </div>
       </div>
-      <div state={{ isFromPortfolio: true }} style={{ marginTop: "15px" }}>
+      <div style={{ marginTop: "15px" }}>
         <ButtonComp
-          onClick={() => navigate("/add-watch-list")}
+          onClick={() => navigate("/add-watch-list", {state:{ isFromPortfolio: true }})}
           text={"Add Tokens"}
           maxWidth={"100%"}
         />

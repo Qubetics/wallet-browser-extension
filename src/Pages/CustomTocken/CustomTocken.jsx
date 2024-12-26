@@ -180,7 +180,7 @@ function CustomTocken() {
         {
           tokenAddress: address,
           coinFamily: selectedChain.coinFamily,
-          coin_symbol: '',
+          // coin_symbol: '',
         },
         {
           headers: {
@@ -189,6 +189,8 @@ function CustomTocken() {
         }
       );
 
+      console.log("TOKENNNNNNNNNNNNNNN ", tokenData);
+      
       setTokenInfo({
         name: tokenData.data.data.name,
         symbol: tokenData.data.data.symbol,
@@ -197,6 +199,8 @@ function CustomTocken() {
 
       store.dispatch(setLoading(false));
     } catch (error) {
+      console.log('Error >>>>> ', error);
+      
       store.dispatch(setLoading(false));
       return messageApi.error(
         'Invalid token address provided. Please check the address and try again.'
@@ -378,17 +382,23 @@ function CustomTocken() {
 
 
                 store.dispatch(setLoading(true));
+                console.log('selectedChainselectedChainselectedChain ',selectedChain);
+                
                 await server.post(
                   '/wallet/addtoken',
                   {
                     name: tokenInfo.name,
                     symbol: tokenInfo.symbol,
+                    coin_gicko_alias:tokenInfo.symbol,
                     decimals: tokenInfo.decimals,
                     token_address: tokenAddress,
                     coin_family: selectedChain.coinFamily,
                     wallet_address: account.coinFamilyAndAddress[selectedChain.coinFamily],
                     wallet_name: account.name,
                     token_type: selectedChain.tokenType,
+                    isSwapList:selectedChain?.swap, 
+                    coin_gicko_id:''
+                    
                   },
                   {
                     headers: {
