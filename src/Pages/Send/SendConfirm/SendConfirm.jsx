@@ -165,6 +165,8 @@ function SendConfirm() {
 
   const handleTransaction = async () => {
     try {
+      console.log("PPPPPPPPPPPPPPPP");
+      
       store.dispatch(setLoading(true));
 
       const { chains } = await chrome.storage.local.get("chains");
@@ -174,6 +176,8 @@ function SendConfirm() {
 
       if (chain.isEVM) {
         if (coin.coin.token_address) {
+          console.log("maticmaticmaticmaticmaticmaticmatic ", coin);
+          
           const response =
             await Web3Helper.generateRawTransactionForTokenAndBroadcast(
               to,
@@ -184,7 +188,7 @@ function SendConfirm() {
               fiatGasFee,
               currency.name,
               toName,
-              chain.slug,
+              chain.slug == "matic" ? "polygon" : chain.slug,
               chain.chainId,
               coin.coin.token_address,
               coin.coin.decimals,
@@ -208,7 +212,7 @@ function SendConfirm() {
               fiatGasFee,
               currency.name,
               toName,
-              chain.slug,
+              chain.slug == "matic" ? "polygon" : chain.slug,
               chain.chainId,
               coin.coin.coin_symbol,
               coin.coin.coin_family == 1

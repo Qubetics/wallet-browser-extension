@@ -39,6 +39,8 @@ export class Web3Helper {
         }
       );
 
+      console.log("CCCCCCCCCCCCXXXXXXXXXXXX ", data);
+      
       return {
         estimate: data.gas_estimate,
         fast: data.resultList.fast_gas_price,
@@ -46,7 +48,7 @@ export class Web3Helper {
         safe: data.resultList.safe_gas_price,
       };
     } catch (error) {
-      console.log(error);
+      console.log('QQQQQQQQQQQQQQQQQ ', error);
       return false;
     }
   };
@@ -363,19 +365,24 @@ export class Web3Helper {
         transaction,
         privateKey
       );
-      console.log("🚀 ~ Web3Helper ~ signedTransaction:", signedTransaction)
+      console.log("🚀 ~ Web3Helper ~ signedTransaction:", signedTransaction);
+      
+      const gasPriceInWei = web3.utils.toWei(gasPriceRes.fast.toString(), 'gwei');
+
+      const trx = signedTransaction.rawTransaction;
+      const stringWithout0x = trx.startsWith("0x") ? trx.slice(2) : trx;
 
 
       const response = await server.post(
         `${slug}/${symbol}/send`,
         {
           nonce: nonce,
-          tx_raw: signedTransaction.rawTransaction,
+          tx_raw: stringWithout0x,
           from: from,
           to: to,
           amount: amount,
           gas_estimate: gaslimit,
-          gas_price: gasInEth,
+          gas_price: gasPriceInWei,//gasPriceRes.fast * Math.pow(10, 9),//gasInEth,
           tx_type: type || 'withdraw',
         },
         {
@@ -455,6 +462,53 @@ export class Web3Helper {
     }
   };
 
+
+
+
+
+  static web3s = new Web3(process.env.REACT_APP_ETH_RPC);
+
+
+
+  static getPriorityFee = async (web3) => {
+
+    const feeHistory = await web3.eth.getFeeHistory(1, 'latest', [10]);
+
+    const priorityFee = feeHistory.reward[0][0]; // Average of the 10th percentile priority fees
+
+    return web3.utils.toHex(priorityFee);
+
+  }
+
+
+
+  static getGasEstimation = async ({ from, to, data, coinFamily }) => {
+    const web3s = new Web3(
+      coinFamily == 1 ? process.env.REACT_APP_BNB_RPC :
+        coinFamily == 2 ? process.env.REACT_APP_ETH_RPC :
+          process.env.REACT_APP_MATIC_RPC
+    );
+
+    const transaction = {
+      from: from,
+      to: to,
+      value: web3s.utils.toWei('0', 'ether'), // Value in Wei (e.g., 0.01 ETH)
+      data: web3s.utils.toHex(data) // Optional data field
+    };
+    return await web3s.eth.estimateGas(transaction)
+      .then(gasEstimate => {
+        console.log(`Estimated Gas: ${gasEstimate}`, transaction);
+        return gasEstimate * 3
+      })
+      .catch(error => {
+        console.error('Error estimating gas:', error);
+        return 21000 * 3;
+      });
+  }
+
+
+
+
   static generateRawTransactionForTokenAndBroadcast = async (
     to,
     from,
@@ -469,7 +523,8 @@ export class Web3Helper {
     tokenAddress,
     decimals,
     symbol,
-    type
+    type,
+    coinFamily
   ) => {
     try {
       const { account } = store.getState();
@@ -491,10 +546,28 @@ export class Web3Helper {
         symbol
       );
 
+      console.log('gasPriceRes-------> ', gasPriceRes);
+
       const nonce = await this.getNonce(slug, true, tokenAddress, symbol, from);
+      console.log("NONCEEEEEE ", nonce);
+
+      const data = contract.methods
+        .transfer(
+          to,
+          new BigNumber(amount)
+            .multipliedBy(new BigNumber(decimals))
+            .toFixed(0)
+        )
+        .encodeABI()
+
+      // console.log("::::::data ", data);
 
       const gasPrice = gasPriceRes.fast * Math.pow(10, 9);
-      const gaslimit = gasPriceRes.estimate;
+      const gaslimit = await this.getGasEstimation({ from, to, data, coinFamily })
+
+      // const gasPrice = gasPriceRes.fast * Math.pow(10, 9);
+      // const gaslimit = gasPriceRes.estimate;
+      console.log('PLLLLLLLLLLLLLLL ', gasPrice, gaslimit);
 
       const transaction = {
         nonce,
@@ -503,14 +576,7 @@ export class Web3Helper {
         to: tokenAddress,
         value: '0x0',
         from: from,
-        data: contract.methods
-          .transfer(
-            to,
-            new BigNumber(amount)
-              .multipliedBy(new BigNumber(decimals))
-              .toFixed(0)
-          )
-          .encodeABI(),
+        data: data,
         chainId,
       };
 

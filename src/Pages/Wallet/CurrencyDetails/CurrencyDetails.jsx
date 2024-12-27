@@ -34,7 +34,7 @@ import CurrencyBalanceDetails from "./CurrencyBalance";
 function CurrencyDetails() {
   const { currency, account } = useSelector((state) => state);
 
-  
+
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const getLocation = useLocation();
@@ -212,9 +212,9 @@ function CurrencyDetails() {
                   {
                     address: account.address,
                     coin_id: coin.coin.coin_id,
-                    status:coin?.coin?.watchlist_data?.status == '1'
-                        ? 0
-                        : 1,
+                    status: coin?.coin?.watchlist_data?.status == '1'
+                      ? 0
+                      : 1,
                   },
                 ],
               },
@@ -226,7 +226,7 @@ function CurrencyDetails() {
             );
             console.log('accountaccountaccount ', account);
             console.log('coincoincoincoincoin ', coin);
-            
+
             setIsStared(!isStared)
           } catch (error) {
             messageApi.error('Unable to favourite the selected coin');
@@ -246,7 +246,7 @@ function CurrencyDetails() {
                   color: "#fff",
                 }}
               >
-                {coin.coin.coin_family === 1 ? "BEP20" : coin.coin.coin_family === 2 ? "ERC20":coin.coin.coin_family === 4 ?"ERC20":coin.coin.coin_family === 5 ?"SPL":coin.coin.coin_family === 6 ?"TRC20":""}
+                {coin.coin.coin_family === 1 ? "BEP20" : coin.coin.coin_family === 2 ? "ERC20" : coin.coin.coin_family === 4 ? "ERC20" : coin.coin.coin_family === 5 ? "SPL" : coin.coin.coin_family === 6 ? "TRC20" : ""}
               </p>
               <p
                 className="currDetails__card__text"
@@ -257,11 +257,11 @@ function CurrencyDetails() {
                 {currency.symbol}
                 {price
                   ? addCommasToNumber(
-                      getFlooredFixed(
-                        Number(price?.value),
-                        parseFloat(price?.value) < 1 ? 12 : 2
-                      )
+                    getFlooredFixed(
+                      Number(price?.value),
+                      parseFloat(price?.value) < 1 ? 12 : 2
                     )
+                  )
                   : "0.00"}{" "}
                 <span
                   style={{
@@ -313,8 +313,8 @@ function CurrencyDetails() {
 
           {coin && (
             <div className="editWallet__linkOuter">
-              {console.log('CMCBCMNCBMCBCM ',account.coinFamilyAndAddress)}
-              {console.log('CCCCCCCCCCCCCCCCC',coin.coin.coin_family)}
+              {console.log('account.coinFamilyAndAddress ', account)}
+              {console.log('CCCCCCCCCCCCCCCCC', coin.coin.coin_family)}
               <InputField
                 value={account.coinFamilyAndAddress[coin.coin.coin_family]}
                 readonly={true}
@@ -386,12 +386,12 @@ function CurrencyDetails() {
                     data.type === "dapp"
                       ? "Smart Contract"
                       : data.type === "deposit"
-                      ? "Received"
-                      : data.type === "withdraw"
-                      ? "Sent"
-                      : data.type.toLowerCase() === "swap"
-                      ? "Swap"
-                      : "Withdraw";
+                        ? "Received"
+                        : data.type === "withdraw"
+                          ? "Sent"
+                          : data.type.toLowerCase() === "swap"
+                            ? "Swap"
+                            : "Withdraw";
 
                   return (
                     <HistryList
@@ -401,9 +401,9 @@ function CurrencyDetails() {
                       coinname={data?.coin_data?.coin_symbol?.toUpperCase()}
                       address={`${data?.from_adrs?.substring(0, 5)}.....
           ${data?.from_adrs?.substring(
-            data?.from_adrs?.length - 5,
-            data?.from_adrs?.length
-          )}`}
+                        data?.from_adrs?.length - 5,
+                        data?.from_adrs?.length
+                      )}`}
                       valueCurrency={`${addCommasToNumber(
                         getFlooredFixed(data?.amount, 5)
                       )} ${data?.coin_data?.coin_symbol?.toUpperCase()}`}
@@ -416,9 +416,9 @@ function CurrencyDetails() {
                           ? name
                           : `${data?.to_adrs?.substring(0, 5)}.....
           ${data?.to_adrs?.substring(
-            data?.to_adrs?.length - 5,
-            data?.to_adrs?.length
-          )}`
+                            data?.to_adrs?.length - 5,
+                            data?.to_adrs?.length
+                          )}`
                       }
                       TickIcon={
                         transactionType === "Deposit" ? Deposit : Sendhistry

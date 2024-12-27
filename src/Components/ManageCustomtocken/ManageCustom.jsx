@@ -94,6 +94,9 @@ function ManageCustom(props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
+
+  console.log("CCCCCCCCCCCCCCCCNNNNNNNNNNNNN ", coin);
+  
   return (
     <>
       <div className="manageList">

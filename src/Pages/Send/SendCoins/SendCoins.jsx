@@ -9,7 +9,7 @@ import { store } from "../../..";
 import { setLoading } from "../../../actions/loading";
 import MenuRestofHeaders from "../../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders";
 import ButtonComp from "../../../Components/ButtonComp/ButtonComp";
-import { InputField } from "../../../Components/InputField/InputFieldSimple";
+import { InputField, InputFieldOnly } from "../../../Components/InputField/InputFieldSimple";
 import ModalCustom from "../../../Components/ModalCustom/ModalCustom";
 import { Web3Helper } from "../../../helpers/web3.helper";
 import style from "./style.module.scss";
@@ -37,12 +37,35 @@ import {
 } from "../../../helpers/common.helper";
 import TransactionFeeSlider from "../../../Components/TransactionFeeSlider/TransactionFeeSlider";
 import ReactSlider from "react-slider";
+import AddressTableSend from "../../../Components/AddressTable/AddressTableSend";
 
 let inputCount = 0;
 let transactionSize = 0;
 let outputCount = 2;
 let btcTosatoshi = 100000000;
 let btcTosatoshiMultiplier = 0.00000001;
+
+
+
+
+
+const crypto = {
+
+  1: "BNB",
+
+  2: "ETH",
+
+  3: "BTC",
+
+  4: "POL",
+
+  5: "SOL",
+
+  6: "TRX",
+
+}
+
+
 
 function SendCoins() {
   const { account, currency } = useSelector((state) => state);
@@ -63,6 +86,8 @@ function SendCoins() {
   const [messageApi, contextHolder] = message.useMessage({});
   const [list, setList] = useState([]);
   const [selectedGasPrice, setSelectedGasPrice] = useState(0);
+  const [nativeCoinPrice, setNativeCoinPrice] = useState(0);
+
 
   const [myGasPrice, setGasPrice] = useState({
     estimate: 0,
@@ -71,7 +96,41 @@ function SendCoins() {
     safe: 0,
   });
 
+
+  const fetchNativePrice = async () => {
+
+    const parentCoin = await server.post(
+
+      "/wallet/nativeCoinFiatPrice",
+
+      {
+
+        coin_family: coin.coin.coin_family,
+
+        fiat_currency: currency.name,
+
+      },
+
+      {
+
+        headers: {
+
+          Authorization: account.jwtToken,
+
+        },
+
+      }
+
+    );
+
+
+
+    setNativeCoinPrice(parentCoin?.data?.data?.fiatCoinPrice?.value)
+
+  }
+
   useEffect(() => {
+    fetchNativePrice();
     init();
     const price = coin.coin.fiat_price_data || 0;
 
@@ -92,21 +151,28 @@ function SendCoins() {
         (chain) => chain.coinFamily === coin.coin.coin_family
       );
 
-      const result = await Web3Helper.getGasPrice(
-        chain.slug,
-        account.coinFamilyAndAddress[coin.coin.coin_family],
-        account.coinFamilyAndAddress[coin.coin.coin_family],
-        coin.coin.token_address ? 1 : 0,
-        coin.coin.token_address,
-        coin.coin.coin_symbol
-      );
+      console.log("CHains============> ", chains);
+      
 
-      setSelectedGasPrice(result.fast);
-      setGasPrice(result);
+      if (chains.isEVM) {
+        const result = await Web3Helper.getGasPrice(
+          chain.slug == "matic" ? "polygon" : chain.slug,
+          account.coinFamilyAndAddress[coin.coin.coin_family],
+          account.coinFamilyAndAddress[coin.coin.coin_family],
+          coin.coin.token_address ? 1 : 0,
+          coin.coin.token_address,
+          coin.coin.coin_symbol
+        );
+        console.log("RRRRRRRRRRRRRRRSSSSSSSSSSSSSS ", result);
 
-      console.log({
-        wallet_address: account.coinFamilyAndAddress[coin.coin.coin_family],
-      });
+        setSelectedGasPrice(result.fast);
+        setGasPrice(result);
+
+        console.log({
+          wallet_address: account.coinFamilyAndAddress[coin.coin.coin_family],
+        });
+      }
+
       const { data } = await server.post(
         "/user/address_book",
         {
@@ -203,7 +269,7 @@ function SendCoins() {
 
       // Get the current gas price
       const gasPrice = await Web3Helper.getGasPrice(
-        chain.slug,
+        chain.slug == "matic" ? "polygon" : chain.slug,
         coin.wallet_address,
         coin.wallet_address,
         false,
@@ -244,6 +310,25 @@ function SendCoins() {
       );
       setAmount(amt);
       store.dispatch(setLoading(false));
+    }
+  };
+
+  const handleChange = (val) => {
+    // console.log('gasPrice?. ', myGasPrice); 
+    switch (val) {
+      case 0: {
+        setSelectedGasPrice(myGasPrice?.safe);
+        break;
+      }
+      case 50: {
+        setSelectedGasPrice(myGasPrice?.propose);
+        break;
+      }
+      case 100: {
+        setSelectedGasPrice(myGasPrice?.fast);
+        break;
+      }
+      default: { }
     }
   };
 
@@ -359,10 +444,10 @@ function SendCoins() {
           <div className={style.do}>
             <div
               className={style.send__infoText}
-              // style={{
-              //   position: 'relative',
-              //   left: '20px',
-              // }}
+            // style={{
+            //   position: 'relative',
+            //   left: '20px',
+            // }}
             >
               = {currency.symbol}
               {addCommasToNumber(
@@ -402,13 +487,64 @@ function SendCoins() {
         /> */}
           <div className="transactionFee">
             <h4>Transaction Fee</h4>
-            <Slider
-              marks={{
-                0: "Low",
-                50: "Average",
-                100: "High",
-              }}
-            />
+
+
+            { (coin?.coin?.coin_family == 2 || coin?.coin?.coin_family == 3 || coin?.coin?.coin_family == 5) ? <>
+              <InputFieldOnly
+                placeholder={"Transaction Fee"}
+                label=""
+                value={(parseFloat(myGasPrice?.estimate * (myGasPrice?.fast * 3) / 10 ** 9))?.toFixed(5)}
+                readonly={true}
+                placeholderBaseColor={true}
+              />
+            </> : <>
+              <Slider
+                marks={{
+                  0: "Low",
+                  50: "Average",
+                  100: "High",
+                }}
+                defaultValue={100}
+                step={null}
+                onChange={handleChange}
+              />
+
+
+              <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <p style={{ color: 'white' }}>{(parseFloat(myGasPrice?.estimate * myGasPrice?.safe / 10 ** 9))?.toFixed(5)} {crypto[coin?.coin?.coin_family]?.toUpperCase()}</p>
+                  <p style={{ color: 'white' }}> {(parseFloat(nativeCoinPrice) * parseFloat(myGasPrice?.estimate * myGasPrice?.safe / 10 ** 9))?.toFixed(5)} {currency?.name?.toUpperCase()}</p>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+
+
+
+                  <p style={{ color: 'white' }}>{(parseFloat(myGasPrice?.estimate * myGasPrice?.propose / 10 ** 9))?.toFixed(5)} {crypto[coin?.coin?.coin_family]?.toUpperCase()}</p>
+
+                  <p style={{ color: 'white' }}> {(parseFloat(nativeCoinPrice) * parseFloat(myGasPrice?.estimate * myGasPrice?.propose / 10 ** 9))?.toFixed(5)} {currency?.name?.toUpperCase()}</p>
+
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+
+
+
+                  <p style={{ color: 'white' }}>{(parseFloat(myGasPrice?.estimate * myGasPrice?.fast / 10 ** 9))?.toFixed(5)} {crypto[coin?.coin?.coin_family]?.toUpperCase()}</p>
+
+                  <p style={{ color: 'white' }}> {(parseFloat(nativeCoinPrice) * parseFloat(myGasPrice?.estimate * myGasPrice?.fast / 10 ** 9))?.toFixed(5)} {currency?.name?.toUpperCase()}</p>
+
+                </div>
+
+              </div>
+
+            </>
+
+
+
+            }
+
+
           </div>
         </div>
         <div>
@@ -417,26 +553,30 @@ function SendCoins() {
               store.dispatch(setLoading(true));
 
               const { chains } = await chrome.storage.local.get("chains");
+              console.log("chains ===========>", chains);
+              
               const chain = chains.find(
                 (chain) => chain.coinFamily === coin.coin.coin_family
               );
 
-              if (!chain.isEVM && chain.currencyName === "ADA" && amount < 1) {
-                store.dispatch(setLoading(false));
-                return messageApi.error(
-                  "The minimum value must be greater than 1 or equal to 1."
-                );
-              }
+              console.log("CHAIN-----------> ", chain);
+              
+              // if (!chain.isEVM && chain.currencyName === "ADA" && amount < 1) {
+              //   store.dispatch(setLoading(false));
+              //   return messageApi.error(
+              //     "The minimum value must be greater than 1 or equal to 1."
+              //   );
+              // }
 
-              if (!chain.isEVM && chain.currencyName === "ADA") {
-                const check = await AdaHelper.checkCardanoAddressType(address);
-                store.dispatch(setLoading(false));
-                if (check !== "Shelley-era address") {
-                  return messageApi.error(
-                    "Invalid address: Only Shelley-era addresses (starting with 'addr1') are supported."
-                  );
-                }
-              }
+              // if (!chain.isEVM && chain.currencyName === "ADA") {
+              //   const check = await AdaHelper.checkCardanoAddressType(address);
+              //   store.dispatch(setLoading(false));
+              //   if (check !== "Shelley-era address") {
+              //     return messageApi.error(
+              //       "Invalid address: Only Shelley-era addresses (starting with 'addr1') are supported."
+              //     );
+              //   }
+              // }
 
               if (!amount) {
                 store.dispatch(setLoading(false));
@@ -534,22 +674,26 @@ function SendCoins() {
                   coin.coin.coin_family == 1
                     ? process.env.REACT_APP_BNB_RPC
                     : coin.coin.coin_family == 2
-                    ? process.env.REACT_APP_ETH_RPC
-                    : process.env.REACT_APP_MATIC_RPC
+                      ? process.env.REACT_APP_ETH_RPC
+                      : process.env.REACT_APP_MATIC_RPC
                 );
 
-                console.log(nativeCoinResponse);
-                console.log(coin);
+                console.log("nativeCoinResponse---> ", nativeCoinResponse);
+                console.log("coincoincoincoin----> ", coin);
 
                 const nativeCoinBalance = new BigNumber(nativeCoinResponse);
                 // console.log("nativeCoinBalance DATA : ", nativeCoinBalance);
                 const finalAmount = new BigNumber(amount);
                 console.log("🚀 ~ finalAmount:", finalAmount.toString());
+
+
+
                 let gasEstimate = new BigNumber(myGasPrice.estimate);
+                console.log("gasEstimategasEstimategasEstimate ", gasEstimate);
                 const gasPrice = new BigNumber(selectedGasPrice).times(
                   1000000000
                 );
-
+                console.log("gasPricegasPricegasPricegasPricegasPrice ", gasPrice);
                 const gasInEth = gasPrice
                   .times(gasEstimate)
                   .div(Math.pow(10, 18));
@@ -560,6 +704,9 @@ function SendCoins() {
                   "  gasInEth :: ",
                   Number(gasInEth)
                 );
+
+                console.log("COINMMMMMMMMMMMMM ", coin);
+
                 if (coin.coin.token_address) {
                   if (nativeCoinBalance.isLessThan(gasInEth)) {
                     store.dispatch(setLoading(false));
@@ -580,6 +727,9 @@ function SendCoins() {
                 } else {
                   const totalAmountIncludingGasPriceInEth =
                     gasInEth.plus(finalAmount);
+
+                  console.log("nativeCoinBalancenativeCoinBalancenativeCoinBalance ", nativeCoinBalance, finalAmount, totalAmountIncludingGasPriceInEth);
+
 
                   if (
                     nativeCoinBalance.isLessThan(
@@ -691,8 +841,8 @@ function SendCoins() {
                   // );
                   if (
                     totalAmountAvailable -
-                      Math.round(amount * btcTosatoshi) -
-                      fee <
+                    Math.round(amount * btcTosatoshi) -
+                    fee <
                     0
                   ) {
                     store.dispatch(setLoading(false));
@@ -736,31 +886,31 @@ function SendCoins() {
                     }
                     if (
                       satoshis -
-                        (fee +
-                          parseInt(
-                            Math.round(amount * btcTosatoshi).toString()
-                          )) >
+                      (fee +
+                        parseInt(
+                          Math.round(amount * btcTosatoshi).toString()
+                        )) >
                       546
                     ) {
                       transaction.change(coin.address);
                     }
                     if (
                       satoshis -
-                        (fee +
-                          parseInt(
-                            Math.round(amount * btcTosatoshi).toString()
-                          )) >
+                      (fee +
+                        parseInt(
+                          Math.round(amount * btcTosatoshi).toString()
+                        )) >
                       546
                     ) {
                       transaction.fee(fee);
                     } else {
                       transaction.fee(
                         fee +
-                          (satoshis -
-                            (fee +
-                              parseInt(
-                                Math.round(amount * btcTosatoshi).toString()
-                              )))
+                        (satoshis -
+                          (fee +
+                            parseInt(
+                              Math.round(amount * btcTosatoshi).toString()
+                            )))
                       );
                     }
                     const btcPrivateKey =
@@ -891,7 +1041,7 @@ function SendCoins() {
         <div className={style.viewphrases}>
           {list.length > 0 ? (
             <>
-              <AddressTable
+              <AddressTableSend
                 setAddress={(value, name) => {
                   setAddress(value);
                   setContact(name);
@@ -900,7 +1050,12 @@ function SendCoins() {
                 dataArray={list.map((el) => {
                   return {
                     address: el.address,
-                    name: el.name.toUpperCase(),
+
+                    name: el.name,
+
+                    id: el?.id,
+
+                    wallet_data: el?.wallet_data
                   };
                 })}
               />

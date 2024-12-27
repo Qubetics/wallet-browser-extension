@@ -53,7 +53,7 @@ function AddNewWallet() {
                       return;
                     }
                   }}
-                  // coloredBg={true}
+                // coloredBg={true}
                 />
                 <div className="textInfoBaseColor">
                   Max Limit: {name ? name.length : 0}/25
@@ -63,56 +63,67 @@ function AddNewWallet() {
             <div className="setPassword__footerbutton">
               <ButtonComp
                 onClick={async () => {
-                  if (!name) {
-                    return messageApi.error(
-                      "Please enter a valid name to proceed."
+                  try {
+                    if (!name) {
+                      return messageApi.error(
+                        "Please enter a valid name to proceed."
+                      );
+                    }
+
+                    if (name.trim().length === 0) {
+                      return messageApi.error(
+                        "Name should have a minimum of 3 characters."
+                      );
+                    }
+
+                    if (name.length < 3) {
+                      return messageApi.error(
+                        "Name should have a minimum of 3 characters."
+                      );
+                    }
+
+                    if (name.length > 25) {
+                      return messageApi.error(
+                        "Name should not have more than 25 characters."
+                      );
+                    }
+
+                    const { accounts } = await chrome.storage.session.get(
+                      "accounts"
                     );
-                  }
 
-                  if (name.trim().length === 0) {
-                    return messageApi.error(
-                      "Name should have a minimum of 3 characters."
+                    const checkIfExists = await accounts.find(
+                      (el) => el.name.toLowerCase() === name.toLowerCase()
                     );
-                  }
 
-                  if (name.length < 3) {
-                    return messageApi.error(
-                      "Name should have a minimum of 3 characters."
+                    if (checkIfExists) {
+                      return messageApi.error(
+                        "Wallet with this name already exists"
+                      );
+                    } 
+                     
+                    const mnemonics = await WalletHelper.getMnemonics(
+                      account.address
                     );
-                  }
-
-                  if (name.length > 25) {
-                    return messageApi.error(
-                      "Name should not have more than 25 characters."
+                     
+                    store.dispatch(setLoading(true));
+                    const response = await WalletHelper.generateAndSetWallet(
+                      mnemonics,
+                      name
                     );
+                    await WalletHelper.setWalletPreference(response);
+                    store.dispatch(setLoading(false));
+
+                    navigate("/wallet");
+                  } catch (error) {
+                    console.error("Error occurred:", error);
+                    messageApi.error("An error occurred. Please try again.");
+                  } finally {
+                    const delay = 3000;
+                    const startTime = Date.now();
+                    while (Date.now() - startTime < delay) { }
+                    store.dispatch(setLoading(false));
                   }
-
-                  const { accounts } = await chrome.storage.session.get(
-                    "accounts"
-                  );
-
-                  const checkIfExists = await accounts.find(
-                    (el) => el.name.toLowerCase() === name.toLowerCase()
-                  );
-
-                  if (checkIfExists) {
-                    return messageApi.error(
-                      "Wallet with this name already exists"
-                    );
-                  }
-
-                  const mnemonics = await WalletHelper.getMnemonics(
-                    account.address
-                  );
-                  store.dispatch(setLoading(true));
-                  const response = await WalletHelper.generateAndSetWallet(
-                    mnemonics,
-                    name
-                  );
-                  await WalletHelper.setWalletPreference(response);
-                  store.dispatch(setLoading(false));
-
-                  navigate("/wallet");
                 }}
                 text={"Create"}
                 maxWidth="100%"

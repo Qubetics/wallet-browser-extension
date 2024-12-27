@@ -271,6 +271,8 @@ function SwapDetails() {
 
   const handleSwap = async () => {
     try {
+      console.log('ppppppppppppppppp', token1);
+      
       const uniHelper = new UniswapHelper(token1.rpc);
 
       if (requireApproval) {

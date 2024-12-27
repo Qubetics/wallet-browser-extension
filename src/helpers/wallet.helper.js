@@ -84,7 +84,7 @@ export class WalletHelper {
         accounts: JSON.parse(decryptedAccounts),
       });
       store.dispatch(setAccount(defaultAccount));
-      
+
       store.dispatch(setChain(chains.find((el) => el.default) || chains[0]));
       store.dispatch(
         setCurrency({
@@ -120,9 +120,12 @@ export class WalletHelper {
         const decryptedMnemonics = SecurityHelper.decrypt(mnemonics, password);
 
         const defaultMnemonics = JSON.parse(decryptedMnemonics)[0];
+        console.log('OLDDDDDDDDDDDDDDDDDDDD ', defaultMnemonics);
+
         return defaultMnemonics.phrase;
       } else {
         const { phrase } = ethers.Wallet.createRandom().mnemonic;
+        console.log('phrasephrasephrasephrasephrase ', phrase);
         return phrase;
       }
     } catch (error) {
@@ -562,11 +565,19 @@ export class WalletHelper {
       const { chains } = await chrome.storage.local.get('chains');
       const { currency } = await chrome.storage.local.get('currency');
 
+     
+
       if (!accounts) {
         accounts = [];
       }
 
       const address = await privateKeyToAddress(privateKey);
+      const solanaAddress = await SolanaHelper.generateSolanaAddressFromPrivateKey(
+        privateKey
+      );
+      const bitcoinAddress = await BTCHelper.generateBitcoinAddress(
+        privateKey
+      );
 
       const { deviceId } = await chrome.storage.local.get('deviceId');
 
@@ -590,9 +601,19 @@ export class WalletHelper {
               coin_family: 2,
             },
             {
+              symbol: 'btc',
+              address: bitcoinAddress,
+              coin_family: 3,
+            },
+            {
               symbol: 'matic',
               address: address,
               coin_family: 4,
+            },
+            {
+              symbol: 'sol',
+              address: solanaAddress,
+              coin_family: 5,
             },
           ],
         },
@@ -619,10 +640,12 @@ export class WalletHelper {
           coinFamilyAndAddress: {
             1: address,
             2: address,
+            3: bitcoinAddress,
             4: address,
+            5: solanaAddress
           },
-          coinFamilies: [1, 2, 4],
-          addressLists: [address, address, address],
+          coinFamilies: [1, 2, 3, 4, 5],
+          addressLists: [address, address, bitcoinAddress, address, solanaAddress],
           jwtToken:
             accounts.length === 0
               ? createWallet.data.data.token
@@ -685,8 +708,7 @@ export class WalletHelper {
       // const adaAddress =
       //   AdaHelper.generateWalletAddress(newMnemonics).baseAddress;
 
-      console.log("solanaAddress bitcoinAddress tronAddress=====> ", solanaAddress, bitcoinAddress);
-      
+
       if (!accounts) {
         accounts = [];
       }
@@ -694,10 +716,11 @@ export class WalletHelper {
       newMnemonics = newMnemonics?.toLowerCase();
       const { address, privateKey } = ethers.Wallet.fromMnemonic(
         newMnemonics,
-        `m/44'/60'/0'/0/${accounts.length}`
+        // `m/44'/60'/0'/0/${accounts.length}`
+        `m/44'/60'/0'/0/0`
       );
 
-      console.log(`m/44'/60'/0'/0/${accounts.length}`);
+      // console.log(`m/44'/60'/0'/0/${accounts.length}`);
 
       if (!mnemonics) {
         mnemonics = [];
@@ -757,7 +780,7 @@ export class WalletHelper {
             //   coin_family: 6,
             // }
           ],
-          
+
         },
         {
           headers: {
@@ -782,7 +805,9 @@ export class WalletHelper {
           coinFamilyAndAddress: {
             1: address,
             2: address,
+            3: bitcoinAddress,
             4: address,
+            5: solanaAddress
           },
           coinFamilies: [1, 2, 3, 4, 5],
           addressLists: [address, address, bitcoinAddress, address, solanaAddress],

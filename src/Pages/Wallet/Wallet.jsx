@@ -200,7 +200,7 @@ function Wallet() {
                     : "****",
                   routeTo: "currencyDetails",
                   // type: token.coin.coin_family === 1 ? "BEP20" : "ERC20",
-                  type: token.coin.coin_family === 1 ? "BEP20" : token.coin.coin_family === 2 ? "ERC20" : token.coin.coin_family === 4 ? "ERC20" : token.coin.coin_family === 5 ? "SPL" : token.coin.coin_family === 6 ? "TRC20" : "",
+                  type: token.coin.is_token ? (token.coin.coin_family === 1 ? "BEP20" : token.coin.coin_family === 2 ? "ERC20" : token.coin.coin_family === 4 ? "ERC20" : token.coin.coin_family === 5 ? "SPL" : token.coin.coin_family === 6 ? "TRC20" : ""):'',
                   status: true,
                   coin: token,
                 };

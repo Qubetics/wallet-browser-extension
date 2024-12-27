@@ -4,6 +4,7 @@ import * as bip39 from '@scure/bip39';
 import { derivePath } from 'ed25519-hd-key';
 import {
   Account,
+  Keypair,
   Connection,
   PublicKey,
   LAMPORTS_PER_SOL,
@@ -23,6 +24,7 @@ import { Base58 } from '@ethersproject/basex';
 import BigNumber from 'bignumber.js';
 const soltokenbalance = require('soltokenbalance');
 const Buffer = require('safe-buffer').Buffer;
+const bs58 = require('bs58');
 
 const SEND_OPTIONS = {
   skipPreflight: true,
@@ -52,6 +54,22 @@ export class SolanaHelper {
     return account.publicKey.toBase58();
   };
 
+  static generateSolanaAddressFromPrivateKey = async (privateKey) => {
+    try {
+      let secretKey = bs58.decode(privateKey);
+      const account = Keypair.fromSecretKey(secretKey);
+      return {
+        address: account.publicKey.toBase58(),
+        privateKey: privateKey,
+        account: account,
+      };
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
+  };
+
+
   generateSolanaAddress1 = async (mnemonics) => {
     const seed = await bip39.mnemonicToSeed(mnemonics);
     const path = `m/44'/501'/0'`;
@@ -73,6 +91,21 @@ export class SolanaHelper {
 
   getGasPrice = () => {
     return 0.000005;
+  };
+
+  generateSolanaAddressFromPrivateKey = async (privateKey) => {
+    try {
+      let secretKey = bs58.decode(privateKey);
+      const account = Keypair.fromSecretKey(secretKey);
+      return {
+        address: account.publicKey.toBase58(),
+        privateKey: privateKey,
+        account: account,
+      };
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
   };
 
   generateRawTransactionForCoinAndBroadcast = async (
