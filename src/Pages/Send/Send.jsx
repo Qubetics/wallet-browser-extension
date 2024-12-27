@@ -17,6 +17,7 @@ import { server } from '../../server';
 import { store } from '../..';
 import { setTokens } from '../../actions/tokens';
 import { setLoading } from '../../actions/loading';
+import { token_type } from '../../helpers/constant';
 
 function Send() {
   const { account, tokens, currency, balanceIn } = useSelector(
@@ -37,7 +38,7 @@ function Send() {
         fiat_type: currency.name,
         limit: 2000,
         page: 1,
-        search: '',
+        search: keyword,
       },
       {
         headers: {
@@ -112,7 +113,7 @@ function Send() {
                 const balance = new BigNumber(token.balance);
                 const result = myPrice.times(balance);
                 const formattedResult = result.toString();
-
+ 
                 return {
                   position: token.sort_order,
                   coinIcon: token.coin.coin_image,
@@ -141,7 +142,7 @@ function Send() {
                     ? addCommasToNumber(getFlooredFixed(formattedResult, 2))
                     : '****',
                   routeTo: 'sendCurrency',
-                  type: token.coin.coin_family === 1 ? 'BEP20' : 'ERC20',
+                  type:token?.coin?.token_address!==null ? token_type(token.coin.coin_family):'',
                   status: true,
                   coin: token,
                 };

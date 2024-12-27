@@ -50,9 +50,7 @@ function ReceiveCurrency() {
 
   // Check if the current path is /receive-currency
   const isReceiveCurrencyRoute = location.state?.nftButton;
-  console.log(location, "Location");
-
-
+   
   function goToBack(address) {
     navigator.clipboard.writeText(address);
     messageApi.success("Address copied successfully.");
@@ -79,7 +77,7 @@ function ReceiveCurrency() {
           <div className="receiveCurrency_copy">
             <div>
               <p>Your Qubetics Address</p>
-              <h5>{selectedCoin.wallet_address}</h5>
+              <h5>{selectedCoin.wallet_address.substring(0,15)}...</h5>
             </div>
             <ButtonComp
             onClick={()=>goToBack(selectedCoin.wallet_address)} 
@@ -92,14 +90,14 @@ function ReceiveCurrency() {
             />
           </div>
 
-          <p className="receiveCurrency_sendCoin">
+          {/* <p className="receiveCurrency_sendCoin">
             Lorem ipsum dolor sit amet consectetur. Pulvinar risus eget nulla in
             pretium sit. Purus placerat vulputate in vulputate venenatis
             adipiscing quis maecenas auctor.
             <br />
             <Link style={{ textDecoration: "none" }}>Learn more </Link>
             about {`${location?.state?.symbol?.toUpperCase()}`} tokens.
-          </p>
+          </p> */}
         </div>
         <div style={{ padding: "0 24px" }}>
           {isReceiveCurrencyRoute ? (
@@ -110,7 +108,8 @@ function ReceiveCurrency() {
               <ButtonComp text={"Address Book"} maxWidth={"100%"} />
             </div>
           ) : (
-            <ButtonComp text={"Share Your Address"} maxWidth={"100%"} />
+            // <ButtonComp text={"Share Your Address"} maxWidth={"100%"} />
+            ""
           )}
         </div>
       </div>

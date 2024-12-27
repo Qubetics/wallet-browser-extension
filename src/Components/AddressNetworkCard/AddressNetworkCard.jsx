@@ -371,6 +371,7 @@ const deleteSubwallet = async (itm) => {
             <p
               style={{
                 fontSize: "20px",
+                color:"white"
               }}
             >
               Are you sure you want to delete this contact?
@@ -388,7 +389,7 @@ const deleteSubwallet = async (itm) => {
               className="green"
               style={{
                 padding: "12px 53px",
-                backgroundColor: "rgb(213 175 34)",
+                backgroundColor: "rgb(56 101 109)",
                 color: "white",
                 fontSize: "18px",
                 borderRadius: "7px",

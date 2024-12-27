@@ -22,6 +22,7 @@ import { DURATION } from "../../config/message.config";
 import CopyIconBlue from "../../Assets/CopyIconBlue.svg";
 import ModalCustom from "../../Components/ModalCustom/ModalCustom";
 import { setLoading } from "../../actions/loading";
+import { token_type } from "../../helpers/constant";
 
 function ReceiveTokens() {
   const { account, tokens, currency, balanceIn } = useSelector(
@@ -60,7 +61,7 @@ function ReceiveTokens() {
         fiat_type: currency.name,
         limit: 2000,
         page: 1,
-        search: "",
+        search: keyword,
       },
       {
         headers: {
@@ -167,7 +168,7 @@ function ReceiveTokens() {
                   ? addCommasToNumber(getFlooredFixed(formattedResult, 2))
                   : "****",
                 routeTo: "receive-currency",
-                type: token.coin.coin_family === 1 ? "BEP20" : "ERC20",
+                type: token?.coin?.token_address!==null ? token_type(token.coin.coin_family):'',    //token.coin.coin_family === 1 ? "BEP20" : "ERC20",
                 status: true,
                 coin: token,
                 // showModal,

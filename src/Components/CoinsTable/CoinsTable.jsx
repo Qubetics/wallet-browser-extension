@@ -278,6 +278,7 @@ function CoinsTable({ dataArray, showCoinPrice, name }) {
             <p
               style={{
                 fontSize: "20px",
+                color:"white"
               }}
             >
               Are you sure you want to Delete this Alert?
@@ -363,7 +364,7 @@ function CoinsTable({ dataArray, showCoinPrice, name }) {
               className='green'
               style={{
                 padding: '12px 53px',
-                backgroundColor: 'rgb(213, 175, 34)',
+                backgroundColor: 'rgb(56 101 109)',
                 color: 'white',
                 fontSize: '18px',
                 borderRadius: '7px',

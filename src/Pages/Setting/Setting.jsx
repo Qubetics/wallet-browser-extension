@@ -168,13 +168,13 @@ function Setting() {
     },
     {
       setinglist: "About Us",
-      to: "/",
+      to: "",
       ticketcheck: theme == "darkTheme" ? AboutUs : AboutUs,
       RightArow: "true",
     },
     {
       setinglist: "Privacy Policy",
-      to: "/",
+      to: "",
       ticketcheck: theme == "darkTheme" ? PrivacyPolicy : PrivacyPolicy,
       RightArow: "true",
     },

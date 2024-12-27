@@ -37,10 +37,7 @@ export class Web3Helper {
             Authorization: account.jwtToken,
           },
         }
-      );
-
-      console.log("CCCCCCCCCCCCXXXXXXXXXXXX ", data);
-      
+      ); 
       return {
         estimate: data.gas_estimate,
         fast: data.resultList.fast_gas_price,
@@ -48,7 +45,7 @@ export class Web3Helper {
         safe: data.resultList.safe_gas_price,
       };
     } catch (error) {
-      console.log('QQQQQQQQQQQQQQQQQ ', error);
+      console.log('Error ', error);
       return false;
     }
   };
@@ -546,10 +543,10 @@ export class Web3Helper {
         symbol
       );
 
-      console.log('gasPriceRes-------> ', gasPriceRes);
+      // console.log('gasPriceRes-------> ', gasPriceRes);
 
       const nonce = await this.getNonce(slug, true, tokenAddress, symbol, from);
-      console.log("NONCEEEEEE ", nonce);
+      // console.log("NONCEEEEEE ", nonce);
 
       const data = contract.methods
         .transfer(
@@ -567,7 +564,8 @@ export class Web3Helper {
 
       // const gasPrice = gasPriceRes.fast * Math.pow(10, 9);
       // const gaslimit = gasPriceRes.estimate;
-      console.log('PLLLLLLLLLLLLLLL ', gasPrice, gaslimit);
+      // console.log('PLLLLLLLLLLLLLLL ', gasPrice, gaslimit);
+
 
       const transaction = {
         nonce,
@@ -585,18 +583,21 @@ export class Web3Helper {
         privateKey
       );
       console.log("🚀 ~ Web3Helper ~ signedTransaction:", signedTransaction)
+    const gasPriceInWei = web3.utils.toWei(gasPriceRes.fast.toString(), 'gwei');
 
+      const trx = signedTransaction.rawTransaction;
+      const stringWithout0x = trx.startsWith("0x") ? trx.slice(2) : trx;
 
       const response = await server.post(
         `${slug}/${tokenAddress}/send`,
         {
           nonce: nonce,
-          tx_raw: signedTransaction.rawTransaction,
+          tx_raw: stringWithout0x,
           from: from,
           to: to,
           amount: amount,
           gas_estimate: gaslimit,
-          gas_price: gasPrice,
+          gas_price: gasPriceInWei,
           tx_type: type || 'withdraw',
         },
         {

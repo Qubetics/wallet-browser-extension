@@ -458,8 +458,8 @@ function MenuRestofHeaders({
         )}
         {manageTo && (
           <span className="manageTo" style={{ cursor: "pointer" }}>
-            <img src={ReorderManage} alt="img" />
-            <img src={manageStart} alt="img" />
+            {/* <img src={ReorderManage} alt="img" /> */}
+            <img onClick={()=>navigate('/add-watch-list')} src={manageStart} alt="img" />
           </span>
         )}
 

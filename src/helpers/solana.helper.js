@@ -22,6 +22,7 @@ import { server } from '../server';
 import { getSignature } from './common.helper';
 import { Base58 } from '@ethersproject/basex';
 import BigNumber from 'bignumber.js';
+import { error } from 'loglevel';
 const soltokenbalance = require('soltokenbalance');
 const Buffer = require('safe-buffer').Buffer;
 const bs58 = require('bs58');
@@ -138,7 +139,7 @@ export class SolanaHelper {
 
       let blockhash = (await this.connection.getLatestBlockhash('finalized'))
         .blockhash;
-
+        console.log('🚀 ~ SolanaHelper ~ blockhash:', blockhash);
       const transaction = new Transaction().add(
         SystemProgram.transfer({
           fromPubkey: myKeyPair.publicKey,
@@ -146,6 +147,7 @@ export class SolanaHelper {
           lamports: amount * LAMPORTS_PER_SOL,
         })
       );
+      console.log('🚀 ~ SolanaHelper ~ transaction:', transaction);
 
       transaction.recentBlockhash = blockhash;
 
@@ -553,7 +555,7 @@ export class SolanaHelper {
         lastValidBlockHeight
       );
 
-      await Promise.race([
+     return await Promise.race([
         connection.confirmTransaction(
           {
             ...blockhashWithExpiryBlockHeight,
@@ -564,7 +566,7 @@ export class SolanaHelper {
           'confirmed'
         ),
 
-        new Promise(async (resolve) => {
+          new Promise(async (resolve) => {
           // in case ws socket died
           while (!abortSignal.aborted) {
             await wait(2_000);
@@ -574,11 +576,16 @@ export class SolanaHelper {
             console.log('🚀 ~ SolanaHelper ~ newPromise ~ tx:', tx);
             // console.log("tx:D::D:::::::", tx);
             if (tx?.value?.confirmationStatus === 'confirmed') {
+              console.log(' txn confirmed:::::;;:')
               resolve(tx);
             }
           }
         }),
-      ]);
+      ]).then((resp)=>{
+        console.log("RESPPPPPPPPPPP ", resp);
+        return resp;
+      }).catch((error)=>{console.log("Error in SOLANA ", error);
+      }) ;
     } catch (e) {
       console.log(e, 'e=====');
       if (e) {

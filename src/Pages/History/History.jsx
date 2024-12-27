@@ -43,17 +43,18 @@ function History() {
     }
 
     store.dispatch(setLoading(true));
+ 
     const transactionList = await server.post(
       `/wallet/transaction/list`,
       {
         coin_family: state
           ? state.coinId
-            ? [state.coinId]
+            ?  state.coinId=='all'?account.coinFamilies:[state.coinId]
             : account.coinFamilies
           : account.coinFamilies,
         addrsListKeys: state
           ? state.coinId
-            ? [account.coinFamilyAndAddress[state.coinId]]
+            ? state.coinId=='all'?account.addressLists:[account.coinFamilyAndAddress[state.coinId]]
             : account.addressLists
           : account.addressLists,
         page: currentPage,

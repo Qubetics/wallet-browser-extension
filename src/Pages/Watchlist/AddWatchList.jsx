@@ -23,6 +23,7 @@ import CopyIconBlue from '../../Assets/CopyIconBlue.svg';
 import ModalCustom from '../../Components/ModalCustom/ModalCustom';
 import { setLoading } from '../../actions/loading';
 import ButtonComp from '../../Components/ButtonComp/ButtonComp';
+import { token_type } from '../../helpers/constant';
 
 function AddWatchList() {
   const { account, currency, balanceIn } = useSelector((state) => state);
@@ -143,6 +144,7 @@ function AddWatchList() {
               const result = myPrice.times(balance);
               const formattedResult = result.toString();
 
+              // {console.log("token========++++++++++++++++", token);}
               return {
                 position: token.sort_order,
                 coinIcon: token.coin_image,
@@ -171,7 +173,7 @@ function AddWatchList() {
                   ? addCommasToNumber(getFlooredFixed(formattedResult, 2))
                   : '****',
                 routeTo: 'no-where',
-                type: token.coin_family === 1 ? 'BEP20' : 'ERC20',
+                type:  token.is_token !==0 ? token_type(token.coin_family):"",
                 status: true,
                 coin: token,
                 watch: async () => {

@@ -21,7 +21,7 @@ import { Web3Helper } from "../../../helpers/web3.helper";
 import "./SendConfirm.scss";
 import warning from "../../../Assets/PNG/warning.png";
 import DarkLogo from "../../../Assets/DarkLogo.svg";
-import Logo from "../../../Assets/Logo.png";
+import Logo from "../../../Assets/logo.png";
 import {
   addCommasToNumber,
   getFlooredFixed,
@@ -164,9 +164,7 @@ function SendConfirm() {
   ];
 
   const handleTransaction = async () => {
-    try {
-      console.log("PPPPPPPPPPPPPPPP");
-      
+    try { 
       store.dispatch(setLoading(true));
 
       const { chains } = await chrome.storage.local.get("chains");
@@ -175,15 +173,13 @@ function SendConfirm() {
       );
 
       if (chain.isEVM) {
-        if (coin.coin.token_address) {
-          console.log("maticmaticmaticmaticmaticmaticmatic ", coin);
-          
+        if (coin.coin.token_address) { 
           const response =
             await Web3Helper.generateRawTransactionForTokenAndBroadcast(
               to,
               coin.wallet_address,
               amount,
-              coin.coin.oin_id,
+              coin.coin.coin_id,
               fiatCoin,
               fiatGasFee,
               currency.name,
@@ -228,6 +224,75 @@ function SendConfirm() {
               "Insufficient funds to perform transaction."
             );
           }
+        }
+      }else if (!chain.isEVM && chain.currencyName === "SOL") {
+        const solanaHelper = new SolanaHelper(chain.rpcUrl); 
+        if (coin?.coin?.token_address) {
+          const response =
+            await solanaHelper.generateRawTransactionForTokenAndBroadcast(
+              to,
+              coin.wallet_address,
+              amount,
+              coin.coin.coin_id,
+              fiatCoin,
+              fiatGasFee,
+              currency.name,
+              toName,
+              chain?.slug,
+              chain?.chainId,
+              coin?.coin?.token_address,
+              coin?.coin?.decimals,
+              coin.coin.token_type,
+              coin.balance
+            );
+          if (!response) {
+            store.dispatch(setLoading(false));
+            return messageApi.error(
+              "Insufficient funds to perform transaction."
+            );
+          }
+        } else {
+          const response =
+            await solanaHelper.generateRawTransactionForCoinAndBroadcast(
+              to,
+              coin.wallet_address,
+              amount,
+              coin.coin.coin_id,
+              fiatCoin,
+              fiatGasFee,
+              currency.name,
+              toName,
+              chain.slug,
+              chain.chainId
+            ); 
+          if (!response) {
+            store.dispatch(setLoading(false));
+            return messageApi.error(
+              "Insufficient funds to perform transaction."
+            );
+          }
+        }
+      } else if (!chain.isEVM && chain.currencyName === "BTC") {
+        let tx_fee = parseFloat(getFlooredFixed(+networkFee, 8));
+        const response =
+          await BTCHelper.generateRawTransactionForCoinAndBroadcast(
+            to,
+            coin.wallet_address,
+            amount,
+            coin.coin.coin_id,
+            fiatCoin,
+            fiatGasFee,
+            currency.name,
+            toName,
+            chain.slug,
+            chain.chainId,
+            rawTransaction,
+            tx_fee
+          );
+
+        if (!response) {
+          store.dispatch(setLoading(false));
+          return messageApi.error("Insufficient funds to perform transaction.");
         }
       }
 
@@ -373,19 +438,20 @@ function SendConfirm() {
       >
         <div className={"confirmationsModal"}>
           <div className={"iInner"}>
-            {theme == "darkTheme" ? (
+            {/* {theme == "darkTheme" ? (
               <img src={DarkLogo} alt="" />
-            ) : (
+            ) : ( */}
               <img
                 src={Logo}
                 alt=""
                 style={{
-                  width: "100px",
+                  width: "70px",
+                  height:"70px"
                 }}
               />
-            )}
+            {/* )} */}
             <div>
-              <p>
+              <p style={{color:"white"}}>
                 Withdraw request of{" "}
                 {addCommasToNumber(getFlooredFixed(amount, 5))}{" "}
                 {coin.coin.coin_symbol.toUpperCase()} has been processed

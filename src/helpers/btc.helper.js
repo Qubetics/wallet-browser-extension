@@ -22,18 +22,21 @@ export class BTCHelper {
 
   static getUnspent = async (address) => {
     const { account } = store.getState();
-    try {
-      const { data } = await server.post(
-        `/btc/unspent_new`,
-        {
-          address: address,
-        },
+    try { 
+      const { data } = await server.get(
+        // `/btc/unspent_new`,
+        `/bitcoin/unspent/:${address}`,
+        // {
+        //   address: address,
+        // },
         {
           headers: {
             Authorization: account.jwtToken,
           },
         }
       );
+      console.log("BTC FEESSSS ", data);
+      
       return data.data || [];
     } catch (error) {
       console.log(error);

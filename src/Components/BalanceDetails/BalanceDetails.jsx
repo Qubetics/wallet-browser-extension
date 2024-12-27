@@ -63,8 +63,7 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
 
   const fetchAccounts = async () => {
     const { accounts } = await chrome.storage.session.get("accounts");
-    console.log("ACCCCCCCCCCCCCCCCCCCC ", accounts);
-    
+     
     const items = accounts.flatMap((account, index) => {
       const accountItem = {
         label: (
@@ -657,7 +656,7 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
           <Link
             onClick={(e) => {
               e.preventDefault();
-              path === "currencyDetails" ? showModal() : navigate("/history");
+              path === "currencyDetails" ? showModal() : navigate("/history",{});
             }}
             to="#"
             className={

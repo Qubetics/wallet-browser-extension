@@ -94,6 +94,7 @@ function ManageWallet() {
               {data.map((data, idx) => (
                 <li
                   key={idx}
+                  style={{marginBottom:10}}
                   className="currency_click"
                   onClick={async () => {
                     setDrawer(true);
@@ -565,7 +566,7 @@ function ManageWallet() {
 
                 padding: "12px 53px",
 
-                backgroundColor: "rgb(213 175 34)",
+                backgroundColor: "rgb(56 101 109)",
 
                 color: "white",
 

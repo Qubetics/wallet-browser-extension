@@ -86,6 +86,8 @@ function SendCoins() {
   const [messageApi, contextHolder] = message.useMessage({});
   const [list, setList] = useState([]);
   const [selectedGasPrice, setSelectedGasPrice] = useState(0);
+  const [selectedGasPriceSol, setSelectedGasPriceSol] = useState(0);
+
   const [nativeCoinPrice, setNativeCoinPrice] = useState(0);
 
 
@@ -150,11 +152,9 @@ function SendCoins() {
       const chain = chains.find(
         (chain) => chain.coinFamily === coin.coin.coin_family
       );
+ 
 
-      console.log("CHains============> ", chains);
-      
-
-      if (chains.isEVM) {
+      if (chain.isEVM) {
         const result = await Web3Helper.getGasPrice(
           chain.slug == "matic" ? "polygon" : chain.slug,
           account.coinFamilyAndAddress[coin.coin.coin_family],
@@ -163,8 +163,7 @@ function SendCoins() {
           coin.coin.token_address,
           coin.coin.coin_symbol
         );
-        console.log("RRRRRRRRRRRRRRRSSSSSSSSSSSSSS ", result);
-
+         
         setSelectedGasPrice(result.fast);
         setGasPrice(result);
 
@@ -172,6 +171,19 @@ function SendCoins() {
           wallet_address: account.coinFamilyAndAddress[coin.coin.coin_family],
         });
       }
+
+
+      if (!chain.isEVM && chain.currencyName === "BTC") {
+        const gasPrice = await BTCHelper.getBTCGasPrice(); 
+        setSelectedGasPrice(gasPrice);
+      }
+      if (!chain.isEVM && chain.currencyName === "SOL") {
+        const solanaHelper = new SolanaHelper(chain.rpcUrl);
+        const gasPrice = solanaHelper.getGasPrice(); 
+        setSelectedGasPriceSol(gasPrice);
+      }
+
+
 
       const { data } = await server.post(
         "/user/address_book",
@@ -489,7 +501,18 @@ function SendCoins() {
             <h4>Transaction Fee</h4>
 
 
-            { (coin?.coin?.coin_family == 2 || coin?.coin?.coin_family == 3 || coin?.coin?.coin_family == 5) ? <>
+           
+
+
+              {(coin?.coin?.coin_family == 3 || coin?.coin?.coin_family == 5) ?
+              <InputFieldOnly
+              placeholder={"Transaction Fee"}
+              label=""
+              value={selectedGasPriceSol}
+              readonly={true}
+              placeholderBaseColor={true}
+            />:
+            (coin?.coin?.coin_family == 2) ? <>
               <InputFieldOnly
                 placeholder={"Transaction Fee"}
                 label=""
@@ -553,14 +576,11 @@ function SendCoins() {
               store.dispatch(setLoading(true));
 
               const { chains } = await chrome.storage.local.get("chains");
-              console.log("chains ===========>", chains);
-              
+               
               const chain = chains.find(
                 (chain) => chain.coinFamily === coin.coin.coin_family
               );
-
-              console.log("CHAIN-----------> ", chain);
-              
+  
               // if (!chain.isEVM && chain.currencyName === "ADA" && amount < 1) {
               //   store.dispatch(setLoading(false));
               //   return messageApi.error(
@@ -678,35 +698,21 @@ function SendCoins() {
                       : process.env.REACT_APP_MATIC_RPC
                 );
 
-                console.log("nativeCoinResponse---> ", nativeCoinResponse);
-                console.log("coincoincoincoin----> ", coin);
-
-                const nativeCoinBalance = new BigNumber(nativeCoinResponse);
-                // console.log("nativeCoinBalance DATA : ", nativeCoinBalance);
+                
+                const nativeCoinBalance = new BigNumber(nativeCoinResponse); 
                 const finalAmount = new BigNumber(amount);
                 console.log("🚀 ~ finalAmount:", finalAmount.toString());
 
 
 
-                let gasEstimate = new BigNumber(myGasPrice.estimate);
-                console.log("gasEstimategasEstimategasEstimate ", gasEstimate);
+                let gasEstimate = new BigNumber(myGasPrice.estimate); 
                 const gasPrice = new BigNumber(selectedGasPrice).times(
                   1000000000
-                );
-                console.log("gasPricegasPricegasPricegasPricegasPrice ", gasPrice);
+                ); 
                 const gasInEth = gasPrice
                   .times(gasEstimate)
                   .div(Math.pow(10, 18));
-
-                console.log(
-                  "nativeCoinBalance ::: ",
-                  Number(nativeCoinBalance),
-                  "  gasInEth :: ",
-                  Number(gasInEth)
-                );
-
-                console.log("COINMMMMMMMMMMMMM ", coin);
-
+ 
                 if (coin.coin.token_address) {
                   if (nativeCoinBalance.isLessThan(gasInEth)) {
                     store.dispatch(setLoading(false));
@@ -727,10 +733,7 @@ function SendCoins() {
                 } else {
                   const totalAmountIncludingGasPriceInEth =
                     gasInEth.plus(finalAmount);
-
-                  console.log("nativeCoinBalancenativeCoinBalancenativeCoinBalance ", nativeCoinBalance, finalAmount, totalAmountIncludingGasPriceInEth);
-
-
+   
                   if (
                     nativeCoinBalance.isLessThan(
                       totalAmountIncludingGasPriceInEth

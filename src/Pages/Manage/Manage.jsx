@@ -187,7 +187,8 @@ function Manage() {
                     name={data.coin_name}
                     symbol={data.coin_symbol}
                     img={data.coin_image}
-                    valuecurrency={data.coin_family === 1 ? "BEP20" : "ERC20"}
+                    // valuecurrency={data.coin_family === 1 ? "BEP20" : "ERC20"}
+                    valuecurrency={(data?.token_address!==null?(data.coin_family === 1 ? "BEP20" : data.coin_family === 2 ? "ERC20":data.coin_family === 4 ?"ERC20":data.coin_family === 5 ?"SPL":data.coin_family === 6 ?"TRC20":""):'')}
                     id={data.id}
                     coinFamily={data.coin_family}
                     walletAddress={
@@ -195,6 +196,8 @@ function Manage() {
                     }
                     status={data.wallet_data?.status || false}
                     coin={data}
+                    curr={currency}
+                    init={init}
                   />
                 ))
               ) : !loading ? (

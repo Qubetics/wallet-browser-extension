@@ -126,6 +126,7 @@ function CustomTocken() {
             : null
         }
         onChange={(value) => {
+          setTokenAddress(null);
           const selectedChain = chains.find((el) => el.coinFamily == value);
           setSelectedChain(selectedChain);
         }}

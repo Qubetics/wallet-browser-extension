@@ -352,6 +352,8 @@ function FilterHistory() {
                if(!filterValue.fromDate && filterValue.toDate){
                 return messageApi.error('Please select the from date.');
                }
+
+                
               store.dispatch(setFilter(filterValue));
               if (state?.currencyDetail) {
                 navigate("/currencyDetails", {

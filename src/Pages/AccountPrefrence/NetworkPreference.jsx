@@ -185,6 +185,7 @@ function AccountPreference() {
             <p
               style={{
                 fontSize: "20px",
+                color:"white"
               }}
             >
               Are you sure you want to delete this wallet?
@@ -201,7 +202,7 @@ function AccountPreference() {
                 className='green'
                 style={{
                   padding: "12px 53px",
-                  backgroundColor: "green",
+                  backgroundColor: "rgb(56 101 109)",
                   color: "white",
                   fontSize: "18px",
                   borderRadius: "7px",

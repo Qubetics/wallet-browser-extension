@@ -8,6 +8,7 @@ import { store } from "../..";
 import { setLoading } from "../../actions/loading";
 import { server } from "../../server";
 import { WalletHelper } from "../../helpers/wallet.helper";
+import { useNavigate } from "react-router-dom";
 
 function ManageCustom(props) {
   const [messageApi, contextHolder] = message.useMessage();
@@ -24,6 +25,8 @@ function ManageCustom(props) {
     walletAddress,
     symbol,
     coin,
+    curr,
+    init
   } = props;
 
   const [newStatus, setStatus] = useState(null);
@@ -63,6 +66,7 @@ function ManageCustom(props) {
       break;
   }
 
+  const navigate =useNavigate()
   const onChange = async (checked) => {
     try {
       store.dispatch(setLoading(true));
@@ -80,8 +84,12 @@ function ManageCustom(props) {
           },
         }
       );
-
-      store.dispatch(setLoading(false));
+      const delay = 2000;
+      const startTime = Date.now();
+      while (Date.now() - startTime < delay) { }
+      message.success(`Token ${checked ? 'enabled' : 'disabled'} successfully`)
+      init();
+      store.dispatch(setLoading(false)); 
       setStatus(checked);
     } catch (error) {
       store.dispatch(setLoading(false));
@@ -95,7 +103,7 @@ function ManageCustom(props) {
   }, [id]);
 
 
-  console.log("CCCCCCCCCCCCCCCCNNNNNNNNNNNNN ", coin);
+  console.log("CCCCCCCCCCCCCCCCNNNNNNNNNNNNN ",curr, currency, coin);
   
   return (
     <>
@@ -138,15 +146,15 @@ function ManageCustom(props) {
               }}
             >
               {currency}
-              {valuecurrency !== "" ? "" : ""}
+              {valuecurrency ? 
               <p
                 style={{
                   marginLeft: "5px",
                   fontWeight: "500",
                 }}
               >
-                ({valuecurrency})
-              </p>
+               ({valuecurrency})
+              </p>:""}
             </p>
             <span
               className="coinNname"
@@ -154,7 +162,7 @@ function ManageCustom(props) {
               }}
             >
               {/* {name} */}
-              $68,090.27 <span style={{ color: "#D33535" }}>-1.44%</span>
+              {curr?.symbol}  {coin?.fiat_price_data?.value?.toFixed(2)} <span style={{ color: coin?.fiat_price_data?.price_change_24h< 0 ?"#D33535":"green" }}>{coin?.fiat_price_data?.price_change_24h?.toFixed(2)}%</span>
             </span>
           </div>
         </div>
@@ -165,7 +173,7 @@ function ManageCustom(props) {
             flexDirection: "column",
           }}
         >
-          <Switch checked={newStatus} onChange={onChange} />
+          <Switch checked={coin?.wallet_data?.status} onChange={onChange} />
           {/* <span
             className='networkNameNew'
             style={{

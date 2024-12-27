@@ -30,6 +30,7 @@ import CopyIcon from "../../../Assets/CopyIconBlue.svg";
 import ShareIcon from "../../../Assets/ShareIcon.png";
 import usdt from "../../../Assets/Coins/usdt.svg";
 import CurrencyBalanceDetails from "./CurrencyBalance";
+import { token_type } from "../../../helpers/constant";
 
 function CurrencyDetails() {
   const { currency, account } = useSelector((state) => state);
@@ -196,9 +197,9 @@ function CurrencyDetails() {
           </span>
         }
         chartIcon={() => {
-          chrome.tabs.create({
-            url: `https://trading.skymarvel.io?key=${coin?.coin?.coin_symbol?.toUpperCase()}`,
-          });
+          // chrome.tabs.create({
+          //   url: `https://trading.skymarvel.io?key=${coin?.coin?.coin_symbol?.toUpperCase()}`,
+          // });
         }}
         // stared={() => {
         //   navigate("/watch-list-tokens");
@@ -223,10 +224,7 @@ function CurrencyDetails() {
                   Authorization: account.jwtToken,
                 },
               }
-            );
-            console.log('accountaccountaccount ', account);
-            console.log('coincoincoincoincoin ', coin);
-
+            ); 
             setIsStared(!isStared)
           } catch (error) {
             messageApi.error('Unable to favourite the selected coin');
@@ -246,7 +244,9 @@ function CurrencyDetails() {
                   color: "#fff",
                 }}
               >
-                {coin.coin.coin_family === 1 ? "BEP20" : coin.coin.coin_family === 2 ? "ERC20" : coin.coin.coin_family === 4 ? "ERC20" : coin.coin.coin_family === 5 ? "SPL" : coin.coin.coin_family === 6 ? "TRC20" : ""}
+                 
+                {coin?.token_address!==null?token_type(coin?.coin_family):'Coin'}
+                {/* {coin.coin.coin_family === 1 ? "BEP20" : coin.coin.coin_family === 2 ? "ERC20" : coin.coin.coin_family === 4 ? "ERC20" : coin.coin.coin_family === 5 ? "SPL" : coin.coin.coin_family === 6 ? "TRC20" : ""} */}
               </p>
               <p
                 className="currDetails__card__text"
@@ -259,7 +259,7 @@ function CurrencyDetails() {
                   ? addCommasToNumber(
                     getFlooredFixed(
                       Number(price?.value),
-                      parseFloat(price?.value) < 1 ? 12 : 2
+                      parseFloat(price?.value) < 1 ? 4 : 2
                     )
                   )
                   : "0.00"}{" "}
@@ -312,9 +312,7 @@ function CurrencyDetails() {
           </div>
 
           {coin && (
-            <div className="editWallet__linkOuter">
-              {console.log('account.coinFamilyAndAddress ', account)}
-              {console.log('CCCCCCCCCCCCCCCCC', coin.coin.coin_family)}
+            <div className="editWallet__linkOuter"> 
               <InputField
                 value={account.coinFamilyAndAddress[coin.coin.coin_family]}
                 readonly={true}
@@ -342,12 +340,12 @@ function CurrencyDetails() {
                         messageApi.success("Address copied to clipboard");
                       }}
                     />
-                    <img
+                    {/* <img
                       src={ShareIcon}
                       style={{
                         cursor: "pointer",
                       }}
-                    />
+                    /> */}
                   </span>
                 }
               />

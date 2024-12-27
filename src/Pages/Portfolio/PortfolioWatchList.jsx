@@ -25,6 +25,7 @@ import { setLoading } from "../../actions/loading";
 import ButtonComp from "../../Components/ButtonComp/ButtonComp";
 import GroupBtc from "../../Assets/Group.svg";
 import DeleteIcon from "../../Assets/DeleteIcon.svg";
+import { token_type } from "../../helpers/constant";
 
 function PortfolioWatchList() {
   const { account, currency, balanceIn } = useSelector((state) => state);
@@ -165,6 +166,7 @@ function PortfolioWatchList() {
                   const balance = new BigNumber(token.balance);
                   const result = myPrice.times(balance);
                   const formattedResult = result.toString();
+                  // console.log("TTTTTTTTTTTT ", token);
 
                   return {
                     position: token.sort_order,
@@ -173,21 +175,21 @@ function PortfolioWatchList() {
                     coinSubName: token.coin_name,
                     coinPrice: myPrice.toNumber()
                       ? formatSmallNumber(
-                          exponential_to_decimal(myPrice.toNumber())
-                        )
+                        exponential_to_decimal(myPrice.toNumber())
+                      )
                       : "0.00",
                     coinStatus: getFlooredFixed(
                       price
                         ? parseFloat(
-                            price.price_change_percentage_24h || 0
-                          ).toLocaleString()
+                          price.price_change_percentage_24h || 0
+                        ).toLocaleString()
                         : 0,
                       2
                     ),
                     currCryptoBal: balanceIn
                       ? `${addCommasToNumber(
-                          parseFloat(getFlooredFixed(token.balance, 6))
-                        )}`
+                        parseFloat(getFlooredFixed(token.balance, 6))
+                      )}`
                       : `****`,
                     currCryptoBalSymbol: token.coin_symbol.toUpperCase(),
                     currDollerBal: balanceIn
@@ -195,7 +197,7 @@ function PortfolioWatchList() {
                       : "****",
                     routeTo: "no-where",
                     // type: token.coin_family === 1 ? "BEP20" : "ERC20",
-                    type:token.coin_family === 1 ? "BEP20" : token.coin_family === 2 ? "ERC20":token.coin_family === 4 ?"ERC20":token.coin_family === 5 ?"SPL":token.coin_family === 6 ?"TRC20":"",
+                    type: token.is_token !==0? token_type(token.coin_family) : "",
                     status: true,
                     coin: token,
                     currPriceValue: priceData,
@@ -245,7 +247,7 @@ function PortfolioWatchList() {
       </div>
       <div style={{ marginTop: "15px" }}>
         <ButtonComp
-          onClick={() => navigate("/add-watch-list", {state:{ isFromPortfolio: true }})}
+          onClick={() => navigate("/add-watch-list", { state: { isFromPortfolio: true } })}
           text={"Add Tokens"}
           maxWidth={"100%"}
         />

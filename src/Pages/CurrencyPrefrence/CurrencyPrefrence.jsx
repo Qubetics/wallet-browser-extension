@@ -13,10 +13,11 @@ import { store } from "../..";
 import { setLoading } from "../../actions/loading";
 import { server } from "../../server";
 import TickIcon from "../../Assets/TickIconC.svg";
+import { message } from "antd";
 function CurrencyPrefrence() {
   const navigate = useNavigate();
   const { currency, account } = useSelector((state) => state);
-
+  const [messageApi, contextHolder] = message.useMessage();
   console.log("account::", account);
   const [data, setData] = useState([]);
 
@@ -58,6 +59,7 @@ function CurrencyPrefrence() {
           backTo={state ? (state.backTo ? "/wallet" : "/setting") : "/setting"}
           title={"Native Currency"}
         />
+        {contextHolder}
         <div className={`flexedContent`}>
           {/* <div className='listItems'>
             <ul>
@@ -86,7 +88,8 @@ function CurrencyPrefrence() {
             className="listItems"
             style={{
               display: "flex", 
-              flexDirection: 'column'
+              flexDirection: 'column',
+              gap:"25px"
             }}
           >
             {data.map((data) => (
@@ -101,12 +104,14 @@ function CurrencyPrefrence() {
                       name: data.name,
                       symbol: data.symbol,
                     });
-                    navigate('/wallet');
+
+                    message.success("Currency updated successfully")
+                    navigate('/setting');
                   }} style={{ display: "flex", alignItems: "center", gap: "13px" }}>
-                  <img src={data?.img} alt="img" />
+                  <img style={{height:30, width:30}} src={data?.img} alt="img" />
                   <span className="Currencyname">{data?.name}</span>
                 </div>
-                {data.name === currency.name ? <img src={TickIcon} alt="usd" /> : ''}
+                {data.name === currency.name ? <img style={{height:12, width:12}} src={TickIcon} alt="usd" /> : ''}
                 </div>))}
           </div>
         </div>
