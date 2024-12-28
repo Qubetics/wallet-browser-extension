@@ -118,7 +118,7 @@ function CurrencyDetails() {
       `/wallet/transaction/list`,
       {
         coin_id: coin.coin.coin_id,
-        coin_type: coin.coin.coin_symbol,
+        // coin_type: coin.coin.coin_symbol,
         coin_family: [coin.coin.coin_family],
         addrsListKeys: [coin.wallet_address],
         page: 1,
@@ -245,7 +245,7 @@ function CurrencyDetails() {
                 }}
               >
                  
-                {coin?.token_address!==null?token_type(coin?.coin_family):'Coin'}
+                {coin?.coin?.token_address!==null?token_type(coin?.coin?.coin_family):'Coin'}
                 {/* {coin.coin.coin_family === 1 ? "BEP20" : coin.coin.coin_family === 2 ? "ERC20" : coin.coin.coin_family === 4 ? "ERC20" : coin.coin.coin_family === 5 ? "SPL" : coin.coin.coin_family === 6 ? "TRC20" : ""} */}
               </p>
               <p
@@ -289,7 +289,7 @@ function CurrencyDetails() {
               </p>
             </div>
             <div style={{ textAlign: "center", margin: "12px auto" }}>
-              <img src={usdt} alt="usdt" />
+              <img style={{height:50, width:50}} src={coin?.coin?.coin_image} alt="usdt" />
             </div>
             <CurrencyBalanceDetails
               mt0="currDetails__card__mt0"

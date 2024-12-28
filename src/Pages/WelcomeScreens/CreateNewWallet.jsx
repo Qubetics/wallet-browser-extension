@@ -122,6 +122,9 @@ function CreateNewWallet() {
             const finalData = createWalletMnemonics || mnemonics;
             console.log("🚀 ~ onClick={ ~ finalData:", finalData);
 
+            console.log("------FFF-------> ", finalData);
+            console.log("-------------> ", type);
+            
             navigate("/setPassword", {
               state: {
                 type,

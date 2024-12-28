@@ -692,6 +692,7 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin }) {
                   marginBottom: "17px",
                   fontSize: "15px",
                   fontWeight: "bold",
+                  display:'none'
                 }}
               >
                 Address

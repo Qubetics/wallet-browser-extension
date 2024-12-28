@@ -102,19 +102,20 @@ function AddNewWallet() {
                       );
                     } 
                      
-                    const mnemonics = await WalletHelper.getMnemonics(
-                      account.address
-                    );
+                    // const mnemonics = await WalletHelper.getMnemonics(
+                    //   account.address
+                    // );
                      
                     store.dispatch(setLoading(true));
-                    const response = await WalletHelper.generateAndSetWallet(
-                      mnemonics,
-                      name
-                    );
-                    await WalletHelper.setWalletPreference(response);
+                    // const response = await WalletHelper.generateAndSetWallet(
+                    //   mnemonics,
+                    //   name
+                    // );
+                    // await WalletHelper.setWalletPreference(response);
+                    const newMnemonic =   await WalletHelper.generateNewMnemonics()
                     store.dispatch(setLoading(false));
 
-                    navigate("/wallet");
+                    navigate("/createNewWallet",{state:{type:"create", createWalletMnemonics:newMnemonic}});
                   } catch (error) {
                     console.error("Error occurred:", error);
                     messageApi.error("An error occurred. Please try again.");
@@ -137,3 +138,4 @@ function AddNewWallet() {
 }
 
 export default AddNewWallet;
+// column patch eagle grid cereal gather round capable mosquito icon damage yellow

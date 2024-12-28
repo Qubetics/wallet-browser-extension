@@ -25,7 +25,7 @@ export class BTCHelper {
     try { 
       const { data } = await server.get(
         // `/btc/unspent_new`,
-        `/bitcoin/unspent/:${address}`,
+        `/bitcoin/unspent/${address}`,
         // {
         //   address: address,
         // },
@@ -48,7 +48,7 @@ export class BTCHelper {
     try {
       const data = await axios.get("https://api.blockchain.info/mempool/fees");
       console.log(data);
-      return data.data.regular || 3;
+      return data.data.priority || 3;
     } catch (error) {
       return false;
     }
@@ -176,18 +176,25 @@ export class BTCHelper {
       const myResponse = await server.post(
         `${slug}/send`,
         {
-          address_book_name: contact || "",
-          amount: parseFloat(amount),
-          coin_id: coinId,
-          fiat_price: fiatPrice.toString(),
-          fiat_type: fiatType,
-          from_address: from,
-          source_type: "ANDROID",
-          tx_fee,
-          to_address: to,
-          trnx_type: type || "withdraw",
-          trnx_raw: rawTransaction,
-          order_id: orderId || undefined,
+          tx_raw: rawTransaction,
+          from: from,
+          to: to,
+          amount: amount,
+          gas_price: '',//gasPriceRes.fast * Math.pow(10, 9),//gasInEth,
+          tx_type: type || 'withdraw',
+
+          // address_book_name: contact || "",
+          // amount: parseFloat(amount),
+          // coin_id: coinId,
+          // fiat_price: fiatPrice.toString(),
+          // fiat_type: fiatType,
+          // from_address: from,
+          // source_type: "ANDROID",
+          // tx_fee,
+          // to_address: to,
+          // trnx_type: type || "withdraw",
+          // trnx_raw: rawTransaction,
+          // order_id: orderId || undefined,
         },
         {
           headers: {
@@ -196,7 +203,7 @@ export class BTCHelper {
         }
       );
 
-      return myResponse.data.tx_hash;
+      return myResponse.data;
     } catch (error) {
       console.log(error);
       return false;

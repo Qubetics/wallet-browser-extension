@@ -238,13 +238,15 @@ function SendConfirm() {
               fiatGasFee,
               currency.name,
               toName,
-              chain?.slug,
+             `solana/${coin.coin.token_address}`,// chain?.slug,
               chain?.chainId,
               coin?.coin?.token_address,
               coin?.coin?.decimals,
               coin.coin.token_type,
               coin.balance
             );
+            console.log("SOLLLLL RSP ", response);
+            
           if (!response) {
             store.dispatch(setLoading(false));
             return messageApi.error(
@@ -262,9 +264,11 @@ function SendConfirm() {
               fiatGasFee,
               currency.name,
               toName,
-              chain.slug,
+`solana/${coin.coin.coin_symbol}`,//chain.slug,
               chain.chainId
             ); 
+            console.log("RRRRR solana--- ", response);
+            
           if (!response) {
             store.dispatch(setLoading(false));
             return messageApi.error(
@@ -284,7 +288,7 @@ function SendConfirm() {
             fiatGasFee,
             currency.name,
             toName,
-            chain.slug,
+            `bitcoin/${chain.slug}`,
             chain.chainId,
             rawTransaction,
             tx_fee

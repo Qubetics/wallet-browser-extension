@@ -9,7 +9,7 @@ function WalletName() {
       <div className="cardWhite">
         <h2 className="cardWhite__title">Wallet Name</h2>
         <p className="cardWhite__subTitle">
-          You can simply identify multiple wallets and label your own wallet.
+          You can simply identify multiple wallets and label your own wallet.4
         </p>
         <div className="cardWhite__linkOuter">
           <InputFieldOnly placeholder={"Token Name"} label='Amount' />

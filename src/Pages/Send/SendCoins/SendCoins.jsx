@@ -174,9 +174,47 @@ function SendCoins() {
 
 
       if (!chain.isEVM && chain.currencyName === "BTC") {
+        try {
         const gasPrice = await BTCHelper.getBTCGasPrice(); 
-        setSelectedGasPrice(gasPrice);
-      }
+          const unspent = await BTCHelper.getUnspent(coin.wallet_address);
+          if (!unspent) {
+            store.dispatch(setLoading(false));
+            return messageApi.error(
+              "Unable to fetch unspent at the moment."
+            );
+          }
+          if (unspent.length === 0) {
+            store.dispatch(setLoading(false));
+            return messageApi.error(
+              "You have a pending transaction in your account or you do not have enough balance to proceed with the transaction."
+            );
+          }
+          const inputs = [];
+          let totalAmountAvailable = 0;
+          unspent.forEach((element) => {
+            let utxo = {};
+            utxo.satoshis = Math.floor(Number(element.value));
+            utxo.script = element.script;
+            utxo.address = coin.wallet_address;
+            utxo.txId = element.tx_hash;
+            utxo.outputIndex = element.tx_output_n;
+            totalAmountAvailable += parseFloat(utxo.satoshis);
+            inputCount += 1;
+            inputs.push(utxo);
+          });
+          transactionSize =inputCount * 146 + outputCount * 34 + 10 - inputCount;
+          let fee = transactionSize * gasPrice;
+          console.log('btc feee::::::', fee);
+          
+          const totalFee = (transactionSize *gasPrice *btcTosatoshiMultiplier).toFixed(8);
+          console.log('btc Totalfeee::::::', totalFee);
+
+        setSelectedGasPriceSol(totalFee);                
+    } catch (error) {
+      store.dispatch(setLoading(false));
+          console.log('btc errrr:::::::',error);
+    }
+  }
       if (!chain.isEVM && chain.currencyName === "SOL") {
         const solanaHelper = new SolanaHelper(chain.rpcUrl);
         const gasPrice = solanaHelper.getGasPrice(); 
@@ -222,6 +260,23 @@ function SendCoins() {
   };
 
   const calculatePercentageWise = async (percentage) => {
+    if(coin?.coin?.coin_family == 3 || coin?.coin?.coin_family == 5){
+      if(coin?.coin?.token_address !==null){
+      return  setAmount(myBalance?.toString());
+      }else{
+        const maxAfterGas = new BigNumber(myBalance).minus(selectedGasPriceSol);
+        console.log(maxAfterGas.toString());
+        if (maxAfterGas.isNegative()) {
+          return messageApi.error("Insufficient balance to cover gas fee.");
+        }else{
+         setAmount(maxAfterGas?.toString());
+        }
+  
+       console.log("Not Max For SOL BTC");
+       
+       return
+      }
+    }
     if (coin.coin.token_address) {
       let rpc;
       let amountToSend = 0;
@@ -782,7 +837,7 @@ function SendCoins() {
               } else if (!chain.isEVM && chain.currencyName === "BTC") {
                 try {
                   const gasPrice = await BTCHelper.getBTCGasPrice();
-                  const unspent = await BTCHelper.getUnspent(coin.address);
+                  const unspent = await BTCHelper.getUnspent(coin.wallet_address);
                   if (!unspent) {
                     store.dispatch(setLoading(false));
                     return messageApi.error(
@@ -799,17 +854,19 @@ function SendCoins() {
                   let totalAmountAvailable = 0;
                   unspent.forEach((element) => {
                     let utxo = {};
-                    utxo.satoshis = Math.floor(Number(element.value));
-                    utxo.script = element.script;
-                    utxo.address = coin.address;
-                    utxo.txId = element.tx_hash;
-                    utxo.outputIndex = element.tx_output_n;
+                    utxo.satoshis = Math.floor(Number(element.satoshis));
+                    utxo.script = element.scriptPubKey;
+                    utxo.address = coin.wallet_address;
+                    utxo.txId = element.txid;
+                    utxo.outputIndex = element.vout;
                     totalAmountAvailable += parseFloat(utxo.satoshis);
                     inputCount += 1;
                     inputs.push(utxo);
                   });
-                  transactionSize =
-                    inputCount * 146 + outputCount * 34 + 10 - inputCount;
+
+                  console.log("--------inputs-------> ", inputs);
+                  
+                  transactionSize =inputCount * 146 + outputCount * 34 + 10 - inputCount;
                   let fee = transactionSize * gasPrice;
                   const totalFee = (
                     transactionSize *
@@ -895,7 +952,7 @@ function SendCoins() {
                         )) >
                       546
                     ) {
-                      transaction.change(coin.address);
+                      transaction.change(coin.wallet_address);
                     }
                     if (
                       satoshis -
@@ -960,7 +1017,7 @@ function SendCoins() {
                     store.dispatch(setLoading(true));
                     const fee = await AdaHelper.getFee(
                       address,
-                      coin.address,
+                      coin.wallet_address,
                       amount
                     );
                     if (!fee) {
@@ -998,7 +1055,7 @@ function SendCoins() {
                     store.dispatch(setLoading(true));
                     const fee = await AdaHelper.getFee(
                       address,
-                      coin.address,
+                      coin.wallet_address,
                       amount
                     );
                     if (!fee) {

@@ -5,20 +5,55 @@ import { store } from "../..";
 import { setLoading } from "../../actions/loading";
 import { server } from "../../server";
 import BTC from "../../Assets/Coins/BTC.png";
+
+
+
+
+
+const colors = [
+
+  "#00e396", "#ff4560", "#775dd0", "#feb019", "#ff5733", "#8e44ad", "#2ecc71", "#f39c12", "#3498db", "#e74c3c"
+
+];
+
+
+
+
+
+const generateColors = (baseColors, count) => {
+
+  const colors = [];
+
+  for (let i = 0; i < count; i++) {
+
+    colors.push(baseColors[i % baseColors.length]);
+
+  }
+
+  return colors;
+
+};
+
+const baseColors = generateColors(colors, 100);
+
+
+
 const AllocationChart = () => {
   const [portfolio, setPortfolio] = useState([]);
-  const [portfolioBalace, setPortfolioBalace] = useState(0);
-  const [labels, setLabels] = useState(["ETH", "BNB", "SOL", "BTC", "POL"]);
-  const [chartSeries, setChartSeries] = useState([0, 0, 0, 0, 0]);
-  const { account, currency, tokens, balanceIn, theme } = useSelector(
-    (state) => state
-  );
+  const [portfolioBalance, setPortfolioBalance] = useState(0);
+
+  const [labels, setLabels] = useState([]);
+
+  const [chartSeries, setChartSeries] = useState([]);
+
+  const { account, currency } = useSelector((state) => state);
+
 
   const [chartOptions, setChartOptions] = useState({
     chart: {
       type: "donut",
     },
-    labels: labels, // Initial empty array, will update later
+    labels: [], // Initial empty array, will update later
     plotOptions: {
       pie: {
         donut: {
@@ -75,48 +110,62 @@ const AllocationChart = () => {
           },
         }
       );
-      setPortfolio(data?.data);
-      const totalBalance = data?.data.reduce(
-        (acc, obj) => acc + obj?.balance,
+
+
+      const portfolioData = data?.data || [];
+      setPortfolio(portfolioData);
+
+      const totalBalance = portfolioData.reduce(
+        (acc, obj) => acc + parseFloat(obj?.balance) * parseFloat(obj?.coin?.fiat_price_data?.value || 0),
         0
       );
-
-      // Check if totalBalance is valid
-      if (totalBalance == 0) {
-        console.error("Total balance is zero. Cannot calculate percentages.");
-        setPortfolioBalace(0);
-        setChartSeries([0, 0, 0, 0, 0]);
+      if (totalBalance === 0) {
+        setPortfolioBalance(0);
+        setChartSeries([]);
+        setLabels([]);
         store.dispatch(setLoading(false));
         return;
       }
-
-      const percentages = data?.data.map((obj) => {
+      const percentages = portfolioData.map((obj) => {
+        const symbol = obj?.coin?.coin_symbol;
+        let type = null;
+        if (symbol == 'USDT' || symbol == 'USDC') {
+          switch (obj?.coin?.coin_family) {
+            case 1: {
+              type = 'BEP-20 '
+              break;
+            }
+            case 2: {
+              type = 'ERC-20 '
+              break;
+            }
+            case 4: {
+              type = 'ERC-20 '
+              break;
+            }
+          }
+        }
         return {
-          name: obj?.coin?.coin_symbol,
-          percentage: (
-            (obj?.balance / totalBalance == 0 ? 1 : totalBalance) * 100
-          ).toFixed(2),
-        };
+          name: type ? (type + obj?.coin?.coin_symbol) : obj?.coin?.coin_symbol,
+          percentage:
+            ((parseFloat(obj?.balance) * parseFloat(obj?.coin?.fiat_price_data?.value || 0)) / totalBalance) * 100,
+        }
       });
 
-      const names = percentages.map((item) => item.name.toUpperCase());
-      const percentagesArr = percentages.map((item) =>
-        parseFloat(item.percentage)
-      );
+      const names = percentages.map((item) => item.name?.toUpperCase() || "Unknown");
+      const percentagesArr = percentages.map((item) => parseFloat(item.percentage.toFixed(2)));
 
-      // Update labels and series dynamically
       setLabels(names);
       setChartSeries(percentagesArr);
-      console.log("TTTTTTTTTTTTTTTTT ", totalBalance);
+      setPortfolioBalance(totalBalance);
 
-      setPortfolioBalace(totalBalance);
+      const chartColors = percentagesArr.map((_, index) => baseColors[index % baseColors.length]);
 
-      // Update chart options with new labels
       setChartOptions((prevOptions) => ({
         ...prevOptions,
         labels: names,
+        colors: chartColors,
       }));
-
       store.dispatch(setLoading(false));
     } catch (error) {
       console.log("Portfolio error: ", error);
@@ -129,25 +178,16 @@ const AllocationChart = () => {
   }, []);
 
   useEffect(() => {
-    // Check if the chartSeries is empty or all values are zero
-    const isEmpty =
-      chartSeries.length === 0 || chartSeries.every((val) => val === 0);
-
-    if (isEmpty) {
-      setChartSeries([100]); // Show a full dark section when no data
+    if (!chartSeries.length || chartSeries.every((val) => val === 0)) {
+      setChartSeries([100]);
       setChartOptions((prevOptions) => ({
         ...prevOptions,
-        colors: ["#1413132e"], // Dark color for empty state
-        labels: ["No Data"], // Label for empty state
-      }));
-    } else {
-      setChartOptions((prevOptions) => ({
-        ...prevOptions,
-        colors: ["#00E396", "#FEB019", "#FF4560", "#775DD0", "#00D9E9"], // Restore original colors
+        colors: ["#1413132e"],
+        labels: ["No Data"],
       }));
     }
   }, [chartSeries]);
-  const currencies = ["Bitcoin", "Ethereum", "Solana", "Tether"];
+
   return (
     <div
       className="allocation-chart"
@@ -189,17 +229,19 @@ const AllocationChart = () => {
             Total Invested Amount:
           </span>
           <span style={{ color: "#FFFFFF", fontWeight: "600" }}>
-            {currency?.symbol} {portfolioBalace.toFixed(2)}
+            {currency?.symbol} {portfolioBalance.toFixed(2)}
           </span>
         </h3>
       </div>
       <div className="investedAmountShow">
-        {currencies.map((currency, index) => (
+        {Array.isArray(labels) && labels.map((currency, index) => (
           <div
             key={index}
-            className={`investedCurrency ${currency.toLowerCase()}`}
+            className={`investedCurrency`}
+
+            style={{ borderLeft: `6px solid ${baseColors[index]}`, backgroundColor: '#141423' }}
           >
-            <p>{currency}</p>
+            <p style={{ textTransform: 'capitalize' }}>{currency}</p>
           </div>
         ))}
       </div>
@@ -211,7 +253,25 @@ const AllocationChart = () => {
             <li key={idx} className="coinsTable1 flex-item">
               <div className="coinsTable1__left">
                 <div className="coinsTable1__left__icon">
-                  <img src={BTC} alt="" />
+                  {itm?.coin?.coin_image ? <img style={{ height: 35, width: 35 }}
+
+                    src={itm?.coin?.coin_image} alt="" /> : (
+                    <div
+                      className="randb extra borderDarkLight"
+                      style={{
+                        height: "30px",
+                        width: "30px",
+                        background: "rgb(202, 201, 201)",
+                        borderRadius: "50%",
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        border: "1px solid",
+                      }}
+                    >
+                      {itm?.coin?.coin_symbol.split("")[0].toUpperCase()}
+                    </div>
+                  )}
                 </div>
                 <div className="coinsTable1__left__textSec">
                   <div className="coinsTable1__textTop">
@@ -223,18 +283,23 @@ const AllocationChart = () => {
                   <div>
                     <span style={{ color: "#98969B" }}>Percentage</span>
                     <span style={{ color: "#7DB0FF", marginLeft: "5px" }}>
-                      {(
+                      {/* {(
                         (itm?.balance /
                           (portfolioBalace === 0 ? 1 : portfolioBalace)) *
                         100
                       ).toFixed(2)}
-                      %
+                      % */}
+                      {(((parseFloat(itm?.balance) * parseFloat(itm?.coin?.fiat_price_data?.value || 0)) / portfolioBalance) * 100).toFixed(2)}%
                     </span>
                   </div>
                 </div>
               </div>
               <div className="coinsTable1__right">
-                <span> {itm?.balance}</span>
+                <span style={{ color: "#FFFFFF" }}>
+                  {currency?.symbol} {' '}{(parseFloat(itm?.balance) * parseFloat(itm?.coin?.fiat_price_data?.value || 0)).toFixed(2)}
+                </span>
+
+
 
                 <span>
                   <span style={{ color: "#98969B", marginLeft: "5px" }}>

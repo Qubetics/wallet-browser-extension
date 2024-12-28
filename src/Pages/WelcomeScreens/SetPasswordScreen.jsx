@@ -32,6 +32,9 @@ function validatePassword(password) {
 
 function SetPasswordScreen() {
   const { state } = useLocation();
+
+  console.log("STATETtttttttttttt ", state);
+  
   const { type, createWalletMnemonics, createShuffledMnemonics } = state;
   const navigate = useNavigate();
   const { layoutHeader } = useOutletContext();

@@ -139,12 +139,22 @@ export class SolanaHelper {
 
       let blockhash = (await this.connection.getLatestBlockhash('finalized'))
         .blockhash;
-        console.log('🚀 ~ SolanaHelper ~ blockhash:', blockhash);
+      console.log('🚀 ~ SolanaHelper ~ blockhash:', blockhash);
+
+      const solValue = new BigNumber(amount);
+
+      // Convert SOL to lamports (1 SOL = 10^9 lamports)
+      const lamports = solValue.multipliedBy(LAMPORTS_PER_SOL).integerValue(BigNumber.ROUND_DOWN);
+
+
+      // const lamports = new BigNumber(Math.round(amount * LAMPORTS_PER_SOL));
+      console.log("lllllllllllllll ", lamports);
+
       const transaction = new Transaction().add(
         SystemProgram.transfer({
           fromPubkey: myKeyPair.publicKey,
           toPubkey: new PublicKey(to),
-          lamports: amount * LAMPORTS_PER_SOL,
+          lamports: lamports,
         })
       );
       console.log('🚀 ~ SolanaHelper ~ transaction:', transaction);
@@ -176,7 +186,7 @@ export class SolanaHelper {
             lastValidBlockHeight: lastValidBlockHeight,
           },
         });
-
+console.log('transaction response::::::::::', transactionResponse);
       if (!transactionResponse) {
         console.error('Transaction not confirmed');
         return false;
@@ -200,17 +210,12 @@ export class SolanaHelper {
       const myResponse = await server.post(
         `${slug}/send`,
         {
-          address_book_name: contact || '',
-          amount: parseFloat(amount),
-          coin_id: coinId,
-          fiat_price: fiatPrice.toString(),
-          fiat_type: fiatType,
-          from_address: from,
-          source_type: 'ANDROID',
-          to_address: to,
-          trnx_type: type || 'withdraw',
-          tx_id: signature,
-          order_id: orderId || undefined,
+          txid: signature,
+          from: from,
+          to: to,
+          amount: amount, 
+          gas_price: '0.000005',
+          tx_type: type || 'withdraw',
         },
         {
           headers: {
@@ -219,7 +224,7 @@ export class SolanaHelper {
         }
       );
 
-      return myResponse.data.tx_hash;
+      return myResponse.data;
     } catch (error) {
       console.log(error, '=====eror');
       let message = error?.message;
@@ -232,17 +237,12 @@ export class SolanaHelper {
         const myResponse = await server.post(
           `${slug}/send`,
           {
-            address_book_name: contact || '',
-            amount: parseFloat(amount),
-            coin_id: coinId,
-            fiat_price: fiatPrice.toString(),
-            fiat_type: fiatType,
-            from_address: from,
-            source_type: 'ANDROID',
-            to_address: to,
-            trnx_type: type || 'withdraw',
-            tx_id: txid,
-            order_id: orderId || undefined,
+            txid: txid,
+            from: from,
+            to: to,
+            amount: amount, 
+            gas_price: '0.000005',
+            tx_type: type || 'withdraw',
           },
           {
             headers: {
@@ -251,7 +251,7 @@ export class SolanaHelper {
           }
         );
 
-        return myResponse.data.tx_hash;
+        return myResponse.data;
       }
       // console.log('-----------false');
       return false;
@@ -334,12 +334,12 @@ export class SolanaHelper {
       console.log('🚀 ~ SolanaHelper ~ toTokenAccount:', toTokenAccount);
       console.log('🚀 ~ SolanaHelper ~ fromTokenAccount:', fromTokenAccount);
 
-      console.log(amount, decimals, '============amount');
+      // console.log(amount, decimals, '============amount');
 
-      console.log(
-        new BigNumber(amount).multipliedBy(new BigNumber(decimals)).toNumber(),
-        '============amount'
-      );
+      // console.log(
+      //   new BigNumber(amount).multipliedBy(new BigNumber(decimals)).toNumber(),
+      //   '============amount'
+      // );
 
       const transaction = new Transaction().add(
         splToken.Token.createTransferInstruction(
@@ -381,16 +381,17 @@ export class SolanaHelper {
           },
         });
 
+         
       if (!transactionResponse) {
         console.error('Transaction not confirmed');
         return false;
       }
 
       if (transactionResponse.meta?.err) {
-        console.error(
-          'transactionResponse.meta:::',
-          transactionResponse.meta?.err
-        );
+        // console.error(
+        //   'transactionResponse.meta:::',
+        //   transactionResponse.meta?.err
+        // );
         return false;
       }
 
@@ -402,18 +403,25 @@ export class SolanaHelper {
 
       const myResponse = await server.post(
         `${slug}/send`,
-        {
-          address_book_name: contact || '',
-          amount: parseFloat(amount),
-          coin_id: coinId,
-          fiat_price: fiatPrice.toString(),
-          fiat_type: fiatType,
-          from_address: from,
-          source_type: 'ANDROID',
-          to_address: to,
-          trnx_type: type || 'withdraw',
-          tx_id: signature,
-          order_id: orderId || undefined,
+        { 
+          txid: signature,
+          from: from,
+          to: to,
+          amount: amount, 
+          gas_price: '0.000005',
+          tx_type: type || 'withdraw',
+
+          // address_book_name: contact || '',
+          // amount: parseFloat(amount),
+          // coin_id: coinId,
+          // fiat_price: fiatPrice.toString(),
+          // fiat_type: fiatType,
+          // from_address: from,
+          // source_type: 'ANDROID',
+          // to_address: to,
+          // trnx_type: type || 'withdraw',
+          // tx_id: signature,
+          // order_id: orderId || undefined,
         },
 
         {
@@ -423,7 +431,7 @@ export class SolanaHelper {
         }
       );
 
-      return myResponse.data.tx_hash;
+      return myResponse.data;
 
       return true;
     } catch (error) {
@@ -438,17 +446,13 @@ export class SolanaHelper {
         const myResponse = await server.post(
           `${slug}/send`,
           {
-            address_book_name: contact || '',
-            amount: parseFloat(amount),
-            coin_id: coinId,
-            fiat_price: fiatPrice.toString(),
-            fiat_type: fiatType,
-            from_address: from,
-            source_type: 'ANDROID',
-            to_address: to,
-            trnx_type: 'withdraw',
-            tx_id: txid,
-            order_id: orderId || undefined,
+            txid: txid,
+            from: from,
+            to: to,
+            amount: amount, 
+            gas_price: '0.000005',
+            tx_type: type || 'withdraw',
+  
           },
           {
             headers: {
@@ -457,7 +461,7 @@ export class SolanaHelper {
           }
         );
 
-        return myResponse.data.tx_hash;
+        return myResponse.data;
       }
       return false;
     }
@@ -526,20 +530,21 @@ export class SolanaHelper {
       serializedTransaction,
       SEND_OPTIONS
     );
-    console.log('txid:::>:>:>:>', txid);
+    // console.log('txid:::>:>:>:>', txid);
     const controller = new AbortController();
     const abortSignal = controller.signal;
-    console.log('Here');
+    // console.log('Here');
     const abortableResender = async () => {
       while (true) {
         await wait(2_000);
         if (abortSignal.aborted) return;
         try {
-          await connection.sendRawTransaction(
+          const opt = await connection.sendRawTransaction(
             serializedTransaction,
             SEND_OPTIONS
           );
-          console.log('Here 2');
+          // console.log('Here 2', opt);
+          return opt;
         } catch (e) {
           console.warn(`Failed to resend transaction: ${e}`);
         }
@@ -555,7 +560,7 @@ export class SolanaHelper {
         lastValidBlockHeight
       );
 
-     return await Promise.race([
+      return await Promise.race([
         connection.confirmTransaction(
           {
             ...blockhashWithExpiryBlockHeight,
@@ -566,7 +571,7 @@ export class SolanaHelper {
           'confirmed'
         ),
 
-          new Promise(async (resolve) => {
+        new Promise(async (resolve) => {
           // in case ws socket died
           while (!abortSignal.aborted) {
             await wait(2_000);
@@ -578,14 +583,10 @@ export class SolanaHelper {
             if (tx?.value?.confirmationStatus === 'confirmed') {
               console.log(' txn confirmed:::::;;:')
               resolve(tx);
-            }
+            } 
           }
         }),
-      ]).then((resp)=>{
-        console.log("RESPPPPPPPPPPP ", resp);
-        return resp;
-      }).catch((error)=>{console.log("Error in SOLANA ", error);
-      }) ;
+      ]) 
     } catch (e) {
       console.log(e, 'e=====');
       if (e) {
