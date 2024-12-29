@@ -81,7 +81,7 @@ function FixWidthLayout() {
         )} */}
         {path === "history" && (
           <MenuRestofHeaders
-            backTo={"/setting"}
+            backTo={getLocation?.state?.path==='/wallet'?"/wallet" : "/setting"}
             title={"History"}
             FilterIcon={"/filter-history"}
           />

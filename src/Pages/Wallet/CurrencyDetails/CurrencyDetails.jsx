@@ -225,6 +225,7 @@ function CurrencyDetails() {
                 },
               }
             ); 
+            messageApi.success(`${!isStared? 'Added in':"Removed from "} watchlist successfully`);
             setIsStared(!isStared)
           } catch (error) {
             messageApi.error('Unable to favourite the selected coin');

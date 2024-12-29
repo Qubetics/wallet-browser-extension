@@ -656,7 +656,7 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
           <Link
             onClick={(e) => {
               e.preventDefault();
-              path === "currencyDetails" ? showModal() : navigate("/history",{});
+              path === "currencyDetails" ? showModal() : navigate("/history",{state:{path:'/wallet'}});
             }}
             to="#"
             className={
@@ -711,6 +711,7 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
           handleOk={handleOk}
           handleCancel={handleCancel}
           customClass={"change"}
+          style={{background:"#100e0e"}}
         >
           <div className={"balanceDetails__modal"}>
             <div>

@@ -28,7 +28,7 @@ function ShowSecretPhrase() {
           <div className=''>
             <div className="copyPhrase setPhrase">
               <div className="setPhrase__secretPharse">
-                <h2 className="setPhrase__secretPharse__title">
+                <h2 className="setPhrase__secretPharse__title" style={{color:"#fff"}}>
                   Your Secret Phrase
                 </h2>
                 {/* <p className="setPhrase__secretPharse__grayText">

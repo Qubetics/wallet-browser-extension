@@ -22,7 +22,7 @@ export const Portfolio = () => {
       <MenuRestofHeaders
         title={"Portfolio"}
         backTo={"/wallet"}
-        portfolio={true}
+        // portfolio={true}
       />
       <div className={``}>
         <Tabs selectedIndex={sel}>

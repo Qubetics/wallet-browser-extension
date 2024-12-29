@@ -119,12 +119,7 @@ function CreateNewWallet() {
 
             mnemonics = await WalletHelper.generateNewMnemonics();
 
-            const finalData = createWalletMnemonics || mnemonics;
-            console.log("🚀 ~ onClick={ ~ finalData:", finalData);
-
-            console.log("------FFF-------> ", finalData);
-            console.log("-------------> ", type);
-            
+            const finalData = createWalletMnemonics || mnemonics; 
             navigate("/setPassword", {
               state: {
                 type,

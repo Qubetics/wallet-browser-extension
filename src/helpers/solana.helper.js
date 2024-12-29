@@ -147,8 +147,7 @@ export class SolanaHelper {
       const lamports = solValue.multipliedBy(LAMPORTS_PER_SOL).integerValue(BigNumber.ROUND_DOWN);
 
 
-      // const lamports = new BigNumber(Math.round(amount * LAMPORTS_PER_SOL));
-      console.log("lllllllllllllll ", lamports);
+      // const lamports = new BigNumber(Math.round(amount * LAMPORTS_PER_SOL)); 
 
       const transaction = new Transaction().add(
         SystemProgram.transfer({

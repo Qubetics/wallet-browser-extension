@@ -401,7 +401,7 @@ function ManageWallet() {
                 }}
                 className="currency_click listItems "
                 onClick={async () => {
-                  navigate("/add-new-wallet");
+                  navigate("/add-new-wallet", {state:{type:'create', addNew:true}});
                 }}
               >
                 <div
@@ -455,7 +455,9 @@ function ManageWallet() {
                 }}
                 className="currency_click listItems"
                 onClick={async () => {
-                  navigate("/import-wallet-name");
+                  // navigate("/import-wallet-name");
+                  navigate("/add-new-wallet", {state: { type: "import" },});
+
                 }}
               >
                 <div

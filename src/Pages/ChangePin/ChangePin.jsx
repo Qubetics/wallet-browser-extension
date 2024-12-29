@@ -105,7 +105,9 @@ function ChangePin() {
                 type={"text"}
                 value={oldPassword}
                 getData={(password) => {
-                  setOldPassword(password);
+                  if (password?.length <= 25) {
+                    setOldPassword(password);
+                  }
                 }}
               />
             </div>
@@ -119,7 +121,9 @@ function ChangePin() {
                 type={"text"}
                 value={newPassword}
                 getData={(password) => {
-                  handlePasswordChange(password);
+                  if (password?.length <= 25) {
+                    handlePasswordChange(password);
+                  } 
                 }}
               />
             </div>
@@ -141,7 +145,9 @@ function ChangePin() {
                 type={"text"}
                 value={confirmPassword}
                 getData={(password) => {
-                  setConfirmPassword(password);
+                  if (password?.length <= 25) {
+                    setConfirmPassword(password);
+                  } 
                 }}
               />
             </div>

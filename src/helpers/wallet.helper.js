@@ -119,13 +119,10 @@ export class WalletHelper {
       if (mnemonics) {
         const decryptedMnemonics = SecurityHelper.decrypt(mnemonics, password);
 
-        const defaultMnemonics = JSON.parse(decryptedMnemonics)[0];
-        console.log('OLDDDDDDDDDDDDDDDDDDDD ', defaultMnemonics);
-
+        const defaultMnemonics = JSON.parse(decryptedMnemonics)[0]; 
         return defaultMnemonics.phrase;
       } else {
-        const { phrase } = ethers.Wallet.createRandom().mnemonic;
-        console.log('phrasephrasephrasephrasephrase ', phrase);
+        const { phrase } = ethers.Wallet.createRandom().mnemonic; 
         return phrase;
       }
     } catch (error) {
@@ -155,7 +152,7 @@ export class WalletHelper {
       const derivedSeed = derivePath(path, seed).key;
       const account = new Account(
         nacl.sign.keyPair.fromSeed(derivedSeed).secretKey
-      );
+      );  
       return account.secretKey;
     } catch (error) {
       return false;

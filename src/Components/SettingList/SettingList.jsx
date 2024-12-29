@@ -408,7 +408,7 @@ function SettingList(props) {
             <img src={warning} />
             <div>
               <p>
-                By resetting, all wallets you have saved within the Qubetics App
+                By resetting, all wallets you have saved within the Qubetics Extension
                 will be erased. Please make sure you have each wallet's 12-word
                 seed phrase written down before resetting.
               </p>

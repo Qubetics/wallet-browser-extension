@@ -190,11 +190,11 @@ function CoinsTable({ dataArray, showCoinPrice, name }) {
                     gap: "5px",
                   }}
                 >
-                  {currency.symbol}
-                  <span style={{ marginLeft: "4px", color: "#98969B" }}>
-                    {ele.currPriceValue ? ele.currPriceValue.toFixed(2) : 0}
+                  
+                  <span style={{ color: "#98969B" }}>
+                  {currency.symbol}{' '}{ele.currPriceValue ? ele.currPriceValue.toFixed(2) : 0}
                   </span>
-                  {name == "portfolio" && <img onClick={() => showDeleteModal(ele)} src={bin} />}
+                  {name == "portfolio" && <img style={{marginLeft:15}} onClick={() => showDeleteModal(ele)} src={bin} />}
                 </span>
               ) : ele.watch ? (
                 ele.isActiveInWatchList ? (

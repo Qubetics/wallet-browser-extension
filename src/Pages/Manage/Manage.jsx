@@ -97,8 +97,8 @@ function Manage() {
           <MenuRestofHeaders
             backTo={"/wallet"}
             title={"Add Tokens"}
-            manageTo={
-              true
+            // manageTo={
+            //   true
               // !(
               //   filteredTokens.length === 1 &&
               //   filteredTokens[0]?.coin_symbol === "btc" &&
@@ -106,7 +106,7 @@ function Manage() {
               // )
               //   ? "/add-token"
               //   : false
-            }
+            // }
           />
           {!(
             filteredTokens.length === 1 &&

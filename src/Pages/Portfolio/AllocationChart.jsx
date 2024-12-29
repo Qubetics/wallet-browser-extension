@@ -198,15 +198,15 @@ const AllocationChart = () => {
       }}
     >
       <div style={{ position: "relative" }}>
-        <Chart
+        {portfolioBalance > 0 && <Chart
           options={chartOptions}
           series={chartSeries}
           type="donut"
           height={200}
-        />
+        />}
 
         {/* Custom text in the center of the chart */}
-        <div className="assetsAllocation">
+        {portfolioBalance > 0 && <div className="assetsAllocation">
           <span
             style={{ fontSize: "14px", fontWeight: "400", color: "#98969B" }}
           >
@@ -217,7 +217,7 @@ const AllocationChart = () => {
           >
             Allocation
           </span>
-        </div>
+        </div>}
       </div>
 
       {/* Total Invested Amount */}
@@ -296,7 +296,7 @@ const AllocationChart = () => {
               </div>
               <div className="coinsTable1__right">
                 <span style={{ color: "#FFFFFF" }}>
-                  {currency?.symbol} {' '}{(parseFloat(itm?.balance) * parseFloat(itm?.coin?.fiat_price_data?.value || 0)).toFixed(2)}
+                  {currency?.symbol}{(parseFloat(itm?.balance) * parseFloat(itm?.coin?.fiat_price_data?.value || 0)).toFixed(2)}
                 </span>
 
 

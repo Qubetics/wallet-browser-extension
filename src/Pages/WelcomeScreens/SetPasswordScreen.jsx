@@ -32,8 +32,6 @@ function validatePassword(password) {
 
 function SetPasswordScreen() {
   const { state } = useLocation();
-
-  console.log("STATETtttttttttttt ", state);
   
   const { type, createWalletMnemonics, createShuffledMnemonics } = state;
   const navigate = useNavigate();
@@ -78,8 +76,9 @@ function SetPasswordScreen() {
   }, [activeTab]);
 
   const handlePasswordChange = (value) => {
+    if(value.length <= 25){
     setPassword(value);
-    setValidation(validatePassword(value));
+    setValidation(validatePassword(value));}
   };
 
   const popError = (error) => {
@@ -97,12 +96,21 @@ function SetPasswordScreen() {
     await chrome.storage.session.set({ password: password.trim() });
 
     if (type === "create") {
-      await WalletHelper.setPasswordInSession(password);
-      const mnemonics = await WalletHelper.getMnemonics();
-      setMnemonics(mnemonics);
-      setShuffledMnemonics(
-        mnemonics.split(" ").sort(() => Math.random() - 0.5)
-      );
+       await WalletHelper.setPasswordInSession(password);
+      if (state?.addNew) {
+        // createWalletMnemonics, createShuffledMnemonics
+        setMnemonics(createWalletMnemonics);
+        setShuffledMnemonics(
+          createWalletMnemonics.split(" ").sort(() => Math.random() - 0.5)
+        );
+      } else { 
+        const mnemonics =  await WalletHelper.getMnemonics();
+        setMnemonics(mnemonics);
+        setShuffledMnemonics(
+          mnemonics.split(" ").sort(() => Math.random() - 0.5)
+        );
+      }
+
       setActiveTab("secretPhrase");
     } else {
       setActiveTab("confirmSecretPhrase");
@@ -116,7 +124,7 @@ function SetPasswordScreen() {
   const handleConfirmSecretPhrase = async () => {
     if (correct) {
       store.dispatch(setLoading(true));
-      const { name } = await chrome.storage.session.get("name");
+      const { name } = await chrome.storage.session.get("name");  
       await WalletHelper.generateAndSetWallet(mnemonics, name);
       store.dispatch(setLoading(false));
       setActiveTab("congrats");
@@ -127,7 +135,7 @@ function SetPasswordScreen() {
 
   const handleImportSecretPhrase = async () => {
     try {
-      
+
       if (!terms) {
         return popError("Please accept the terms and conditions.");
       }
@@ -169,42 +177,39 @@ function SetPasswordScreen() {
         <div className="setPassword__tabs">
           {!create && (
             <div
-              className={`setPassword__tabs__itself ${
-                activeTab === "setPassword" &&
+              className={`setPassword__tabs__itself ${activeTab === "setPassword" &&
                 "setPassword__tabs__itself_active"
-              }`}
+                }`}
             ></div>
           )}
 
           {type === "create" && (
             <div
-              className={`setPassword__tabs__itself ${
-                activeTab === "secretPhrase" &&
+              className={`setPassword__tabs__itself ${activeTab === "secretPhrase" &&
                 "setPassword__tabs__itself_active"
-              }`}
+                }`}
             ></div>
           )}
 
           <div
-            className={`setPassword__tabs__itself ${
-              activeTab === "confirmSecretPhrase" &&
+            className={`setPassword__tabs__itself ${activeTab === "confirmSecretPhrase" &&
               "setPassword__tabs__itself_active"
-            }`}
+              }`}
           ></div>
         </div>
       )}
 
-      <div className={activeTab === "congrats" ? "congrates-item":""}>{layoutHeader}</div>
+      <div className={activeTab === "congrats" ? "congrates-item" : ""}>{layoutHeader}</div>
 
       <h3 className="setPassword__heading">
         {type === "create" &&
           (activeTab === "setPassword"
             ? "Create Password"
             : activeTab === "secretPhrase"
-            ? "Write Down Your Seed Phrase"
-            : activeTab === "confirmSecretPhrase"
-            ? "Enter Your Seed Phrase"
-            : "")}
+              ? "Write Down Your Seed Phrase"
+              : activeTab === "confirmSecretPhrase"
+                ? "Enter Your Seed Phrase"
+                : "")}
       </h3>
       <p
         className="welcomeScreens-text"
@@ -214,10 +219,10 @@ function SetPasswordScreen() {
           (activeTab === "setPassword"
             ? ""
             : activeTab === "secretPhrase"
-            ? "This is your seed phrase. Write it down on a paper and keep it in a safe place. You'll be asked to re-enter this phrase (in order) on the next step."
-            : activeTab === "confirmSecretPhrase"
-            ? "Tap the words to put them next to each other in the correct order."
-            : "")}
+              ? "This is your seed phrase. Write it down on a paper and keep it in a safe place. You'll be asked to re-enter this phrase (in order) on the next step."
+              : activeTab === "confirmSecretPhrase"
+                ? "Tap the words to put them next to each other in the correct order."
+                : "")}
       </p>
 
       {activeTab === "setPassword" && (
@@ -238,7 +243,9 @@ function SetPasswordScreen() {
           </div>
           <InputFieldSimple
             placeholder="Confirm Password"
-            getData={setConfirmPassword}
+            getData={(e)=>{ 
+              if(e?.length<=25){
+              setConfirmPassword(e)}}}
             value={confirmPassword}
             label="Confirm Password"
           />
@@ -256,7 +263,7 @@ function SetPasswordScreen() {
         <SecretPhrase mnemonics={mnemonics} termsCheck={setTerms}>
           <div className="setPassword__footerbuttons">
             <ButtonComp
-              onClick={() => {if(terms){ setActiveTab("confirmSecretPhrase")}}}
+              onClick={() => { if (terms) { setActiveTab("confirmSecretPhrase") } }}
               text="Continue"
               maxWidth="100%"
             />

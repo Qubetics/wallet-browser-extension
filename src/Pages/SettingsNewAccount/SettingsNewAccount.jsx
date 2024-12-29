@@ -22,6 +22,9 @@ function AddNewWallet() {
     duration: DURATION,
   });
 
+  console.log("Add new wallet new");
+  console.log("oooooooooSSSSSSSSSSSSS ", state);
+  
   return (
     <div>
       {contextHolder}
@@ -101,30 +104,47 @@ function AddNewWallet() {
                         "Wallet with this name already exists"
                       );
                     } 
-                     
+                    console.log('Comemmmmmmmmm');
+                    
+                    store.dispatch(setLoading(true));
+                      await chrome.storage.session.set({name: name.trim(),});
                     // const mnemonics = await WalletHelper.getMnemonics(
                     //   account.address
                     // );
                      
-                    store.dispatch(setLoading(true));
+                    
                     // const response = await WalletHelper.generateAndSetWallet(
                     //   mnemonics,
                     //   name
                     // );
                     // await WalletHelper.setWalletPreference(response);
                     const newMnemonic =   await WalletHelper.generateNewMnemonics()
-                    store.dispatch(setLoading(false));
+                    
 
-                    navigate("/createNewWallet",{state:{type:"create", createWalletMnemonics:newMnemonic}});
+                    // navigate("/createNewWallet",{state:{type:"create", createWalletMnemonics:newMnemonic}});
+
+                    navigate("/setPassword", {
+                      state: {
+                        type:state?.type,
+                        addNew:state?.addNew,
+                        createWalletMnemonics: newMnemonic,
+                        createShuffledMnemonics: newMnemonic
+                          .split(" ")
+                          .sort(() => Math.random() - 0.5),
+                      },
+                    }); 
+                    store.dispatch(setLoading(false));
                   } catch (error) {
                     console.error("Error occurred:", error);
                     messageApi.error("An error occurred. Please try again.");
-                  } finally {
-                    const delay = 3000;
-                    const startTime = Date.now();
-                    while (Date.now() - startTime < delay) { }
                     store.dispatch(setLoading(false));
                   }
+                  //  finally { 
+                  //   const delay = 3000;
+                  //   const startTime = Date.now();
+                  //   while (Date.now() - startTime < delay) { }
+                  //   store.dispatch(setLoading(false));
+                  // }
                 }}
                 text={"Create"}
                 maxWidth="100%"

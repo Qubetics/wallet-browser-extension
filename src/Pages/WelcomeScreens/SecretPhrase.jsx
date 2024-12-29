@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "./Welcome.scss";
 import CopyIcon from "../../Assets/CopyIcon.svg";
 import { Checkbox, message } from "antd";
@@ -18,11 +18,14 @@ function SecretPhrase({ children, mnemonics, termsCheck }) {
     navigator.clipboard.writeText(str);
     messageApi.success("Phrase Copied");
   }
-  const onChange = (e) => {
-    console.log('CCCCCCCCCCCCCCCC ', e.target.checked);
-    
-    termsCheck(e.target.checked);
-  };
+  // const onChange = (e) => { 
+  //   termsCheck(e.target.checked);
+  // };
+
+  useEffect(()=>{
+    termsCheck(true);
+  },[]);
+
   return (
     <div className="setPassword__secretPharse">
       <div>
@@ -84,7 +87,7 @@ function SecretPhrase({ children, mnemonics, termsCheck }) {
           </div>
           <div className="donotShare_item">
             <img src={TickImg} alt="" />
-            <p>Qubetics Wallet support will NEVER reach out to ask for it</p>
+            <p>Qubetics Extension support will NEVER reach out to ask for it</p>
           </div>
         </div>
         {/* </div> */}
@@ -105,9 +108,9 @@ function SecretPhrase({ children, mnemonics, termsCheck }) {
             textAlign: "left",
           }}
         >
-          <Checkbox onChange={onChange}>
+          {/* <Checkbox onChange={onChange}>
             <p >I understand</p>
-          </Checkbox>
+          </Checkbox> */}
         </div>
       </div>
       {children}

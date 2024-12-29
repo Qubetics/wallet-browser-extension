@@ -9,9 +9,15 @@ import { message } from 'antd';
 import { useSelector } from 'react-redux';
 import { DURATION } from '../../config/message.config';
 import CopyIcon from '../../Assets/CopyIconBlue.svg';
+import { WalletHelper } from '../../helpers/wallet.helper';
+import { SystemProgram } from "@solana/web3.js";
 
 function ShowPrivateKey() {
   const [address, setAddress] = useState(null);
+
+  const [btcKey, setBtcKey] = useState(null);
+  const [solKey, setSolKey] = useState(null);
+
   const [messageApi, contextHolder] = message.useMessage({
     duration: DURATION,
   });
@@ -34,22 +40,33 @@ function ShowPrivateKey() {
   }
 
   const coin = {
-
     1: "BNB",
-
     2: "ETH",
-
     3: "BTC",
-
     4: "POL",
-
     5: "SOL",
-
     6: "TRX",
-
   };
 
 
+  console.log('lllllllllllllllllllll ', account,);
+
+  const get_privateKey = async () => {
+    const btcK = await WalletHelper.getBitcoinPrivateKey();
+    console.log("CCCCCCCCCCCCCCCccc11111111 ", btcK);
+
+    // const kkk = await WalletHelper.getSolanaPrivateKey();
+    // console.log("LLLLLLLLLLLLLLLLLL ", kkk); 
+    // const secretKeyUint8Array = new Uint8Array(kkk.data); 
+    // const secretKeyBase64 = Buffer.from(secretKeyUint8Array).toString("base64");
+    // console.log("Secret Key (Base64):", secretKeyBase64);
+
+    // const solK = SystemProgram.from(kkk).toString('base64')
+    // console.log("CCCCCCCCCCCCCCCccc ", solK);
+  }
+  useEffect(() => {
+    get_privateKey();
+  }, []);
 
   return (
     <div>
@@ -88,59 +105,31 @@ function ShowPrivateKey() {
           </div>
         </div> */}
         <div className={`flexedContent`}>
-
           <div className="editWallet privateWallet">
-
-            <h2>Keep your private key safe!</h2>
-
+            <h2 style={{ color: "#fff", marginBottom: 25 }}>
+              Keep your private key safe!</h2>
             {account &&
-
               address &&
-
-              account?.coinFamilies.map((data, idx) => (
-
-                <div
-
-                  className="editWallet__linkOuter"
-
+              account?.coinFamilies.map(async (data, idx) => (
+                <div className="editWallet__linkOuter"
                   key={idx}
-
-                  style={{ display: "flex", alignItems: "center" }}
-
+                  style={{ display: "flex", alignItems: "center", backgroundColor: "#295a72", borderRadius: 25, justifyContent: 'space-between', marginBottom: '16px', padding: "15px 24px" }}
                 >
-
                   <span style={{ color: "white" }}>
-
-                    {address?.slice(0, 15)}...{coin?.[data]}
-
+                    {coin?.[data] == 'btc' ? btcKey :
+                      coin?.[data] == 'sol' ? solKey : <>{address?.slice(0, 15)}...{coin?.[data]}</>}
                   </span>
-
                   <div className="secretkeyss">
-
                     <span style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-
                       <span style={{ color: "white" }}>{coin?.[data]}</span>
-
-
-
                       <img
-
                         src={CopyIcon}
-
                         width={14}
-
                         height={16}
-
                         onClick={copyToClipboard}
-
                       />
-
                     </span>
-
                   </div>
-
-
-
                   {/* <InputFieldOnly
 
         placeholder={"Private Key"}
