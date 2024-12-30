@@ -2820,7 +2820,7 @@ function Swap() {
                   </span>
                 }
                 getData={(value) => {
-                  const hasEmoji = /[\p{Emoji}]/u.test(value);
+                  const hasEmoji = /[\p{Extended_Pictographic}]/u.test(value);
                   if (hasEmoji) { return false }
                   setKeyword(value);
                   if (value.trim().length === 0) {

@@ -164,12 +164,8 @@ function SendCoins() {
           coin.coin.coin_symbol
         );
          
-        setSelectedGasPrice(result.fast);
+        setSelectedGasPrice(result.propose);
         setGasPrice(result);
-
-        console.log({
-          wallet_address: account.coinFamilyAndAddress[coin.coin.coin_family],
-        });
       }
 
 
@@ -582,7 +578,7 @@ function SendCoins() {
                   50: "Average",
                   100: "High",
                 }}
-                defaultValue={100}
+                defaultValue={50}
                 step={null}
                 onChange={handleChange}
               />

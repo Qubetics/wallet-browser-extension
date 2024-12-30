@@ -2178,7 +2178,7 @@ function SecretPhrasePaste({ children, termsCheck, getMnemonics, type }) {
           </div>
         </div>
 
-        {sortedWordList.length > 0 ? (
+        {/* {sortedWordList.length > 0 ? (
           <div className="setPassword__secretPhrase__latters">
             <div
               className={`${"setPassword__secretPharse__confirmFieldSBgInner"} ${"setPassword__secretPharse__confirmFieldSBgInner"}`}
@@ -2202,7 +2202,7 @@ function SecretPhrasePaste({ children, termsCheck, getMnemonics, type }) {
               />
             ) : null}
           </div>
-        ) : null}
+        ) : null} */}
 
         {contextHolder}
         <div className={"checkboxOuter"}>

@@ -60,7 +60,7 @@ function WatchList() {
         fiat_type: currency.name,
         limit: 2000,
         page: 1,
-        search: keyword,
+        search: keyword?.trim(),
       },
       {
         headers: {
@@ -110,7 +110,7 @@ function WatchList() {
               value={keyword}
               checkForSymbols={true}
               getData={(value) => {
-                const hasEmoji = /[\p{Emoji}]/u.test(value);
+                const hasEmoji =/[\p{Extended_Pictographic}]/u.test(value);
                 if (hasEmoji) { return false }
                 setKeyword(value);
               }}

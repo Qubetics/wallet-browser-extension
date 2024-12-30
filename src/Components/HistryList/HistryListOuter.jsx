@@ -101,7 +101,7 @@ function HistoryListOuter(props) {
             <img src={TickIcon}></img>
             <div className="send">
               <p className="sendRecieve">
-                {sendRecieve}
+                {sendRecieve}{' '}
                 {valueCurrency}
               </p>
               <div className="histryStatus">

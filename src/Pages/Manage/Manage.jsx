@@ -32,7 +32,7 @@ function Manage() {
         page: currentPage,
         limit: 25,
         currency_code: currency.name,
-        search: keyword,
+        search: keyword?.trim(),
       },
       {
         headers: {
@@ -132,7 +132,7 @@ function Manage() {
                   </span>
                 }
                 getData={(value) => {
-                  const hasEmoji = /[\p{Emoji}]/u.test(value);
+                  const hasEmoji = /[\p{Extended_Pictographic}]/u.test(value);
                   if (value.length <= 25 && !hasEmoji) {
                     setKeyword(value);
                     setCurrentPage(1);

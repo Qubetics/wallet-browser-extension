@@ -66,7 +66,9 @@ function VerifyPassword() {
           value={password}
           customFunction={handleLogin}
           getData={(password) => {
-            const hasEmoji = /[\p{Emoji}]/u.test(password);
+            
+            const hasEmoji = /[\p{Extended_Pictographic}]/u.test(password);
+            console.log("-----------------> ", hasEmoji);
             if (!hasEmoji) {
               setPassword(password);
             }

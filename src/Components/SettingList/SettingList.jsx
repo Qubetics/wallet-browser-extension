@@ -40,6 +40,7 @@ function SettingList(props) {
 
   const handleCancel = () => {
     setOpenmodal(false);
+    setPassword(null);
   };
 
   const onLogoutClick = () => {
@@ -351,9 +352,10 @@ function SettingList(props) {
       >
         <div className='viewphrases'>
           <InputFieldSimple
+          value={password}
             placeholder='Password'
             getData={(value) => {
-              const hasEmoji = /[\p{Emoji}]/u.test(value);
+              const hasEmoji = /[\p{Extended_Pictographic}]/u.test(value);
               if (value.length <= 100 && !hasEmoji) {
                 setPassword(value);
               }
@@ -424,6 +426,7 @@ function SettingList(props) {
             maxWidth={'100%'}
             onClick={async () => {
               setOpenmodal(true);
+              setPassword(null);
             }}
           />
         </div>

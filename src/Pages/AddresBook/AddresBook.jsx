@@ -110,7 +110,7 @@ function AddresBook() {
             value={keyword}
             checkForSymbols={true}
             getData={(value) => {
-              const hasEmoji = /[\p{Emoji}]/u.test(value);
+              const hasEmoji = /[\p{Extended_Pictographic}]/u.test(value);
               if (value.length <= 100 && !hasEmoji) {
                 setKeyword(value);
               }

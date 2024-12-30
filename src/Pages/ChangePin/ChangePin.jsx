@@ -105,7 +105,7 @@ function ChangePin() {
                 type={"text"}
                 value={oldPassword}
                 getData={(password) => {
-                  const hasEmoji = /[\p{Emoji}]/u.test(password);
+                  const hasEmoji = /[\p{Extended_Pictographic}]/u.test(password);
                   if (password?.length <= 25 && !hasEmoji) {
                     setOldPassword(password);
                   }
@@ -122,7 +122,7 @@ function ChangePin() {
                 type={"text"}
                 value={newPassword}
                 getData={(password) => {
-                  const hasEmoji = /[\p{Emoji}]/u.test(password);
+                  const hasEmoji = /[\p{Extended_Pictographic}]/u.test(password);
                   if (password?.length <= 25 && !hasEmoji) {
                     handlePasswordChange(password);
                   } 
@@ -147,7 +147,7 @@ function ChangePin() {
                 type={"text"}
                 value={confirmPassword}
                 getData={(password) => {
-                  const hasEmoji = /[\p{Emoji}]/u.test(password);
+                  const hasEmoji = /[\p{Extended_Pictographic}]/u.test(password);
                   if (password?.length <= 25 && !hasEmoji) {
                     setConfirmPassword(password);
                   } 

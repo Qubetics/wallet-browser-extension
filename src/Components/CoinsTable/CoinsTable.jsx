@@ -349,7 +349,7 @@ function CoinsTable({ dataArray, showCoinPrice, name }) {
                 color: "white"
               }}
             >
-              Are you sure you want to Delete from Watchlist ?
+              Are you sure you want to delete this asset from the watchlist ?
             </p>
           </div>
           <div

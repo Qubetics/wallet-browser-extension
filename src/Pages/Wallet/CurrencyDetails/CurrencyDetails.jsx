@@ -197,10 +197,11 @@ function CurrencyDetails() {
           </span>
         }
         chartIcon={() => {
-          if(coin?.coin?.graph_pair){
-          chrome.tabs.create({
-            url: `https://trading-view.qubetics.work/?key=${coin?.coin?.graph_pair?.toUpperCase()}`,
-          });}else{
+          if (coin?.coin?.graph_pair) {
+            chrome.tabs.create({
+              url: `https://trading-view.qubetics.work/?key=${coin?.coin?.graph_pair?.toUpperCase()}`,
+            });
+          } else {
             return messageApi.error("Key pair not exists")
           }
         }}
@@ -227,8 +228,8 @@ function CurrencyDetails() {
                   Authorization: account.jwtToken,
                 },
               }
-            ); 
-            messageApi.success(`${!isStared? 'Added in':"Removed from "} watchlist successfully`);
+            );
+            messageApi.success(`${!isStared ? 'Added in' : "Removed from "} watchlist successfully`);
             setIsStared(!isStared)
           } catch (error) {
             messageApi.error('Unable to favourite the selected coin');
@@ -248,8 +249,8 @@ function CurrencyDetails() {
                   color: "#fff",
                 }}
               >
-                 
-                {coin?.coin?.token_address!==null?token_type(coin?.coin?.coin_family):'Coin'}
+
+                {coin?.coin?.token_address !== null ? token_type(coin?.coin?.coin_family) : 'Coin'}
                 {/* {coin.coin.coin_family === 1 ? "BEP20" : coin.coin.coin_family === 2 ? "ERC20" : coin.coin.coin_family === 4 ? "ERC20" : coin.coin.coin_family === 5 ? "SPL" : coin.coin.coin_family === 6 ? "TRC20" : ""} */}
               </p>
               <p
@@ -293,7 +294,25 @@ function CurrencyDetails() {
               </p>
             </div>
             <div style={{ textAlign: "center", margin: "12px auto" }}>
-              <img style={{height:50, width:50}} src={coin?.coin?.coin_image} alt="usdt" />
+              {coin?.coin?.coin_image ?
+                <img style={{ height: 50, width: 50 }} src={coin?.coin?.coin_image} alt="usdt" />
+                :
+                <div
+                  className="randb extra borderDarkLight"
+                  style={{
+                    height: "30px",
+                    width: "30px",
+                    background: "rgb(202, 201, 201)",
+                    borderRadius: "50%",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    border: "1px solid",
+                  }}
+                >
+                  {coin?.coin?.coin_name?.split("")[0]}
+                </div>
+              }
             </div>
             <CurrencyBalanceDetails
               mt0="currDetails__card__mt0"
@@ -316,7 +335,7 @@ function CurrencyDetails() {
           </div>
 
           {coin && (
-            <div className="editWallet__linkOuter"> 
+            <div className="editWallet__linkOuter">
               <InputField
                 value={account.coinFamilyAndAddress[coin.coin.coin_family]}
                 readonly={true}

@@ -140,7 +140,7 @@ function SendConfirm() {
       textVal: `${parseFloat(getFlooredFixed(+networkFee, 8))} ${
         parentCoin ? parentCoin.currencySymbol.toUpperCase() : ""
       }/ ${currency.symbol}${addCommasToNumber(
-        getFlooredFixed(fiatGasFee, 4)
+        getFlooredFixed(fiatGasFee, 2)
       )}`,
     },
     {

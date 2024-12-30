@@ -543,7 +543,7 @@ export class Web3Helper {
         symbol
       );
 
-      // console.log('gasPriceRes-------> ', gasPriceRes);
+      console.log('gasPriceRes-------> ', gasPriceRes);
 
       const nonce = await this.getNonce(slug, true, tokenAddress, symbol, from);
       // console.log("NONCEEEEEE ", nonce);

@@ -28,6 +28,7 @@ import { modifyString } from '../../helpers/common.helper';
 var WAValidator = require('multicoin-address-validator');
 
 function CustomTocken() {
+  const [disabled, setDisabled] = useState(false);
   const { chain, account } = useSelector((state) => state);
   const [tokenAddress, setTokenAddress] = useState(null);
   const [messageApi, contextHolder] = message.useMessage({
@@ -407,15 +408,16 @@ function CustomTocken() {
                     },
                   }
                 );
+                setDisabled(true)
                 store.dispatch(setLoading(false));
 
                 messageApi.success(resp?.data?.message);
-                console.log("RESPPPPPPPPPPPPPP ", resp?.data?.message);
+                 
                 setTimeout(() => {
                   navigate('/wallet');
-                }, 5000);
+                }, 3000);
               } catch (error) {
-                console.log("EEEEEEEEEEEEEEEEEEE", error);
+                 
                 store.dispatch(setLoading(false));
 
                 const errorMessage = error?.response?.data?.message;
@@ -429,7 +431,7 @@ function CustomTocken() {
             }}
           >
             {' '}
-            <ButtonComp text={'Add Token'} maxWidth={'100%'} />
+            <ButtonComp disabled={disabled} text={'Add Token'} maxWidth={'100%'} />
           </Link>
         </div>
       </div>
