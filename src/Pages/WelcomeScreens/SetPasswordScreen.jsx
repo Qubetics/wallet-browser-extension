@@ -32,7 +32,7 @@ function validatePassword(password) {
 
 function SetPasswordScreen() {
   const { state } = useLocation();
-  
+
   const { type, createWalletMnemonics, createShuffledMnemonics } = state;
   const navigate = useNavigate();
   const { layoutHeader } = useOutletContext();
@@ -76,9 +76,10 @@ function SetPasswordScreen() {
   }, [activeTab]);
 
   const handlePasswordChange = (value) => {
-    if(value.length <= 25){
-    setPassword(value);
-    setValidation(validatePassword(value));}
+    if (value.length <= 25) {
+      setPassword(value);
+      setValidation(validatePassword(value));
+    }
   };
 
   const popError = (error) => {
@@ -96,15 +97,15 @@ function SetPasswordScreen() {
     await chrome.storage.session.set({ password: password.trim() });
 
     if (type === "create") {
-       await WalletHelper.setPasswordInSession(password);
+      await WalletHelper.setPasswordInSession(password);
       if (state?.addNew) {
         // createWalletMnemonics, createShuffledMnemonics
         setMnemonics(createWalletMnemonics);
         setShuffledMnemonics(
           createWalletMnemonics.split(" ").sort(() => Math.random() - 0.5)
         );
-      } else { 
-        const mnemonics =  await WalletHelper.getMnemonics();
+      } else {
+        const mnemonics = await WalletHelper.getMnemonics();
         setMnemonics(mnemonics);
         setShuffledMnemonics(
           mnemonics.split(" ").sort(() => Math.random() - 0.5)
@@ -124,7 +125,7 @@ function SetPasswordScreen() {
   const handleConfirmSecretPhrase = async () => {
     if (correct) {
       store.dispatch(setLoading(true));
-      const { name } = await chrome.storage.session.get("name");  
+      const { name } = await chrome.storage.session.get("name");
       await WalletHelper.generateAndSetWallet(mnemonics, name);
       store.dispatch(setLoading(false));
       setActiveTab("congrats");
@@ -164,9 +165,11 @@ function SetPasswordScreen() {
         popError("Invalid mnemonics. Please try again.");
       }
       store.dispatch(setLoading(false));
-    } catch {
+    } catch (e) {
+      console.log("pppppppppppppppppppppppp ", e);
+
       store.dispatch(setLoading(false));
-      popError("An error occurred. Please try again.");
+      popError(e ? e : "An error occurred. Please try again.");
     }
   };
 
@@ -243,9 +246,11 @@ function SetPasswordScreen() {
           </div>
           <InputFieldSimple
             placeholder="Confirm Password"
-            getData={(e)=>{ 
-              if(e?.length<=25){
-              setConfirmPassword(e)}}}
+            getData={(e) => {
+              if (e?.length <= 25) {
+                setConfirmPassword(e)
+              }
+            }}
             value={confirmPassword}
             label="Confirm Password"
           />

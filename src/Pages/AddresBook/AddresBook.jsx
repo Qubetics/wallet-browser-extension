@@ -110,7 +110,10 @@ function AddresBook() {
             value={keyword}
             checkForSymbols={true}
             getData={(value) => {
-              setKeyword(value);
+              const hasEmoji = /[\p{Emoji}]/u.test(value);
+              if (value.length <= 100 && !hasEmoji) {
+                setKeyword(value);
+              }
             }}
           />
         </div>
@@ -129,22 +132,22 @@ function AddresBook() {
         {list.length > 0 ? (
           list.map((el, index) => (
             <AddressNetworkCard
-                heading={el?.name?.toUpperCase()}
-                address={el?.address}
-                wallet_address={el?.address}
-                // currency={`${el?.coin_data?.coin_symbol.toUpperCase()} (${el.coin_data.coin_name
-                // })`}
-                currency={`${el?.wallet_data?.coin_family} (${el.wallet_data.name})`}
-                index={index}
-                id={el?.id}
-                refresh={refresh}
-                wallet_data={el.wallet_data}
-                editModal={editModal}
-                setEditModal={setEditModal}
-                editModalMain={editModalMain}
-                setEditModalMain={setEditModalMain}
-                inits={init}
-              />
+              heading={el?.name?.toUpperCase()}
+              address={el?.address}
+              wallet_address={el?.address}
+              // currency={`${el?.coin_data?.coin_symbol.toUpperCase()} (${el.coin_data.coin_name
+              // })`}
+              currency={`${el?.wallet_data?.coin_family} (${el.wallet_data.name})`}
+              index={index}
+              id={el?.id}
+              refresh={refresh}
+              wallet_data={el.wallet_data}
+              editModal={editModal}
+              setEditModal={setEditModal}
+              editModalMain={editModalMain}
+              setEditModalMain={setEditModalMain}
+              inits={init}
+            />
           ))
         ) : (
           <p

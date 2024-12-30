@@ -235,7 +235,13 @@ function Setting() {
           <div className="viewphrases">
             <InputFieldSimple
               placeholder="Password"
-              getData={setPassword}
+              // getData={setPassword}
+              getData={(value) => {
+                const hasEmoji = /[\p{Emoji}]/u.test(value);
+                if (value.length <= 100 && !hasEmoji) {
+                  setPassword(value);
+                }
+              }}
               customFunction={async () => {
                 const { password: sessionPassword } =
                   await chrome.storage.session.get("password");

@@ -85,6 +85,8 @@ function Send() {
             value={keyword}
             checkForSymbols={true}
             getData={(value) => {
+              const hasEmoji = /[\p{Emoji}]/u.test(value);
+              if (hasEmoji) { return false }
               setKeyword(value);
             }}
             addonBefore={
@@ -113,7 +115,7 @@ function Send() {
                 const balance = new BigNumber(token.balance);
                 const result = myPrice.times(balance);
                 const formattedResult = result.toString();
- 
+
                 return {
                   position: token.sort_order,
                   coinIcon: token.coin.coin_image,
@@ -121,28 +123,28 @@ function Send() {
                   coinSubName: token.coin.coin_name,
                   coinPrice: myPrice.toNumber()
                     ? formatSmallNumber(
-                        exponential_to_decimal(myPrice.toNumber())
-                      )
+                      exponential_to_decimal(myPrice.toNumber())
+                    )
                     : '0.00',
                   coinStatus: getFlooredFixed(
                     price
                       ? parseFloat(
-                          price.price_change_percentage_24h || 0
-                        ).toLocaleString()
+                        price.price_change_percentage_24h || 0
+                      ).toLocaleString()
                       : 0,
                     2
                   ),
                   currCryptoBal: balanceIn
                     ? `${addCommasToNumber(
-                        parseFloat(getFlooredFixed(token.balance, 6))
-                      )}`
+                      parseFloat(getFlooredFixed(token.balance, 6))
+                    )}`
                     : `****`,
                   currCryptoBalSymbol: token.coin.coin_symbol.toUpperCase(),
                   currDollerBal: balanceIn
                     ? addCommasToNumber(getFlooredFixed(formattedResult, 2))
                     : '****',
                   routeTo: 'sendCurrency',
-                  type:token?.coin?.token_address!==null ? token_type(token.coin.coin_family):'',
+                  type: token?.coin?.token_address !== null ? token_type(token.coin.coin_family) : '',
                   status: true,
                   coin: token,
                 };

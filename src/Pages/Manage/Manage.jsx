@@ -97,16 +97,16 @@ function Manage() {
           <MenuRestofHeaders
             backTo={"/wallet"}
             title={"Add Tokens"}
-            // manageTo={
-            //   true
-              // !(
-              //   filteredTokens.length === 1 &&
-              //   filteredTokens[0]?.coin_symbol === "btc" &&
-              //   account.isWatchOnly
-              // )
-              //   ? "/add-token"
-              //   : false
-            // }
+          // manageTo={
+          //   true
+          // !(
+          //   filteredTokens.length === 1 &&
+          //   filteredTokens[0]?.coin_symbol === "btc" &&
+          //   account.isWatchOnly
+          // )
+          //   ? "/add-token"
+          //   : false
+          // }
           />
           {!(
             filteredTokens.length === 1 &&
@@ -132,8 +132,11 @@ function Manage() {
                   </span>
                 }
                 getData={(value) => {
-                  setKeyword(value);
-                  setCurrentPage(1);
+                  const hasEmoji = /[\p{Emoji}]/u.test(value);
+                  if (value.length <= 25 && !hasEmoji) {
+                    setKeyword(value);
+                    setCurrentPage(1);
+                  }
                 }}
               />
             </div>
@@ -188,7 +191,7 @@ function Manage() {
                     symbol={data.coin_symbol}
                     img={data.coin_image}
                     // valuecurrency={data.coin_family === 1 ? "BEP20" : "ERC20"}
-                    valuecurrency={(data?.token_address!==null?(data.coin_family === 1 ? "BEP20" : data.coin_family === 2 ? "ERC20":data.coin_family === 4 ?"ERC20":data.coin_family === 5 ?"SPL":data.coin_family === 6 ?"TRC20":""):'')}
+                    valuecurrency={(data?.token_address !== null ? (data.coin_family === 1 ? "BEP20" : data.coin_family === 2 ? "ERC20" : data.coin_family === 4 ? "ERC20" : data.coin_family === 5 ? "SPL" : data.coin_family === 6 ? "TRC20" : "") : '')}
                     id={data.id}
                     coinFamily={data.coin_family}
                     walletAddress={

@@ -113,7 +113,10 @@ function PortfolioWatchList() {
               value={keyword}
               checkForSymbols={true}
               getData={(value) => {
-                setKeyword(value);
+                const hasEmoji = /[\p{Emoji}]/u.test(value);
+                if (value.length <= 25 && !hasEmoji) {
+                  setKeyword(value);
+                }
               }}
               addonBefore={
                 <span>
@@ -197,7 +200,7 @@ function PortfolioWatchList() {
                       : "****",
                     routeTo: "no-where",
                     // type: token.coin_family === 1 ? "BEP20" : "ERC20",
-                    type: token.is_token !==0? token_type(token.coin_family) : "",
+                    type: token.is_token !== 0 ? token_type(token.coin_family) : "",
                     status: true,
                     coin: token,
                     currPriceValue: priceData,

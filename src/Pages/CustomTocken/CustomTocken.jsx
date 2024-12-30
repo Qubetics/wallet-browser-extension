@@ -215,7 +215,7 @@ function CustomTocken() {
       <MenuRestofHeaders
         backTo={state ? (state.swap ? '/swap' : '/wallet') : '/wallet'}
         title={'Add Custom Token'}
-        manage={state ? (state.swap ? '/swap' : '/wallet') : '/wallet'}
+        manage={state ? (state.swap ? '/swap' : '/wallet') : '/manage'}
       />
       <div className={`flexedContent`}>
         <div className={style.token}>

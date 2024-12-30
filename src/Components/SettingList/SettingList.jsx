@@ -149,9 +149,9 @@ function SettingList(props) {
             e.preventDefault();
 
 
-            if(to === "/logout") {
+            if (to === "/logout") {
               return setLogoutOpenmodal(true)
-            } 
+            }
 
             if (to === '/lock') {
               await chrome.storage.session.remove(['accounts', 'password']);
@@ -234,10 +234,10 @@ function SettingList(props) {
           <div
             className='settingList'
             onClick={async () => {
-              if(to === "/logout") {
+              if (to === "/logout") {
                 return setLogoutOpenmodal(true)
-              } 
-  
+              }
+
               if (to === '/watch-password') {
                 return navigate('/watch-password', {
                   state: {
@@ -328,11 +328,11 @@ function SettingList(props) {
             )}
             {switchToggle === 'switchToggleAutoLock' && (
               <div className='autoLockTogal'>
-              <Switch
-                className='switchSec2'
-                onChange={toggleAutoLock}
-                checked={isAutoLock}
-              />
+                <Switch
+                  className='switchSec2'
+                  onChange={toggleAutoLock}
+                  checked={isAutoLock}
+                />
               </div>
             )}
           </div>
@@ -352,7 +352,12 @@ function SettingList(props) {
         <div className='viewphrases'>
           <InputFieldSimple
             placeholder='Password'
-            getData={setPassword}
+            getData={(value) => {
+              const hasEmoji = /[\p{Emoji}]/u.test(value);
+              if (value.length <= 100 && !hasEmoji) {
+                setPassword(value);
+              }
+            }}
             customFunction={async () => {
               const { password: sessionPassword } =
                 await chrome.storage.session.get('password');

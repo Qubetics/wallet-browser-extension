@@ -851,7 +851,8 @@ export class WalletHelper {
       return id;
     } catch (error) {
       console.log(error);
-      return false;
+      // return false;
+      throw error?.response?.data?.message || "Something went wrong."
     }
   };
 

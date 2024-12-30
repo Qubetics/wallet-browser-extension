@@ -110,6 +110,8 @@ function WatchList() {
               value={keyword}
               checkForSymbols={true}
               getData={(value) => {
+                const hasEmoji = /[\p{Emoji}]/u.test(value);
+                if (hasEmoji) { return false }
                 setKeyword(value);
               }}
               addonBefore={
@@ -150,21 +152,21 @@ function WatchList() {
                     coinSubName: token.coin_name,
                     coinPrice: myPrice.toNumber()
                       ? formatSmallNumber(
-                          exponential_to_decimal(myPrice.toNumber())
-                        )
+                        exponential_to_decimal(myPrice.toNumber())
+                      )
                       : "0.00",
                     coinStatus: getFlooredFixed(
                       price
                         ? parseFloat(
-                            price.price_change_percentage_24h || 0
-                          ).toLocaleString()
+                          price.price_change_percentage_24h || 0
+                        ).toLocaleString()
                         : 0,
                       2
                     ),
                     currCryptoBal: balanceIn
                       ? `${addCommasToNumber(
-                          parseFloat(getFlooredFixed(token.balance, 6))
-                        )}`
+                        parseFloat(getFlooredFixed(token.balance, 6))
+                      )}`
                       : `****`,
                     currCryptoBalSymbol: token.coin_symbol.toUpperCase(),
                     currDollerBal: balanceIn

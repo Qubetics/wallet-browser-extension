@@ -492,6 +492,8 @@ function BuyCoins() {
             value={keyword}
             checkForSymbols={true}
             getData={(value) => {
+                const hasEmoji = /[\p{Emoji}]/u.test(value);
+              if (hasEmoji) {return false}
               setKeyword(value);
               if (value.trim().length === 0) {
                 setFilteredTokens(myTokens);

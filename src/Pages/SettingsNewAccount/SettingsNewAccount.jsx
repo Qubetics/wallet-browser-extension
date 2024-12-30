@@ -22,7 +22,7 @@ function AddNewWallet() {
     duration: DURATION,
   });
 
-   
+
   return (
     <div>
       {contextHolder}
@@ -44,7 +44,8 @@ function AddNewWallet() {
                   value={name}
                   placeholderBaseColor={true}
                   getData={(name) => {
-                    if (name.length <= 25) {
+                    const hasEmoji = /[\p{Emoji}]/u.test(name);
+                    if (name.length <= 25 && !hasEmoji) {
                       if (/^\s/.test(name)) {
                         setName("");
                       } else {
@@ -101,35 +102,35 @@ function AddNewWallet() {
                       return messageApi.error(
                         "Wallet with this name already exists"
                       );
-                    } 
-                    
+                    }
+
                     store.dispatch(setLoading(true));
-                      await chrome.storage.session.set({name: name.trim(),});
+                    await chrome.storage.session.set({ name: name.trim(), });
                     // const mnemonics = await WalletHelper.getMnemonics(
                     //   account.address
                     // );
-                     
-                    
+
+
                     // const response = await WalletHelper.generateAndSetWallet(
                     //   mnemonics,
                     //   name
                     // );
                     // await WalletHelper.setWalletPreference(response);
-                    const newMnemonic =   await WalletHelper.generateNewMnemonics()
-                    
+                    const newMnemonic = await WalletHelper.generateNewMnemonics()
+
 
                     // navigate("/createNewWallet",{state:{type:"create", createWalletMnemonics:newMnemonic}});
 
                     navigate("/setPassword", {
                       state: {
-                        type:state?.type,
-                        addNew:state?.addNew,
+                        type: state?.type,
+                        addNew: state?.addNew,
                         createWalletMnemonics: newMnemonic,
                         createShuffledMnemonics: newMnemonic
                           .split(" ")
                           .sort(() => Math.random() - 0.5),
                       },
-                    }); 
+                    });
                     store.dispatch(setLoading(false));
                   } catch (error) {
                     console.error("Error occurred:", error);

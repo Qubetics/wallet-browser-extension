@@ -113,6 +113,8 @@ function AddWatchList() {
               value={keyword}
               checkForSymbols={true}
               getData={(value) => {
+                const hasEmoji = /[\p{Emoji}]/u.test(value);
+                if (hasEmoji) { return false }
                 setKeyword(value);
               }}
               addonBefore={
@@ -173,7 +175,7 @@ function AddWatchList() {
                   ? addCommasToNumber(getFlooredFixed(formattedResult, 2))
                   : '****',
                 routeTo: 'no-where',
-                type:  token.is_token !==0 ? token_type(token.coin_family):"",
+                type: token.is_token !== 0 ? token_type(token.coin_family) : "",
                 status: true,
                 coin: token,
                 watch: async () => {
