@@ -213,7 +213,7 @@ function Wallet() {
         <ButtonComp
           maxWidth="190px"
           onClick={() => {
-            return navigate('/manage');
+            return navigate('/add-token');
           }}
           text={
             <span>

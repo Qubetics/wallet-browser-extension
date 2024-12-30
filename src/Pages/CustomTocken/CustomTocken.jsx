@@ -106,23 +106,23 @@ function CustomTocken() {
         value={
           selectedChain
             ? {
-                value: selectedChain?.coinFamily,
-                label: (
-                  <span
-                    className='flexedItemSelect'
-                    style={{
-                      textAlign: 'center',
-                    }}
-                  >
-                    <img
-                      src={selectedChain?.image}
-                      className={style.chainImage}
-                      alt=''
-                    />
-                    {selectedChain?.currencySymbol}
-                  </span>
-                ),
-              }
+              value: selectedChain?.coinFamily,
+              label: (
+                <span
+                  className='flexedItemSelect'
+                  style={{
+                    textAlign: 'center',
+                  }}
+                >
+                  <img
+                    src={selectedChain?.image}
+                    className={style.chainImage}
+                    alt=''
+                  />
+                  {selectedChain?.currencySymbol}
+                </span>
+              ),
+            }
             : null
         }
         onChange={(value) => {
@@ -162,9 +162,9 @@ function CustomTocken() {
       state?.swap
         ? chains.find((chain) => chain.coinFamily == state.swap)
         : chains.filter(
-            (el) =>
-              el.supportTokens && account.coinFamilyAndAddress[el.coinFamily]
-          )[0]
+          (el) =>
+            el.supportTokens && account.coinFamilyAndAddress[el.coinFamily]
+        )[0]
     );
   };
 
@@ -190,8 +190,8 @@ function CustomTocken() {
         }
       );
 
-      console.log("TOKENNNNNNNNNNNNNNN ", tokenData);
-      
+      // console.log("TOKENNNNNNNNNNNNNNN ", tokenData);
+
       setTokenInfo({
         name: tokenData.data.data.name,
         symbol: tokenData.data.data.symbol,
@@ -201,7 +201,7 @@ function CustomTocken() {
       store.dispatch(setLoading(false));
     } catch (error) {
       console.log('Error >>>>> ', error);
-      
+
       store.dispatch(setLoading(false));
       return messageApi.error(
         'Invalid token address provided. Please check the address and try again.'
@@ -213,9 +213,9 @@ function CustomTocken() {
     <div className={`scrollableCont`}>
       {contextHolder}
       <MenuRestofHeaders
-        backTo={state ? (state.swap ? '/swap' : '/manage') : '/manage'}
+        backTo={state ? (state.swap ? '/swap' : '/wallet') : '/wallet'}
         title={'Add Custom Token'}
-        manage={state ? (state.swap ? '/swap' : '/manage') : '/manage'}
+        manage={state ? (state.swap ? '/swap' : '/wallet') : '/wallet'}
       />
       <div className={`flexedContent`}>
         <div className={style.token}>
@@ -383,23 +383,23 @@ function CustomTocken() {
 
 
                 store.dispatch(setLoading(true));
-                console.log('selectedChainselectedChainselectedChain ',selectedChain);
-                
-                await server.post(
+                // console.log('selectedChainselectedChainselectedChain ',selectedChain);
+
+                const resp = await server.post(
                   '/wallet/addtoken',
                   {
                     name: tokenInfo.name,
                     symbol: tokenInfo.symbol,
-                    coin_gicko_alias:tokenInfo.symbol,
+                    coin_gicko_alias: tokenInfo.symbol,
                     decimals: tokenInfo.decimals,
                     token_address: tokenAddress,
                     coin_family: selectedChain.coinFamily,
                     wallet_address: account.coinFamilyAndAddress[selectedChain.coinFamily],
                     wallet_name: account.name,
                     token_type: selectedChain.tokenType,
-                    isSwapList:selectedChain?.swap, 
-                    coin_gicko_id:''
-                    
+                    isSwapList: selectedChain?.swap,
+                    coin_gicko_id: ''
+
                   },
                   {
                     headers: {
@@ -408,10 +408,14 @@ function CustomTocken() {
                   }
                 );
                 store.dispatch(setLoading(false));
-                messageApi.success('Token added successfully');
-                return navigate('/wallet');
+
+                messageApi.success(resp?.data?.message);
+                console.log("RESPPPPPPPPPPPPPP ", resp?.data?.message);
+                setTimeout(() => {
+                  navigate('/wallet');
+                }, 5000);
               } catch (error) {
-                console.log(error);
+                console.log("EEEEEEEEEEEEEEEEEEE", error);
                 store.dispatch(setLoading(false));
 
                 const errorMessage = error?.response?.data?.message;
@@ -421,7 +425,7 @@ function CustomTocken() {
                 } else {
                   return messageApi.error('Something went wrong');
                 }
-              }
+              }  
             }}
           >
             {' '}
@@ -824,6 +828,7 @@ function CustomTocken() {
                     });
                   }
                 }
+                messageApi.success('Token added successfully.');
                 return navigate('/wallet');
               } catch (error) {
                 console.log(error);

@@ -10,28 +10,11 @@ import { useSelector } from 'react-redux';
 import { DURATION } from '../../config/message.config';
 import CopyIcon from '../../Assets/CopyIconBlue.svg';
 import { WalletHelper } from '../../helpers/wallet.helper';
-import { SystemProgram } from "@solana/web3.js";
-import bs58 from 'bs58';
-
-
-
-
-const coin = {
-  1: "BNB",
-  2: "ETH",
-  3: "BTC",
-  4: "POL",
-  5: "SOL",
-  6: "TRX",
-};
+const bs58 = require('bs58');
 
 
 function ShowPrivateKey() {
   const [address, setAddress] = useState(null);
-
-  const [btcKey, setBtcKey] = useState(null);
-  const [solKey, setSolKey] = useState(null);
-
   const [messageApi, contextHolder] = message.useMessage({
     duration: DURATION,
   });
@@ -41,7 +24,7 @@ function ShowPrivateKey() {
   } = useLocation();
 
   const init = () => {
-    setAddress(account?.privateKey);
+    setAddress(account.privateKey);
   };
 
   useEffect(() => {
@@ -53,23 +36,32 @@ function ShowPrivateKey() {
     messageApi.success('Private key copied to clipboard');
   }
 
+  const coin = {
+    1: "BNB",
+    2: "ETH",
+    3: "BTC",
+    4: "POL",
+    5: "SOL",
+    6: "TRX",
+  };
 
  
-  const get_privateKey = async () => {
-    const btcK = await WalletHelper.getBitcoinPrivateKey();
-    setBtcKey(btcK) 
-    const rr = await WalletHelper?.getSolanaPrivateKey();
-    const privateKey =  bs58.encode(rr)
-    console.log("EEEEEEEEEEEEEEEEEEEEe ", privateKey); 
-    setSolKey(privateKey); 
-  }
+const [solKey, setSolKey] = useState(null);
+const [btcKey, setBtcKey] = useState(null);
 
-  useEffect(() => {
-    get_privateKey();
-  }, []);
+const get_privateKey = async () => {
+  const btcK = await WalletHelper.getBitcoinPrivateKey();
+  setBtcKey(btcK) 
+  const rr = await WalletHelper?.getSolanaPrivateKey();
+  const privateKey =  bs58.encode(rr);
+  setSolKey(privateKey); 
+}
 
-  console.log("CCCCCCCCCCCCCXS ", account);
-  
+useEffect(() => {
+  get_privateKey();
+}, []);
+
+
   return (
     <div>
       {contextHolder}
@@ -80,22 +72,23 @@ function ShowPrivateKey() {
         /> 
         <div className={`flexedContent`}>
           <div className="editWallet privateWallet">
-            <h2 style={{ color: "#fff", marginBottom: 25 }}>
+            <h2 style={{color:"#fff", marginBottom:25}}>
               Keep your private key safe!</h2>
-            {Array.isArray(account?.coinFamilies) &&
+            {account &&
               address &&
-              account?.coinFamilies.map(async (data, idx) => (
-                <div className="editWallet__linkOuter"
-                  key={idx}
+              account?.coinFamilies.map((data, idx) => (
+                <div className="editWallet__linkOuter" 
+                  key={idx} 
                   style={{ display: "flex", alignItems: "center", backgroundColor: "#295a72", borderRadius: 25, justifyContent: 'space-between', marginBottom: '16px', padding: "15px 24px" }}
                 >
                   <span style={{ color: "white" }}>
-                    {data == 3 ? btcKey?.slice(0, 15) :
-                      data == 5 ? solKey?.slice(0, 15) : <>{address?.slice(0, 15)}...{coin[data]}</>}
+                  {coin[`${data}`] =='BTC' ? <>{btcKey?.slice(0, 15)}...</> :
+                  coin[`${data}`] =='SOL' ? <>{solKey?.slice(0, 15)}...</> : <>{address?.slice(0, 15)}...</>
+                  }
                   </span>
                   <div className="secretkeyss">
                     <span style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                      <span style={{ color: "white" }}>{coin[data]}</span>
+                      <span style={{ color: "white" }}>{coin[`${data}`]}</span>
                       <img
                         src={CopyIcon}
                         width={14}
@@ -104,39 +97,7 @@ function ShowPrivateKey() {
                       />
                     </span>
                   </div>
-                  {/* <InputFieldOnly
-
-        placeholder={"Private Key"}
-
-        label="Keep your private key safe!"
-
-        value={address}
-
-        readonly={true}
-
-        placeholderBaseColor={true}
-
-        getData={(address) => {
-
-          setAddress(address);
-
-        }}
-
-      /> */}
-
-                  {/* <div
-
-        onClick={copyToClipboard}
-
-        className="setPassword__secretPharse__copyField"
-
-      >
-
-        <img src={CopyIcon} width={14} height={16} />
-
-        <span>Copy</span>
-
-      </div> */}
+                   
 
                 </div>
 

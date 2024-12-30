@@ -197,9 +197,9 @@ function CurrencyDetails() {
           </span>
         }
         chartIcon={() => {
-          // chrome.tabs.create({
-          //   url: `https://trading.skymarvel.io?key=${coin?.coin?.coin_symbol?.toUpperCase()}`,
-          // });
+          chrome.tabs.create({
+            url: `https://trading-view.qubetics.work/?key=${coin?.coin?.coin_symbol?.toUpperCase()}`,
+          });
         }}
         // stared={() => {
         //   navigate("/watch-list-tokens");

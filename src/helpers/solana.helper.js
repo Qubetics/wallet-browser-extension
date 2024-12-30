@@ -184,8 +184,7 @@ export class SolanaHelper {
             blockhash,
             lastValidBlockHeight: lastValidBlockHeight,
           },
-        });
-console.log('transaction response::::::::::', transactionResponse);
+        }); 
       if (!transactionResponse) {
         console.error('Transaction not confirmed');
         return false;

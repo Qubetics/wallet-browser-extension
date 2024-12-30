@@ -200,6 +200,7 @@ function NftDetail() {
           </div>
           <div style={{ marginTop: "15px" }}>
             <ButtonComp
+            disabled={true}
               onClick={() => {
                 navigate("/receive-currency", { state: { nftButton: true } });
               }}
