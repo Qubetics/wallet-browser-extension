@@ -152,7 +152,9 @@ export class WalletHelper {
       const derivedSeed = derivePath(path, seed).key;
       const account = new Account(
         nacl.sign.keyPair.fromSeed(derivedSeed).secretKey
-      );  
+      );
+      console.log("lllllllllllDDDDDDDDDDDDDDdddd ");
+      
       return account.secretKey;
     } catch (error) {
       return false;
