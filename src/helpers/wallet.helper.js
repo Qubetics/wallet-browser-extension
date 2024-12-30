@@ -792,7 +792,10 @@ export class WalletHelper {
       const id = uuidv4();
 
       const finalAccounts = [
-        ...accounts,
+        ...accounts.map(account => ({
+          ...account,
+          default: false, // Set all existing accounts' default to false
+        })),
         {
           id,
           address: address,
@@ -800,7 +803,8 @@ export class WalletHelper {
           privateKey,
           path: `m/44'/60'/0'/0/${accounts.length + 1}`,
           name,
-          default: accounts.length === 0 ? true : false,
+          // default: accounts.length === 0 ? true : false,
+          default:true, // make default
           coinFamilyAndAddress: {
             1: address,
             2: address,
@@ -832,6 +836,8 @@ export class WalletHelper {
 
       await chrome.storage.session.set({ accounts: finalAccounts });
 
+      console.log("FInalllllllllllllllll ", finalAccounts);
+      
       store.dispatch(setAccount(finalAccounts.find((el) => el.default)));
 
       store.dispatch(setChain(chains.find((el) => el.default)));

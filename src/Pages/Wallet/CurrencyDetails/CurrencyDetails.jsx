@@ -197,9 +197,12 @@ function CurrencyDetails() {
           </span>
         }
         chartIcon={() => {
+          if(coin?.coin?.graph_pair){
           chrome.tabs.create({
-            url: `https://trading-view.qubetics.work/?key=${coin?.coin?.coin_symbol?.toUpperCase()}`,
-          });
+            url: `https://trading-view.qubetics.work/?key=${coin?.coin?.graph_pair?.toUpperCase()}`,
+          });}else{
+            return messageApi.error("Key pair not exists")
+          }
         }}
         // stared={() => {
         //   navigate("/watch-list-tokens");
