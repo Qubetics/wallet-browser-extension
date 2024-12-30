@@ -25,7 +25,7 @@ import { Loader } from "../../../Components/Loader/Loader";
 import { DURATION } from "../../../config/message.config";
 import warning from "../../../Assets/PNG/warning.png";
 import DarkLogo from "../../../Assets/DarkLogo.svg";
-import Logo from "../../../Assets/Logo.png";
+import Logo from "../../../Assets/logo.png";
 import InputFieldSimple from "../../../Components/InputField/InputFieldSimple";
 import BigNumber from "bignumber.js";
 import { PancakeHelper } from "../../../helpers/pancake.helper";

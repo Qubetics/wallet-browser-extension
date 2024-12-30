@@ -141,7 +141,7 @@ function ConnectedApp() {
           <div className="searchBarFixed">
             <div className="search">
               <InputField
-                placeholder={"Search"}
+                placeholder={"Add URL"}
                 checkForSymbols={true}
                 addonBefore={
                   <span>

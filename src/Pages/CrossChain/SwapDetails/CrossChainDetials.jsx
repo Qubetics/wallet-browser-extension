@@ -24,7 +24,7 @@ import warning from "../../../Assets/PNG/warning.png";
 import InputFieldSimple from "../../../Components/InputField/InputFieldSimple";
 
 import DarkLogo from "../../../Assets/DarkLogo.svg";
-import Logo from "../../../Assets/Logo.png";
+import Logo from "../../../Assets/logo.png";
 
 function getFlooredFixed(v, d) {
   return (Math.floor(v * Math.pow(10, d)) / Math.pow(10, d)).toFixed(d);

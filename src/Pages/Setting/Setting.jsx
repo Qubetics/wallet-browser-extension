@@ -166,12 +166,12 @@ function Setting() {
       ticketcheck: theme == "darkTheme" ? NativeCurrency : NativeCurrency,
       RightArow: "true",
     },
-    {
-      setinglist: "About Us",
-      to: "",
-      ticketcheck: theme == "darkTheme" ? AboutUs : AboutUs,
-      RightArow: "true",
-    },
+    // {
+    //   setinglist: "About Us",
+    //   to: "",
+    //   ticketcheck: theme == "darkTheme" ? AboutUs : AboutUs,
+    //   RightArow: "true",
+    // },
     {
       setinglist: "Privacy Policy",
       to: "",

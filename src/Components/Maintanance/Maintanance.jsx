@@ -1,5 +1,5 @@
 import React from "react";
-import Logo from "../../Assets/Logo.png";
+import Logo from "../../Assets/logo.png";
 import DarkLogo from "../../Assets/DarkLogo.svg";
 import ButtonComp from "../ButtonComp/ButtonComp";
 import { useSelector } from "react-redux";

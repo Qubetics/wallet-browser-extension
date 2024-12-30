@@ -21,7 +21,7 @@ import { Web3Helper } from "../../../helpers/web3.helper";
 import "./SendConfirm.scss";
 import warning from "../../../Assets/PNG/warning.png";
 import DarkLogo from "../../../Assets/DarkLogo.svg";
-import Logo from "../../../Assets/Logo.png";
+import Logo from "../../../Assets/logo.png";
 import {
   addCommasToNumber,
   getFlooredFixed,

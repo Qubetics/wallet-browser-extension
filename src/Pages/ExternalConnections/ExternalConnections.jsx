@@ -3,7 +3,7 @@ import './external.scss';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import ModalCustom from '../../Components/ModalCustom/ModalCustom';
-import logo from '../../Assets/Logo.png';
+import logo from '../../Assets/logo.png';
 import moment from 'moment';
 import { Web3Helper } from '../../helpers/web3.helper';
 import Web3 from 'web3';

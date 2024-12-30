@@ -22,9 +22,7 @@ function AddNewWallet() {
     duration: DURATION,
   });
 
-  console.log("Add new wallet new");
-  console.log("oooooooooSSSSSSSSSSSSS ", state);
-  
+   
   return (
     <div>
       {contextHolder}
@@ -104,7 +102,6 @@ function AddNewWallet() {
                         "Wallet with this name already exists"
                       );
                     } 
-                    console.log('Comemmmmmmmmm');
                     
                     store.dispatch(setLoading(true));
                       await chrome.storage.session.set({name: name.trim(),});

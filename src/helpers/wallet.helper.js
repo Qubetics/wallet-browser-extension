@@ -836,8 +836,6 @@ export class WalletHelper {
 
       await chrome.storage.session.set({ accounts: finalAccounts });
 
-      console.log("FInalllllllllllllllll ", finalAccounts);
-      
       store.dispatch(setAccount(finalAccounts.find((el) => el.default)));
 
       store.dispatch(setChain(chains.find((el) => el.default)));

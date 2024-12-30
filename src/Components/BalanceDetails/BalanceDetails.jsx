@@ -32,7 +32,7 @@ import { DURATION } from "../../config/message.config";
 import { setLoading } from "../../actions/loading";
 import CoinsTable from "../CoinsTable/CoinsTable";
 import BigNumber from "bignumber.js";
-import Logo from "../../Assets/Logo.png";
+import Logo from "../../Assets/logo.png";
 import aName from "../../Assets/aName.svg";
 import {
   addCommasToNumber,

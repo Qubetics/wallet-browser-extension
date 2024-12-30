@@ -248,7 +248,7 @@ const AllocationChart = () => {
 
       {/* Asset details */}
       <ul className="portfolio__tableOuter ">
-        {portfolio &&
+        {portfolioBalance > 0 && portfolio &&
           portfolio.map((itm, idx) => (
             <li key={idx} className="coinsTable1 flex-item">
               <div className="coinsTable1__left">
@@ -289,7 +289,7 @@ const AllocationChart = () => {
                         100
                       ).toFixed(2)}
                       % */}
-                      {(((parseFloat(itm?.balance) * parseFloat(itm?.coin?.fiat_price_data?.value || 0)) / portfolioBalance) * 100).toFixed(2)}%
+                      {(((parseFloat(itm?.balance) * parseFloat(itm?.coin?.fiat_price_data?.value || 0)) / portfolioBalance || 1) * 100).toFixed(2)}%
                     </span>
                   </div>
                 </div>
