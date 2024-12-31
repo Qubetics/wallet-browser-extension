@@ -159,6 +159,11 @@ code {
     }
   }
 }
+.ant-modal-close-x{
+  img{
+    filter: brightness();
+  }
+}
 .inputField__input {
   color: #98969b !important;
   border-color: #76747b !important;
