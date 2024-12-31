@@ -663,7 +663,7 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin }) {
             isModalOpen={isModalOpen}
             handleOk={handleOk}
             handleCancel={handleCancel}
-            customClass={""}
+            customClass={"reciveModal"}
           >
             <div className={"balanceDetails__modal"}>
               <div>

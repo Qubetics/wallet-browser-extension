@@ -281,7 +281,7 @@ const deleteSubwallet = async (itm) => {
         <div className="valueAddress adressCard">
           {Array.isArray(wallet_data) &&
             wallet_data.map((elem, idx) => (
-              <div key={idx} className="addressBook">
+              <div key={idx} className="addressBook adressCard_inner">
                 <div className="bookAddress">
                   <div className="leftSec">
                     <img

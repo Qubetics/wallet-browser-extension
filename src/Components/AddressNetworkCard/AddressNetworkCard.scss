@@ -5,8 +5,14 @@
   padding: 16px !important;
   border-radius: 14px !important;
   margin-bottom: 20px;
+  &_inner {
+    margin-top: 15px !important;
+    &:first-child {
+      margin-top: 0 !important;
+    }
+  }
   .addressBook {
-    margin: 0 !important;
+    margin: 0;
     .bookAddress {
       display: flex;
       align-items: center;

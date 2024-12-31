@@ -57,3 +57,12 @@
     align-items: center;
   }
 }
+.leftSecBottom{
+  display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: space-between;
+    .address{
+      color: $white;
+    }
+}
