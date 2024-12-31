@@ -26,6 +26,7 @@ import ButtonComp from "../../Components/ButtonComp/ButtonComp";
 import GroupBtc from "../../Assets/Group.svg";
 import DeleteIcon from "../../Assets/DeleteIcon.svg";
 import { token_type } from "../../helpers/constant";
+import NoRecord from "../../Assets/no-record.svg"
 
 function PortfolioWatchList() {
   const { account, currency, balanceIn } = useSelector((state) => state);
@@ -232,16 +233,18 @@ function PortfolioWatchList() {
                 })}
             />
           ) : (
-            <p
+            <div className="noRecord">
+              <img src={NoRecord} alt="" />
+              <p
               className="noAddress"
               style={{
-                marginTop: "50%",
                 fontWeight: "bold",
                 fontSize: "17px",
               }}
             >
-              No assets found
+              No record found
             </p>
+              </div>
           )}
         </div>
       </div>

@@ -6,6 +6,7 @@ function ButtonComp({
   bordered,
   onClick,
   onKeyDown,
+  deletebordered,
   maxWidth,
   marginBottom,
   disabled,
@@ -16,6 +17,8 @@ function ButtonComp({
     <button
       className={`ButtonStyle ${style.ButtonStyle} ${
         bordered ? style.ButtonStyle__bordered : ""
+      }  ${
+        deletebordered ? style.ButtonStyle__deletebordered : ""
       } ${disabled ? "disabled" : ""}`}
       onClick={onClick}
       onKeyDown={onKeyDown}

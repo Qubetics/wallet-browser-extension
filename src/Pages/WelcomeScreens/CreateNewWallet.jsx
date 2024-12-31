@@ -31,9 +31,9 @@ function CreateNewWallet() {
           {layoutHeader}
           <div style={{marginTop:"16px"}}>
             <InputFieldOnly
-              placeholder={"Enter Wallet Name here"}
+              placeholder={"Enter here"}
               value={name}
-              label={"Wallet Name"}
+              label={"Enter Wallet Name"}
               checkForSymbols={true}
               placeholderBaseColor={true}
               coloredBg={true}

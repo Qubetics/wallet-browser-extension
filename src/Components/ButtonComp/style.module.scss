@@ -22,6 +22,15 @@
     // border: 1px solid $border-00ADEE;
     opacity: 0.6;
   }
+  &__deletebordered{
+    border: 1px solid $red;
+    background: transparent;
+    color: $red;
+    margin-bottom: 10px !important;
+    &:hover {
+      opacity: 0.6;
+    }
+  }
   &__bordered {
     border: 1px solid $border-00ADEE;
     background: transparent;

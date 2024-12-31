@@ -90,7 +90,7 @@ function WelcomeScreen() {
         >
           <span className="cardWhite__linkOuter__linkImage">
             {/* <img src={PlusBordredIcon} width={20} height={20} /> */}
-            Create New Wallet
+            Create a new wallet
           </span>
           {/* <span>
             <img src={ArrowRightIcon} width={8} height={15} />

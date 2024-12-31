@@ -11,6 +11,8 @@ import search from "../../Assets/SearchIcon.svg";
 import { setCreate } from "../../actions/create";
 import { useNavigate } from "react-router-dom";
 import MyWallet from "../../Assets/myWallet.svg";
+import NoRecord from "../../Assets/no-record.svg"
+
 import Jupiter from "../../Assets/Jupiter.png";
 import { InputField } from "../../Components/InputField/InputFieldSimple";
 
@@ -159,7 +161,7 @@ function ConnectedApp() {
               />
             </div>
           </div>
-          <div className={`flexedContent`}>
+          {/* <div className={`flexedContent`}>
             <div className="dApp">
               <h3>Finance</h3>
               <div className="dApp_card">
@@ -190,7 +192,19 @@ function ConnectedApp() {
                 </div>
               </div>
             </div>
-          </div>
+          </div> */}
+          <div className="noRecord">
+              <img src={NoRecord} alt="" />
+              <p
+              className="noAddress"
+              style={{
+                fontWeight: "bold",
+                fontSize: "17px",
+              }}
+            >
+              No dAPP history found
+            </p>
+              </div>
         </div>
       </div>
     </div>

@@ -26,8 +26,8 @@ import { QRCode } from "react-qrcode-logo";
 import { store } from "../..";
 import { Drawer } from "antd";
 import ModalCloseIcon from "../../Assets/ModalCloseIcon.svg";
-import OpenDark from "../../Assets/open-dark.png";
-import CloseDark from "../../Assets/close-dark.png";
+import OpenDark from "../../Assets/open-dark.svg";
+import CloseDark from "../../Assets/close-dark.svg";
 import { DURATION } from "../../config/message.config";
 import { setLoading } from "../../actions/loading";
 import CoinsTable from "../CoinsTable/CoinsTable";
@@ -400,7 +400,7 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
                   store.dispatch(setBalancesIn(false));
                 }}
                 style={{
-                  width: "17px",
+                  width: "25px",
                   marginLeft: "9px",
                   position: "relative",
                   top: "-7px",
@@ -418,7 +418,7 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
                   store.dispatch(setBalancesIn(true));
                 }}
                 style={{
-                  width: "17px",
+                  width: "25px",
                   marginLeft: "9px",
                   position: "relative",
                   top: "-7px",

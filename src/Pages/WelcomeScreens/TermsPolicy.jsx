@@ -67,7 +67,7 @@ function TermsPolicy() {
                 state: { type: state?.type },
               });
             }else{
-              messageApi.error('Please accept terms and condations')
+              messageApi.error('Please accept terms and conditions')
             }
           }}
           text={"Continue"}

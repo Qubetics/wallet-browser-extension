@@ -11,7 +11,7 @@ function CongratulationsScreen() {
   return (
     <div className="setPassword__secretPharse walletReady">
       {/* <img src={WalletCreated} alt="WalletCreated " width={"308px"} /> */}
-      <Lottie loop animationData={TickAnimation} play style={{ height: 308 }} />
+      <Lottie loop={false} animationData={TickAnimation} play style={{ height: 308 }} />
 
       {/* <h1>ALL DONE!</h1>
       <p>Wallet Created Successfully</p> */}
