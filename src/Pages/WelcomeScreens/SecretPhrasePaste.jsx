@@ -2137,10 +2137,10 @@ function SecretPhrasePaste({ children, termsCheck, getMnemonics, type }) {
 
   return (
     <div className="setPassword__secretPharse">
-      <h3 className="setPassword__heading">Wallet Name</h3>
+      <h3 className="setPassword__heading">Enter Secret Phrase</h3>
       <p className="welcomeScreens-text">
-        {type ||
-          "You can label your own wallet and manage multiple wallets here."}
+        {/* {type ||
+          "You can label your own wallet and manage multiple wallets here."} */}
       </p>
       <div>
         <div className="setPassword__secretPharse__fieldSBg">

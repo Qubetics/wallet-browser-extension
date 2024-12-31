@@ -76,9 +76,9 @@ function AddressTableSend({ dataArray, setAddress, setContact }) {
                                             <div className="addressInner">
                                                 {/* <h3>{ele?.name}</h3> */}
                                                 <span className="address">
-                                                    {elem?.wallet_address.substring(0, 7)}.....
+                                                    {elem?.wallet_address.substring(0, 12)}.....
                                                     {elem?.wallet_address.substring(
-                                                        elem?.wallet_address.length - 7,
+                                                        elem?.wallet_address.length - 12,
                                                         elem?.wallet_address.length
                                                     )}
                                                 </span>

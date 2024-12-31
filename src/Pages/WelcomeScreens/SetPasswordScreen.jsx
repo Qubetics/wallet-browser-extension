@@ -32,18 +32,21 @@ function validatePassword(password) {
 
 function SetPasswordScreen() {
   const { state } = useLocation();
-
+  const [isShare, setIsShare] = useState(false);
+  const [isSupport, setIsSupport] = useState(false);
   const { type, createWalletMnemonics, createShuffledMnemonics } = state;
   const navigate = useNavigate();
   const { layoutHeader } = useOutletContext();
   const { create } = useSelector((state) => state);
 
+  // setActiveTab("secretPhrase");
   const [activeTab, setActiveTab] = useState(
-    create
-      ? type === "create"
-        ? "secretPhrase"
-        : "confirmSecretPhrase"
-      : "setPassword"
+    state?.addNew ? "secretPhrase" : state?.addNewImport?"confirmSecretPhrase":
+      create
+        ? type === "create"
+          ? "secretPhrase"
+          : "confirmSecretPhrase"
+        : "setPassword"
   );
   const [validation, setValidation] = useState(validatePassword(""));
   const [password, setPassword] = useState("");
@@ -123,15 +126,24 @@ function SetPasswordScreen() {
   };
 
   const handleConfirmSecretPhrase = async () => {
-    if (correct) {
-      store.dispatch(setLoading(true));
-      const { name } = await chrome.storage.session.get("name");
-      await WalletHelper.generateAndSetWallet(mnemonics, name);
+    try {
+      if (correct) {
+        store.dispatch(setLoading(true));
+        const { name } = await chrome.storage.session.get("name");
+        console.log("=================> ", mnemonics);
+
+        await WalletHelper.generateAndSetWallet(mnemonics, name);
+        store.dispatch(setLoading(false));
+        setActiveTab("congrats");
+      } else {
+        store.dispatch(setLoading(false));
+        popError("Please check the phrase order and try again.");
+      }
+    } catch (error) {
+      console.log("Create error--> ", error);
       store.dispatch(setLoading(false));
-      setActiveTab("congrats");
-    } else {
-      popError("Please check the phrase order and try again.");
     }
+
   };
 
   const handleImportSecretPhrase = async () => {
@@ -228,7 +240,7 @@ function SetPasswordScreen() {
                 : "")}
       </p>
 
-      {activeTab === "setPassword" && (
+      {activeTab === "setPassword" && (!state?.addNew ||!state?.addNewImport)&& (
         <div style={{}}>
           <InputFieldSimple
             placeholder="Enter Password"
@@ -265,10 +277,11 @@ function SetPasswordScreen() {
       )}
 
       {activeTab === "secretPhrase" && (
-        <SecretPhrase mnemonics={mnemonics} termsCheck={setTerms}>
+        <SecretPhrase mnemonics={mnemonics} termsCheck={setTerms} isShare={isShare} setIsShare={setIsShare} isSupport={isSupport} setIsSupport={setIsSupport}>
           <div className="setPassword__footerbuttons">
             <ButtonComp
-              onClick={() => { if (terms) { setActiveTab("confirmSecretPhrase") } }}
+              disabled={!isShare || !isSupport}
+              onClick={() => { if (isShare && isSupport) { setActiveTab("confirmSecretPhrase") } }}
               text="Continue"
               maxWidth="100%"
             />

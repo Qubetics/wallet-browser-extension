@@ -6,9 +6,10 @@ import { DURATION } from "../../config/message.config";
 import ErroeImg from "../../Assets/ErroeImg.svg";
 import TickImg from "../../Assets/TickImg.svg";
 import style from "./Welcome.scss";
-function SecretPhrase({ children, mnemonics, termsCheck }) {
+function SecretPhrase({ children, mnemonics, termsCheck, isShare, setIsShare, isSupport, setIsSupport }) {
   console.log("🚀 ~ SecretPhrase ~ mnemonics:", mnemonics);
   console.log("🚀 ~ SecretPhrase ~ termsCheck:", termsCheck);
+  
   const [messageApi, contextHolder] = message.useMessage({
     duration: DURATION,
   });
@@ -82,7 +83,7 @@ function SecretPhrase({ children, mnemonics, termsCheck }) {
           </div> */}
         <div className="donotShare">
           <div className="donotShare_item checkboxOuter">
-            <Checkbox  onChange={onChange}>
+            <Checkbox  onChange={()=>{setIsShare(!isShare)}}>
               {" "}
               <p>
                 {" "}
@@ -98,7 +99,7 @@ function SecretPhrase({ children, mnemonics, termsCheck }) {
             </p> */}
           </div>
           <div className="donotShare_item checkboxOuter">
-            <Checkbox onChange={onChange}>
+            <Checkbox onChange={()=>{setIsSupport(!isSupport)}}>
               <p>
                 Qubetics Extension support will NEVER reach out to ask for it
               </p>

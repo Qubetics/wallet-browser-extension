@@ -24,8 +24,7 @@ const BuySell = () => {
         { headers: { Authorization: account.jwtToken } }
       );
       setCoins(data.coins || []);
-      setFiats(data.fiats || []);
-      console.log(data, "datadatadatadatadata");
+      setFiats(data.fiats || []); 
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {

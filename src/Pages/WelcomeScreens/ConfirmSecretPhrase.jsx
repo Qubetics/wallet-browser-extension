@@ -8,7 +8,7 @@ function ConfirmSecretPhrase({
   checkIfCorrect,
 }) {
   console.log("🚀 ~ shuffledMnemonics:", shuffledMnemonics);
-  console.log("🚀 ~ mnemonics:", mnemonics);
+  console.log("🚀 ~ mnemonics mere wala mnemonic :", mnemonics);
   const [blankArray, setBlankArray] = useState([]);
   const phrases = shuffledMnemonics;
   const pushData = (ele) => {

@@ -701,6 +701,7 @@ export class WalletHelper {
       const bitcoinAddress = await BTCHelper.generateBitcoinAddress(
         newMnemonics
       );
+console.log("ADDDDD ", solanaAddress);
 
       // const tronAddress = await TronHelper.generateTronAddress(newMnemonics);
 
@@ -713,11 +714,14 @@ export class WalletHelper {
       }
 
       newMnemonics = newMnemonics?.toLowerCase();
+      console.log("AAAAAAAAAAAAAAAAAAAA ", newMnemonics);
+      
       const { address, privateKey } = ethers.Wallet.fromMnemonic(
         newMnemonics,
         // `m/44'/60'/0'/0/${accounts.length}`
         `m/44'/60'/0'/0/0`
       );
+      console.log("address, privateKey ", address, privateKey, mnemonics);
 
       // console.log(`m/44'/60'/0'/0/${accounts.length}`);
 
@@ -726,8 +730,9 @@ export class WalletHelper {
       } else {
         mnemonics = SecurityHelper.decrypt(mnemonics, password);
         mnemonics = JSON.parse(mnemonics);
+        console.log("GEN NWWWWW ", mnemonics);
+        
       }
-
       const finalMnemonics = [
         ...mnemonics,
         {
@@ -736,6 +741,7 @@ export class WalletHelper {
           address: address,
         },
       ];
+      console.log("Finallll ", finalMnemonics);
 
       const { deviceId } = await chrome.storage.local.get('deviceId');
 
@@ -789,6 +795,7 @@ export class WalletHelper {
         }
       );
 
+      console.log("Createeeeeeeeee ", createWallet);
       const id = uuidv4();
 
       const finalAccounts = [

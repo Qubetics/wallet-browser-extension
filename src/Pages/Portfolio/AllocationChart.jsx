@@ -289,7 +289,7 @@ const AllocationChart = () => {
                         100
                       ).toFixed(2)}
                       % */}
-                      {(((parseFloat(itm?.balance) * parseFloat(itm?.coin?.fiat_price_data?.value || 0)) / portfolioBalance || 1) * 100).toFixed(2)}%
+                      {portfolioBalance && (((parseFloat(itm?.balance) * parseFloat(itm?.coin?.fiat_price_data?.value || 0)) / portfolioBalance) * 100).toFixed(2)}%
                     </span>
                   </div>
                 </div>

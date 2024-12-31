@@ -91,6 +91,7 @@ function ManageWallet() {
         <div className={`flexedContent manageWalletHeight`}>
           <div>
             {" "}
+             
             {data.map((data, idx) => (
               <div className="listItems">
                 <ul>
@@ -113,7 +114,7 @@ function ManageWallet() {
                           gap: "0",
                         }}
                       >
-                        <p className="walletName">{data.name}</p>
+                        <p className="walletName">{data?.name?.length > 10 ? `${data.name.substring(0, 7)}...` : data?.name} <span style={{color:"#00aeef", fontSize:15}}>{data?.default?" (Default)":""}</span></p>
                         <p className="walletAdd">
                           {data.address.substring(0, 7)}.....
                           {data.address.substring(
@@ -408,7 +409,7 @@ function ManageWallet() {
                 className="currency_click listItems"
                 onClick={async () => {
                   // navigate("/import-wallet-name");
-                  navigate("/add-new-wallet", { state: { type: "import" } });
+                  navigate("/add-new-wallet", { state: { type: "import", addNewImport: true } });
                 }}
               >
                 <div

@@ -125,6 +125,7 @@ function AddNewWallet() {
                       state: {
                         type: state?.type,
                         addNew: state?.addNew,
+                        addNewImport:state?.addNewImport,
                         createWalletMnemonics: newMnemonic,
                         createShuffledMnemonics: newMnemonic
                           .split(" ")

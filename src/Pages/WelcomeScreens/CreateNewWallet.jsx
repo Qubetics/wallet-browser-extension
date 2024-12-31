@@ -38,6 +38,8 @@ function CreateNewWallet() {
               placeholderBaseColor={true}
               coloredBg={true}
               getData={(name) => {
+                const hasEmoji =/[\p{Extended_Pictographic}]/u.test(name);
+                if (hasEmoji) { return false }
                 if (name.length <= 25) {
                   if (/^\s/.test(name)) {
                     setName("");

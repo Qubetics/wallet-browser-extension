@@ -40,7 +40,7 @@ function AddresBook() {
         // },
         {
           address: Object.values(account?.coinFamilyAndAddress),
-          coin_family: [1, 2, 4],
+          coin_family: [1, 2, 3, 4, 5],
           limit: 25,
           page: 1,
           search: keyword ? keyword.trim() : undefined,
