@@ -780,7 +780,7 @@ function CrossChain() {
   }
 
   useEffect(() => {
-    init();
+    // init();
   }, [page]);
 
   const handleScroll = () => {

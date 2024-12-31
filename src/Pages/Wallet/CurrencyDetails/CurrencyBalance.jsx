@@ -585,7 +585,8 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin }) {
             <span>{account.isWatchOnly ? "Buy" : "Buy/Sell"} </span>
           </Link> */}
           <Link
-            to="/buy-sell"
+            // to="/buy-sell"
+            to="#"
             onClick={(e) => {
               e.preventDefault();
               if (buySellM?.is_maintenance) {
@@ -598,7 +599,7 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin }) {
                 //   return messageApi.error("Coin not supported.");
                 // }
               } else {
-                return navigate("/buy-sell");
+                // return navigate("/buy-sell");
               }
             }}
             className={

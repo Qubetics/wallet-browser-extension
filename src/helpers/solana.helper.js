@@ -121,9 +121,9 @@ export class SolanaHelper {
     slug,
     chainId,
     orderId,
-    type
+    type, 
   ) => {
-    try {
+    try { 
       const { account } = store.getState();
       // console.log('-------------account', account);
       // const privateKey = await WalletHelper.getSolanaPrivateKey();
@@ -185,6 +185,8 @@ export class SolanaHelper {
             lastValidBlockHeight: lastValidBlockHeight,
           },
         }); 
+        console.log("----------------KKKKKKKK----------", transactionResponse);
+        
       if (!transactionResponse) {
         console.error('Transaction not confirmed');
         return false;
@@ -300,7 +302,8 @@ export class SolanaHelper {
     tokenType,
     balance,
     orderId,
-    type
+    type,
+    gasPriceType
   ) => {
     try {
       const { account } = store.getState();
@@ -379,6 +382,7 @@ export class SolanaHelper {
           },
         });
 
+         console.log('TxnResponse sol token:::::::',transactionResponse);
          
       if (!transactionResponse) {
         console.error('Transaction not confirmed');

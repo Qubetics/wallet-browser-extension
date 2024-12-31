@@ -168,9 +168,11 @@ export class BTCHelper {
     rawTransaction,
     tx_fee,
     orderId,
-    type
+    type,
+     
   ) => {
-    try {
+    try { 
+      
       const { account } = store.getState();
 
       const myResponse = await server.post(

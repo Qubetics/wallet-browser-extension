@@ -828,7 +828,7 @@ function Swap() {
   }, [selected, selectedCF]);
 
   useEffect(() => {
-    init();
+    // init();
   }, []);
 
   const handleTokensSwapChangePosition = async () => {

@@ -37,7 +37,7 @@ export class Web3Helper {
             Authorization: account.jwtToken,
           },
         }
-      ); 
+      );
       return {
         estimate: data.gas_estimate,
         fast: data.resultList.fast_gas_price,
@@ -289,9 +289,11 @@ export class Web3Helper {
     chainId,
     symbol,
     rpc,
-    type
+    type,
+    gasPriceType
   ) => {
     try {
+      console.log("gasPriceType---------> ", gasPriceType);
       const { account } = store.getState();
       const web3 = new Web3();
 
@@ -312,8 +314,8 @@ export class Web3Helper {
       );
       const nonce = await this.getNonce(slug, false, null, symbol, from);
       const gaslimit = gasPriceRes.estimate;
-      const gasInEth =
-        (gasPriceRes.fast * Math.pow(10, 9) * gaslimit) / Math.pow(10, 18);
+      const gsFee = gasPriceType == 1 ? gasPriceRes.safe : gasPriceType == 2 ? gasPriceRes.propose : gasPriceRes.fast;
+      const gasInEth = (gsFee * Math.pow(10, 9) * gaslimit) / Math.pow(10, 18);
       const totalAmount = +gasInEth + +amount;
       const balance = await this.getCoinBalance(from, rpc);
       console.log('🚀 ~ Web3Helper ~ balance:', balance);
@@ -330,7 +332,7 @@ export class Web3Helper {
 
       const transaction = {
         nonce,
-        gasPrice: web3.utils.toHex(gasPriceRes.fast * Math.pow(10, 9)),
+        gasPrice: web3.utils.toHex(gsFee * Math.pow(10, 9)),
         gasLimit: web3.utils.toHex(gaslimit),
         to: to,
         value: web3.utils.toHex(
@@ -345,7 +347,7 @@ export class Web3Helper {
 
       console.log({
         nonce,
-        gasPrice: web3.utils.toHex(gasPriceRes.fast * Math.pow(10, 9)),
+        gasPrice: web3.utils.toHex(gsFee * Math.pow(10, 9)),
         gasLimit: web3.utils.toHex(gaslimit),
         to: to,
         value: web3.utils.toHex(
@@ -363,8 +365,8 @@ export class Web3Helper {
         privateKey
       );
       console.log("🚀 ~ Web3Helper ~ signedTransaction:", signedTransaction);
-      
-      const gasPriceInWei = web3.utils.toWei(gasPriceRes.fast.toString(), 'gwei');
+
+      const gasPriceInWei = web3.utils.toWei(gsFee.toString(), 'gwei');
 
       const trx = signedTransaction.rawTransaction;
       const stringWithout0x = trx.startsWith("0x") ? trx.slice(2) : trx;
@@ -379,7 +381,7 @@ export class Web3Helper {
           to: to,
           amount: amount,
           gas_estimate: gaslimit,
-          gas_price: gasPriceInWei,//gasPriceRes.fast * Math.pow(10, 9),//gasInEth,
+          gas_price: gasPriceInWei,//gsFee * Math.pow(10, 9),//gasInEth,
           tx_type: type || 'withdraw',
         },
         {
@@ -521,8 +523,10 @@ export class Web3Helper {
     decimals,
     symbol,
     type,
-    coinFamily
+    coinFamily,
+    gasPriceType
   ) => {
+    console.log('tokenAddress:::::', tokenAddress, 'decimals:::::::', decimals, " gasPriceType::: ", gasPriceType, "coin_family ", coinFamily)
     try {
       const { account } = store.getState();
 
@@ -559,7 +563,9 @@ export class Web3Helper {
 
       // console.log("::::::data ", data);
 
-      const gasPrice = gasPriceRes.fast * Math.pow(10, 9);
+      const gsFee = gasPriceType == 1 ? gasPriceRes.safe : gasPriceType == 2 ? gasPriceRes.propose : gasPriceRes.fast;
+
+      const gasPrice = gsFee * Math.pow(10, 9);
       const gaslimit = await this.getGasEstimation({ from, to, data, coinFamily })
 
       // const gasPrice = gasPriceRes.fast * Math.pow(10, 9);
@@ -583,7 +589,7 @@ export class Web3Helper {
         privateKey
       );
       console.log("🚀 ~ Web3Helper ~ signedTransaction:", signedTransaction)
-    const gasPriceInWei = web3.utils.toWei(gasPriceRes.fast.toString(), 'gwei');
+      const gasPriceInWei = web3.utils.toWei(gasPriceRes.fast.toString(), 'gwei');
 
       const trx = signedTransaction.rawTransaction;
       const stringWithout0x = trx.startsWith("0x") ? trx.slice(2) : trx;

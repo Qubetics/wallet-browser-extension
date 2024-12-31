@@ -23,6 +23,7 @@ import Reorder, {
   reorderFromTo,
   reorderFromToImmutable,
 } from "react-reorder";
+import { token_type } from "../../helpers/constant";
 function CoinsTableDraggable({ dataArray, refresh }) {
   const navigate = useNavigate();
   const { account } = useSelector((state) => state);
@@ -130,7 +131,16 @@ function CoinsTableDraggable({ dataArray, refresh }) {
                 className="coinsTable1__textTop"
                 style={{ cursor: "pointer" }}
               >
-                <span className="coinNname">{ele.coinSubName}</span>
+
+                <span className="coinNname">
+
+                  {
+                    ele?.coinSubName?.length > 10 && ele?.coin?.coin?.token_address
+                      ? `${ele.coinSubName.substring(0, 7)}...`
+                      : ele?.coinSubName
+                  }
+
+                </span>
                 <span
                   style={{
                     fontSize: "14px",
@@ -138,20 +148,19 @@ function CoinsTableDraggable({ dataArray, refresh }) {
                     marginLeft: "3px",
                   }}
                 >
-                  {ele?.coin?.coin_family == 9 ? "PLS" : ele.type}
+                  {ele?.coin?.coin?.token_address ? token_type(ele?.coin?.coin?.coin_family) : ""}
                 </span>
                 <div className={`${"coinsTable1__grayText12"} textBold`}></div>
               </div>
-              <div  style={{ color: "#98969B" }} className="grayText1 test-class">
+              <div style={{ color: "#98969B" }} className="grayText1 test-class">
                 <span>{ele.routeTo === "no-where" ? "" : currency.symbol}</span>
                 <div
                   dangerouslySetInnerHTML={{ __html: ele.coinPrice }}
                 ></div>{" "}
                 <span>&nbsp;| </span>
                 <div
-                  className={`${"coinsTable1__grayText12"} ${
-                    ele.coinStatus <= 0 ? "negitiveText" : "positiveText"
-                  }`}
+                  className={`${"coinsTable1__grayText12"} ${ele.coinStatus <= 0 ? "negitiveText" : "positiveText"
+                    }`}
                   style={{ marginLeft: "3px" }}
                 >
                   {ele.coinStatus < 0 ? "" : "+"}
@@ -366,17 +375,17 @@ function CoinsTableDraggable({ dataArray, refresh }) {
                 style={{ justifyContent: "flex-end" }}
               >
                 {ele.currDollerBal === "ABOVE" ||
-                ele.currDollerBal === "BELOW" ? (
+                  ele.currDollerBal === "BELOW" ? (
                   `Price ${capitalize(ele.currDollerBal)}`
                 ) : (
                   <>
                     {ele.routeTo === "no-where"
                       ? ""
                       : balanceIn
-                      ? ele.routeTo === "enter-price-spritz"
-                        ? "$"
-                        : currency.symbol
-                      : ""}
+                        ? ele.routeTo === "enter-price-spritz"
+                          ? "$"
+                          : currency.symbol
+                        : ""}
                     {ele.currDollerBal}
                   </>
                 )}
@@ -431,7 +440,7 @@ function CoinsTableDraggable({ dataArray, refresh }) {
             <p
               style={{
                 fontSize: "20px",
-                color:"white"
+                color: "white"
               }}
             >
               Are you sure you want to Delete this Alert?

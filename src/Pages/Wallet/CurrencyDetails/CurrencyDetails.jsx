@@ -175,6 +175,7 @@ function CurrencyDetails() {
                   justifyContent: "center",
                   alignItems: "center",
                   border: "1px solid",
+                  color:"black"
                 }}
               >
                 {coin?.coin?.coin_name &&
@@ -293,7 +294,7 @@ function CurrencyDetails() {
                 </span>
               </p>
             </div>
-            <div style={{ textAlign: "center", margin: "12px auto" }}>
+            <div style={{ textAlign: "center", margin: "12px auto", display:'flex', justifyContent:'center' }}>
               {coin?.coin?.coin_image ?
                 <img style={{ height: 50, width: 50 }} src={coin?.coin?.coin_image} alt="usdt" />
                 :

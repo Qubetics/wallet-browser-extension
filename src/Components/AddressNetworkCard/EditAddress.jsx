@@ -153,6 +153,7 @@ export const EditAddress = ({ editModal, setEditModal, heading, editData, setEdi
                                 addonAfter={
                                     <div className={style.token__selectStyle}>
                                         <span
+                                        style={{color:"#fff"}}
                                             className={style.token__pasteText}
                                             onClick={async () => {
                                                 const data = await navigator.clipboard.readText();

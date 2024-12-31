@@ -40,8 +40,10 @@ function SendConfirm() {
       contact,
       theme,
       redirectTo,
+      gasPriceType
     },
   } = useLocation();
+ 
 
   const { account, currency } = useSelector((state) => state);
   const [isModalOpen1, setIsModalOpen1] = useState(false);
@@ -132,30 +134,27 @@ function SendConfirm() {
       textVal: toName
         ? toName
         : ENSName
-        ? ENSName
-        : `${to.substring(0, 7)}.....${to.substring(to.length - 7, to.length)}`,
+          ? ENSName
+          : `${to.substring(0, 7)}.....${to.substring(to.length - 7, to.length)}`,
     },
     {
       text: "Network Fee",
-      textVal: `${parseFloat(getFlooredFixed(+networkFee, 8))} ${
-        parentCoin ? parentCoin.currencySymbol.toUpperCase() : ""
-      }/ ${currency.symbol}${addCommasToNumber(
-        getFlooredFixed(fiatGasFee, 2)
-      )}`,
+      textVal: `${parseFloat(getFlooredFixed(+networkFee, 8))} ${parentCoin ? parentCoin.currencySymbol.toUpperCase() : ""
+        }/ ${currency.symbol}${addCommasToNumber(
+          getFlooredFixed(fiatGasFee, 2)
+        )}`,
     },
     {
       text: "Total value",
       textVal: coin.coin.token_address
         ? `${addCommasToNumber(
-            parseFloat(getFlooredFixed(amount, 8))
-          )} ${coin.coin.coin_symbol.toUpperCase()}/ ${
-            currency.symbol
-          }${addCommasToNumber(getFlooredFixed(+fiatGasFee + +fiatCoin, 2))}`
+          parseFloat(getFlooredFixed(amount, 8))
+        )} ${coin.coin.coin_symbol.toUpperCase()}/ ${currency.symbol
+        }${addCommasToNumber(getFlooredFixed(+fiatGasFee + +fiatCoin, 2))}`
         : `${addCommasToNumber(
-            parseFloat(getFlooredFixed(+amount + +networkFee, 8))
-          )} ${coin.coin.coin_symbol.toUpperCase()}/ ${
-            currency.symbol
-          }${addCommasToNumber(getFlooredFixed(+fiatGasFee + +fiatCoin, 2))}`,
+          parseFloat(getFlooredFixed(+amount + +networkFee, 8))
+        )} ${coin.coin.coin_symbol.toUpperCase()}/ ${currency.symbol
+        }${addCommasToNumber(getFlooredFixed(+fiatGasFee + +fiatCoin, 2))}`,
     },
     {
       text: "Date",
@@ -164,7 +163,7 @@ function SendConfirm() {
   ];
 
   const handleTransaction = async () => {
-    try { 
+    try {
       store.dispatch(setLoading(true));
 
       const { chains } = await chrome.storage.local.get("chains");
@@ -173,7 +172,7 @@ function SendConfirm() {
       );
 
       if (chain.isEVM) {
-        if (coin.coin.token_address) { 
+        if (coin.coin.token_address) {
           const response =
             await Web3Helper.generateRawTransactionForTokenAndBroadcast(
               to,
@@ -188,7 +187,10 @@ function SendConfirm() {
               chain.chainId,
               coin.coin.token_address,
               coin.coin.decimals,
-              coin.coin.token_type
+              coin.coin.token_type,
+              '',
+              coin.coin.coin_family,
+              gasPriceType
             );
 
           if (!response) {
@@ -214,8 +216,10 @@ function SendConfirm() {
               coin.coin.coin_family == 1
                 ? process.env.REACT_APP_BNB_RPC
                 : coin.coin.coin_family == 2
-                ? process.env.REACT_APP_ETH_RPC
-                : process.env.REACT_APP_MATIC_RPC
+                  ? process.env.REACT_APP_ETH_RPC
+                  : process.env.REACT_APP_MATIC_RPC,
+              "",
+              gasPriceType
             );
 
           if (!response) {
@@ -225,8 +229,8 @@ function SendConfirm() {
             );
           }
         }
-      }else if (!chain.isEVM && chain.currencyName === "SOL") {
-        const solanaHelper = new SolanaHelper(chain.rpcUrl); 
+      } else if (!chain.isEVM && chain.currencyName === "SOL") {
+        const solanaHelper = new SolanaHelper(chain.rpcUrl);
         if (coin?.coin?.token_address) {
           const response =
             await solanaHelper.generateRawTransactionForTokenAndBroadcast(
@@ -238,15 +242,15 @@ function SendConfirm() {
               fiatGasFee,
               currency.name,
               toName,
-             `solana/${coin.coin.token_address}`,// chain?.slug,
+              `solana/${coin.coin.token_address}`,// chain?.slug,
               chain?.chainId,
               coin?.coin?.token_address,
               coin?.coin?.decimals,
               coin.coin.token_type,
-              coin.balance
+              coin.balance,
             );
-            console.log("SOLLLLL RSP ", response);
-            
+          // console.log("SOLLLLL RSP ", response);
+
           if (!response) {
             store.dispatch(setLoading(false));
             return messageApi.error(
@@ -264,11 +268,11 @@ function SendConfirm() {
               fiatGasFee,
               currency.name,
               toName,
-`solana/${coin.coin.coin_symbol}`,//chain.slug,
-              chain.chainId
-            ); 
-            console.log("RRRRR solana--- ", response);
-            
+              `solana/${coin.coin.coin_symbol}`,//chain.slug,
+              chain.chainId, 
+            );
+          // console.log("RRRRR solana--- ", response);
+
           if (!response) {
             store.dispatch(setLoading(false));
             return messageApi.error(
@@ -291,7 +295,8 @@ function SendConfirm() {
             `bitcoin/${chain.slug}`,
             chain.chainId,
             rawTransaction,
-            tx_fee
+            tx_fee,
+            gasPriceType
           );
 
         if (!response) {
@@ -445,17 +450,17 @@ function SendConfirm() {
             {/* {theme == "darkTheme" ? (
               <img src={DarkLogo} alt="" />
             ) : ( */}
-              <img
-                src={Logo}
-                alt=""
-                style={{
-                  width: "70px",
-                  height:"70px"
-                }}
-              />
+            <img
+              src={Logo}
+              alt=""
+              style={{
+                width: "70px",
+                height: "70px"
+              }}
+            />
             {/* )} */}
             <div>
-              <p style={{color:"white"}}>
+              <p style={{ color: "white" }}>
                 Withdraw request of{" "}
                 {addCommasToNumber(getFlooredFixed(amount, 5))}{" "}
                 {coin.coin.coin_symbol.toUpperCase()} has been processed

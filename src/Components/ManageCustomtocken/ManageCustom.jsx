@@ -9,6 +9,7 @@ import { setLoading } from "../../actions/loading";
 import { server } from "../../server";
 import { WalletHelper } from "../../helpers/wallet.helper";
 import { useNavigate } from "react-router-dom";
+import { token_type } from "../../helpers/constant";
 
 function ManageCustom(props) {
   const [messageApi, contextHolder] = message.useMessage();
@@ -150,7 +151,8 @@ function ManageCustom(props) {
                   fontWeight: "500",
                 }}
               >
-               ({valuecurrency})
+                {/* ({valuecurrency}) */}
+                {coin?.token_address ? `(${token_type(coin?.coin_family)})`:""}
               </p>:""}
             </p>
             <span

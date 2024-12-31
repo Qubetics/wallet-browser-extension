@@ -76,6 +76,8 @@ function SendCoins() {
   const navigate = useNavigate();
 
   const [myBalance, setBalance] = useState(0);
+  const [gasPriceType, setGasPriceType] = useState(2); // 1 slow, 2 medium, 3 fast
+  
   let [address, setAddress] = useState(backAddress || null);
   const [contact, setContact] = useState(null);
   const [amount, setAmount] = useState(backAmount || null);
@@ -165,6 +167,7 @@ function SendCoins() {
         );
          
         setSelectedGasPrice(result.propose);
+        setGasPriceType(2);
         setGasPrice(result);
       }
 
@@ -381,14 +384,17 @@ function SendCoins() {
     switch (val) {
       case 0: {
         setSelectedGasPrice(myGasPrice?.safe);
+        setGasPriceType(1)
         break;
       }
       case 50: {
         setSelectedGasPrice(myGasPrice?.propose);
+        setGasPriceType(2)
         break;
       }
       case 100: {
         setSelectedGasPrice(myGasPrice?.fast);
+        setGasPriceType(3)
         break;
       }
       default: { }
@@ -578,6 +584,7 @@ function SendCoins() {
                   50: "Average",
                   100: "High",
                 }}
+                tooltip={{ open: false }}
                 defaultValue={50}
                 step={null}
                 onChange={handleChange}
@@ -807,6 +814,7 @@ function SendCoins() {
                     ENSName,
                     contact: findContact?.name,
                     redirectTo,
+                    gasPriceType
                   },
                 });
               } else if (!chain.isEVM && chain.currencyName === "SOL") {

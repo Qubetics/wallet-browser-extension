@@ -32,6 +32,8 @@ function AddContact() {
   const [chains, setChains] = useState([]);
   const [selectedChain, setSelectedChain] = useState(chain);
 
+  console.log("ADDDDDDDDDDDDD FROM SEND ", state?.coin, state?.redirectTo);
+  
   const selectAfterTo = (
     <div className={"addonAfter"}>
       <Select
@@ -83,8 +85,15 @@ function AddContact() {
   const init = async () => {
     const { chains } = await chrome.storage.local.get("chains");
     setChains(chains);
+    console.log("CCCCCCCCCC ", state?.coin?.coin_family, chains);
+    
+    if (state?.coin?.coin_family){
+      const selectedChain = chains.find((el) => el.coinFamily == state?.coin?.coin_family);
+          setSelectedChain(selectedChain);
+    }
   };
 
+  
   useEffect(() => {
     init();
   }, []);
@@ -187,6 +196,7 @@ function AddContact() {
               addonAfter={
                 <div className={style.token__selectStyle}>
                   <span
+                    style={{ color: "#fff" }}
                     className={style.token__pasteText}
                     onClick={async () => {
                       const data = await navigator.clipboard.readText();

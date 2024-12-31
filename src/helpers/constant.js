@@ -10,7 +10,7 @@ export const BL_CODE = {
 
 
 export const token_type = (coin_family) =>{
-return coin_family === 1 ? "BEP20" : coin_family === 2 ? "ERC20":coin_family === 4 ?"ERC20":coin_family === 5 ?"SPL":coin_family === 6 ?"TRC20":""
+return coin_family === 1 ? "BEP20" : coin_family === 2 ? "ERC20":coin_family === 4 ?"POL ERC20":coin_family === 5 ?"SPL":coin_family === 6 ?"TRC20":""
 }
 
 export const SWIFT_ERROR = {

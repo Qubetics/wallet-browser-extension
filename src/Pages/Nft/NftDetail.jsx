@@ -166,7 +166,7 @@ function NftDetail() {
     //   )}
     // </div>
     <div className="">
-      <MenuRestofHeaders title={"NFT’s"} backTo={"/wallet"} portfolio={true} />
+      <MenuRestofHeaders title={"NFT’s"} backTo={"/wallet"}  />
       <div className={`scrollableCont`}>
         <div className={`flexedContent padding-Top`}>
           <div className="nftDetailList">
@@ -176,7 +176,7 @@ function NftDetail() {
                   className="nftSuper"
                   key={nft.id}
                   onClick={() => {
-                    navigate("/nftManage");
+                    // navigate("/nftManage");
                   }}
                 >
                   <div className="nftSuper_img">
