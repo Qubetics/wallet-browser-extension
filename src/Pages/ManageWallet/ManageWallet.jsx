@@ -89,43 +89,45 @@ function ManageWallet() {
       <div className={`scrollableCont`}>
         <MenuRestofHeaders backTo={"/setting"} title={"Manage Wallet"} />
         <div className={`flexedContent manageWalletHeight`}>
-          <div className="listItems">
-            <ul>
-              {data.map((data, idx) => (
-                <li
-                  key={idx}
-                  style={{ marginBottom: 10 }}
-                  className="currency_click"
-                  onClick={async () => {
-                    setDrawer(true);
-                    setSelectedAccount(data);
-                    setName(data?.name);
-                  }}
-                >
-                  <div style={{ display: "flex", alignItems: "center" }}>
-                    <img src={Logo} alt="" />
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "flex-start",
-                        gap: "0",
-                      }}
-                    >
-                      <p className="walletName">{data.name}</p>
-                      <p className="walletAdd">
-                        {data.address.substring(0, 7)}.....
-                        {data.address.substring(
-                          data.address.length - 7,
-                          data.address.length
-                        )}
-                      </p>
+          <div>
+            {" "}
+            {data.map((data, idx) => (
+              <div className="listItems">
+                <ul>
+                  <li
+                    key={idx}
+                    className="currency_click"
+                    onClick={async () => {
+                      setDrawer(true);
+                      setSelectedAccount(data);
+                      setName(data?.name);
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center" }}>
+                      <img src={Logo} alt="" />
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "flex-start",
+                          gap: "0",
+                        }}
+                      >
+                        <p className="walletName">{data.name}</p>
+                        <p className="walletAdd">
+                          {data.address.substring(0, 7)}.....
+                          {data.address.substring(
+                            data.address.length - 7,
+                            data.address.length
+                          )}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                  <img src={WalletIBtn} alt="I" />
-                </li>
-              ))}
-            </ul>
+                    <img src={WalletIBtn} alt="I" />
+                  </li>
+                </ul>
+              </div>
+            ))}
           </div>
           <div>
             <ButtonComp

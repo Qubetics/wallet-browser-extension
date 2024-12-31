@@ -710,7 +710,7 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
           isModalOpen={isModalOpen}
           handleOk={handleOk}
           handleCancel={handleCancel}
-          customClass={"change"}
+          customClass="change"
           style={{background:"#100e0e"}}
         >
           <div className={"balanceDetails__modal"}>

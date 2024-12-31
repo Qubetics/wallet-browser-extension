@@ -68,7 +68,7 @@ function AddressTableSend({ dataArray, setAddress, setContact }) {
                                             setAddress(elem?.wallet_address, ele.name);
                                         }}
                                     >
-                                        <div className="leftSec">
+                                        <div className="leftSecBottom">
                                             <img
                                                 style={{ height: 36 }}
                                                 src={elem?.coin_data?.coin_image}

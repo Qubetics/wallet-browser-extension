@@ -93,6 +93,9 @@
     font-weight: 500;
     text-decoration: none;
     cursor: pointer;
+    @media screen and (max-width: 350px) {
+      gap: 0px;
+    }
     &__whiteText {
       min-width: 40px;
       text-decoration: none;
@@ -103,6 +106,13 @@
       cursor: pointer;
       span {
         color: #98969b;
+      }
+    }
+    &__img {
+      @media screen and (max-width: 350px) {
+        img {
+          width: 40px;
+        }
       }
     }
   }
@@ -132,7 +142,7 @@
     }
     &__wrapedText {
       cursor: pointer;
-      max-width: 100%;
+      max-width: 279px;
       padding: 12px 21px;
       background: transparent
         linear-gradient(180deg, #00aeef1a 0%, #367cc71a 100%) 0% 0% no-repeat
@@ -141,6 +151,9 @@
       border-radius: 30px;
       display: flex;
       align-items: center;
+      img {
+        filter: brightness(0.5);
+      }
       span {
         margin-left: 7px;
         max-width: 100%;
@@ -149,9 +162,7 @@
         text-overflow: ellipsis;
         overflow: hidden;
         white-space: nowrap;
-        @include theme() {
-          color: theme-get("whiteblack");
-        }
+        color: #000;
         font-size: 14px;
         font-weight: bold;
       }
@@ -191,7 +202,7 @@
   @include theme() {
     background-color: theme-get("modalBg");
   }
-  max-width: 400px;
+  max-width: 360px !important;
   padding: 8px;
   width: 100% !important;
 }

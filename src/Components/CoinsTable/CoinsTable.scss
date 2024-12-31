@@ -15,7 +15,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 15px;
+  gap: 0px;
   padding: 14px;
   padding-right: 20px;
   background-color: #18171f;
@@ -63,6 +63,7 @@
     align-items: center;
     word-break: break-word;
     display: flex;
+    flex-flow: wrap;
   }
   &__grayText12 {
     font-size: 14px;
