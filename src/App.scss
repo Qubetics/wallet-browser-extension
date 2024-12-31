@@ -484,6 +484,7 @@ body::-webkit-scrollbar {
   }
   .ant-checkbox-inner {
     border-radius: 100% !important;
+    background-color: transparent !important;
   }
   .ant-checkbox-checked {
     padding: 0 !important;
@@ -503,10 +504,10 @@ body::-webkit-scrollbar {
   text-align: left;
 }
 
-:where(.css-dev-only-do-not-override-acm2ia).ant-checkbox-checked
+.ant-checkbox-checked
   .ant-checkbox-inner {
   border-color: $baseText-00AEEF;
-  background-color: $baseText-00AEEF;
+  background-color: $baseText-00AEEF !important;
 }
 
 //Dropdown Css//

@@ -18,8 +18,7 @@ input:focus {
 
 .token {
   &__symbol_dec {
-    display: flex;
-    gap: 20px;
+   margin-bottom: 20px;
   }
   &__pasteText {
     color: $baseText-00AEEF;

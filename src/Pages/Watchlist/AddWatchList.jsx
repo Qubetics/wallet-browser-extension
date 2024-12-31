@@ -215,7 +215,7 @@ function AddWatchList() {
               fontSize: '17px',
             }}
           >
-            No assets found
+            No record found
           </p>
         )}
       </div>

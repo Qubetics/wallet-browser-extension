@@ -1,6 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap");
 * {
-  font-family: "DM Sans", sans-serif;
+  font-family: "DM Sans", sans-serif !important;
   * {
     padding: 0;
     margin: 0;
@@ -8,7 +8,7 @@
 }
 body {
   margin: 0;
-  font-family: "DM Sans", sans-serif;
+  font-family: "DM Sans", sans-serif !important;
 }
 code {
   // font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
@@ -67,7 +67,6 @@ code {
   margin-top: 50px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
   justify-content: flex-end;
   &_item {
     display: flex;
@@ -124,7 +123,7 @@ code {
         #6145ea 101.48%
       );
       border-radius: 14px;
-      padding: 1px;
+      padding: 2px;
       -webkit-mask: linear-gradient(#000 0 0) content-box,
         linear-gradient(#000 0 0);
       mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
@@ -356,6 +355,26 @@ code {
 .padding-Top {
   padding-top: 0 !important;
 }
+.warrningMsg {
+  display: flex;
+  gap: 10px;
+  background: #f7941a1f;
+  padding: 13px;
+  margin-bottom: 24px;
+  border-radius: 14px;
+  align-items: self-start;
+  text-align: left;
+  img {
+    width: 14px;
+    margin-top: 4px;
+
+  }
+  p {
+    color: #f7931a;
+    font-size: 14px;
+    font-weight: 400;
+  }
+}
 .cancelBtn {
   width: 100%;
   .ButtonStyle {
@@ -377,7 +396,7 @@ code {
         #6145ea 101.48%
       );
       border-radius: 14px;
-      padding: 1px;
+      padding: 2px;
       -webkit-mask: linear-gradient(#000 0 0) content-box,
         linear-gradient(#000 0 0);
       mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
@@ -408,7 +427,7 @@ code {
   }
 }
 .manageWalletHeight {
-  min-height: calc(-266px + 100vh);
+  min-height: calc(-348px + 100vh);
   display: flex;
   flex-direction: column;
   justify-content: space-between;

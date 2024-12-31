@@ -18,13 +18,16 @@ function SecretPhrase({ children, mnemonics, termsCheck }) {
     navigator.clipboard.writeText(str);
     messageApi.success("Phrase Copied");
   }
-  // const onChange = (e) => { 
+  // const onChange = (e) => {
   //   termsCheck(e.target.checked);
   // };
+  const onChange = (e) => {
+    console.log(`checked = ${e.target.checked}`);
+  };
 
-  useEffect(()=>{
+  useEffect(() => {
     termsCheck(true);
-  },[]);
+  }, []);
 
   return (
     <div className="setPassword__secretPharse">
@@ -78,16 +81,31 @@ function SecretPhrase({ children, mnemonics, termsCheck }) {
             </p>
           </div> */}
         <div className="donotShare">
-          <div className="donotShare_item">
-            <img src={TickImg} alt="" />
+          <div className="donotShare_item checkboxOuter">
+            <Checkbox  onChange={onChange}>
+              {" "}
+              <p>
+                {" "}
+                DO NOT share your phrase to any as this gives full access to
+                your wallet!
+              </p>
+            </Checkbox>
+
+            {/* <img src={TickImg} alt="" />
             <p>
               DO NOT share your phrase to any as this gives full access to your
               wallet!
-            </p>
+            </p> */}
           </div>
-          <div className="donotShare_item">
+          <div className="donotShare_item checkboxOuter">
+            <Checkbox onChange={onChange}>
+              <p>
+                Qubetics Extension support will NEVER reach out to ask for it
+              </p>
+            </Checkbox>
+            {/* 
             <img src={TickImg} alt="" />
-            <p>Qubetics Extension support will NEVER reach out to ask for it</p>
+            <p>Qubetics Extension support will NEVER reach out to ask for it</p> */}
           </div>
         </div>
         {/* </div> */}

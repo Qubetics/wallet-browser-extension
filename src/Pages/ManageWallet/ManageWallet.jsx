@@ -10,6 +10,8 @@ import { setLoading } from "../../actions/loading";
 import { Drawer, message } from "antd";
 import ModalCloseIcon from "../../Assets/ModalCloseIcon.svg";
 import darkclose from "../../Assets/darkclose.svg";
+import BackupMnemonics from "../../Assets/Backup-Mnemonics.png";
+import Privatekey from "../../Assets/Backup-Private-Qubetics.png";
 import InputFieldSimple, {
   InputFieldOnly,
 } from "../../Components/InputField/InputFieldSimple";
@@ -62,8 +64,6 @@ function ManageWallet() {
 
   const [selectedAccount, setSelectedAccount] = useState(null);
 
-
-  
   const init = async () => {
     store.dispatch(setLoading(true));
     let { accounts } = await chrome.storage.session.get("accounts");
@@ -94,7 +94,7 @@ function ManageWallet() {
               {data.map((data, idx) => (
                 <li
                   key={idx}
-                  style={{marginBottom:10}}
+                  style={{ marginBottom: 10 }}
                   className="currency_click"
                   onClick={async () => {
                     setDrawer(true);
@@ -183,7 +183,14 @@ function ManageWallet() {
                 }}
               >
                 <div style={{ display: "flex", alignItems: "center" }}>
-                  <img src={Logo} alt="" />
+                  <img
+                    style={{
+                      width: "20px",
+                      height: "20px",
+                    }}
+                    src={BackupMnemonics}
+                    alt=""
+                  />
                   <div
                     style={{
                       display: "flex",
@@ -203,7 +210,14 @@ function ManageWallet() {
                 }}
               >
                 <div style={{ display: "flex", alignItems: "center" }}>
-                  <img src={Logo} alt="" />
+                  <img
+                    style={{
+                      width: "20px",
+                      height: "20px",
+                    }}
+                    src={Privatekey}
+                    alt=""
+                  />
                   <div
                     style={{
                       display: "flex",
@@ -220,141 +234,75 @@ function ManageWallet() {
           </div>
 
           <ButtonComp
-
             onClick={async () => {
-
               if (!name) {
-
                 return messageApi.error(
-
                   "Please enter a valid name to proceed."
-
                 );
-
               }
-
-
 
               if (name.trim().length === 0) {
-
                 return messageApi.error(
-
                   "Name should have a minimum of 3 characters."
-
                 );
-
               }
-
-
 
               if (name.length < 3) {
-
                 return messageApi.error(
-
                   "Name should have a minimum of 3 characters."
-
                 );
-
               }
-
-
 
               if (name.length > 25) {
-
                 return messageApi.error(
-
                   "Name should not have more than 25 characters."
-
                 );
-
               }
 
-
-
-              const { accounts } = await chrome.storage.session.get(
-
-                "accounts"
-
-              );
-
-
+              const { accounts } = await chrome.storage.session.get("accounts");
 
               if (accounts) {
-
                 const checkIfExists = accounts.find(
-
                   (el) => el.name.toLowerCase() === name.toLowerCase()
-
                 );
 
-
-
                 if (checkIfExists) {
-
                   return messageApi.error(
-
                     "This wallet name already exists. Use a different name."
-
                   );
-
                 }
-
               }
 
-
-
               const updating = await WalletHelper.updateWalletName(
-
                 name.trim(),
 
                 state ? state.id : selectedAccount.id
-
               );
 
               if (!updating) {
-
-                return messageApi.error(
-
-                  "Unable to update name at the moment."
-
-                );
-
+                return messageApi.error("Unable to update name at the moment.");
               }
 
               setDrawer(false);
 
               init();
-
             }}
-
-
-
             text={"Update Wallet"}
-
             maxWidth={"352px"}
-
             marginBottom={"10px"}
-
           />
 
           <ButtonComp
-
+            deletebordered
             onClick={async () => {
-
               if (account.id === selectedAccount.id) {
-
                 return messageApi.error("Unable to delete default wallet");
-
               }
 
               setDeleteModal(true);
-
             }}
-
             text={"Delete Wallet"}
-
             maxWidth={"100%"}
-
           />
           {/* <ButtonComp
             onClick={async () => {
@@ -397,11 +345,13 @@ function ManageWallet() {
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
-                  cursor: "pointer"
+                  cursor: "pointer",
                 }}
                 className="currency_click listItems "
                 onClick={async () => {
-                  navigate("/add-new-wallet", {state:{type:'create', addNew:true}});
+                  navigate("/add-new-wallet", {
+                    state: { type: "create", addNew: true },
+                  });
                 }}
               >
                 <div
@@ -456,8 +406,7 @@ function ManageWallet() {
                 className="currency_click listItems"
                 onClick={async () => {
                   // navigate("/import-wallet-name");
-                  navigate("/add-new-wallet", {state: { type: "import" },});
-
+                  navigate("/add-new-wallet", { state: { type: "import" } });
                 }}
               >
                 <div
@@ -507,47 +456,28 @@ function ManageWallet() {
       </Drawer>
 
       <ModalCustom
-
         title={"Delete Address"}
-
         isModalOpen={deleteModal}
-
         customClass="customClassModal"
-
         handleCancel={() => {
-
           setDeleteModal(false);
-
         }}
-
       >
-
         <div className="viewphrases">
-
           <div className="viewphrases__iInner">
-
             <p
-
               style={{
-
                 fontSize: "20px",
 
-                color: "white"
-
+                color: "white",
               }}
-
             >
-
               Are you sure you want to delete this wallet?
-
             </p>
-
           </div>
 
           <div
-
             style={{
-
               display: "flex",
 
               alignItems: "center",
@@ -555,17 +485,11 @@ function ManageWallet() {
               justifyContent: "center",
 
               marginTop: "30px",
-
             }}
-
           >
-
             <div
-
               className="green"
-
               style={{
-
                 padding: "12px 53px",
 
                 backgroundColor: "rgb(56 101 109)",
@@ -579,21 +503,15 @@ function ManageWallet() {
                 marginRight: "20px",
 
                 cursor: "pointer",
-
               }}
-
               onClick={async () => {
-
                 try {
-
                   store.dispatch(setLoading(true));
 
                   await WalletHelper.deleteWallet(
-
                     selectedAccount.id,
 
                     account.address
-
                   );
 
                   setDrawer(false);
@@ -603,29 +521,17 @@ function ManageWallet() {
                   store.dispatch(setLoading(false));
 
                   setDeleteModal(false);
-
                 } catch (e) {
-
                   store.dispatch(setLoading(false));
-
                 }
-
-              }
-
-              }
-
+              }}
             >
-
               Yes
-
             </div>
 
             <div
-
               className="red"
-
               style={{
-
                 padding: "12px 53px",
 
                 color: "#F5DA76",
@@ -638,32 +544,21 @@ function ManageWallet() {
 
                 cursor: "pointer",
 
-                border: "1px solid #F5DA76"
+                border: "1px solid #F5DA76",
 
                 // border: 1px solid #F5DA76,
 
                 // bo
-
               }}
-
               onClick={() => {
-
                 setDeleteModal(false);
-
               }}
-
             >
-
               No
-
             </div>
-
           </div>
-
         </div>
-
       </ModalCustom>
-
 
       <ModalCustom
         title={"Show Secret Phrase"}
