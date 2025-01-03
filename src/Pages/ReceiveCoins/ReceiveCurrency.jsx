@@ -18,26 +18,19 @@ function ReceiveCurrency() {
   const [messageApi, contextHolder] = message.useMessage();
   const location = useLocation();
 
-
-  useEffect(()=>{ 
-
-    const coin = {wallet_address: location?.state?.coin?.wallet_address, // Replace with actual address or dynamic data
+  useEffect(() => {
+    const coin = {
+      wallet_address: location?.state?.coin?.wallet_address, // Replace with actual address or dynamic data
 
       coin: {
-
         coin_image: location?.state?.coin?.coin?.coin_image, // Replace with actual coin image
 
         coin_symbol: location?.state?.symbol, // Replace with actual coin symbol
-
-      }}
+      },
+    };
 
     setSelectedCoin(coin);
-
-  },[])
-
-
-
-
+  }, []);
 
   const copyToClipboard = async (text) => {
     try {
@@ -50,15 +43,19 @@ function ReceiveCurrency() {
 
   // Check if the current path is /receive-currency
   const isReceiveCurrencyRoute = location.state?.nftButton;
-   
+
   function goToBack(address) {
     navigator.clipboard.writeText(address);
     messageApi.success("Address copied successfully.");
   }
+
   return (
     <div className="receiveCurrency scrollableCont">
       {contextHolder}
-      <MenuRestofHeaders backTo={"/receive-tokens"}  title={`Receive ${location?.state?.symbol?.toUpperCase()}`} />
+      <MenuRestofHeaders
+        backTo={"/receive-tokens"}
+        title={`Receive ${location?.state?.symbol?.toUpperCase()}`}
+      />
       <div className="receiveCurrency_content  manageWalletHeight">
         <div className={`flexedContent padding-Top`}>
           <div className="receiveCurrency_balanceDetails">
@@ -72,15 +69,17 @@ function ReceiveCurrency() {
               logoWidth={55}
               logoPadding={8}
               logoPaddingStyle="circle"
+              bgColor="#000"
+              fgColor="#fff"
             />
           </div>
           <div className="receiveCurrency_copy">
             <div>
               <p>Your Qubetics Address</p>
-              <h5>{selectedCoin.wallet_address.substring(0,15)}...</h5>
+              <h5>{selectedCoin.wallet_address.substring(0, 15)}...</h5>
             </div>
             <ButtonComp
-            onClick={()=>goToBack(selectedCoin.wallet_address)} 
+              onClick={() => goToBack(selectedCoin.wallet_address)}
               text={
                 <span className="copyText">
                   Copy <img src={CopyIcon} alt="copy" />
