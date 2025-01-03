@@ -103,7 +103,7 @@ code {
   }
 }
 .walletBtn {
-  padding-top: 24px;
+  padding-top: 18px;
   .ButtonStyle {
     background: transparent;
     height: 50px;
@@ -139,6 +139,9 @@ code {
     justify-content: center;
   }
 }
+.walletBtnOuterExt{
+  padding-top: 10px;
+}
 .buysellTabList {
   border-bottom: 1px solid #98969b;
 
@@ -159,8 +162,8 @@ code {
     }
   }
 }
-.ant-modal-close-x{
-  img{
+.ant-modal-close-x {
+  img {
     filter: brightness();
   }
 }
@@ -304,7 +307,7 @@ code {
   margin-top: 20px;
   display: flex;
   flex-direction: column;
-  height: 270px;
+  height: 291px;
   max-height: max-content;
   overflow: auto;
   .coinsTable1__right {
@@ -372,7 +375,6 @@ code {
   img {
     width: 14px;
     margin-top: 4px;
-
   }
   p {
     color: #f7931a;
@@ -439,9 +441,19 @@ code {
   gap: 20px;
 }
 .manageTabHeight {
-  min-height: calc(-330px + 100vh) !important;
+  min-height: calc(-397px + 100vh) !important;
 }
 .WatchlistContents {
   height: 376px;
   overflow: auto;
+}
+.balanceDetailsOuterExt {
+  padding-top: 18px;
+  .balanceDetails__decoratedSec {
+    margin: 10px 0;
+    .balanceDetails__title {
+      font-size: 40px;
+      line-height: 40px;
+    }
+  }
 }

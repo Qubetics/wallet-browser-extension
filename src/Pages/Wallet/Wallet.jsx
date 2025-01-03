@@ -209,7 +209,8 @@ function Wallet() {
           />
         )}
       </div>
-      <div className="walletBtn">
+      <div className={`${"walletBtn"} ${height <= 600 ? "walletBtnOuterExt" : ""
+          }`}>
         <ButtonComp
           maxWidth="190px"
           onClick={() => {

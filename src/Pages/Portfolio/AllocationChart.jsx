@@ -70,9 +70,19 @@ const AllocationChart = () => {
       enabled: false,
       // formatter: (val) => `${val.toFixed(2)}%`,
     },
-    colors,
+
     legend: {
-      position: "bottom",
+      position: "right",
+      textAnchor:"left",
+      labels: {
+        colors: "#fff",
+      },
+      itemMargin: {
+        vertical: 5,
+        horizontal: 5,
+        textAlign:"left"
+
+      },
     },
     tooltip: {
       y: {
@@ -170,12 +180,13 @@ const AllocationChart = () => {
       setChartSeries([100]);
     }
   }, [chartSeries]);
+
   return (
     <div
       className="allocation-chart"
       style={{
         color: "#fff",
-        maxWidth: "400px",
+        // maxWidth: "300px",
         margin: "0 auto",
       }}
     >
@@ -185,7 +196,7 @@ const AllocationChart = () => {
             options={chartOptions}
             series={chartSeries}
             type="donut"
-            height={300}
+            height={200}
           />
         )}
 
