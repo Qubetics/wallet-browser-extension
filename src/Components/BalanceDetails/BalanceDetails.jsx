@@ -720,7 +720,7 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
                 <QRCode
                   value={coin.address}
                   size={230}
-                  qrStyle="square"
+                  qrStyle="dots"
                   eyeRadius={10}
                   logoImage={coin.coin.coin_image}
                   logoHeight={55}

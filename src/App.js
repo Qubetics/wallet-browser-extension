@@ -320,7 +320,7 @@ function App() {
       style={
         !isSidePanelOpen
           ? {
-              minWidth: "300px",
+              minWidth: "400px",
             }
           : {}
       }

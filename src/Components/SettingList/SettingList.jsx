@@ -1,23 +1,24 @@
 /*global chrome*/
 // import Link from 'antd/es/typography/Link';
-import { Link, useNavigate } from 'react-router-dom';
-import React, { useEffect, useState } from 'react';
-import ticketcheck1 from '../../Assets/ArrowRightIcon.svg';
-import DarkArrowRightIcon from '../../Assets/DarkArrowRightIcon.svg';
-import './SettingList.scss';
-import { WalletHelper } from '../../helpers/wallet.helper';
-import { message, Switch } from 'antd';
-import { DURATION } from '../../config/message.config';
-import { useSelector } from 'react-redux';
-import { store } from '../..';
-import { setTheme } from '../../actions/theme';
-import ArrowRyt from '../../Assets/ArrowRightIcon.svg';
-import { setAuth } from '../../actions/auth';
-import ModalCustom from '../ModalCustom/ModalCustom';
-import InputFieldSimple from '../InputField/InputFieldSimple';
-import { setLoading } from '../../actions/loading';
-import ButtonComp from '../ButtonComp/ButtonComp';
-import warning from '../../Assets/PNG/warning.png';
+import { Link, useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import ticketcheck1 from "../../Assets/ArrowRightIcon.svg";
+import DarkArrowRightIcon from "../../Assets/DarkArrowRightIcon.svg";
+import "./SettingList.scss";
+import { WalletHelper } from "../../helpers/wallet.helper";
+import { Checkbox, Drawer, message, Switch } from "antd";
+import { DURATION } from "../../config/message.config";
+import { useSelector } from "react-redux";
+import { store } from "../..";
+import { setTheme } from "../../actions/theme";
+import ArrowRyt from "../../Assets/ArrowRightIcon.svg";
+import { setAuth } from "../../actions/auth";
+import ModalCustom from "../ModalCustom/ModalCustom";
+import InputFieldSimple from "../InputField/InputFieldSimple";
+import { setLoading } from "../../actions/loading";
+import ButtonComp from "../ButtonComp/ButtonComp";
+import warning from "../../Assets/PNG/warning.png";
+import darkclose from "../../Assets/darkclose.svg";
 
 function SettingList(props) {
   const {
@@ -33,6 +34,7 @@ function SettingList(props) {
   const [isModalOpen, setOpenmodal] = useState(false);
   const [isLogoutModalOpen, setLogoutOpenmodal] = useState(false);
   const [password, setPassword] = useState(null);
+  const [isDrawerOpen, setDrawerOpen] = useState(false);
 
   const handleOk = () => {
     setOpenmodal(false);
@@ -54,7 +56,13 @@ function SettingList(props) {
   const handleLogoutCancel = () => {
     setLogoutOpenmodal(false);
   };
-
+  const handleOk4 = () => {
+    setDrawerOpen(false);
+  };
+  const handleCancel4 = () => {
+    setDrawerOpen(false);
+    setPassword(null);
+  };
   const { theme } = useSelector((state) => state);
   const [isAutoLock, setIsAutoLock] = useState(false);
   const [messageApi, contextHolder] = message.useMessage({
@@ -63,26 +71,26 @@ function SettingList(props) {
 
   useEffect(() => {
     if (theme) {
-      if (theme === 'darkTheme') {
-        document.body.classList.remove('lightTheme');
-        document.body.classList.add('darkTheme');
+      if (theme === "darkTheme") {
+        document.body.classList.remove("lightTheme");
+        document.body.classList.add("darkTheme");
       } else {
-        document.body.classList.remove('darkTheme');
-        document.body.classList.add('lightTheme');
+        document.body.classList.remove("darkTheme");
+        document.body.classList.add("lightTheme");
       }
     }
   }, [theme]);
 
   const getTheme = async () => {
-    const { appTheme } = await chrome.storage.local.get('appTheme');
-    const { autoLock } = await chrome.storage.local.get('autoLock');
+    const { appTheme } = await chrome.storage.local.get("appTheme");
+    const { autoLock } = await chrome.storage.local.get("autoLock");
 
     setIsAutoLock(autoLock);
 
     if (!appTheme) {
-      store.dispatch(setTheme('lightTheme'));
+      store.dispatch(setTheme("lightTheme"));
       await chrome.storage.local.set({
-        appTheme: 'lightTheme',
+        appTheme: "lightTheme",
       });
     } else {
       store.dispatch(setTheme(appTheme));
@@ -106,23 +114,23 @@ function SettingList(props) {
   }, [theme]);
 
   const toggleTheme = () => {
-    if (theme === 'darkTheme') {
-      store.dispatch(setTheme('lightTheme'));
-      changeTheme('lightTheme');
-      document.body.classList.add('lightTheme');
-      document.body.classList.remove('darkTheme');
+    if (theme === "darkTheme") {
+      store.dispatch(setTheme("lightTheme"));
+      changeTheme("lightTheme");
+      document.body.classList.add("lightTheme");
+      document.body.classList.remove("darkTheme");
     }
-    if (theme === 'lightTheme') {
-      store.dispatch(setTheme('darkTheme'));
-      changeTheme('darkTheme');
+    if (theme === "lightTheme") {
+      store.dispatch(setTheme("darkTheme"));
+      changeTheme("darkTheme");
 
-      document.body.classList.add('darkTheme');
-      document.body.classList.remove('lightTheme');
+      document.body.classList.add("darkTheme");
+      document.body.classList.remove("lightTheme");
     }
   };
 
   const toggleAutoLock = async () => {
-    const { autoLock } = await chrome.storage.local.get('autoLock');
+    const { autoLock } = await chrome.storage.local.get("autoLock");
     await chrome.storage.local.set({
       autoLock: !autoLock,
     });
@@ -143,87 +151,89 @@ function SettingList(props) {
   return (
     <>
       {contextHolder}
-      <div className='listItems'>
+      <div className="listItems">
         <Link
           to={to}
+          // onClick={async () => {
+          //   setIsModalOpen4(true);
+          // }}
           onClick={async (e) => {
             e.preventDefault();
 
-
             if (to === "/logout") {
-              return setLogoutOpenmodal(true)
+              return setDrawerOpen(true);
             }
 
-            if (to === '/lock') {
-              await chrome.storage.session.remove(['accounts', 'password']);
+            if (to === "/lock") {
+              await chrome.storage.session.remove(["accounts", "password"]);
               store.dispatch(setAuth(false));
-              return navigate('/verify', {
+              return navigate("/verify", {
                 state: {
                   lock: true,
                 },
               });
             }
 
-            if (to === '/watch-password') {
-              return navigate('/watch-password', {
+            if (to === "/watch-password") {
+              return navigate("/watch-password", {
                 state: {
                   chainId,
                 },
               });
             }
 
-            if (to === '/address') {
-              return navigate('/address', {
+            if (to === "/address") {
+              return navigate("/address", {
                 state: {
                   chainId,
                 },
               });
             }
 
-            if (setinglist === 'Import Wallet') {
-              const { accounts } = await chrome.storage.session.get('accounts');
+            if (setinglist === "Import Wallet") {
+              const { accounts } = await chrome.storage.session.get("accounts");
 
               if (accounts.length === 4) {
                 return messageApi.error(
-                  'You have reached the maximum number of created wallets. Please delete one wallet to proceed with adding another.'
+                  "You have reached the maximum number of created wallets. Please delete one wallet to proceed with adding another."
                 );
               }
 
-              return navigate('/new-name', {
+              return navigate("/new-name", {
                 state: {
-                  goTo: '/import-phrase',
+                  goTo: "/import-phrase",
                   mnemonics: null,
                 },
               });
             }
 
-            if (setinglist === 'Create Wallet') {
-              const { accounts } = await chrome.storage.session.get('accounts');
+            if (setinglist === "Create Wallet") {
+              const { accounts } = await chrome.storage.session.get("accounts");
 
               if (accounts.length === 50) {
                 return messageApi.error(
-                  'You have reached the maximum number of created wallets. Please delete one wallet to proceed with adding another.'
+                  "You have reached the maximum number of created wallets. Please delete one wallet to proceed with adding another."
                 );
               }
-              return navigate('/new-name', {
+              return navigate("/new-name", {
                 state: {
-                  goTo: '/multiShowSecretPhrase',
+                  goTo: "/multiShowSecretPhrase",
                   mnemonics: WalletHelper.generateNewMnemonics(),
                 },
               });
             }
 
-            if (setinglist === 'Watch Only Wallet') {
-              const { accounts } = await chrome.storage.session.get('accounts');
+            if (setinglist === "Watch Only Wallet") {
+              const { accounts } = await chrome.storage.session.get("accounts");
 
               if (accounts.length === 4) {
                 return messageApi.error(
-                  'You have reached the maximum number of created wallets. Please delete one wallet to proceed with adding another.'
+                  "You have reached the maximum number of created wallets. Please delete one wallet to proceed with adding another."
                 );
               }
-              return navigate('/new-name', {
+              return navigate("/new-name", {
                 state: {
-                  goTo: '/watch-only-list',
+                  goTo: "/watch-only-list",
                   mnemonics: null,
                 },
               });
@@ -232,105 +242,31 @@ function SettingList(props) {
             return navigate(to);
           }}
         >
-          <div
-            className='settingList'
-            onClick={async () => {
-              if (to === "/logout") {
-                return setLogoutOpenmodal(true)
-              }
-
-              if (to === '/watch-password') {
-                return navigate('/watch-password', {
-                  state: {
-                    chainId,
-                  },
-                });
-              }
-
-              if (to === '/lock') {
-                await chrome.storage.session.remove(['accounts', 'password']);
-                store.dispatch(setAuth(false));
-                return navigate('/verify', {
-                  state: {
-                    lock: true,
-                  },
-                });
-              }
-
-              if (to === '/address') {
-                return navigate('/address', {
-                  state: {
-                    chainId,
-                  },
-                });
-              }
-
-              if (setinglist === 'Privacy Policy') {
-                // return chrome.tabs.create({
-                //   url: 'https://REDACTED/privacy-policy-2/',
-                // });
-              }
-
-              if (setinglist === 'Terms of Service') {
-                // return chrome.tabs.create({
-                //   url: 'https://REDACTED/terms-of-service-2/',
-                // });
-              }
-
-              if (setinglist === 'Import Wallet') {
-                const { accounts } = await chrome.storage.session.get(
-                  'accounts'
-                );
-
-                if (accounts.length === 4) {
-                  return;
-                }
-                return navigate('/new-name', {
-                  state: {
-                    goTo: '/import-phrase',
-                    mnemonics: null,
-                  },
-                });
-              }
-
-              if (setinglist === 'Create Wallet') {
-                const { accounts } = await chrome.storage.session.get(
-                  'accounts'
-                );
-
-                if (accounts.length === 4) {
-                  return;
-                }
-                return navigate('/new-name', {
-                  state: {
-                    goTo: '/multiShowSecretPhrase',
-                    mnemonics: WalletHelper.generateNewMnemonics(),
-                  },
-                });
-              }
-              onClick();
-            }}
-          >
-            <div className='settingList__imgValue'>
+          <div className="settingList">
+            <div className="settingList__imgValue">
               <img src={ticketcheck} />
               <p>{setinglist}</p>
             </div>
             {RightArow && (
               <img
-                src={theme === 'darkTheme' ? DarkArrowRightIcon : DarkArrowRightIcon}
+                src={
+                  theme === "darkTheme"
+                    ? DarkArrowRightIcon
+                    : DarkArrowRightIcon
+                }
               />
             )}
-            {switchToggle === 'switchToggle' && (
+            {switchToggle === "switchToggle" && (
               <Switch
-                className='switchSec'
+                className="switchSec"
                 onChange={toggleTheme}
-                checked={theme === 'darkTheme' ? false : true}
+                checked={theme === "darkTheme" ? false : true}
               />
             )}
-            {switchToggle === 'switchToggleAutoLock' && (
-              <div className='autoLockTogal'>
+            {switchToggle === "switchToggleAutoLock" && (
+              <div className="autoLockTogal">
                 <Switch
-                  className='switchSec2'
+                  className="switchSec2"
                   onChange={toggleAutoLock}
                   checked={isAutoLock}
                 />
@@ -339,21 +275,17 @@ function SettingList(props) {
           </div>
         </Link>
       </div>
-
-
-
-
       <ModalCustom
-        title={'Password'}
+        title={"Password"}
         handleCancel={handleCancel}
         isModalOpen={isModalOpen}
         handleOk={handleOk}
-        customClass='customClassModal'
+        customClass="customClassModal"
       >
-        <div className='viewphrases'>
+        <div className="viewphrases">
           <InputFieldSimple
-          value={password}
-            placeholder='Password'
+            value={password}
+            placeholder="Password"
             getData={(value) => {
               const hasEmoji = /[\p{Extended_Pictographic}]/u.test(value);
               if (value.length <= 100 && !hasEmoji) {
@@ -362,38 +294,38 @@ function SettingList(props) {
             }}
             customFunction={async () => {
               const { password: sessionPassword } =
-                await chrome.storage.session.get('password');
+                await chrome.storage.session.get("password");
 
               if (sessionPassword !== password) {
-                return messageApi.error('Incorrect password provided.');
+                return messageApi.error("Incorrect password provided.");
               }
 
               store.dispatch(setLoading(true));
               await WalletHelper.logout();
               store.dispatch(setLoading(false));
-              navigate('/', {
+              navigate("/", {
                 state: {
                   logout: true,
                 },
               });
             }}
           />
-          <div style={{ marginTop: '10px' }}></div>
+          <div style={{ marginTop: "10px" }}></div>
           <ButtonComp
-            text={'Proceed'}
-            maxWidth={'100%'}
+            text={"Proceed"}
+            maxWidth={"100%"}
             onClick={async () => {
               const { password: sessionPassword } =
-                await chrome.storage.session.get('password');
+                await chrome.storage.session.get("password");
 
               if (sessionPassword !== password) {
-                return messageApi.error('Incorrect password provided.');
+                return messageApi.error("Incorrect password provided.");
               }
 
               store.dispatch(setLoading(true));
               await WalletHelper.logout();
               store.dispatch(setLoading(false));
-              navigate('/', {
+              navigate("/", {
                 state: {
                   logout: true,
                 },
@@ -404,26 +336,26 @@ function SettingList(props) {
       </ModalCustom>
 
       <ModalCustom
-        title={'Logout'}
+        title={"Logout"}
         handleCancel={handleLogoutCancel}
         isModalOpen={isLogoutModalOpen}
         handleOk={handlLogouteOk}
-        customClass='customClassModal'
+        customClass="customClassModal"
       >
-        <div className='viewphrases'>
-          <div className='viewphrases__iInner'>
+        <div className="viewphrases">
+          <div className="viewphrases__iInner">
             <img src={warning} />
             <div>
               <p>
-                By resetting, all wallets you have saved within the Qubetics Extension
-                will be erased. Please make sure you have each wallet's 12-word
-                seed phrase written down before resetting.
+                By resetting, all wallets you have saved within the Qubetics
+                Extension will be erased. Please make sure you have each
+                wallet's 12-word seed phrase written down before resetting.
               </p>
             </div>
           </div>
           <ButtonComp
-            text={'Proceed'}
-            maxWidth={'100%'}
+            text={"Proceed"}
+            maxWidth={"100%"}
             onClick={async () => {
               setOpenmodal(true);
               setPassword(null);
@@ -431,6 +363,38 @@ function SettingList(props) {
           />
         </div>
       </ModalCustom>
+      <Drawer
+        title="Are you sure?"
+        placement="bottom"
+        onClose={handleCancel4}
+        open={isDrawerOpen}
+        closeIcon={<img src={darkclose} />}
+      >
+        <div className={`flexedContent`}>
+          <div className="secretMasterKey">
+            <Checkbox>
+              <p>Please back up your seed phrase before logging out to avoid losing access to your wallet.</p>
+            </Checkbox>
+            <Checkbox>
+              <p>Are you sure you want to log out? Without a backup, you may lose access to your funds.</p>
+            </Checkbox>
+            <div className="secretMasterKey_btns">
+              <div className="cancelBtn">
+                <ButtonComp
+                  maxWidth="100%"
+                  onClick={() => setDrawerOpen(false)}
+                  text="Cancel"
+                />
+              </div>
+              <ButtonComp
+                maxWidth="100%"
+                text="Continue"
+                onClick={() => setLogoutOpenmodal(true)}
+              />
+            </div>
+          </div>
+        </div>
+      </Drawer>
     </>
   );
 }

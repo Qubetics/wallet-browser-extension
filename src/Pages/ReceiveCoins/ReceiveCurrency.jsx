@@ -65,7 +65,7 @@ function ReceiveCurrency() {
             <QRCode
               value={selectedCoin.wallet_address}
               size={230}
-              qrStyle="square"
+              qrStyle="dots"
               eyeRadius={10}
               logoImage={selectedCoin.coin.coin_image}
               logoHeight={55}
