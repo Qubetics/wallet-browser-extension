@@ -19,86 +19,71 @@ const colors = [
   "#e74c3c",
 ];
 
-const generateColors = (baseColors, count) => {
-  const colors = [];
-
-  for (let i = 0; i < count; i++) {
-    colors.push(baseColors[i % baseColors.length]);
+const stringToColour = function (name) {
+  console.log("NAME INN COLOR", name);
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    console.log("HASH", hash);
   }
 
-  return colors;
-};
+  // Generate RGB values for lighter blue shades
+  const r = (hash & 0x3f) + 96; // Restrict red to 96-159 for lighter red tones
+  const g = ((hash >> 5) & 0x3f) + 96; // Restrict green to 96-159 for lighter green tones
+  const b = ((hash >> 10) & 0x7f) + 160; // Restrict blue to 160-255 for bright blue tones
 
-const baseColors = generateColors(colors, 100);
+  // Convert to hex color code
+  return `#${("00" + r.toString(16)).slice(-2)}${("00" + g.toString(16)).slice(
+    -2
+  )}${("00" + b.toString(16)).slice(-2)}`;
+};
 
 const AllocationChart = () => {
   const [portfolio, setPortfolio] = useState([]);
   const [portfolioBalance, setPortfolioBalance] = useState(0);
-
   const [labels, setLabels] = useState([]);
-
   const [chartSeries, setChartSeries] = useState([]);
-
   const { account, currency } = useSelector((state) => state);
 
   const [chartOptions, setChartOptions] = useState({
     chart: {
-      type: "donut", // Change to "donut"
+      type: "donut",
     },
     labels: [],
     plotOptions: {
       pie: {
-        expandOnClick: true,
         donut: {
-          size: "70%", // Set hollow size
+          size: "50%",
           labels: {
-            show: true,
+            // show: true,
             total: {
-              show: true,
+              // show: true,
               label: "Total",
               formatter: () =>
                 `${currency?.symbol || ""} ${portfolioBalance.toFixed(2)}`,
-              style: {
-                fontSize: "14px",
-                fontWeight: 600,
-                color: "#fff",
-              },
             },
           },
         },
       },
     },
-    dataLabels: {
-      enabled: true,
-      formatter: (val) => `${val.toFixed(2)}%`,
-      style: {
-        fontSize: "12px",
-        colors: ["#fff"],
-      },
-    },
-    colors: baseColors,
+    // dataLabels: {
+    //   // enabled: true,
+    //   formatter: (val) => `${val.toFixed(2)}%`,
+    // },
+    colors,
     legend: {
-      show: true,
       position: "bottom",
-      labels: {
-        colors: "#fff",
-      },
     },
     tooltip: {
-      enabled: true,
-      style: {
-        fontSize: "14px",
-      },
       y: {
         formatter: (val) => `${val.toFixed(2)}%`,
       },
     },
   });
 
-  const init = async () => {
+  const fetchPortfolio = async () => {
     try {
       store.dispatch(setLoading(true));
-
       const { data } = await server.post(
         `/wallet/portfolio`,
         {
@@ -126,6 +111,7 @@ const AllocationChart = () => {
             parseFloat(obj?.coin?.fiat_price_data?.value || 0),
         0
       );
+
       if (totalBalance === 0) {
         setPortfolioBalance(0);
         setChartSeries([]);
@@ -133,77 +119,57 @@ const AllocationChart = () => {
         store.dispatch(setLoading(false));
         return;
       }
-      const percentages = portfolioData.map((obj) => {
-        const symbol = obj?.coin?.coin_symbol;
-        let type = null;
-        if (symbol == "USDT" || symbol == "USDC") {
-          switch (obj?.coin?.coin_family) {
-            case 1: {
-              type = "BEP-20 ";
-              break;
-            }
-            case 2: {
-              type = "ERC-20 ";
-              break;
-            }
-            case 4: {
-              type = "ERC-20 ";
-              break;
-            }
-          }
-        }
-        return {
-          name: type ? type + obj?.coin?.coin_symbol : obj?.coin?.coin_symbol,
-          percentage:
-            ((parseFloat(obj?.balance) *
-              parseFloat(obj?.coin?.fiat_price_data?.value || 0)) /
-              totalBalance) *
-            100,
-        };
-      });
 
-      const names = percentages.map(
-        (item) => item.name?.toUpperCase() || "Unknown"
-      );
-      const percentagesArr = percentages.map((item) =>
-        parseFloat(item.percentage.toFixed(2))
-      );
+      const percentages = portfolioData.map((obj) => ({
+        name: obj?.coin?.coin_name || "Unknown",
+        symbol: obj?.coin?.coin_symbol || "Unknown",
+        percentage:
+          ((parseFloat(obj?.balance) *
+            parseFloat(obj?.coin?.fiat_price_data?.value || 0)) /
+            totalBalance) *
+          100,
+      }));
+
+      const names = percentages.map((item) => item.name);
+      const symbols = percentages.map((item) => item.symbol);
+
+      const series = percentages.map((item) => parseFloat(item.percentage));
 
       setLabels(names);
-      setChartSeries(percentagesArr);
+      setChartSeries(series);
       setPortfolioBalance(totalBalance);
 
-      const chartColors = percentagesArr.map(
-        (_, index) => baseColors[index % baseColors.length]
+      const chartColors = percentages.map((_, index) =>
+        stringToColour(_?.name)
       );
 
-      setChartOptions((prevOptions) => ({
-        ...prevOptions,
-        labels: names,
+      setChartOptions((prev) => ({
+        ...prev,
+        labels: symbols,
         colors: chartColors,
       }));
+
       store.dispatch(setLoading(false));
     } catch (error) {
-      console.log("Portfolio error: ", error);
+      console.error("Portfolio fetch error:", error);
       store.dispatch(setLoading(false));
     }
   };
-  //gospel rally radio hole win naive mystery pudding pride scene cousin hawk
+
   useEffect(() => {
-    init();
+    fetchPortfolio();
   }, []);
 
   useEffect(() => {
     if (!chartSeries.length || chartSeries.every((val) => val === 0)) {
-      setChartSeries([100]);
-      setChartOptions((prevOptions) => ({
-        ...prevOptions,
+      setChartOptions((prev) => ({
+        ...prev,
         colors: ["#1413132e"],
         labels: ["No Data"],
       }));
+      setChartSeries([100]);
     }
   }, [chartSeries]);
-
   return (
     <div
       className="allocation-chart"
@@ -219,7 +185,7 @@ const AllocationChart = () => {
             options={chartOptions}
             series={chartSeries}
             type="donut"
-            height={250}
+            height={300}
           />
         )}
 
@@ -253,7 +219,7 @@ const AllocationChart = () => {
           </span>
         </h3>
       </div>
-      <div className="investedAmountShow">
+      {/* <div className="investedAmountShow">
         {Array.isArray(labels) &&
           labels.map((currency, index) => (
             <div
@@ -267,7 +233,7 @@ const AllocationChart = () => {
               <p style={{ textTransform: "capitalize" }}>{currency}</p>
             </div>
           ))}
-      </div>
+      </div> */}
 
       {/* Asset details */}
       <ul className="portfolio__tableOuter ">
