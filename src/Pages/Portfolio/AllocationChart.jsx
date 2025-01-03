@@ -66,10 +66,10 @@ const AllocationChart = () => {
         },
       },
     },
-    // dataLabels: {
-    //   // enabled: true,
-    //   formatter: (val) => `${val.toFixed(2)}%`,
-    // },
+    dataLabels: {
+      enabled: false,
+      // formatter: (val) => `${val.toFixed(2)}%`,
+    },
     colors,
     legend: {
       position: "bottom",
