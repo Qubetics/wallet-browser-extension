@@ -12,6 +12,7 @@ import {
   SystemProgram,
   sendAndConfirmTransaction,
   VersionedTransaction,
+  ComputeBudgetProgram,
 } from '@solana/web3.js';
 import { store } from '..';
 import { WalletHelper } from './wallet.helper';
@@ -342,6 +343,9 @@ export class SolanaHelper {
       //   '============amount'
       // );
 
+      const PRIORITY_FEE_INSTRUCTIONS = ComputeBudgetProgram.setComputeUnitPrice({microLamports: 25000});
+
+
       const transaction = new Transaction().add(
         splToken.Token.createTransferInstruction(
           splToken.TOKEN_PROGRAM_ID,
@@ -352,10 +356,11 @@ export class SolanaHelper {
           new BigNumber(amount).multipliedBy(new BigNumber(decimals)).toNumber()
         )
       );
-
+transaction.add(PRIORITY_FEE_INSTRUCTIONS)
       transaction.recentBlockhash = blockhash;
       console.log('🚀 ~ SolanaHelper ~ transaction:', transaction);
 
+      
       transaction.sign(myKeyPair);
       console.log(transaction);
 
@@ -532,37 +537,32 @@ export class SolanaHelper {
       serializedTransaction,
       SEND_OPTIONS
     );
-    // console.log('txid:::>:>:>:>', txid);
+  
     const controller = new AbortController();
     const abortSignal = controller.signal;
-    // console.log('Here');
+  
     const abortableResender = async () => {
       while (true) {
         await wait(2_000);
         if (abortSignal.aborted) return;
         try {
-          const opt = await connection.sendRawTransaction(
+          await connection.sendRawTransaction(
             serializedTransaction,
             SEND_OPTIONS
           );
-          // console.log('Here 2', opt);
-          return opt;
         } catch (e) {
           console.warn(`Failed to resend transaction: ${e}`);
         }
       }
     };
-
+  
     try {
       abortableResender();
       const lastValidBlockHeight =
         blockhashWithExpiryBlockHeight.lastValidBlockHeight - 150;
-      console.log(
-        '🚀 ~ SolanaHelper ~ lastValidBlockHeight:',
-        lastValidBlockHeight
-      );
-
-      return await Promise.race([
+  
+      // this would throw TransactionExpiredBlockheightExceededError
+      await Promise.race([
         connection.confirmTransaction(
           {
             ...blockhashWithExpiryBlockHeight,
@@ -570,9 +570,8 @@ export class SolanaHelper {
             signature: txid,
             abortSignal,
           },
-          'confirmed'
+          "confirmed"
         ),
-
         new Promise(async (resolve) => {
           // in case ws socket died
           while (!abortSignal.aborted) {
@@ -580,37 +579,31 @@ export class SolanaHelper {
             const tx = await connection.getSignatureStatus(txid, {
               searchTransactionHistory: false,
             });
-            console.log('🚀 ~ SolanaHelper ~ newPromise ~ tx:', tx);
-            // console.log("tx:D::D:::::::", tx);
-            if (tx?.value?.confirmationStatus === 'confirmed') {
-              console.log(' txn confirmed:::::;;:')
+            console.log('------------------------tx',JSON.stringify(tx))
+            if (tx?.value?.confirmationStatus === "finalized") {
               resolve(tx);
-            } 
+            }
           }
         }),
-      ]) 
+      ]);
     } catch (e) {
-      console.log(e, 'e=====');
-      if (e) {
+      if (e ) {
         // we consume this error and getTransaction would return null
-        console.log(
-          'we consume this error and getTransaction would return null'
-        );
         return null;
       } else {
         // invalid state from web3.js
-        console.log('invalid state from web3.js');
         throw e;
       }
     } finally {
       controller.abort();
     }
-
+  
     // in case rpc is not synced yet, we add some retries
     const response = promiseRetry(
       async (retry) => {
+        console.log("------------retry")
         const response = await connection.getTransaction(txid, {
-          commitment: 'confirmed',
+          commitment: "confirmed",
           maxSupportedTransactionVersion: 0,
         });
         if (!response) {
@@ -623,8 +616,9 @@ export class SolanaHelper {
         minTimeout: 1e3,
       }
     );
-
+  
     return response;
+  
   }
 
   unwrapSolana = async (amount, coinId) => {

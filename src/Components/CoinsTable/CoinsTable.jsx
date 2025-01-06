@@ -342,7 +342,7 @@ function CoinsTable({ dataArray, showCoinPrice, name }) {
       </ModalCustom>
 
       <ModalCustom
-        title={"Confirm Deletion"}
+        title={"Confirm Delete"}
         isModalOpen={isModalVisible}
         customClass='customClassModal'
         handleCancel={() => {

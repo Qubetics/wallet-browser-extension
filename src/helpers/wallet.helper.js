@@ -721,7 +721,7 @@ console.log("ADDDDD ", solanaAddress);
         // `m/44'/60'/0'/0/${accounts.length}`
         `m/44'/60'/0'/0/0`
       );
-      console.log("address, privateKey ", address, privateKey, mnemonics);
+      
 
       // console.log(`m/44'/60'/0'/0/${accounts.length}`);
 
@@ -729,9 +729,7 @@ console.log("ADDDDD ", solanaAddress);
         mnemonics = [];
       } else {
         mnemonics = SecurityHelper.decrypt(mnemonics, password);
-        mnemonics = JSON.parse(mnemonics);
-        console.log("GEN NWWWWW ", mnemonics);
-        
+        mnemonics = JSON.parse(mnemonics); 
       }
       const finalMnemonics = [
         ...mnemonics,
