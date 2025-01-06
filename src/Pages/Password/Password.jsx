@@ -12,6 +12,7 @@ import InputFieldSimple from "../../Components/InputField/InputFieldSimple";
 import { DURATION } from "../../config/message.config";
 import { WalletHelper } from "../../helpers/wallet.helper";
 import "./Password.scss";
+import useCurrentHeight from "../../CustomHooks/useCurrentHeight";
 
 function VerifyPassword() {
   const navigate = useNavigate();
@@ -49,9 +50,12 @@ function VerifyPassword() {
     store.dispatch(setLoading(false));
     navigate("/wallet");
   };
+  const height = useCurrentHeight();
 
   return (
-    <div className="cardWhite">
+    <div
+      className={`${"cardWhite"} ${height <= 600 ? "cardWhiteOuterExt" : ""}`}
+    >
       {contextHolder}
       <h2 className="cardWhite__title">Verify</h2>
       <p className="cardWhite__subTitle" style={{ marginBottom: 24 }}>
@@ -66,7 +70,6 @@ function VerifyPassword() {
           value={password}
           customFunction={handleLogin}
           getData={(password) => {
-            
             const hasEmoji = /[\p{Extended_Pictographic}]/u.test(password);
             console.log("-----------------> ", hasEmoji);
             if (!hasEmoji) {

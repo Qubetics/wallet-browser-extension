@@ -68,8 +68,32 @@
     color: theme-get("whiteblack");
   }
 }
-.apexcharts-legend{
+.apexcharts-legend {
   text-align: left !important;
-  top: 16px !important;
+  top: 7px !important;
   right: 0px !important;
+}
+.chartBalance {
+  margin-bottom: 10px;
+  h3 {
+    font-size: 16px;
+    font-weight: 400;
+  }
+  h1 {
+    font-size: 40px;
+    font-weight: 600;
+  }
+}
+.cryptoSec {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-top: 10px;
+  h4 {
+    font-size: 18px !important;
+    font-weight: 500;
+    color: #fff;
+    margin: 0 !important;
+  }
 }
