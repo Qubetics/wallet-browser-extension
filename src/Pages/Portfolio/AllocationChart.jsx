@@ -7,33 +7,16 @@ import { server } from "../../server";
 import BTC from "../../Assets/Coins/BTC.png";
 import CryptoS from "../../Assets/CryptoS.svg";
 
-// const colors = [
-//   "#00e396",
-//   "#ff4560",
-//   "#775dd0",
-//   "#feb019",
-//   "#ff5733",
-//   "#8e44ad",
-//   "#2ecc71",
-//   "#f39c12",
-//   "#3498db",
-//   "#e74c3c",
-// ];
-
 const stringToColour = function (name) {
-  console.log("NAME INN COLOR", name);
   let hash = 0;
   for (let i = 0; i < name.length; i++) {
     hash = name.charCodeAt(i) + ((hash << 5) - hash);
-    console.log("HASH", hash);
   }
 
-  // Generate RGB values for lighter blue shades
-  const r = (hash & 0x3f) + 96; // Restrict red to 96-159 for lighter red tones
-  const g = ((hash >> 5) & 0x3f) + 96; // Restrict green to 96-159 for lighter green tones
-  const b = ((hash >> 10) & 0x7f) + 160; // Restrict blue to 160-255 for bright blue tones
+  const r = (hash & 0x3f) + 96;
+  const g = ((hash >> 5) & 0x3f) + 96;
+  const b = ((hash >> 10) & 0x7f) + 160;
 
-  // Convert to hex color code
   return `#${("00" + r.toString(16)).slice(-2)}${("00" + g.toString(16)).slice(
     -2
   )}${("00" + b.toString(16)).slice(-2)}`;
@@ -49,19 +32,15 @@ const AllocationChart = () => {
   const [chartOptions, setChartOptions] = useState({
     chart: {
       type: "donut",
-      // height:150,
-      // width:150,
     },
     labels: [],
     plotOptions: {
       pie: {
-        size: 400,
+        size: 150,
         donut: {
           size: "60%",
           labels: {
-            // show: true,
             total: {
-              // show: true,
               label: "Total",
               formatter: () =>
                 `${currency?.symbol || ""} ${portfolioBalance.toFixed(2)}`,
@@ -72,19 +51,11 @@ const AllocationChart = () => {
     },
     dataLabels: {
       enabled: false,
-      // formatter: (val) => `${val.toFixed(2)}%`,
     },
-
     legend: {
       position: "right",
-      textAnchor: "left",
       labels: {
         colors: "#fff",
-      },
-      itemMargin: {
-        vertical: 5,
-        horizontal: 5,
-        textAlign: "left",
       },
     },
     tooltip: {
@@ -144,7 +115,6 @@ const AllocationChart = () => {
       }));
 
       const names = percentages.map((item) => item.name);
-      const symbols = percentages.map((item) => item.symbol);
       const series = percentages.map((item) => parseFloat(item.percentage));
       const namesWithPercentages = percentages.map(
         (item) => `${item.name}   ${item.percentage.toFixed(2)}%`
@@ -190,11 +160,9 @@ const AllocationChart = () => {
       className="allocation-chart"
       style={{
         color: "#fff",
-        // maxWidth: "300px",
         margin: "0 auto",
       }}
     >
-      {/* Total Invested Amount */}
       <div className="chartBalance">
         <h3>
           <span>Total Balance:</span>
@@ -209,50 +177,16 @@ const AllocationChart = () => {
             options={chartOptions}
             series={chartSeries}
             type="donut"
-            height={300}
+            height={150}
           />
         )}
-
-        {/* Custom text in the center of the chart */}
-        {/* {portfolioBalance > 0 && (
-          <div className="assetsAllocation">
-            <span
-              style={{ fontSize: "14px", fontWeight: "400", color: "#98969B" }}
-            >
-              Assets
-            </span>
-            <span
-              style={{ fontSize: "16px", fontWeight: "700", color: "#FFFFFF" }}
-            >
-              Allocation
-            </span>
-          </div>
-        )} */}
       </div>
-
-      {/* <div className="investedAmountShow">
-        {Array.isArray(labels) &&
-          labels.map((currency, index) => (
-            <div
-              key={index}
-              className={`investedCurrency`}
-              style={{
-                borderLeft: `6px solid ${baseColors[index]}`,
-                backgroundColor: "#141423",
-              }}
-            >
-              <p style={{ textTransform: "capitalize" }}>{currency}</p>
-            </div>
-          ))}
-      </div> */}
       <div className="cryptoSec">
         <h4>Crypto</h4>
         <img style={{ cursor: "pointer" }} src={CryptoS} alt="SearchIcon" />
       </div>
-      {/* Asset details */}
       <ul className="portfolio__tableOuter ">
         {portfolioBalance > 0 &&
-          portfolio &&
           portfolio.map((itm, idx) => (
             <li key={idx} className="coinsTable1 flex-item">
               <div className="coinsTable1__left">
@@ -291,12 +225,6 @@ const AllocationChart = () => {
                   <div>
                     <span style={{ color: "#98969B" }}>Percentage</span>
                     <span style={{ color: "#7DB0FF", marginLeft: "5px" }}>
-                      {/* {(
-                        (itm?.balance /
-                          (portfolioBalace === 0 ? 1 : portfolioBalace)) *
-                        100
-                      ).toFixed(2)}
-                      % */}
                       {portfolioBalance &&
                         (
                           ((parseFloat(itm?.balance) *

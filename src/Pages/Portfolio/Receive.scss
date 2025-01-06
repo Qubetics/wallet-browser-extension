@@ -70,8 +70,11 @@
 }
 .apexcharts-legend {
   text-align: left !important;
-  top: 7px !important;
+  top: 0px !important;
   right: 0px !important;
+  .apexcharts-legend-series{
+    margin-bottom: 12px !important; 
+  }
 }
 .chartBalance {
   margin-bottom: 10px;
