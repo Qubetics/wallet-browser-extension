@@ -13,6 +13,7 @@ function ModalCustom({
   customClass = "",
   title = "",
   closable = true,
+  isWhite,
 }) {
   // Example: If using theme from Redux
   // const { theme } = useSelector((state) => state);
@@ -21,10 +22,10 @@ function ModalCustom({
     <div>
       <Modal
         closeIcon={
-          true ? (
-            <img src={ModalCloseIcon} alt="Close" />
-          ) : (
+          isWhite ? (
             <img src={BlackCloseIcon} alt="Close" />
+          ) : (
+            <img src={ModalCloseIcon} alt="Close" />
           )
         }
         closable={closable}
