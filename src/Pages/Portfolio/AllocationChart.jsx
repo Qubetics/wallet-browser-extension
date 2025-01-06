@@ -5,7 +5,7 @@ import { store } from "../..";
 import { setLoading } from "../../actions/loading";
 import { server } from "../../server";
 import BTC from "../../Assets/Coins/BTC.png";
-import CryptoS from "../../Assets/CryptoS.svg"
+import CryptoS from "../../Assets/CryptoS.svg";
 
 // const colors = [
 //   "#00e396",
@@ -203,7 +203,7 @@ const AllocationChart = () => {
           {currency?.symbol} {portfolioBalance.toFixed(2)}
         </h1>
       </div>
-      <div style={{ position: "relative",height: '200px' }}>
+      <div style={{ position: "relative" }}>
         {portfolioBalance > 0 && (
           <Chart
             options={chartOptions}
@@ -247,7 +247,7 @@ const AllocationChart = () => {
       </div> */}
       <div className="cryptoSec">
         <h4>Crypto</h4>
-        <img style={{cursor:"pointer"}} src={CryptoS} alt="SearchIcon" />
+        <img style={{ cursor: "pointer" }} src={CryptoS} alt="SearchIcon" />
       </div>
       {/* Asset details */}
       <ul className="portfolio__tableOuter ">
