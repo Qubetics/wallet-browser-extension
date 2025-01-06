@@ -6,18 +6,18 @@ import { setLoading } from "../../actions/loading";
 import { server } from "../../server";
 import BTC from "../../Assets/Coins/BTC.png";
 
-const colors = [
-  "#00e396",
-  "#ff4560",
-  "#775dd0",
-  "#feb019",
-  "#ff5733",
-  "#8e44ad",
-  "#2ecc71",
-  "#f39c12",
-  "#3498db",
-  "#e74c3c",
-];
+// const colors = [
+//   "#00e396",
+//   "#ff4560",
+//   "#775dd0",
+//   "#feb019",
+//   "#ff5733",
+//   "#8e44ad",
+//   "#2ecc71",
+//   "#f39c12",
+//   "#3498db",
+//   "#e74c3c",
+// ];
 
 const stringToColour = function (name) {
   console.log("NAME INN COLOR", name);
@@ -73,15 +73,14 @@ const AllocationChart = () => {
 
     legend: {
       position: "right",
-      textAnchor:"left",
+      textAnchor: "left",
       labels: {
         colors: "#fff",
       },
       itemMargin: {
         vertical: 5,
         horizontal: 5,
-        textAlign:"left"
-
+        textAlign: "left",
       },
     },
     tooltip: {
@@ -142,9 +141,10 @@ const AllocationChart = () => {
 
       const names = percentages.map((item) => item.name);
       const symbols = percentages.map((item) => item.symbol);
-
       const series = percentages.map((item) => parseFloat(item.percentage));
-
+      const namesWithPercentages = percentages.map(
+        (item) => `${item.name}   ${item.percentage.toFixed(2)}%`
+      );
       setLabels(names);
       setChartSeries(series);
       setPortfolioBalance(totalBalance);
@@ -155,7 +155,7 @@ const AllocationChart = () => {
 
       setChartOptions((prev) => ({
         ...prev,
-        labels: symbols,
+        labels: namesWithPercentages,
         colors: chartColors,
       }));
 
