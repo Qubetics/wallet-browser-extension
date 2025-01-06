@@ -1,27 +1,27 @@
-import { AlphaRouter, SwapType } from '@uniswap/smart-order-router';
+import { AlphaRouter, SwapType } from "@uniswap/smart-order-router";
 import {
   CurrencyAmount,
   Ether,
   Percent,
   Token,
   TradeType,
-} from '@uniswap/sdk-core';
-import { ethers } from 'ethers';
-import { BigNumber } from 'bignumber.js';
+} from "@uniswap/sdk-core";
+import { ethers } from "ethers";
+import { BigNumber } from "bignumber.js";
 import {
   UNISWAP_NATIVE_WRAPPED_TOKEN_ADDRESSES,
   UNI_MAINNET_ROUTER,
   UNI_ROUTER_ABI,
   UNI_TESTNET_ROUTER,
   WETH_ABI,
-} from '../config/uniswap.config';
-import { ABI, WRAP_ABI } from '../config/abi';
-import { WalletHelper } from './wallet.helper';
-import { Web3Helper } from './web3.helper';
-import Web3 from 'web3';
-import JSBI from 'jsbi';
-import { server } from '../server';
-import { store } from '..';
+} from "../config/uniswap.config";
+import { ABI, WRAP_ABI } from "../config/abi";
+import { WalletHelper } from "./wallet.helper";
+import { Web3Helper } from "./web3.helper";
+import Web3 from "web3";
+import JSBI from "jsbi";
+import { server } from "../server";
+import { store } from "..";
 
 export class UniswapHelper {
   web3Provider = null;
@@ -31,7 +31,7 @@ export class UniswapHelper {
 
   constructor(rpcUrl) {
     console.log(
-      '🚀 ~ file: uniswap.helper.js:33 ~ UniswapHelper ~ constructor ~ rpcUrl:',
+      "🚀 ~ file: uniswap.helper.js:33 ~ UniswapHelper ~ constructor ~ rpcUrl:",
       rpcUrl
     );
     this.web3Provider = new ethers.providers.JsonRpcProvider(rpcUrl);
@@ -47,7 +47,7 @@ export class UniswapHelper {
     try {
       const data = await this.web3Provider.getTransactionReceipt(hash);
       console.log(
-        '🚀 ~ file: pancake.helper.js:37 ~ PancakeHelper ~ getTransactionStatusThroughHash= ~ data:',
+        "🚀 ~ file: pancake.helper.js:37 ~ PancakeHelper ~ getTransactionStatusThroughHash= ~ data:",
         data
       );
       return data.status;
@@ -60,7 +60,7 @@ export class UniswapHelper {
     try {
       const { account } = store.getState();
       const { data } = await server.post(
-        '/on-chain/quote',
+        "/on-chain/quote",
         {
           chain_id: parseInt(chainId),
           src,
@@ -94,7 +94,7 @@ export class UniswapHelper {
       const { account } = store.getState();
       const WALLET_SECRET = await WalletHelper.getPrivateKey();
       console.log(
-        '🚀 ~ file: pancake.helper.js:129 ~ PancakeHelper ~ sendForApproval ~ WALLET_SECRET:',
+        "🚀 ~ file: pancake.helper.js:129 ~ PancakeHelper ~ sendForApproval ~ WALLET_SECRET:",
         WALLET_SECRET
       );
       const contract = new ethers.Contract(
@@ -106,7 +106,7 @@ export class UniswapHelper {
       // Unlimited allowance value (2^256 - 1)
       const unlimitedAllowance = ethers.constants.MaxUint256;
       console.log(
-        '🚀 ~ file: pancake.helper.js:138 ~ PancakeHelper ~ sendForApproval ~ unlimitedAllowance:',
+        "🚀 ~ file: pancake.helper.js:138 ~ PancakeHelper ~ sendForApproval ~ unlimitedAllowance:",
         unlimitedAllowance
       );
 
@@ -144,8 +144,8 @@ export class UniswapHelper {
       approveTx.gasLimit = gasLimitRequired._hex;
       approveTx.gasPrice = Web3.utils.toHex(gasPrice.fast * Math.pow(10, 9));
       approveTx.from = walletAddress;
-      approveTx.value = '0x0';
-      approveTx.chainId = chainId
+      approveTx.value = "0x0";
+      approveTx.chainId = chainId;
       approveTx.nonce = nonce;
 
       console.log(approveTx);
@@ -153,12 +153,12 @@ export class UniswapHelper {
       // Sign the transaction with the wallet's private key
       const wallet = new ethers.Wallet(WALLET_SECRET, this.web3Provider);
       console.log(
-        '🚀 ~ file: pancake.helper.js:149 ~ PancakeHelper ~ sendForApproval ~ wallet:',
+        "🚀 ~ file: pancake.helper.js:149 ~ PancakeHelper ~ sendForApproval ~ wallet:",
         wallet
       );
       const signedTransaction = await wallet.signTransaction(approveTx);
       console.log(
-        '🚀 ~ file: pancake.helper.js:151 ~ PancakeHelper ~ sendForApproval ~ signedTransaction:',
+        "🚀 ~ file: pancake.helper.js:151 ~ PancakeHelper ~ sendForApproval ~ signedTransaction:",
         signedTransaction
       );
 
@@ -166,13 +166,13 @@ export class UniswapHelper {
         `${slug}/${symbol}/send`,
         {
           nonce: nonce,
-          tx_raw: signedTransaction,
+          tx_raw: signedTransaction.split("0x")[1],
           from: walletAddress,
           to: spenderAddress,
           amount: 0,
           gas_estimate: gasLimitRequired.toNumber(),
-          gas_price: gasPrice,
-          tx_type: 'approve',
+          gas_price: gasPrice?.fast,
+          tx_type: "approve",
         },
         {
           headers: {
@@ -203,7 +203,7 @@ export class UniswapHelper {
         const { account } = store.getState();
 
         const { data } = await server.post(
-          '/on-chain/swap',
+          "/on-chain/swap",
           {
             chain_id: parseInt(token1.chain.chainId),
             src: route.fromToken.address,
@@ -248,7 +248,7 @@ export class UniswapHelper {
 
         const transaction = {
           data: data.data.tx.data,
-          to: '0x1111111254eeb25477b68fb85ed929f73a960582',
+          to: "0x1111111254eeb25477b68fb85ed929f73a960582",
           value: Web3.utils.toHex(data.data.tx.value),
           from: walletAddress,
           gasPrice: Web3.utils.toHex(gasPrice.fast * Math.pow(10, 9)),
@@ -264,13 +264,17 @@ export class UniswapHelper {
           `${slug}/${isToken ? token1.tokenAddress : symbol}/send`,
           {
             nonce: nonce,
-            tx_raw: signedTransaction,
+            tx_raw: signedTransaction.split("0x")[1],
             from: walletAddress,
-            to: '0x1111111254eeb25477b68fb85ed929f73a960582',
+            to: "0x1111111254eeb25477b68fb85ed929f73a960582",
             amount: amount,
             gas_estimate: +increasedGasLimitDecimal,
-            gas_price: gasPrice,
-            tx_type: 'swap',
+            gas_price: gasPrice?.fast,
+            //estimate:gasPrice?.estimate
+            // fast: gasPrice?.fast,
+            // propose: gasPrice?.propose,
+            // safe: gasPrice?.safe,
+            tx_type: "swap",
           },
           {
             headers: {
@@ -301,7 +305,7 @@ export class UniswapHelper {
       );
 
       const gasPrice = await Web3Helper.getGasPrice(
-        'eth',
+        "eth",
         walletAddress,
         walletAddress,
         0
@@ -311,7 +315,7 @@ export class UniswapHelper {
         UNISWAP_NATIVE_WRAPPED_TOKEN_ADDRESSES[1].address,
         token1.address,
         token1.rpc,
-        token1.isToken ? 'withdraw' : 'deposit',
+        token1.isToken ? "withdraw" : "deposit",
         bigAmount
       );
 
@@ -324,7 +328,7 @@ export class UniswapHelper {
 
       const transaction = {
         to: UNISWAP_NATIVE_WRAPPED_TOKEN_ADDRESSES[1].address,
-        value: token1.tokenAddress ? '0x0' : bigAmount,
+        value: token1.tokenAddress ? "0x0" : bigAmount,
         from: walletAddress,
         gasPrice: Web3.utils.toHex(gasPrice.price * Math.pow(10, 9)),
         gasLimit: Web3.utils.toHex(increasedGasLimitDecimal),
@@ -343,33 +347,33 @@ export class UniswapHelper {
         {
           address_list: [
             {
-              address_book_name: '',
+              address_book_name: "",
               amount: parseFloat(amount), // Set to 0 for an approve transaction
               coin_id: coinId, // Set to the appropriate coin ID
               fiat_price: 0,
-              fiat_type: 'USD', // Set to the appropriate fiat type
+              fiat_type: "USD", // Set to the appropriate fiat type
               from_address: walletAddress,
               gas_estimate: parseFloat(increasedGasLimitDecimal),
               gas_price: gasPrice.price,
               to_address: UNISWAP_NATIVE_WRAPPED_TOKEN_ADDRESSES[1].address, // The ERC20 token contract address (to_address should be the token address for an approval transaction)
-              trnx_raw: signedTransaction.split('0x')[1],
-              trnx_type: 'swap',
+              trnx_raw: signedTransaction.split("0x")[1],
+              trnx_type: "swap",
               coin_symbol: token1.symbol,
               swap_fee: 0,
             },
             {
-              address_book_name: '',
+              address_book_name: "",
               amount: parseFloat(adminDetails.amount), // Set to 0 for an approve transaction
               coin_id: adminDetails.coinId, // Set to the appropriate coin ID
               fiat_price: 0,
-              fiat_type: 'USD', // Set to the appropriate fiat type
+              fiat_type: "USD", // Set to the appropriate fiat type
               from_address: walletAddress,
               gas_estimate: parseFloat(increasedGasLimitDecimal),
               gas_price: gasPrice.price,
               to_address: adminDetails.address, // The ERC20 token contract address (to_address should be the token address for an approval transaction)
               trnx_raw: adminDetails.raw_trnx,
-              trnx_type: 'admin_fees',
-              coin_symbol: 'eth',
+              trnx_type: "admin_fees",
+              coin_symbol: "eth",
               swap_fee: 0,
             },
           ],

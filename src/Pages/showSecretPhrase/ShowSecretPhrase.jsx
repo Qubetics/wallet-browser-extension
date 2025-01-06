@@ -12,7 +12,10 @@ function ShowSecretPhrase() {
     duration: DURATION,
   });
   const { state } = useLocation();
+  console.log("STATE",state)
   const { mnemonics } = state;
+  console.log("mnemonics",mnemonics)
+
   const phrases = mnemonics.split(" ");
   function copyToClipboard() {
     const str = phrases.join(",").replaceAll(",", " ");

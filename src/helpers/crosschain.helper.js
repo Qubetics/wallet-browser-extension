@@ -1,14 +1,14 @@
-import axios from 'axios';
-import { SWFT_BASE_URL } from '../config/crosschain.config';
-import { AdaHelper } from './ada.helper';
-import { BTCHelper } from './btc.helper';
-import { getFlooredFixed } from './conversion.helper';
-import { SolanaHelper } from './solana.helper';
-import { WalletHelper } from './wallet.helper';
-import { Web3Helper } from './web3.helper';
-import { SWIFT_ERROR } from './constant';
-import { server } from '../server';
-import { store } from '..';
+import axios from "axios";
+import { SWFT_BASE_URL } from "../config/crosschain.config";
+import { AdaHelper } from "./ada.helper";
+import { BTCHelper } from "./btc.helper";
+import { getFlooredFixed } from "./conversion.helper";
+import { SolanaHelper } from "./solana.helper";
+import { WalletHelper } from "./wallet.helper";
+import { Web3Helper } from "./web3.helper";
+import { SWIFT_ERROR } from "./constant";
+import { server } from "../server";
+import { store } from "..";
 
 export class CrossChainHelper {
   axiosInstance;
@@ -25,7 +25,7 @@ export class CrossChainHelper {
     try {
       const { account } = store.getState();
       const response = await server.post(
-        '/swft/get_base_info',
+        "/swftc/getBaseInfo",
         {
           deposit_coin_code: fromCoinId,
           receive_coin_code: toCoinId,
@@ -94,14 +94,14 @@ export class CrossChainHelper {
         destinationAddr: toCoin.address,
         refundAddr: walletAddress,
         equipmentNo: walletAddress,
-        sourceType: 'ANDROID',
-        sourceFlag: 'widget',
+        sourceType: "ANDROID",
+        sourceFlag: "widget",
       });
 
       const { account } = store.getState();
 
       const response = await server.post(
-        '/swft/accountExchange',
+        "/swft/accountExchange",
         {
           deposit_coin_code: fromCoin.symbol,
           receive_coin_code: toCoin.symbol,
@@ -110,8 +110,8 @@ export class CrossChainHelper {
           destination_addr: toCoin.address,
           refund_addr: walletAddress,
           equipment_no: walletAddress,
-          source_type: 'ANDROID',
-          source_flag: 'widget',
+          source_type: "ANDROID",
+          source_flag: "widget",
         },
         {
           headers: {
@@ -122,7 +122,7 @@ export class CrossChainHelper {
 
       const orderData = response.data.data.data;
 
-      let hash = '';
+      let hash = "";
 
       if (fromCoin.tokenAddress) {
         hash = await Web3Helper.generateRawTransactionForTokenAndBroadcast(
@@ -139,7 +139,7 @@ export class CrossChainHelper {
           fromCoin.tokenAddress,
           Math.pow(10, fromCoin.decimals),
           symbol,
-          'swap'
+          "swap"
         );
       } else {
         hash = await Web3Helper.generateRawTransactionForCoinAndBroadcast(
@@ -155,7 +155,7 @@ export class CrossChainHelper {
           chain.chainId,
           symbol,
           rpc,
-          'swap'
+          "swap"
         );
       }
 
@@ -163,7 +163,7 @@ export class CrossChainHelper {
         return false;
       }
 
-      await this.axiosInstance.post('/v2/modifyTxId', {
+      await this.axiosInstance.post("/v2/modifyTxId", {
         orderId: orderData.orderId,
         depositTxid: hash,
       });

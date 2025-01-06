@@ -304,18 +304,14 @@ function CrossChain() {
   const init = async () => {
     try {
       const { data } = await server.post(
-        "/swft/query_coin_list",
+        "/swftc/queryCoinList",
         {
-          address_list: Object.keys(account.coinFamilyAndAddress)
-            .map((key) => {
-              return {
-                coin_family: key,
-                address: account.coinFamilyAndAddress[key],
-              };
-            })
-            .filter((el) => el.address),
-          is_active: 1,
-          fiat_currency: currency.name,
+          addresses: Object.values(account.coinFamilyAndAddress).filter(
+            (address) => address
+          ),
+
+          is_wallet: true,
+          fiat_type: currency.name,
           per_page: 300,
           page,
         },
@@ -326,18 +322,21 @@ function CrossChain() {
         }
       );
       const inActiveTokens = await server.post(
-        "/swft/query_coin_list",
+        "/swftc/queryCoinList",
         {
-          address_list: Object.keys(account.coinFamilyAndAddress)
-            .map((key) => {
-              return {
-                coin_family: key,
-                address: account.coinFamilyAndAddress[key],
-              };
-            })
-            .filter((el) => el.address),
-          is_active: 0,
-          fiat_currency: currency.name,
+          // addresses: Object.keys(account.coinFamilyAndAddress)
+          //   .map((key) => {
+          //     return {
+          //       coin_family: key,
+          //       address: account.coinFamilyAndAddress[key],
+          //     };
+          //   })
+          //   .filter((el) => el.address),
+          addresses: Object.values(account.coinFamilyAndAddress).filter(
+            (address) => address
+          ),
+          is_wallet: false,
+          fiat_type: currency.name,
           per_page: 20,
           page,
         },
@@ -354,7 +353,7 @@ function CrossChain() {
       let tokens = data?.data?.map((token) => {
         let coinFamilyName = "ETH";
         let tokenType = "ERC20";
-
+        console.log("TOTOTO", token);
         switch (token?.coin_family) {
           case 2:
             coinFamilyName = "ETH";
@@ -375,21 +374,21 @@ function CrossChain() {
         }
 
         return {
-          id: token?.coin_id,
-          symbol: token?.coin_code,
-          showName: token?.coin_code_show,
-          coinSymbol: token.coin_data.coin_symbol,
+          id: token?.coin_data?.coin_id,
+          symbol: token?.coinCode,
+          showName: token?.coinCodeShow,
+          coinSymbol: token.coin_data?.coin_symbol,
           active: true,
-          iHave: token?.wallet_addresses_data ? true : false,
-          name: token?.coin_name,
+          iHave: token?.coin_data?.wallet_data ? true : false,
+          name: token?.coinName,
           tokenAddress: token?.coin_data?.token_address || null,
-          image: token?.coin_image_url,
-          address: account?.coinFamilyAndAddress[token?.coin_family],
+          image: token?.coinImageUrl,
+          address: account?.coinFamilyAndAddress[token?.coin_data?.coin_family],
           isToken: token?.coin_data?.token_address ? true : false,
           coinFamilyName,
-          coinFamily: token?.coin_family,
-          balance: token?.wallet_addresses_data
-            ? token?.wallet_addresses_data?.balance
+          coinFamily: token?.coin_data?.coin_family,
+          balance: token?.coin_data?.wallet_data
+            ? token?.coin_data?.wallet_data?.balance
             : 0,
           price: token?.coin_data?.fiat_price_data
             ? token?.coin_data?.fiat_price_data?.value
@@ -398,10 +397,10 @@ function CrossChain() {
             : 0,
           type: token?.coin_data?.token_address ? tokenType : null,
           chain: chains.find(
-            (chain) => chain?.coinFamily == token?.coin_family
+            (chain) => chain?.coinFamily == token?.coin_data?.coin_family
           ),
           native: token?.coin_data?.native_coin_market_data,
-          decimals: parseInt(token?.coin_data?.decimals.toString().length) - 1,
+          decimals: parseInt(token?.coinDecimal?.toString().length) - 1,
           rpc:
             token.coin_family == 1
               ? process.env.REACT_APP_BNB_RPC
@@ -414,6 +413,7 @@ function CrossChain() {
       const tokens2 = inActiveTokens?.data?.data.map((token) => {
         let coinFamilyName = "ETH";
         let tokenType = "ERC20";
+        console.log("TOTOTO2", token);
 
         switch (token.coin_family) {
           case 2:
@@ -434,20 +434,20 @@ function CrossChain() {
         }
 
         return {
-          id: token.coin_id,
-          symbol: token.coin_code,
-          showName: token.coin_code_show,
+          id: token.coin_data?.coin_id,
+          symbol: token.coinCode,
+          showName: token.coinCodeShow,
           coinSymbol: token.coin_data.coin_symbol,
           active: false,
-          name: token.coin_name,
+          name: token.coinName,
           tokenAddress: token.coin_data.token_address || null,
-          image: token.coin_image_url,
-          address: account.coinFamilyAndAddress[token.coin_family],
+          image: token.coinImageUrl,
+          address: account.coinFamilyAndAddress[token?.coin_data?.coin_family],
           isToken: token.coin_data.token_address ? true : false,
           coinFamilyName,
           coinFamily: token.coin_family,
-          balance: token.wallet_addresses_data
-            ? token.wallet_addresses_data.balance
+          balance: token?.coin_data?.wallet_data
+            ? token.coin_data?.wallet_data.balance
             : 0,
           price: token?.coin_data?.fiat_price_data
             ? token?.coin_data?.fiat_price_data?.value
@@ -455,13 +455,15 @@ function CrossChain() {
               : 0
             : 0,
           type: token.coin_data.token_address ? tokenType : null,
-          chain: chains.find((chain) => chain.coinFamily == token.coin_family),
+          chain: chains.find(
+            (chain) => chain.coinFamily == token?.coin_data?.coin_family
+          ),
           native: token.coin_data.native_coin_market_data,
-          decimals: parseInt(token.coin_data.decimals.toString().length) - 1,
+          decimals: parseInt(token.coinDecimal?.toString().length) - 1,
           rpc:
-            token.coin_family == 1
+            token?.coin_data?.coin_family == 1
               ? process.env.REACT_APP_BNB_RPC
-              : token.coin_family == 2
+              : token?.coin_data?.coin_family == 2
               ? process.env.REACT_APP_ETH_RPC
               : process.env.REACT_APP_MATIC_RPC,
         };
@@ -780,7 +782,7 @@ function CrossChain() {
   }
 
   useEffect(() => {
-    // init();
+    init();
   }, [page]);
 
   const handleScroll = () => {

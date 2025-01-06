@@ -158,6 +158,7 @@ function Swap() {
         // }, 2000);
       }
     }
+    init();
   }, []);
 
   useEffect(() => {
@@ -290,8 +291,8 @@ function Swap() {
             token.coin_family == 1
               ? process.env.REACT_APP_BNB_RPC
               : token.coin_family == 2
-                ? process.env.REACT_APP_ETH_RPC
-                : process.env.REACT_APP_MATIC_RPC,
+              ? process.env.REACT_APP_ETH_RPC
+              : process.env.REACT_APP_MATIC_RPC,
         };
       });
 
@@ -343,7 +344,7 @@ function Swap() {
               addrsListKeys: account.addressLists,
               coin_family: account.coinFamilies,
               fiat_type: currency.name,
-              coin_id_search: state.coinId,
+              coin_id: state.coinId,
             },
             {
               headers: {
@@ -382,8 +383,8 @@ function Swap() {
                 token.coin_family == 1
                   ? process.env.REACT_APP_BNB_RPC
                   : token.coin_family == 2
-                    ? process.env.REACT_APP_ETH_RPC
-                    : process.env.REACT_APP_MATIC_RPC,
+                  ? process.env.REACT_APP_ETH_RPC
+                  : process.env.REACT_APP_MATIC_RPC,
             };
           });
 
@@ -456,7 +457,7 @@ function Swap() {
             addrsListKeys: account.addressLists,
             coin_family: account.coinFamilies,
             fiat_type: currency.name,
-            coin_id_search: uniToken1.id,
+            coin_id: uniToken1.id,
           },
           {
             headers: {
@@ -495,8 +496,8 @@ function Swap() {
                 token.coin_family == 1
                   ? process.env.REACT_APP_BNB_RPC
                   : token.coin_family == 2
-                    ? process.env.REACT_APP_ETH_RPC
-                    : process.env.REACT_APP_MATIC_RPC,
+                  ? process.env.REACT_APP_ETH_RPC
+                  : process.env.REACT_APP_MATIC_RPC,
             };
           });
 
@@ -550,7 +551,7 @@ function Swap() {
             addrsListKeys: account.addressLists,
             coin_family: account.coinFamilies,
             fiat_type: currency.name,
-            coin_id_search: uniToken2.id,
+            coin_id: uniToken2.id,
           },
           {
             headers: {
@@ -587,8 +588,8 @@ function Swap() {
               token.coin_family == 1
                 ? process.env.REACT_APP_BNB_RPC
                 : token.coin_family == 2
-                  ? process.env.REACT_APP_ETH_RPC
-                  : process.env.REACT_APP_MATIC_RPC,
+                ? process.env.REACT_APP_ETH_RPC
+                : process.env.REACT_APP_MATIC_RPC,
           };
         });
 
@@ -604,7 +605,7 @@ function Swap() {
               addrsListKeys: account.addressLists,
               coin_family: account.coinFamilies,
               fiat_type: currency.name,
-              coin_id_search: state.coinId,
+              coin_id: state.coinId,
             },
             {
               headers: {
@@ -643,8 +644,8 @@ function Swap() {
                 token.coin_family == 1
                   ? process.env.REACT_APP_BNB_RPC
                   : token.coin_family == 2
-                    ? process.env.REACT_APP_ETH_RPC
-                    : process.env.REACT_APP_MATIC_RPC,
+                  ? process.env.REACT_APP_ETH_RPC
+                  : process.env.REACT_APP_MATIC_RPC,
             };
           });
 
@@ -793,8 +794,8 @@ function Swap() {
             token.coin_family == 1
               ? process.env.REACT_APP_BNB_RPC
               : token.coin_family == 2
-                ? process.env.REACT_APP_ETH_RPC
-                : process.env.REACT_APP_MATIC_RPC,
+              ? process.env.REACT_APP_ETH_RPC
+              : process.env.REACT_APP_MATIC_RPC,
         };
       });
 
@@ -849,10 +850,10 @@ function Swap() {
       token1.coinFamily == 1
         ? el.network === "bnb"
         : token1.coinFamily == 2
-          ? el.network === "eth"
-          : token1.coinFamily == 4
-            ? el.network === "pol"
-            : el.network === ""
+        ? el.network === "eth"
+        : token1.coinFamily == 4
+        ? el.network === "pol"
+        : el.network === ""
     );
 
     let finalFee = 0;
@@ -1351,15 +1352,16 @@ function Swap() {
               textVal: `1 ${token2.symbol} = ${addCommasToNumber(
                 getFlooredFixed(
                   parseFloat(route.quote.toFixed(token1.decimals)) /
-                  parseFloat(amount),
+                    parseFloat(amount),
                   12
                 )
               )} ${token1.symbol}`,
             },
             {
               text: "Trading Fees",
-              textVal: `${tradingFee} ${token1.coinFamily == 1 ? "ETH" : "BNB"
-                }`,
+              textVal: `${tradingFee} ${
+                token1.coinFamily == 1 ? "ETH" : "BNB"
+              }`,
             },
             {
               text: "Slippage Tolerance",
@@ -1445,15 +1447,16 @@ function Swap() {
               textVal: `1 ${token2.symbol} = ${addCommasToNumber(
                 getFlooredFixed(
                   parseFloat(route.outAmount.toFixed(token1.decimals)) /
-                  parseFloat(amount),
+                    parseFloat(amount),
                   12
                 )
               )} ${token1.symbol}`,
             },
             {
               text: "Trading Fees",
-              textVal: `${tradingFee} ${token1.coinFamily == 1 ? "ETH" : "BNB"
-                }`,
+              textVal: `${tradingFee} ${
+                token1.coinFamily == 1 ? "ETH" : "BNB"
+              }`,
             },
             {
               text: "Slippage Tolerance",
@@ -1513,19 +1516,20 @@ function Swap() {
               textVal: `1 ${token2.symbol} = ${addCommasToNumber(
                 getFlooredFixed(
                   parseFloat(route.outAmount.toFixed(token1.decimals)) /
-                  parseFloat(amount),
+                    parseFloat(amount),
                   12
                 )
               )} ${token1.symbol}`,
             },
             {
               text: "Trading Fees",
-              textVal: `${tradingFee} ${token1.coinFamily == 1
+              textVal: `${tradingFee} ${
+                token1.coinFamily == 1
                   ? "ETH"
                   : token1.coinFamily == 9
-                    ? "PLS"
-                    : "BNB"
-                }`,
+                  ? "PLS"
+                  : "BNB"
+              }`,
             },
             {
               text: "Slippage Tolerance",
@@ -1979,8 +1983,9 @@ function Swap() {
               <Maintanance text="On chain swap is in under maintenance" />
             ) : (
               <div
-                className={`${"fixedContent height-571"} ${height <= 600 ? "fixedContentOuterExt" : ""
-                  }`}
+                className={`${"fixedContent height-571"} ${
+                  height <= 600 ? "fixedContentOuterExt" : ""
+                }`}
               >
                 <div style={{ width: "100%" }} className="swap ">
                   <div className="swap_onChain">
@@ -2035,7 +2040,7 @@ function Swap() {
                           {addCommasToNumber(
                             getFlooredFixed(
                               parseFloat(amount ? amount : 0) *
-                              parseFloat(token1 ? token1.price : 0),
+                                parseFloat(token1 ? token1.price : 0),
                               2
                             )
                           )}
@@ -2296,11 +2301,11 @@ function Swap() {
                       style={
                         loading
                           ? {
-                            pointerEvents: "none",
-                          }
+                              pointerEvents: "none",
+                            }
                           : {
-                            pointerEvents: "auto",
-                          }
+                              pointerEvents: "auto",
+                            }
                       }
                       onClick={() => {
                         if (token2?.iHave) {
@@ -2369,7 +2374,7 @@ function Swap() {
                           {addCommasToNumber(
                             getFlooredFixed(
                               parseFloat(amount2 ? amount2 : 0) *
-                              parseFloat(token2 ? token2.price : 0),
+                                parseFloat(token2 ? token2.price : 0),
                               2
                             )
                           )}
@@ -2746,8 +2751,8 @@ function Swap() {
                         : token1?.id == token2?.id &&
                           token1 != null &&
                           token2 != null
-                          ? "Please select a different token"
-                          : "Swap"
+                        ? "Please select a different token"
+                        : "Swap"
                     }
                     maxWidth={"100%"}
                     disabled={
@@ -2821,7 +2826,9 @@ function Swap() {
                 }
                 getData={(value) => {
                   const hasEmoji = /[\p{Extended_Pictographic}]/u.test(value);
-                  if (hasEmoji) { return false }
+                  if (hasEmoji) {
+                    return false;
+                  }
                   setKeyword(value);
                   if (value.trim().length === 0) {
                     setFilteredTokens(allToken);
@@ -2939,14 +2946,14 @@ function Swap() {
 
                           if (
                             token.tokenAddress ===
-                            "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c" &&
+                              "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c" &&
                             !token2.tokenAddress
                           ) {
                             setIsWrap(true);
                             myWrap = true;
                           } else if (
                             token.tokenAddress ===
-                            "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2" &&
+                              "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2" &&
                             !token2.tokenAddress
                           ) {
                             setIsWrap(true);
@@ -2974,14 +2981,14 @@ function Swap() {
 
                           if (
                             token.tokenAddress ===
-                            "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c" &&
+                              "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c" &&
                             !token1.tokenAddress
                           ) {
                             setIsWrap(true);
                             myWrap = true;
                           } else if (
                             token.tokenAddress ===
-                            "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2" &&
+                              "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2" &&
                             !token1.tokenAddress
                           ) {
                             setIsWrap(true);

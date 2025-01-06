@@ -155,7 +155,6 @@ function SwapDetails() {
       );
 
       let finalFee = 0;
-
       const gasPrice = await Web3Helper.getGasPrice(
         token1.chain.slug,
         token1.address,
