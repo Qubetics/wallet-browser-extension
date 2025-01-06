@@ -1,33 +1,35 @@
 import { Modal } from "antd";
 import React from "react";
-import { useSelector } from "react-redux";
+// Uncomment if theme usage is needed:
+// import { useSelector } from "react-redux";
 import ModalCloseIcon from "../../Assets/ModalCloseIcon.svg";
-import darkclose from "../../Assets/darkclose.svg";
+import BlackCloseIcon from "../../Assets/blackclose.svg";
 
 function ModalCustom({
   isModalOpen,
   handleOk,
   handleCancel,
   children,
-  customClass,
-  title,
-  closable,
+  customClass = "",
+  title = "",
+  closable = true,
 }) {
-  // this is  sample
-  const { theme } = useSelector((state) => state);
+  // Example: If using theme from Redux
+  // const { theme } = useSelector((state) => state);
+
   return (
     <div>
       <Modal
         closeIcon={
-          theme == "darkTheme" ? (
-            <img src={darkclose} />
+          true ? (
+            <img src={ModalCloseIcon} alt="Close" />
           ) : (
-            <img src={ModalCloseIcon} />
+            <img src={BlackCloseIcon} alt="Close" />
           )
         }
-        closable={closable === false ? false : true}
+        closable={closable}
         title={title}
-        className={`modalCustom ${customClass && customClass}`}
+        className={`modalCustom ${customClass}`}
         open={isModalOpen}
         onOk={handleOk}
         onCancel={handleCancel}

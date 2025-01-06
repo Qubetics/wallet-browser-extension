@@ -5,6 +5,7 @@ import { store } from "../..";
 import { setLoading } from "../../actions/loading";
 import { server } from "../../server";
 import BTC from "../../Assets/Coins/BTC.png";
+import CryptoS from "../../Assets/CryptoS.svg"
 
 // const colors = [
 //   "#00e396",
@@ -48,12 +49,15 @@ const AllocationChart = () => {
   const [chartOptions, setChartOptions] = useState({
     chart: {
       type: "donut",
+      // height:150,
+      // width:150,
     },
     labels: [],
     plotOptions: {
       pie: {
+        size: 400,
         donut: {
-          size: "50%",
+          size: "60%",
           labels: {
             // show: true,
             total: {
@@ -190,13 +194,22 @@ const AllocationChart = () => {
         margin: "0 auto",
       }}
     >
-      <div style={{ position: "relative" }}>
+      {/* Total Invested Amount */}
+      <div className="chartBalance">
+        <h3>
+          <span>Total Balance:</span>
+        </h3>
+        <h1>
+          {currency?.symbol} {portfolioBalance.toFixed(2)}
+        </h1>
+      </div>
+      <div style={{ position: "relative",height: '200px' }}>
         {portfolioBalance > 0 && (
           <Chart
             options={chartOptions}
             series={chartSeries}
             type="donut"
-            height={200}
+            height={300}
           />
         )}
 
@@ -217,19 +230,6 @@ const AllocationChart = () => {
         )} */}
       </div>
 
-      {/* Total Invested Amount */}
-      <div style={{ textAlign: "center", marginTop: "0", color: "#fff" }}>
-        <h3 style={{ fontSize: "18px" }}>
-          <span
-            style={{ color: "#98969B", fontWeight: "400", paddingRight: "5px" }}
-          >
-            Total Invested Amount:
-          </span>
-          <span style={{ color: "#FFFFFF", fontWeight: "600" }}>
-            {currency?.symbol} {portfolioBalance.toFixed(2)}
-          </span>
-        </h3>
-      </div>
       {/* <div className="investedAmountShow">
         {Array.isArray(labels) &&
           labels.map((currency, index) => (
@@ -245,7 +245,10 @@ const AllocationChart = () => {
             </div>
           ))}
       </div> */}
-
+      <div className="cryptoSec">
+        <h4>Crypto</h4>
+        <img style={{cursor:"pointer"}} src={CryptoS} alt="SearchIcon" />
+      </div>
       {/* Asset details */}
       <ul className="portfolio__tableOuter ">
         {portfolioBalance > 0 &&
