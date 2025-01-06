@@ -35,7 +35,8 @@ function SettingList(props) {
   const [isLogoutModalOpen, setLogoutOpenmodal] = useState(false);
   const [password, setPassword] = useState(null);
   const [isDrawerOpen, setDrawerOpen] = useState(false);
-
+  const [ischecked1, setIschecked1] = useState(false);
+  const [ischecked2, setIschecked2] = useState(false);
   const handleOk = () => {
     setOpenmodal(false);
   };
@@ -372,11 +373,27 @@ function SettingList(props) {
       >
         <div className={`flexedContent`}>
           <div className="secretMasterKey">
-            <Checkbox>
-              <p>Please back up your seed phrase before logging out to avoid losing access to your wallet.</p>
+            <Checkbox
+              checked={ischecked1}
+              onChange={(value) => {
+                setIschecked1(value.target.checked);
+              }}
+            >
+              <p>
+                Please back up your seed phrase before logging out to avoid
+                losing access to your wallet.
+              </p>
             </Checkbox>
-            <Checkbox>
-              <p>Are you sure you want to log out? Without a backup, you may lose access to your funds.</p>
+            <Checkbox
+              checked={ischecked2}
+              onChange={(value) => {
+                setIschecked2(value.target.checked);
+              }}
+            >
+              <p>
+                Are you sure you want to log out? Without a backup, you may lose
+                access to your funds.
+              </p>
             </Checkbox>
             <div className="secretMasterKey_btns">
               <div className="cancelBtn">
@@ -389,6 +406,7 @@ function SettingList(props) {
               <ButtonComp
                 maxWidth="100%"
                 text="Continue"
+                disabled={!ischecked1 || !ischecked2}
                 onClick={() => setLogoutOpenmodal(true)}
               />
             </div>

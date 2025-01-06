@@ -43,6 +43,8 @@ function SendConfirm() {
       gasPriceType
     },
   } = useLocation();
+
+  
  
 
   const { account, currency } = useSelector((state) => state);

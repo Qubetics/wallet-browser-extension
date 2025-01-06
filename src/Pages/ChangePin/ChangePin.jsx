@@ -105,7 +105,9 @@ function ChangePin() {
                 type={"text"}
                 value={oldPassword}
                 getData={(password) => {
-                  const hasEmoji = /[\p{Extended_Pictographic}]/u.test(password);
+                  const hasEmoji = /[\p{Extended_Pictographic}]/u.test(
+                    password
+                  );
                   if (password?.length <= 25 && !hasEmoji) {
                     setOldPassword(password);
                   }
@@ -122,10 +124,12 @@ function ChangePin() {
                 type={"text"}
                 value={newPassword}
                 getData={(password) => {
-                  const hasEmoji = /[\p{Extended_Pictographic}]/u.test(password);
+                  const hasEmoji = /[\p{Extended_Pictographic}]/u.test(
+                    password
+                  );
                   if (password?.length <= 25 && !hasEmoji) {
                     handlePasswordChange(password);
-                  } 
+                  }
                 }}
               />
             </div>
@@ -147,10 +151,12 @@ function ChangePin() {
                 type={"text"}
                 value={confirmPassword}
                 getData={(password) => {
-                  const hasEmoji = /[\p{Extended_Pictographic}]/u.test(password);
+                  const hasEmoji = /[\p{Extended_Pictographic}]/u.test(
+                    password
+                  );
                   if (password?.length <= 25 && !hasEmoji) {
                     setConfirmPassword(password);
-                  } 
+                  }
                 }}
               />
             </div>
@@ -158,7 +164,7 @@ function ChangePin() {
         </div>
         <div style={{ marginTop: "50px" }}>
           <ButtonComp
-            text={"Update "}
+            text={"Update"}
             onClick={async () => {
               if (confirmPassword !== newPassword) {
                 return messageApi.error("The passwords do not match.");
@@ -193,7 +199,7 @@ function ChangePin() {
               setConfirmPassword("");
               messageApi.success("Password updated successfully.");
               setTimeout(() => {
-                navigate(-1);
+                navigate("/securitySetting");
               }, 600);
             }}
           />

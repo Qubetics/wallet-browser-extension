@@ -33,6 +33,9 @@ function ManageWallet() {
   const [messageApi, contextHolder] = message.useMessage();
   const [isModalOpen1, setIsModalOpen1] = useState(false);
   const [isModalOpen4, setIsModalOpen4] = useState(false);
+  const [ischecked1, setIschecked1] = useState(false);
+  const [ischecked2, setIschecked2] = useState(false);
+  
 
   const handleOk1 = () => {
     setIsModalOpen1(false);
@@ -71,7 +74,6 @@ function ManageWallet() {
   };
 
   const [selectedAccount, setSelectedAccount] = useState(null);
-  console.log("SELECTEDACCOUNT", selectedAccount);
 
   const init = async () => {
     store.dispatch(setLoading(true));
@@ -715,10 +717,20 @@ function ManageWallet() {
               Tap on all checkboxes to confirm you understand the importance of
               your secret phrase
             </p>
-            <Checkbox>
+            <Checkbox
+              checked={ischecked1}
+              onChange={(value) => {
+                setIschecked1(value.target.checked);
+              }}
+            >
               <p>If I lose my secret phrase, my funds will be lost forever.</p>
             </Checkbox>
-            <Checkbox>
+            <Checkbox
+              checked={ischecked2}
+              onChange={(value) => {
+                setIschecked2(value.target.checked);
+              }}
+            >
               <p>Qubetics Wallet support will NEVER reach out to ask for it.</p>
             </Checkbox>
             <div className="secretMasterKey_btns">
@@ -726,7 +738,7 @@ function ManageWallet() {
                 <ButtonComp
                   maxWidth="100%"
                   onClick={() => {
-                    handleCancel4(); 
+                    handleCancel4();
                   }}
                   text="Cancel"
                 />
@@ -736,6 +748,7 @@ function ManageWallet() {
                 onClick={async () => {
                   setIsModalOpen1(true);
                 }}
+                disabled={!ischecked1 || !ischecked2}
                 text="Continue"
               />
             </div>

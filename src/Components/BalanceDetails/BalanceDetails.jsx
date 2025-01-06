@@ -325,7 +325,9 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
                 >
                   <Link onClick={(e) => e.preventDefault()}>
                     <p>
-                      {account.name} <img src={downeIcon} alt="downeIcon" />
+                      {account.name.charAt(0).toUpperCase() +
+                        account.name.slice(1)}
+                      <img src={downeIcon} alt="downeIcon" />
                     </p>
                   </Link>
                 </Dropdown>
