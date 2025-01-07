@@ -316,7 +316,8 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
         <>
           <div className={"balanceDetails__dropdownStyle"}>
             <div className="balanceLeft">
-              <img src={aName} alt="icon" />
+              {/* <img src={aName} alt="icon" /> */}
+              {account.name.charAt(0).toUpperCase()}
               <div>
                 <Dropdown
                   overlayClassName="balanceAdmin"

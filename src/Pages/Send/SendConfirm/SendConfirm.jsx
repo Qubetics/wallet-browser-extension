@@ -40,10 +40,11 @@ function SendConfirm() {
       contact,
       theme,
       redirectTo,
-      gasPriceType
+      gasPriceType,
     },
   } = useLocation();
- 
+  console.log("In send confirm networkFee:::", networkFee);
+  console.log("In send confirm rawTransaction:::", rawTransaction);
 
   const { account, currency } = useSelector((state) => state);
   const [isModalOpen1, setIsModalOpen1] = useState(false);
@@ -134,27 +135,30 @@ function SendConfirm() {
       textVal: toName
         ? toName
         : ENSName
-          ? ENSName
-          : `${to.substring(0, 7)}.....${to.substring(to.length - 7, to.length)}`,
+        ? ENSName
+        : `${to.substring(0, 7)}.....${to.substring(to.length - 7, to.length)}`,
     },
     {
       text: "Network Fee",
-      textVal: `${parseFloat(getFlooredFixed(+networkFee, 8))} ${parentCoin ? parentCoin.currencySymbol.toUpperCase() : ""
-        }/ ${currency.symbol}${addCommasToNumber(
-          getFlooredFixed(fiatGasFee, 2)
-        )}`,
+      textVal: `${parseFloat(getFlooredFixed(+networkFee, 8))} ${
+        parentCoin ? parentCoin.currencySymbol.toUpperCase() : ""
+      }/ ${currency.symbol}${addCommasToNumber(
+        getFlooredFixed(fiatGasFee, 2)
+      )}`,
     },
     {
       text: "Total value",
       textVal: coin.coin.token_address
         ? `${addCommasToNumber(
-          parseFloat(getFlooredFixed(amount, 8))
-        )} ${coin.coin.coin_symbol.toUpperCase()}/ ${currency.symbol
-        }${addCommasToNumber(getFlooredFixed(+fiatGasFee + +fiatCoin, 2))}`
+            parseFloat(getFlooredFixed(amount, 8))
+          )} ${coin.coin.coin_symbol.toUpperCase()}/ ${
+            currency.symbol
+          }${addCommasToNumber(getFlooredFixed(+fiatGasFee + +fiatCoin, 2))}`
         : `${addCommasToNumber(
-          parseFloat(getFlooredFixed(+amount + +networkFee, 8))
-        )} ${coin.coin.coin_symbol.toUpperCase()}/ ${currency.symbol
-        }${addCommasToNumber(getFlooredFixed(+fiatGasFee + +fiatCoin, 2))}`,
+            parseFloat(getFlooredFixed(+amount + +networkFee, 8))
+          )} ${coin.coin.coin_symbol.toUpperCase()}/ ${
+            currency.symbol
+          }${addCommasToNumber(getFlooredFixed(+fiatGasFee + +fiatCoin, 2))}`,
     },
     {
       text: "Date",
@@ -188,7 +192,7 @@ function SendConfirm() {
               coin.coin.token_address,
               coin.coin.decimals,
               coin.coin.token_type,
-              '',
+              "",
               coin.coin.coin_family,
               gasPriceType
             );
@@ -216,8 +220,8 @@ function SendConfirm() {
               coin.coin.coin_family == 1
                 ? process.env.REACT_APP_BNB_RPC
                 : coin.coin.coin_family == 2
-                  ? process.env.REACT_APP_ETH_RPC
-                  : process.env.REACT_APP_MATIC_RPC,
+                ? process.env.REACT_APP_ETH_RPC
+                : process.env.REACT_APP_MATIC_RPC,
               "",
               gasPriceType
             );
@@ -242,12 +246,12 @@ function SendConfirm() {
               fiatGasFee,
               currency.name,
               toName,
-              `solana/${coin.coin.token_address}`,// chain?.slug,
+              `solana/${coin.coin.token_address}`, // chain?.slug,
               chain?.chainId,
               coin?.coin?.token_address,
               coin?.coin?.decimals,
               coin.coin.token_type,
-              coin.balance,
+              coin.balance
             );
           // console.log("SOLLLLL RSP ", response);
 
@@ -268,8 +272,8 @@ function SendConfirm() {
               fiatGasFee,
               currency.name,
               toName,
-              `solana/${coin.coin.coin_symbol}`,//chain.slug,
-              chain.chainId, 
+              `solana/${coin.coin.coin_symbol}`, //chain.slug,
+              chain.chainId
             );
           // console.log("RRRRR solana--- ", response);
 
@@ -455,7 +459,7 @@ function SendConfirm() {
               alt=""
               style={{
                 width: "70px",
-                height: "70px"
+                height: "70px",
               }}
             />
             {/* )} */}
