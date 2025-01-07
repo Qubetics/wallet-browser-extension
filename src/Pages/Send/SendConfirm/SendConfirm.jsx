@@ -43,6 +43,7 @@ function SendConfirm() {
       gasPriceType,
     },
   } = useLocation();
+  
   console.log("In send confirm networkFee:::", networkFee);
   console.log("In send confirm rawTransaction:::", rawTransaction);
 

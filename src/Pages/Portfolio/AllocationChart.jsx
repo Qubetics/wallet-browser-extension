@@ -171,9 +171,17 @@ const AllocationChart = () => {
 
       const names = percentages.map((item) => item.name);
       const series = percentages.map((item) => parseFloat(item.percentage));
+      // const namesWithPercentages = percentages.map(
+      //   (item) => `${item.name}   ${item.percentage.toFixed(2)}%`
+      // );
+
       const namesWithPercentages = percentages.map(
-        (item) => `${item.name}   ${item.percentage.toFixed(2)}%`
+        (item) =>
+          `${
+            item.name.length > 15 ? item.name.slice(0, 12) + `...` : item.name
+          }   ${item.percentage.toFixed(2)}%`
       );
+
       setNamesWithPercentages(namesWithPercentages);
 
       setLabels(names);
