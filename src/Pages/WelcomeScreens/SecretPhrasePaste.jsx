@@ -2083,6 +2083,8 @@ function SecretPhrasePaste({ children, termsCheck, getMnemonics, type }) {
     }
     // Update state with the input value
     setMnemonics(value);
+    console.log("mmmmmmmmmmmmmmmmmmmmmmmmm ", mnemonics);
+    
     getMnemonics(value);
 
     // If the value is empty, clear the sorted word list

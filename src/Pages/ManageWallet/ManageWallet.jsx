@@ -21,13 +21,16 @@ import { WalletHelper } from "../../helpers/wallet.helper";
 import warning from "../../Assets/PNG/warning.png";
 import WalletIBtn from "../../Assets/WalletIBtn.svg";
 import DarkArrowRightIcon from "../../Assets/DarkArrowRightIcon.svg";
+import { server } from "../../server";
 function ManageWallet() {
   const [data, setData] = useState([]);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [deleteModal, setDeleteModal] = useState(false);
   const [drawer, setDrawer] = useState(false);
   const { theme } = useSelector((state) => state);
-  const { account } = useSelector((state) => state);
+  const { account, tokens, currency, balanceIn } = useSelector(
+    (state) => state
+  );
   const [name, setName] = useState("");
   const [password, setPassword] = useState(null);
   const [messageApi, contextHolder] = message.useMessage();
@@ -35,6 +38,7 @@ function ManageWallet() {
   const [isModalOpen4, setIsModalOpen4] = useState(false);
   const [ischecked1, setIschecked1] = useState(false);
   const [ischecked2, setIschecked2] = useState(false);
+  const [totalAmt, setTotalAmt] = useState(0);
 
 
   const handleOk1 = () => {
@@ -79,9 +83,41 @@ function ManageWallet() {
     store.dispatch(setLoading(true));
     let { accounts } = await chrome.storage.session.get("accounts");
     setData(accounts);
+    if (state?.from == 'myWallet') {
+      let ids = []
+      console.log("ACCCCCCCCCCCCCCCCCCCCC ", accounts);
+      accounts.map(itm => {
+        ids.push(itm.userId)
+      })
+      getTotalBalance(ids);
+    }
+
+
     store.dispatch(setLoading(false));
   };
 
+  const getTotalBalance = async (ids) => {
+    const response = await server.post(
+      `/wallet/allBalances`,
+      {
+        userIds: ids,
+        fiatType: currency.name,
+      },
+      {
+        headers: {
+          Authorization: account.jwtToken,
+        },
+      }
+    );
+    console.log("TOTALLLLLLLLLLLLLL ", response);
+    let total = 0;
+    Array.isArray(response.data?.data) && response.data?.data.map((itm) => {
+      Array.isArray(itm?.user_wallet_relation) && itm?.user_wallet_relation.map((userBalItem) => {
+        total += parseFloat(userBalItem?.balance) * parseFloat(userBalItem?.coin?.fiat_price_data?.value)
+      })
+    })
+    setTotalAmt(total);
+  }
   useEffect(() => {
     init();
   }, []);
@@ -114,11 +150,24 @@ function ManageWallet() {
     }
   };
 
+
+
   return (
     <>
       {contextHolder}
       <div className={`scrollableCont`}>
-        <MenuRestofHeaders backTo={"/setting"} title={"Manage Wallet"} />
+        <div className="searchBarFixed">
+          <MenuRestofHeaders backTo={state?.from == 'myWallet' ? "/wallet" : "/setting"} title={state?.from == 'myWallet' ? "My Wallet" : "Manage Wallet"} />
+
+          {state?.from == 'myWallet' && <div className="myWalletsBalance">
+            <div className="myWalletsBalance_value">
+              <h4>Total Balance</h4>
+              <h1>{currency?.symbol} {totalAmt?.toFixed(2)}</h1>
+            </div>
+            <div></div>
+          </div>}
+        </div>
+
         <div className={`flexedContent manageWalletHeight`}>
           <div>
             {" "}
@@ -163,12 +212,12 @@ function ManageWallet() {
                         </p>
                       </div>
                     </div>
-                    <img onClick={async (e) => {
+                    {state?.from !== 'myWallet' && <img onClick={async (e) => {
                       e.preventDefault();
                       setDrawer(true);
                       setSelectedAccount(data);
                       setName(data?.name);
-                    }} src={WalletIBtn} alt="I" />
+                    }} src={WalletIBtn} alt="I" />}
                   </li>
                 </ul>
               </div>
@@ -562,16 +611,12 @@ function ManageWallet() {
 
                   await WalletHelper.deleteWallet(
                     selectedAccount.id,
-
                     account.address
                   );
-
+                  await WalletHelper.removeMnemonic(selectedAccount.coinFamilyAndAddress[1])
                   setDrawer(false);
-
                   init();
-
                   store.dispatch(setLoading(false));
-
                   setDeleteModal(false);
                 } catch (e) {
                   store.dispatch(setLoading(false));

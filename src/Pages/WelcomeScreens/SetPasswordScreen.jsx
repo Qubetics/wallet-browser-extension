@@ -155,6 +155,8 @@ function SetPasswordScreen() {
 
       const isValid = WalletHelper.checkMnemonics(getMnemonicsData.trim());
       const { accounts } = await chrome.storage.session.get("accounts");
+      console.log('getMnemonicsData-----------> ', getMnemonicsData);
+
 
       if (
         accounts &&
