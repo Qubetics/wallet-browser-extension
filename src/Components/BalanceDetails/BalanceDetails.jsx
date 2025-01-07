@@ -315,9 +315,13 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
       {path !== "currencyDetails" ? (
         <>
           <div className={"balanceDetails__dropdownStyle"}>
-            <div className="balanceLeft">
+            <div className="balanceLeft"
+            onClick={()=>{navigate("/manage-wallet",{state:{from:'myWallet'}})}}
+            >
               {/* <img src={aName} alt="icon" /> */}
-              {account.name.charAt(0).toUpperCase()}
+              <div className="balanceName">
+                <h5>{account.name.charAt(0).toUpperCase()}</h5>
+              </div>
               <div>
                 <Link
                   to={"/my-wallets"}

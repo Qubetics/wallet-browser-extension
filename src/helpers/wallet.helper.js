@@ -273,15 +273,22 @@ export class WalletHelper {
     window.location.reload(true);
   };
 
+
   static checkIfAlreadyThere = async (newMnemonics) => {
     const { password } = await chrome.storage.session.get("password");
     let { mnemonics } = await chrome.storage.local.get("mnemonics");
     const decryptMnemonics = SecurityHelper.decrypt(mnemonics, password);
+    console.log("mnemonicsmnemonicsmnemonics ", mnemonics);
+
+    console.log("newMnemonicsnewMnemonicsnewMnemonicsnewMnemonics ", newMnemonics);
+    console.log('JSON.parse(decryptMnemonics)JSON.parse(decryptMnemonics) ', JSON.parse(decryptMnemonics));
+
 
     if (decryptMnemonics) {
-      const checkIfThere = JSON.parse(decryptMnemonics).find(
-        (el) => el.phrase === newMnemonics
-      );
+      const checkIfThere = false;
+      // JSON.parse(decryptMnemonics).find(
+      //   (el) => el.phrase === newMnemonics
+      // );
 
       if (checkIfThere) return true;
       return false;
@@ -677,6 +684,8 @@ export class WalletHelper {
         }
       );
 
+      console.log("Create wallet---------- ", createWallet);
+
       const id = uuidv4();
 
       const finalAccounts = [
@@ -704,6 +713,7 @@ export class WalletHelper {
             address,
             solanaAddress,
           ],
+          userId: createWallet.data.data.userId,
           jwtToken:
             accounts.length === 0
               ? createWallet.data.data.token
@@ -779,7 +789,7 @@ export class WalletHelper {
         // `m/44'/60'/0'/0/${accounts.length}`
         `m/44'/60'/0'/0/0`
       );
-      
+
 
       // console.log(`m/44'/60'/0'/0/${accounts.length}`);
 
@@ -787,13 +797,16 @@ export class WalletHelper {
         mnemonics = [];
       } else {
         mnemonics = SecurityHelper.decrypt(mnemonics, password);
-        mnemonics = JSON.parse(mnemonics); 
+        mnemonics = JSON.parse(mnemonics);
+        if(!Array.isArray(mnemonics)){
+          mnemonics=[mnemonics]
+        }
       }
       const finalMnemonics = [
         ...mnemonics,
         {
           phrase: newMnemonics,
-          default: accounts.length === 0 ? true : false,
+          default: accounts?.length === 0 ? true : false,
           address: address,
         },
       ];
@@ -882,6 +895,7 @@ export class WalletHelper {
             address,
             solanaAddress,
           ],
+          userId: createWallet.data.data.userId,
           jwtToken: createWallet.data.data.token,
           refreshToken: createWallet.data.data.refreshToken,
           deviceId: deviceId,
@@ -1248,10 +1262,47 @@ export class WalletHelper {
     }
   };
 
+
+  static removeMnemonic = async (address) => {
+
+    const { password } = await chrome.storage.session.get("password");
+    const { mnemonics } = await chrome.storage.local.get("mnemonics");
+    if (mnemonics) {
+      const decryptedMnemonics = SecurityHelper.decrypt(mnemonics, password);
+
+      // Parse the decrypted mnemonics
+      const mnemonicsList = JSON.parse(decryptedMnemonics);
+      console.log("mnemonicsList", mnemonicsList);
+      // Find the mnemonic matching the provided address
+      const unmatchedMnemonic = mnemonicsList.filter(
+        (mnemonic) => mnemonic.address.toLowerCase() !== address.toLowerCase()
+      );
+      console.log("unmatchedMnemonic", unmatchedMnemonic);
+      // if (unmatchedMnemonic.length == 1) {
+        // const encryptedAgain = SecurityHelper.encrypt([unmatchedMnemonic[unmatchedMnemonic.length-1]], password);
+        // chrome.storage.local.set({
+        //   mnemonics: encryptedAgain,
+        //   registered: true,
+        // });
+      // } else {
+        const encryptedAgain = SecurityHelper.encrypt(unmatchedMnemonic, password);
+
+        console.log("encryptedAgain", encryptedAgain);
+        chrome.storage.local.set({
+          mnemonics: encryptedAgain,
+          registered: true,
+        });
+      // }
+
+    }
+  }
+
   static deleteWallet = async (id, evmAddress) => {
     const { password } = await chrome.storage.session.get("password");
     const { accounts } = await chrome.storage.local.get("accounts");
     const decryptedAccounts = SecurityHelper.decrypt(accounts, password);
+
+    console.log("decryptedAccounts-----------> ", decryptedAccounts);
 
     const newAccounts = JSON.parse(decryptedAccounts).filter(
       (el) => el.id !== id
