@@ -236,3 +236,26 @@
   font-weight: 400;
   margin-bottom: 10px;
 }
+.myWallets {
+  .manageWalletHeight {
+    min-height: calc(-404px + 100vh) !important;
+  }
+}
+.myWalletsBalance {
+  padding: 0 24px;
+  &_value {
+    text-align: left;
+    color: #ffffff;
+    h4 {
+      font-size: 18px;
+      font-weight: 400;
+      line-height: 18px;
+      margin-bottom: 10px;
+    }
+    h1 {
+      font-size: 40px;
+      font-weight: 600;
+      line-height: 40px;
+    }
+  }
+}
