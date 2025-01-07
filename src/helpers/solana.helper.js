@@ -1,7 +1,7 @@
 /*global chrome*/
-import nacl from 'tweetnacl';
-import * as bip39 from '@scure/bip39';
-import { derivePath } from 'ed25519-hd-key';
+import nacl from "tweetnacl";
+import * as bip39 from "@scure/bip39";
+import { derivePath } from "ed25519-hd-key";
 import {
   Account,
   Keypair,
@@ -12,20 +12,21 @@ import {
   SystemProgram,
   sendAndConfirmTransaction,
   VersionedTransaction,
-} from '@solana/web3.js';
-import { store } from '..';
-import { WalletHelper } from './wallet.helper';
-import * as splToken from '@solana/spl-token';
-import SolanaWallet, { SolanaSignTransaction } from 'solana-wallet';
-import promiseRetry from 'promise-retry';
-import { server } from '../server';
-import { getSignature } from './common.helper';
-import { Base58 } from '@ethersproject/basex';
-import BigNumber from 'bignumber.js';
-import { error } from 'loglevel';
-const soltokenbalance = require('soltokenbalance');
-const Buffer = require('safe-buffer').Buffer;
-const bs58 = require('bs58');
+  ComputeBudgetProgram,
+} from "@solana/web3.js";
+import { store } from "..";
+import { WalletHelper } from "./wallet.helper";
+import * as splToken from "@solana/spl-token";
+import SolanaWallet, { SolanaSignTransaction } from "solana-wallet";
+import promiseRetry from "promise-retry";
+import { server } from "../server";
+import { getSignature } from "./common.helper";
+import { Base58 } from "@ethersproject/basex";
+import BigNumber from "bignumber.js";
+import { error } from "loglevel";
+const soltokenbalance = require("soltokenbalance");
+const Buffer = require("safe-buffer").Buffer;
+const bs58 = require("bs58");
 
 const SEND_OPTIONS = {
   skipPreflight: true,
@@ -69,7 +70,6 @@ export class SolanaHelper {
       return false;
     }
   };
-
 
   generateSolanaAddress1 = async (mnemonics) => {
     const seed = await bip39.mnemonicToSeed(mnemonics);
@@ -121,9 +121,9 @@ export class SolanaHelper {
     slug,
     chainId,
     orderId,
-    type, 
+    type
   ) => {
-    try { 
+    try {
       const { account } = store.getState();
       // console.log('-------------account', account);
       // const privateKey = await WalletHelper.getSolanaPrivateKey();
@@ -133,21 +133,22 @@ export class SolanaHelper {
         return false;
       }
       const myKeyPair = await this.generateSolanaAddress1(mnemonics);
-      console.log('🚀 ~ SolanaHelper ~ myKeyPair:', myKeyPair);
+      console.log("🚀 ~ SolanaHelper ~ myKeyPair:", myKeyPair);
 
-      const lastValidBlockHeight = await this.connection.getSlot('finalized');
+      const lastValidBlockHeight = await this.connection.getSlot("finalized");
 
-      let blockhash = (await this.connection.getLatestBlockhash('finalized'))
+      let blockhash = (await this.connection.getLatestBlockhash("finalized"))
         .blockhash;
-      console.log('🚀 ~ SolanaHelper ~ blockhash:', blockhash);
+      console.log("🚀 ~ SolanaHelper ~ blockhash:", blockhash);
 
       const solValue = new BigNumber(amount);
 
       // Convert SOL to lamports (1 SOL = 10^9 lamports)
-      const lamports = solValue.multipliedBy(LAMPORTS_PER_SOL).integerValue(BigNumber.ROUND_DOWN);
+      const lamports = solValue
+        .multipliedBy(LAMPORTS_PER_SOL)
+        .integerValue(BigNumber.ROUND_DOWN);
 
-
-      // const lamports = new BigNumber(Math.round(amount * LAMPORTS_PER_SOL)); 
+      // const lamports = new BigNumber(Math.round(amount * LAMPORTS_PER_SOL));
 
       const transaction = new Transaction().add(
         SystemProgram.transfer({
@@ -156,7 +157,7 @@ export class SolanaHelper {
           lamports: lamports,
         })
       );
-      console.log('🚀 ~ SolanaHelper ~ transaction:', transaction);
+      console.log("🚀 ~ SolanaHelper ~ transaction:", transaction);
 
       transaction.recentBlockhash = blockhash;
 
@@ -164,13 +165,13 @@ export class SolanaHelper {
       console.log(transaction);
 
       const signature = getSignature(transaction);
-      console.log('🚀 ~ SolanaHelper ~ signature:', signature);
+      console.log("🚀 ~ SolanaHelper ~ signature:", signature);
       const serializedTransaction = Buffer.from(transaction.serialize());
       console.log(
-        '🚀 ~ SolanaHelper ~ serializedTransaction:',
+        "🚀 ~ SolanaHelper ~ serializedTransaction:",
         serializedTransaction
       );
-      console.log('🚀 ~ SolanaHelper ~ blockhash:', blockhash);
+      console.log("🚀 ~ SolanaHelper ~ blockhash:", blockhash);
 
       console.log({
         blockhash,
@@ -184,17 +185,17 @@ export class SolanaHelper {
             blockhash,
             lastValidBlockHeight: lastValidBlockHeight,
           },
-        }); 
-        console.log("----------------KKKKKKKK----------", transactionResponse);
-        
+        });
+      console.log("----------------KKKKKKKK----------", transactionResponse);
+
       if (!transactionResponse) {
-        console.error('Transaction not confirmed');
+        console.error("Transaction not confirmed");
         return false;
       }
 
       if (transactionResponse.meta?.err) {
         console.error(
-          'transactionResponse.meta:::',
+          "transactionResponse.meta:::",
           transactionResponse.meta?.err
         );
         return false;
@@ -213,9 +214,9 @@ export class SolanaHelper {
           txid: signature,
           from: from,
           to: to,
-          amount: amount, 
-          gas_price: '0.000005',
-          tx_type: type || 'withdraw',
+          amount: amount,
+          gas_price: "0.000005",
+          tx_type: type || "withdraw",
         },
         {
           headers: {
@@ -226,10 +227,10 @@ export class SolanaHelper {
 
       return myResponse.data;
     } catch (error) {
-      console.log(error, '=====eror');
+      console.log(error, "=====eror");
       let message = error?.message;
-      let arr = message.split(' ');
-      let findIndex = arr?.indexOf('signature');
+      let arr = message.split(" ");
+      let findIndex = arr?.indexOf("signature");
       if (findIndex != -1 && arr.length >= findIndex + 1) {
         let txid = arr[findIndex + 1];
         const { account } = store.getState();
@@ -240,9 +241,9 @@ export class SolanaHelper {
             txid: txid,
             from: from,
             to: to,
-            amount: amount, 
-            gas_price: '0.000005',
-            tx_type: type || 'withdraw',
+            amount: amount,
+            gas_price: "0.000005",
+            tx_type: type || "withdraw",
           },
           {
             headers: {
@@ -260,7 +261,7 @@ export class SolanaHelper {
 
   async createdAssociatedAccounts(toAddress, tokenAddress, myKeyPair) {
     console.log(
-      '🚀 ~ SolanaHelper ~ createdAssociatedAccounts ~ toAddress, tokenAddress, myKeyPair:',
+      "🚀 ~ SolanaHelper ~ createdAssociatedAccounts ~ toAddress, tokenAddress, myKeyPair:",
       toAddress,
       tokenAddress,
       myKeyPair
@@ -313,27 +314,27 @@ export class SolanaHelper {
         return false;
       }
       const myKeyPair = await this.generateSolanaAddress1(mnemonics);
-      console.log('🚀 ~ SolanaHelper ~ myKeyPair:', myKeyPair);
+      console.log("🚀 ~ SolanaHelper ~ myKeyPair:", myKeyPair);
       const tokenBalance = balance;
       // console.log('AMOUNT::', amount, 'TOKEN BALANCE::', tokenBalance);
       if (amount > tokenBalance) {
         return false;
       }
 
-      const lastValidBlockHeight = await this.connection.getSlot('finalized');
+      const lastValidBlockHeight = await this.connection.getSlot("finalized");
       console.log(
-        '🚀 ~ SolanaHelper ~ lastValidBlockHeight:',
+        "🚀 ~ SolanaHelper ~ lastValidBlockHeight:",
         lastValidBlockHeight
       );
 
-      let blockhash = (await this.connection.getLatestBlockhash('finalized'))
+      let blockhash = (await this.connection.getLatestBlockhash("finalized"))
         .blockhash;
-      console.log('🚀 ~ SolanaHelper ~ blockhash:', blockhash);
+      console.log("🚀 ~ SolanaHelper ~ blockhash:", blockhash);
 
       const { fromTokenAccount, toTokenAccount } =
         await this.createdAssociatedAccounts(to, tokenAddress, myKeyPair);
-      console.log('🚀 ~ SolanaHelper ~ toTokenAccount:', toTokenAccount);
-      console.log('🚀 ~ SolanaHelper ~ fromTokenAccount:', fromTokenAccount);
+      console.log("🚀 ~ SolanaHelper ~ toTokenAccount:", toTokenAccount);
+      console.log("🚀 ~ SolanaHelper ~ fromTokenAccount:", fromTokenAccount);
 
       // console.log(amount, decimals, '============amount');
 
@@ -341,6 +342,9 @@ export class SolanaHelper {
       //   new BigNumber(amount).multipliedBy(new BigNumber(decimals)).toNumber(),
       //   '============amount'
       // );
+
+      const PRIORITY_FEE_INSTRUCTIONS =
+        ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 25000 });
 
       const transaction = new Transaction().add(
         splToken.Token.createTransferInstruction(
@@ -352,21 +356,21 @@ export class SolanaHelper {
           new BigNumber(amount).multipliedBy(new BigNumber(decimals)).toNumber()
         )
       );
-
+      transaction.add(PRIORITY_FEE_INSTRUCTIONS);
       transaction.recentBlockhash = blockhash;
-      console.log('🚀 ~ SolanaHelper ~ transaction:', transaction);
+      console.log("🚀 ~ SolanaHelper ~ transaction:", transaction);
 
       transaction.sign(myKeyPair);
       console.log(transaction);
 
       const signature = getSignature(transaction);
-      console.log('🚀 ~ SolanaHelper ~ signature:', signature);
+      console.log("🚀 ~ SolanaHelper ~ signature:", signature);
       const serializedTransaction = Buffer.from(transaction.serialize());
       console.log(
-        '🚀 ~ SolanaHelper ~ serializedTransaction:',
+        "🚀 ~ SolanaHelper ~ serializedTransaction:",
         serializedTransaction
       );
-      console.log('🚀 ~ SolanaHelper ~ blockhash:', blockhash);
+      console.log("🚀 ~ SolanaHelper ~ blockhash:", blockhash);
 
       console.log({
         blockhash,
@@ -382,10 +386,10 @@ export class SolanaHelper {
           },
         });
 
-         console.log('TxnResponse sol token:::::::',transactionResponse);
-         
+      console.log("TxnResponse sol token:::::::", transactionResponse);
+
       if (!transactionResponse) {
-        console.error('Transaction not confirmed');
+        console.error("Transaction not confirmed");
         return false;
       }
 
@@ -405,13 +409,13 @@ export class SolanaHelper {
 
       const myResponse = await server.post(
         `${slug}/send`,
-        { 
+        {
           txid: signature,
           from: from,
           to: to,
-          amount: amount, 
-          gas_price: '0.000005',
-          tx_type: type || 'withdraw',
+          amount: amount,
+          gas_price: "0.000005",
+          tx_type: type || "withdraw",
 
           // address_book_name: contact || '',
           // amount: parseFloat(amount),
@@ -437,10 +441,10 @@ export class SolanaHelper {
 
       return true;
     } catch (error) {
-      console.log(error, '=====eror');
+      console.log(error, "=====eror");
       let message = error?.message;
-      let arr = message.split(' ');
-      let findIndex = arr?.indexOf('signature');
+      let arr = message.split(" ");
+      let findIndex = arr?.indexOf("signature");
       if (findIndex != -1 && arr.length >= findIndex + 1) {
         let txid = arr[findIndex + 1];
         const { account } = store.getState();
@@ -451,10 +455,9 @@ export class SolanaHelper {
             txid: txid,
             from: from,
             to: to,
-            amount: amount, 
-            gas_price: '0.000005',
-            tx_type: type || 'withdraw',
-  
+            amount: amount,
+            gas_price: "0.000005",
+            tx_type: type || "withdraw",
           },
           {
             headers: {
@@ -471,17 +474,17 @@ export class SolanaHelper {
 
   signRawTransaction = async (raw, instructions) => {
     console.log(
-      '🚀 ~ SolanaHelper ~ signRawTransaction= ~ transaction:',
+      "🚀 ~ SolanaHelper ~ signRawTransaction= ~ transaction:",
       instructions
     );
-    console.log('🚀 ~ SolanaHelper ~ signRawTransaction= ~ raw:', raw);
+    console.log("🚀 ~ SolanaHelper ~ signRawTransaction= ~ raw:", raw);
 
     try {
       const { account } = store.getState();
 
       const mnemonics = await WalletHelper.getMnemonics(account.address);
       console.log(
-        '🚀 ~ SolanaHelper ~ signRawTransaction= ~ mnemonics:',
+        "🚀 ~ SolanaHelper ~ signRawTransaction= ~ mnemonics:",
         mnemonics
       );
       if (!mnemonics) {
@@ -489,13 +492,13 @@ export class SolanaHelper {
       }
       const myKeyPair = await this.generateSolanaAddress1(mnemonics);
       console.log(
-        '🚀 ~ SolanaHelper ~ signRawTransaction= ~ myKeyPair:',
+        "🚀 ~ SolanaHelper ~ signRawTransaction= ~ myKeyPair:",
         myKeyPair
       );
 
       let solanaWallet = new SolanaWallet(myKeyPair.secretKey);
       console.log(
-        '🚀 ~ SolanaHelper ~ signRawTransaction= ~ solanaWallet:',
+        "🚀 ~ SolanaHelper ~ signRawTransaction= ~ solanaWallet:",
         solanaWallet
       );
       const { signature } = await solanaWallet.signTransaction(
@@ -503,7 +506,7 @@ export class SolanaHelper {
         { ...instructions, partialSignatures: [] }
       );
       console.log(
-        '🚀 ~ SolanaHelper ~ signRawTransaction= ~ signature:',
+        "🚀 ~ SolanaHelper ~ signRawTransaction= ~ signature:",
         signature
       );
 
@@ -511,10 +514,10 @@ export class SolanaHelper {
       // return result;
       return signature;
     } catch (error) {
-      console.log('-----------error', error);
+      console.log("-----------error", error);
       let message = error?.message;
-      let arr = message.split(' ');
-      let findIndex = arr?.indexOf('Signature');
+      let arr = message.split(" ");
+      let findIndex = arr?.indexOf("Signature");
       if (findIndex != -1) {
         const signature = arr[1];
         return signature;
@@ -532,21 +535,19 @@ export class SolanaHelper {
       serializedTransaction,
       SEND_OPTIONS
     );
-    // console.log('txid:::>:>:>:>', txid);
+
     const controller = new AbortController();
     const abortSignal = controller.signal;
-    // console.log('Here');
+
     const abortableResender = async () => {
       while (true) {
         await wait(2_000);
         if (abortSignal.aborted) return;
         try {
-          const opt = await connection.sendRawTransaction(
+          await connection.sendRawTransaction(
             serializedTransaction,
             SEND_OPTIONS
           );
-          // console.log('Here 2', opt);
-          return opt;
         } catch (e) {
           console.warn(`Failed to resend transaction: ${e}`);
         }
@@ -557,12 +558,9 @@ export class SolanaHelper {
       abortableResender();
       const lastValidBlockHeight =
         blockhashWithExpiryBlockHeight.lastValidBlockHeight - 150;
-      console.log(
-        '🚀 ~ SolanaHelper ~ lastValidBlockHeight:',
-        lastValidBlockHeight
-      );
 
-      return await Promise.race([
+      // this would throw TransactionExpiredBlockheightExceededError
+      await Promise.race([
         connection.confirmTransaction(
           {
             ...blockhashWithExpiryBlockHeight,
@@ -570,9 +568,8 @@ export class SolanaHelper {
             signature: txid,
             abortSignal,
           },
-          'confirmed'
+          "confirmed"
         ),
-
         new Promise(async (resolve) => {
           // in case ws socket died
           while (!abortSignal.aborted) {
@@ -580,26 +577,19 @@ export class SolanaHelper {
             const tx = await connection.getSignatureStatus(txid, {
               searchTransactionHistory: false,
             });
-            console.log('🚀 ~ SolanaHelper ~ newPromise ~ tx:', tx);
-            // console.log("tx:D::D:::::::", tx);
-            if (tx?.value?.confirmationStatus === 'confirmed') {
-              console.log(' txn confirmed:::::;;:')
+            console.log("------------------------tx", JSON.stringify(tx));
+            if (tx?.value?.confirmationStatus === "finalized") {
               resolve(tx);
-            } 
+            }
           }
         }),
-      ]) 
+      ]);
     } catch (e) {
-      console.log(e, 'e=====');
       if (e) {
         // we consume this error and getTransaction would return null
-        console.log(
-          'we consume this error and getTransaction would return null'
-        );
         return null;
       } else {
         // invalid state from web3.js
-        console.log('invalid state from web3.js');
         throw e;
       }
     } finally {
@@ -609,8 +599,9 @@ export class SolanaHelper {
     // in case rpc is not synced yet, we add some retries
     const response = promiseRetry(
       async (retry) => {
+        console.log("------------retry");
         const response = await connection.getTransaction(txid, {
-          commitment: 'confirmed',
+          commitment: "confirmed",
           maxSupportedTransactionVersion: 0,
         });
         if (!response) {
@@ -636,17 +627,17 @@ export class SolanaHelper {
         return false;
       }
       const myKeyPair = await this.generateSolanaAddress1(mnemonics);
-      console.log('🚀 ~ SolanaHelper ~ unwrapSolana= ~ myKeyPair:', myKeyPair);
+      console.log("🚀 ~ SolanaHelper ~ unwrapSolana= ~ myKeyPair:", myKeyPair);
 
       const { fromTokenAccount } = await this.createdAssociatedAccounts(
         account.coinFamilyAndAddress[4],
-        'So11111111111111111111111111111111111111112',
+        "So11111111111111111111111111111111111111112",
         myKeyPair
       );
 
-      const lastValidBlockHeight = await this.connection.getSlot('finalized');
+      const lastValidBlockHeight = await this.connection.getSlot("finalized");
 
-      let blockhash = (await this.connection.getLatestBlockhash('finalized'))
+      let blockhash = (await this.connection.getLatestBlockhash("finalized"))
         .blockhash;
 
       const transaction = new Transaction().add(
@@ -665,13 +656,13 @@ export class SolanaHelper {
       console.log(transaction);
 
       const signature = getSignature(transaction);
-      console.log('🚀 ~ SolanaHelper ~ signature:', signature);
+      console.log("🚀 ~ SolanaHelper ~ signature:", signature);
       const serializedTransaction = Buffer.from(transaction.serialize());
       console.log(
-        '🚀 ~ SolanaHelper ~ serializedTransaction:',
+        "🚀 ~ SolanaHelper ~ serializedTransaction:",
         serializedTransaction
       );
-      console.log('🚀 ~ SolanaHelper ~ blockhash:', blockhash);
+      console.log("🚀 ~ SolanaHelper ~ blockhash:", blockhash);
 
       console.log({
         blockhash,
@@ -688,13 +679,13 @@ export class SolanaHelper {
         });
 
       if (!transactionResponse) {
-        console.error('Transaction not confirmed');
+        console.error("Transaction not confirmed");
         return false;
       }
 
       if (transactionResponse.meta?.err) {
         console.error(
-          'transactionResponse.meta:::',
+          "transactionResponse.meta:::",
           transactionResponse.meta?.err
         );
         return false;
@@ -713,15 +704,15 @@ export class SolanaHelper {
       await server.post(
         `/sol/send`,
         {
-          address_book_name: '',
+          address_book_name: "",
           amount: parseFloat(amount),
           coin_id: coinId,
           fiat_price: 0,
-          fiat_type: 'usd',
+          fiat_type: "usd",
           from_address: account.coinFamilyAndAddress[4],
-          source_type: 'ANDROID',
-          to_address: 'So11111111111111111111111111111111111111112',
-          trnx_type: 'swap',
+          source_type: "ANDROID",
+          to_address: "So11111111111111111111111111111111111111112",
+          trnx_type: "swap",
           tx_id: signature,
           order_id: undefined,
         },
@@ -734,11 +725,11 @@ export class SolanaHelper {
 
       return true;
     } catch (error) {
-      console.log(error, '=====eror');
+      console.log(error, "=====eror");
 
       let message = error?.message;
-      let arr = message.split(' ');
-      let findIndex = arr?.indexOf('signature');
+      let arr = message.split(" ");
+      let findIndex = arr?.indexOf("signature");
       if (findIndex != -1 && arr.length >= findIndex + 1) {
         let txid = arr[findIndex + 1];
         const { account } = store.getState();
@@ -746,15 +737,15 @@ export class SolanaHelper {
         const myResponse = await server.post(
           `/sol/send`,
           {
-            address_book_name: '',
+            address_book_name: "",
             amount: parseFloat(amount),
             coin_id: coinId,
             fiat_price: 0,
-            fiat_type: 'usd',
+            fiat_type: "usd",
             from_address: account.coinFamilyAndAddress[4],
-            source_type: 'ANDROID',
-            to_address: 'So11111111111111111111111111111111111111112',
-            trnx_type: 'swap',
+            source_type: "ANDROID",
+            to_address: "So11111111111111111111111111111111111111112",
+            trnx_type: "swap",
             tx_id: txid,
             order_id: undefined,
           },
@@ -782,40 +773,40 @@ export class SolanaHelper {
       const { account } = store.getState();
 
       const mnemonics = await WalletHelper.getMnemonics(account.address);
-      console.log('🚀 ~ SolanaHelper ~ mnemonics:', mnemonics);
+      console.log("🚀 ~ SolanaHelper ~ mnemonics:", mnemonics);
       if (!mnemonics) {
         return false;
       }
       const myKeyPair = await this.generateSolanaAddress1(mnemonics);
-      console.log('🚀 ~ SolanaHelper ~ myKeyPair:', myKeyPair);
+      console.log("🚀 ~ SolanaHelper ~ myKeyPair:", myKeyPair);
 
       const connection = new Connection(
         process.env.REACT_APP_SOL_RPC,
-        'confirmed'
+        "confirmed"
       );
 
       const swapTransactionBuf = Buffer.from(
         swapTransaction.swapTransaction,
-        'base64'
+        "base64"
       );
       console.log(
-        '🚀 ~ SolanaHelper ~ swapTransactionBuf:',
+        "🚀 ~ SolanaHelper ~ swapTransactionBuf:",
         swapTransactionBuf
       );
       let transaction = VersionedTransaction.deserialize(swapTransactionBuf);
-      console.log('🚀 ~ SolanaHelper ~ transaction:', transaction);
+      console.log("🚀 ~ SolanaHelper ~ transaction:", transaction);
 
       // sign the transaction
       transaction.sign([myKeyPair]);
       const signature = getSignature(transaction);
-      console.log('🚀 ~ SolanaHelper ~ signature:', signature);
+      console.log("🚀 ~ SolanaHelper ~ signature:", signature);
       const serializedTransaction = Buffer.from(transaction.serialize());
       console.log(
-        '🚀 ~ SolanaHelper ~ serializedTransaction:',
+        "🚀 ~ SolanaHelper ~ serializedTransaction:",
         serializedTransaction
       );
       const blockhash = transaction.message.recentBlockhash;
-      console.log('🚀 ~ SolanaHelper ~ blockhash:', blockhash);
+      console.log("🚀 ~ SolanaHelper ~ blockhash:", blockhash);
 
       console.log({
         blockhash,
@@ -832,13 +823,13 @@ export class SolanaHelper {
         });
 
       if (!transactionResponse) {
-        console.error('Transaction not confirmed');
+        console.error("Transaction not confirmed");
         return false;
       }
 
       if (transactionResponse.meta?.err) {
         console.error(
-          'transactionResponse.meta:::',
+          "transactionResponse.meta:::",
           transactionResponse.meta?.err
         );
         return false;
@@ -847,15 +838,15 @@ export class SolanaHelper {
       const myResponse = await server.post(
         `/sol/send`,
         {
-          address_book_name: '',
+          address_book_name: "",
           amount: parseFloat(amount),
           coin_id: coinId,
           fiat_price: 0,
-          fiat_type: 'usd',
+          fiat_type: "usd",
           from_address: from,
-          source_type: 'ANDROID',
+          source_type: "ANDROID",
           to_address: to,
-          trnx_type: 'swap',
+          trnx_type: "swap",
           tx_id: signature,
           order_id: undefined,
         },
@@ -869,10 +860,10 @@ export class SolanaHelper {
 
       return myResponse.data.tx_hash;
     } catch (error) {
-      console.log(error, '=====eror');
+      console.log(error, "=====eror");
       let message = error?.message;
-      let arr = message.split(' ');
-      let findIndex = arr?.indexOf('signature');
+      let arr = message.split(" ");
+      let findIndex = arr?.indexOf("signature");
       if (findIndex != -1 && arr.length >= findIndex + 1) {
         let txid = arr[findIndex + 1];
         const { account } = store.getState();
@@ -880,15 +871,15 @@ export class SolanaHelper {
         const myResponse = await server.post(
           `/sol/send`,
           {
-            address_book_name: '',
+            address_book_name: "",
             amount: parseFloat(amount),
             coin_id: coinId,
             fiat_price: 0,
-            fiat_type: 'usd',
+            fiat_type: "usd",
             from_address: from,
-            source_type: 'ANDROID',
+            source_type: "ANDROID",
             to_address: to,
-            trnx_type: 'swap',
+            trnx_type: "swap",
             tx_id: txid,
             order_id: undefined,
           },

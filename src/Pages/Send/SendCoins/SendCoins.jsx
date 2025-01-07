@@ -146,7 +146,7 @@ function SendCoins() {
           coin.coin.coin_symbol
         );
 
-        setSelectedGasPrice(result.propose);
+        setSelectedGasPrice(result.fast);
         setGasPriceType(2);
         setGasPrice(result);
       }
@@ -552,7 +552,7 @@ function SendCoins() {
                   placeholder={"Transaction Fee"}
                   label=""
                   value={parseFloat(
-                    (myGasPrice?.estimate * (myGasPrice?.fast * 3)) / 10 ** 9
+                    (myGasPrice?.estimate * (myGasPrice?.fast * 1.5)) / 10 ** 9
                   )?.toFixed(5)}
                   readonly={true}
                   placeholderBaseColor={true}
@@ -821,9 +821,7 @@ function SendCoins() {
                     to: address,
                     amount: amount,
                     coin,
-                    networkFee: parseFloat(
-                      (myGasPrice?.estimate * (myGasPrice?.fast * 3)) / 10 ** 9
-                    )?.toFixed(5), //gasInEth.toFixed(5),
+                    networkFee: gasInEth.toFixed(5),
                     ENSName,
                     contact: findContact?.name,
                     redirectTo,

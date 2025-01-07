@@ -17,10 +17,11 @@ function ShowPrivateKey() {
   const [messageApi, contextHolder] = message.useMessage({
     duration: DURATION,
   });
-
+  console.log("ADDRESS", address);
   const {
     state: { account },
   } = useLocation();
+  console.log("account", account);
 
   const init = () => {
     setAddress(account.privateKey);
@@ -48,11 +49,29 @@ function ShowPrivateKey() {
   const [btcKey, setBtcKey] = useState(null);
 
   const get_privateKey = async () => {
-    const btcK = await WalletHelper.getBitcoinPrivateKey();
-    setBtcKey(btcK);
-    const rr = await WalletHelper?.getSolanaPrivateKey();
-    const privateKey = bs58.encode(rr);
-    setSolKey(privateKey);
+    console.log("INNNNNNNN", account?.coinFamilyAndAddress);
+    if (account?.coinFamilyAndAddress) {
+      const evmAddress = account.coinFamilyAndAddress["1"];
+
+      // const btcAddress = account.coinFamilyAndAddress["3"];
+      // const solAddress = account.coinFamilyAndAddress["5"];
+      // console.log("btcAddress", btcAddress);
+      console.log("evmAddress", evmAddress);
+
+      const btcK = await WalletHelper.getBitcoinPrivateKeyWithAddress(
+        evmAddress
+      );
+      setBtcKey(btcK);
+      console.log("btcK", btcK);
+
+      const solPrivateKeyData =
+        await WalletHelper.getSolanaPrivateKeyWithAddress(evmAddress);
+      const privateKey = bs58.encode(solPrivateKeyData);
+      console.log("SolprivateKey", privateKey);
+      setSolKey(privateKey);
+    } else {
+      console.error("coinFamilyAndAddress data is missing");
+    }
   };
 
   useEffect(() => {

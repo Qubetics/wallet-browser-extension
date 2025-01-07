@@ -197,10 +197,10 @@ function CoinsTable({ dataArray, showCoinPrice, name }) {
                     gap: "5px",
                   }}
                 >
-                  <span style={{ color: "#98969B" }}>
+                  {/* <span style={{ color: "#98969B" }}>
                     {currency.symbol}{" "}
                     {ele.currPriceValue ? ele.currPriceValue.toFixed(2) : 0}
-                  </span>
+                  </span> */}
                   {name == "portfolio" && (
                     <img
                       style={{ marginLeft: 15 }}

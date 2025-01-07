@@ -36,7 +36,6 @@ const AllocationChart = () => {
     labels: [],
     plotOptions: {
       pie: {
-        size: 150,
         donut: {
           size: "60%",
           labels: {
@@ -177,7 +176,7 @@ const AllocationChart = () => {
             options={chartOptions}
             series={chartSeries}
             type="donut"
-            height={150}
+            height={200}
           />
         )}
       </div>

@@ -161,7 +161,7 @@ function PortfolioWatchList() {
             <CoinsTable
               name="portfolio"
               // delete={DeleteIcon}
-              // showCoinPrice={true}
+              showCoinPrice={true}
               dataArray={tokens
                 .filter((token) => token.watchlist_data)
                 .map((token) => {

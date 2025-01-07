@@ -120,11 +120,12 @@ export class WalletHelper {
 
         // Parse the decrypted mnemonics
         const mnemonicsList = JSON.parse(decryptedMnemonics);
-
+        console.log("mnemonicsList", mnemonicsList);
         // Find the mnemonic matching the provided address
         const matchedMnemonic = mnemonicsList.find(
-          (mnemonic) => mnemonic.address === address
+          (mnemonic) => mnemonic.address.toLowerCase() === address.toLowerCase()
         );
+        console.log("matchedMnemonic", matchedMnemonic);
 
         // Return the matched mnemonic phrase, or the default if no match
         const defaultMnemonics = matchedMnemonic || mnemonicsList[0];
@@ -170,6 +171,28 @@ export class WalletHelper {
     }
   };
 
+  static getSolanaPrivateKeyWithAddress = async (address) => {
+    console.log("addressInSolana", address);
+    const mnemonics = await WalletHelper.getMnemonics(address);
+    console.log("mnemonicsinsolana", mnemonics);
+    try {
+      // const { password } = await chrome.storage.session.get("password");
+      // const { mnemonics } = await chrome.storage.local.get("mnemonics");
+      // const decryptedMnemonics = SecurityHelper.decrypt(mnemonics, password);
+      // const defaultMnemonics = JSON.parse(mnemonics).find((el) => el.default);
+      const seed = await bip39.mnemonicToSeed(mnemonics);
+      const path = `m/44'/501'/0'`;
+      const derivedSeed = derivePath(path, seed).key;
+      const account = new Account(
+        nacl.sign.keyPair.fromSeed(derivedSeed).secretKey
+      );
+
+      return account.secretKey;
+    } catch (error) {
+      return false;
+    }
+  };
+
   static getBitcoinPrivateKey = async () => {
     try {
       const { password } = await chrome.storage.session.get("password");
@@ -183,6 +206,32 @@ export class WalletHelper {
         "",
         !IS_PRODUCTION
       );
+      var child0 = root.deriveAccount(0);
+      var account0 = new BIP84.fromZPrv(child0);
+      return account0.getPrivateKey(0);
+    } catch (error) {
+      return false;
+    }
+  };
+
+  static getBitcoinPrivateKeyWithAddress = async (address) => {
+    console.log("addressInBtc", address);
+
+    const mnemonics = await WalletHelper.getMnemonics(address);
+    console.log("mnemonics", mnemonics);
+    try {
+      // const { password } = await chrome.storage.session.get("password");
+      // const { mnemonics } = await chrome.storage.local.get("mnemonics");
+
+      // const decryptedMnemonics = SecurityHelper.decrypt(mnemonics, password);
+      // console.log("decryptedMnemonics", decryptedMnemonics);
+
+      // const defaultMnemonics = JSON.parse(decryptedMnemonics).find(
+      //   (el) => el.default
+      // );
+      // console.log("defaultMnemonics", defaultMnemonics);
+
+      var root = new BIP84.fromSeed(mnemonics, "", !IS_PRODUCTION);
       var child0 = root.deriveAccount(0);
       var account0 = new BIP84.fromZPrv(child0);
       return account0.getPrivateKey(0);
