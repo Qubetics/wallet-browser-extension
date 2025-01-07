@@ -317,7 +317,9 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
           <div className={"balanceDetails__dropdownStyle"}>
             <div className="balanceLeft">
               {/* <img src={aName} alt="icon" /> */}
-              {account.name.charAt(0).toUpperCase()}
+              <div className="balanceName">
+                <h5>{account.name.charAt(0).toUpperCase()}</h5>
+              </div>
               <div>
                 <Link
                   to={"/my-wallets"}
