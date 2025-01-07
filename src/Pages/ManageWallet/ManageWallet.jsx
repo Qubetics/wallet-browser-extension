@@ -35,7 +35,7 @@ function ManageWallet() {
   const [isModalOpen4, setIsModalOpen4] = useState(false);
   const [ischecked1, setIschecked1] = useState(false);
   const [ischecked2, setIschecked2] = useState(false);
-  
+
 
   const handleOk1 = () => {
     setIsModalOpen1(false);
@@ -94,6 +94,26 @@ function ManageWallet() {
 
   const { state } = useLocation();
 
+  const setDefaultAccount = async (selectedAccount) => {
+    try {
+      store.dispatch(setLoading(true));
+      const { accounts } = await chrome.storage.session.get("accounts");
+      if (accounts) {
+        accounts.map((acc) => ({
+          ...acc,
+          default: acc.id === selectedAccount.id,
+        }));
+        await WalletHelper.setWalletPreference(selectedAccount.id);
+        await init()
+        messageApi.success("Default account updated successfully!");
+      }
+    } catch (error) {
+      messageApi.error("Failed to update the default account.");
+    } finally {
+      store.dispatch(setLoading(false));
+    }
+  };
+
   return (
     <>
       {contextHolder}
@@ -108,13 +128,15 @@ function ManageWallet() {
                   <li
                     key={idx}
                     className="currency_click"
-                    onClick={async () => {
-                      setDrawer(true);
-                      setSelectedAccount(data);
-                      setName(data?.name);
-                    }}
                   >
-                    <div style={{ display: "flex", alignItems: "center" }}>
+                    <div style={{ display: "flex", alignItems: "center" }}
+                      onClick={async (e) => {
+                        e.preventDefault();
+                        if (!data?.default) {
+                          setDefaultAccount(data);
+                        }
+                      }}
+                    >
                       <img src={Logo} alt="" />
                       <div
                         style={{
@@ -141,7 +163,12 @@ function ManageWallet() {
                         </p>
                       </div>
                     </div>
-                    <img src={WalletIBtn} alt="I" />
+                    <img onClick={async (e) => {
+                      e.preventDefault();
+                      setDrawer(true);
+                      setSelectedAccount(data);
+                      setName(data?.name);
+                    }} src={WalletIBtn} alt="I" />
                   </li>
                 </ul>
               </div>
@@ -201,9 +228,9 @@ function ManageWallet() {
                 onClick={async () => {
                   setIsModalOpen4(true);
                 }}
-                // onClick={async () => {
-                //   isModalOpen4(true);
-                // }}
+              // onClick={async () => {
+              //   isModalOpen4(true);
+              // }}
               >
                 <div style={{ display: "flex", alignItems: "center" }}>
                   <img
