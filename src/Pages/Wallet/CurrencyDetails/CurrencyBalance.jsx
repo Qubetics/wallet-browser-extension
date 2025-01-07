@@ -419,8 +419,8 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin }) {
                 color: "#fff",
                 padding: "0px",
                 fontWeight: "bold",
-                lineHeight:"16px",
-                padding:"10px 0"
+                lineHeight: "16px",
+                padding: "10px 0",
               }}
               className={`${"balanceDetails__title"} ${
                 textLeft ? textLeft : ""
@@ -664,6 +664,7 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin }) {
             handleOk={handleOk}
             handleCancel={handleCancel}
             customClass={"reciveModal"}
+            isWhite={true}
           >
             <div className={"balanceDetails__modal"}>
               <div>
@@ -671,12 +672,13 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin }) {
                   <QRCode
                     value={coin.wallet_address}
                     size={230}
-                    qrStyle="square"
+                    qrStyle="dots"
                     eyeRadius={10}
                     logoImage={coin.coin.coin_image}
                     logoHeight={55}
                     logoWidth={55}
                     logoPadding={8}
+                    // fgColor="url(#conicGradient)"
                     logoPaddingStyle="circle"
                     style={{
                       borderRadius: "20px",
@@ -693,7 +695,7 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin }) {
                   marginBottom: "17px",
                   fontSize: "15px",
                   fontWeight: "bold",
-                  display:'none'
+                  display: "none",
                 }}
               >
                 Address

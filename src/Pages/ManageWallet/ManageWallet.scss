@@ -38,3 +38,27 @@
     }
   }
 }
+.secretMasterKey {
+  p {
+    color: #98969b;
+    font-size: 14px;
+  }
+  .ant-checkbox-wrapper {
+    margin: 0 !important;
+    padding: 0 !important;
+    margin-top: 20px !important;
+    .ant-checkbox-inner {
+      background-color: transparent;
+      border-color: #98969b;
+    }
+    p {
+      padding-left: 10px;
+    }
+  }
+  &_btns {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-top: 30px;
+  }
+}

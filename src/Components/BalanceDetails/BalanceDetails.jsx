@@ -51,6 +51,7 @@ import downeIcon from "../../Assets/downeIcon.svg";
 import history from "../../Assets/history.svg";
 import Trade from "../../Assets/Trade.svg";
 import Bell from "../../Assets/Bell.svg";
+import useCurrentHeight from "../../CustomHooks/useCurrentHeight";
 
 function BalanceDetails({ className, textLeft, mt0, coin }) {
   const { account, currency, chain, tokens, theme, balanceIn } = useSelector(
@@ -63,7 +64,7 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
 
   const fetchAccounts = async () => {
     const { accounts } = await chrome.storage.session.get("accounts");
-     
+
     const items = accounts.flatMap((account, index) => {
       const accountItem = {
         label: (
@@ -301,10 +302,12 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
     setIsModalOpen2(false);
     setPassword(null);
   };
-
+  const height = useCurrentHeight();
   return (
     <div
-      className={`${"balanceDetails"} ${mt0 ? mt0 : ""}`}
+      className={`${"balanceDetails"} ${mt0 ? mt0 : ""}    ${
+        height <= 600 ? "balanceDetailsOuterExt" : ""
+      }`}
       style={{ position: "relative" }}
     >
       {contextHolder}
@@ -313,12 +316,19 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
         <>
           <div className={"balanceDetails__dropdownStyle"}>
             <div className="balanceLeft">
-              <img src={aName} alt="icon" />
+              {/* <img src={aName} alt="icon" /> */}
+              {account.name.charAt(0).toUpperCase()}
               <div>
-                <Dropdown overlayClassName="balanceAdmin" menu={{ items: accounts }} trigger={["click"]}>
+                <Dropdown
+                  overlayClassName="balanceAdmin"
+                  menu={{ items: accounts }}
+                  trigger={["click"]}
+                >
                   <Link onClick={(e) => e.preventDefault()}>
                     <p>
-                      {account.name} <img src={downeIcon} alt="downeIcon" />
+                      {account.name.charAt(0).toUpperCase() +
+                        account.name.slice(1)}
+                      <img src={downeIcon} alt="downeIcon" />
                     </p>
                   </Link>
                 </Dropdown>
@@ -558,8 +568,8 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
 
         {!coin ? (
           <Link
-            // to="/buy-sell"
-            to="#"
+            to="/buy-sell"
+            // to="#"
             onClick={(e) => {
               e.preventDefault();
               if (buySellM?.is_maintenance) {
@@ -572,7 +582,7 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
                   return messageApi.error("Coin not supported.");
                 }
               } else {
-                // return navigate("/buy-sell");
+                return navigate("/buy-sell");
               }
             }}
             className={
@@ -657,7 +667,9 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
           <Link
             onClick={(e) => {
               e.preventDefault();
-              path === "currencyDetails" ? showModal() : navigate("/history",{state:{path:'/wallet'}});
+              path === "currencyDetails"
+                ? showModal()
+                : navigate("/history", { state: { path: "/wallet" } });
             }}
             to="#"
             className={
@@ -712,7 +724,7 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
           handleOk={handleOk}
           handleCancel={handleCancel}
           customClass="change"
-          style={{background:"#100e0e"}}
+          style={{ background: "#100e0e" }}
         >
           <div className={"balanceDetails__modal"}>
             <div>
@@ -720,7 +732,7 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
                 <QRCode
                   value={coin.address}
                   size={230}
-                  qrStyle="square"
+                  qrStyle="dots"
                   eyeRadius={10}
                   logoImage={coin.coin.coin_image}
                   logoHeight={55}

@@ -26,10 +26,11 @@ import ButtonComp from "../../Components/ButtonComp/ButtonComp";
 import GroupBtc from "../../Assets/Group.svg";
 import DeleteIcon from "../../Assets/DeleteIcon.svg";
 import { token_type } from "../../helpers/constant";
-import NoRecord from "../../Assets/no-record.svg"
+import NoRecord from "../../Assets/no-record.svg";
 
 function PortfolioWatchList() {
   const { account, currency, balanceIn } = useSelector((state) => state);
+
   const navigate = useNavigate();
   const [keyword, setKeyword] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -167,7 +168,7 @@ function PortfolioWatchList() {
                   const price = token.fiat_price_data || null;
                   const priceData = token?.fiat_price_data?.value || 0;
                   const myPrice = new BigNumber(price ? price.value : 0);
-                  const balance = new BigNumber(token.balance);
+                  const balance = new BigNumber(token?.wallets[0]?.balance);
                   const result = myPrice.times(balance);
                   const formattedResult = result.toString();
                   // console.log("TTTTTTTTTTTT ", token);
@@ -179,21 +180,23 @@ function PortfolioWatchList() {
                     coinSubName: token.coin_name,
                     coinPrice: myPrice.toNumber()
                       ? formatSmallNumber(
-                        exponential_to_decimal(myPrice.toNumber())
-                      )
+                          exponential_to_decimal(myPrice.toNumber())
+                        )
                       : "0.00",
                     coinStatus: getFlooredFixed(
                       price
                         ? parseFloat(
-                          price.price_change_percentage_24h || 0
-                        ).toLocaleString()
+                            price.price_change_percentage_24h || 0
+                          ).toLocaleString()
                         : 0,
                       2
                     ),
                     currCryptoBal: balanceIn
                       ? `${addCommasToNumber(
-                        parseFloat(getFlooredFixed(token.balance, 6))
-                      )}`
+                          parseFloat(
+                            getFlooredFixed(token?.wallets[0]?.balance, 6)
+                          )
+                        )}`
                       : `****`,
                     currCryptoBalSymbol: token.coin_symbol.toUpperCase(),
                     currDollerBal: balanceIn
@@ -201,7 +204,8 @@ function PortfolioWatchList() {
                       : "****",
                     routeTo: "no-where",
                     // type: token.coin_family === 1 ? "BEP20" : "ERC20",
-                    type: token.is_token !== 0 ? token_type(token.coin_family) : "",
+                    type:
+                      token.is_token !== 0 ? token_type(token.coin_family) : "",
                     status: true,
                     coin: token,
                     currPriceValue: priceData,
@@ -239,21 +243,23 @@ function PortfolioWatchList() {
             <div className="noRecord">
               <img src={NoRecord} alt="" />
               <p
-              className="noAddress"
-              style={{
-                fontWeight: "bold",
-                fontSize: "17px",
-              }}
-            >
-              No record found
-            </p>
-              </div>
+                className="noAddress"
+                style={{
+                  fontWeight: "bold",
+                  fontSize: "17px",
+                }}
+              >
+                No record found
+              </p>
+            </div>
           )}
         </div>
       </div>
       <div style={{ marginTop: "15px" }}>
         <ButtonComp
-          onClick={() => navigate("/add-watch-list", { state: { isFromPortfolio: true } })}
+          onClick={() =>
+            navigate("/add-watch-list", { state: { isFromPortfolio: true } })
+          }
           text={"Add Tokens"}
           maxWidth={"100%"}
         />

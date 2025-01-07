@@ -7,7 +7,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { store } from "../..";
 import { setLoading } from "../../actions/loading";
-import { Drawer, message } from "antd";
+import { Checkbox, Drawer, message } from "antd";
 import ModalCloseIcon from "../../Assets/ModalCloseIcon.svg";
 import darkclose from "../../Assets/darkclose.svg";
 import BackupMnemonics from "../../Assets/Backup-Mnemonics.png";
@@ -32,12 +32,23 @@ function ManageWallet() {
   const [password, setPassword] = useState(null);
   const [messageApi, contextHolder] = message.useMessage();
   const [isModalOpen1, setIsModalOpen1] = useState(false);
+  const [isModalOpen4, setIsModalOpen4] = useState(false);
+  const [ischecked1, setIschecked1] = useState(false);
+  const [ischecked2, setIschecked2] = useState(false);
+  
 
   const handleOk1 = () => {
     setIsModalOpen1(false);
   };
   const handleCancel1 = () => {
     setIsModalOpen1(false);
+    setPassword(null);
+  };
+  const handleOk4 = () => {
+    setIsModalOpen4(false);
+  };
+  const handleCancel4 = () => {
+    setIsModalOpen4(false);
     setPassword(null);
   };
 
@@ -63,7 +74,6 @@ function ManageWallet() {
   };
 
   const [selectedAccount, setSelectedAccount] = useState(null);
-  console.log("SELECTEDACCOUNT", selectedAccount);
 
   const init = async () => {
     store.dispatch(setLoading(true));
@@ -189,8 +199,11 @@ function ManageWallet() {
               <li
                 className="currencyClick"
                 onClick={async () => {
-                  setIsModalOpen1(true);
+                  setIsModalOpen4(true);
                 }}
+                // onClick={async () => {
+                //   isModalOpen4(true);
+                // }}
               >
                 <div style={{ display: "flex", alignItems: "center" }}>
                   <img
@@ -685,6 +698,63 @@ function ManageWallet() {
           />
         </div>
       </ModalCustom>
+      <Drawer
+        title="This secret phrase is the master key to your wallet"
+        placement="bottom"
+        onClose={handleCancel4}
+        open={isModalOpen4}
+        closeIcon={
+          theme == "darkTheme" ? (
+            <img src={darkclose} />
+          ) : (
+            <img src={ModalCloseIcon} />
+          )
+        }
+      >
+        <div className={`flexedContent`}>
+          <div className="secretMasterKey">
+            <p>
+              Tap on all checkboxes to confirm you understand the importance of
+              your secret phrase
+            </p>
+            <Checkbox
+              checked={ischecked1}
+              onChange={(value) => {
+                setIschecked1(value.target.checked);
+              }}
+            >
+              <p>If I lose my secret phrase, my funds will be lost forever.</p>
+            </Checkbox>
+            <Checkbox
+              checked={ischecked2}
+              onChange={(value) => {
+                setIschecked2(value.target.checked);
+              }}
+            >
+              <p>Qubetics Wallet support will NEVER reach out to ask for it.</p>
+            </Checkbox>
+            <div className="secretMasterKey_btns">
+              <div className="cancelBtn">
+                <ButtonComp
+                  maxWidth="100%"
+                  onClick={() => {
+                    handleCancel4();
+                  }}
+                  text="Cancel"
+                />
+              </div>
+              <ButtonComp
+                maxWidth="100%"
+                onClick={async () => {
+                  setIsModalOpen1(true);
+                }}
+                disabled={!ischecked1 || !ischecked2}
+                text="Continue"
+              />
+            </div>
+          </div>
+        </div>
+      </Drawer>
     </>
   );
 }
