@@ -28,17 +28,23 @@ const AllocationChart = () => {
   const [labels, setLabels] = useState([]);
   const [chartSeries, setChartSeries] = useState([]);
   const { account, currency } = useSelector((state) => state);
-
   const [chartOptions, setChartOptions] = useState({
     chart: {
       type: "donut",
+    },
+    stroke: {
+      show: true,
+      curve: "straight",
+      lineCap: "butt",
+      colors: ["#000"],
+      width: 1,
     },
     labels: [],
     plotOptions: {
       pie: {
         size: 150,
         donut: {
-          size: "60%",
+          size: "55%",
           labels: {
             total: {
               label: "Total",
@@ -58,6 +64,7 @@ const AllocationChart = () => {
         colors: "#fff",
       },
     },
+
     tooltip: {
       y: {
         formatter: (val) => `${val.toFixed(2)}%`,
@@ -171,13 +178,13 @@ const AllocationChart = () => {
           {currency?.symbol} {portfolioBalance.toFixed(2)}
         </h1>
       </div>
-      <div style={{ position: "relative" }}>
+      <div style={{ position: "relative", overflow: "hidden" }}>
         {portfolioBalance > 0 && (
           <Chart
             options={chartOptions}
             series={chartSeries}
             type="donut"
-            height={150}
+            width="388"
           />
         )}
       </div>
