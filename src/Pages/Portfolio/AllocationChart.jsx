@@ -28,6 +28,8 @@ const AllocationChart = () => {
   const [labels, setLabels] = useState([]);
   const [chartSeries, setChartSeries] = useState([]);
   const { account, currency } = useSelector((state) => state);
+  const [namesWithPercentages, setNamesWithPercentages] = useState([]);
+
   const [chartOptions, setChartOptions] = useState({
     chart: {
       type: "donut",
@@ -61,15 +63,62 @@ const AllocationChart = () => {
       position: "right",
       labels: {
         colors: "#fff",
+        // useSeriesColors: true, // Use series colors for legend items
+      },
+      formatter: function (seriesName, opts) {
+        const index = opts.w.globals.seriesNames.indexOf(seriesName);
+        return namesWithPercentages[index]; // Show names with percentages
       },
     },
-
     tooltip: {
       y: {
         formatter: (val) => `${val.toFixed(2)}%`,
       },
     },
   });
+
+  // const [chartOptions, setChartOptions] = useState({
+  //   chart: {
+  //     type: "donut",
+  //   },
+  //   stroke: {
+  //     show: true,
+  //     curve: "straight",
+  //     lineCap: "butt",
+  //     colors: ["#000"],
+  //     width: 1,
+  //   },
+  //   labels: [],
+  //   plotOptions: {
+  //     pie: {
+  //       donut: {
+  //         size: "55%",
+  //         labels: {
+  //           total: {
+  //             label: "Total",
+  //             formatter: () =>
+  //               `${currency?.symbol || ""} ${portfolioBalance.toFixed(2)}`,
+  //           },
+  //         },
+  //       },
+  //     },
+  //   },
+  //   dataLabels: {
+  //     enabled: false,
+  //   },
+  //   legend: {
+  //     position: "right",
+  //     labels: {
+  //       colors: "#fff",
+  //     },
+  //   },
+
+  //   tooltip: {
+  //     y: {
+  //       formatter: (val) => `${val.toFixed(2)}%`,
+  //     },
+  //   },
+  // });
 
   const fetchPortfolio = async () => {
     try {
@@ -125,6 +174,8 @@ const AllocationChart = () => {
       const namesWithPercentages = percentages.map(
         (item) => `${item.name}   ${item.percentage.toFixed(2)}%`
       );
+      setNamesWithPercentages(namesWithPercentages);
+
       setLabels(names);
       setChartSeries(series);
       setPortfolioBalance(totalBalance);
@@ -135,8 +186,15 @@ const AllocationChart = () => {
 
       setChartOptions((prev) => ({
         ...prev,
-        labels: namesWithPercentages,
+        labels: names,
         colors: chartColors,
+        legend: {
+          ...prev.legend,
+          formatter: function (seriesName, opts) {
+            const index = opts.w.globals.seriesNames.indexOf(seriesName);
+            return namesWithPercentages[index]; // Use namesWithPercentages for the legend
+          },
+        },
       }));
 
       store.dispatch(setLoading(false));
@@ -184,7 +242,7 @@ const AllocationChart = () => {
             series={chartSeries}
             type="donut"
             width="388"
-            height=''
+            height=""
           />
         )}
       </div>
