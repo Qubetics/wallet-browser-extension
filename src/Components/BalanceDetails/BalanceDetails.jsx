@@ -319,7 +319,21 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
               {/* <img src={aName} alt="icon" /> */}
               {account.name.charAt(0).toUpperCase()}
               <div>
-                <Dropdown
+                <Link
+                  to={"/my-wallets"}
+                  //  onClick={(e) => e.preventDefault()}
+                >
+                  <p>
+                    {account.name.charAt(0).toUpperCase() +
+                      account.name.slice(1)}
+                    <img
+                      style={{ marginLeft: "10px" }}
+                      src={downeIcon}
+                      alt="downeIcon"
+                    />
+                  </p>
+                </Link>
+                {/* <Dropdown
                   overlayClassName="balanceAdmin"
                   menu={{ items: accounts }}
                   trigger={["click"]}
@@ -331,7 +345,7 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
                       <img src={downeIcon} alt="downeIcon" />
                     </p>
                   </Link>
-                </Dropdown>
+                </Dropdown> */}
                 {/* <p className="mainNetwor"> ETH Main Network</p> */}
               </div>
             </div>

@@ -99,6 +99,7 @@ import ReceiveCurrency from "./Pages/ReceiveCoins/ReceiveCurrency";
 import SecuritySetting from "./Pages/Setting/SecuritySetting";
 import NftManageWallet from "./Pages/Nft/NftManageWallet";
 import NftSend from "./Pages/Nft/NftSend";
+import MyWallets from "./Components/BalanceDetails/MyWallets";
 
 function App() {
   const [state, setState] = useState("Active");
@@ -468,6 +469,7 @@ function App() {
           <Route index path="/manage-wallet" element={<ManageWallet />} />
           <Route index path="/show-private-key" element={<ShowPrivateKey />} />
           <Route index path="/add-new-wallet" element={<AddNewWallet />} />
+          <Route index path="/my-wallets" element={<MyWallets />} />
           <Route
             index
             path="/import-wallet-name"
