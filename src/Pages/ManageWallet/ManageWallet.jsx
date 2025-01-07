@@ -85,7 +85,7 @@ function ManageWallet() {
     setData(accounts);
     if (state?.from == 'myWallet') {
       let ids = []
-      console.log("ACCCCCCCCCCCCCCCCCCCCC ", accounts);
+      // console.log("ACCCCCCCCCCCCCCCCCCCCC ", accounts);
       accounts.map(itm => {
         ids.push(itm.userId)
       })
@@ -109,11 +109,13 @@ function ManageWallet() {
         },
       }
     );
-    console.log("TOTALLLLLLLLLLLLLL ", response);
+    // console.log("TOTALLLLLLLLLLLLLL ", response);
     let total = 0;
     Array.isArray(response.data?.data) && response.data?.data.map((itm) => {
       Array.isArray(itm?.user_wallet_relation) && itm?.user_wallet_relation.map((userBalItem) => {
-        total += parseFloat(userBalItem?.balance) * parseFloat(userBalItem?.coin?.fiat_price_data?.value)
+        // console.log("parseFloat(userBalItem?.balance) * parseFloat(userBalItem?.coin?.fiat_price_data?.value) ",parseFloat(userBalItem?.balance), parseFloat(userBalItem?.coin?.fiat_price_data?.value), parseFloat(userBalItem?.balance) * parseFloat(userBalItem?.coin?.fiat_price_data?.value));
+        
+        total += parseFloat(userBalItem?.balance || 0) * parseFloat(userBalItem?.coin?.fiat_price_data?.value || 0)
       })
     })
     setTotalAmt(total);
