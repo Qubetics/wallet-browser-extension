@@ -40,7 +40,6 @@ function ManageWallet() {
   const [ischecked2, setIschecked2] = useState(false);
   const [totalAmt, setTotalAmt] = useState(0);
 
-
   const handleOk1 = () => {
     setIsModalOpen1(false);
   };
@@ -83,15 +82,14 @@ function ManageWallet() {
     store.dispatch(setLoading(true));
     let { accounts } = await chrome.storage.session.get("accounts");
     setData(accounts);
-    if (state?.from == 'myWallet') {
-      let ids = []
+    if (state?.from == "myWallet") {
+      let ids = [];
       // console.log("ACCCCCCCCCCCCCCCCCCCCC ", accounts);
-      accounts.map(itm => {
-        ids.push(itm.userId)
-      })
+      accounts.map((itm) => {
+        ids.push(itm.userId);
+      });
       getTotalBalance(ids);
     }
-
 
     store.dispatch(setLoading(false));
   };
@@ -111,15 +109,17 @@ function ManageWallet() {
     );
     // console.log("TOTALLLLLLLLLLLLLL ", response);
     let total = 0;
-    Array.isArray(response.data?.data) && response.data?.data.map((itm) => {
-      Array.isArray(itm?.user_wallet_relation) && itm?.user_wallet_relation.map((userBalItem) => {
-        // console.log("parseFloat(userBalItem?.balance) * parseFloat(userBalItem?.coin?.fiat_price_data?.value) ",parseFloat(userBalItem?.balance), parseFloat(userBalItem?.coin?.fiat_price_data?.value), parseFloat(userBalItem?.balance) * parseFloat(userBalItem?.coin?.fiat_price_data?.value));
-        
-        total += parseFloat(userBalItem?.balance || 0) * parseFloat(userBalItem?.coin?.fiat_price_data?.value || 0)
-      })
-    })
+    Array.isArray(response.data?.data) &&
+      response.data?.data.map((itm) => {
+        Array.isArray(itm?.user_wallet_relation) &&
+          itm?.user_wallet_relation.map((userBalItem) => {
+            total +=
+              parseFloat(userBalItem?.balance || 0) *
+              parseFloat(userBalItem?.coin?.fiat_price_data?.value || 0);
+          });
+      });
     setTotalAmt(total);
-  }
+  };
   useEffect(() => {
     init();
   }, []);
@@ -142,7 +142,7 @@ function ManageWallet() {
           default: acc.id === selectedAccount.id,
         }));
         await WalletHelper.setWalletPreference(selectedAccount.id);
-        await init()
+        await init();
         messageApi.success("Default account updated successfully!");
       }
     } catch (error) {
@@ -152,22 +152,27 @@ function ManageWallet() {
     }
   };
 
-
-
   return (
     <>
       {contextHolder}
       <div className={`scrollableCont`}>
         <div className="searchBarFixed">
-          <MenuRestofHeaders backTo={state?.from == 'myWallet' ? "/wallet" : "/setting"} title={state?.from == 'myWallet' ? "My Wallet" : "Manage Wallet"} />
+          <MenuRestofHeaders
+            backTo={state?.from == "myWallet" ? "/wallet" : "/setting"}
+            title={state?.from == "myWallet" ? "My Wallet" : "Manage Wallet"}
+          />
 
-          {state?.from == 'myWallet' && <div className="myWalletsBalance">
-            <div className="myWalletsBalance_value">
-              <h4>Total Balance</h4>
-              <h1>{currency?.symbol} {totalAmt?.toFixed(2)}</h1>
+          {state?.from == "myWallet" && (
+            <div className="myWalletsBalance">
+              <div className="myWalletsBalance_value">
+                <h4>Total Balance</h4>
+                <h1>
+                  {currency?.symbol} {totalAmt?.toFixed(2)}
+                </h1>
+              </div>
+              <div></div>
             </div>
-            <div></div>
-          </div>}
+          )}
         </div>
 
         <div className={`flexedContent manageWalletHeight`}>
@@ -176,11 +181,9 @@ function ManageWallet() {
             {data.map((data, idx) => (
               <div className="listItems">
                 <ul>
-                  <li
-                    key={idx}
-                    className="currency_click"
-                  >
-                    <div style={{ display: "flex", alignItems: "center" }}
+                  <li key={idx} className="currency_click">
+                    <div
+                      style={{ display: "flex", alignItems: "center" }}
                       onClick={async (e) => {
                         e.preventDefault();
                         if (!data?.default) {
@@ -214,12 +217,18 @@ function ManageWallet() {
                         </p>
                       </div>
                     </div>
-                    {state?.from !== 'myWallet' && <img onClick={async (e) => {
-                      e.preventDefault();
-                      setDrawer(true);
-                      setSelectedAccount(data);
-                      setName(data?.name);
-                    }} src={WalletIBtn} alt="I" />}
+                    {state?.from !== "myWallet" && (
+                      <img
+                        onClick={async (e) => {
+                          e.preventDefault();
+                          setDrawer(true);
+                          setSelectedAccount(data);
+                          setName(data?.name);
+                        }}
+                        src={WalletIBtn}
+                        alt="I"
+                      />
+                    )}
                   </li>
                 </ul>
               </div>
@@ -279,9 +288,9 @@ function ManageWallet() {
                 onClick={async () => {
                   setIsModalOpen4(true);
                 }}
-              // onClick={async () => {
-              //   isModalOpen4(true);
-              // }}
+                // onClick={async () => {
+                //   isModalOpen4(true);
+                // }}
               >
                 <div style={{ display: "flex", alignItems: "center" }}>
                   <img
@@ -615,7 +624,9 @@ function ManageWallet() {
                     selectedAccount.id,
                     account.address
                   );
-                  await WalletHelper.removeMnemonic(selectedAccount.coinFamilyAndAddress[1])
+                  await WalletHelper.removeMnemonic(
+                    selectedAccount.coinFamilyAndAddress[1]
+                  );
                   setDrawer(false);
                   init();
                   store.dispatch(setLoading(false));

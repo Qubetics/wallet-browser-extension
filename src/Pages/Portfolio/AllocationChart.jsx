@@ -77,49 +77,6 @@ const AllocationChart = () => {
     },
   });
 
-  // const [chartOptions, setChartOptions] = useState({
-  //   chart: {
-  //     type: "donut",
-  //   },
-  //   stroke: {
-  //     show: true,
-  //     curve: "straight",
-  //     lineCap: "butt",
-  //     colors: ["#000"],
-  //     width: 1,
-  //   },
-  //   labels: [],
-  //   plotOptions: {
-  //     pie: {
-  //       donut: {
-  //         size: "55%",
-  //         labels: {
-  //           total: {
-  //             label: "Total",
-  //             formatter: () =>
-  //               `${currency?.symbol || ""} ${portfolioBalance.toFixed(2)}`,
-  //           },
-  //         },
-  //       },
-  //     },
-  //   },
-  //   dataLabels: {
-  //     enabled: false,
-  //   },
-  //   legend: {
-  //     position: "right",
-  //     labels: {
-  //       colors: "#fff",
-  //     },
-  //   },
-
-  //   tooltip: {
-  //     y: {
-  //       formatter: (val) => `${val.toFixed(2)}%`,
-  //     },
-  //   },
-  // });
-
   const fetchPortfolio = async () => {
     try {
       store.dispatch(setLoading(true));
@@ -159,15 +116,29 @@ const AllocationChart = () => {
         return;
       }
 
-      const percentages = portfolioData.map((obj) => ({
-        name: obj?.coin?.coin_name || "Unknown",
-        symbol: obj?.coin?.coin_symbol || "Unknown",
-        percentage:
-          ((parseFloat(obj?.balance) *
-            parseFloat(obj?.coin?.fiat_price_data?.value || 0)) /
-            totalBalance) *
-          100,
-      }));
+      // const percentages = portfolioData.map((obj) => ({
+      //   name: obj?.coin?.coin_name || "Unknown",
+      //   symbol: obj?.coin?.coin_symbol || "Unknown",
+      //   percentage:
+      //     ((parseFloat(obj?.balance) *
+      //       parseFloat(obj?.coin?.fiat_price_data?.value || 0)) /
+      //       totalBalance) *
+      //     100,
+      // }));
+      console.log("PORTFOLIO DATA", portfolioData);
+      const percentages = portfolioData
+        .filter((obj) => parseFloat(obj?.balance) > 0 && obj?.balance !== null)
+        .map((obj) => ({
+          name: obj?.coin?.coin_name || "Unknown",
+          symbol: obj?.coin?.coin_symbol || "Unknown",
+          percentage:
+            ((parseFloat(obj?.balance) *
+              parseFloat(obj?.coin?.fiat_price_data?.value || 0)) /
+              totalBalance) *
+            100,
+        }));
+
+      console.log("PERCENTAGE CONSOLE", percentages);
 
       const names = percentages.map((item) => item.name);
       const series = percentages.map((item) => parseFloat(item.percentage));
@@ -178,7 +149,7 @@ const AllocationChart = () => {
       const namesWithPercentages = percentages.map(
         (item) =>
           `${
-            item.name.length > 15 ? item.name.slice(0, 12) + `...` : item.name
+            item.name.length > 12 ? item.name.slice(0, 12) + `...` : item.name
           }   ${item.percentage.toFixed(2)}%`
       );
 
@@ -249,7 +220,7 @@ const AllocationChart = () => {
             options={chartOptions}
             series={chartSeries}
             type="donut"
-            width="388"
+            width="380"
             height=""
           />
         )}
