@@ -22,8 +22,13 @@ import warning from "../../Assets/PNG/warning.png";
 import WalletIBtn from "../../Assets/WalletIBtn.svg";
 import DarkArrowRightIcon from "../../Assets/DarkArrowRightIcon.svg";
 import { server } from "../../server";
+import OpenDark from "../../Assets/open-dark.svg";
+import CloseDark from "../../Assets/close-dark.svg";
+
 function ManageWallet() {
   const [data, setData] = useState([]);
+  const [show, setShow] = useState(true);
+
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [deleteModal, setDeleteModal] = useState(false);
   const [drawer, setDrawer] = useState(false);
@@ -107,7 +112,7 @@ function ManageWallet() {
         },
       }
     );
-    // console.log("TOTALLLLLLLLLLLLLL ", response);
+
     let total = 0;
     Array.isArray(response.data?.data) &&
       response.data?.data.map((itm) => {
@@ -188,6 +193,7 @@ function ManageWallet() {
                         e.preventDefault();
                         if (!data?.default) {
                           setDefaultAccount(data);
+                          navigate("/wallet");
                         }
                       }}
                     >
