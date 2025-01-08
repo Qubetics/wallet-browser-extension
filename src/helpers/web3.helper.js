@@ -15,7 +15,7 @@ export class Web3Helper {
     tokenAddress,
     symbol
   ) => {
-    console.log({
+    console.log("XXXXXXXSSSSSSSSSSS----> ", {
       slug,
       toAddress,
       fromAddress,

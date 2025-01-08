@@ -20,6 +20,7 @@ import blackStar from "../../Assets/blackStar.svg";
 import blueStar from "../../Assets/blueStar.svg";
 import { token_type } from "../../helpers/constant";
 import ButtonComp from "../ButtonComp/ButtonComp";
+import { Tooltip } from "antd";
 
 function CoinsTable({ dataArray, showCoinPrice, name }) {
   const navigate = useNavigate();
@@ -137,10 +138,12 @@ function CoinsTable({ dataArray, showCoinPrice, name }) {
                 style={{ cursor: "pointer" }}
               >
                 <span className="coinNname">
+                <Tooltip title={`${ele?.coinSubName}`}>
                   {ele?.coinSubName?.length > 10 &&
                     ele?.coin?.coin?.token_address
-                    ? `${ele.coinSubName.substring(0, 7)}...`
-                    : ele?.coinSubName}
+                    ? `${ele.coinSubName.substring(0, 15)}...`
+                    : `${ele.coinSubName.substring(0, 15)}...`}
+                    </Tooltip>
                 </span>
                 <span
                   style={{
