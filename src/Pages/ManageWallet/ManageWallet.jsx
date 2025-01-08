@@ -169,12 +169,12 @@ function ManageWallet() {
           {state?.from == 'myWallet' && <div className="myWalletsBalance">
             <div className="myWalletsBalance_value">
               <h4>Total Balance</h4>
-              <h1>
+              <h1 style={{display:'flex', alignItems:'center', gap:'20px'}}>
                 {currency?.symbol} {show ? totalAmt?.toFixed(2) : "***"} <span onClick={() => setShow(!show)}>
-                  {show ? <img
+                  {show ? <img style={{height:'20px'}}
                     src={OpenDark}
                     alt="" />
-                    : <img
+                    : <img style={{height:'30px'}}
                       src={CloseDark}
                       alt="" />}
                 </span></h1>
