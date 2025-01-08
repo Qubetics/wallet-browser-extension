@@ -162,19 +162,19 @@ function ManageWallet() {
   return (
     <>
       {contextHolder}
-      <div className={`scrollableCont`}>
+      <div className={state?.from == 'myWallet'?`scrollableCont myWallet`:`scrollableCont`}>
         <div className="searchBarFixed">
           <MenuRestofHeaders backTo={state?.from == 'myWallet' ? "/wallet" : "/setting"} title={state?.from == 'myWallet' ? "My Wallet" : "Manage Wallet"} />
 
           {state?.from == 'myWallet' && <div className="myWalletsBalance">
             <div className="myWalletsBalance_value">
               <h4>Total Balance</h4>
-              <h1 style={{display:'flex', alignItems:'center', gap:'20px'}}>
+              <h1 style={{ display: 'flex', alignItems: 'center', gap: '20px', justifyContent:"space-between" }}>
                 {currency?.symbol} {show ? totalAmt?.toFixed(2) : "***"} <span onClick={() => setShow(!show)}>
-                  {show ? <img style={{height:'20px'}}
+                  {show ? <img style={{ height: '20px' }}
                     src={OpenDark}
                     alt="" />
-                    : <img style={{height:'30px'}}
+                    : <img style={{ height: '30px' }}
                       src={CloseDark}
                       alt="" />}
                 </span></h1>
@@ -593,34 +593,19 @@ function ManageWallet() {
             </p>
           </div>
 
+
+
           <div
             style={{
               display: "flex",
-
               alignItems: "center",
-
               justifyContent: "center",
-
               marginTop: "30px",
+              gap: "20px"
             }}
           >
-            <div
-              className="green"
-              style={{
-                padding: "12px 53px",
-
-                backgroundColor: "rgb(56 101 109)",
-
-                color: "white",
-
-                fontSize: "18px",
-
-                borderRadius: "25px",
-
-                marginRight: "20px",
-
-                cursor: "pointer",
-              }}
+            <ButtonComp
+              maxWidth="100%"
               onClick={async () => {
                 try {
                   store.dispatch(setLoading(true));
@@ -638,38 +623,18 @@ function ManageWallet() {
                   store.dispatch(setLoading(false));
                 }
               }}
-            >
-              Yes
+              text="Yes"
+            />
+            <div className="cancelBtn">
+              <ButtonComp
+                maxWidth="100%"
+                onClick={() => {
+                  setDeleteModal(false);
+                }}
+                text="No"
+              />
             </div>
-
-            <div
-              className="red"
-              style={{
-                padding: "12px 53px",
-
-                color: "#F5DA76",
-
-                fontSize: "18px",
-
-                borderRadius: "25px",
-
-                marginLeft: "20px",
-
-                cursor: "pointer",
-
-                border: "1px solid #F5DA76",
-
-                // border: 1px solid #F5DA76,
-
-                // bo
-              }}
-              onClick={() => {
-                setDeleteModal(false);
-              }}
-            >
-              No
-            </div>
-          </div>
+          </div> 
         </div>
       </ModalCustom>
 

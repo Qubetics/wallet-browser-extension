@@ -18,6 +18,7 @@ import DeleteIcon from "../../Assets/delete.png";
 import DownArrowSuffix from "../../Assets/DownArrowSuffix.svg";
 import JohWick from "../../Assets/JohWick.svg";
 import { EditAddressMain } from "./EditAddressMain.jsx";
+import ButtonComp from "../ButtonComp/ButtonComp.jsx";
 
 const crypto = {
   1: "BNB",
@@ -110,117 +111,117 @@ function AddressNetworkCard(props) {
     }
   };
 
-  
 
-const handleSubmitMain = async () => {
 
-  try {
+  const handleSubmitMain = async () => {
 
-    store.dispatch(setLoading(true));
+    try {
 
-    const response = await server.post(
+      store.dispatch(setLoading(true));
 
-      "/user/edit_address_book_contact_name",
+      const response = await server.post(
 
-      {
+        "/user/edit_address_book_contact_name",
 
-        address_book_id: editDataMain?.address_book_id,
+        {
 
-        address_book_name: editDataMain?.address_book_name,
+          address_book_id: editDataMain?.address_book_id,
 
-        // address_book_wallet_address: editDataMain?.wallet_address
+          address_book_name: editDataMain?.address_book_name,
 
-      },
-
-      {
-
-        headers: {
-
-          Authorization: account.jwtToken,
+          // address_book_wallet_address: editDataMain?.wallet_address
 
         },
 
-      }
+        {
 
-    );
+          headers: {
 
-    inits();
+            Authorization: account.jwtToken,
 
-    store.dispatch(setLoading(false));
+          },
 
-    setEditDataMain(null);
+        }
 
-    setEditModalMain(false);
+      );
 
-  } catch (error) {
+      inits();
 
-    console.log("error ", error);
+      store.dispatch(setLoading(false));
 
-    store.dispatch(setLoading(false));
+      setEditDataMain(null);
 
-    return messageApi.error(error.response.message);
+      setEditModalMain(false);
 
-  }
+    } catch (error) {
 
-};
+      console.log("error ", error);
+
+      store.dispatch(setLoading(false));
+
+      return messageApi.error(error.response.message);
+
+    }
+
+  };
 
 
 
- 
 
-const deleteSubwallet = async (itm) => {
 
-  try {
+  const deleteSubwallet = async (itm) => {
 
-    store.dispatch(setLoading(true));
+    try {
 
-    const response = await server.post(
+      store.dispatch(setLoading(true));
 
-      "/user/delete_address_book_wallet_address",
+      const response = await server.post(
 
-      {
+        "/user/delete_address_book_wallet_address",
 
-        address_book_id: itm?.address_book_id,
+        {
 
-        id: itm?.id,
+          address_book_id: itm?.address_book_id,
 
-      },
-
-      {
-
-        headers: {
-
-          Authorization: account.jwtToken,
+          id: itm?.id,
 
         },
 
-      }
+        {
 
-    );
+          headers: {
 
-    inits();
+            Authorization: account.jwtToken,
 
-    store.dispatch(setLoading(false));
+          },
 
-    setDeleteItem(null);
+        }
 
-    setEditData(null);
+      );
 
-    setDeleteModal(false);
+      inits();
 
-  } catch (error) {
+      store.dispatch(setLoading(false));
 
-    console.log("Error ", error);
+      setDeleteItem(null);
 
-    setDeleteModal(false);
+      setEditData(null);
 
-    store.dispatch(setLoading(false));
+      setDeleteModal(false);
 
-    return messageApi.error(error.response.message);
+    } catch (error) {
 
-  }
+      console.log("Error ", error);
 
-};
+      setDeleteModal(false);
+
+      store.dispatch(setLoading(false));
+
+      return messageApi.error(error.response.message);
+
+    }
+
+  };
 
 
   return (
@@ -371,7 +372,7 @@ const deleteSubwallet = async (itm) => {
             <p
               style={{
                 fontSize: "20px",
-                color:"white"
+                color: "white"
               }}
             >
               Are you sure you want to delete this contact?
@@ -383,9 +384,48 @@ const deleteSubwallet = async (itm) => {
               alignItems: "center",
               justifyContent: "center",
               marginTop: "30px",
+              gap: "20px"
             }}
           >
-            <div
+            <ButtonComp
+              maxWidth="100%"
+              onClick={async () => {
+                store.dispatch(setLoading(true));
+
+                if (deleteType == "sub") {
+                  deleteSubwallet(deleteItem);
+                  store.dispatch(setLoading(false));
+                } else {
+                  await server.post(
+                    // "/wallet/delete_address_in_book",
+                    "/user/delete_address_book",
+                    {
+                      id,
+                      // wallet_address:address,
+                    },
+                    {
+                      headers: {
+                        Authorization: account.jwtToken,
+                      },
+                    }
+                  );
+                  store.dispatch(setLoading(false));
+                  setDeleteModal(false);
+                  refresh();
+                }
+              }}
+              text="Yes"
+            />
+            <div className="cancelBtn">
+              <ButtonComp
+                maxWidth="100%"
+                onClick={() => {
+                  setDeleteModal(false);
+                }}
+                text="No"
+              />
+            </div>
+            {/* <div
               className="green"
               style={{
                 padding: "12px 53px",
@@ -440,7 +480,7 @@ const deleteSubwallet = async (itm) => {
               }}
             >
               No
-            </div>
+            </div> */}
           </div>
         </div>
       </ModalCustom>

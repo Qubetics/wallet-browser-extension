@@ -228,27 +228,18 @@ function WithdrawCard({
             >
               Are you sure you want to delete this account?
             </p>
-          </div>
+          </div> 
           <div
-            // className="loggout_confirm"
             style={{
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               marginTop: "30px",
+              gap: "20px"
             }}
           >
-            <div
-              className="green"
-              style={{
-                padding: "12px 53px",
-                backgroundColor: "rgb(56 101 109)",
-                color: "white",
-                fontSize: "18px",
-                borderRadius: "7px",
-                marginRight: "20px",
-                cursor: "pointer",
-              }}
+            <ButtonComp
+              maxWidth="100%"
               onClick={async () => {
                 store.dispatch(setLoading(true));
                 const response = await spritzHelper.deleteBankAccount(
@@ -262,25 +253,16 @@ function WithdrawCard({
                 handleCancel();
                 init();
               }}
-            >
-              Confirm
-            </div>
-            <div
-              className="red"
-              style={{
-                padding: "12px 53px",
-                backgroundColor: "red",
-                color: "white",
-                fontSize: "18px",
-                borderRadius: "7px",
-                marginLeft: "20px",
-                cursor: "pointer",
-              }}
-              onClick={() => {
-                handleCancel();
-              }}
-            >
-              Cancel
+              text="Confirm"
+            />
+            <div className="cancelBtn">
+              <ButtonComp
+                maxWidth="100%"
+                onClick={() => {
+                  handleCancel();
+                }}
+                text="No"
+              />
             </div>
           </div>
         </div>

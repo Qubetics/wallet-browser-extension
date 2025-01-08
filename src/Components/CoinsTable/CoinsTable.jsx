@@ -19,6 +19,7 @@ import { Draggable } from "react-drag-reorder";
 import blackStar from "../../Assets/blackStar.svg";
 import blueStar from "../../Assets/blueStar.svg";
 import { token_type } from "../../helpers/constant";
+import ButtonComp from "../ButtonComp/ButtonComp";
 
 function CoinsTable({ dataArray, showCoinPrice, name }) {
   const navigate = useNavigate();
@@ -137,7 +138,7 @@ function CoinsTable({ dataArray, showCoinPrice, name }) {
               >
                 <span className="coinNname">
                   {ele?.coinSubName?.length > 10 &&
-                  ele?.coin?.coin?.token_address
+                    ele?.coin?.coin?.token_address
                     ? `${ele.coinSubName.substring(0, 7)}...`
                     : ele?.coinSubName}
                 </span>
@@ -165,9 +166,8 @@ function CoinsTable({ dataArray, showCoinPrice, name }) {
                 ></div>{" "}
                 &nbsp;|
                 <div
-                  className={`${"coinsTable1__grayText12"} ${
-                    ele.coinStatus <= 0 ? "negitiveText" : "positiveText"
-                  }`}
+                  className={`${"coinsTable1__grayText12"} ${ele.coinStatus <= 0 ? "negitiveText" : "positiveText"
+                    }`}
                   style={{ marginLeft: "3px" }}
                 >
                   {ele.coinStatus < 0 ? "" : "+"}
@@ -225,17 +225,17 @@ function CoinsTable({ dataArray, showCoinPrice, name }) {
                   style={{ justifyContent: "flex-end" }}
                 >
                   {ele.currDollerBal === "ABOVE" ||
-                  ele.currDollerBal === "BELOW" ? (
+                    ele.currDollerBal === "BELOW" ? (
                     `Price ${capitalize(ele.currDollerBal)}`
                   ) : (
                     <>
                       {ele.routeTo === "no-where"
                         ? ""
                         : balanceIn
-                        ? ele.routeTo === "enter-price-spritz"
-                          ? "$"
-                          : currency.symbol
-                        : ""}
+                          ? ele.routeTo === "enter-price-spritz"
+                            ? "$"
+                            : currency.symbol
+                          : ""}
                       {ele.currDollerBal}
                     </>
                   )}
@@ -303,9 +303,29 @@ function CoinsTable({ dataArray, showCoinPrice, name }) {
               alignItems: "center",
               justifyContent: "center",
               marginTop: "30px",
+              gap: "20px"
             }}
           >
-            <div
+            <ButtonComp
+              maxWidth="100%"
+              onClick={async () => {
+                store.dispatch(setLoading(true));
+                await WalletHelper.removeAlert(selected);
+                store.dispatch(setLoading(false));
+                setDeleteModal(false);
+              }}
+              text="Yes"
+            />
+            <div className="cancelBtn">
+              <ButtonComp
+                maxWidth="100%"
+                onClick={() => {
+                  setDeleteModal(false);
+                }}
+                text="No"
+              />
+            </div>
+            {/* <div
               className="green"
               style={{
                 padding: "12px 53px",
@@ -341,7 +361,7 @@ function CoinsTable({ dataArray, showCoinPrice, name }) {
               }}
             >
               No
-            </div>
+            </div> */}
           </div>
         </div>
       </ModalCustom>
@@ -371,9 +391,24 @@ function CoinsTable({ dataArray, showCoinPrice, name }) {
               alignItems: "center",
               justifyContent: "center",
               marginTop: "30px",
+              gap: "20px"
             }}
           >
-            <div
+            <ButtonComp
+              maxWidth="100%"
+              onClick={handleConfirmDelete}
+              text="Yes"
+            />
+            <div className="cancelBtn">
+              <ButtonComp
+                maxWidth="100%"
+                onClick={() => {
+                  setIsModalVisible(false);
+                }}
+                text="No"
+              />
+            </div>
+            {/* <div
               className="green"
               style={{
                 padding: "12px 53px",
@@ -387,8 +422,8 @@ function CoinsTable({ dataArray, showCoinPrice, name }) {
               onClick={handleConfirmDelete}
             >
               Yes
-            </div>
-            <div
+            </div> */}
+            {/* <div
               className="red"
               style={{
                 padding: "12px 53px",
@@ -404,7 +439,7 @@ function CoinsTable({ dataArray, showCoinPrice, name }) {
               }}
             >
               No
-            </div>
+            </div> */}
           </div>
         </div>
       </ModalCustom>

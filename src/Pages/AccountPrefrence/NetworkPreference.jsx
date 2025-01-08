@@ -13,6 +13,7 @@ import JustLogo from "../../Assets/LogoOnly.png";
 
 import { DURATION } from "../../config/message.config";
 import ModalCustom from "../../Components/ModalCustom/ModalCustom";
+import ButtonComp from "../../Components/ButtonComp/ButtonComp";
 
 function AccountPreference() {
   const [data, setData] = useState([]);
@@ -185,7 +186,7 @@ function AccountPreference() {
             <p
               style={{
                 fontSize: "20px",
-                color:"white"
+                color: "white"
               }}
             >
               Are you sure you want to delete this wallet?
@@ -196,9 +197,29 @@ function AccountPreference() {
                 alignItems: "center",
                 justifyContent: "center",
                 marginTop: "30px",
+                gap:"20px"
               }}
             >
-              <div
+              <ButtonComp
+                maxWidth="100%"
+                onClick={async () => {
+                  store.dispatch(setLoading(true));
+                  await WalletHelper.deleteWallet(selected, evmAddress);
+                  store.dispatch(setLoading(false));
+                  setDeleteModal(false);
+                }}
+                text="Yes"
+              />
+              <div className="cancelBtn">
+                <ButtonComp
+                  maxWidth="100%"
+                  onClick={() => {
+                    setDeleteModal(false);
+                  }}
+                  text="No"
+                />
+              </div>
+              {/* <div
                 className='green'
                 style={{
                   padding: "12px 53px",
@@ -217,8 +238,8 @@ function AccountPreference() {
                 }}
               >
                 Confirm
-              </div>
-              <div
+              </div> */}
+              {/* <div
                 className='red'
                 style={{
                   padding: "12px 53px",
@@ -234,7 +255,7 @@ function AccountPreference() {
                 }}
               >
                 Cancel
-              </div>
+              </div> */}
             </div>
           </div>
         </div>

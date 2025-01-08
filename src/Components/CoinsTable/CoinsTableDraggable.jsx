@@ -24,6 +24,7 @@ import Reorder, {
   reorderFromToImmutable,
 } from "react-reorder";
 import { token_type } from "../../helpers/constant";
+import ButtonComp from "../ButtonComp/ButtonComp";
 function CoinsTableDraggable({ dataArray, refresh }) {
   const navigate = useNavigate();
   const { account } = useSelector((state) => state);
@@ -446,6 +447,36 @@ function CoinsTableDraggable({ dataArray, refresh }) {
               Are you sure you want to Delete this Alert?
             </p>
           </div>
+
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              marginTop: "30px",
+              gap: "20px"
+            }}
+          >
+            <ButtonComp
+              maxWidth="100%"
+              onClick={async () => {
+                store.dispatch(setLoading(true));
+                await WalletHelper.removeAlert(selected);
+                store.dispatch(setLoading(false));
+                setDeleteModal(false);
+              }}
+              text="Yes"
+            />
+            <div className="cancelBtn">
+              <ButtonComp
+                maxWidth="100%"
+                onClick={() => {
+                  setDeleteModal(false);
+                }}
+                text="No"
+              />
+            </div>
+            </div>
           <div
             style={{
               display: "flex",
@@ -453,44 +484,7 @@ function CoinsTableDraggable({ dataArray, refresh }) {
               justifyContent: "center",
               marginTop: "30px",
             }}
-          >
-            <div
-              className="green"
-              style={{
-                padding: "12px 53px",
-                backgroundColor: "rgb(56 101 109)",
-                color: "white",
-                fontSize: "18px",
-                borderRadius: "7px",
-                marginRight: "20px",
-                cursor: "pointer",
-              }}
-              onClick={async () => {
-                store.dispatch(setLoading(true));
-                await WalletHelper.removeAlert(selected);
-                store.dispatch(setLoading(false));
-                setDeleteModal(false);
-              }}
-            >
-              Yes
-            </div>
-            <div
-              className="red"
-              style={{
-                padding: "12px 53px",
-                backgroundColor: "red",
-                color: "white",
-                fontSize: "18px",
-                borderRadius: "7px",
-                marginLeft: "20px",
-                cursor: "pointer",
-              }}
-              onClick={() => {
-                setDeleteModal(false);
-              }}
-            >
-              No
-            </div>
+          > 
           </div>
         </div>
       </ModalCustom>

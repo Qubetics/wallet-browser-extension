@@ -38,6 +38,7 @@ import {
 import ModalCustom from "../../ModalCustom/ModalCustom";
 import ReorderManage from "../../../Assets/ReorderManage.svg";
 import manageStart from "../../../Assets/manageStart.svg";
+import ButtonComp from "../../ButtonComp/ButtonComp";
 
 function MenuRestofHeaders({
   title,
@@ -380,7 +381,7 @@ function MenuRestofHeaders({
             to={void 0}
             onClick={stared}
           >
-            
+
             {isStared ? (
               <img
                 src={blueStar}
@@ -449,9 +450,9 @@ function MenuRestofHeaders({
           <span
             style={{ cursor: "pointer" }}
             to={void 0}
-            // onClick={() => {
-            //   navigate(manage);
-            // }}
+          // onClick={() => {
+          //   navigate(manage);
+          // }}
           >
             {theme == "darkTheme" ? <img src={Bell} /> : <img src={Bell} />}
           </span>
@@ -459,7 +460,7 @@ function MenuRestofHeaders({
         {manageTo && (
           <span className="manageTo" style={{ cursor: "pointer" }}>
             {/* <img src={ReorderManage} alt="img" /> */}
-            <img onClick={()=>navigate('/add-watch-list')} src={manageStart} alt="img" />
+            <img onClick={() => navigate('/add-watch-list')} src={manageStart} alt="img" />
           </span>
         )}
 
@@ -481,10 +482,10 @@ function MenuRestofHeaders({
               <div className="innerLink">
                 <img
                   src={UploadAcc}
-                  // onClick={() => {
-                  //   store.dispatch(setCreate(true));
-                  //   navigate("/bankAccount");
-                  // }}
+                // onClick={() => {
+                //   store.dispatch(setCreate(true));
+                //   navigate("/bankAccount");
+                // }}
                 />
                 <div className="multibankAccount">
                   <img src={BackImg} />
@@ -495,10 +496,10 @@ function MenuRestofHeaders({
               <ButtonCompGray
                 text={"Skip"}
                 marginTop={"20px"}
-                // onClick={() => {
-                //   store.dispatch(setCreate(true));
-                //   navigate("/withdraw");
-                // }}
+              // onClick={() => {
+              //   store.dispatch(setCreate(true));
+              //   navigate("/withdraw");
+              // }}
               />
             </div>
           </Drawer>
@@ -526,7 +527,28 @@ function MenuRestofHeaders({
                   marginTop: "30px",
                 }}
               >
-                <div
+                <ButtonComp
+                  maxWidth="100%"
+                  onClick={async () => {
+                    await chrome.storage.local.remove(["spritzData"]);
+                    await chrome.storage.session.remove(["spritzApiKey"]);
+                    store.dispatch(spritzKyc(null));
+                    store.dispatch(spritzAccounts([]));
+                    store.dispatch(spritzLogin(null));
+                    navigate("/emailAddress");
+                  }}
+                  text="Yes"
+                />
+                <div className="cancelBtn">
+                  <ButtonComp
+                    maxWidth="100%"
+                    onClick={() => {
+                      handleCancel();
+                    }}
+                    text="No"
+                  />
+                  </div>
+                  {/* <div
                   className="green"
                   style={{
                     padding: "12px 53px",
@@ -547,26 +569,26 @@ function MenuRestofHeaders({
                   }}
                 >
                   Yes
-                </div>
-                <div
-                  className="red"
-                  style={{
-                    padding: "12px 53px",
-                    backgroundColor: "red",
-                    color: "white",
-                    fontSize: "18px",
-                    borderRadius: "7px",
-                    marginLeft: "20px",
-                    cursor: "pointer",
-                  }}
-                  onClick={() => {
-                    handleCancel();
-                  }}
-                >
-                  No
+                </div> */}
+                  {/* <div
+                    className="red"
+                    style={{
+                      padding: "12px 53px",
+                      backgroundColor: "red",
+                      color: "white",
+                      fontSize: "18px",
+                      borderRadius: "7px",
+                      marginLeft: "20px",
+                      cursor: "pointer",
+                    }}
+                    onClick={() => {
+                      handleCancel();
+                    }}
+                  >
+                    No
+                  </div> */}
                 </div>
               </div>
-            </div>
           </ModalCustom>
         </div>
       </div>

@@ -109,40 +109,40 @@ function WalletListing() {
           const address = account.coinFamilyAndAddress[coinFamily];
           balances.data.data[`${coinFamily}_${address.toLowerCase()}`]
             ? balances.data.data[
-                `${coinFamily}_${address.toLowerCase()}`
-              ].forEach((token) => {
-                console.log(
-                  account.isWatchOnly &&
-                    token.watch_only_wallet_addresses_data &&
-                    account.name ===
-                      token.watch_only_wallet_addresses_data.wallet_name
-                );
-                console.log(
-                  account.isWatchOnly,
-                  token?.watch_only_wallet_addresses_data,
-                  account.name,
-                  token?.watch_only_wallet_addresses_data?.wallet_name
-                );
-                if (
-                  account.isWatchOnly &&
-                  token.watch_only_wallet_addresses_data &&
-                  account.name ===
-                    token.watch_only_wallet_addresses_data.wallet_name
-                ) {
-                  const fiatValue =
-                    token.balance *
-                    (token.coin_data.coins_market?.current_price || 0);
-                  fiatBalance += fiatValue;
-                } else if (
-                  !account.isWatchOnly &&
-                  !token.watch_only_wallet_addresses_data
-                ) {
-                  const fiatValue =
-                    token.balance *
-                    (token.coin_data.coins_market?.current_price || 0);
-                  fiatBalance += fiatValue;
-                }
-              })
+              `${coinFamily}_${address.toLowerCase()}`
+            ].forEach((token) => {
+              console.log(
+                account.isWatchOnly &&
+                token.watch_only_wallet_addresses_data &&
+                account.name ===
+                token.watch_only_wallet_addresses_data.wallet_name
+              );
+              console.log(
+                account.isWatchOnly,
+                token?.watch_only_wallet_addresses_data,
+                account.name,
+                token?.watch_only_wallet_addresses_data?.wallet_name
+              );
+              if (
+                account.isWatchOnly &&
+                token.watch_only_wallet_addresses_data &&
+                account.name ===
+                token.watch_only_wallet_addresses_data.wallet_name
+              ) {
+                const fiatValue =
+                  token.balance *
+                  (token.coin_data.coins_market?.current_price || 0);
+                fiatBalance += fiatValue;
+              } else if (
+                !account.isWatchOnly &&
+                !token.watch_only_wallet_addresses_data
+              ) {
+                const fiatValue =
+                  token.balance *
+                  (token.coin_data.coins_market?.current_price || 0);
+                fiatBalance += fiatValue;
+              }
+            })
             : (fiatBalance += 0);
         });
 
@@ -779,7 +779,7 @@ function WalletListing() {
             <p
               style={{
                 fontSize: '20px',
-                color:"white"
+                color: "white"
               }}
             >
               Are you sure you want to delete this wallet?
@@ -793,17 +793,8 @@ function WalletListing() {
               marginTop: '30px',
             }}
           >
-            <div
-              className='green'
-              style={{
-                padding: '12px 53px',
-                backgroundColor: 'rgb(56 101 109)',
-                color: 'white',
-                fontSize: '18px',
-                borderRadius: '7px',
-                marginRight: '20px',
-                cursor: 'pointer',
-              }}
+            <ButtonComp
+              maxWidth="100%"
               onClick={async () => {
                 store.dispatch(setLoading(true));
 
@@ -855,26 +846,17 @@ function WalletListing() {
                 setDeleteModal(false);
                 store.dispatch(setLoading(false));
               }}
-            >
-              Yes
-            </div>
-            <div
-              className='red'
-              style={{
-                padding: '12px 53px',
-                backgroundColor: 'red',
-                color: 'white',
-                fontSize: '18px',
-                borderRadius: '7px',
-                marginLeft: '20px',
-                cursor: 'pointer',
-              }}
-              onClick={() => {
-                setDeleteModal(false);
-              }}
-            >
-              No
-            </div>
+              text="Yes"
+            />
+            <div className="cancelBtn">
+              <ButtonComp
+                maxWidth="100%"
+                onClick={() => {
+                  setDeleteModal(false);
+                }}
+                text="No"
+              />
+            </div> 
           </div>
         </div>
       </ModalCustom>

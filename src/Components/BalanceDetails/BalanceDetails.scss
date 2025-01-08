@@ -243,6 +243,7 @@
 }
 .myWalletsBalance {
   padding: 0 24px;
+  padding-bottom: 24px !important;
   &_value {
     text-align: left;
     color: #ffffff;
@@ -257,5 +258,13 @@
       font-weight: 600;
       line-height: 40px;
     }
+  }
+}
+.myWallet{
+  .flexedContent{
+    padding-top: 0px !important;
+  }
+  .manageWalletHeight{
+    min-height: calc(-427px + 100vh) !important;
   }
 }
