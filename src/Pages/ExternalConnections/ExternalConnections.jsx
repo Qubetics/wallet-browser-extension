@@ -64,12 +64,17 @@ export const ExternalConnection = () => {
             ? JSON.parse(decodeURIComponent(queryParams.get('data')))
             : null;
 
+          console.log("GET data from query params : ", method, " XXX ", data);
+
           setData(data);
 
           if (method === 'requestAccounts' && account) {
             setMethod('requestAccounts');
             store.dispatch(setLoading(false));
           } else if (method === 'signTransaction' && account) {
+            console.log("MYDEFAULT CHAIN ----> ", myDefaultChain);
+            console.log(" CHAIN ----> ", chain);
+            
             const gasPriceRes = await Web3Helper.getGasPrice(
               myDefaultChain.slug,
               data.from,
@@ -153,15 +158,17 @@ export const ExternalConnection = () => {
 
   const handleResponse = (result) => {
     console.log('🚀 ~ file: ExternalConnections.jsx:105 ~ handleResponse ~ result', result);
-    chrome.runtime.sendMessage({ method, result }, (response) => {
-      chrome.windows.getCurrent(function (window) {
-        chrome.windows.remove(window.id);
-      });
-    });
+    // chrome.runtime.sendMessage({ method, result }, (response) => {
+    //   chrome.windows.getCurrent(function (window) {
+    //     chrome.windows.remove(window.id);
+    //   });
+    // });
   };
 
   const handleTransaction = async () => {
     try {
+      console.log("TRAAAAAAAAAAAAAAAAAAAAAA ", data);
+
       store.dispatch(setLoading(true));
       if (data.network === 'solana') {
         console.log(
@@ -435,17 +442,17 @@ export const ExternalConnection = () => {
                     <div className={'confirmCurrency__keyValues__value'}>
                       {data.value
                         ? addCommasToNumber(
-                            getFlooredFixed(
-                              new BigNumber(data.value)
-                                .dividedBy(new BigNumber(10).pow(18))
-                                .plus(new BigNumber(feeInEth))
-                                .toString(),
-                              5
-                            )
+                          getFlooredFixed(
+                            new BigNumber(data.value)
+                              .dividedBy(new BigNumber(10).pow(18))
+                              .plus(new BigNumber(feeInEth))
+                              .toString(),
+                            5
                           )
+                        )
                         : addCommasToNumber(getFlooredFixed(feeInEth, 5)) +
-                          ' ' +
-                          chain.currencySymbol}{' '}
+                        ' ' +
+                        chain.currencySymbol}{' '}
                     </div>
                   </div>
 
@@ -599,14 +606,14 @@ export const ExternalConnection = () => {
                     <div className={'confirmCurrency__keyValues__value'}>
                       {data.value
                         ? addCommasToNumber(
-                            getFlooredFixed(
-                              new BigNumber(data.value)
-                                .dividedBy(new BigNumber(10).pow(18))
-                                .plus(new BigNumber(feeInEth))
-                                .toString(),
-                              6
-                            )
+                          getFlooredFixed(
+                            new BigNumber(data.value)
+                              .dividedBy(new BigNumber(10).pow(18))
+                              .plus(new BigNumber(feeInEth))
+                              .toString(),
+                            6
                           )
+                        )
                         : 0}{' '}
                     </div>
                   </div>
