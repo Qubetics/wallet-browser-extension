@@ -1,6 +1,6 @@
 /*global chrome*/
 import React, { useEffect, useState } from "react";
-import "./NetworkPreference.scss"
+import "./NetworkPreference.scss";
 import MenuRestofHeaders from "../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders";
 import { useNavigate } from "react-router-dom";
 import { Checkbox, message } from "antd";
@@ -9,7 +9,7 @@ import { store } from "../..";
 import { setLoading } from "../../actions/loading";
 import { WalletHelper } from "../../helpers/wallet.helper";
 import bin from "../../Assets/delete.png";
-import JustLogo from "../../Assets/LogoOnly.png";
+import JustLogo from "../../Assets/logo.png";
 
 import { DURATION } from "../../config/message.config";
 import ModalCustom from "../../Components/ModalCustom/ModalCustom";
@@ -141,12 +141,12 @@ function AccountPreference() {
                       onClick={async () => {
                         handleChange(data);
                       }}
-                      className='checkboxInner'
+                      className="checkboxInner"
                       checked={account.id === data.id}
                     ></Checkbox>
                     {data.id === account.id ? null : (
                       <div
-                        className='delete'
+                        className="delete"
                         onClick={async () => {
                           setDeleteModal(true);
                           setSelected(data.id);
@@ -155,7 +155,7 @@ function AccountPreference() {
                       >
                         <img
                           src={bin}
-                          alt=''
+                          alt=""
                           style={{
                             height: "16px",
                             width: "16px",
@@ -175,7 +175,7 @@ function AccountPreference() {
       <ModalCustom
         title={"Delete Wallet"}
         isModalOpen={deleteModal}
-        customClass='customClassModal'
+        customClass="customClassModal"
         handleCancel={() => {
           setDeleteModal(false);
         }}
@@ -185,7 +185,7 @@ function AccountPreference() {
             <p
               style={{
                 fontSize: "20px",
-                color:"white"
+                color: "white",
               }}
             >
               Are you sure you want to delete this wallet?
@@ -199,7 +199,7 @@ function AccountPreference() {
               }}
             >
               <div
-                className='green'
+                className="green"
                 style={{
                   padding: "12px 53px",
                   backgroundColor: "rgb(56 101 109)",
@@ -219,7 +219,7 @@ function AccountPreference() {
                 Confirm
               </div>
               <div
-                className='red'
+                className="red"
                 style={{
                   padding: "12px 53px",
                   backgroundColor: "red",
