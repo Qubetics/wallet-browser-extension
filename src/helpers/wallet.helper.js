@@ -683,9 +683,7 @@ export class WalletHelper {
           },
         }
       );
-
-      console.log("Create wallet---------- ", createWallet);
-
+ 
       const id = uuidv4();
 
       const finalAccounts = [

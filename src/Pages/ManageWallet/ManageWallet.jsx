@@ -22,8 +22,14 @@ import warning from "../../Assets/PNG/warning.png";
 import WalletIBtn from "../../Assets/WalletIBtn.svg";
 import DarkArrowRightIcon from "../../Assets/DarkArrowRightIcon.svg";
 import { server } from "../../server";
+import OpenDark from "../../Assets/open-dark.svg";
+import CloseDark from "../../Assets/close-dark.svg";
+
+
 function ManageWallet() {
   const [data, setData] = useState([]);
+  const [show, setShow] = useState(true);
+
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [deleteModal, setDeleteModal] = useState(false);
   const [drawer, setDrawer] = useState(false);
@@ -109,17 +115,16 @@ function ManageWallet() {
         },
       }
     );
-    // console.log("TOTALLLLLLLLLLLLLL ", response);
+
     let total = 0;
     Array.isArray(response.data?.data) && response.data?.data.map((itm) => {
       Array.isArray(itm?.user_wallet_relation) && itm?.user_wallet_relation.map((userBalItem) => {
-        // console.log("parseFloat(userBalItem?.balance) * parseFloat(userBalItem?.coin?.fiat_price_data?.value) ",parseFloat(userBalItem?.balance), parseFloat(userBalItem?.coin?.fiat_price_data?.value), parseFloat(userBalItem?.balance) * parseFloat(userBalItem?.coin?.fiat_price_data?.value));
-        
         total += parseFloat(userBalItem?.balance || 0) * parseFloat(userBalItem?.coin?.fiat_price_data?.value || 0)
       })
     })
     setTotalAmt(total);
   }
+
   useEffect(() => {
     init();
   }, []);
@@ -164,7 +169,15 @@ function ManageWallet() {
           {state?.from == 'myWallet' && <div className="myWalletsBalance">
             <div className="myWalletsBalance_value">
               <h4>Total Balance</h4>
-              <h1>{currency?.symbol} {totalAmt?.toFixed(2)}</h1>
+              <h1>
+                {currency?.symbol} {show ? totalAmt?.toFixed(2) : "***"} <span onClick={() => setShow(!show)}>
+                  {show ? <img
+                    src={OpenDark}
+                    alt="" />
+                    : <img
+                      src={CloseDark}
+                      alt="" />}
+                </span></h1>
             </div>
             <div></div>
           </div>}
@@ -185,6 +198,7 @@ function ManageWallet() {
                         e.preventDefault();
                         if (!data?.default) {
                           setDefaultAccount(data);
+                          navigate("/wallet")
                         }
                       }}
                     >
