@@ -105,6 +105,7 @@ function ManageWallet() {
       {
         userIds: ids,
         fiatType: currency.name,
+        fetchFrom: "extension",
       },
       {
         headers: {

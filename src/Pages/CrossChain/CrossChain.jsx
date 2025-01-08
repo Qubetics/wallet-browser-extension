@@ -382,7 +382,7 @@ function CrossChain() {
           iHave: token?.coin_data?.wallet_data ? true : false,
           name: token?.coinName,
           tokenAddress: token?.coin_data?.token_address || null,
-          image: token?.coinImageUrl,
+          image: token?.coin_data?.coin_image,
           address: account?.coinFamilyAndAddress[token?.coin_data?.coin_family],
           isToken: token?.coin_data?.token_address ? true : false,
           coinFamilyName,
@@ -413,7 +413,6 @@ function CrossChain() {
       const tokens2 = inActiveTokens?.data?.data.map((token) => {
         let coinFamilyName = "ETH";
         let tokenType = "ERC20";
-        console.log("TOTOTO2", token);
 
         switch (token.coin_family) {
           case 2:

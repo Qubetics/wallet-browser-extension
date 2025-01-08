@@ -27,8 +27,8 @@ export class CrossChainHelper {
       const response = await server.post(
         "/swftc/getBaseInfo",
         {
-          deposit_coin_code: fromCoinId,
-          receive_coin_code: toCoinId,
+          depositCoinCode: fromCoinId,
+          receiveCoinCode: toCoinId,
         },
         {
           headers: {

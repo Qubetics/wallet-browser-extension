@@ -130,8 +130,11 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
     tokens.forEach((token) => {
       const price = token.coin.fiat_price_data || null;
       if (price) {
+        console.log("Price", price);
         const fiatValue = parseFloat(token.balance) * parseFloat(price.value);
+        console.log("fiatValue", fiatValue);
         total += fiatValue;
+        console.log("total", total);
       }
     });
     setTotal(total);
@@ -315,8 +318,11 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
       {path !== "currencyDetails" ? (
         <>
           <div className={"balanceDetails__dropdownStyle"}>
-            <div className="balanceLeft"
-            onClick={()=>{navigate("/manage-wallet",{state:{from:'myWallet'}})}}
+            <div
+              className="balanceLeft"
+              onClick={() => {
+                navigate("/manage-wallet", { state: { from: "myWallet" } });
+              }}
             >
               {/* <img src={aName} alt="icon" /> */}
               <div className="balanceName">

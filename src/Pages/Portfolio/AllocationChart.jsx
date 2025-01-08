@@ -227,7 +227,7 @@ const AllocationChart = () => {
       </div>
       <div className="cryptoSec">
         <h4>Crypto</h4>
-        <img style={{ cursor: "pointer" }} src={CryptoS} alt="SearchIcon" />
+        {/* <img style={{ cursor: "pointer" }} src={CryptoS} alt="SearchIcon" /> */}
       </div>
       <ul className="portfolio__tableOuter ">
         {portfolioBalance > 0 &&
