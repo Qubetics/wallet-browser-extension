@@ -552,7 +552,7 @@ function SendCoins() {
                   placeholder={"Transaction Fee"}
                   label=""
                   value={parseFloat(
-                    (myGasPrice?.estimate * (myGasPrice?.fast * 1.5)) / 10 ** 9
+                    (myGasPrice?.estimate * myGasPrice?.fast) / 10 ** 9
                   )?.toFixed(5)}
                   readonly={true}
                   placeholderBaseColor={true}
@@ -821,7 +821,10 @@ function SendCoins() {
                     to: address,
                     amount: amount,
                     coin,
-                    networkFee: gasInEth.toFixed(5),
+                    networkFee: (
+                      (myGasPrice?.estimate * myGasPrice?.fast) /
+                      10 ** 9
+                    )?.toFixed(5),
                     ENSName,
                     contact: findContact?.name,
                     redirectTo,

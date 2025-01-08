@@ -132,15 +132,11 @@ function CoinsTableDraggable({ dataArray, refresh }) {
                 className="coinsTable1__textTop"
                 style={{ cursor: "pointer" }}
               >
-
                 <span className="coinNname">
-
-                  {
-                    ele?.coinSubName?.length > 10 && ele?.coin?.coin?.token_address
-                      ? `${ele.coinSubName.substring(0, 7)}...`
-                      : ele?.coinSubName
-                  }
-
+                  {ele?.coinSubName?.length > 10 &&
+                  ele?.coin?.coin?.token_address
+                    ? `${ele.coinSubName.substring(0, 7)}...`
+                    : ele?.coinSubName}
                 </span>
                 <span
                   style={{
@@ -149,19 +145,25 @@ function CoinsTableDraggable({ dataArray, refresh }) {
                     marginLeft: "3px",
                   }}
                 >
-                  {ele?.coin?.coin?.token_address ? token_type(ele?.coin?.coin?.coin_family) : ""}
+                  {ele?.coin?.coin?.token_address
+                    ? token_type(ele?.coin?.coin?.coin_family)
+                    : ""}
                 </span>
                 <div className={`${"coinsTable1__grayText12"} textBold`}></div>
               </div>
-              <div style={{ color: "#98969B" }} className="grayText1 test-class">
+              <div
+                style={{ color: "#98969B" }}
+                className="grayText1 test-class"
+              >
                 <span>{ele.routeTo === "no-where" ? "" : currency.symbol}</span>
                 <div
                   dangerouslySetInnerHTML={{ __html: ele.coinPrice }}
                 ></div>{" "}
                 <span>&nbsp;| </span>
                 <div
-                  className={`${"coinsTable1__grayText12"} ${ele.coinStatus <= 0 ? "negitiveText" : "positiveText"
-                    }`}
+                  className={`${"coinsTable1__grayText12"} ${
+                    ele.coinStatus <= 0 ? "negitiveText" : "positiveText"
+                  }`}
                   style={{ marginLeft: "3px" }}
                 >
                   {ele.coinStatus < 0 ? "" : "+"}
@@ -230,7 +232,7 @@ function CoinsTableDraggable({ dataArray, refresh }) {
                 height: "44px",
               }}
             >
-              <svg
+              {/* <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="25"
                 height="25"
@@ -365,7 +367,7 @@ function CoinsTableDraggable({ dataArray, refresh }) {
                     />
                   </g>
                 </g>
-              </svg>
+              </svg> */}
             </div>
           </div>
           <div className="coinsTable1__right">
@@ -376,17 +378,17 @@ function CoinsTableDraggable({ dataArray, refresh }) {
                 style={{ justifyContent: "flex-end" }}
               >
                 {ele.currDollerBal === "ABOVE" ||
-                  ele.currDollerBal === "BELOW" ? (
+                ele.currDollerBal === "BELOW" ? (
                   `Price ${capitalize(ele.currDollerBal)}`
                 ) : (
                   <>
                     {ele.routeTo === "no-where"
                       ? ""
                       : balanceIn
-                        ? ele.routeTo === "enter-price-spritz"
-                          ? "$"
-                          : currency.symbol
-                        : ""}
+                      ? ele.routeTo === "enter-price-spritz"
+                        ? "$"
+                        : currency.symbol
+                      : ""}
                     {ele.currDollerBal}
                   </>
                 )}
@@ -441,7 +443,7 @@ function CoinsTableDraggable({ dataArray, refresh }) {
             <p
               style={{
                 fontSize: "20px",
-                color: "white"
+                color: "white",
               }}
             >
               Are you sure you want to Delete this Alert?

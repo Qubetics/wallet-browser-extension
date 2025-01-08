@@ -25,7 +25,6 @@ import { server } from "../../server";
 import OpenDark from "../../Assets/open-dark.svg";
 import CloseDark from "../../Assets/close-dark.svg";
 
-
 function ManageWallet() {
   const [data, setData] = useState([]);
   const [show, setShow] = useState(true);
@@ -45,7 +44,6 @@ function ManageWallet() {
   const [ischecked1, setIschecked1] = useState(false);
   const [ischecked2, setIschecked2] = useState(false);
   const [totalAmt, setTotalAmt] = useState(0);
-
 
   const handleOk1 = () => {
     setIsModalOpen1(false);
@@ -89,15 +87,14 @@ function ManageWallet() {
     store.dispatch(setLoading(true));
     let { accounts } = await chrome.storage.session.get("accounts");
     setData(accounts);
-    if (state?.from == 'myWallet') {
-      let ids = []
+    if (state?.from == "myWallet") {
+      let ids = [];
       // console.log("ACCCCCCCCCCCCCCCCCCCCC ", accounts);
-      accounts.map(itm => {
-        ids.push(itm.userId)
-      })
+      accounts.map((itm) => {
+        ids.push(itm.userId);
+      });
       getTotalBalance(ids);
     }
-
 
     store.dispatch(setLoading(false));
   };
@@ -108,6 +105,7 @@ function ManageWallet() {
       {
         userIds: ids,
         fiatType: currency.name,
+        fetchFrom: "extension",
       },
       {
         headers: {
@@ -117,14 +115,17 @@ function ManageWallet() {
     );
 
     let total = 0;
-    Array.isArray(response.data?.data) && response.data?.data.map((itm) => {
-      Array.isArray(itm?.user_wallet_relation) && itm?.user_wallet_relation.map((userBalItem) => {
-        total += parseFloat(userBalItem?.balance || 0) * parseFloat(userBalItem?.coin?.fiat_price_data?.value || 0)
-      })
-    })
+    Array.isArray(response.data?.data) &&
+      response.data?.data.map((itm) => {
+        Array.isArray(itm?.user_wallet_relation) &&
+          itm?.user_wallet_relation.map((userBalItem) => {
+            total +=
+              parseFloat(userBalItem?.balance || 0) *
+              parseFloat(userBalItem?.coin?.fiat_price_data?.value || 0);
+          });
+      });
     setTotalAmt(total);
-  }
-
+  };
   useEffect(() => {
     init();
   }, []);
@@ -147,7 +148,7 @@ function ManageWallet() {
           default: acc.id === selectedAccount.id,
         }));
         await WalletHelper.setWalletPreference(selectedAccount.id);
-        await init()
+        await init();
         messageApi.success("Default account updated successfully!");
       }
     } catch (error) {
@@ -157,19 +158,17 @@ function ManageWallet() {
     }
   };
 
-
-
   return (
     <>
       {contextHolder}
-      <div className={state?.from == 'myWallet'?`scrollableCont myWallet`:`scrollableCont`}>
+      <div className={state?.from == 'myWallet' ? `scrollableCont myWallet` : `scrollableCont`}>
         <div className="searchBarFixed">
           <MenuRestofHeaders backTo={state?.from == 'myWallet' ? "/wallet" : "/setting"} title={state?.from == 'myWallet' ? "My Wallet" : "Manage Wallet"} />
 
           {state?.from == 'myWallet' && <div className="myWalletsBalance">
             <div className="myWalletsBalance_value">
               <h4>Total Balance</h4>
-              <h1 style={{ display: 'flex', alignItems: 'center', gap: '20px', justifyContent:"space-between" }}>
+              <h1 style={{ display: 'flex', alignItems: 'center', gap: '20px', justifyContent: "space-between" }}>
                 {currency?.symbol} {show ? totalAmt?.toFixed(2) : "***"} <span onClick={() => setShow(!show)}>
                   {show ? <img style={{ height: '20px' }}
                     src={OpenDark}
@@ -179,8 +178,8 @@ function ManageWallet() {
                       alt="" />}
                 </span></h1>
             </div>
-            <div></div>
-          </div>}
+          </div>
+          }
         </div>
 
         <div className={`flexedContent manageWalletHeight`}>
@@ -189,16 +188,14 @@ function ManageWallet() {
             {data.map((data, idx) => (
               <div className="listItems">
                 <ul>
-                  <li
-                    key={idx}
-                    className="currency_click"
-                  >
-                    <div style={{ display: "flex", alignItems: "center" }}
+                  <li key={idx} className="currency_click">
+                    <div
+                      style={{ display: "flex", alignItems: "center" }}
                       onClick={async (e) => {
                         e.preventDefault();
                         if (!data?.default) {
                           setDefaultAccount(data);
-                          navigate("/wallet")
+                          navigate("/wallet");
                         }
                       }}
                     >
@@ -228,12 +225,18 @@ function ManageWallet() {
                         </p>
                       </div>
                     </div>
-                    {state?.from !== 'myWallet' && <img onClick={async (e) => {
-                      e.preventDefault();
-                      setDrawer(true);
-                      setSelectedAccount(data);
-                      setName(data?.name);
-                    }} src={WalletIBtn} alt="I" />}
+                    {state?.from !== "myWallet" && (
+                      <img
+                        onClick={async (e) => {
+                          e.preventDefault();
+                          setDrawer(true);
+                          setSelectedAccount(data);
+                          setName(data?.name);
+                        }}
+                        src={WalletIBtn}
+                        alt="I"
+                      />
+                    )}
                   </li>
                 </ul>
               </div>
@@ -614,7 +617,9 @@ function ManageWallet() {
                     selectedAccount.id,
                     account.address
                   );
-                  await WalletHelper.removeMnemonic(selectedAccount.coinFamilyAndAddress[1])
+                  await WalletHelper.removeMnemonic(
+                    selectedAccount.coinFamilyAndAddress[1]
+                  );
                   setDrawer(false);
                   init();
                   store.dispatch(setLoading(false));
@@ -634,7 +639,7 @@ function ManageWallet() {
                 text="No"
               />
             </div>
-          </div> 
+          </div>
         </div>
       </ModalCustom>
 

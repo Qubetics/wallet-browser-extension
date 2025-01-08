@@ -28,6 +28,8 @@ const AllocationChart = () => {
   const [labels, setLabels] = useState([]);
   const [chartSeries, setChartSeries] = useState([]);
   const { account, currency } = useSelector((state) => state);
+  const [namesWithPercentages, setNamesWithPercentages] = useState([]);
+
   const [chartOptions, setChartOptions] = useState({
     chart: {
       type: "donut",
@@ -61,9 +63,13 @@ const AllocationChart = () => {
       position: "right",
       labels: {
         colors: "#fff",
+        // useSeriesColors: true, // Use series colors for legend items
+      },
+      formatter: function (seriesName, opts) {
+        const index = opts.w.globals.seriesNames.indexOf(seriesName);
+        return namesWithPercentages[index]; // Show names with percentages
       },
     },
-
     tooltip: {
       y: {
         formatter: (val) => `${val.toFixed(2)}%`,
@@ -110,21 +116,45 @@ const AllocationChart = () => {
         return;
       }
 
-      const percentages = portfolioData.map((obj) => ({
-        name: obj?.coin?.coin_name || "Unknown",
-        symbol: obj?.coin?.coin_symbol || "Unknown",
-        percentage:
-          ((parseFloat(obj?.balance) *
-            parseFloat(obj?.coin?.fiat_price_data?.value || 0)) /
-            totalBalance) *
-          100,
-      }));
+      // const percentages = portfolioData.map((obj) => ({
+      //   name: obj?.coin?.coin_name || "Unknown",
+      //   symbol: obj?.coin?.coin_symbol || "Unknown",
+      //   percentage:
+      //     ((parseFloat(obj?.balance) *
+      //       parseFloat(obj?.coin?.fiat_price_data?.value || 0)) /
+      //       totalBalance) *
+      //     100,
+      // }));
+      console.log("PORTFOLIO DATA", portfolioData);
+      const percentages = portfolioData
+        .filter((obj) => parseFloat(obj?.balance) > 0 && obj?.balance !== null)
+        .map((obj) => ({
+          name: obj?.coin?.coin_name || "Unknown",
+          symbol: obj?.coin?.coin_symbol || "Unknown",
+          percentage:
+            ((parseFloat(obj?.balance) *
+              parseFloat(obj?.coin?.fiat_price_data?.value || 0)) /
+              totalBalance) *
+            100,
+        }));
+
+      console.log("PERCENTAGE CONSOLE", percentages);
 
       const names = percentages.map((item) => item.name);
       const series = percentages.map((item) => parseFloat(item.percentage));
+      // const namesWithPercentages = percentages.map(
+      //   (item) => `${item.name}   ${item.percentage.toFixed(2)}%`
+      // );
+
       const namesWithPercentages = percentages.map(
-        (item) => `${item.name}   ${item.percentage.toFixed(2)}%`
+        (item) =>
+          `${
+            item.name.length > 12 ? item.name.slice(0, 12) + `...` : item.name
+          }   ${item.percentage.toFixed(2)}%`
       );
+
+      setNamesWithPercentages(namesWithPercentages);
+
       setLabels(names);
       setChartSeries(series);
       setPortfolioBalance(totalBalance);
@@ -135,8 +165,15 @@ const AllocationChart = () => {
 
       setChartOptions((prev) => ({
         ...prev,
-        labels: namesWithPercentages,
+        labels: names,
         colors: chartColors,
+        legend: {
+          ...prev.legend,
+          formatter: function (seriesName, opts) {
+            const index = opts.w.globals.seriesNames.indexOf(seriesName);
+            return namesWithPercentages[index]; // Use namesWithPercentages for the legend
+          },
+        },
       }));
 
       store.dispatch(setLoading(false));
@@ -183,14 +220,14 @@ const AllocationChart = () => {
             options={chartOptions}
             series={chartSeries}
             type="donut"
-            width="388"
-            height=''
+            width="380"
+            height=""
           />
         )}
       </div>
       <div className="cryptoSec">
         <h4>Crypto</h4>
-        <img style={{ cursor: "pointer" }} src={CryptoS} alt="SearchIcon" />
+        {/* <img style={{ cursor: "pointer" }} src={CryptoS} alt="SearchIcon" /> */}
       </div>
       <ul className="portfolio__tableOuter ">
         {portfolioBalance > 0 &&

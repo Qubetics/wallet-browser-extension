@@ -552,7 +552,7 @@ export class Web3Helper {
       console.log("gasPriceRes-------> ", gasPriceRes);
 
       const nonce = await this.getNonce(slug, true, tokenAddress, symbol, from);
-      // console.log("NONCEEEEEE ", nonce);
+      console.log("NONCEEEEEE ", nonce);
 
       const data = contract.methods
         .transfer(
@@ -572,8 +572,8 @@ export class Web3Helper {
 
       const gasPrice =
         "0xA07c5b74C9B40447a954e1466938b865b6BBea36" === tokenAddress
-          ? 3 * Math.pow(10, 9)
-          : gsFee * Math.pow(10, 9);
+          ? 3 * gsFee * Math.pow(10, 9)
+          : gsFee * 1.5 * Math.pow(10, 9);
 
       const gaslimit = await this.getGasEstimation({
         from,
@@ -582,17 +582,13 @@ export class Web3Helper {
         coinFamily,
       });
 
-      // const gasPrice = gasPriceRes.fast * Math.pow(10, 9);
-      // const gaslimit = gasPriceRes.estimate;
-      // console.log('PLLLLLLLLLLLLLLL ', gasPrice, gaslimit);
-
       const transaction = {
         nonce,
         gasPrice: web3.utils.toHex(gasPrice),
         gasLimit:
           "0xA07c5b74C9B40447a954e1466938b865b6BBea36" === tokenAddress
             ? web3.utils.toHex(gaslimit * 3)
-            : web3.utils.toHex(gaslimit),
+            : web3.utils.toHex(gaslimit * 1.5),
         to: tokenAddress,
         value: "0x0",
         from: from,
