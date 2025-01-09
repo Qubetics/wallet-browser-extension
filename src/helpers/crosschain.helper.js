@@ -141,9 +141,9 @@ export class CrossChainHelper {
           Math.pow(10, fromCoin.decimals),
           symbol,
           "swap",
-          2,
-          3,
-          orderData.orderId
+          // 2,
+          // 3,
+          // orderData.orderId
         );
       } else {
         hash = await Web3Helper.generateRawTransactionForCoinAndBroadcast(

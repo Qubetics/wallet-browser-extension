@@ -76,9 +76,9 @@ function CrossChain() {
   const [availableTokens, setAvailableTokens] = useState([]);
   const [loading, setInnerLoading] = useState(false);
   const [token1, setToken1] = useState(null);
-
-  console.log("TOKEN ! ! 1 INitially", token1);
   const [token2, setToken2] = useState(null);
+  console.log("TOKEN ! ! 1 INitially", token1);
+  console.log("TOKEN ! ! 2 INitially", token2);
   const [balance, setBalance] = useState(0);
   const [balance2, setBalance2] = useState(0);
   const navigate = useNavigate();
@@ -109,8 +109,8 @@ function CrossChain() {
   const percentages = [25, 50, 75, 100];
 
   useEffect(() => {
+    console.log("SWAPDETAILS", swapDetail);
     if (swapDetail) {
-      console.log("SWAPDETAILS", swapDetail);
       if (swapDetail?.tab == 1) {
         setToken1(swapDetail?.token1);
         setToken2(swapDetail?.token2);
@@ -163,14 +163,13 @@ function CrossChain() {
           setInfoData([
             {
               text: "Estimate Rate",
-              textVal: `1 ${tokenOne.symbol} = ${
-                route
-                  ? getFlooredFixed(
-                      parseFloat(route.exchangeData.instantRate),
-                      5
-                    )
-                  : 0
-              } ${tokenTwo.symbol}`,
+              textVal: `1 ${tokenOne.symbol} = ${route
+                ? getFlooredFixed(
+                  parseFloat(route.exchangeData.instantRate),
+                  5
+                )
+                : 0
+                } ${tokenTwo.symbol}`,
             },
             {
               text: "Service Fee",
@@ -185,9 +184,9 @@ function CrossChain() {
                   parseFloat(
                     route
                       ? getFlooredFixed(
-                          parseFloat(route.exchangeData.receiveCoinFee),
-                          5
-                        )
+                        parseFloat(route.exchangeData.receiveCoinFee),
+                        5
+                      )
                       : 0
                   ),
                   6
@@ -357,20 +356,22 @@ function CrossChain() {
         let coinFamilyName = "ETH";
         let tokenType = "ERC20";
         switch (token?.coin_family) {
-          case 2:
-            coinFamilyName = "ETH";
-            tokenType = "ERC20";
-            break;
-
           case 1:
             coinFamilyName = "BNB";
             tokenType = "BEP20";
+            break;
+          case 2:
+            coinFamilyName = "ETH";
+            tokenType = "ERC20";
             break;
           case 4:
             coinFamilyName = "POL";
             tokenType = "ERC20";
             break;
-
+          case 5:
+            coinFamilyName = "SOL";
+            tokenType = "SPL";
+            break;
           default:
             break;
         }
@@ -407,8 +408,8 @@ function CrossChain() {
             token.coin_family == 1
               ? process.env.REACT_APP_BNB_RPC
               : token.coin_family == 2
-              ? process.env.REACT_APP_ETH_RPC
-              : process.env.REACT_APP_MATIC_RPC,
+                ? process.env.REACT_APP_ETH_RPC
+                : process.env.REACT_APP_MATIC_RPC,
         };
       });
 
@@ -417,18 +418,21 @@ function CrossChain() {
         let tokenType = "ERC20";
 
         switch (token.coin_family) {
-          case 2:
-            coinFamilyName = "ETH";
-            tokenType = "ERC20";
-            break;
-
           case 1:
             coinFamilyName = "BNB";
             tokenType = "BEP20";
             break;
+          case 2:
+            coinFamilyName = "ETH";
+            tokenType = "ERC20";
+            break;
           case 4:
             coinFamilyName = "POL";
             tokenType = "ERC20";
+            break;
+          case 5:
+            coinFamilyName = "SOL";
+            tokenType = "SPL";
             break;
           default:
             break;
@@ -465,8 +469,8 @@ function CrossChain() {
             token?.coin_data?.coin_family == 1
               ? process.env.REACT_APP_BNB_RPC
               : token?.coin_data?.coin_family == 2
-              ? process.env.REACT_APP_ETH_RPC
-              : process.env.REACT_APP_MATIC_RPC,
+                ? process.env.REACT_APP_ETH_RPC
+                : process.env.REACT_APP_MATIC_RPC,
         };
       });
 
@@ -711,14 +715,13 @@ function CrossChain() {
           setInfoData([
             {
               text: "Estimate Rate",
-              textVal: `1 ${token1.symbol} = ${
-                route
-                  ? getFlooredFixed(
-                      parseFloat(route.exchangeData.instantRate),
-                      5
-                    )
-                  : 0
-              } ${token2.symbol}`,
+              textVal: `1 ${token1.symbol} = ${route
+                ? getFlooredFixed(
+                  parseFloat(route.exchangeData.instantRate),
+                  5
+                )
+                : 0
+                } ${token2.symbol}`,
             },
             {
               text: "Service Fee",
@@ -733,9 +736,9 @@ function CrossChain() {
                   parseFloat(
                     route
                       ? getFlooredFixed(
-                          parseFloat(route.exchangeData.receiveCoinFee),
-                          5
-                        )
+                        parseFloat(route.exchangeData.receiveCoinFee),
+                        5
+                      )
                       : 0
                   ),
                   6
@@ -1351,9 +1354,8 @@ function CrossChain() {
     //   </div>
 
     <div
-      className={`${"fixedContent height-571"} ${
-        height <= 600 ? "fixedContentOuterExt" : ""
-      }`}
+      className={`${"fixedContent height-571"} ${height <= 600 ? "fixedContentOuterExt" : ""
+        }`}
     >
       <div style={{ width: "100%", marginBottom: "20px" }}>
         <div
@@ -1444,7 +1446,7 @@ function CrossChain() {
                   {addCommasToNumber(
                     getFlooredFixed(
                       parseFloat(amount ? amount : 0) *
-                        parseFloat(token1 ? token1.price : 0),
+                      parseFloat(token1 ? token1.price : 0),
                       2
                     )
                   )}
@@ -1586,7 +1588,7 @@ function CrossChain() {
                   {addCommasToNumber(
                     getFlooredFixed(
                       parseFloat(amount2 ? amount2 : 0) *
-                        parseFloat(token2 ? token2.price : 0),
+                      parseFloat(token2 ? token2.price : 0),
                       2
                     )
                   )}
@@ -1728,12 +1730,12 @@ function CrossChain() {
         onClick={async () => {
           console.log(
             !token1 ||
-              !token2 ||
-              !amount ||
-              !amount2 ||
-              amount <= 0 ||
-              amount2 <= 0 ||
-              loading
+            !token2 ||
+            !amount ||
+            !amount2 ||
+            amount <= 0 ||
+            amount2 <= 0 ||
+            loading
           );
           if (isNaN(parseFloat(amount)) || isNaN(parseFloat(amount2))) {
             return messageApi.error("Please enter a valid amount to proceed.");
