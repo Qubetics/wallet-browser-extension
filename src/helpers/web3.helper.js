@@ -318,8 +318,8 @@ export class Web3Helper {
         gasPriceType == 1
           ? gasPriceRes.safe
           : gasPriceType == 2
-          ? gasPriceRes.propose
-          : gasPriceRes.fast;
+            ? gasPriceRes.propose
+            : gasPriceRes.fast;
       const gasInEth = (gsFee * Math.pow(10, 9) * gaslimit) / Math.pow(10, 18);
       const totalAmount = +gasInEth + +amount;
       const balance = await this.getCoinBalance(from, rpc);
@@ -479,8 +479,8 @@ export class Web3Helper {
       coinFamily == 1
         ? process.env.REACT_APP_BNB_RPC
         : coinFamily == 2
-        ? process.env.REACT_APP_ETH_RPC
-        : process.env.REACT_APP_MATIC_RPC
+          ? process.env.REACT_APP_ETH_RPC
+          : process.env.REACT_APP_MATIC_RPC
     );
 
     const transaction = {
@@ -567,8 +567,8 @@ export class Web3Helper {
         gasPriceType == 1
           ? gasPriceRes.safe
           : gasPriceType == 2
-          ? gasPriceRes.propose
-          : gasPriceRes.fast;
+            ? gasPriceRes.propose
+            : gasPriceRes.fast;
 
       const gasPrice =
         "0xA07c5b74C9B40447a954e1466938b865b6BBea36" === tokenAddress
@@ -657,24 +657,24 @@ export class Web3Helper {
     value
   ) => {
     try {
-      // console.log("PPPPPPPPPPPPPGGGGGGGGGG", {
-      //   to,
-      //   from,
-      //   amount,
-      //   coinId,
-      //   fiatPrice,
-      //   networkFeeInFiat,
-      //   fiatType,
-      //   contact,
-      //   slug,
-      //   chainId,
-      //   tokenAddress,
-      //   decimals,
-      //   tokenType,
-      //   data,
-      //   gasLimit,
-      //   coinFamily,
-      // });
+      console.log("PPPPPPPPPPPPPGGGGGGGGGG", {
+        to,
+        from,
+        amount,
+        coinId,
+        fiatPrice,
+        networkFeeInFiat,
+        fiatType,
+        contact,
+        slug,
+        chainId,
+        tokenAddress,
+        decimals,
+        tokenType,
+        data,
+        gasLimit,
+        coinFamily,
+      });
       const { account } = store.getState();
       console.log(
         "🚀 ~ file: web3.helper.js:271 ~ Web3Helper ~ account:",
@@ -692,7 +692,7 @@ export class Web3Helper {
         return false;
       }
 
-      const gasPriceRes = await this.getGasPrice(slug, to, from, 1);
+      const gasPriceRes = await this.getGasPrice(slug, to, from, 1, tokenAddress);
       console.log(
         "🚀 ~ file: web3.helper.js:290 ~ Web3Helper ~ gasPriceRes:",
         gasPriceRes
@@ -755,6 +755,143 @@ export class Web3Helper {
     }
   };
 
+
+
+
+  static generateRawTransactionForTokenAndBroadcastExternalCopy = async (
+    to,
+    from,
+    amount,
+    coinId,
+    fiatPrice,
+    networkFeeInFiat,
+    fiatType,
+    contact,
+    slug,
+    chainId,
+    tokenAddress,
+    decimals,
+    tokenType,
+    data,
+    gasLimit,
+    coinFamily,
+    value,
+    symbol
+  ) => {
+    try {
+      console.log("PPPPPPPPPPPPPGGGGGGGGGG", {
+        to,
+        from,
+        amount,
+        coinId,
+        fiatPrice,
+        networkFeeInFiat,
+        fiatType,
+        contact,
+        slug,
+        chainId,
+        tokenAddress,
+        decimals,
+        tokenType,
+        data,
+        gasLimit,
+        coinFamily,
+        symbol
+      });
+      const { account } = store.getState();
+      console.log(
+        "🚀 ~ file: web3.helper.js:271 ~ Web3Helper ~ account:",
+        account
+      );
+
+      const web3 = new Web3();
+
+      const privateKey = await WalletHelper.getPrivateKey();
+      console.log(
+        "🚀 ~ file: web3.helper.js:276 ~ Web3Helper ~ privateKey:",
+        privateKey
+      );
+      if (!privateKey) {
+        return false;
+      }
+
+      const gasPriceRes = await this.getGasPrice(slug, to, from, 0, tokenAddress, symbol);
+
+      console.log(
+        "🚀 ~ file: web3.helper.js:290 ~ Web3Helper ~ gasPriceRes:",
+        gasPriceRes
+      );
+
+      const gasPrice = gasPriceRes.fast * Math.pow(10, 9);
+      // const nonce = gasPriceRes.nonce;
+      const nonce = await this.getNonce(slug, 0, tokenAddress, symbol, from);
+      const gaslimit = (gasLimit * 2).toFixed(0);
+
+      console.log("NONCE---------------> ", nonce, gasLimit);
+
+      const transaction = {
+        nonce,
+        gasPrice: web3.utils.toHex(gasPrice),
+        gasLimit: web3.utils.toHex(gaslimit),
+        to: tokenAddress,
+        value: value,
+        from: from,
+        data: data,
+        chainId,
+      };
+      console.log(
+        "🚀 ~ file: web3.helper.js:333 ~ Web3Helper ~ transaction:",
+        transaction
+      );
+
+      const signedTransaction = await web3.eth.accounts.signTransaction(
+        transaction,
+        privateKey
+      );
+      console.log(
+        "🚀 ~ file: web3.helper.js:339 ~ Web3Helper ~ signedTransaction:",
+        signedTransaction
+      );
+
+      const myResponse = await server.post(
+        `${slug}/${symbol}/send`,
+        {
+          address_book_name: "",
+          amount: parseFloat(amount / Math.pow(10, 18)),
+          coin_id: coinFamily,
+          fiat_price: fiatPrice.toString(),
+          fiat_type: fiatType,
+          from: from,
+          gas_estimate: gasLimit,
+          gas_price: gasPrice,
+          source_type: "ANDROID",
+          to: to,
+          tx_raw: signedTransaction.rawTransaction.split("0x")[1],
+          tx_type: "dapp",
+          nonce, 
+
+ 
+          // tx_raw: stringWithout0x,
+          // from: from,
+          // to: to,
+          // amount: amount,
+          // gas_estimate: gaslimit,
+          // gas_price: gasPriceInWei, //gsFee * Math.pow(10, 9),//gasInEth,
+          // tx_type: type || "withdraw",
+        },
+        {
+          headers: {
+            Authorization: account.jwtToken,
+          },
+        }
+      );
+      console.log("Responseeee ", myResponse);
+
+      return myResponse.data.tx_hash;
+    } catch (error) {
+      return false;
+    }
+  };
   static generateRawTransactionForNFTAndBroadcast = async (
     to,
     from,

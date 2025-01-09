@@ -65,6 +65,8 @@ export const ExternalConnection = () => {
             : null;
 
           console.log("GET data from query params : ", method, " XXX ", data);
+          console.log("chainsssss ", chains, " accountaccount ", account);
+          
 
           setData(data);
 
@@ -75,51 +77,69 @@ export const ExternalConnection = () => {
             console.log("MYDEFAULT CHAIN ----> ", myDefaultChain);
             console.log(" CHAIN ----> ", chain);
             
+
+            const symbol = myDefaultChain.slug =='polygon'?"pol":myDefaultChain.slug =="ethereum"?"eth":myDefaultChain.slug =="binancesmartchain"?"bnb":""
             const gasPriceRes = await Web3Helper.getGasPrice(
               myDefaultChain.slug,
               data.from,
               data.to,
-              1
+              // 1
+              false,
+              null,
+              symbol
             );
 
-            // console.log(" myDefaultChain ", myDefaultChain);
-            // console.log("DDDDDDDDDDDDDDD ", data);
+            console.log("gassssssssssssssss ", gasPriceRes);
+            
+            console.log(" myDefaultChain ", myDefaultChain);
+            console.log("DDDDDDDDDDDDDDD ", data);
 
+            // chain id==> 1->Eth, 137->Pol, 56->Bnb
             let rpc =
               myDefaultChain?.chainId == 1
-                ? process.env.REACT_APP_ETH_RPC
-                : process.env.REACT_APP_BNB_RPC;
+                ? process.env.REACT_APP_ETH_RPC :
+                myDefaultChain?.chainId == 56 ? process.env.REACT_APP_BNB_RPC
+                : process.env.REACT_APP_MATIC_RPC;
             const provider = new Web3.providers.HttpProvider(rpc);
+            console.log("RPCCCCCCCCCCCCC ", rpc);
+            console.log("providerproviderprovider ", provider);
+            
             const web3 = new Web3(provider);
+            console.log("web3web3web3web3 ", web3);
             let gasEstimate = '';
 
             if (myDefaultChain?.chainId == 1) {
+              console.log("11111111111111111111", data?.from, " TOOOOOOOOOO ", data?.to);
+              console.log("data?.datadata?.datadata?.datadata?.datadata?.data  : ", data?.data);
+              
               let estimate = await web3.eth.estimateGas({
                 from: data?.from,
                 to: data?.to,
                 data: data?.data,
               });
-              // console.log("ESTIMATE ::: ", estimate);
-
+              console.log("ESTIMATE ETH ::: ", estimate);
               gasEstimate = (estimate * 1.5).toFixed(0);
             } else {
+              console.log("2222222222222222");
               if (data.gas) {
+                console.log("3333333333333333");
                 gasEstimate = new BigNumber(data.gas);
               } else {
+                console.log("44444444444444444");
                 let estimate = await web3.eth.estimateGas({
                   from: data?.from,
                   to: data?.to,
                   data: data?.data,
                 });
-                // console.log("ESTIMATEBBNB ::: ", estimate);
+                console.log("ESTIMATEBBNB ::: ", estimate);
 
                 gasEstimate = (estimate * 1.5).toFixed(0);
               }
             }
-            // console.log("ESTIMATTTTTTTTT ", gasEstimate);
+            console.log("ESTIMATTTTTTTTT ", gasEstimate);
             setGaslimitNew(gasEstimate);
 
-            const gasPrice = new BigNumber(gasPriceRes.price).times(1000000000);
+            const gasPrice = new BigNumber(gasPriceRes.fast).times(1000000000);
 
             const gasInEth = gasPrice.times(gasEstimate).div(Math.pow(10, 18));
 
@@ -158,11 +178,11 @@ export const ExternalConnection = () => {
 
   const handleResponse = (result) => {
     console.log('🚀 ~ file: ExternalConnections.jsx:105 ~ handleResponse ~ result', result);
-    // chrome.runtime.sendMessage({ method, result }, (response) => {
-    //   chrome.windows.getCurrent(function (window) {
-    //     chrome.windows.remove(window.id);
-    //   });
-    // });
+     chrome.runtime.sendMessage({ method, result }, (response) => {
+       chrome.windows.getCurrent(function (window) {
+         chrome.windows.remove(window.id);
+       });
+     });
   };
 
   const handleTransaction = async () => {
@@ -193,8 +213,11 @@ export const ExternalConnection = () => {
       } else {
         const gasLimit = Web3.utils.toDecimal(data.gas);
         // console.log("gasLimit TRX ", gasLimit);
+        const { chains } = await chrome.storage.local.get('chains'); 
+        const myDefaultChain = chains.find((el) => el.default);
+        const symbol = myDefaultChain.slug =='polygon'?"pol":myDefaultChain.slug =="ethereum"?"eth":myDefaultChain.slug =="binancesmartchain"?"bnb":""
         const hash =
-          await Web3Helper.generateRawTransactionForTokenAndBroadcastExternal(
+          await Web3Helper.generateRawTransactionForTokenAndBroadcastExternalCopy(
             data.to,
             data.from,
             data.value ? new BigNumber(data.value).toString() : 0,
@@ -211,7 +234,8 @@ export const ExternalConnection = () => {
             data.data,
             gasLimitNew || gasLimit,
             chain.coinFamily,
-            data.value
+            data.value,
+            symbol
           );
 
         console.log(
@@ -232,6 +256,8 @@ export const ExternalConnection = () => {
   };
 
   const handleChainSwitch = async () => {
+    console.log("TO CHAINNNNNNNNNN ", toChain);
+    
     if (toChain) {
       store.dispatch(setLoading(true));
       await WalletHelper.setNetworkPreference(toChain.chainId);
@@ -325,6 +351,9 @@ export const ExternalConnection = () => {
                         cursor: 'pointer',
                       }}
                       onClick={async () => {
+                        console.log("Acccounttttttttttttttttt ", data);
+                        console.log("coinFamilyAndAddress--------> ", account);
+                        
                         handleResponse([
                           data?.network === 'solana'
                             ? account.coinFamilyAndAddress[4]
