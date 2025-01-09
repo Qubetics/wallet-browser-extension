@@ -68,7 +68,7 @@ export const ExternalConnection = () => {
           if (method === 'requestAccounts' && account) {
             setMethod('requestAccounts');
             store.dispatch(setLoading(false));
-          } else if (method === 'signTransaction' && account) { 
+          } else if (method === 'signTransaction' && account) {
             const symbol = myDefaultChain.slug == 'polygon' ? "pol" : myDefaultChain.slug == "ethereum" ? "eth" : myDefaultChain.slug == "binancesmartchain" ? "bnb" : ""
             const gasPriceRes = await Web3Helper.getGasPrice(
               myDefaultChain.slug,
@@ -78,19 +78,19 @@ export const ExternalConnection = () => {
               false,
               null,
               symbol
-            ); 
+            );
             // chain id==> 1->Eth, 137->Pol, 56->Bnb
             let rpc =
               myDefaultChain?.chainId == 1
                 ? process.env.REACT_APP_ETH_RPC :
                 myDefaultChain?.chainId == 56 ? process.env.REACT_APP_BNB_RPC
                   : process.env.REACT_APP_MATIC_RPC;
-            const provider = new Web3.providers.HttpProvider(rpc);  
-            const web3 = new Web3(provider); 
+            const provider = new Web3.providers.HttpProvider(rpc);
+            const web3 = new Web3(provider);
             let gasEstimate = '';
 
             if (myDefaultChain?.chainId == 1) {
-              if (data.gas) { 
+              if (data.gas) {
                 gasEstimate = new BigNumber(data.gas);
               } else {
                 let estimate = await web3.eth.estimateGas({
@@ -101,18 +101,18 @@ export const ExternalConnection = () => {
                 });
                 gasEstimate = (estimate * 1.5).toFixed(0);
               }
-            } else { 
-              if (data.gas) { 
+            } else {
+              if (data.gas) {
                 gasEstimate = new BigNumber(data.gas);
-              } else { 
+              } else {
                 let estimate = await web3.eth.estimateGas({
                   from: data?.from,
                   to: data?.to,
                   data: data?.data,
-                }); 
+                });
                 gasEstimate = (estimate * 1.5).toFixed(0);
               }
-            } 
+            }
             setGaslimitNew(gasEstimate);
 
             const gasPrice = new BigNumber(gasPriceRes.fast).times(1000000000);
@@ -162,7 +162,7 @@ export const ExternalConnection = () => {
   };
 
   const handleTransaction = async () => {
-    try { 
+    try {
       store.dispatch(setLoading(true));
       if (data.network === 'solana') {
         console.log(
@@ -229,7 +229,7 @@ export const ExternalConnection = () => {
     }
   };
 
-  const handleChainSwitch = async () => { 
+  const handleChainSwitch = async () => {
     if (toChain) {
       store.dispatch(setLoading(true));
       await WalletHelper.setNetworkPreference(toChain.chainId);
@@ -305,49 +305,32 @@ export const ExternalConnection = () => {
                   <div className={'swapDetails__border'}></div>
                   <div
                     style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      marginTop: '30px',
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      marginTop: "30px",
+                      gap: "20px"
                     }}
                   >
-                    <div
-                      className='green'
-                      style={{
-                        padding: '12px 53px',
-                        backgroundColor: 'green',
-                        color: 'white',
-                        fontSize: '18px',
-                        borderRadius: '7px',
-                        marginRight: '20px',
-                        cursor: 'pointer',
-                      }}
-                      onClick={async () => { 
+                    <ButtonComp
+                      maxWidth="100%"
+                      onClick={async () => {
                         handleResponse([
                           data?.network === 'solana'
                             ? account.coinFamilyAndAddress[4]
                             : account.address,
                         ]);
                       }}
-                    >
-                      Accept
-                    </div>
-                    <div
-                      className='red'
-                      style={{
-                        padding: '12px 53px',
-                        backgroundColor: 'red',
-                        color: 'white',
-                        fontSize: '18px',
-                        borderRadius: '7px',
-                        marginLeft: '20px',
-                        cursor: 'pointer',
-                      }}
-                      onClick={async () => {
-                        handleResponse([]);
-                      }}
-                    >
-                      Reject
+                      text="Accept"
+                    />
+                    <div className="cancelBtn">
+                      <ButtonComp
+                        maxWidth="100%"
+                        onClick={async () => {
+                          handleResponse([]);
+                        }}
+                        text="Reject"
+                      />
                     </div>
                   </div>
                 </div>
@@ -464,47 +447,36 @@ export const ExternalConnection = () => {
                   </div>
 
                   <div className={'swapDetails__border'}></div>
+
+
+
+
+
+
                   <div
                     style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      marginTop: '30px',
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      marginTop: "30px",
+                      gap: "20px"
                     }}
                   >
-                    <div
-                      className='green'
-                      style={{
-                        padding: '12px 53px',
-                        backgroundColor: 'green',
-                        color: 'white',
-                        fontSize: '18px',
-                        borderRadius: '7px',
-                        marginRight: '20px',
-                        cursor: 'pointer',
-                      }}
+                    <ButtonComp
+                      maxWidth="100%"
                       onClick={async () => {
                         setOpenmodal(true);
                       }}
-                    >
-                      Accept
-                    </div>
-                    <div
-                      className='red'
-                      style={{
-                        padding: '12px 53px',
-                        backgroundColor: 'red',
-                        color: 'white',
-                        fontSize: '18px',
-                        borderRadius: '7px',
-                        marginLeft: '20px',
-                        cursor: 'pointer',
-                      }}
-                      onClick={async () => {
-                        handleResponse(null);
-                      }}
-                    >
-                      Reject
+                      text="Accept"
+                    />
+                    <div className="cancelBtn">
+                      <ButtonComp
+                        maxWidth="100%"
+                        onClick={async () => {
+                          handleResponse(null);
+                        }}
+                        text="Reject"
+                      />
                     </div>
                   </div>
                 </div>
@@ -628,45 +600,28 @@ export const ExternalConnection = () => {
                   <div className={'swapDetails__border'}></div>
                   <div
                     style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      marginTop: '30px',
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      marginTop: "30px",
+                      gap: "20px"
                     }}
                   >
-                    <div
-                      className='green'
-                      style={{
-                        padding: '12px 53px',
-                        backgroundColor: 'green',
-                        color: 'white',
-                        fontSize: '18px',
-                        borderRadius: '7px',
-                        marginRight: '20px',
-                        cursor: 'pointer',
-                      }}
+                    <ButtonComp
+                      maxWidth="100%"
                       onClick={async () => {
                         setOpenmodal(true);
                       }}
-                    >
-                      Accept
-                    </div>
-                    <div
-                      className='red'
-                      style={{
-                        padding: '12px 53px',
-                        backgroundColor: 'red',
-                        color: 'white',
-                        fontSize: '18px',
-                        borderRadius: '7px',
-                        marginLeft: '20px',
-                        cursor: 'pointer',
-                      }}
-                      onClick={async () => {
-                        handleResponse(null);
-                      }}
-                    >
-                      Reject
+                      text="Accept"
+                    />
+                    <div className="cancelBtn">
+                      <ButtonComp
+                        maxWidth="100%"
+                        onClick={async () => {
+                          handleResponse(null);
+                        }}
+                        text="Reject"
+                      />
                     </div>
                   </div>
                 </div>
@@ -729,47 +684,32 @@ export const ExternalConnection = () => {
                     <img src={toChain?.image} width={30} height={30} />
                   </div>
                   <div className={'swapDetails__border'}></div>
+
+
                   <div
                     style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      marginTop: '30px',
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      marginTop: "30px",
+                      gap: "20px"
                     }}
                   >
-                    <div
-                      className='green'
-                      style={{
-                        padding: '12px 53px',
-                        backgroundColor: 'green',
-                        color: 'white',
-                        fontSize: '18px',
-                        borderRadius: '7px',
-                        marginRight: '20px',
-                        cursor: 'pointer',
-                      }}
+                    <ButtonComp
+                      maxWidth="100%"
                       onClick={async () => {
                         handleChainSwitch();
                       }}
-                    >
-                      Accept
-                    </div>
-                    <div
-                      className='red'
-                      style={{
-                        padding: '12px 53px',
-                        backgroundColor: 'red',
-                        color: 'white',
-                        fontSize: '18px',
-                        borderRadius: '7px',
-                        marginLeft: '20px',
-                        cursor: 'pointer',
-                      }}
-                      onClick={async () => {
-                        handleResponse(false);
-                      }}
-                    >
-                      Reject
+                      text="Accept"
+                    />
+                    <div className="cancelBtn">
+                      <ButtonComp
+                        maxWidth="100%"
+                        onClick={async () => {
+                          handleResponse(false);
+                        }}
+                        text="Reject"
+                      />
                     </div>
                   </div>
                 </div>
