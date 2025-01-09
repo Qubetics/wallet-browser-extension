@@ -77,8 +77,8 @@ function CrossChain() {
   const [loading, setInnerLoading] = useState(false);
   const [token1, setToken1] = useState(null);
   const [token2, setToken2] = useState(null);
-  console.log("TOKEN ! ! 1 INitially", token1);
-  console.log("TOKEN ! ! 2 INitially", token2);
+  // console.log("TOKEN ! ! 1 INitially", token1);
+  // console.log("TOKEN ! ! 2 INitially", token2);
   const [balance, setBalance] = useState(0);
   const [balance2, setBalance2] = useState(0);
   const navigate = useNavigate();
@@ -311,7 +311,6 @@ function CrossChain() {
           addresses: Object.values(account.coinFamilyAndAddress).filter(
             (address) => address
           ),
-
           is_wallet: true,
           fiat_type: currency.name,
           per_page: 300,
@@ -376,6 +375,9 @@ function CrossChain() {
             break;
         }
 
+
+        console.log("------------------> ", token);
+        
         return {
           id: token?.coin_data?.coin_id,
           symbol: token?.coinCode,
@@ -402,14 +404,13 @@ function CrossChain() {
           chain: chains.find(
             (chain) => chain?.coinFamily == token?.coin_data?.coin_family
           ),
-          native: token?.coin_data?.native_coin_market_data,
-          decimals: parseInt(token?.coinDecimal?.toString().length) - 1,
+          native: token?.coin_data?.fiat_price_data,
+          decimals: parseInt(token?.coinDecimal), //?.toString().length) - 1,
           rpc:
-            token.coin_family == 1
-              ? process.env.REACT_APP_BNB_RPC
-              : token.coin_family == 2
-                ? process.env.REACT_APP_ETH_RPC
-                : process.env.REACT_APP_MATIC_RPC,
+            token.coin_family == 1 ? process.env.REACT_APP_BNB_RPC : token.coin_family == 2
+              ? process.env.REACT_APP_ETH_RPC : token.coin_family == 3 ? process.env.REACT_APP_BTC_RPC :
+                token.coin_family == 4 ? process.env.REACT_APP_MATIC_RPC :
+                  token.coin_family == 5 ? process.env.REACT_APP_SOL_RPC : "",
         };
       });
 
@@ -438,6 +439,8 @@ function CrossChain() {
             break;
         }
 
+
+
         return {
           id: token.coin_data?.coin_id,
           symbol: token.coinCode,
@@ -463,14 +466,18 @@ function CrossChain() {
           chain: chains.find(
             (chain) => chain.coinFamily == token?.coin_data?.coin_family
           ),
-          native: token.coin_data.native_coin_market_data,
-          decimals: parseInt(token.coinDecimal?.toString().length) - 1,
+          native: token.coin_data.fiat_price_data,
+          decimals: parseInt(token.coinDecimal), //?.toString().length) - 1,
           rpc:
-            token?.coin_data?.coin_family == 1
-              ? process.env.REACT_APP_BNB_RPC
-              : token?.coin_data?.coin_family == 2
-                ? process.env.REACT_APP_ETH_RPC
-                : process.env.REACT_APP_MATIC_RPC,
+            // token?.coin_data?.coin_family == 1
+            //   ? process.env.REACT_APP_BNB_RPC
+            //   : token?.coin_data?.coin_family == 2
+            //     ? process.env.REACT_APP_ETH_RPC
+            //     : process.env.REACT_APP_MATIC_RPC,
+            token?.coin_data?.coin_family == 1 ? process.env.REACT_APP_BNB_RPC : token?.coin_data?.coin_family == 2
+              ? process.env.REACT_APP_ETH_RPC : token?.coin_data?.coin_family == 3 ? process.env.REACT_APP_BTC_RPC :
+                token?.coin_data?.coin_family == 4 ? process.env.REACT_APP_MATIC_RPC :
+                  token?.coin_data?.coin_family == 5 ? process.env.REACT_APP_SOL_RPC : "",
         };
       });
 
@@ -484,11 +491,15 @@ function CrossChain() {
 
       tokens = [...tokens, ...tokens2];
       let modifiedList = await uniqueList(allToken, tokens);
+      console.log("ALLL UNIQUE TOKEN ", modifiedList);
+
       setAllTokens(modifiedList);
       setFilteredTokens(modifiedList);
 
       let { crossToken1 } = await chrome.storage.local.get("crossToken1");
       let { crossToken2 } = await chrome.storage.local.get("crossToken2");
+      console.log("crossToken1crossToken1 ", crossToken1);
+      console.log("crossToken2crossToken2 ", crossToken2);
 
       if (!crossToken1 && !crossToken2) {
         let myToken1 = modifiedList.find(
@@ -1759,61 +1770,123 @@ function CrossChain() {
             );
           }
 
-          const gasPrice = await Web3Helper.getGasPrice(
-            token1.chain.slug,
-            token1.address,
-            token1.address,
-            token1.isToken,
-            token1.tokenAddress,
-            token1.coinSymbol
-          );
+          if (token1.chain.isEVM) {
+            const gasPrice = await Web3Helper.getGasPrice(
+              token1.chain.slug,
+              token1.address,
+              token1.address,
+              token1.isToken,
+              token1.tokenAddress,
+              token1.coinSymbol
+            );
 
-          if (!gasPrice) {
+            if (!gasPrice) {
+              store.dispatch(setLoading(false));
+
+              return messageApi.error("Unable to fetch gas price at the moment.");
+            }
+
+            const gasInEth =
+              (gasPrice.fast * Math.pow(10, 9) * gasPrice.estimate) /
+              Math.pow(10, 18);
             store.dispatch(setLoading(false));
 
-            return messageApi.error("Unable to fetch gas price at the moment.");
-          }
-
-          const gasInEth =
-            (gasPrice.fast * Math.pow(10, 9) * gasPrice.estimate) /
-            Math.pow(10, 18);
-          store.dispatch(setLoading(false));
-
-          const parentCoin = await server.post(
-            "/wallet/nativeCoinFiatPrice",
-            {
-              coin_family: token1.coinFamily,
-              fiat_currency: currency.name,
-            },
-            {
-              headers: {
-                Authorization: account.jwtToken,
+            const parentCoin = await server.post(
+              "/wallet/nativeCoinFiatPrice",
+              {
+                coin_family: token1.coinFamily,
+                fiat_currency: currency.name,
               },
-            }
-          );
+              {
+                headers: {
+                  Authorization: account.jwtToken,
+                },
+              }
+            );
 
-          let swapDetailed = {
-            route,
-            token1,
-            token2,
-            amount,
-            amount2,
-            tokenChain: token1.chain,
-            networkFee: gasInEth,
-            walletAddress: token1.address,
-            token1Price: newBalanceToFiatConversion(token1.price, amount),
-            parentCoin: {
-              value: parentCoin.data.data.fiatCoinPrice.value,
-            },
-            tab: 1,
-            rpc: token1.rpc,
-            coinSymbol: token1.coinSymbol,
-          };
-          store.dispatch(swapDetailAc(swapDetailed));
-          navigate("/crosschain-swapDetails", {
-            state: swapDetailed,
-          });
-        }}
+            let swapDetailed = {
+              route,
+              token1,
+              token2,
+              amount,
+              amount2,
+              tokenChain: token1.chain,
+              networkFee: gasInEth,
+              walletAddress: token1.address,
+              token1Price: newBalanceToFiatConversion(token1.price, amount),
+              parentCoin: {
+                value: parentCoin.data.data.fiatCoinPrice.value,
+              },
+              tab: 1,
+              rpc: token1.rpc,
+              coinSymbol: token1.coinSymbol,
+            };
+            store.dispatch(swapDetailAc(swapDetailed));
+            navigate("/crosschain-swapDetails", {
+              state: swapDetailed,
+            });
+          } else if (token1.chain.currencyName == 'SOL') {
+            console.log("XXXXXXXXXXXXXXXx ");
+
+            const solanaHelper = new SolanaHelper(token1?.chain?.rpcUrl);
+            const gasPrice = solanaHelper.getGasPrice();
+
+            store.dispatch(setLoading(false));
+
+            console.log("newBalanceToFiatConversion(token1?.price, amount) ", amount, newBalanceToFiatConversion(token1?.price, amount));
+
+            let swapDetailed = {
+              route,
+              token1,
+              token2,
+              amount,
+              amount2,
+              tokenChain: token1?.chain,
+              networkFee: gasPrice,
+              walletAddress: token1?.address,
+              token1Price: newBalanceToFiatConversion(token1?.price, amount),
+              parentCoin: token1?.native || null,
+              tab: 1,
+            };
+            store.dispatch(swapDetailAc(swapDetailed));
+            console.log("swapDetailedswapDetailed ", swapDetailed);
+
+            navigate('/crosschain-swapDetails', {
+              state: swapDetailed,
+            });
+          } else if (token1.chain.currencyName === 'BTC') {
+            try {
+              const gasPrice = await BTCHelper.getBTCGasPrice();
+              let swapDetailed = {
+                route,
+                token1,
+                token2,
+                amount,
+                amount2,
+                tokenChain: token1.chain,
+                networkFee: gasPrice / Math.pow(10, 8),
+                walletAddress: token1.address,
+                token1Price: newBalanceToFiatConversion(token1.price, amount),
+                parentCoin: token1.native,
+                tab: 1,
+              };
+              store.dispatch(swapDetailAc(swapDetailed));
+
+              store.dispatch(setLoading(false));
+              navigate('/crosschain-swapDetails', {
+                state: swapDetailed,
+              });
+            } catch (error) {
+              store.dispatch(setLoading(false));
+              return messageApi.error(error.message);
+            }
+          }
+        }
+
+
+
+
+        }
         text={"Swap"}
         maxWidth={"100%"}
         disabled={

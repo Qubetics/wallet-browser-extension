@@ -290,7 +290,8 @@ export class Web3Helper {
     symbol,
     rpc,
     type,
-    gasPriceType
+    gasPriceType,
+    orderId
   ) => {
     try {
       console.log("gasPriceType---------> ", gasPriceType);
@@ -381,18 +382,20 @@ export class Web3Helper {
       const trx = signedTransaction.rawTransaction;
       const stringWithout0x = trx.startsWith("0x") ? trx.slice(2) : trx;
 
+      let payload =
+      {
+        nonce: nonce,
+        tx_raw: stringWithout0x,
+        from: from,
+        to: to,
+        amount: amount,
+        gas_estimate: gaslimit,
+        gas_price: gasPriceInWei, //gsFee * Math.pow(10, 9),//gasInEth,
+        tx_type: type || "withdraw",
+      }
+      payload['orderId'] = orderId;
       const response = await server.post(
-        `${slug}/${symbol}/send`,
-        {
-          nonce: nonce,
-          tx_raw: stringWithout0x,
-          from: from,
-          to: to,
-          amount: amount,
-          gas_estimate: gaslimit,
-          gas_price: gasPriceInWei, //gsFee * Math.pow(10, 9),//gasInEth,
-          tx_type: type || "withdraw",
-        },
+        `${slug}/${symbol}/send`, payload,
         {
           headers: {
             Authorization: account.jwtToken,
@@ -616,18 +619,23 @@ export class Web3Helper {
       const trx = signedTransaction.rawTransaction;
       const stringWithout0x = trx.startsWith("0x") ? trx.slice(2) : trx;
 
+      let payload = {
+        nonce: nonce,
+        tx_raw: stringWithout0x,
+        from: from,
+        to: to,
+        amount: amount,
+        gas_estimate: gaslimit,
+        gas_price: gasPriceInWei,
+        tx_type: type || "withdraw",
+      }
+
+      if (orderId) {
+        payload['orderId'] = orderId;
+      }
       const response = await server.post(
         `${slug}/${tokenAddress}/send`,
-        {
-          nonce: nonce,
-          tx_raw: stringWithout0x,
-          from: from,
-          to: to,
-          amount: amount,
-          gas_estimate: gaslimit,
-          gas_price: gasPriceInWei,
-          tx_type: type || "withdraw",
-        },
+        payload,
         {
           headers: {
             Authorization: account.jwtToken,
@@ -875,9 +883,9 @@ export class Web3Helper {
           to: to,
           tx_raw: signedTransaction.rawTransaction.split("0x")[1],
           tx_type: "dapp",
-          nonce, 
+          nonce,
 
- 
+
           // tx_raw: stringWithout0x,
           // from: from,
           // to: to,
