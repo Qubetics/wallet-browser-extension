@@ -76,6 +76,8 @@ function CrossChain() {
   const [availableTokens, setAvailableTokens] = useState([]);
   const [loading, setInnerLoading] = useState(false);
   const [token1, setToken1] = useState(null);
+
+  console.log("TOKEN ! ! 1 INitially", token1);
   const [token2, setToken2] = useState(null);
   const [balance, setBalance] = useState(0);
   const [balance2, setBalance2] = useState(0);
@@ -108,6 +110,7 @@ function CrossChain() {
 
   useEffect(() => {
     if (swapDetail) {
+      console.log("SWAPDETAILS", swapDetail);
       if (swapDetail?.tab == 1) {
         setToken1(swapDetail?.token1);
         setToken2(swapDetail?.token2);
@@ -353,7 +356,6 @@ function CrossChain() {
       let tokens = data?.data?.map((token) => {
         let coinFamilyName = "ETH";
         let tokenType = "ERC20";
-        console.log("TOTOTO", token);
         switch (token?.coin_family) {
           case 2:
             coinFamilyName = "ETH";
@@ -571,7 +573,7 @@ function CrossChain() {
     }
   };
 
-  console.log(route);
+  // console.log(route);
 
   const handleTokensSwapChangePosition = async () => {
     if (token1 && token2) {

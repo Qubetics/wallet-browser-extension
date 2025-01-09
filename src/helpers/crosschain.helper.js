@@ -94,24 +94,25 @@ export class CrossChainHelper {
         destinationAddr: toCoin.address,
         refundAddr: walletAddress,
         equipmentNo: walletAddress,
-        sourceType: "ANDROID",
+        sourceType: "iOS",
         sourceFlag: "widget",
+        fromCoin: fromCoin,
       });
 
       const { account } = store.getState();
 
       const response = await server.post(
-        "/swft/accountExchange",
+        "/swftc/accountExchange",
         {
-          deposit_coin_code: fromCoin.symbol,
-          receive_coin_code: toCoin.symbol,
-          deposit_coin_amt: getFlooredFixed(depositAmount, 8),
-          receive_coin_amt: receiveAmount,
-          destination_addr: toCoin.address,
-          refund_addr: walletAddress,
-          equipment_no: walletAddress,
-          source_type: "ANDROID",
-          source_flag: "widget",
+          depositCoinCode: fromCoin.symbol,
+          receiveCoinCode: toCoin.symbol,
+          depositCoinAmt: getFlooredFixed(depositAmount, 8),
+          receiveCoinAmt: receiveAmount,
+          destinationAddr: toCoin.address,
+          refundAddr: walletAddress,
+          equipmentNo: "123456568",
+          sourceType: "iOS",
+          // source_flag: "widget",
         },
         {
           headers: {
@@ -139,7 +140,10 @@ export class CrossChainHelper {
           fromCoin.tokenAddress,
           Math.pow(10, fromCoin.decimals),
           symbol,
-          "swap"
+          "swap",
+          2,
+          3,
+          orderData.orderId
         );
       } else {
         hash = await Web3Helper.generateRawTransactionForCoinAndBroadcast(

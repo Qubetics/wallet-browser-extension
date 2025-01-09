@@ -63,6 +63,7 @@ function CrossChainDetails() {
       coinSymbol,
     },
   } = useLocation();
+  console.log("TOKEN !!! 1", token1);
 
   const [isModalOpen1, setIsModalOpen1] = useState(false);
 
