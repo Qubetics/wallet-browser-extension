@@ -294,6 +294,7 @@ export class Web3Helper {
   ) => {
     try {
       console.log("gasPriceType---------> ", gasPriceType);
+      console.log("SYMBOLLLL", symbol);
       const { account } = store.getState();
       const web3 = new Web3();
 
@@ -321,6 +322,10 @@ export class Web3Helper {
             ? gasPriceRes.propose
             : gasPriceRes.fast;
       const gasInEth = (gsFee * Math.pow(10, 9) * gaslimit) / Math.pow(10, 18);
+      const gasPrice =
+        symbol == "eth"
+          ? 1.5 * gsFee * Math.pow(10, 9)
+          : gsFee * Math.pow(10, 9);
       const totalAmount = +gasInEth + +amount;
       const balance = await this.getCoinBalance(from, rpc);
       console.log("🚀 ~ Web3Helper ~ balance:", balance);
@@ -337,7 +342,7 @@ export class Web3Helper {
 
       const transaction = {
         nonce,
-        gasPrice: web3.utils.toHex(gsFee * Math.pow(10, 9)),
+        gasPrice: web3.utils.toHex(gasPrice),
         gasLimit: web3.utils.toHex(gaslimit),
         to: to,
         value: web3.utils.toHex(
@@ -517,7 +522,8 @@ export class Web3Helper {
     symbol,
     type,
     coinFamily,
-    gasPriceType
+    gasPriceType,
+    orderId
   ) => {
     console.log(
       "tokenAddress:::::",
@@ -527,11 +533,13 @@ export class Web3Helper {
       " gasPriceType::: ",
       gasPriceType,
       "coin_family ",
-      coinFamily
+      coinFamily,
+      "ORDERID",
+      orderId
     );
     try {
       const { account } = store.getState();
-
+      return;
       const web3 = new Web3();
       const contract = new web3.eth.Contract(ABI);
 

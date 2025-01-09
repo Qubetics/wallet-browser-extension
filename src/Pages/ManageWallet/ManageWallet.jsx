@@ -24,10 +24,11 @@ import DarkArrowRightIcon from "../../Assets/DarkArrowRightIcon.svg";
 import { server } from "../../server";
 import OpenDark from "../../Assets/open-dark.svg";
 import CloseDark from "../../Assets/close-dark.svg";
+import { setBalancesIn } from "../../actions/balance-off-out";
 
 function ManageWallet() {
   const [data, setData] = useState([]);
-  const [show, setShow] = useState(true);
+  // const [show, setShow] = useState(true);
 
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [deleteModal, setDeleteModal] = useState(false);
@@ -161,25 +162,87 @@ function ManageWallet() {
   return (
     <>
       {contextHolder}
-      <div className={state?.from == 'myWallet' ? `scrollableCont myWallet` : `scrollableCont`}>
+      <div
+        className={
+          state?.from == "myWallet"
+            ? `scrollableCont myWallet`
+            : `scrollableCont`
+        }
+      >
         <div className="searchBarFixed">
-          <MenuRestofHeaders backTo={state?.from == 'myWallet' ? "/wallet" : "/setting"} title={state?.from == 'myWallet' ? "My Wallet" : "Manage Wallet"} />
+          <MenuRestofHeaders
+            backTo={state?.from == "myWallet" ? "/wallet" : "/setting"}
+            title={state?.from == "myWallet" ? "My Wallet" : "Manage Wallet"}
+          />
 
-          {state?.from == 'myWallet' && <div className="myWalletsBalance">
-            <div className="myWalletsBalance_value">
-              <h4>Total Balance</h4>
-              <h1 style={{ display: 'flex', alignItems: 'center', gap: '20px', justifyContent: "space-between" }}>
-                {currency?.symbol} {show ? totalAmt?.toFixed(2) : "***"} <span onClick={() => setShow(!show)}>
-                  {show ? <img style={{ height: '20px' }}
+          {state?.from == "myWallet" && (
+            <div className="myWalletsBalance">
+              <div className="myWalletsBalance_value">
+                <h4>Total Balance</h4>
+                <h1
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "20px",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  {currency?.symbol} {balanceIn ? totalAmt?.toFixed(2) : "****"}
+                  {/* <span onClick={() => setShow(!show)}> */}
+                  {/* {show ? <img style={{ height: '20px' }}
                     src={OpenDark}
                     alt="" />
                     : <img style={{ height: '30px' }}
                       src={CloseDark}
-                      alt="" />}
-                </span></h1>
+                      alt="" />} */}
+                  {balanceIn ? (
+                    <img
+                      src={OpenDark}
+                      alt=""
+                      onClick={async () => {
+                        await chrome.storage.local.set({
+                          balanceIn: false,
+                        });
+                        await WalletHelper.updateBalanceInShow(
+                          false,
+                          account.id
+                        );
+                        store.dispatch(setBalancesIn(false));
+                      }}
+                      style={{
+                        width: "25px",
+                        marginLeft: "9px",
+                        position: "relative",
+                        top: "-7px",
+                      }}
+                    />
+                  ) : (
+                    <img
+                      src={CloseDark}
+                      alt=""
+                      onClick={async () => {
+                        await chrome.storage.local.set({
+                          balanceIn: true,
+                        });
+                        await WalletHelper.updateBalanceInShow(
+                          true,
+                          account.id
+                        );
+                        store.dispatch(setBalancesIn(true));
+                      }}
+                      style={{
+                        width: "25px",
+                        marginLeft: "9px",
+                        position: "relative",
+                        top: "-7px",
+                      }}
+                    />
+                  )}
+                  {/* </span> */}
+                </h1>
+              </div>
             </div>
-          </div>
-          }
+          )}
         </div>
 
         <div className={`flexedContent manageWalletHeight`}>
@@ -296,9 +359,9 @@ function ManageWallet() {
                 onClick={async () => {
                   setIsModalOpen4(true);
                 }}
-              // onClick={async () => {
-              //   isModalOpen4(true);
-              // }}
+                // onClick={async () => {
+                //   isModalOpen4(true);
+                // }}
               >
                 <div style={{ display: "flex", alignItems: "center" }}>
                   <img
@@ -596,15 +659,13 @@ function ManageWallet() {
             </p>
           </div>
 
-
-
           <div
             style={{
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               marginTop: "30px",
-              gap: "20px"
+              gap: "20px",
             }}
           >
             <ButtonComp
