@@ -779,25 +779,25 @@ export class Web3Helper {
     symbol
   ) => {
     try {
-      console.log("PPPPPPPPPPPPPGGGGGGGGGG", {
-        to,
-        from,
-        amount,
-        coinId,
-        fiatPrice,
-        networkFeeInFiat,
-        fiatType,
-        contact,
-        slug,
-        chainId,
-        tokenAddress,
-        decimals,
-        tokenType,
-        data,
-        gasLimit,
-        coinFamily,
-        symbol
-      });
+      // console.log("PPPPPPPPPPPPPGGGGGGGGGG", {
+      //   to,
+      //   from,
+      //   amount,
+      //   coinId,
+      //   fiatPrice,
+      //   networkFeeInFiat,
+      //   fiatType,
+      //   contact,
+      //   slug,
+      //   chainId,
+      //   tokenAddress,
+      //   decimals,
+      //   tokenType,
+      //   data,
+      //   gasLimit,
+      //   coinFamily,
+      //   symbol
+      // });
       const { account } = store.getState();
       console.log(
         "🚀 ~ file: web3.helper.js:271 ~ Web3Helper ~ account:",
@@ -827,7 +827,7 @@ export class Web3Helper {
       const nonce = await this.getNonce(slug, 0, tokenAddress, symbol, from);
       const gaslimit = (gasLimit * 2).toFixed(0);
 
-      console.log("NONCE---------------> ", nonce, gasLimit);
+      // console.log("NONCE---------------> ", nonce, gasLimit);
 
       const transaction = {
         nonce,
@@ -885,7 +885,7 @@ export class Web3Helper {
           },
         }
       );
-      console.log("Responseeee ", myResponse);
+      // console.log("Responseeee ", myResponse);
 
       return myResponse.data.tx_hash;
     } catch (error) {
