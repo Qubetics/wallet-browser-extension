@@ -14,6 +14,7 @@ const TokenDrawer = ({
     handleSearch,
     handleSelectToken,
     theme,
+    sel
 }) => {
     console.log(tokens, "Available Tokens");
 
@@ -23,7 +24,7 @@ const TokenDrawer = ({
             placement="bottom"
             onClose={() => {
                 onClose();
-                setKeyword(''); 
+                setKeyword('');
             }}
             open={open}
             closeIcon={
@@ -96,53 +97,108 @@ const TokenDrawer = ({
                                         cursor: 'pointer',
                                     }}
                                 >
-                                    {/* Token Image or Initial */}
-                                    {token.coin_image || token.image ? (
-                                        <img
-                                            style={{
-                                                width: '29px',
-                                                marginRight: '15px',
-                                            }}
-                                            src={token.coin_image || token.image}
-                                            alt={token.coin_name || token.currency_name}
-                                        />
-                                    ) : (
-                                        <div
-                                            style={{
-                                                alignItems: 'center',
-                                                backgroundColor: 'rgba(98,126,234,.2)',
-                                                borderRadius: '49%',
-                                                display: 'flex',
-                                                height: '29px',
-                                                justifyContent: 'center',
-                                                width: '29px',
-                                                marginRight: '15px',
-                                            }}
-                                        >
-                                            {(token.coin_name || token.currency_name)?.[0] || 'N/A'}
-                                        </div>
-                                    )}
+                                    {sel == 0 ?
+                                        <>
+                                            {token.coin_image || token.image ? (
+                                                <img
+                                                    style={{
+                                                        width: '29px',
+                                                        marginRight: '15px',
+                                                    }}
+                                                    src={token.coin_image || token.image}
+                                                    alt={token.coin_name || token.currency_name}
+                                                />
+                                            ) : (
+                                                <div
+                                                    style={{
+                                                        alignItems: 'center',
+                                                        backgroundColor: 'rgba(98,126,234,.2)',
+                                                        borderRadius: '49%',
+                                                        display: 'flex',
+                                                        height: '29px',
+                                                        justifyContent: 'center',
+                                                        width: '29px',
+                                                        marginRight: '15px',
+                                                    }}
+                                                >
+                                                    {(token.coin_name || token.currency_name)?.[0] || 'N/A'}
+                                                </div>
+                                            )}
 
-                                    {/* Token Name and Symbol */}
-                                    <p>
-                                        <span
-                                            style={{ fontSize: '17px' }}
-                                            className="noAddress"
-                                        >
-                                            {token.coin_name || token.currency_name}
-                                        </span>
-                                        <span
-                                            className="noAddress"
-                                            style={{
-                                                fontSize: '11px',
-                                                marginLeft: '5px',
-                                            }}
-                                        >
-                                            {token.coin_symbol || token.currency_symbol
-                                                ? ` / ${token.coin_symbol || token.currency_symbol}`
-                                                : null}
-                                        </span>
-                                    </p>
+                                            {/* Token Name and Symbol */}
+                                            <p>
+                                                <span
+                                                    style={{ fontSize: '17px' }}
+                                                    className="noAddress"
+                                                >
+                                                    {token.coin_name || token.currency_name}
+                                                </span>
+                                                <span
+                                                    className="noAddress"
+                                                    style={{
+                                                        fontSize: '11px',
+                                                        marginLeft: '5px',
+                                                    }}
+                                                >
+                                                    {token.coin_symbol || token.currency_symbol
+                                                        ? ` / ${token.coin_symbol || token.currency_symbol}`
+                                                        : null}
+                                                </span>
+                                            </p>
+                                        </> : <>
+
+
+
+
+                                            {token?.coin?.coin_image ? (
+                                                <img
+                                                    style={{
+                                                        width: '29px',
+                                                        marginRight: '15px',
+                                                    }}
+                                                    src={token?.coin?.coin_image}
+                                                    alt={token?.coin?.coin_name || token?.coin?.currency_name}
+                                                />
+                                            ) : (
+                                                <div
+                                                    style={{
+                                                        alignItems: 'center',
+                                                        backgroundColor: 'rgba(98,126,234,.2)',
+                                                        borderRadius: '49%',
+                                                        display: 'flex',
+                                                        height: '29px',
+                                                        justifyContent: 'center',
+                                                        width: '29px',
+                                                        marginRight: '15px',
+                                                    }}
+                                                >
+                                                    {(token?.coin?.coin_name || token?.coin?.currency_name)?.[0] || 'N/A'}
+                                                </div>
+                                            )}
+
+                                            {/* Token Name and Symbol */}
+                                            <p>
+                                                <span
+                                                    style={{ fontSize: '17px' }}
+                                                    className="noAddress"
+                                                >
+                                                    {token?.coin?.coin_name || token?.coin?.currency_name}
+                                                </span>
+                                                <span
+                                                    className="noAddress"
+                                                    style={{
+                                                        fontSize: '11px',
+                                                        marginLeft: '5px',
+                                                    }}
+                                                >
+                                                    {token?.coin?.coin_symbol || token?.coin?.currency_symbol
+                                                        ? ` / ${token?.coin?.coin_symbol || token?.coin?.currency_symbol}`
+                                                        : null}
+                                                </span>
+                                            </p>
+
+
+                                        </>}
                                 </div>
                             </div>
                         ))
