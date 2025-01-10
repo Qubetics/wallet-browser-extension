@@ -163,13 +163,14 @@ function CrossChain() {
           setInfoData([
             {
               text: "Estimate Rate",
-              textVal: `1 ${tokenOne.symbol} = ${route
-                ? getFlooredFixed(
-                  parseFloat(route.exchangeData.instantRate),
-                  5
-                )
-                : 0
-                } ${tokenTwo.symbol}`,
+              textVal: `1 ${tokenOne.symbol} = ${
+                route
+                  ? getFlooredFixed(
+                      parseFloat(route.exchangeData.instantRate),
+                      5
+                    )
+                  : 0
+              } ${tokenTwo.symbol}`,
             },
             {
               text: "Service Fee",
@@ -184,9 +185,9 @@ function CrossChain() {
                   parseFloat(
                     route
                       ? getFlooredFixed(
-                        parseFloat(route.exchangeData.receiveCoinFee),
-                        5
-                      )
+                          parseFloat(route.exchangeData.receiveCoinFee),
+                          5
+                        )
                       : 0
                   ),
                   6
@@ -242,6 +243,7 @@ function CrossChain() {
         token1.coinFamily == 5 ||
         token1.coinFamily == 2
       ) {
+        console.log("TTTTTTTTTTTT ", token1);
         const finalAmountToSend = new BigNumber(token1.balance).multipliedBy(
           new BigNumber(percentage).dividedBy(100)
         );
@@ -257,11 +259,13 @@ function CrossChain() {
             : finalAmountToSend.toFixed(18).toString()
         );
       } else {
+        console.log("FFFFFFFFFFFFFF ", token1);
         const amountToSend = await Web3Helper.getTokenBalance(
           token1.tokenAddress,
           token1.address,
           token1.rpc
         );
+        console.log("AMTTTTTTTTTTTT ", amountToSend);
         if (amountToSend == 0) {
           setAmount2(0);
           setInfoData([]);
@@ -375,9 +379,8 @@ function CrossChain() {
             break;
         }
 
-
         console.log("------------------> ", token);
-        
+
         return {
           id: token?.coin_data?.coin_id,
           symbol: token?.coinCode,
@@ -407,10 +410,17 @@ function CrossChain() {
           native: token?.coin_data?.fiat_price_data,
           decimals: parseInt(token?.coinDecimal), //?.toString().length) - 1,
           rpc:
-            token.coin_family == 1 ? process.env.REACT_APP_BNB_RPC : token.coin_family == 2
-              ? process.env.REACT_APP_ETH_RPC : token.coin_family == 3 ? process.env.REACT_APP_BTC_RPC :
-                token.coin_family == 4 ? process.env.REACT_APP_MATIC_RPC :
-                  token.coin_family == 5 ? process.env.REACT_APP_SOL_RPC : "",
+            token?.coin_data?.coin_family == 1
+              ? process.env.REACT_APP_BNB_RPC
+              : token?.coin_data?.coin_family == 2
+              ? process.env.REACT_APP_ETH_RPC
+              : token?.coin_data?.coin_family == 3
+              ? process.env.REACT_APP_BTC_RPC
+              : token?.coin_data?.coin_family == 4
+              ? process.env.REACT_APP_MATIC_RPC
+              : token?.coin_data?.coin_family == 5
+              ? process.env.REACT_APP_SOL_RPC
+              : "",
         };
       });
 
@@ -438,8 +448,6 @@ function CrossChain() {
           default:
             break;
         }
-
-
 
         return {
           id: token.coin_data?.coin_id,
@@ -474,10 +482,17 @@ function CrossChain() {
             //   : token?.coin_data?.coin_family == 2
             //     ? process.env.REACT_APP_ETH_RPC
             //     : process.env.REACT_APP_MATIC_RPC,
-            token?.coin_data?.coin_family == 1 ? process.env.REACT_APP_BNB_RPC : token?.coin_data?.coin_family == 2
-              ? process.env.REACT_APP_ETH_RPC : token?.coin_data?.coin_family == 3 ? process.env.REACT_APP_BTC_RPC :
-                token?.coin_data?.coin_family == 4 ? process.env.REACT_APP_MATIC_RPC :
-                  token?.coin_data?.coin_family == 5 ? process.env.REACT_APP_SOL_RPC : "",
+            token?.coin_data?.coin_family == 1
+              ? process.env.REACT_APP_BNB_RPC
+              : token?.coin_data?.coin_family == 2
+              ? process.env.REACT_APP_ETH_RPC
+              : token?.coin_data?.coin_family == 3
+              ? process.env.REACT_APP_BTC_RPC
+              : token?.coin_data?.coin_family == 4
+              ? process.env.REACT_APP_MATIC_RPC
+              : token?.coin_data?.coin_family == 5
+              ? process.env.REACT_APP_SOL_RPC
+              : "",
         };
       });
 
@@ -726,13 +741,14 @@ function CrossChain() {
           setInfoData([
             {
               text: "Estimate Rate",
-              textVal: `1 ${token1.symbol} = ${route
-                ? getFlooredFixed(
-                  parseFloat(route.exchangeData.instantRate),
-                  5
-                )
-                : 0
-                } ${token2.symbol}`,
+              textVal: `1 ${token1.symbol} = ${
+                route
+                  ? getFlooredFixed(
+                      parseFloat(route.exchangeData.instantRate),
+                      5
+                    )
+                  : 0
+              } ${token2.symbol}`,
             },
             {
               text: "Service Fee",
@@ -747,9 +763,9 @@ function CrossChain() {
                   parseFloat(
                     route
                       ? getFlooredFixed(
-                        parseFloat(route.exchangeData.receiveCoinFee),
-                        5
-                      )
+                          parseFloat(route.exchangeData.receiveCoinFee),
+                          5
+                        )
                       : 0
                   ),
                   6
@@ -1365,8 +1381,9 @@ function CrossChain() {
     //   </div>
 
     <div
-      className={`${"fixedContent height-571"} ${height <= 600 ? "fixedContentOuterExt" : ""
-        }`}
+      className={`${"fixedContent height-571"} ${
+        height <= 600 ? "fixedContentOuterExt" : ""
+      }`}
     >
       <div style={{ width: "100%", marginBottom: "20px" }}>
         <div
@@ -1457,7 +1474,7 @@ function CrossChain() {
                   {addCommasToNumber(
                     getFlooredFixed(
                       parseFloat(amount ? amount : 0) *
-                      parseFloat(token1 ? token1.price : 0),
+                        parseFloat(token1 ? token1.price : 0),
                       2
                     )
                   )}
@@ -1599,7 +1616,7 @@ function CrossChain() {
                   {addCommasToNumber(
                     getFlooredFixed(
                       parseFloat(amount2 ? amount2 : 0) *
-                      parseFloat(token2 ? token2.price : 0),
+                        parseFloat(token2 ? token2.price : 0),
                       2
                     )
                   )}
@@ -1741,12 +1758,12 @@ function CrossChain() {
         onClick={async () => {
           console.log(
             !token1 ||
-            !token2 ||
-            !amount ||
-            !amount2 ||
-            amount <= 0 ||
-            amount2 <= 0 ||
-            loading
+              !token2 ||
+              !amount ||
+              !amount2 ||
+              amount <= 0 ||
+              amount2 <= 0 ||
+              loading
           );
           if (isNaN(parseFloat(amount)) || isNaN(parseFloat(amount2))) {
             return messageApi.error("Please enter a valid amount to proceed.");
@@ -1783,7 +1800,9 @@ function CrossChain() {
             if (!gasPrice) {
               store.dispatch(setLoading(false));
 
-              return messageApi.error("Unable to fetch gas price at the moment.");
+              return messageApi.error(
+                "Unable to fetch gas price at the moment."
+              );
             }
 
             const gasInEth =
@@ -1825,7 +1844,7 @@ function CrossChain() {
             navigate("/crosschain-swapDetails", {
               state: swapDetailed,
             });
-          } else if (token1.chain.currencyName == 'SOL') {
+          } else if (token1.chain.currencyName == "SOL") {
             console.log("XXXXXXXXXXXXXXXx ");
 
             const solanaHelper = new SolanaHelper(token1?.chain?.rpcUrl);
@@ -1833,7 +1852,11 @@ function CrossChain() {
 
             store.dispatch(setLoading(false));
 
-            console.log("newBalanceToFiatConversion(token1?.price, amount) ", amount, newBalanceToFiatConversion(token1?.price, amount));
+            console.log(
+              "newBalanceToFiatConversion(token1?.price, amount) ",
+              amount,
+              newBalanceToFiatConversion(token1?.price, amount)
+            );
 
             let swapDetailed = {
               route,
@@ -1851,10 +1874,10 @@ function CrossChain() {
             store.dispatch(swapDetailAc(swapDetailed));
             console.log("swapDetailedswapDetailed ", swapDetailed);
 
-            navigate('/crosschain-swapDetails', {
+            navigate("/crosschain-swapDetails", {
               state: swapDetailed,
             });
-          } else if (token1.chain.currencyName === 'BTC') {
+          } else if (token1.chain.currencyName === "BTC") {
             try {
               const gasPrice = await BTCHelper.getBTCGasPrice();
               let swapDetailed = {
@@ -1873,7 +1896,7 @@ function CrossChain() {
               store.dispatch(swapDetailAc(swapDetailed));
 
               store.dispatch(setLoading(false));
-              navigate('/crosschain-swapDetails', {
+              navigate("/crosschain-swapDetails", {
                 state: swapDetailed,
               });
             } catch (error) {
@@ -1881,12 +1904,7 @@ function CrossChain() {
               return messageApi.error(error.message);
             }
           }
-        }
-
-
-
-
-        }
+        }}
         text={"Swap"}
         maxWidth={"100%"}
         disabled={
