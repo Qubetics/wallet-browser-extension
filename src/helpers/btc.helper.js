@@ -22,7 +22,7 @@ export class BTCHelper {
 
   static getUnspent = async (address) => {
     const { account } = store.getState();
-    try { 
+    try {
       const { data } = await server.get(
         // `/btc/unspent_new`,
         `/bitcoin/unspent/${address}`,
@@ -36,7 +36,7 @@ export class BTCHelper {
         }
       );
       console.log("BTC FEESSSS ", data);
-      
+
       return data.data || [];
     } catch (error) {
       console.log(error);
@@ -120,22 +120,22 @@ export class BTCHelper {
       }
       if (
         satoshis -
-        (fee + parseInt(Math.round(amount * btcTosatoshi).toString())) >
+          (fee + parseInt(Math.round(amount * btcTosatoshi).toString())) >
         546
       ) {
         transaction.change(fromAddress);
       }
       if (
         satoshis -
-        (fee + parseInt(Math.round(amount * btcTosatoshi).toString())) >
+          (fee + parseInt(Math.round(amount * btcTosatoshi).toString())) >
         546
       ) {
         transaction.fee(fee);
       } else {
         transaction.fee(
           fee +
-          (satoshis -
-            (fee + parseInt(Math.round(amount * btcTosatoshi).toString())))
+            (satoshis -
+              (fee + parseInt(Math.round(amount * btcTosatoshi).toString())))
         );
       }
 
@@ -168,42 +168,40 @@ export class BTCHelper {
     rawTransaction,
     tx_fee,
     orderId,
-    type,
-     
+    type
   ) => {
-    try { 
-      
-      const { account } = store.getState();
-
-      const myResponse = await server.post(
-        `${slug}/send`,
-        {
-          tx_raw: rawTransaction,
-          from: from,
-          to: to,
-          amount: amount,
-          gas_price: '',//gasPriceRes.fast * Math.pow(10, 9),//gasInEth,
-          tx_type: type || 'withdraw',
-
-          // address_book_name: contact || "",
-          // amount: parseFloat(amount),
-          // coin_id: coinId,
-          // fiat_price: fiatPrice.toString(),
-          // fiat_type: fiatType,
-          // from_address: from,
-          // source_type: "ANDROID",
-          // tx_fee,
-          // to_address: to,
-          // trnx_type: type || "withdraw",
-          // trnx_raw: rawTransaction,
-          // order_id: orderId || undefined,
-        },
-        {
-          headers: {
-            Authorization: account.jwtToken,
-          },
-        }
+    try {
+      console.log(
+        "TO",
+        to,
+        "FROM",
+        from,
+        "AMOUNT",
+        amount,
+        "SLUG",
+        slug,
+        "RAW",
+        rawTransaction,
+        "ORDERID",
+        orderId,
+        "TYPE",
+        type
       );
+      const { account } = store.getState();
+      let payload = {
+        tx_raw: rawTransaction,
+        from: from,
+        to: to,
+        amount: amount,
+        gas_price: "", //gasPriceRes.fast * Math.pow(10, 9),//gasInEth,
+        tx_type: type || "withdraw",
+      };
+      payload["orderId"] = orderId;
+      const myResponse = await server.post(`${slug}/send`, payload, {
+        headers: {
+          Authorization: account.jwtToken,
+        },
+      });
 
       return myResponse.data;
     } catch (error) {

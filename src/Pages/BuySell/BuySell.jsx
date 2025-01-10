@@ -14,7 +14,7 @@ const BuySell = () => {
   const [coins, setCoins] = useState([]);
   const [fiats, setFiats] = useState([]);
   const [loading, setLoading] = useState(false);
-
+  console.log("SELECTED TAB", selectedTab);
   const init = async () => {
     setLoading(true);
     try {
@@ -24,7 +24,7 @@ const BuySell = () => {
         { headers: { Authorization: account.jwtToken } }
       );
       setCoins(data.coins || []);
-      setFiats(data.fiats || []); 
+      setFiats(data.fiats || []);
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {

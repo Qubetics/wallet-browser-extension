@@ -1027,7 +1027,7 @@ function SendCoins() {
                       },
                     });
                   }
-                } catch (error) {
+                } catch (error) { 
                   console.log(error);
                   store.dispatch(setLoading(false));
                   return messageApi.error(error.message);
