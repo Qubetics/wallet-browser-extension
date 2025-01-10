@@ -64,6 +64,19 @@ function CrossChainDetails() {
     },
   } = useLocation();
   console.log("TOKEN !!! 1", token1);
+console.log("PREVVVVVVVVVVVVVV ", {
+  token1,
+  token2,
+  amount,
+  amount2,
+  tokenChain,
+  networkFee,
+  walletAddress,
+  token1Price,
+  parentCoin,
+  rpc,
+  coinSymbol,
+});
 
   const [isModalOpen1, setIsModalOpen1] = useState(false);
 
@@ -186,7 +199,8 @@ function CrossChainDetails() {
               style={{ textAlign: "center" }}
               className="swapDetails__valueText__text"
             >
-              <span>To</span>
+              {/* <span>To</span> */}
+              <span>From</span>
               <br />
               {addCommasToNumber(getFlooredFixed(parseFloat(amount), 6))}{" "}
               {token1.symbol}
@@ -195,7 +209,8 @@ function CrossChainDetails() {
               style={{ textAlign: "center" }}
               className="swapDetails__valueText__text"
             >
-              <span>From</span>
+              <span>To</span>
+              {/* <span>From</span> */}
               {addCommasToNumber(getFlooredFixed(parseFloat(amount2), 4))}{" "}
               {token2.symbol}
             </p>
@@ -233,10 +248,11 @@ function CrossChainDetails() {
             <div className="swapDetails__keyValuesText__inner">
               <p className="swapDetails__keyValuesText__key">Network Fee</p>
               <p className="swapDetails__keyValuesText__val">
-                {addCommasToNumber(getFlooredFixed(networkFee, 5))}{" "}
+                {console.log()}
+                {addCommasToNumber(getFlooredFixed(networkFee, 6))}{" "}
                 {tokenChain.currencySymbol} / ({currency.symbol}{" "}
                 {addCommasToNumber(
-                  getFlooredFixed(parentCoin.value * networkFee, 2)
+                  getFlooredFixed(parentCoin?.value * networkFee, 2)
                 )}
                 )
               </p>

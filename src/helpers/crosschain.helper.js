@@ -125,6 +125,9 @@ export class CrossChainHelper {
 
       let hash = "";
 
+      let coinFamily = fromCoin?.coinFamily;
+      let gasPriceType = 3;
+
       if (fromCoin.tokenAddress) {
         hash = await Web3Helper.generateRawTransactionForTokenAndBroadcast(
           orderData.platformAddr,
@@ -140,10 +143,10 @@ export class CrossChainHelper {
           fromCoin.tokenAddress,
           Math.pow(10, fromCoin.decimals),
           symbol,
-          "swap",
-          // 2,
-          // 3,
-          // orderData.orderId
+          "cross_chain",
+          coinFamily,
+          gasPriceType,
+          orderData.orderId
         );
       } else {
         hash = await Web3Helper.generateRawTransactionForCoinAndBroadcast(
@@ -159,7 +162,9 @@ export class CrossChainHelper {
           chain.chainId,
           symbol,
           rpc,
-          "swap"
+          "cross_chain",
+          '',
+          orderData.orderId
         );
       }
 
