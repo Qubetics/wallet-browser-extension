@@ -675,7 +675,7 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
           </Link>
         ) : null}
         <Link
-          to="#"
+          to="/swap"
           className={
             path === "currencyDetails"
               ? "balanceDetails__items__whiteText"
