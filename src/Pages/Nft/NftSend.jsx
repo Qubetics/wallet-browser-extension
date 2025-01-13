@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import MenuRestofHeaders from "../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders";
 import SendNFTimg from "../../Assets/SendNFT.png";
 import { InputField } from "../../Components/InputField/InputFieldSimple";
 import AddressBook from "../../Assets/address-book-svgrepo-com.svg";
 import ButtonComp from "../../Components/ButtonComp/ButtonComp";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Drawer } from "antd";
 import varLine from "../../Assets/varLine.svg";
 import nftCopy from "../../Assets/nftCopy.svg";
@@ -13,6 +13,15 @@ function NftSend() {
   const [selectedAccount, setSelectedAccount] = useState(null);
   const [drawer, setDrawer] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const [nftDetails, setNftDetails] = useState();
+  useEffect(() => {
+    if (location.state) {
+      const nft = location.state;
+      setNftDetails(nft?.detail);
+      console.log("nftDetails", nft);
+    }
+  }, [location.state]);
 
   const handleConfirm = () => {
     // Simulating the data assignment
@@ -28,14 +37,14 @@ function NftSend() {
         <div className="flexedContent manageWalletHeight ">
           <div className="nftSend">
             <div className="nftSend_superInfluencers">
-              <img src={SendNFTimg} alt="Send NFT" />
+              <img src={nftDetails?.image} alt="Send NFT" />
               <div>
-                <h3>Super Influencers</h3>
+                <h3>{nftDetails?.name}</h3>
                 <p>
-                  <span>Token ID:</span> #170781515624
+                  <span>Token ID:</span> {nftDetails?.token_id}
                 </p>
                 <p>
-                  <span>Standard:</span> ERC-1155
+                  <span>Standard:</span> {nftDetails?.token_type}
                 </p>
               </div>
             </div>
@@ -89,7 +98,7 @@ function NftSend() {
                   }
                 />
                 <p className="availableNft">
-                  <span>Available NFTs:</span> 27
+                  <span>Available NFTs:</span> {nftDetails?.amount}
                 </p>
                 <p>
                   <span>Transaction Fees (Matic):</span> 3.265
