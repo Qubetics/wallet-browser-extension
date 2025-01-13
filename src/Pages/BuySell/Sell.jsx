@@ -107,10 +107,10 @@ const Sell = ({ coins = [], fiats = [], loading }) => {
       console.log("XXXXXXXXXXXXXXXXXXXXXXXXXXX ", res);
       if (!response.ok) {
         store.dispatch(setLoading(false));
-        if (res?.message.includes('Amount off limits.')) {
+        // if (res?.message.includes('Amount off limits.')) {
           messageApi.info("Please enter amount between min max range");
           return;
-        }
+        // }
       }
       console.log("SSSSSSSSAAAAAAAAAAAAAAa");
 
@@ -585,13 +585,13 @@ const Sell = ({ coins = [], fiats = [], loading }) => {
           text="Sell"
           maxWidth={"100%"}
           onClick={handleSellCoin} //{handleSell}
-          disabled={!amount || !isAmountValid || loading}
+          disabled={!amount || !isAmountValid || loading || amount==0}
         />
       </div>
 
       <TokenDrawer
         open={open}
-        onClose={() => setOpen(false)}
+        onClose={() => {setOpen(false); setKeyword('')}}
         tokens={filteredTokens}
         keyword={keyword}
         setKeyword={setKeyword}

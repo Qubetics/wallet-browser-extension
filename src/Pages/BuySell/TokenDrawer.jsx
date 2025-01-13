@@ -81,7 +81,7 @@ const TokenDrawer = ({
                                 style={{
                                     width: '100%',
                                 }}
-                                onClick={() => handleSelectToken(token)}
+                                onClick={() => { handleSelectToken(token); setKeyword(''); }}
                             >
                                 <div
                                     className="token"

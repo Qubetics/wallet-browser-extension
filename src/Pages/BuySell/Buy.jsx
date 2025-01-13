@@ -40,15 +40,18 @@ const Buy = ({ coins = [], fiats = [] }) => {
       const fiatItem = selectedFiat?.currency_code?.toUpperCase();
       const cryptoItem = selectedCoin?.coin?.coin_symbol?.toUpperCase()
       let url = `https://api.mercuryo.io/v1.6/widget/buy/rate?from=${fiatItem}&to=${cryptoItem}&amount=${amount}&widget_id=${process.env.REACT_APP_MERCURYO_WIDGET_ID}`
+      if(cryptoItem<=0){
+        return;
+      }
       const response = await fetch(url);
-      console.log("urlurlurlurl ", response);
       const res = await response?.json()
+      console.log("urlurlurlurl ", res);
       if (!response.ok) {
         store.dispatch(setLoading(false));
-        if (res?.message.includes('Amount off limits.')) {
+        // if (res?.message.includes('Amount off limits.')) {
           messageApi.info("Please enter amount between min max range");
           return;
-        }
+        // }
       }
       setConversionDetail(res?.data);
       store.dispatch(setLoading(false));
@@ -65,7 +68,7 @@ const Buy = ({ coins = [], fiats = [] }) => {
       setReceiveAmount("");
     }
     const timer = setTimeout(() => {
-      if (selectedFiat && selectedCoin && amount) {
+      if (selectedFiat && selectedCoin && amount>0) {
         convertedAmtFun()
       }
     }, 3000);
@@ -561,13 +564,13 @@ const Buy = ({ coins = [], fiats = [] }) => {
           maxWidth={"100%"}
           // onClick={handleBuy}
           onClick={onPressContinue}
-          disabled={!amount || !isAmountValid}
+          disabled={!amount || !isAmountValid || amount == 0}
         />
       </div>
 
       <TokenDrawer
         open={open}
-        onClose={() => setOpen(false)}
+        onClose={() => {setOpen(false); setKeyword('')}}
         tokens={filteredTokens}
         keyword={keyword}
         setKeyword={setKeyword}
