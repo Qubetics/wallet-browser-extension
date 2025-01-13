@@ -7,34 +7,64 @@ import MenuRestofHeaders from "../../Components/BalanceDetails/MenuRestofHeaders
 import { useSelector } from "react-redux";
 import { Tabs, TabList, Tab } from "react-tabs";
 import { server } from "../../server";
+import { supportedNetworks } from "../../helpers/constant";
+
+
 
 const BuySell = () => {
-  const { account } = useSelector((state) => state);
+  const { account, tokens } = useSelector((state) => state);
   const [selectedTab, setSelectedTab] = useState(0);
   const [coins, setCoins] = useState([]);
   const [fiats, setFiats] = useState([]);
+  const [fiatsPayMethod, setFiatsPayMethod] = useState([]);
   const [loading, setLoading] = useState(false);
-  console.log("SELECTED TAB", selectedTab);
-  const init = async () => {
-    setLoading(true);
-    try {
-      const { data } = await server.post(
-        `/wallet/buy-sell-coins`,
-        { addresses: [account.address] },
-        { headers: { Authorization: account.jwtToken } }
-      );
-      setCoins(data.coins || []);
-      setFiats(data.fiats || []);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+
+  const getSupportedCurrency = async () => {
+    const response = await server.get("/wallet/currencyfiatlist", {
+      headers: {
+        Authorization: account.jwtToken,
+      },
+    });
+    const data = response.data.data;
+    const responseCurr = await fetch('https://api.mercuryo.io/v1.6/lib/currencies')
+    const { data: mercurioResponse } = await responseCurr.json();
+    console.log();
+
+    const crypto_currencies = mercurioResponse?.config.crypto_currencies;
+    const fiat = mercurioResponse?.fiat
+    const fiat_payment_methods = mercurioResponse?.fiat_payment_methods
+
+    const filterFiatCurr = data.filter(itm => fiat.some(symbol => symbol.toLowerCase() === itm?.currency_code?.toLowerCase()));
+    console.log("Filtered currency : ", filterFiatCurr);
+    setFiats(filterFiatCurr);
+    // List of supported blockchains/networks
+
+    let cryptoCurrencies = crypto_currencies.filter(crypto => {
+      let networkData = supportedNetworks.find(supportNetwork => crypto.network.toLowerCase() == supportNetwork.network.toLowerCase());
+      if (networkData) {
+        crypto.coin_family = networkData.coin_family;
+        return crypto;
+      }
+    })
+    const myCrypto = tokens.filter(itm => {
+      const findData = cryptoCurrencies.find(crypto => itm?.coin.coin_family === crypto?.coin_family &&
+        (itm?.coin.is_token === 0 ? crypto?.currency.toLowerCase() === itm?.coin?.coin_symbol.toLowerCase() : crypto?.contract.toLowerCase() === itm?.coin?.token_address.toLowerCase()))
+      if (findData) {
+        return itm;
+      }
+    });
+    console.log("MMMMMMMMMMMMMM ", myCrypto);
+    
+    setCoins(myCrypto);
+    setFiatsPayMethod(fiat_payment_methods);
+  }
 
   useEffect(() => {
-    init();
+    getSupportedCurrency();
   }, []);
+
+
+
 
   return (
     <div className={`scrollableCont`}>

@@ -1,16 +1,18 @@
 
 export const BL_CODE = {
- 1: "BNB",
- 2: "ETH",
- 3: "BTC",
- 4: "POL",
- 5: "SOL",
- 6: "TRX"
+  1: "BNB",
+  2: "ETH",
+  3: "BTC",
+  4: "POL",
+  5: "SOL",
+  6: "TRX"
 }
 
+export const supportedNetworks = [{ coin_family: 1, network: "BINANCESMARTCHAIN" }, { coin_family: 2, network: "ETHEREUM" }, { coin_family: 3, network: "BITCOIN" }, { coin_family: 4, network: "POLYGON" }, { coin_family: 5, network: "SOLANA" }, { coin_family: 6, network: "TRON" }];
 
-export const token_type = (coin_family) =>{
-return coin_family === 1 ? "BEP20" : coin_family === 2 ? "ERC20":coin_family === 4 ?"POL ERC20":coin_family === 5 ?"SPL":coin_family === 6 ?"TRC20":""
+
+export const token_type = (coin_family) => {
+  return coin_family === 1 ? "BEP20" : coin_family === 2 ? "ERC20" : coin_family === 4 ? "POL ERC20" : coin_family === 5 ? "SPL" : coin_family === 6 ? "TRC20" : ""
 }
 
 export const SWIFT_ERROR = {
