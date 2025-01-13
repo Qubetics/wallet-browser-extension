@@ -8,6 +8,8 @@ import { useSelector } from "react-redux";
 import { Tabs, TabList, Tab } from "react-tabs";
 import { server } from "../../server";
 import { supportedNetworks } from "../../helpers/constant";
+import { store } from "../..";
+import { setLoading } from "../../actions/loading";
 
 
 
@@ -17,46 +19,57 @@ const BuySell = () => {
   const [coins, setCoins] = useState([]);
   const [fiats, setFiats] = useState([]);
   const [fiatsPayMethod, setFiatsPayMethod] = useState([]);
-  const [loading, setLoading] = useState(false);
+  // const [loading, setLoading] = useState(false);
 
   const getSupportedCurrency = async () => {
-    const response = await server.get("/wallet/currencyfiatlist", {
-      headers: {
-        Authorization: account.jwtToken,
-      },
-    });
-    const data = response.data.data;
-    const responseCurr = await fetch('https://api.mercuryo.io/v1.6/lib/currencies')
-    const { data: mercurioResponse } = await responseCurr.json();
-    console.log();
+    try {
+      console.log("Come");
+      
+      store.dispatch(setLoading(true));
+      const response = await server.get("/wallet/currencyfiatlist", {
+        headers: {
+          Authorization: account.jwtToken,
+        },
+      });
+      const data = response.data.data;
+      const responseCurr = await fetch('https://api.mercuryo.io/v1.6/lib/currencies')
+      const { data: mercurioResponse } = await responseCurr.json();
+      console.log();
 
-    const crypto_currencies = mercurioResponse?.config.crypto_currencies;
-    const fiat = mercurioResponse?.fiat
-    const fiat_payment_methods = mercurioResponse?.fiat_payment_methods
+      const crypto_currencies = mercurioResponse?.config.crypto_currencies;
+      const fiat = mercurioResponse?.fiat
+      const fiat_payment_methods = mercurioResponse?.fiat_payment_methods
 
-    const filterFiatCurr = data.filter(itm => fiat.some(symbol => symbol.toLowerCase() === itm?.currency_code?.toLowerCase()));
-    console.log("Filtered currency : ", filterFiatCurr);
-    setFiats(filterFiatCurr);
-    // List of supported blockchains/networks
+      const filterFiatCurr = data.filter(itm => fiat.some(symbol => symbol.toLowerCase() === itm?.currency_code?.toLowerCase()));
+      console.log("Filtered currency : ", filterFiatCurr);
+      setFiats(filterFiatCurr);
+      // List of supported blockchains/networks
 
-    let cryptoCurrencies = crypto_currencies.filter(crypto => {
-      let networkData = supportedNetworks.find(supportNetwork => crypto.network.toLowerCase() == supportNetwork.network.toLowerCase());
-      if (networkData) {
-        crypto.coin_family = networkData.coin_family;
-        return crypto;
-      }
-    })
-    const myCrypto = tokens.filter(itm => {
-      const findData = cryptoCurrencies.find(crypto => itm?.coin.coin_family === crypto?.coin_family &&
-        (itm?.coin.is_token === 0 ? crypto?.currency.toLowerCase() === itm?.coin?.coin_symbol.toLowerCase() : crypto?.contract.toLowerCase() === itm?.coin?.token_address.toLowerCase()))
-      if (findData) {
-        return itm;
-      }
-    });
-    console.log("MMMMMMMMMMMMMM ", myCrypto);
-    
-    setCoins(myCrypto);
-    setFiatsPayMethod(fiat_payment_methods);
+      let cryptoCurrencies = crypto_currencies.filter(crypto => {
+        let networkData = supportedNetworks.find(supportNetwork => crypto.network.toLowerCase() == supportNetwork.network.toLowerCase());
+        if (networkData) {
+          crypto.coin_family = networkData.coin_family;
+          return crypto;
+        }
+      })
+      const myCrypto = tokens.filter(itm => {
+        const findData = cryptoCurrencies.find(crypto => itm?.coin.coin_family === crypto?.coin_family &&
+          (itm?.coin.is_token === 0 ? crypto?.currency.toLowerCase() === itm?.coin?.coin_symbol.toLowerCase() : crypto?.contract.toLowerCase() === itm?.coin?.token_address.toLowerCase()))
+        if (findData) {
+          return itm;
+        }
+      });
+      console.log("MMMMMMMMMMMMMM ", myCrypto);
+
+      setCoins(myCrypto);
+      setFiatsPayMethod(fiat_payment_methods);
+      store.dispatch(setLoading(false));
+    } catch (error) {
+      console.log("-------------------> ", error);
+      
+      store.dispatch(setLoading(false));
+    }
+
   }
 
   useEffect(() => {
@@ -111,10 +124,10 @@ const BuySell = () => {
 
           <div className="tabContent">
             {selectedTab === 0 && (
-              <Buy fiats={fiats} coins={coins} loading={loading} />
+              <Buy fiats={fiats} coins={coins}  />
             )}
             {selectedTab === 1 && (
-              <Sell fiats={fiats} coins={coins} loading={loading} />
+              <Sell fiats={fiats} coins={coins} />
             )}
           </div>
         </Tabs>
