@@ -1,3 +1,5 @@
+/*global chrome*/
+
 import React, { useEffect, useState } from "react";
 import MenuRestofHeaders from "../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders";
 import SendNFTimg from "../../Assets/SendNFT.png";
@@ -8,19 +10,64 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Drawer } from "antd";
 import varLine from "../../Assets/varLine.svg";
 import nftCopy from "../../Assets/nftCopy.svg";
+import { useSelector } from "react-redux";
+import { Web3Helper } from "../../helpers/web3.helper";
+import { store } from "../..";
+import { setLoading } from "../../actions/loading";
+import { BigNumber, ethers } from "ethers";
 
 function NftSend() {
   const [selectedAccount, setSelectedAccount] = useState(null);
   const [drawer, setDrawer] = useState(false);
+  const [toAddress, setToAddress] = useState(null);
+  const [quantity, setQuantity] = useState();
+  const [networkFee, setNetworkFee] = useState();
+
+  const { account } = useSelector((state) => state);
+
   const navigate = useNavigate();
   const location = useLocation();
   const [nftDetails, setNftDetails] = useState();
+  const getNetwrokFee = async () => {
+    const { chains } = await chrome.storage.local.get("chains");
+    const chain = chains.find((chain) => chain.coinFamily == 2);
+    console.log("CHAIN", chain);
+
+    const gasData = await Web3Helper.getGasPrice(
+      chain.slug,
+      toAddress,
+      account?.coinFamilyAndAddress[2],
+      0,
+      nftDetails?.token_address,
+      nftDetails?.token_id,
+      nftDetails?.token_type,
+      nftDetails?.amount
+    );
+
+    if (!ethers.utils.isAddress(toAddress)) {
+      store.dispatch(setLoading(false));
+      return console.error("Please provide a valid address to proceed.");
+    }
+
+    let gasEstimate = gasData.estimate;
+    const gasPrice = new BigNumber(gasData.price).times(1000000000);
+
+    if (!gasPrice) {
+      store.dispatch(setLoading(false));
+      return console.error("Unable to fetch gas price at the moment.");
+    }
+
+    const gasInEth = gasPrice.times(gasEstimate).div(Math.pow(10, 18));
+    // networkFee: gasInEth.toFixed(5),
+    setNetworkFee(gasInEth.toFixed(5));
+  };
   useEffect(() => {
     if (location.state) {
       const nft = location.state;
       setNftDetails(nft?.detail);
       console.log("nftDetails", nft);
     }
+    getNetwrokFee();
   }, [location.state]);
 
   const handleConfirm = () => {
@@ -52,9 +99,11 @@ function NftSend() {
               <InputField
                 placeholder="Enter Address"
                 label="Address"
+                getData={setToAddress}
+                value={toAddress}
                 addonAfter={
                   <>
-                    <span>
+                    {/* <span>
                       <img
                         src={AddressBook}
                         style={{
@@ -64,13 +113,17 @@ function NftSend() {
                         }}
                         alt="Address Book"
                       />
-                    </span>
+                    </span> */}
                     <span
                       style={{
                         position: "relative",
                         top: "-5px",
                         color: "#fff",
                         cursor: "pointer",
+                      }}
+                      onClick={async () => {
+                        const data = await navigator.clipboard.readText();
+                        setToAddress(data);
                       }}
                     >
                       Paste
@@ -82,6 +135,8 @@ function NftSend() {
                 <InputField
                   placeholder="00"
                   label="Quantity"
+                  getData={setQuantity}
+                  value={quantity}
                   addonAfter={
                     <span
                       style={{
@@ -92,6 +147,7 @@ function NftSend() {
                         color: "#fff",
                         cursor: "pointer",
                       }}
+                      onClick={() => setQuantity(nftDetails?.amount)}
                     >
                       Max
                     </span>
@@ -101,7 +157,7 @@ function NftSend() {
                   <span>Available NFTs:</span> {nftDetails?.amount}
                 </p>
                 <p>
-                  <span>Transaction Fees (Matic):</span> 3.265
+                  <span>Transaction Fees : {networkFee}</span>
                 </p>
               </div>
             </div>
@@ -111,6 +167,7 @@ function NftSend() {
               onClick={handleConfirm}
               text="Confirm"
               maxWidth="100%"
+              disabled={!toAddress || !quantity}
             />
           </div>
         </div>
@@ -124,14 +181,14 @@ function NftSend() {
       >
         <div className="nftSend">
           <div className="nftSend_superInfluencers">
-            <img src={SendNFTimg} alt="Send NFT" />
+            <img src={nftDetails?.image} alt="Send NFT" />
             <div>
-              <h3>Super Influencers</h3>
+              <h3>{nftDetails?.name}</h3>
               <p>
-                <span>Token ID:</span> #170781515624
+                <span>Token ID:</span> {nftDetails?.token_id}
               </p>
               <p>
-                <span>Standard:</span> ERC-1155
+                <span>Standard:</span> {nftDetails?.token_type}
               </p>
             </div>
           </div>
@@ -144,7 +201,7 @@ function NftSend() {
               <div className="d-flex" style={{ marginBottom: "34px" }}>
                 <span>From</span>
                 <p>
-                  0xdfhsfn.....fgds{" "}
+                  {account?.coinFamilyAndAddress[2]}
                   <span>
                     <img src={nftCopy} alt="copy" />
                   </span>
@@ -153,7 +210,7 @@ function NftSend() {
               <div className="d-flex">
                 <span>TO</span>
                 <p>
-                  0xdfhsfn.....fgds{" "}
+                  {toAddress}
                   <span>
                     <img src={nftCopy} alt="copy" />
                   </span>
