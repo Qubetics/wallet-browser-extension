@@ -48,7 +48,7 @@ const TokenDrawer = ({
                 {/* Search Input Field */}
                 <div className="search" style={{ marginBottom: '30px' }}>
                     <InputField
-                        placeholder="Search name or paste address"
+                        placeholder="Search..."
                         coloredBg="#eef3f9"
                         value={keyword}
                         checkForSymbols

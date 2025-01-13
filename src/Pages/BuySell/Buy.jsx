@@ -49,7 +49,7 @@ const Buy = ({ coins = [], fiats = [] }) => {
           messageApi.info("Please enter amount between min max range");
           return;
         }
-      } 
+      }
       setConversionDetail(res?.data);
       store.dispatch(setLoading(false));
     } catch (error) {
@@ -72,9 +72,7 @@ const Buy = ({ coins = [], fiats = [] }) => {
     return () => clearTimeout(timer);
   }, [amount, selectedFiat, selectedCoin]);
 
-  useEffect(() => {
-    console.log("FFFFFFFFFFFFFFFFFFF ", fiats, coins);
-
+  useEffect(() => { 
     if (fiats.length > 0) setSelectedFiat(fiats[0]);
     if (coins.length > 0) setSelectedCoin(coins[0]);
   }, [fiats, coins]);
@@ -83,20 +81,19 @@ const Buy = ({ coins = [], fiats = [] }) => {
     setFilteredTokens(sel === 0 ? fiats : coins);
   }, [sel, fiats, coins]);
 
-  const handleSearch = (searchTerm) => {
+  const handleSearch = (searchTerm) => { 
     setKeyword(searchTerm);
-    if (sel === 0) {
+    if (sel === 0) { 
       setFilteredTokens(
         fiats.filter((fiat) =>
-          fiat.currency_name?.toLowerCase().includes(searchTerm.toLowerCase())
+          fiat.currency_name?.toLowerCase().includes(searchTerm?.toLowerCase()) || fiat.currency_code?.toLowerCase().includes(searchTerm.toLowerCase())
         )
       );
     } else {
       setFilteredTokens(
         coins.filter((coin) =>
-          coin.coin_name?.toLowerCase().includes(searchTerm.toLowerCase())
-        )
-      );
+          coin?.coin?.coin_name?.toLowerCase().includes(searchTerm?.toLowerCase()) || coin?.coin?.coin_symbol?.toLowerCase().includes(searchTerm?.toLowerCase())
+          ));
     }
   };
 
@@ -116,8 +113,6 @@ const Buy = ({ coins = [], fiats = [] }) => {
   };
 
   const handleFieldChange = async (amount) => {
-    console.log("handleFieldChangehandleFieldChange");
-
     if (!amount) {
       setAmount("");
       setReceiveAmount("");
@@ -166,9 +161,7 @@ const Buy = ({ coins = [], fiats = [] }) => {
 
   const findMinMax = async () => {
     try {
-      store.dispatch(setLoading(true));
-      console.log("SSSSSSSSSSSSSSSSS ", selectedFiat);
-      console.log("CCCCCCCCCCCCCCCCC ", selectedCoin);
+      store.dispatch(setLoading(true)); 
       store.dispatch(setLoading(true));
       const fiatItem = selectedFiat?.currency_code?.toUpperCase();
       const cryptoItem = selectedCoin?.coin?.coin_symbol?.toUpperCase()
@@ -176,8 +169,7 @@ const Buy = ({ coins = [], fiats = [] }) => {
       const { data } = await response.json();
       setFiatMinMax(data[`${fiatItem}`]);
       setCryptoMinMax(data[`${cryptoItem}`]);
-      store.dispatch(setLoading(false));
-      console.log("DATA--------------> ", data[`${fiatItem}`], " ----------- ", data[`${cryptoItem}`], data);
+      store.dispatch(setLoading(false)); 
     } catch (error) {
       messageApi.error(error?.message || "Something went wrong.")
       store.dispatch(setLoading(false));

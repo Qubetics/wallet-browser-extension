@@ -142,13 +142,13 @@ const Sell = ({ coins = [], fiats = [], loading }) => {
     if (sel === 1) {
       setFilteredTokens(
         coins.filter((coin) =>
-          coin.coin_name?.toLowerCase().includes(searchTerm.toLowerCase())
-        )
+          coin?.coin?.coin_name?.toLowerCase().includes(searchTerm.toLowerCase()) || coin?.coin?.coin_symbol?.toLowerCase().includes(searchTerm.toLowerCase()
+          ))
       );
     } else {
       setFilteredTokens(
         fiats.filter((fiat) =>
-          fiat.currency_name?.toLowerCase().includes(searchTerm.toLowerCase())
+          fiat.currency_name?.toLowerCase().includes(searchTerm.toLowerCase()) || fiat.currency_code?.toLowerCase().includes(searchTerm.toLowerCase()) 
         )
       );
     }
@@ -464,10 +464,10 @@ const Sell = ({ coins = [], fiats = [], loading }) => {
       let orderUrl = ""
       let sourceCurrName = selectedCoin?.coin?.coin_symbol
       let network = networkItm?.network
-      let targetCurrName =  selectedFiat?.currency_code/// Need to check
+      let targetCurrName = selectedFiat?.currency_code/// Need to check
       let sourceAmount = amount
       let targetAmount = conversionDetail?.fiat_amount || 0
-      let coin_family = selectedCoin?.coin?.coin_family 
+      let coin_family = selectedCoin?.coin?.coin_family
       let coinId = selectedCoin?.coin?.coin_id
 
 
