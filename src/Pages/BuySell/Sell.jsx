@@ -1,5 +1,6 @@
 /*global chrome*/
 import React, { useEffect, useState } from "react";
+import crypto from 'crypto-browserify';
 import TokenDrawer from "./TokenDrawer";
 import { InputField } from "../../Components/InputField/InputFieldSimple";
 import ButtonComp from "../../Components/ButtonComp/ButtonComp";
@@ -461,13 +462,12 @@ const Sell = ({ coins = [], fiats = [], loading }) => {
       let secret = wallet_address + process.env.REACT_APP_MERCURYO_SECRET_KEY;
       let signature = crypto.createHash("sha512").update(secret).digest("hex");
       let orderUrl = ""
-      let sourceCurrName = selectedFiat?.currency_code
+      let sourceCurrName = selectedCoin?.coin?.coin_symbol
       let network = networkItm?.network
-      let targetCurrName = selectedCoin?.coin?.coin_symbol /// Need to check
+      let targetCurrName =  selectedFiat?.currency_code/// Need to check
       let sourceAmount = amount
       let targetAmount = conversionDetail?.fiat_amount || 0
-      let coin_family = selectedCoin?.coin?.coin_family
-      let backHead = "Buy "
+      let coin_family = selectedCoin?.coin?.coin_family 
       let coinId = selectedCoin?.coin?.coin_id
 
 
@@ -485,16 +485,17 @@ const Sell = ({ coins = [], fiats = [], loading }) => {
       }
 
       console.log("DERRRRRRRRRRRRRRR ", {
-        sourceCurrName,
-        network,
-        targetCurrName,
+        sourceAmount,
         targetAmount,
+        sourceCurrName,
+        targetCurrName,
+        network,
         wallet_address,
         merchant_transaction_id,
         signature
       });
 
-      window.open(`https://exchange.mercuryo.io/?widget_id=${process.env.REACT_APP_MERCURYO_WIDGET_ID}&type=buy&fiat_currency=${sourceCurrName}&fix_fiat_currency=true&network=${network}&currency=${targetCurrName}&fix_currency=true&fiat_amount=${sourceAmount}&fix_fiat_amount=true&amount=${targetAmount}&fix_amount=true&address=${wallet_address}&redirect_url=${process.env.REACT_APP_MERCURYO_REDIRECT_URL}&merchant_transaction_id=${merchant_transaction_id}&signature=${signature}`, '_blank', 'noopener,noreferrer')
+      window.open(`https://exchange.mercuryo.io/?widget_id=${process.env.REACT_APP_MERCURYO_WIDGET_ID}&type=sell&fiat_currency=${targetCurrName}&fix_fiat_currency=true&network=${network}&currency=${sourceCurrName}&fix_currency=true&fiat_amount=${targetAmount}&fix_fiat_amount=true&amount=${sourceAmount}&fix_amount=true&address=${wallet_address}&redirect_url=${process.env.REACT_APP_MERCURYO_REDIRECT_URL}&merchant_transaction_id=${merchant_transaction_id}&signature=${signature}`, '_blank', 'noopener,noreferrer')
       console.log("orderUrl>>>>", orderUrl);
 
 
