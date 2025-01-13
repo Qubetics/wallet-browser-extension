@@ -41,10 +41,21 @@ const Buy = ({ coins = [], fiats = [] }) => {
       const cryptoItem = selectedCoin?.coin?.coin_symbol?.toUpperCase()
       let url = `https://api.mercuryo.io/v1.6/widget/buy/rate?from=${fiatItem}&to=${cryptoItem}&amount=${amount}&widget_id=${process.env.REACT_APP_MERCURYO_WIDGET_ID}`
       const response = await fetch(url);
-      const { data } = await response.json()
-      setConversionDetail(data);
+      console.log("urlurlurlurl ", response);
+      const res = await response?.json()
+      if (!response.ok) {
+        store.dispatch(setLoading(false));
+        if (res?.message.includes('Amount off limits.')) {
+          messageApi.info("Please enter amount between min max range");
+          return;
+        }
+      } 
+      setConversionDetail(res?.data);
       store.dispatch(setLoading(false));
     } catch (error) {
+      console.log("------------xxx------------>", error);
+      setConversionDetail(null);
+      messageApi.error(error?.message || "Something went wrong.")
       store.dispatch(setLoading(false));
     }
   }
@@ -54,23 +65,16 @@ const Buy = ({ coins = [], fiats = [] }) => {
       setReceiveAmount("");
     }
     const timer = setTimeout(() => {
-      //   if (amount >= +fiatMinMax?.min && amount <= +fiatMinMax?.max) {
       if (selectedFiat && selectedCoin && amount) {
         convertedAmtFun()
       }
-      //   } else { 
-      //     messageApi.error('Please enter valid amount')
-      //   }
-    }, 2000);
-
+    }, 3000);
     return () => clearTimeout(timer);
-
-
-  }, [amount,selectedFiat, selectedCoin]);
+  }, [amount, selectedFiat, selectedCoin]);
 
   useEffect(() => {
     console.log("FFFFFFFFFFFFFFFFFFF ", fiats, coins);
-    
+
     if (fiats.length > 0) setSelectedFiat(fiats[0]);
     if (coins.length > 0) setSelectedCoin(coins[0]);
   }, [fiats, coins]);
@@ -175,6 +179,7 @@ const Buy = ({ coins = [], fiats = [] }) => {
       store.dispatch(setLoading(false));
       console.log("DATA--------------> ", data[`${fiatItem}`], " ----------- ", data[`${cryptoItem}`], data);
     } catch (error) {
+      messageApi.error(error?.message || "Something went wrong.")
       store.dispatch(setLoading(false));
     }
 
@@ -482,6 +487,7 @@ const Buy = ({ coins = [], fiats = [] }) => {
       // }, 800);
     } catch (error) {
       console.log("onPressContinue error =======", error);
+      messageApi.error("Something went wrong.")
       // setIsLoading(false);
 
     }
@@ -531,7 +537,13 @@ const Buy = ({ coins = [], fiats = [] }) => {
           checkForSymbols={true}
           disabled={true}
           addonAfter={selectAfter2}
-          value={conversionDetail?.total[selectedCoin?.coin?.coin_symbol?.toUpperCase()] || 0}   //{receiveAmount}
+          value={
+            addCommasToNumber(
+              parseFloat(
+                getFlooredFixed(conversionDetail?.total[selectedCoin?.coin?.coin_symbol?.toUpperCase()] || 0, 6)
+              )
+            )
+          }
         />
         {cryptoMinMax && <span style={{ color: "white" }}>Min : {
           addCommasToNumber(

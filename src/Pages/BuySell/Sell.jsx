@@ -7,6 +7,10 @@ import { Select, message } from "antd";
 import { server } from "../../server";
 import { useSelector } from "react-redux";
 import { DURATION } from "../../config/message.config";
+import { store } from "../..";
+import { setLoading } from "../../actions/loading";
+import { addCommasToNumber, getFlooredFixed } from "../../helpers/conversion.helper";
+import { supportedNetworks } from "../../helpers/constant";
 
 const Sell = ({ coins = [], fiats = [], loading }) => {
   const { account, theme } = useSelector((state) => state);
@@ -23,6 +27,9 @@ const Sell = ({ coins = [], fiats = [], loading }) => {
   const [selectedCoin, setSelectedCoin] = useState(null);
   const [sel, setSel] = useState(1);
   const [isAmountValid, setIsAmountValid] = useState(true);
+  const [cryptoMinMax, setCryptoMinMax] = useState(null);
+  const [fiatMinMax, setFiatMinMax] = useState(null);
+  const [conversionDetail, setConversionDetail] = useState(null);
 
   console.log(
     selectedFiat,
@@ -36,6 +43,41 @@ const Sell = ({ coins = [], fiats = [], loading }) => {
     filteredTokens,
     "filteredTokens"
   );
+
+
+  const findMinMax = async () => {
+    try {
+      store.dispatch(setLoading(true));
+      console.log("SSSSSSSSSSSSSSSSS ", selectedFiat);
+      console.log("CCCCCCCCCCCCCCCCC ", selectedCoin);
+      store.dispatch(setLoading(true));
+      const fiatItem = selectedFiat?.currency_code?.toUpperCase();
+      const cryptoItem = selectedCoin?.coin?.coin_symbol?.toUpperCase()
+      let url = `https://api.mercuryo.io/v1.6/public/currency-limits?from=${fiatItem}&to=${cryptoItem}&widget_id=${process.env.REACT_APP_MERCURYO_WIDGET_ID}&type=sell`
+      const response = await fetch(url);
+      const { data } = await response.json();
+      setFiatMinMax(data[`${fiatItem}`]);
+      setCryptoMinMax(data[`${cryptoItem}`]);
+      store.dispatch(setLoading(false));
+      console.log("DATA--------------> ", data[`${fiatItem}`], " ----------- ", data[`${cryptoItem}`], data);
+    } catch (error) {
+      messageApi.error(error?.message || "Something went wrong.")
+      store.dispatch(setLoading(false));
+    }
+
+
+  }
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      // if (selectedCoin && selectedFiat && amount) {
+      if (selectedCoin && selectedFiat) {
+        findMinMax();
+        // handleFieldChange(amount);
+      }
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [selectedCoin, selectedFiat, amount]);
 
   useEffect(() => {
     if (amount === "") {
@@ -51,6 +93,48 @@ const Sell = ({ coins = [], fiats = [], loading }) => {
   useEffect(() => {
     setFilteredTokens(sel === 1 ? coins : fiats);
   }, [sel, coins, fiats]);
+
+  const convertedAmtFun = async () => {
+    try {
+      store.dispatch(setLoading(true));
+      const fiatItem = selectedFiat?.currency_code?.toUpperCase();
+      const cryptoItem = selectedCoin?.coin?.coin_symbol?.toUpperCase()
+      let url = `https://api.mercuryo.io/v1.6/public/convert?from=${cryptoItem}&to=${fiatItem}&type=sell&amount=${amount}&widget_id=${process.env.REACT_APP_MERCURYO_WIDGET_ID}`
+      const response = await fetch(url);
+      console.log("urlurlurlurl ", response);
+      const res = await response?.json()
+      console.log("XXXXXXXXXXXXXXXXXXXXXXXXXXX ", res);
+      if (!response.ok) {
+        store.dispatch(setLoading(false));
+        if (res?.message.includes('Amount off limits.')) {
+          messageApi.info("Please enter amount between min max range");
+          return;
+        }
+      }
+      console.log("SSSSSSSSAAAAAAAAAAAAAAa");
+
+      setConversionDetail(res?.data);
+      store.dispatch(setLoading(false));
+    } catch (error) {
+      console.log("------------xxx------------>", error);
+      setConversionDetail(null);
+      messageApi.error(error?.message || "Something went wrong.")
+      store.dispatch(setLoading(false));
+    }
+  }
+
+  useEffect(() => {
+    if (amount === "") {
+      setReceiveAmount("");
+    }
+    const timer = setTimeout(() => {
+      if (selectedFiat && selectedCoin && amount) {
+        convertedAmtFun()
+      }
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, [amount, selectedFiat, selectedCoin]);
+
 
   const handleSearch = (searchTerm) => {
     setKeyword(searchTerm);
@@ -130,6 +214,8 @@ const Sell = ({ coins = [], fiats = [], loading }) => {
   };
 
   useEffect(() => {
+    console.log("selectedCoin && selectedFiat && amount ", selectedCoin, selectedFiat, amount);
+
     const timer = setTimeout(() => {
       if (selectedCoin && selectedFiat && amount) {
         handleFieldChange(amount);
@@ -209,7 +295,7 @@ const Sell = ({ coins = [], fiats = [], loading }) => {
                     {selectedFiat?.currency_name?.split("")[0]}
                   </div>
                 )}
-                {selectedFiat?.currency_name}
+                {selectedFiat?.currency_code}
               </span>
             ),
           },
@@ -266,10 +352,10 @@ const Sell = ({ coins = [], fiats = [], loading }) => {
         open={false}
         value={[
           {
-            value: selectedCoin?.coin_id,
+            value: selectedCoin?.coin?.coin_id,
             label: (
               <span className="flexedItemSelect">
-                {selectedCoin?.coin_image ? (
+                {selectedCoin?.coin?.coin_image ? (
                   <img
                     style={{
                       height: "20px",
@@ -278,7 +364,7 @@ const Sell = ({ coins = [], fiats = [], loading }) => {
                       position: "relative",
                       borderRadius: "15px",
                     }}
-                    src={selectedCoin?.coin_image}
+                    src={selectedCoin?.coin?.coin_image}
                   />
                 ) : (
                   <div
@@ -293,20 +379,20 @@ const Sell = ({ coins = [], fiats = [], loading }) => {
                       alignItems: "center",
                     }}
                   >
-                    {selectedCoin?.coin_name?.split("")[0]}
+                    {selectedCoin?.coin?.coin_name?.split("")[0]}
                   </div>
                 )}
-                {selectedCoin?.coin_name}
+                {selectedCoin?.coin?.coin_symbol?.toUpperCase()}
               </span>
             ),
           },
         ]}
         defaultValue={[
           {
-            value: selectedCoin?.coin_id,
+            value: selectedCoin?.coin?.coin_id,
             label: (
               <span className="flexedItemSelect">
-                {selectedCoin?.coin_image ? (
+                {selectedCoin?.coin?.coin_image ? (
                   <img
                     style={{
                       height: "20px",
@@ -314,7 +400,7 @@ const Sell = ({ coins = [], fiats = [], loading }) => {
                       objectFit: "contain",
                       borderRadius: "15px",
                     }}
-                    src={selectedCoin?.coin_image}
+                    src={selectedCoin?.coin?.coin_image}
                   />
                 ) : (
                   <div
@@ -329,10 +415,10 @@ const Sell = ({ coins = [], fiats = [], loading }) => {
                       alignItems: "center",
                     }}
                   >
-                    {selectedCoin?.coin_name?.split("")[0]}
+                    {selectedCoin?.coin?.coin_name?.split("")[0]}
                   </div>
                 )}
-                {selectedCoin?.coin_name}
+                {selectedCoin?.coin?.coin_symbol?.toUpperCase()}
               </span>
             ),
           },
@@ -346,6 +432,93 @@ const Sell = ({ coins = [], fiats = [], loading }) => {
       />
     </div>
   );
+
+
+  const handleSellCoin = () => {
+    console.log("AMOUNT : ", amount);
+    console.log("fiatMinMax : ", fiatMinMax);
+    console.log("cryptoMinMax : ", cryptoMinMax);
+    console.log("conversionDetail : ", conversionDetail);
+
+    try {
+      if (amount < +cryptoMinMax?.min) {
+        messageApi.error("Minimum amount should be greater then " + cryptoMinMax?.min + selectedFiat?.currency_code)
+        return
+      } else if (amount > +cryptoMinMax?.max) {
+        messageApi.error("Maximum amount should be less then " + cryptoMinMax?.max + selectedFiat?.currency_code)
+        return
+      } else if (!amount || !conversionDetail?.fiat_amount) {
+        messageApi.error("Please enter amount")
+        return
+      }
+      console.log("selectedCrypto<<<", selectedCoin);
+      let wallet_address = selectedCoin?.wallet_address;
+      console.log("wallet_address data ======", wallet_address);
+
+      let networkItm = supportedNetworks.find(itm => itm?.coin_family == selectedCoin?.coin?.coin_family);
+      console.log("NETWWWWWWWWWWWWWW ", networkItm);
+      let merchant_transaction_id = Math.random().toString(36).substr(2) + Date.now().toString(36);
+      let secret = wallet_address + process.env.REACT_APP_MERCURYO_SECRET_KEY;
+      let signature = crypto.createHash("sha512").update(secret).digest("hex");
+      let orderUrl = ""
+      let sourceCurrName = selectedFiat?.currency_code
+      let network = networkItm?.network
+      let targetCurrName = selectedCoin?.coin?.coin_symbol /// Need to check
+      let sourceAmount = amount
+      let targetAmount = conversionDetail?.fiat_amount || 0
+      let coin_family = selectedCoin?.coin?.coin_family
+      let backHead = "Buy "
+      let coinId = selectedCoin?.coin?.coin_id
+
+
+      let apiReq = {
+        ramp_type: "mercuryo",
+        coin_id: coinId,
+        coin_family: coin_family,
+        tx_type: 'buy',
+        wallet_address: wallet_address,
+        amount,
+        fiat_price: Number(targetAmount),
+        fiat_type: sourceCurrName,
+        merchant_id: merchant_transaction_id,
+        order_id: merchant_transaction_id
+      }
+
+      console.log("DERRRRRRRRRRRRRRR ", {
+        sourceCurrName,
+        network,
+        targetCurrName,
+        targetAmount,
+        wallet_address,
+        merchant_transaction_id,
+        signature
+      });
+
+      window.open(`https://exchange.mercuryo.io/?widget_id=${process.env.REACT_APP_MERCURYO_WIDGET_ID}&type=buy&fiat_currency=${sourceCurrName}&fix_fiat_currency=true&network=${network}&currency=${targetCurrName}&fix_currency=true&fiat_amount=${sourceAmount}&fix_fiat_amount=true&amount=${targetAmount}&fix_amount=true&address=${wallet_address}&redirect_url=${process.env.REACT_APP_MERCURYO_REDIRECT_URL}&merchant_transaction_id=${merchant_transaction_id}&signature=${signature}`, '_blank', 'noopener,noreferrer')
+      console.log("orderUrl>>>>", orderUrl);
+
+
+      // Actions.currentScene != "BuySellWebview" &&
+      //   Actions.BuySellWebview({
+      //     providerName: backHead + targetCurrName,
+      //     redirectLink: orderUrl,
+      //     apiReq: apiReq,
+      //     onSuccess: () => {
+      //       // setToValue("")
+      //       // setYouPay("")
+      //     }
+      //   });
+      // setTimeout(() => {
+      //   // setIsLoading(false);
+      // }, 800);
+    } catch (error) {
+      console.log("onPressContinue error =======", error);
+      messageApi.error("Something went wrong.")
+      // setIsLoading(false);
+
+    }
+  };
+
 
   return (
     <div className="swap manageWalletHeight manageTabHeight">
@@ -363,6 +536,19 @@ const Sell = ({ coins = [], fiats = [], loading }) => {
           getData={setAmount}
           value={amount}
         />
+        {cryptoMinMax && <span style={{ color: "white" }}>Min : {
+          addCommasToNumber(
+            parseFloat(
+              getFlooredFixed(cryptoMinMax?.min, 6)
+            )
+          )
+        } {" "} Max : {
+            addCommasToNumber(
+              parseFloat(
+                getFlooredFixed(cryptoMinMax?.max, 6)
+              )
+            )
+          }</span>}
 
         <InputField
           mb0={true}
@@ -373,8 +559,21 @@ const Sell = ({ coins = [], fiats = [], loading }) => {
           checkForSymbols={true}
           disabled={true}
           addonAfter={selectAfter}
-          value={receiveAmount}
+          value={conversionDetail?.fiat_amount} //{receiveAmount}
         />
+        {fiatMinMax && <span style={{ color: "white" }}>Min : {
+          addCommasToNumber(
+            parseFloat(
+              getFlooredFixed(fiatMinMax?.min, 2)
+            )
+          )
+        } {" "} Max : {
+            addCommasToNumber(
+              parseFloat(
+                getFlooredFixed(fiatMinMax?.max, 2)
+              )
+            )
+          }</span>}
         {/* 
             <div className="buy_sell_des">
                 Buy/Sell digital assets are supported by Moonpay. Digital assets are high risk. Make sure you understand the risks associated with each digital asset before you invest.
@@ -384,7 +583,7 @@ const Sell = ({ coins = [], fiats = [], loading }) => {
         <ButtonComp
           text="Sell"
           maxWidth={"100%"}
-          onClick={handleSell}
+          onClick={handleSellCoin} //{handleSell}
           disabled={!amount || !isAmountValid || loading}
         />
       </div>
@@ -398,6 +597,7 @@ const Sell = ({ coins = [], fiats = [], loading }) => {
         handleSearch={handleSearch}
         handleSelectToken={handleSelectToken}
         theme={theme}
+        sel={sel}
       />
     </div>
   );

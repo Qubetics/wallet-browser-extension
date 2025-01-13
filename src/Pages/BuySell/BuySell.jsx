@@ -10,6 +10,9 @@ import { server } from "../../server";
 import { supportedNetworks } from "../../helpers/constant";
 import { store } from "../..";
 import { setLoading } from "../../actions/loading";
+import { message } from "antd";
+import { DURATION } from "../../config/message.config";
+
 
 
 
@@ -18,13 +21,32 @@ const BuySell = () => {
   const [selectedTab, setSelectedTab] = useState(0);
   const [coins, setCoins] = useState([]);
   const [fiats, setFiats] = useState([]);
+  const [allFiats, setAllFiats] = useState([]);
   const [fiatsPayMethod, setFiatsPayMethod] = useState([]);
+  const [messageApi, contextHolder] = message.useMessage({
+    duration: DURATION,
+    maxCount: 1,
+  });
   // const [loading, setLoading] = useState(false);
+
+
+  useEffect(() => {
+    console.log("FIATESSSSSSSSSSSSSSSSSSS ", fiats);
+
+    if (selectedTab == 1) {
+      let eurUsd = Array.isArray(allFiats) && allFiats.filter(itm => itm?.currency_code == "EUR" || itm?.currency_code == "USD");
+      console.log("eurUsdeurUsd ", eurUsd);
+      setFiats(eurUsd);
+    }else {
+      setFiats(allFiats)
+    }
+
+  }, [selectedTab]);
 
   const getSupportedCurrency = async () => {
     try {
       console.log("Come");
-      
+
       store.dispatch(setLoading(true));
       const response = await server.get("/wallet/currencyfiatlist", {
         headers: {
@@ -34,7 +56,7 @@ const BuySell = () => {
       const data = response.data.data;
       const responseCurr = await fetch('https://api.mercuryo.io/v1.6/lib/currencies')
       const { data: mercurioResponse } = await responseCurr.json();
-      console.log();
+      console.log('mercurioResponse-----> ', mercurioResponse);
 
       const crypto_currencies = mercurioResponse?.config.crypto_currencies;
       const fiat = mercurioResponse?.fiat
@@ -43,6 +65,7 @@ const BuySell = () => {
       const filterFiatCurr = data.filter(itm => fiat.some(symbol => symbol.toLowerCase() === itm?.currency_code?.toLowerCase()));
       console.log("Filtered currency : ", filterFiatCurr);
       setFiats(filterFiatCurr);
+      setAllFiats(filterFiatCurr)
       // List of supported blockchains/networks
 
       let cryptoCurrencies = crypto_currencies.filter(crypto => {
@@ -66,7 +89,7 @@ const BuySell = () => {
       store.dispatch(setLoading(false));
     } catch (error) {
       console.log("-------------------> ", error);
-      
+      messageApi.error(error?.message || "Something went wrong.");
       store.dispatch(setLoading(false));
     }
 
@@ -81,6 +104,7 @@ const BuySell = () => {
 
   return (
     <div className={`scrollableCont`}>
+      {contextHolder}
       <MenuRestofHeaders backTo={"/wallet"} title={"Buy Sell"} />
       <div className="flexedContent ">
         <Tabs selectedIndex={selectedTab}>
@@ -124,7 +148,7 @@ const BuySell = () => {
 
           <div className="tabContent">
             {selectedTab === 0 && (
-              <Buy fiats={fiats} coins={coins}  />
+              <Buy fiats={fiats} coins={coins} />
             )}
             {selectedTab === 1 && (
               <Sell fiats={fiats} coins={coins} />
