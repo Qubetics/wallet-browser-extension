@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { store } from "../..";
 import { setNFTbackData } from "../../actions/setNFTBackData";
@@ -13,82 +13,138 @@ import SuperInfluencers3 from "../../Assets/SuperInfluencers3.png";
 import SuperInfluencers4 from "../../Assets/SuperInfluencers4.png";
 import MenuRestofHeaders from "../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders";
 import EthIcon from "../../Assets/EthIcon.svg";
+import { server } from "../../server";
+import { setImage } from "../../actions/image";
+import { setNfts } from "../../actions/nfts";
 
 function NftDetail() {
   const navigate = useNavigate();
   const { account } = useSelector((state) => state);
-  const {
-    state: { detail },
-  } = useLocation();
+  const { nfts } = useSelector((state) => state);
 
-  const [messageApi, contextHolder] = message.useMessage();
+  console.log("account", account);
+  const init = async (refresh) => {
+    const walletsList = await server.post(
+      `/wallet/nft/from_moalis`,
+      {
+        address_list: [
+          // {
+          //   coin_symbol: "bnb",
+          //   coin_family: "1",
+          //   wallet_address: account.coinFamilyAndAddress[1],
+          // },
+          {
+            coin_symbol: "eth",
+            coin_family: "2",
+            wallet_address: account?.coinFamilyAndAddress[2],
+          },
+          // {
+          //   coin_symbol: "btc",
+          //   coin_family: "3",
+          //   wallet_address: account.coinFamilyAndAddress[3],
+          // },
+          // {
+          //   coin_symbol: "pol",
+          //   coin_family: "4",
+          //   wallet_address: account.coinFamilyAndAddress[4],
+          // },
+          // {
+          //   coin_symbol: "sol",
+          //   coin_family: "5",
+          //   wallet_address: account.coinFamilyAndAddress[5],
+          // },
+          // {
+          //   coin_symbol: "trx",
+          //   coin_family: "6",
+          //   wallet_address: account.coinFamilyAndAddress[6],
+          // },
+        ],
+      },
+      {
+        headers: {
+          Authorization: account.jwtToken,
+        },
+      }
+    );
+    console.log("GET NFT API RESPONSE:::", walletsList);
+    store.dispatch(setNfts(walletsList.data.data));
+  };
 
-  const nftData = [
-    {
-      id: 1,
-      imgSrc: SuperInfluencers1,
-      title: "Super Influencers",
-      subText: "#1260",
-      price: 6.5,
-      icon: EthIcon,
-    },
-    {
-      id: 2,
-      imgSrc: SuperInfluencers2,
-      title: "Super Influencers",
-      subText: "#1261",
-      price: 5.75,
-      icon: EthIcon,
-    },
-    {
-      id: 3,
-      imgSrc: SuperInfluencers3,
-      title: "Super Influencers",
-      subText: "#1260",
-      price: 6.5,
-      icon: EthIcon,
-    },
-    {
-      id: 4,
-      imgSrc: SuperInfluencers4,
-      title: "Super Influencers",
-      subText: "#1261",
-      price: 5.75,
-      icon: EthIcon,
-    },
-    {
-      id: 5,
-      imgSrc: SuperInfluencers1,
-      title: "Super Influencers",
-      subText: "#1260",
-      price: 6.5,
-      icon: EthIcon,
-    },
-    {
-      id: 6,
-      imgSrc: SuperInfluencers2,
-      title: "Super Influencers",
-      subText: "#1261",
-      price: 5.75,
-      icon: EthIcon,
-    },
-    {
-      id: 7,
-      imgSrc: SuperInfluencers3,
-      title: "Super Influencers",
-      subText: "#1260",
-      price: 6.5,
-      icon: EthIcon,
-    },
-    {
-      id: 8,
-      imgSrc: SuperInfluencers4,
-      title: "Super Influencers",
-      subText: "#1261",
-      price: 5.75,
-      icon: EthIcon,
-    },
-  ];
+  //in your component
+  // function addDefaultSrc(ev) {
+  //   ev.target.src = nft1;
+  // }
+
+  useEffect(() => {
+    init();
+  }, []);
+
+  // const nftData = [
+  //   {
+  //     id: 1,
+  //     imgSrc: SuperInfluencers1,
+  //     title: "Super Influencers",
+  //     subText: "#1260",
+  //     price: 6.5,
+  //     icon: EthIcon,
+  //   },
+  //   {
+  //     id: 2,
+  //     imgSrc: SuperInfluencers2,
+  //     title: "Super Influencers",
+  //     subText: "#1261",
+  //     price: 5.75,
+  //     icon: EthIcon,
+  //   },
+  //   {
+  //     id: 3,
+  //     imgSrc: SuperInfluencers3,
+  //     title: "Super Influencers",
+  //     subText: "#1260",
+  //     price: 6.5,
+  //     icon: EthIcon,
+  //   },
+  //   {
+  //     id: 4,
+  //     imgSrc: SuperInfluencers4,
+  //     title: "Super Influencers",
+  //     subText: "#1261",
+  //     price: 5.75,
+  //     icon: EthIcon,
+  //   },
+  //   {
+  //     id: 5,
+  //     imgSrc: SuperInfluencers1,
+  //     title: "Super Influencers",
+  //     subText: "#1260",
+  //     price: 6.5,
+  //     icon: EthIcon,
+  //   },
+  //   {
+  //     id: 6,
+  //     imgSrc: SuperInfluencers2,
+  //     title: "Super Influencers",
+  //     subText: "#1261",
+  //     price: 5.75,
+  //     icon: EthIcon,
+  //   },
+  //   {
+  //     id: 7,
+  //     imgSrc: SuperInfluencers3,
+  //     title: "Super Influencers",
+  //     subText: "#1260",
+  //     price: 6.5,
+  //     icon: EthIcon,
+  //   },
+  //   {
+  //     id: 8,
+  //     imgSrc: SuperInfluencers4,
+  //     title: "Super Influencers",
+  //     subText: "#1261",
+  //     price: 5.75,
+  //     icon: EthIcon,
+  //   },
+  // ];
   return (
     // <div className='nfDetail'>
     //   {contextHolder}
@@ -166,41 +222,48 @@ function NftDetail() {
     //   )}
     // </div>
     <div className="">
-      <MenuRestofHeaders title={"NFT’s"} backTo={"/wallet"}  />
+      <MenuRestofHeaders title={"NFT’s"} backTo={"/wallet"} />
       <div className={`scrollableCont`}>
         <div className={`flexedContent padding-Top`}>
           <div className="nftDetailList">
             <div className="nftDetail">
-              {nftData.map((nft) => (
-                <div
-                  className="nftSuper"
-                  key={nft.id}
-                  onClick={() => {
-                    // navigate("/nftManage");
-                  }}
-                >
-                  <div className="nftSuper_img">
-                    <img src={nft.imgSrc} alt="NftImg" />
-                  </div>
-                  <div className="superInfluencers">
-                    <h4>{nft.title}</h4>
-                    <div className="superInfluencers_subText">
-                      <h4>{nft.subText}</h4>
-                      <h4>
-                        <span style={{ marginRight: "5px" }}>
-                          <img src={nft.icon} alt="" />
-                        </span>
-                        {nft.price}
-                      </h4>
+              {nfts.length === 0
+                ? "NFT's will appear here"
+                : nfts.map((nft) => (
+                    <div
+                      className="nftSuper"
+                      key={nft?.id}
+                      onClick={() => {
+                        store.dispatch(setImage(nft.image || null));
+                        navigate("/nftManage", {
+                          state: {
+                            detail: nft,
+                          },
+                        });
+                      }}
+                    >
+                      <div className="nftSuper_img">
+                        <img src={nft?.image} alt="NftImg" />
+                      </div>
+                      <div className="superInfluencers">
+                        <h4>{nft.title}</h4>
+                        <div className="superInfluencers_subText">
+                          <h4>{nft?.name}</h4>
+                          <h4>
+                            <span style={{ marginRight: "5px" }}>
+                              <img src={nft?.icon} alt="" />
+                            </span>
+                            {/* {nft?.amount} */}
+                          </h4>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              ))}
+                  ))}
             </div>
           </div>
           <div style={{ marginTop: "15px" }}>
             <ButtonComp
-            disabled={true}
+              disabled={true}
               onClick={() => {
                 navigate("/receive-currency", { state: { nftButton: true } });
               }}

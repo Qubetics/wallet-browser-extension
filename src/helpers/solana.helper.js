@@ -207,23 +207,21 @@ export class SolanaHelper {
       //   [myKeyPair]
       // );
       // console.log('signature====', signature);
+      let payload = {
+        txid: signature,
+        from: from,
+        to: to,
+        amount: amount,
+        gas_price: "0.000005",
+        tx_type: type || "withdraw",
+      };
+      payload["orderId"] = orderId;
 
-      const myResponse = await server.post(
-        `${slug}/send`,
-        {
-          txid: signature,
-          from: from,
-          to: to,
-          amount: amount,
-          gas_price: "0.000005",
-          tx_type: type || "withdraw",
+      const myResponse = await server.post(`${slug}/send`, payload, {
+        headers: {
+          Authorization: account.jwtToken,
         },
-        {
-          headers: {
-            Authorization: account.jwtToken,
-          },
-        }
-      );
+      });
 
       return myResponse.data;
     } catch (error) {
@@ -343,8 +341,8 @@ export class SolanaHelper {
       //   '============amount'
       // );
 
-      const PRIORITY_FEE_INSTRUCTIONS = ComputeBudgetProgram.setComputeUnitPrice({microLamports: 25000});
-
+      const PRIORITY_FEE_INSTRUCTIONS =
+        ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 25000 });
 
       const transaction = new Transaction().add(
         splToken.Token.createTransferInstruction(
@@ -360,7 +358,6 @@ export class SolanaHelper {
       transaction.recentBlockhash = blockhash;
       console.log("🚀 ~ SolanaHelper ~ transaction:", transaction);
 
-      
       transaction.sign(myKeyPair);
       console.log(transaction);
 
@@ -407,29 +404,19 @@ export class SolanaHelper {
       //   transaction,
       //   [myKeyPair]
       // );
+      let payload = {
+        txid: signature,
+        from: from,
+        to: to,
+        amount: amount,
+        gas_price: "0.000005",
+        tx_type: type || "withdraw",
+      };
+      payload["orderId"] = orderId;
 
       const myResponse = await server.post(
         `${slug}/send`,
-        {
-          txid: signature,
-          from: from,
-          to: to,
-          amount: amount,
-          gas_price: "0.000005",
-          tx_type: type || "withdraw",
-
-          // address_book_name: contact || '',
-          // amount: parseFloat(amount),
-          // coin_id: coinId,
-          // fiat_price: fiatPrice.toString(),
-          // fiat_type: fiatType,
-          // from_address: from,
-          // source_type: 'ANDROID',
-          // to_address: to,
-          // trnx_type: type || 'withdraw',
-          // tx_id: signature,
-          // order_id: orderId || undefined,
-        },
+        payload,
 
         {
           headers: {
@@ -554,7 +541,7 @@ export class SolanaHelper {
         }
       }
     };
-  
+
     try {
       abortableResender();
       const lastValidBlockHeight =
@@ -595,7 +582,7 @@ export class SolanaHelper {
     } finally {
       controller.abort();
     }
-  
+
     // in case rpc is not synced yet, we add some retries
     const response = promiseRetry(
       async (retry) => {
@@ -614,9 +601,8 @@ export class SolanaHelper {
         minTimeout: 1e3,
       }
     );
-  
+
     return response;
-  
   }
 
   unwrapSolana = async (amount, coinId) => {

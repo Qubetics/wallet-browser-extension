@@ -320,8 +320,8 @@ export class Web3Helper {
         gasPriceType == 1
           ? gasPriceRes.safe
           : gasPriceType == 2
-            ? gasPriceRes.propose
-            : gasPriceRes.fast;
+          ? gasPriceRes.propose
+          : gasPriceRes.fast;
       const gasInEth = (gsFee * Math.pow(10, 9) * gaslimit) / Math.pow(10, 18);
       const gasPrice =
         symbol == "eth"
@@ -382,8 +382,7 @@ export class Web3Helper {
       const trx = signedTransaction.rawTransaction;
       const stringWithout0x = trx.startsWith("0x") ? trx.slice(2) : trx;
 
-      let payload =
-      {
+      let payload = {
         nonce: nonce,
         tx_raw: stringWithout0x,
         from: from,
@@ -392,16 +391,13 @@ export class Web3Helper {
         gas_estimate: gaslimit,
         gas_price: gasPriceInWei, //gsFee * Math.pow(10, 9),//gasInEth,
         tx_type: type || "withdraw",
-      }
-      payload['orderId'] = orderId;
-      const response = await server.post(
-        `${slug}/${symbol}/send`, payload,
-        {
-          headers: {
-            Authorization: account.jwtToken,
-          },
-        }
-      );
+      };
+      payload["orderId"] = orderId;
+      const response = await server.post(`${slug}/${symbol}/send`, payload, {
+        headers: {
+          Authorization: account.jwtToken,
+        },
+      });
 
       return response.data.tx_hash;
     } catch (error) {
@@ -487,8 +483,8 @@ export class Web3Helper {
       coinFamily == 1
         ? process.env.REACT_APP_BNB_RPC
         : coinFamily == 2
-          ? process.env.REACT_APP_ETH_RPC
-          : process.env.REACT_APP_MATIC_RPC
+        ? process.env.REACT_APP_ETH_RPC
+        : process.env.REACT_APP_MATIC_RPC
     );
 
     const transaction = {
@@ -577,8 +573,8 @@ export class Web3Helper {
         gasPriceType == 1
           ? gasPriceRes.safe
           : gasPriceType == 2
-            ? gasPriceRes.propose
-            : gasPriceRes.fast;
+          ? gasPriceRes.propose
+          : gasPriceRes.fast;
 
       const gasPrice =
         "0xA07c5b74C9B40447a954e1466938b865b6BBea36" === tokenAddress
@@ -628,10 +624,10 @@ export class Web3Helper {
         gas_estimate: gaslimit,
         gas_price: gasPriceInWei,
         tx_type: type || "withdraw",
-      }
+      };
 
       if (orderId) {
-        payload['orderId'] = orderId;
+        payload["orderId"] = orderId;
       }
       const response = await server.post(
         `${slug}/${tokenAddress}/send`,
@@ -707,7 +703,13 @@ export class Web3Helper {
         return false;
       }
 
-      const gasPriceRes = await this.getGasPrice(slug, to, from, 1, tokenAddress);
+      const gasPriceRes = await this.getGasPrice(
+        slug,
+        to,
+        from,
+        1,
+        tokenAddress
+      );
       console.log(
         "🚀 ~ file: web3.helper.js:290 ~ Web3Helper ~ gasPriceRes:",
         gasPriceRes
@@ -770,9 +772,6 @@ export class Web3Helper {
     }
   };
 
-
-
-
   static generateRawTransactionForTokenAndBroadcastExternalCopy = async (
     to,
     from,
@@ -830,7 +829,14 @@ export class Web3Helper {
         return false;
       }
 
-      const gasPriceRes = await this.getGasPrice(slug, to, from, 0, tokenAddress, symbol);
+      const gasPriceRes = await this.getGasPrice(
+        slug,
+        to,
+        from,
+        0,
+        tokenAddress,
+        symbol
+      );
 
       console.log(
         "🚀 ~ file: web3.helper.js:290 ~ Web3Helper ~ gasPriceRes:",
@@ -884,7 +890,6 @@ export class Web3Helper {
           tx_raw: signedTransaction.rawTransaction.split("0x")[1],
           tx_type: "dapp",
           nonce,
-
 
           // tx_raw: stringWithout0x,
           // from: from,

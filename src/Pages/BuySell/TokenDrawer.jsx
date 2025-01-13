@@ -16,7 +16,7 @@ const TokenDrawer = ({
     theme,
     sel
 }) => {
-    console.log(tokens, "Available Tokens");
+    // console.log(tokens, "Available Tokens");
 
     return (
         <Drawer

@@ -1,28 +1,48 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import MenuRestofHeaders from "../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders";
 import ManageWalletImg from "../../Assets/ManageWalletImg.png";
 import ButtonComp from "../../Components/ButtonComp/ButtonComp";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 function NftManageWallet() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [nftDetails, setNftDetails] = useState();
+  useEffect(() => {
+    if (location.state) {
+      const nft = location.state;
+      setNftDetails(nft?.detail);
+      console.log("nftDetails", nft);
+    }
+  }, [location.state]);
   const contactAddresses = [
-    { id: 1, label: "Contact Address", address: "0X4e8...57b8fd" },
-    { id: 2, label: "Owner Address", address: "0X4e8...57b8fd" },
-    { id: 3, label: "Token ID", address: "#170781515624" },
-    { id: 2, label: "Token Standard.", address: "ERC-1155" },
-    { id: 3, label: "Quantity", address: "01" },
+    {
+      id: 1,
+      label: "Contact Address",
+      address: `${nftDetails?.token_address.slice(
+        0,
+        15
+      )}...${nftDetails?.token_address.slice(-5)}`,
+    },
+    {
+      id: 2,
+      label: "Owner Address",
+      address: `${nftDetails?.owner_of.slice(
+        0,
+        15
+      )}...${nftDetails?.owner_of.slice(-5)}`,
+    },
+    { id: 3, label: "Token ID", address: nftDetails?.token_id },
+    { id: 2, label: "Token Standard.", address: nftDetails?.token_type },
+    { id: 3, label: "Quantity", address: nftDetails?.amount },
   ];
   return (
     <div>
-      <MenuRestofHeaders title={"Manage Wallet"}  backTo={"/wallet"} />
+      <MenuRestofHeaders title={"Manage Wallet"} backTo={"/nftDetail"} />
       <div className={`scrollableCont`}>
         <div className={`flexedContent manageWalletHeight`}>
           <div className="nftManage">
-            <img src={ManageWalletImg} alt="img" />
-            <p className="nftManage_text">
-              Lorem Ipsum is simply dummy text of the printing and typesetting
-              industry. Lorem Ipsum has been the industry's standard dummy{" "}
-            </p>
+            <img src={nftDetails?.image} alt="img" />
+            <p className="nftManage_text">{nftDetails?.description}</p>
             <div className="nftManage_countryYears">
               <div style={{ textAlign: "left" }}>
                 <h5>USA</h5>
@@ -51,7 +71,11 @@ function NftManageWallet() {
           <div style={{ marginTop: "15px" }}>
             <ButtonComp
               onClick={() => {
-                navigate("/NftSend");
+                navigate("/NftSend", {
+                  state: {
+                    detail: nftDetails,
+                  },
+                });
               }}
               text={"Send"}
               maxWidth={"100%"}
