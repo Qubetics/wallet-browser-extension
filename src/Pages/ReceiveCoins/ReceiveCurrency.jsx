@@ -6,6 +6,7 @@ import CopyIcon from "../../Assets/CopyIcon.svg";
 import "./Receive.scss";
 import ButtonComp from "../../Components/ButtonComp/ButtonComp";
 import { Link, useLocation } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 function ReceiveCurrency() {
   const [selectedCoin, setSelectedCoin] = useState({
@@ -15,8 +16,11 @@ function ReceiveCurrency() {
       coin_symbol: "BTC", // Replace with actual coin symbol
     },
   });
+  const { account } = useSelector((state) => state);
+
   const [messageApi, contextHolder] = message.useMessage();
   const location = useLocation();
+  console.log("LOCATION IN RECIEVE", location);
 
   useEffect(() => {
     const coin = {
@@ -54,17 +58,27 @@ function ReceiveCurrency() {
       {contextHolder}
       <MenuRestofHeaders
         backTo={"/receive-tokens"}
-        title={`Receive ${location?.state?.symbol?.toUpperCase()}`}
+        title={
+          isReceiveCurrencyRoute
+            ? `Receive NFT`
+            : `Receive ${location?.state?.symbol?.toUpperCase()}`
+        }
       />
       <div className="receiveCurrency_content  manageWalletHeight">
         <div className={`flexedContent padding-Top`}>
           <div className="receiveCurrency_balanceDetails">
             <QRCode
-              value={selectedCoin.wallet_address}
+              value={
+                isReceiveCurrencyRoute
+                  ? account?.coinFamilyAndAddress[2]
+                  : selectedCoin.wallet_address
+              }
               size={230}
               qrStyle="dots"
               eyeRadius={10}
-              logoImage={selectedCoin.coin.coin_image}
+              logoImage={
+                isReceiveCurrencyRoute ? null : selectedCoin.coin.coin_image
+              }
               logoHeight={55}
               logoWidth={55}
               logoPadding={8}
@@ -76,10 +90,19 @@ function ReceiveCurrency() {
           <div className="receiveCurrency_copy">
             <div>
               <p>Your Qubetics Address</p>
-              <h5>{selectedCoin.wallet_address.substring(0, 15)}...</h5>
+              {/* <h5>{selectedCoin.wallet_address?.substring(0, 15)}...</h5> */}
+              <h5>
+                {isReceiveCurrencyRoute
+                  ? `${account?.coinFamilyAndAddress[2].slice(0, 15)}...`
+                  : `${selectedCoin.wallet_address.slice(0, 15)}...`}
+              </h5>
             </div>
             <ButtonComp
-              onClick={() => goToBack(selectedCoin.wallet_address)}
+              onClick={() =>
+                isReceiveCurrencyRoute
+                  ? goToBack(account?.coinFamilyAndAddress[2])
+                  : goToBack(selectedCoin.wallet_address)
+              }
               text={
                 <span className="copyText">
                   Copy <img src={CopyIcon} alt="copy" />
@@ -98,7 +121,7 @@ function ReceiveCurrency() {
             about {`${location?.state?.symbol?.toUpperCase()}`} tokens.
           </p> */}
         </div>
-        <div style={{ padding: "0 24px" }}>
+        {/* <div style={{ padding: "0 24px" }}>
           {isReceiveCurrencyRoute ? (
             <div className="shareBtn">
               <div className="cancelBtn">
@@ -110,7 +133,7 @@ function ReceiveCurrency() {
             // <ButtonComp text={"Share Your Address"} maxWidth={"100%"} />
             ""
           )}
-        </div>
+        </div> */}
       </div>
     </div>
   );

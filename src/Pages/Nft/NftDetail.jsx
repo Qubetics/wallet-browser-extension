@@ -226,7 +226,7 @@ function NftDetail() {
       <div className={`scrollableCont`}>
         <div className={`flexedContent padding-Top`}>
           <div className="nftDetailList">
-            <div className="nftDetail">
+            <div className="nftDetail" style={{ color: "#fff" }}>
               {nfts.length === 0
                 ? "NFT's will appear here"
                 : nfts.map((nft) => (
@@ -263,9 +263,11 @@ function NftDetail() {
           </div>
           <div style={{ marginTop: "15px" }}>
             <ButtonComp
-              disabled={true}
+              disabled={false}
               onClick={() => {
-                navigate("/receive-currency", { state: { nftButton: true } });
+                navigate("/receive-currency", {
+                  state: { nftButton: true, nfts },
+                });
               }}
               text={"Receive"}
               maxWidth={"100%"}
