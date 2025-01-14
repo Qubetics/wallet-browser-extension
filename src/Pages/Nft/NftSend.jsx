@@ -39,8 +39,7 @@ function NftSend() {
 
   const getNetwrokFee = async () => {
     const { chains } = await chrome.storage.local.get("chains");
-    const chain = chains.find((chain) => chain.coinFamily == 2);
-    console.log("CHAIN", chain);
+    const chain = chains.find((chain) => chain.coinFamily == 2); 
 
     const gasData = await Web3Helper.getGasPriceNft(
       chain.slug,
@@ -51,8 +50,7 @@ function NftSend() {
       nftDetails?.token_type,
       quantity
     );
-
-    console.log("GAS DATA:-----------> ", gasData);
+ 
     setNftGasData(gasData)
 
     if (!ethers.utils.isAddress(toAddress)) {
@@ -62,16 +60,14 @@ function NftSend() {
 
     let gasEstimate = gasData.estimate;
     // const gasPrice = new BigNumber(gasData.price).times(1000000000);
-    const gasPrice = new BigNumber(gasData.fast).times(1000000000);
-    console.log("GASXXXXXXXXXXXXX ", gasPrice);
+    const gasPrice = new BigNumber(gasData.fast).times(1000000000); 
 
     if (!gasPrice) {
       store.dispatch(setLoading(false));
       return console.error("Unable to fetch gas price at the moment.");
     }
 
-    const gasInEth = gasPrice.times(gasEstimate).div(Math.pow(10, 18));
-    console.log("gasInEth as BigNumber: ", gasInEth.toString());
+    const gasInEth = gasPrice.times(gasEstimate).div(Math.pow(10, 18)); 
 
     // Convert gasInEth to a floating-point number using parseFloat
     const gasInEthFloat = parseFloat(gasInEth.toString());  // Convert BigNumber to string first
@@ -84,8 +80,7 @@ function NftSend() {
   useEffect(() => {
     if (location.state) {
       const nft = location.state;
-      setNftDetails(nft?.detail);
-      console.log("nftDetails", nft);
+      setNftDetails(nft?.detail); 
     }
 
   }, [location.state]);
@@ -106,10 +101,7 @@ function NftSend() {
 
 
   const handleTransaction = async () => {
-    store.dispatch(setLoading(true));
-
-    console.log("CCCCCCCCCCUUUUUUUUUUUU ", currency);
-
+    store.dispatch(setLoading(true)); 
     const { data } = await server.post(
       '/wallet/nativeCoinBalance',
       {
@@ -122,15 +114,9 @@ function NftSend() {
           Authorization: account.jwtToken,
         },
       }
-    );
-
-
-    console.log("BALANCEEEEEEEEEE ", data?.data?.wallet_data?.balance, " FFFFF ", networkFee);
-
+    ); 
     const balance = new BigNumber(data?.data?.wallet_data?.balance);
-    const fee = new BigNumber(networkFee);
-    console.log("FEEEEEEEE : ", balance, fee);
-
+    const fee = new BigNumber(networkFee); 
     if (fee.isGreaterThan(balance)) {
       store.dispatch(setLoading(false));
       // setOpenmodal(false);
@@ -182,8 +168,7 @@ function NftSend() {
           'WITHDRAW',
           nftDetails?.token_id,
           nftGasData
-        );
-      console.log("responseresponse===> ", response);
+        ); 
 
       if (!response) {
         store.dispatch(setLoading(false));
@@ -216,8 +201,7 @@ function NftSend() {
       }
     );
 
-    store.dispatch(setNfts(walletsList?.data?.data));
-    console.log("WALETTTTTTTT ", walletsList);
+    store.dispatch(setNfts(walletsList?.data?.data)); 
 
     store.dispatch(setLoading(false));
     navigate('/history');

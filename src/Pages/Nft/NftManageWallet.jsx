@@ -10,8 +10,7 @@ function NftManageWallet() {
   useEffect(() => {
     if (location.state) {
       const nft = location.state;
-      setNftDetails(nft?.detail);
-      console.log("nftDetails", nft);
+      setNftDetails(nft?.detail); 
     }
   }, [location.state]);
   const contactAddresses = [

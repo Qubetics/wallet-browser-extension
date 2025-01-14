@@ -26,8 +26,7 @@ function NftDetail() {
 
   const init = async (refresh) => {
     try {
-      store.dispatch(setLoading(true));
-      console.log("account", account);
+      store.dispatch(setLoading(true)); 
       const walletsList = await server.post(
         `/wallet/nft/from_moalis`,
         {
@@ -69,8 +68,7 @@ function NftDetail() {
             Authorization: account.jwtToken,
           },
         }
-      );
-      console.log("GET NFT API RESPONSE:::", walletsList);
+      ); 
       store.dispatch(setNfts(walletsList.data.data));
       store.dispatch(setLoading(false));
     } catch (error) {
