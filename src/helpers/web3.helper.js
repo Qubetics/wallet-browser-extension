@@ -7,6 +7,77 @@ import BigNumber from "bignumber.js";
 import { ethers } from "ethers";
 
 export class Web3Helper {
+
+  static gaspriceNft = async ({ slug, to, from, token_value, amount }) => {
+    const { account } = store.getState();
+    try {
+      const { data } = await server.post(
+        `/${slug}/${token_value}/gas_estimation`,
+        {
+          to, from, token_value, amount
+        },
+        {
+          headers: {
+            Authorization: account.jwtToken,
+          },
+        }
+      );
+      // console.log("NFTGASSSSSSSSSSSSSSS ", this.gaspriceNft);
+
+      return {
+        estimate: data.gas_estimate,
+        fast: data.resultList.fast_gas_price,
+        propose: data.resultList.propose_gas_price,
+        safe: data.resultList.safe_gas_price,
+      };
+    } catch (error) {
+      console.log("Error ", error);
+      return false;
+    }
+  }
+
+
+  static getGasPriceNft = async (
+    slug,
+    toAddress,
+    fromAddress,
+    tokenAddress,
+    token_value,
+    token_type,
+    amount
+  ) => {
+    console.log("XXXXXXXSSSSSSSSSSS----> ", {
+
+    });
+
+    const { account } = store.getState();
+    try {
+      const { data } = await server.post(
+        `/${slug}/${tokenAddress}/gas_estimation`,
+        {
+          from: fromAddress,
+          to: toAddress,
+          amount,
+          token_value
+        },
+        {
+          headers: {
+            Authorization: account.jwtToken,
+          },
+        }
+      );
+      return {
+        estimate: data.gas_estimate,
+        fast: data.resultList.fast_gas_price,
+        propose: data.resultList.propose_gas_price,
+        safe: data.resultList.safe_gas_price,
+      };
+    } catch (error) {
+      console.log("Error ", error);
+      return false;
+    }
+  };
+
   static getGasPrice = async (
     slug,
     toAddress,
@@ -320,8 +391,8 @@ export class Web3Helper {
         gasPriceType == 1
           ? gasPriceRes.safe
           : gasPriceType == 2
-          ? gasPriceRes.propose
-          : gasPriceRes.fast;
+            ? gasPriceRes.propose
+            : gasPriceRes.fast;
       const gasInEth = (gsFee * Math.pow(10, 9) * gaslimit) / Math.pow(10, 18);
       const gasPrice =
         symbol == "eth"
@@ -483,8 +554,8 @@ export class Web3Helper {
       coinFamily == 1
         ? process.env.REACT_APP_BNB_RPC
         : coinFamily == 2
-        ? process.env.REACT_APP_ETH_RPC
-        : process.env.REACT_APP_MATIC_RPC
+          ? process.env.REACT_APP_ETH_RPC
+          : process.env.REACT_APP_MATIC_RPC
     );
 
     const transaction = {
@@ -573,8 +644,8 @@ export class Web3Helper {
         gasPriceType == 1
           ? gasPriceRes.safe
           : gasPriceType == 2
-          ? gasPriceRes.propose
-          : gasPriceRes.fast;
+            ? gasPriceRes.propose
+            : gasPriceRes.fast;
 
       const gasPrice =
         "0xA07c5b74C9B40447a954e1466938b865b6BBea36" === tokenAddress
@@ -926,7 +997,8 @@ export class Web3Helper {
     tokenType,
     orderId,
     type,
-    tokenId
+    tokenId,
+    nftGasData
   ) => {
     try {
       const { account } = store.getState();
@@ -943,22 +1015,21 @@ export class Web3Helper {
         return false;
       }
 
-      const gasPriceRes = await this.getGasPrice(
-        slug,
-        to,
-        from,
-        1,
-        tokenAddress,
-        tokenId,
-        tokenType
-      );
-
-      // console.log(from, to, tokenId);
-
-      const gasPrice = gasPriceRes.price * Math.pow(10, 9);
-      const nonce = gasPriceRes.nonce;
-      const gaslimit = gasPriceRes.estimate;
-
+      // const gasPriceRes = await this.getGasPrice(
+      //   slug,
+      //   to,
+      //   from,
+      //   1,
+      //   tokenAddress,
+      //   tokenId,
+      //   tokenType
+      // );
+      const gasPriceRes = nftGasData;
+      const gaslimits = gasPriceRes.estimate;
+      const gasPrice = gasPriceRes.fast * Math.pow(10, 9);
+      const nonce = await this.getNonce(slug, 1, tokenAddress, null, from);
+      const gaslimit = (gaslimits * 2).toFixed(0);
+      
       const transaction = {
         nonce,
         gasPrice: web3.utils.toHex(gasPrice),
@@ -1029,7 +1100,8 @@ export class Web3Helper {
     tokenType,
     orderId,
     type,
-    tokenId
+    tokenId,
+    nftGasData
   ) => {
     try {
       const { account } = store.getState();
@@ -1040,22 +1112,13 @@ export class Web3Helper {
       const privateKey = await WalletHelper.getPrivateKey();
       if (!privateKey) {
         return false;
-      }
+      } 
+      const gasPriceRes = nftGasData; 
+      const gaslimits = gasPriceRes.estimate;
 
-      const gasPriceRes = await this.getGasPrice(
-        slug,
-        to,
-        from,
-        1,
-        tokenAddress,
-        tokenId,
-        tokenType,
-        amount
-      );
-
-      const gasPrice = gasPriceRes.price * Math.pow(10, 9);
-      const nonce = gasPriceRes.nonce;
-      const gaslimit = gasPriceRes.estimate;
+      const gasPrice = gasPriceRes.fast * Math.pow(10, 9);
+      const nonce = await this.getNonce(slug, 1, tokenAddress, null, from);
+      const gaslimit = (gaslimits * 2).toFixed(0);
 
       const data = contract.methods
         .safeTransferFrom(from, to, tokenId, amount, [])
@@ -1072,28 +1135,30 @@ export class Web3Helper {
         chainId,
       };
 
+      console.log("TRANSACTIONNNNNNNNNNNNNN NFT: ", transaction); 
       const signedTransaction = await web3.eth.accounts.signTransaction(
         transaction,
         privateKey
       );
 
       const myResponse = await server.post(
-        `${slug}/send`,
+        `${slug}/${tokenAddress}/send`,
         {
           address_book_name: contact || "",
           amount: parseFloat(amount),
           coin_id: coinId,
           fiat_price: fiatPrice.toString(),
           fiat_type: fiatType,
-          from_address: from,
+          from,
           gas_estimate: gasPriceRes.estimate,
           gas_price: gasPriceRes.price,
           source_type: "ANDROID",
-          to_address: to,
-          trnx_raw: signedTransaction.rawTransaction.split("0x")[1],
-          trnx_type: type || "withdraw",
+          to,
+          tx_raw: signedTransaction.rawTransaction.split("0x")[1],
+          tx_type: type || "withdraw",
           order_id: orderId || undefined,
           token_id: tokenId,
+          gas_price: gasPrice
         },
         {
           headers: {

@@ -16,58 +16,66 @@ import EthIcon from "../../Assets/EthIcon.svg";
 import { server } from "../../server";
 import { setImage } from "../../actions/image";
 import { setNfts } from "../../actions/nfts";
+import { setLoading } from "../../actions/loading";
 
 function NftDetail() {
   const navigate = useNavigate();
   const { account } = useSelector((state) => state);
   const { nfts } = useSelector((state) => state);
 
-  console.log("account", account);
+
   const init = async (refresh) => {
-    const walletsList = await server.post(
-      `/wallet/nft/from_moalis`,
-      {
-        address_list: [
-          // {
-          //   coin_symbol: "bnb",
-          //   coin_family: "1",
-          //   wallet_address: account.coinFamilyAndAddress[1],
-          // },
-          {
-            coin_symbol: "eth",
-            coin_family: "2",
-            wallet_address: account?.coinFamilyAndAddress[2],
-          },
-          // {
-          //   coin_symbol: "btc",
-          //   coin_family: "3",
-          //   wallet_address: account.coinFamilyAndAddress[3],
-          // },
-          // {
-          //   coin_symbol: "pol",
-          //   coin_family: "4",
-          //   wallet_address: account.coinFamilyAndAddress[4],
-          // },
-          // {
-          //   coin_symbol: "sol",
-          //   coin_family: "5",
-          //   wallet_address: account.coinFamilyAndAddress[5],
-          // },
-          // {
-          //   coin_symbol: "trx",
-          //   coin_family: "6",
-          //   wallet_address: account.coinFamilyAndAddress[6],
-          // },
-        ],
-      },
-      {
-        headers: {
-          Authorization: account.jwtToken,
+    try {
+      store.dispatch(setLoading(true));
+      console.log("account", account);
+      const walletsList = await server.post(
+        `/wallet/nft/from_moalis`,
+        {
+          address_list: [
+            // {
+            //   coin_symbol: "bnb",
+            //   coin_family: "1",
+            //   wallet_address: account.coinFamilyAndAddress[1],
+            // },
+            {
+              coin_symbol: "eth",
+              coin_family: "2",
+              wallet_address: account?.coinFamilyAndAddress[2],
+            },
+            // {
+            //   coin_symbol: "btc",
+            //   coin_family: "3",
+            //   wallet_address: account.coinFamilyAndAddress[3],
+            // },
+            // {
+            //   coin_symbol: "pol",
+            //   coin_family: "4",
+            //   wallet_address: account.coinFamilyAndAddress[4],
+            // },
+            // {
+            //   coin_symbol: "sol",
+            //   coin_family: "5",
+            //   wallet_address: account.coinFamilyAndAddress[5],
+            // },
+            // {
+            //   coin_symbol: "trx",
+            //   coin_family: "6",
+            //   wallet_address: account.coinFamilyAndAddress[6],
+            // },
+          ],
         },
-      }
-    );
-    console.log("GET NFT API RESPONSE:::", walletsList);
-    store.dispatch(setNfts(walletsList.data.data));
+        {
+          headers: {
+            Authorization: account.jwtToken,
+          },
+        }
+      );
+      console.log("GET NFT API RESPONSE:::", walletsList);
+      store.dispatch(setNfts(walletsList.data.data));
+      store.dispatch(setLoading(false));
+    } catch (error) {
+      store.dispatch(setLoading(false));
+    }
   };
 
   //in your component
@@ -79,72 +87,6 @@ function NftDetail() {
     init();
   }, []);
 
-  // const nftData = [
-  //   {
-  //     id: 1,
-  //     imgSrc: SuperInfluencers1,
-  //     title: "Super Influencers",
-  //     subText: "#1260",
-  //     price: 6.5,
-  //     icon: EthIcon,
-  //   },
-  //   {
-  //     id: 2,
-  //     imgSrc: SuperInfluencers2,
-  //     title: "Super Influencers",
-  //     subText: "#1261",
-  //     price: 5.75,
-  //     icon: EthIcon,
-  //   },
-  //   {
-  //     id: 3,
-  //     imgSrc: SuperInfluencers3,
-  //     title: "Super Influencers",
-  //     subText: "#1260",
-  //     price: 6.5,
-  //     icon: EthIcon,
-  //   },
-  //   {
-  //     id: 4,
-  //     imgSrc: SuperInfluencers4,
-  //     title: "Super Influencers",
-  //     subText: "#1261",
-  //     price: 5.75,
-  //     icon: EthIcon,
-  //   },
-  //   {
-  //     id: 5,
-  //     imgSrc: SuperInfluencers1,
-  //     title: "Super Influencers",
-  //     subText: "#1260",
-  //     price: 6.5,
-  //     icon: EthIcon,
-  //   },
-  //   {
-  //     id: 6,
-  //     imgSrc: SuperInfluencers2,
-  //     title: "Super Influencers",
-  //     subText: "#1261",
-  //     price: 5.75,
-  //     icon: EthIcon,
-  //   },
-  //   {
-  //     id: 7,
-  //     imgSrc: SuperInfluencers3,
-  //     title: "Super Influencers",
-  //     subText: "#1260",
-  //     price: 6.5,
-  //     icon: EthIcon,
-  //   },
-  //   {
-  //     id: 8,
-  //     imgSrc: SuperInfluencers4,
-  //     title: "Super Influencers",
-  //     subText: "#1261",
-  //     price: 5.75,
-  //     icon: EthIcon,
-  //   },
-  // ];
   return (
     // <div className='nfDetail'>
     //   {contextHolder}
@@ -228,37 +170,37 @@ function NftDetail() {
           <div className="nftDetailList">
             <div className="nftDetail" style={{ color: "#fff" }}>
               {nfts.length === 0
-                ? "NFT's will appear here"
+                ? <div className="emptyNft">NFT's will appear here</div>
                 : nfts.map((nft) => (
-                    <div
-                      className="nftSuper"
-                      key={nft?.id}
-                      onClick={() => {
-                        store.dispatch(setImage(nft.image || null));
-                        navigate("/nftManage", {
-                          state: {
-                            detail: nft,
-                          },
-                        });
-                      }}
-                    >
-                      <div className="nftSuper_img">
-                        <img src={nft?.image} alt="NftImg" />
-                      </div>
-                      <div className="superInfluencers">
-                        <h4>{nft.title}</h4>
-                        <div className="superInfluencers_subText">
-                          <h4>{nft?.name}</h4>
-                          <h4>
-                            <span style={{ marginRight: "5px" }}>
-                              <img src={nft?.icon} alt="" />
-                            </span>
-                            {/* {nft?.amount} */}
-                          </h4>
-                        </div>
+                  <div
+                    className="nftSuper"
+                    key={nft?.id}
+                    onClick={() => {
+                      store.dispatch(setImage(nft.image || null));
+                      navigate("/nftManage", {
+                        state: {
+                          detail: nft,
+                        },
+                      });
+                    }}
+                  >
+                    <div className="nftSuper_img">
+                      <img src={nft?.image} alt="NftImg" />
+                    </div>
+                    <div className="superInfluencers">
+                      <h4>{nft.title}</h4>
+                      <div className="superInfluencers_subText">
+                        <h4>{nft?.name}</h4>
+                        <h4>
+                          <span style={{ marginRight: "5px" }}>
+                            <img src={nft?.icon} alt="" />
+                          </span>
+                          {/* {nft?.amount} */}
+                        </h4>
                       </div>
                     </div>
-                  ))}
+                  </div>
+                ))}
             </div>
           </div>
           <div style={{ marginTop: "15px" }}>

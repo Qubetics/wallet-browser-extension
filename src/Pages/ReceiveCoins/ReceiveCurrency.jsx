@@ -57,7 +57,7 @@ function ReceiveCurrency() {
     <div className="receiveCurrency scrollableCont">
       {contextHolder}
       <MenuRestofHeaders
-        backTo={"/receive-tokens"}
+        backTo={isReceiveCurrencyRoute?"/nftDetail":"/receive-tokens"}
         title={
           isReceiveCurrencyRoute
             ? `Receive NFT`

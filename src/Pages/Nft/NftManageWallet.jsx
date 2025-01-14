@@ -43,7 +43,7 @@ function NftManageWallet() {
           <div className="nftManage">
             <img src={nftDetails?.image} alt="img" />
             <p className="nftManage_text">{nftDetails?.description}</p>
-            <div className="nftManage_countryYears">
+            {/* <div className="nftManage_countryYears">
               <div style={{ textAlign: "left" }}>
                 <h5>USA</h5>
                 <p>Country</p>
@@ -56,7 +56,7 @@ function NftManageWallet() {
                 <h5>Neon</h5>
                 <p>Architectural Style</p>
               </div>
-            </div>
+            </div> */}
             <div>
               <div className="nftManage_address">
                 {contactAddresses.map((contact) => (
