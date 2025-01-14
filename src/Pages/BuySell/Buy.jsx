@@ -45,7 +45,7 @@ const Buy = ({ coins = [], fiats = [] }) => {
       }
       const response = await fetch(url);
       const res = await response?.json()
-      console.log("urlurlurlurl ", res);
+      // console.log("urlurlurlurl ", res);
       if (!response.ok) {
         store.dispatch(setLoading(false));
         // if (res?.message.includes('Amount off limits.')) {
@@ -56,7 +56,7 @@ const Buy = ({ coins = [], fiats = [] }) => {
       setConversionDetail(res?.data);
       store.dispatch(setLoading(false));
     } catch (error) {
-      console.log("------------xxx------------>", error);
+      console.log("Error : ", error);
       setConversionDetail(null);
       messageApi.error(error?.message || "Something went wrong.")
       store.dispatch(setLoading(false));
@@ -413,12 +413,12 @@ const Buy = ({ coins = [], fiats = [] }) => {
         messageApi.error("Please enter amount")
         return
       }
-      console.log("selectedCrypto<<<", selectedCoin);
+      // console.log("selectedCrypto<<<", selectedCoin);
       let wallet_address = selectedCoin?.wallet_address;
-      console.log("wallet_address data ======", wallet_address);
+      // console.log("wallet_address data ======", wallet_address);
 
       let networkItm = supportedNetworks.find(itm => itm?.coin_family == selectedCoin?.coin?.coin_family);
-      console.log("NETWWWWWWWWWWWWWW ", networkItm);
+      // console.log("NETWWWWWWWWWWWWWW ", networkItm);
       let merchant_transaction_id = Math.random().toString(36).substr(2) + Date.now().toString(36);
       let secret = wallet_address + process.env.REACT_APP_MERCURYO_SECRET_KEY;
       let signature = crypto.createHash("sha512").update(secret).digest("hex");
@@ -446,25 +446,25 @@ const Buy = ({ coins = [], fiats = [] }) => {
         order_id: merchant_transaction_id
       }
 
-      console.log("REQ>>>>", apiReq);
+      // console.log("REQ>>>>", apiReq);
 
 
       // selectedTabData == "sell"
       //   ? (orderUrl = `https://exchange.mercuryo.io/?widget_id=${Constants.MERCURYO_WIDGET_ID}&type=sell&fiat_currency=${sourceCurrName}&fix_fiat_currency=true&fiat_amount=${sourceAmount}&fix_fiat_amount=true&currency=${targetCurrName}&fix_currency=true&amount=${targetAmount}&fix_amount=true&address=${wallet_address}&redirect_url=${MERCURYO_REDIRECT_URL}&merchant_transaction_id=${merchant_transaction_id}&signature=${signature}&refund_address=${wallet_address}`)
       //   : (orderUrl = `https://exchange.mercuryo.io/?widget_id=${Constants.MERCURYO_WIDGET_ID}&type=buy&fiat_currency=${sourceCurrName}&fix_fiat_currency=true&network=${network}&currency=${targetCurrName}&fix_currency=true&fiat_amount=${sourceAmount}&fix_fiat_amount=true&amount=${targetAmount}&fix_amount=true&address=${wallet_address}&redirect_url=${MERCURYO_REDIRECT_URL}&merchant_transaction_id=${merchant_transaction_id}&signature=${signature}`)
 
-      console.log("DERRRRRRRRRRRRRRR ", {
-        sourceCurrName,
-        network,
-        targetCurrName,
-        targetAmount,
-        wallet_address,
-        merchant_transaction_id,
-        signature
-      });
+      // console.log("DERRRRRRRRRRRRRRR ", {
+      //   sourceCurrName,
+      //   network,
+      //   targetCurrName,
+      //   targetAmount,
+      //   wallet_address,
+      //   merchant_transaction_id,
+      //   signature
+      // });
 
       window.open(`https://exchange.mercuryo.io/?widget_id=${process.env.REACT_APP_MERCURYO_WIDGET_ID}&type=buy&fiat_currency=${sourceCurrName}&fix_fiat_currency=true&network=${network}&currency=${targetCurrName}&fix_currency=true&fiat_amount=${sourceAmount}&fix_fiat_amount=true&amount=${targetAmount}&fix_amount=true&address=${wallet_address}&redirect_url=${process.env.REACT_APP_MERCURYO_REDIRECT_URL}&merchant_transaction_id=${merchant_transaction_id}&signature=${signature}`, '_blank', 'noopener,noreferrer')
-      console.log("orderUrl>>>>", orderUrl);
+      // console.log("orderUrl>>>>", orderUrl);
 
 
       // Actions.currentScene != "BuySellWebview" &&
@@ -481,7 +481,7 @@ const Buy = ({ coins = [], fiats = [] }) => {
       //   // setIsLoading(false);
       // }, 800);
     } catch (error) {
-      console.log("onPressContinue error =======", error);
+      console.log("error =======", error);
       messageApi.error("Something went wrong.")
       // setIsLoading(false);
 
@@ -502,9 +502,7 @@ const Buy = ({ coins = [], fiats = [] }) => {
           type="number"
           // disabled={loading}
           addonAfter={selectAfter}
-          getData={(e) => {
-            console.log("EEEEEEEEEEEEEeee ", e);
-
+          getData={(e) => { 
             setAmount(e)
           }}
           value={amount}

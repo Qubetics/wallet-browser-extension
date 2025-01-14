@@ -32,25 +32,25 @@ const Sell = ({ coins = [], fiats = [], loading }) => {
   const [fiatMinMax, setFiatMinMax] = useState(null);
   const [conversionDetail, setConversionDetail] = useState(null);
 
-  console.log(
-    selectedFiat,
-    "selectedFiat",
-    selectedCoin,
-    "selectedCoin",
-    coins,
-    "coins",
-    fiats,
-    "fiats",
-    filteredTokens,
-    "filteredTokens"
-  );
+  // console.log(
+  //   selectedFiat,
+  //   "selectedFiat",
+  //   selectedCoin,
+  //   "selectedCoin",
+  //   coins,
+  //   "coins",
+  //   fiats,
+  //   "fiats",
+  //   filteredTokens,
+  //   "filteredTokens"
+  // );
 
 
   const findMinMax = async () => {
     try {
       store.dispatch(setLoading(true));
-      console.log("SSSSSSSSSSSSSSSSS ", selectedFiat);
-      console.log("CCCCCCCCCCCCCCCCC ", selectedCoin);
+      // console.log("SSSSSSSSSSSSSSSSS ", selectedFiat);
+      // console.log("CCCCCCCCCCCCCCCCC ", selectedCoin);
       store.dispatch(setLoading(true));
       const fiatItem = selectedFiat?.currency_code?.toUpperCase();
       const cryptoItem = selectedCoin?.coin?.coin_symbol?.toUpperCase()
@@ -60,7 +60,7 @@ const Sell = ({ coins = [], fiats = [], loading }) => {
       setFiatMinMax(data[`${fiatItem}`]);
       setCryptoMinMax(data[`${cryptoItem}`]);
       store.dispatch(setLoading(false));
-      console.log("DATA--------------> ", data[`${fiatItem}`], " ----------- ", data[`${cryptoItem}`], data);
+      // console.log("DATA--------------> ", data[`${fiatItem}`], " ----------- ", data[`${cryptoItem}`], data);
     } catch (error) {
       messageApi.error(error?.message || "Something went wrong.")
       store.dispatch(setLoading(false));
@@ -102,22 +102,21 @@ const Sell = ({ coins = [], fiats = [], loading }) => {
       const cryptoItem = selectedCoin?.coin?.coin_symbol?.toUpperCase()
       let url = `https://api.mercuryo.io/v1.6/public/convert?from=${cryptoItem}&to=${fiatItem}&type=sell&amount=${amount}&widget_id=${process.env.REACT_APP_MERCURYO_WIDGET_ID}`
       const response = await fetch(url);
-      console.log("urlurlurlurl ", response);
+      // console.log("urlurlurlurl ", response);
       const res = await response?.json()
-      console.log("XXXXXXXXXXXXXXXXXXXXXXXXXXX ", res);
+      // console.log("XXXXXXXXXXXXXXXXXXXXXXXXXXX ", res);
       if (!response.ok) {
         store.dispatch(setLoading(false));
         // if (res?.message.includes('Amount off limits.')) {
           messageApi.info("Please enter amount between min max range");
           return;
         // }
-      }
-      console.log("SSSSSSSSAAAAAAAAAAAAAAa");
+      } 
 
       setConversionDetail(res?.data);
       store.dispatch(setLoading(false));
     } catch (error) {
-      console.log("------------xxx------------>", error);
+      // console.log("------------xxx------------>", error);
       setConversionDetail(null);
       messageApi.error(error?.message || "Something went wrong.")
       store.dispatch(setLoading(false));
@@ -215,7 +214,7 @@ const Sell = ({ coins = [], fiats = [], loading }) => {
   };
 
   useEffect(() => {
-    console.log("selectedCoin && selectedFiat && amount ", selectedCoin, selectedFiat, amount);
+    // console.log("selectedCoin && selectedFiat && amount ", selectedCoin, selectedFiat, amount);
 
     const timer = setTimeout(() => {
       if (selectedCoin && selectedFiat && amount) {
@@ -436,11 +435,7 @@ const Sell = ({ coins = [], fiats = [], loading }) => {
 
 
   const handleSellCoin = () => {
-    console.log("AMOUNT : ", amount);
-    console.log("fiatMinMax : ", fiatMinMax);
-    console.log("cryptoMinMax : ", cryptoMinMax);
-    console.log("conversionDetail : ", conversionDetail);
-
+    
     try {
       if (amount < +cryptoMinMax?.min) {
         messageApi.error("Minimum amount should be greater then " + cryptoMinMax?.min + selectedFiat?.currency_code)
@@ -452,12 +447,12 @@ const Sell = ({ coins = [], fiats = [], loading }) => {
         messageApi.error("Please enter amount")
         return
       }
-      console.log("selectedCrypto<<<", selectedCoin);
+      // console.log("selectedCrypto<<<", selectedCoin);
       let wallet_address = selectedCoin?.wallet_address;
-      console.log("wallet_address data ======", wallet_address);
+      // console.log("wallet_address data ======", wallet_address);
 
       let networkItm = supportedNetworks.find(itm => itm?.coin_family == selectedCoin?.coin?.coin_family);
-      console.log("NETWWWWWWWWWWWWWW ", networkItm);
+      // console.log("NETWWWWWWWWWWWWWW ", networkItm);
       let merchant_transaction_id = Math.random().toString(36).substr(2) + Date.now().toString(36);
       let secret = wallet_address + process.env.REACT_APP_MERCURYO_SECRET_KEY;
       let signature = crypto.createHash("sha512").update(secret).digest("hex");
@@ -484,19 +479,19 @@ const Sell = ({ coins = [], fiats = [], loading }) => {
         order_id: merchant_transaction_id
       }
 
-      console.log("DERRRRRRRRRRRRRRR ", {
-        sourceAmount,
-        targetAmount,
-        sourceCurrName,
-        targetCurrName,
-        network,
-        wallet_address,
-        merchant_transaction_id,
-        signature
-      });
+      // console.log("DERRRRRRRRRRRRRRR ", {
+      //   sourceAmount,
+      //   targetAmount,
+      //   sourceCurrName,
+      //   targetCurrName,
+      //   network,
+      //   wallet_address,
+      //   merchant_transaction_id,
+      //   signature
+      // });
 
       window.open(`https://exchange.mercuryo.io/?widget_id=${process.env.REACT_APP_MERCURYO_WIDGET_ID}&type=sell&fiat_currency=${targetCurrName}&fix_fiat_currency=true&network=${network}&currency=${sourceCurrName}&fix_currency=true&fiat_amount=${targetAmount}&fix_fiat_amount=true&amount=${sourceAmount}&fix_amount=true&address=${wallet_address}&redirect_url=${process.env.REACT_APP_MERCURYO_REDIRECT_URL}&merchant_transaction_id=${merchant_transaction_id}&signature=${signature}`, '_blank', 'noopener,noreferrer')
-      console.log("orderUrl>>>>", orderUrl);
+      // console.log("orderUrl>>>>", orderUrl);
 
 
       // Actions.currentScene != "BuySellWebview" &&
@@ -513,7 +508,7 @@ const Sell = ({ coins = [], fiats = [], loading }) => {
       //   // setIsLoading(false);
       // }, 800);
     } catch (error) {
-      console.log("onPressContinue error =======", error);
+      console.log("error =======", error);
       messageApi.error("Something went wrong.")
       // setIsLoading(false);
 

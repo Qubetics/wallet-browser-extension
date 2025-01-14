@@ -30,12 +30,10 @@ const BuySell = () => {
   // const [loading, setLoading] = useState(false);
 
 
-  useEffect(() => {
-    console.log("FIATESSSSSSSSSSSSSSSSSSS ", fiats);
-
+  useEffect(() => { 
     if (selectedTab == 1) {
       let eurUsd = Array.isArray(allFiats) && allFiats.filter(itm => itm?.currency_code == "EUR" || itm?.currency_code == "USD");
-      console.log("eurUsdeurUsd ", eurUsd);
+      // console.log("eurUsdeurUsd ", eurUsd);
       setFiats(eurUsd);
     }else {
       setFiats(allFiats)
@@ -44,9 +42,7 @@ const BuySell = () => {
   }, [selectedTab]);
 
   const getSupportedCurrency = async () => {
-    try {
-      console.log("Come");
-
+    try { 
       store.dispatch(setLoading(true));
       const response = await server.get("/wallet/currencyfiatlist", {
         headers: {
@@ -55,15 +51,12 @@ const BuySell = () => {
       });
       const data = response.data.data;
       const responseCurr = await fetch('https://api.mercuryo.io/v1.6/lib/currencies')
-      const { data: mercurioResponse } = await responseCurr.json();
-      console.log('mercurioResponse-----> ', mercurioResponse);
-
+      const { data: mercurioResponse } = await responseCurr.json(); 
       const crypto_currencies = mercurioResponse?.config.crypto_currencies;
       const fiat = mercurioResponse?.fiat
       const fiat_payment_methods = mercurioResponse?.fiat_payment_methods
 
-      const filterFiatCurr = data.filter(itm => fiat.some(symbol => symbol.toLowerCase() === itm?.currency_code?.toLowerCase()));
-      console.log("Filtered currency : ", filterFiatCurr);
+      const filterFiatCurr = data.filter(itm => fiat.some(symbol => symbol.toLowerCase() === itm?.currency_code?.toLowerCase())); 
       setFiats(filterFiatCurr);
       setAllFiats(filterFiatCurr)
       // List of supported blockchains/networks
@@ -81,14 +74,12 @@ const BuySell = () => {
         if (findData) {
           return itm;
         }
-      });
-      console.log("MMMMMMMMMMMMMM ", myCrypto);
-
+      }); 
       setCoins(myCrypto);
       setFiatsPayMethod(fiat_payment_methods);
       store.dispatch(setLoading(false));
     } catch (error) {
-      console.log("-------------------> ", error);
+      console.log("Error := ", error);
       messageApi.error(error?.message || "Something went wrong.");
       store.dispatch(setLoading(false));
     }

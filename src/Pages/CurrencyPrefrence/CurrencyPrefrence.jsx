@@ -18,7 +18,7 @@ function CurrencyPrefrence() {
   const navigate = useNavigate();
   const { currency, account } = useSelector((state) => state);
   const [messageApi, contextHolder] = message.useMessage();
-  console.log("account::", account);
+  // console.log("account::", account);
   const [data, setData] = useState([]);
 
   const init = async () => {
