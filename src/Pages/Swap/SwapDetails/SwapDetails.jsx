@@ -227,7 +227,7 @@ function SwapDetails() {
       // console.log("END OF FUNCTION");
       setLoading(false);
     } catch (error) {
-      console.log(error);
+      console.log("Swap error : ", error);
       setLoading(false);
       return messageApi.error("Something went wrong");
     }
@@ -270,8 +270,18 @@ function SwapDetails() {
 
   const handleSwap = async () => {
     try {
-      console.log('ppppppppppppppppp', token1);
+      const bal = token1?.balance*token1?.coin?.fiat_price_data?.value;
+      const totalAmt = (parseFloat(amount)+parseFloat(networkPrice)) * token1?.coin?.fiat_price_data?.value
 
+      console.log("SEND DETAIL : ", bal, totalAmt);
+      
+      if(bal<totalAmt){
+        return messageApi.error(
+          "Insufficient balance to proceed with the transaction."
+        );
+      }
+      // console.log('ppppppppppppppppp',requireApproval, token1, " networkPrice : ", networkPrice ,  token1?.balance < amount+networkPrice);
+ 
       const uniHelper = new UniswapHelper(token1.rpc);
 
       if (requireApproval) {
@@ -285,6 +295,9 @@ function SwapDetails() {
           token1.isToken,
           parseInt(token1.chain.chainId)
         );
+
+        console.log("ccccccccccccccccccc", data);
+        
         if (!data) {
           setSwapModal(false);
           setLogoutOpenmodal(false);
@@ -306,6 +319,8 @@ function SwapDetails() {
             token1.rpc
           );
 
+          console.log("approvalapproval ", approval, " :: amount :: ", amount);
+          
           if (
             parseFloat(approval) <= parseFloat(amount) ||
             approval === false
@@ -317,6 +332,7 @@ function SwapDetails() {
           }
         }
 
+        // let amtSend = isMax ? (amount-networkPrice) : amount
         const data = await uniHelper.sendSwapTransaction(
           route,
           token1.address,
@@ -329,6 +345,8 @@ function SwapDetails() {
           commision
         );
 
+        console.log("SWAAAAAAAAAAAAAAAAa ", data);
+        
         if (!data) {
           setSwapModal(false);
           return messageApi.error("Something went wrong.");
@@ -392,13 +410,13 @@ function SwapDetails() {
             </div>
             <div className="swapDetails__valueText">
               <p className="swapDetails__valueText__text">
-                <span>To</span>
+                <span>From</span>
                 <br />
                 {addCommasToNumber(getFlooredFixed(parseFloat(amount), 8))}{" "}
                 {token1.symbol}
               </p>
               <p className="swapDetails__valueText__text">
-                <span>From</span>
+                <span>To</span>
                 <br />
                 {addCommasToNumber(getFlooredFixed(parseFloat(amount2), 6))}
                 {token2.symbol}

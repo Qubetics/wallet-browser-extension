@@ -72,7 +72,7 @@ function ManageCustom(props) {
     try {
       store.dispatch(setLoading(true));
 
-      await server.post(
+      const resp = await server.post(
         "/wallet/activeinactive",
         {
           coinId: coin.coin_id,
@@ -85,13 +85,17 @@ function ManageCustom(props) {
           },
         }
       );
-      const delay = 2000;
-      const startTime = Date.now();
-      while (Date.now() - startTime < delay) { }
-      message.success(`Token ${checked ? 'enabled' : 'disabled'} successfully`)
-      init();
-      store.dispatch(setLoading(false)); 
-      setStatus(checked);
+      // console.log("RRRRRRRRRRRRRRRR ", resp?.data);
+      
+      if(resp?.data){
+        const delay = 3000;
+        const startTime = Date.now();
+        while (Date.now() - startTime < delay) { }
+        message.success(`Token ${checked ? 'enabled' : 'disabled'} successfully`)
+        init();
+        store.dispatch(setLoading(false)); 
+        setStatus(checked);
+      }
     } catch (error) {
       store.dispatch(setLoading(false));
       return messageApi.error("Something went wrong.");

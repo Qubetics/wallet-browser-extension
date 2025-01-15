@@ -63,7 +63,7 @@ import { WalletHelper } from "../../helpers/wallet.helper";
 import Maintanance from "../../Components/Maintanance/Maintanance";
 import { swapDetailAc } from "../../actions/swap";
 import useCurrentHeight from "../../CustomHooks/useCurrentHeight";
-import { rpc_chain, token_type } from "../../helpers/constant";
+import { BL_CODE, rpc_chain, token_type } from "../../helpers/constant";
 function getFlooredFixed(v, d) {
   return (Math.floor(v * Math.pow(10, d)) / Math.pow(10, d)).toFixed(d);
 }
@@ -271,7 +271,7 @@ function Swap() {
       );
 
       // console.log("DDDDDDDDDDDDDDDD ", data);
-      
+
       const tokens = data.data.map((token) => {
         return {
           id: token.coin_id,
@@ -318,7 +318,7 @@ function Swap() {
         );
 
         // console.log("TOKENNNNNNNNN1", myToken1, " XXXX ", tokens);
-        
+
         if (!myToken1) {
           myToken1 = tokens.find((token) => !token.tokenAddress);
         }
@@ -393,7 +393,7 @@ function Swap() {
           const myStateToken = newTokens[0];
 
           console.log("newTokensnewTokensnewTokens ", newTokens);
-          
+
           if (!myStateToken) {
             messageApi.error("Token not available for swap.");
           }
@@ -423,7 +423,7 @@ function Swap() {
           }
           if (state.coinFamily) {
             console.log("WWWWWWWWWW ", myToken1);
-            
+
             setToken1(myToken1);
             handleToken1Change(myStateToken);
             setSelectedCoinFamily(myStateToken?.coinFamily);
@@ -855,6 +855,8 @@ function Swap() {
 
       const result = originalNumber * percent;
 
+      console.log("TTTTTTTTTTTTTTTTTTT ",result, " PLPLPL ", token1);
+      
       // Step 3: Add the result to the original number
       finalFee = getFlooredFixed(
         result / token1.coin.native_coin_market_data.current_price,
@@ -862,7 +864,7 @@ function Swap() {
       );
     }
 
-    if (token1.coinFamily == 4) {
+    if (token1.coinFamily == 5) {
       setAdminSwapFee(myAdminFee.swap_fees);
       const gasPrice = 0.000005;
       const finalFeeSol = new BigNumber(gasPrice)
@@ -874,17 +876,20 @@ function Swap() {
       return getFlooredFixed(finalFeeSol, 9);
     }
 
+    console.log("HERRRRRRRRRRRRR ", BL_CODE[token1.coinFamily].toLowerCase());
+    
     const gasPrice = await Web3Helper.getGasPrice(
-      token1.coinFamily == 1 ? "eth" : token1.coinFamily == 9 ? "pls" : "bnb",
+      // token1.coinFamily == 1 ? "eth" : token1.coinFamily == 9 ? "pls" : "bnb",
+      BL_CODE[token1.coinFamily].toLowerCase(),
       token1.address,
       token1.address,
       0
     );
-    if (token1.coinFamily == 1) {
+    if (token1.coinFamily == 2) {
       let finalGasFee;
       if (!isWrap) {
         finalGasFee =
-          (gasPrice.price *
+          (gasPrice.fast *
             Math.pow(10, 9) *
             parseInt(route.estimatedGasUsed.toString()) *
             2) /
@@ -903,7 +908,7 @@ function Swap() {
         );
 
         finalGasFee =
-          (gasPrice.price * Math.pow(10, 9) * estimate * 2) / Math.pow(10, 18);
+          (gasPrice.fast * Math.pow(10, 9) * estimate * 2) / Math.pow(10, 18);
       }
 
       if (finalFee) {
@@ -919,19 +924,19 @@ function Swap() {
           );
 
           finalGasFee +=
-            (gasPrice.price *
+            (gasPrice.fast *
               Math.pow(10, 9) *
               (parseInt(gasPrice.estimate) + 10000)) /
             Math.pow(10, 18);
         } else {
           finalGasFee +=
-            (gasPrice.price * Math.pow(10, 9) * (parseInt(21000) + 5000)) /
+            (gasPrice.fast * Math.pow(10, 9) * (parseInt(21000) + 5000)) /
             Math.pow(10, 18);
         }
       }
 
       finalGasFeeForTransaction = finalGasFee;
-    } else if (token1.coinFamily == 3) {
+    } else if (token1.coinFamily == 1) {
       let functionCall = null;
 
       if (token1.isToken && token2.isToken) {
@@ -970,7 +975,7 @@ function Swap() {
       if (myGasEstimate.status) {
         if (myGasEstimate.skip) {
           let finalGasFee =
-            (gasPrice.price * Math.pow(10, 9) * parseInt(150000)) /
+            (gasPrice.fast * Math.pow(10, 9) * parseInt(150000)) /
             Math.pow(10, 18);
 
           if (finalFee) {
@@ -986,24 +991,24 @@ function Swap() {
               );
 
               finalGasFee +=
-                (gasPrice.price *
+                (gasPrice.fast *
                   Math.pow(10, 9) *
                   parseInt(gasPrice.estimate)) /
                 Math.pow(10, 18);
             } else {
               finalGasFee +=
-                (gasPrice.price * Math.pow(10, 9) * parseInt(31000)) /
-                Math.pow(10, 18); 
+                (gasPrice.fast * Math.pow(10, 9) * parseInt(31000)) /
+                Math.pow(10, 18);
             }
           }
 
-          finalGasFeeForTransaction = finalGasFee; 
+          finalGasFeeForTransaction = finalGasFee;
         } else {
           return myGasEstimate;
         }
       } else {
         let finalGasFee =
-          (gasPrice.price *
+          (gasPrice.fast *
             Math.pow(10, 9) *
             (parseInt(myGasEstimate) + 30000)) /
           Math.pow(10, 18);
@@ -1019,13 +1024,13 @@ function Swap() {
               token1.type
             );
             finalGasFee +=
-              (gasPrice.price *
+              (gasPrice.fast *
                 Math.pow(10, 9) *
                 (parseInt(gasPrice.estimate) + 10000)) /
               Math.pow(10, 18);
           } else {
             finalGasFee +=
-              (gasPrice.price * Math.pow(10, 9) * parseInt(31000)) /
+              (gasPrice.fast * Math.pow(10, 9) * parseInt(31000)) /
               Math.pow(10, 18);
           }
         }
@@ -1060,7 +1065,7 @@ function Swap() {
       if (myGasEstimate.status) {
         if (myGasEstimate.skip) {
           let finalGasFee =
-            (gasPrice.price * Math.pow(10, 9) * parseInt(150000)) /
+            (gasPrice.fast * Math.pow(10, 9) * parseInt(150000)) /
             Math.pow(10, 18);
 
           if (finalFee) {
@@ -1076,13 +1081,13 @@ function Swap() {
               );
 
               finalGasFee +=
-                (gasPrice.price *
+                (gasPrice.fast *
                   Math.pow(10, 9) *
                   parseInt(gasPrice.estimate)) /
                 Math.pow(10, 18);
             } else {
               finalGasFee +=
-                (gasPrice.price * Math.pow(10, 9) * parseInt(31000)) /
+                (gasPrice.fast * Math.pow(10, 9) * parseInt(31000)) /
                 Math.pow(10, 18);
             }
           }
@@ -1093,7 +1098,7 @@ function Swap() {
         }
       } else {
         let finalGasFee =
-          (gasPrice.price *
+          (gasPrice.fast *
             Math.pow(10, 9) *
             (parseInt(myGasEstimate) + 30000)) /
           Math.pow(10, 18);
@@ -1116,13 +1121,13 @@ function Swap() {
             // );
 
             finalGasFee +=
-              (gasPrice.price *
+              (gasPrice.fast *
                 Math.pow(10, 9) *
                 (parseInt(gasPrice.estimate) + 10000)) /
               Math.pow(10, 18);
           } else {
             finalGasFee +=
-              (gasPrice.price * Math.pow(10, 9) * parseInt(31000)) /
+              (gasPrice.fast * Math.pow(10, 9) * parseInt(31000)) /
               Math.pow(10, 18);
           }
         }
@@ -1131,12 +1136,14 @@ function Swap() {
       }
     }
 
-    // console.log(
-    //   "parseFloat(finalFee) finalGasFeeForTransaction ",
-    //   parseFloat(finalFee),
-    //   "   :: ",
-    //   finalGasFeeForTransaction
-    // );
+    console.log(
+      "parseFloat(finalFee) finalGasFeeForTransaction ",
+      parseFloat(finalFee),
+      "   :: ",
+      finalGasFeeForTransaction
+    );
+    // console.log(" FEEEEEEEEEEEEEEEE ", finalFee, " finalGasFeeForTransaction : ", finalGasFeeForTransaction);
+    
     setTradingFee(parseFloat(finalFee) + finalGasFeeForTransaction);
     return getFlooredFixed(parseFloat(finalFee) + finalGasFeeForTransaction, 5);
   };
@@ -1267,7 +1274,7 @@ function Swap() {
     try {
       if (amount > 0) {
         setLoading(true);
-        if (token1.coinFamily == 1) {
+        if (token1.coinFamily == 2) {
           if (isWrap) {
             const tradingFee = await calculateTradingFee(null, amount, true);
             setInfoData([
@@ -1336,7 +1343,7 @@ function Swap() {
             },
             {
               text: "Trading Fees",
-              textVal: `${tradingFee} ${token1.coinFamily == 1 ? "ETH" : "BNB"
+              textVal: `${tradingFee} ${(BL_CODE[token1?.coinFamily])
                 }`,
             },
             {
@@ -1355,7 +1362,7 @@ function Swap() {
           setAount(route.quote.toFixed(token1.decimals));
 
           setLoading(false);
-        } else if (token1.coinFamily == 3) {
+        } else if (token1.coinFamily == 1) {
           if (isWrap) {
             const tradingFee = await calculateTradingFee(null, amount, true);
 
@@ -1516,7 +1523,7 @@ function Swap() {
           ]);
 
           setLoading(false);
-        } else if (token1.coinFamily == 4) {
+        } else if (token1.coinFamily == 5) {
           try {
             const response = await server.get(
               "https://quote-api.jup.ag/v6/quote",
@@ -2687,6 +2694,11 @@ function Swap() {
                       const balanceExtraToAddIfFromIsNativeCoin =
                         feeAmount.plus(amountToAdd);
 
+                      console.log('nativeBalance :: ', parseFloat(nativeBalance));
+                      console.log('feeAmount :: ', parseFloat(feeAmount));
+                      console.log(' amountToAdd ', parseFloat(amountToAdd), " balanceExtraToAddIfFromIsNativeCoin ", parseFloat(balanceExtraToAddIfFromIsNativeCoin));
+
+
                       if (
                         balanceExtraToAddIfFromIsNativeCoin.gt(nativeBalance)
                       ) {
@@ -2695,7 +2707,7 @@ function Swap() {
                           "Insufficient balance to proceed with the transaction."
                         );
                       }
-
+                      
                       store.dispatch(overAllLoader(false));
 
                       let swapDetailed = {

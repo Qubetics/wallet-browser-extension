@@ -11,6 +11,7 @@ import { server } from "../../server.js";
 import { store } from "../../index.js";
 import { setLoading } from "../../actions/loading.js";
 import useCurrentHeight from "../../CustomHooks/useCurrentHeight.js";
+import { token_type } from "../../helpers/constant.js";
 
 function Manage() {
   const { account, chain, loading, currency } = useSelector((state) => state);
@@ -22,6 +23,12 @@ function Manage() {
   const [isFetchingData, setIsFetchingData] = useState(false);
   const [total, setTotal] = useState(0);
   const height = useCurrentHeight();
+
+
+  useEffect(()=>{
+    console.log("filteredTokens===> ", filteredTokens); 
+  },[JSON.stringify(filteredTokens)])
+  
   const init = async () => {
     store.dispatch(setLoading(true));
     const coinList = await server.post(
@@ -191,7 +198,7 @@ function Manage() {
                     symbol={data.coin_symbol}
                     img={data.coin_image}
                     // valuecurrency={data.coin_family === 1 ? "BEP20" : "ERC20"}
-                    valuecurrency={(data?.token_address !== null ? (data.coin_family === 1 ? "BEP20" : data.coin_family === 2 ? "ERC20" : data.coin_family === 4 ? "ERC20" : data.coin_family === 5 ? "SPL" : data.coin_family === 6 ? "TRC20" : "") : '')}
+                    valuecurrency={(data?.token_address !== null ? (token_type(data?.coin_family)) : '')}
                     id={data.id}
                     coinFamily={data.coin_family}
                     walletAddress={
