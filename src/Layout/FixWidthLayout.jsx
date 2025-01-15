@@ -84,6 +84,7 @@ function FixWidthLayout() {
             backTo={getLocation?.state?.path==='/wallet'?"/wallet" : "/setting"}
             title={"History"}
             FilterIcon={"/filter-history"}
+            path={state?.path ?? ''}
           />
         )}
         {path === "changePin" && (

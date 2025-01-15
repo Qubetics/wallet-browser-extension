@@ -19,9 +19,7 @@ function ReceiveCurrency() {
   const { account } = useSelector((state) => state);
 
   const [messageApi, contextHolder] = message.useMessage();
-  const location = useLocation();
-  console.log("LOCATION IN RECIEVE", location);
-
+  const location = useLocation(); 
   useEffect(() => {
     const coin = {
       wallet_address: location?.state?.coin?.wallet_address, // Replace with actual address or dynamic data
@@ -57,7 +55,7 @@ function ReceiveCurrency() {
     <div className="receiveCurrency scrollableCont">
       {contextHolder}
       <MenuRestofHeaders
-        backTo={isReceiveCurrencyRoute?"/nftDetail":"/receive-tokens"}
+        backTo={isReceiveCurrencyRoute ? "/nftDetail" : "/receive-tokens"}
         title={
           isReceiveCurrencyRoute
             ? `Receive NFT`
@@ -112,14 +110,10 @@ function ReceiveCurrency() {
             />
           </div>
 
-          {/* <p className="receiveCurrency_sendCoin">
-            Lorem ipsum dolor sit amet consectetur. Pulvinar risus eget nulla in
-            pretium sit. Purus placerat vulputate in vulputate venenatis
-            adipiscing quis maecenas auctor.
-            <br />
-            <Link style={{ textDecoration: "none" }}>Learn more </Link>
-            about {`${location?.state?.symbol?.toUpperCase()}`} tokens.
-          </p> */}
+          <p className="receiveCurrency_sendCoin">
+
+            Send only {`${location?.state?.symbol?.toUpperCase()}`} to this address. Sending any other coins may result in permanent loss.
+          </p>
         </div>
         {/* <div style={{ padding: "0 24px" }}>
           {isReceiveCurrencyRoute ? (

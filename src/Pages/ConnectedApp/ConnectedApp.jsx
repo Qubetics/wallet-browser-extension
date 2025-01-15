@@ -95,7 +95,7 @@ function ConnectedApp() {
           )}
         </div> */}
         <div>
-          <div className="searchBarFixed">
+          {/* <div className="searchBarFixed">
             <div className="search">
               <InputField
                 placeholder={"Add URL"}
@@ -115,7 +115,7 @@ function ConnectedApp() {
                 }
               />
             </div>
-          </div>
+          </div> */}
 
 
 
@@ -169,7 +169,7 @@ function ConnectedApp() {
                   fontSize: "17px",
                 }}
               >
-                No dAPP history found
+                No dApp history found
               </p>
             </div>}
         </div>

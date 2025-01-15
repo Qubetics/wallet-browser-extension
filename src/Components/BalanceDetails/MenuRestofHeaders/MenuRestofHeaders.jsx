@@ -67,11 +67,13 @@ function MenuRestofHeaders({
   portfolio,
   manageTo,
   isStared,
+  path
 }) {
   const { theme, spritzFilter, billPayFilter, spritzTab } = useSelector(
     (state) => state
   );
 
+  const {state} = useLocation();
   const { filter, swapDetail } = useSelector((state) => state);
   const navigate = useNavigate();
   const location = useLocation();
@@ -254,7 +256,7 @@ function MenuRestofHeaders({
                   });
                 } else {
                   return navigate(backTo, {
-                    state: { ...filter, coinId: filter.coinId.value },
+                    state: { ...filter, coinId: filter.coinId.value, path },
                   });
                 }
               }
@@ -305,7 +307,7 @@ function MenuRestofHeaders({
                 });
               }
 
-              return navigate(backTo);
+              return navigate(backTo, { state: { path: path ?? "" } });
             }}
           >
             {theme == "darkTheme" ? (
@@ -357,7 +359,12 @@ function MenuRestofHeaders({
           </Link>
         )}
         {FilterIcon && (
-          <Link to={FilterIcon}>
+          <Link
+            onClick={(e) => {
+              e.preventDefault();
+              navigate(FilterIcon, { state: { path: state?.path ?? '' } })
+            }}
+          >
             {theme == "darkTheme" ? (
               <img src={DarkFilterIcon} />
             ) : (
@@ -547,8 +554,8 @@ function MenuRestofHeaders({
                     }}
                     text="No"
                   />
-                  </div>
-                  {/* <div
+                </div>
+                {/* <div
                   className="green"
                   style={{
                     padding: "12px 53px",
@@ -570,7 +577,7 @@ function MenuRestofHeaders({
                 >
                   Yes
                 </div> */}
-                  {/* <div
+                {/* <div
                     className="red"
                     style={{
                       padding: "12px 53px",
@@ -587,8 +594,8 @@ function MenuRestofHeaders({
                   >
                     No
                   </div> */}
-                </div>
               </div>
+            </div>
           </ModalCustom>
         </div>
       </div>

@@ -63,6 +63,7 @@ import { WalletHelper } from "../../helpers/wallet.helper";
 import Maintanance from "../../Components/Maintanance/Maintanance";
 import { swapDetailAc } from "../../actions/swap";
 import useCurrentHeight from "../../CustomHooks/useCurrentHeight";
+import { rpc_chain, token_type } from "../../helpers/constant";
 function getFlooredFixed(v, d) {
   return (Math.floor(v * Math.pow(10, d)) / Math.pow(10, d)).toFixed(d);
 }
@@ -203,6 +204,7 @@ function Swap() {
     }
   }
   const percentages = [25, 50, 75, 100];
+
   const calculateAccordingly = async (percentage) => {
     try {
       store.dispatch(overAllLoader(true));
@@ -249,6 +251,11 @@ function Swap() {
 
       setCommision(comissionData.data.data);
 
+      // console.log("ccaaaaaaa ", account);
+      // console.log("currencycurrency ", currency);
+      // console.log("STATTTTTTTTTT ", state);
+
+
       const { data } = await server.post(
         `/wallet/swap_coinlist`,
         {
@@ -263,6 +270,8 @@ function Swap() {
         }
       );
 
+      // console.log("DDDDDDDDDDDDDDDD ", data);
+      
       const tokens = data.data.map((token) => {
         return {
           id: token.coin_id,
@@ -285,14 +294,9 @@ function Swap() {
             (chain) => chain?.coinFamily == token?.coin_family
           ),
           balance: token.wallets[0] ? toFixed(token.wallets[0].balance) : 0,
-          type: token.coin_family === 1 ? "BEP20" : "ERC20",
+          type: token_type(token.coin_family),
           jupiter_fee_address: null,
-          rpc:
-            token.coin_family == 1
-              ? process.env.REACT_APP_BNB_RPC
-              : token.coin_family == 2
-              ? process.env.REACT_APP_ETH_RPC
-              : process.env.REACT_APP_MATIC_RPC,
+          rpc: rpc_chain(token.coin_family)
         };
       });
 
@@ -313,6 +317,8 @@ function Swap() {
           (token) => !token.tokenAddress && token.iHave && token.coinFamily == 3
         );
 
+        // console.log("TOKENNNNNNNNN1", myToken1, " XXXX ", tokens);
+        
         if (!myToken1) {
           myToken1 = tokens.find((token) => !token.tokenAddress);
         }
@@ -377,20 +383,17 @@ function Swap() {
                 (chain) => chain?.coinFamily == token?.coin_family
               ),
               balance: token.wallets[0] ? toFixed(token.wallets[0].balance) : 0,
-              type: token.coin_family === 1 ? "BEP20" : "ERC20",
+              type: token_type(token.coin_family),
               jupiter_fee_address: null,
-              rpc:
-                token.coin_family == 1
-                  ? process.env.REACT_APP_BNB_RPC
-                  : token.coin_family == 2
-                  ? process.env.REACT_APP_ETH_RPC
-                  : process.env.REACT_APP_MATIC_RPC,
+              rpc: rpc_chain(token.coin_family)
             };
           });
 
           //assign the object to my state token
           const myStateToken = newTokens[0];
 
+          console.log("newTokensnewTokensnewTokens ", newTokens);
+          
           if (!myStateToken) {
             messageApi.error("Token not available for swap.");
           }
@@ -419,6 +422,8 @@ function Swap() {
             }
           }
           if (state.coinFamily) {
+            console.log("WWWWWWWWWW ", myToken1);
+            
             setToken1(myToken1);
             handleToken1Change(myStateToken);
             setSelectedCoinFamily(myStateToken?.coinFamily);
@@ -487,17 +492,12 @@ function Swap() {
                   : 0
                 : 0,
               balance: token.wallets[0] ? toFixed(token.wallets[0].balance) : 0,
-              type: token.coin_family === 1 ? "BEP20" : "ERC20",
+              type: token_type(token.coin_family),
               jupiter_fee_address: null,
               chain: chains.find(
                 (chain) => chain?.coinFamily == token?.coin_family
               ),
-              rpc:
-                token.coin_family == 1
-                  ? process.env.REACT_APP_BNB_RPC
-                  : token.coin_family == 2
-                  ? process.env.REACT_APP_ETH_RPC
-                  : process.env.REACT_APP_MATIC_RPC,
+              rpc: rpc_chain(token.coin_family)
             };
           });
 
@@ -582,14 +582,9 @@ function Swap() {
               (chain) => chain?.coinFamily == token?.coin_family
             ),
             balance: token.wallets[0] ? toFixed(token.wallets[0].balance) : 0,
-            type: token.coin_family === 1 ? "BEP20" : "ERC20",
+            type: token_type(token.coin_family),
             jupiter_fee_address: null,
-            rpc:
-              token.coin_family == 1
-                ? process.env.REACT_APP_BNB_RPC
-                : token.coin_family == 2
-                ? process.env.REACT_APP_ETH_RPC
-                : process.env.REACT_APP_MATIC_RPC,
+            rpc: rpc_chain(token.coin_family)
           };
         });
 
@@ -635,17 +630,12 @@ function Swap() {
                   : 0
                 : 0,
               balance: token.wallets[0] ? toFixed(token.wallets[0].balance) : 0,
-              type: token.coin_family === 1 ? "BEP20" : "ERC20",
+              type: token_type(token.coin_family),
               jupiter_fee_address: null,
               chain: chains.find(
                 (chain) => chain?.coinFamily == token?.coin_family
               ),
-              rpc:
-                token.coin_family == 1
-                  ? process.env.REACT_APP_BNB_RPC
-                  : token.coin_family == 2
-                  ? process.env.REACT_APP_ETH_RPC
-                  : process.env.REACT_APP_MATIC_RPC,
+              rpc: rpc_chain(token.coin_family)
             };
           });
 
@@ -785,17 +775,12 @@ function Swap() {
               : 0
             : 0,
           balance: token.wallets[0] ? toFixed(token.wallets[0].balance) : 0,
-          type: token.coin_family === 1 ? "BEP20" : "ERC20",
+          type: token_type(token.coin_family),
           jupiter_fee_address: null,
           chain: chains.find(
             (chain) => chain?.coinFamily == token?.coin_family
           ),
-          rpc:
-            token.coin_family == 1
-              ? process.env.REACT_APP_BNB_RPC
-              : token.coin_family == 2
-              ? process.env.REACT_APP_ETH_RPC
-              : process.env.REACT_APP_MATIC_RPC,
+          rpc: rpc_chain(token.coin_family)
         };
       });
 
@@ -850,10 +835,10 @@ function Swap() {
       token1.coinFamily == 1
         ? el.network === "bnb"
         : token1.coinFamily == 2
-        ? el.network === "eth"
-        : token1.coinFamily == 4
-        ? el.network === "pol"
-        : el.network === ""
+          ? el.network === "eth"
+          : token1.coinFamily == 4
+            ? el.network === "pol"
+            : el.network === ""
     );
 
     let finalFee = 0;
@@ -1005,22 +990,14 @@ function Swap() {
                   Math.pow(10, 9) *
                   parseInt(gasPrice.estimate)) /
                 Math.pow(10, 18);
-
-              console.log("finalGasFee 1111 ", finalGasFee);
             } else {
               finalGasFee +=
                 (gasPrice.price * Math.pow(10, 9) * parseInt(31000)) /
-                Math.pow(10, 18);
-
-              console.log("finalGasFee222 ", finalGasFee);
+                Math.pow(10, 18); 
             }
           }
 
-          finalGasFeeForTransaction = finalGasFee;
-          console.log(
-            "finalGasFeeForTransaction ::: ",
-            finalGasFeeForTransaction
-          );
+          finalGasFeeForTransaction = finalGasFee; 
         } else {
           return myGasEstimate;
         }
@@ -1154,12 +1131,12 @@ function Swap() {
       }
     }
 
-    console.log(
-      "parseFloat(finalFee) finalGasFeeForTransaction ",
-      parseFloat(finalFee),
-      "   :: ",
-      finalGasFeeForTransaction
-    );
+    // console.log(
+    //   "parseFloat(finalFee) finalGasFeeForTransaction ",
+    //   parseFloat(finalFee),
+    //   "   :: ",
+    //   finalGasFeeForTransaction
+    // );
     setTradingFee(parseFloat(finalFee) + finalGasFeeForTransaction);
     return getFlooredFixed(parseFloat(finalFee) + finalGasFeeForTransaction, 5);
   };
@@ -1352,16 +1329,15 @@ function Swap() {
               textVal: `1 ${token2.symbol} = ${addCommasToNumber(
                 getFlooredFixed(
                   parseFloat(route.quote.toFixed(token1.decimals)) /
-                    parseFloat(amount),
+                  parseFloat(amount),
                   12
                 )
               )} ${token1.symbol}`,
             },
             {
               text: "Trading Fees",
-              textVal: `${tradingFee} ${
-                token1.coinFamily == 1 ? "ETH" : "BNB"
-              }`,
+              textVal: `${tradingFee} ${token1.coinFamily == 1 ? "ETH" : "BNB"
+                }`,
             },
             {
               text: "Slippage Tolerance",
@@ -1447,16 +1423,15 @@ function Swap() {
               textVal: `1 ${token2.symbol} = ${addCommasToNumber(
                 getFlooredFixed(
                   parseFloat(route.outAmount.toFixed(token1.decimals)) /
-                    parseFloat(amount),
+                  parseFloat(amount),
                   12
                 )
               )} ${token1.symbol}`,
             },
             {
               text: "Trading Fees",
-              textVal: `${tradingFee} ${
-                token1.coinFamily == 1 ? "ETH" : "BNB"
-              }`,
+              textVal: `${tradingFee} ${token1.coinFamily == 1 ? "ETH" : "BNB"
+                }`,
             },
             {
               text: "Slippage Tolerance",
@@ -1516,20 +1491,19 @@ function Swap() {
               textVal: `1 ${token2.symbol} = ${addCommasToNumber(
                 getFlooredFixed(
                   parseFloat(route.outAmount.toFixed(token1.decimals)) /
-                    parseFloat(amount),
+                  parseFloat(amount),
                   12
                 )
               )} ${token1.symbol}`,
             },
             {
               text: "Trading Fees",
-              textVal: `${tradingFee} ${
-                token1.coinFamily == 1
-                  ? "ETH"
-                  : token1.coinFamily == 9
+              textVal: `${tradingFee} ${token1.coinFamily == 1
+                ? "ETH"
+                : token1.coinFamily == 9
                   ? "PLS"
                   : "BNB"
-              }`,
+                }`,
             },
             {
               text: "Slippage Tolerance",
@@ -1572,7 +1546,7 @@ function Swap() {
               .dividedBy(Math.pow(10, token1.decimals))
               .toFixed(token1.decimals);
 
-            console.log(response.data);
+            // console.log(response.data);
             setAount(inAmount);
             setRoute(response.data);
 
@@ -1983,9 +1957,8 @@ function Swap() {
               <Maintanance text="On chain swap is in under maintenance" />
             ) : (
               <div
-                className={`${"fixedContent height-571"} ${
-                  height <= 600 ? "fixedContentOuterExt" : ""
-                }`}
+                className={`${"fixedContent height-571"} ${height <= 600 ? "fixedContentOuterExt" : ""
+                  }`}
               >
                 <div style={{ width: "100%" }} className="swap ">
                   <div className="swap_onChain">
@@ -2040,7 +2013,7 @@ function Swap() {
                           {addCommasToNumber(
                             getFlooredFixed(
                               parseFloat(amount ? amount : 0) *
-                                parseFloat(token1 ? token1.price : 0),
+                              parseFloat(token1 ? token1.price : 0),
                               2
                             )
                           )}
@@ -2301,11 +2274,11 @@ function Swap() {
                       style={
                         loading
                           ? {
-                              pointerEvents: "none",
-                            }
+                            pointerEvents: "none",
+                          }
                           : {
-                              pointerEvents: "auto",
-                            }
+                            pointerEvents: "auto",
+                          }
                       }
                       onClick={() => {
                         if (token2?.iHave) {
@@ -2374,7 +2347,7 @@ function Swap() {
                           {addCommasToNumber(
                             getFlooredFixed(
                               parseFloat(amount2 ? amount2 : 0) *
-                                parseFloat(token2 ? token2.price : 0),
+                              parseFloat(token2 ? token2.price : 0),
                               2
                             )
                           )}
@@ -2751,8 +2724,8 @@ function Swap() {
                         : token1?.id == token2?.id &&
                           token1 != null &&
                           token2 != null
-                        ? "Please select a different token"
-                        : "Swap"
+                          ? "Please select a different token"
+                          : "Swap"
                     }
                     maxWidth={"100%"}
                     disabled={
@@ -2946,14 +2919,14 @@ function Swap() {
 
                           if (
                             token.tokenAddress ===
-                              "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c" &&
+                            "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c" &&
                             !token2.tokenAddress
                           ) {
                             setIsWrap(true);
                             myWrap = true;
                           } else if (
                             token.tokenAddress ===
-                              "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2" &&
+                            "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2" &&
                             !token2.tokenAddress
                           ) {
                             setIsWrap(true);
@@ -2981,14 +2954,14 @@ function Swap() {
 
                           if (
                             token.tokenAddress ===
-                              "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c" &&
+                            "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c" &&
                             !token1.tokenAddress
                           ) {
                             setIsWrap(true);
                             myWrap = true;
                           } else if (
                             token.tokenAddress ===
-                              "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2" &&
+                            "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2" &&
                             !token1.tokenAddress
                           ) {
                             setIsWrap(true);

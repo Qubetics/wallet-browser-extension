@@ -51,6 +51,7 @@ import { setBalancesIn } from "../../../actions/balance-off-out";
 // import { SolanaHelper } from "../../helpers/solana.helper";
 // import DownIcon from "../../../Assets/DownIcon.svg";
 import { store } from "../../..";
+import { log } from "loglevel";
 
 function CurrencyBalanceDetails({ className, textLeft, mt0, coin }) {
   const { account, currency, chain, tokens, theme, balanceIn } = useSelector(
@@ -349,9 +350,8 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin }) {
             }}
           >
             <h3
-              className={`${"balanceDetails__title"} ${
-                textLeft ? textLeft : ""
-              }`}
+              className={`${"balanceDetails__title"} ${textLeft ? textLeft : ""
+                }`}
               style={{
                 maxWidth: "290px",
                 overflow: "hidden",
@@ -363,13 +363,13 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin }) {
             >
               {coin
                 ? `${addCommasToNumber(
-                    getFlooredFixed(coin.balance, 5)
-                  )} ${coin.coin.coin_symbol.toUpperCase()}`
+                  getFlooredFixed(coin.balance, 5)
+                )} ${coin.coin.coin_symbol.toUpperCase()}`
                 : balanceIn
-                ? `${currency.symbol}${addCommasToNumber(
+                  ? `${currency.symbol}${addCommasToNumber(
                     getFlooredFixed(total, 2)
                   )}`
-                : "****"}
+                  : "****"}
             </h3>
 
             {path !== "currencyDetails" ? (
@@ -422,9 +422,8 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin }) {
                 lineHeight: "16px",
                 padding: "10px 0",
               }}
-              className={`${"balanceDetails__title"} ${
-                textLeft ? textLeft : ""
-              }`}
+              className={`${"balanceDetails__title"} ${textLeft ? textLeft : ""
+                }`}
             >
               {currency.symbol}
               {addCommasToNumber(fiatValue)}
@@ -432,9 +431,8 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin }) {
           ) : null}
         </div>
         <div
-          className={`${"balanceDetails__itemsOuter"} ${
-            className ? className : ""
-          }`}
+          className={`${"balanceDetails__itemsOuter"} ${className ? className : ""
+            }`}
           style={
             coin
               ? { justifyContent: "center" }
@@ -613,10 +611,17 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin }) {
             </div>
             <span>{"Buy"} </span>
           </Link>
-          <Link
+          {coin?.coin?.for_swap && <Link
             onClick={(e) => {
               e.preventDefault();
-              path === "currencyDetails" ? showModal() : navigate("/swap");
+              // path === "currencyDetails" ? showModal() : navigate("/swap");
+              navigate("/swap", {
+                state: {
+                  fromOrTo: 1,//coin?.coin?.token_address ?? coin?.coin?.wallet_address,
+                  coinFamily: coin?.coin?.coin_family,
+                  coinId: coin?.coin?.coin_id
+                }
+              })  
             }}
             to="/swap"
             className={
@@ -629,7 +634,7 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin }) {
               <img src={TradeNew} />
             </div>
             <span>Trade</span>
-          </Link>
+          </Link>}
           {/* {path !== "currencyDetails" && (
             <Link
               onClick={(e) => {

@@ -130,7 +130,7 @@ function SetPasswordScreen() {
       if (correct) {
         store.dispatch(setLoading(true));
         const { name } = await chrome.storage.session.get("name");
-        console.log("=================> ", mnemonics);
+        // console.log("=================> ", mnemonics);
 
         await WalletHelper.generateAndSetWallet(mnemonics, name);
         store.dispatch(setLoading(false));
@@ -154,10 +154,7 @@ function SetPasswordScreen() {
       }
 
       const isValid = WalletHelper.checkMnemonics(getMnemonicsData.trim());
-      const { accounts } = await chrome.storage.session.get("accounts");
-      console.log('getMnemonicsData-----------> ', getMnemonicsData);
-
-
+      const { accounts } = await chrome.storage.session.get("accounts"); 
       if (
         accounts &&
         (await WalletHelper.checkIfAlreadyThere(getMnemonicsData.trim()))
@@ -173,15 +170,14 @@ function SetPasswordScreen() {
           name,
           "IMPORT"
         );
+        messageApi.success("Wallet imported successfully.")
         setActiveTab("congrats");
       } else {
         store.dispatch(setLoading(false));
         popError("Invalid mnemonics. Please try again.");
       }
       store.dispatch(setLoading(false));
-    } catch (e) {
-      console.log("pppppppppppppppppppppppp ", e);
-
+    } catch (e) { 
       store.dispatch(setLoading(false));
       popError(e ? e : "An error occurred. Please try again.");
     }

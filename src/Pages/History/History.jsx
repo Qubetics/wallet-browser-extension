@@ -27,7 +27,7 @@ function History() {
 
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const { state } = useLocation();
+  const { pathname, state } = useLocation();
 
   const init = async () => {
     if (!state) {
@@ -43,18 +43,18 @@ function History() {
     }
 
     store.dispatch(setLoading(true));
- 
+
     const transactionList = await server.post(
       `/wallet/transaction/list`,
       {
         coin_family: state
           ? state.coinId
-            ?  state.coinId=='all'?account.coinFamilies:[state.coinId]
+            ? state.coinId == 'all' ? account.coinFamilies : [state.coinId]
             : account.coinFamilies
           : account.coinFamilies,
         addrsListKeys: state
           ? state.coinId
-            ? state.coinId=='all'?account.addressLists:[account.coinFamilyAndAddress[state.coinId]]
+            ? state.coinId == 'all' ? account.addressLists : [account.coinFamilyAndAddress[state.coinId]]
             : account.addressLists
           : account.addressLists,
         page: currentPage,
@@ -109,8 +109,21 @@ function History() {
   };
 
   useEffect(() => {
-    init();
-  }, [currentPage]);
+    init(); 
+    return () => { 
+      if (pathname !== '/filter-history') {
+        store.dispatch(
+          setFilter({
+            coinId: "all",
+            status: "all",
+            fromDate: null,
+            toDate: null,
+            type: "all",
+          })
+        );
+      }
+    }
+  }, [currentPage, pathname]);
 
   return (
     <div className={`scrollableCont`}>
@@ -125,12 +138,12 @@ function History() {
               data.type === "dapp"
                 ? "Smart Contract"
                 : data.type === "deposit"
-                ? "Received"
-                : data.type === "withdraw"
-                ? "Sent"
-                : data.type.toLowerCase() === "swap"
-                ? "Swap"
-                : "Withdraw";
+                  ? "Received"
+                  : data.type === "withdraw"
+                    ? "Sent"
+                    : data.type.toLowerCase() === "swap"
+                      ? "Swap"
+                      : "Withdraw";
 
             return (
               <HistoryListOuter

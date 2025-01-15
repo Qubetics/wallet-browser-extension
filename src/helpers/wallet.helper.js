@@ -278,18 +278,17 @@ export class WalletHelper {
     const { password } = await chrome.storage.session.get("password");
     let { mnemonics } = await chrome.storage.local.get("mnemonics");
     const decryptMnemonics = SecurityHelper.decrypt(mnemonics, password);
-    console.log("mnemonicsmnemonicsmnemonics ", mnemonics);
-
-    console.log("newMnemonicsnewMnemonicsnewMnemonicsnewMnemonics ", newMnemonics);
-    console.log('JSON.parse(decryptMnemonics)JSON.parse(decryptMnemonics) ', JSON.parse(decryptMnemonics));
+    // console.log("mnemonicsmnemonicsmnemonics ", mnemonics);
+    // console.log("newMnemonicsnewMnemonicsnewMnemonicsnewMnemonics ", newMnemonics);
+    // console.log('JSON.parse(decryptMnemonics)JSON.parse(decryptMnemonics) ', JSON.parse(decryptMnemonics));
 
 
     if (decryptMnemonics) {
-      const checkIfThere = false;
-      // JSON.parse(decryptMnemonics).find(
-      //   (el) => el.phrase === newMnemonics
-      // );
-
+      const checkIfThere = JSON.parse(decryptMnemonics).find(
+        (el) => el.phrase === newMnemonics
+      );
+      // console.log("checkIfTherecheckIfThere ", checkIfThere);
+      
       if (checkIfThere) return true;
       return false;
     } else {
@@ -761,14 +760,14 @@ export class WalletHelper {
       const { chains } = await chrome.storage.local.get("chains");
       const { currency } = await chrome.storage.local.get("currency");
       let { mnemonics } = await chrome.storage.local.get("mnemonics");
-      console.log("MNEMONICS in generateAndSetWallet", mnemonics);
+      // console.log("MNEMONICS in generateAndSetWallet", mnemonics);
       const solanaAddress = await SolanaHelper.generateSolanaAddress(
         newMnemonics
       );
       const bitcoinAddress = await BTCHelper.generateBitcoinAddress(
         newMnemonics
       );
-      console.log("ADDDDD ", solanaAddress);
+      // console.log("ADDDDD ", solanaAddress);
 
       // const tronAddress = await TronHelper.generateTronAddress(newMnemonics);
 
@@ -780,7 +779,7 @@ export class WalletHelper {
       }
 
       newMnemonics = newMnemonics?.toLowerCase();
-      console.log("AAAAAAAAAAAAAAAAAAAA ", newMnemonics);
+      // console.log("AAAAAAAAAAAAAAAAAAAA ", newMnemonics);
 
       const { address, privateKey } = ethers.Wallet.fromMnemonic(
         newMnemonics,
@@ -808,7 +807,7 @@ export class WalletHelper {
           address: address,
         },
       ];
-      console.log("Finallll ", finalMnemonics);
+      // console.log("Finallll ", finalMnemonics);
 
       const { deviceId } = await chrome.storage.local.get("deviceId");
 
@@ -861,7 +860,7 @@ export class WalletHelper {
         }
       );
 
-      console.log("Createeeeeeeeee ", createWallet);
+      // console.log("Createeeeeeeeee ", createWallet);
       const id = uuidv4();
 
       const finalAccounts = [

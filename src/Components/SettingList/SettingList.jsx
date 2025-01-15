@@ -19,6 +19,7 @@ import { setLoading } from "../../actions/loading";
 import ButtonComp from "../ButtonComp/ButtonComp";
 import warning from "../../Assets/PNG/warning.png";
 import darkclose from "../../Assets/darkclose.svg";
+import { setFilter } from "../../actions/filter";
 
 function SettingList(props) {
   const {
@@ -30,6 +31,7 @@ function SettingList(props) {
     switchToggle,
     changeTheme,
     RightArow,
+    path
   } = props;
   const [isModalOpen, setOpenmodal] = useState(false);
   const [isLogoutModalOpen, setLogoutOpenmodal] = useState(false);
@@ -240,7 +242,23 @@ function SettingList(props) {
               });
             }
 
-            return navigate(to);
+            if (to === "/history") {
+              store.dispatch(
+                setFilter({
+                  coinId: "all",
+                  status: "all",
+                  fromDate: null,
+                  toDate: null,
+                  type: "all",
+                })
+              );
+              return navigate("/history", {
+                state: { path: path ?? '' },
+              });
+            }
+
+
+            return navigate(to, { state: { path: path ?? '' } });
           }}
         >
           <div className="settingList">

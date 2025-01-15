@@ -181,6 +181,7 @@ function Setting() {
     {
       setinglist: "Transactions History",
       to: "/history",
+      path:"settings", 
       ticketcheck:
         theme == "darkTheme" ? Transactionhistory : Transactionhistory,
       RightArow: "RightArow",
@@ -222,6 +223,7 @@ function Setting() {
             onClick={data.onClick}
             switchToggle={data.switchToggle}
             RightArow={data.RightArow}
+            path={data?.path}
           />
         ))}
 

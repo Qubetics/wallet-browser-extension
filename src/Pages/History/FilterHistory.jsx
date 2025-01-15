@@ -118,6 +118,7 @@ function FilterHistory() {
         <div className="searchBarFixed">
           <MenuRestofHeaders
             backTo={"/history"}
+            path={state?.path ??"/wallet"}
             title={"Filter"}
             coin={state?.currencyDetail || null}
           />
@@ -299,8 +300,7 @@ function FilterHistory() {
                       : null
                   }
                   placeholder="From"
-                  onChange={(value) => {
-                    console.log(value, "From");
+                  onChange={(value) => { 
                     setFilterValue({
                       ...filterValue,
                       fromDate: value ? value.format("YYYY-MM-DD") : null,
@@ -330,8 +330,7 @@ function FilterHistory() {
                       toDate: null,
                     });
                   }}
-                  onChange={(value) => {
-                    console.log(value, "To");
+                  onChange={(value) => { 
                     setFilterValue({
                       ...filterValue,
                       toDate: value ? value.format("YYYY-MM-DD") : null,
@@ -368,7 +367,7 @@ function FilterHistory() {
                   });
                 } else {
                   navigate("/history", {
-                    state: { ...filterValue, coinId: filterValue.coinId.value },
+                    state: { ...filterValue, coinId: filterValue.coinId.value, path: state?.path ?? "/wallet" },
                   });
                 }
               }}

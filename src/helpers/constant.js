@@ -15,6 +15,15 @@ export const token_type = (coin_family) => {
   return coin_family === 1 ? "BEP20" : coin_family === 2 ? "ERC20" : coin_family === 4 ? "POL ERC20" : coin_family === 5 ? "SPL" : coin_family === 6 ? "TRC20" : ""
 }
 
+export const rpc_chain = (coin_family) => {
+  return coin_family === 1 ? process.env.REACT_APP_BNB_RPC :
+    coin_family === 2 ? process.env.REACT_APP_ETH_RPC :
+      coin_family === 3 ? process.env.REACT_APP_BTC_RPC :
+        coin_family === 4 ? process.env.REACT_APP_MATIC_RPC :
+          coin_family === 5 ? process.env.REACT_APP_SOL_RPC :
+            coin_family === 6 ? process.env.REACT_APP_TRON_RPC : ""
+}
+
 export const SWIFT_ERROR = {
   201: 'The equipment source does not exist',
   202: 'Decimal digits of deposit amount are too long',

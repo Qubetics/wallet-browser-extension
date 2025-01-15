@@ -16,7 +16,7 @@ import {
   UNI_MAINNET_ROUTER,
   UNI_TESTNET_ROUTER,
 } from "../../../config/uniswap.config";
-import { message } from "antd";
+import { message, Tooltip } from "antd";
 import { useState } from "react";
 import { UniswapHelper } from "../../../helpers/uniswap.helper";
 import ModalCustom from "../../../Components/ModalCustom/ModalCustom";
@@ -185,7 +185,7 @@ function SwapDetails() {
         addCommasToNumber(
           getFlooredFixed(
             (Number(finalGasFee) + Number(finalFee)) *
-              parseFloat(parentCoin.data.data.fiatCoinPrice.value),
+            parseFloat(parentCoin.data.data.fiatCoinPrice.value),
             4
           )
         )
@@ -271,7 +271,7 @@ function SwapDetails() {
   const handleSwap = async () => {
     try {
       console.log('ppppppppppppppppp', token1);
-      
+
       const uniHelper = new UniswapHelper(token1.rpc);
 
       if (requireApproval) {
@@ -410,13 +410,29 @@ function SwapDetails() {
             <div className="swapDetails__address">
               <p className="swapDetails__address__key">From</p>
               <p className="swapDetails__address__val">
-                <span> {token1.address}</span>
+                <span>
+                  <Tooltip title={`${token1?.address}`}>
+                    {token1.address?.substring(0, 7)}.....
+                    {token1.address?.substring(
+                      token1.address?.length - 7,
+                      token1.address?.length
+                    )}
+                  </Tooltip>
+                </span>
               </p>
             </div>
             <div className="swapDetails__address">
               <p className="swapDetails__address__key">To</p>
               <p className="swapDetails__address__val">
-                <span> {token1.address}</span>
+                <span>
+                  <Tooltip title={`${token1?.address}`}>
+                    {token1.address?.substring(0, 7)}.....
+                    {token1.address?.substring(
+                      token1.address?.length - 7,
+                      token1.address?.length
+                    )}
+                  </Tooltip>
+                </span>
               </p>
             </div>
           </div>
@@ -437,10 +453,10 @@ function SwapDetails() {
                   {token1.coinFamily == 1
                     ? "BNB"
                     : token1.coinFamily == 2
-                    ? "ETH"
-                    : token1.coinFamily == 4
-                    ? "POL"
-                    : "BNB"}{" "}
+                      ? "ETH"
+                      : token1.coinFamily == 4
+                        ? "POL"
+                        : "BNB"}{" "}
                   ({currency.symbol}
                   {networkPriceFiat})
                 </span>
@@ -456,8 +472,8 @@ function SwapDetails() {
               requireApproval
                 ? "Approve"
                 : approvalConfirmed
-                ? "Swap"
-                : "Approval Pending"
+                  ? "Swap"
+                  : "Approval Pending"
             }
             maxWidth={"100%"}
           />

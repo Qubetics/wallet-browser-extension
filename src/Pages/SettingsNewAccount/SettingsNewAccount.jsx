@@ -145,7 +145,7 @@ function AddNewWallet() {
                   //   store.dispatch(setLoading(false));
                   // }
                 }}
-                text={"Create"}
+                text={state?.type=="import"?"Import":"Create"}
                 maxWidth="100%"
               />
             </div>
