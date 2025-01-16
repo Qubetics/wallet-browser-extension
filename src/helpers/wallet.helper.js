@@ -197,7 +197,11 @@ export class WalletHelper {
     try {
       const { password } = await chrome.storage.session.get("password");
       const { mnemonics } = await chrome.storage.local.get("mnemonics");
+      console.log("mnemonics>>>>", mnemonics);
+      
       const decryptedMnemonics = SecurityHelper.decrypt(mnemonics, password);
+      console.log("decryptedMnemonics==== ", JSON.parse(decryptedMnemonics));
+      
       const defaultMnemonics = JSON.parse(decryptedMnemonics).find(
         (el) => el.default
       );
@@ -1214,11 +1218,12 @@ export class WalletHelper {
 
   static setWalletPreference = async (walletId) => {
     try {
-      console.log(walletId, "walletId");
+      console.log(walletId, "walletId>>>>>>>>>>");
       const { password } = await chrome.storage.session.get("password");
       const { accounts } = await chrome.storage.local.get("accounts");
 
       const decryptedAccounts = SecurityHelper.decrypt(accounts, password);
+console.log(">>>>>>>>>>>>>JSON.parse(decryptedAccounts)>>>>>>> ", JSON.parse(decryptedAccounts));
 
       const updatesAccounts = JSON.parse(decryptedAccounts).map((el) => {
         if (el.id === walletId) {
@@ -1228,6 +1233,9 @@ export class WalletHelper {
         }
         return el;
       });
+
+      console.log(".........updatesAccounts>>>>>>> ", updatesAccounts);
+      
       const encryptedAccounts = SecurityHelper.encrypt(
         updatesAccounts,
         password

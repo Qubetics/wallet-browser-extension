@@ -94,7 +94,7 @@ function ConnectedApp() {
             </p>
           )}
         </div> */}
-        <div>
+        <div className="flexedContent">
           {/* <div className="searchBarFixed">
             <div className="search">
               <InputField
@@ -122,7 +122,7 @@ function ConnectedApp() {
           {connections.length > 0 ? (
             connections.map((connection) => (
               <div
-                className="connectesApp"
+                className="connectesApp listItems"
                 onClick={() => {
                   store.dispatch(setCreate(true));
                   navigate("/exchangePancake", {
@@ -152,7 +152,7 @@ function ConnectedApp() {
                 <div className="ryt">
                   <img
                     src={
-                      theme === "darkTheme" ? DarkArrowRightIcon : ticketcheck1
+                      DarkArrowRightIcon
                     }
                   />
                 </div>

@@ -25,6 +25,7 @@ import { server } from "../../server";
 import OpenDark from "../../Assets/open-dark.svg";
 import CloseDark from "../../Assets/close-dark.svg";
 import { setBalancesIn } from "../../actions/balance-off-out";
+import { SecurityHelper } from "../../helpers/security.helper";
 
 function ManageWallet() {
   const [data, setData] = useState([]);
@@ -148,7 +149,41 @@ function ManageWallet() {
           ...acc,
           default: acc.id === selectedAccount.id,
         }));
+
+        console.log("ACCCCCC ", accounts);
+        console.log("ACCCCCCselectedAccount ", selectedAccount);
+
+        const { mnemonics } = await chrome.storage.local.get("mnemonics");
+        const { password } = await chrome.storage.session.get("password");
+        console.log("mnemonics>>>>", mnemonics);
+        const decryptedMnemonics = SecurityHelper.decrypt(mnemonics, password);
+        console.log("mnemonics>>>>", decryptedMnemonics, " IIIIIIIIIIIIIIII ", JSON.parse(decryptedMnemonics));
+
+        const updatesMnemonics = JSON.parse(decryptedMnemonics).map((el) => {
+          if (el.address === selectedAccount?.address) {
+            el.default = true;
+          } else {
+            el.default = false;
+          }
+          return el;
+        });
+        console.log("XXXXXupdatesAccounts22222222 ", updatesMnemonics);
+        const encryptedMnemonics = SecurityHelper.encrypt(updatesMnemonics, password);
+        chrome.storage.local.set({
+          mnemonics: encryptedMnemonics,
+          registered: true,
+        });
+        console.log(".........updatesAccounts>>>>>>> ", updatesMnemonics);
+
+
+
+
+
+
+
+
         await WalletHelper.setWalletPreference(selectedAccount.id);
+
         await init();
         messageApi.success("Default account updated successfully!");
       }
@@ -248,7 +283,7 @@ function ManageWallet() {
         <div className={`flexedContent manageWalletHeight`}>
           <div>
             {" "}
-            {data.map((data, idx) => (
+            {Array.isArray(data) && data.map((data, idx) => (
               <div className="listItems">
                 <ul>
                   <li key={idx} className="currency_click">
@@ -359,9 +394,9 @@ function ManageWallet() {
                 onClick={async () => {
                   setIsModalOpen4(true);
                 }}
-                // onClick={async () => {
-                //   isModalOpen4(true);
-                // }}
+              // onClick={async () => {
+              //   isModalOpen4(true);
+              // }}
               >
                 <div style={{ display: "flex", alignItems: "center" }}>
                   <img

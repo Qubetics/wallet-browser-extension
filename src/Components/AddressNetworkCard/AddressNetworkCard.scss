@@ -7,8 +7,22 @@
   margin-bottom: 20px;
   &_inner {
     margin-top: 15px !important;
+    border-top: 1px solid #292929;
+    padding-top: 15px;
     &:first-child {
       margin-top: 0 !important;
+      border: 0;
+      padding: 0;
+    }
+  }
+  .bookAddress{
+    margin-top: 15px !important;
+    border-top: 1px solid #292929;
+    padding-top: 15px;
+    &:first-child {
+      margin-top: 0 !important;
+      border: 0;
+      padding: 0;
     }
   }
   .addressBook {

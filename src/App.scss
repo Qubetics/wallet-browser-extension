@@ -77,6 +77,8 @@ body::-webkit-scrollbar {
     // @include theme() {
     //   background-color: theme-get("whiteblackBase");
     // }
+    background-image: url("./Assets/main-bg.png");
+    background-repeat: no-repeat;
     z-index: 9;
   }
 

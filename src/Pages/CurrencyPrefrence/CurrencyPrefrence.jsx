@@ -84,36 +84,37 @@ function CurrencyPrefrence() {
               ))}
             </ul>
           </div> */}
-          <div
-            className="listItems"
-            style={{
-              display: "flex", 
-              flexDirection: 'column',
-              gap:"25px"
-            }}
-          >
-            {data.map((data) => (
-              <div  style={{
+          {data.map((data) => (
+            <div
+              className="listItems"
+              style={{
+                display: "flex",
+                flexDirection: 'column',
+                gap: "25px"
+              }}
+            >
+              <div style={{
                 display: "flex",
                 alignItems: "center",
                 gap: "13px",
                 justifyContent: "space-between",
               }}>
                 <div onClick={async () => {
-                    await WalletHelper.setCurrencyPreference({
-                      name: data.name,
-                      symbol: data.symbol,
-                    });
+                  await WalletHelper.setCurrencyPreference({
+                    name: data.name,
+                    symbol: data.symbol,
+                  });
 
-                    message.success("Currency updated successfully")
-                    navigate('/setting');
-                  }} style={{ display: "flex", alignItems: "center", gap: "13px" }}>
-                  <img style={{height:30, width:30}} src={data?.img} alt="img" />
+                  message.success("Currency updated successfully")
+                  navigate('/setting');
+                }} style={{ display: "flex", alignItems: "center", gap: "13px" }}>
+                  <img style={{ height: 30, width: 30 }} src={data?.img} alt="img" />
                   <span className="Currencyname">{data?.name}</span>
                 </div>
-                {data.name === currency.name ? <img style={{height:12, width:12}} src={TickIcon} alt="usd" /> : ''}
-                </div>))}
-          </div>
+                {data.name === currency.name ? <img style={{ height: 12, width: 12 }} src={TickIcon} alt="usd" /> : ''}
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </>

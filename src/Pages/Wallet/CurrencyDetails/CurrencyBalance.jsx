@@ -18,7 +18,7 @@ import BuyIconWhite from "../../../Assets/other-buy.png";
 import SwapIconWhite from "../../../Assets/SwapIconWhite.svg";
 import DarkSendIcon from "../../../Assets/DarkSendIcon.svg";
 import DarkRecieveIcon from "../../../Assets/DarkRecieveIcon.svg";
-import Darkotherbuy from "../../../Assets/Newbuy.svg";
+import Darkotherbuy from "../../../Assets/Newbuy.png";
 import DarkSwapIcon from "../../../Assets/DarkSwapIcon.svg";
 import Buy from "../../../Assets/buy-sell.png";
 import { Dropdown, message } from "antd";

@@ -953,7 +953,7 @@ function SendCoins() {
                   );
                 }
                 store.dispatch(setLoading(false));
-                
+
                 console.log("ITMMMMMMMMMMMMMMM ", {
                   to: address,
                   amount: amount,
@@ -1070,19 +1070,19 @@ function SendCoins() {
                       address,
                       parseInt(Math.round(amount * btcTosatoshi).toString())
                     );
-                    // console.log(
-                    //   "🚀 ~ file: SendCoins.jsx:635 ~ address:",
-                    //   address
-                    // );
+                    console.log(
+                      "🚀 ~ file: SendCoins.jsx:635 ~ address:",
+                      address
+                    );
 
-                    // console.log(
-                    //   "🚀 ~ file: SendCoins.jsx:637 ~ transaction:",
-                    //   transaction
-                    // );
-                    // console.log(
-                    //   "🚀 ~ file: SendCoins.jsx:636 ~ transaction:",
-                    //   transaction
-                    // );
+                    console.log(
+                      "🚀 ~ file: SendCoins.jsx:637 ~ transaction:",
+                      transaction
+                    );
+                    console.log(
+                      "🚀 ~ file: SendCoins.jsx:636 ~ transaction:",
+                      transaction
+                    );
                     let satoshis = 0;
                     for (var i = 0; i < inputs.length; i++) {
                       satoshis = inputs[i].satoshis + satoshis;
@@ -1095,7 +1095,9 @@ function SendCoins() {
                         )) >
                       546
                     ) {
+                      console.log("1111111111"); 
                       transaction.change(coin.wallet_address);
+                      console.log("11111111112");
                     }
                     if (
                       satoshis -
@@ -1105,8 +1107,11 @@ function SendCoins() {
                         )) >
                       546
                     ) {
+                      console.log("22222222222");
                       transaction.fee(fee);
+                      console.log("222222222223");
                     } else {
+                      console.log("333333333333");
                       transaction.fee(
                         fee +
                         (satoshis -
@@ -1115,14 +1120,14 @@ function SendCoins() {
                               Math.round(amount * btcTosatoshi).toString()
                             )))
                       );
+                      console.log("333333333334");
                     }
                     const btcPrivateKey =
                       await WalletHelper.getBitcoinPrivateKey();
 
-                    // console.log(
-                    //   "🚀 ~ file: SendCoins.jsx:656 ~ btcPrivateKey:",
-                    //   btcPrivateKey
-                    // );
+                    console.log(
+                      "🚀 ~ file: SendCoins.jsx:656 ~ btcPrivateKey:", btcPrivateKey
+                    );
 
                     if (!btcPrivateKey) {
                       store.dispatch(setLoading(false));
@@ -1130,8 +1135,12 @@ function SendCoins() {
                         "Unable to fetch private key at the moment please try again later."
                       );
                     }
+                    console.log("Come to sign...");
                     transaction.sign(btcPrivateKey);
+                    console.log("Come to sign...success");
                     const rawTransaction = transaction.serialize();
+                    console.log("'rawTransaction---> ", rawTransaction);
+                    
                     store.dispatch(setLoading(false));
 
                     navigate("/confirmCurrency", {
