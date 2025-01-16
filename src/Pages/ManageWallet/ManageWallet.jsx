@@ -155,9 +155,7 @@ function ManageWallet() {
 
         const { mnemonics } = await chrome.storage.local.get("mnemonics");
         const { password } = await chrome.storage.session.get("password");
-        console.log("mnemonics>>>>", mnemonics);
         const decryptedMnemonics = SecurityHelper.decrypt(mnemonics, password);
-        console.log("mnemonics>>>>", decryptedMnemonics, " IIIIIIIIIIIIIIII ", JSON.parse(decryptedMnemonics));
 
         const updatesMnemonics = JSON.parse(decryptedMnemonics).map((el) => {
           if (el.address === selectedAccount?.address) {
@@ -167,20 +165,12 @@ function ManageWallet() {
           }
           return el;
         });
-        console.log("XXXXXupdatesAccounts22222222 ", updatesMnemonics);
+
         const encryptedMnemonics = SecurityHelper.encrypt(updatesMnemonics, password);
         chrome.storage.local.set({
           mnemonics: encryptedMnemonics,
           registered: true,
         });
-        console.log(".........updatesAccounts>>>>>>> ", updatesMnemonics);
-
-
-
-
-
-
-
 
         await WalletHelper.setWalletPreference(selectedAccount.id);
 
