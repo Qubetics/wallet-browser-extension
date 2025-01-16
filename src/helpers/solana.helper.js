@@ -125,7 +125,7 @@ export class SolanaHelper {
   ) => {
     try {
       const { account } = store.getState();
-      // console.log('-------------account', account);
+      console.log('-------------account', account);
       // const privateKey = await WalletHelper.getSolanaPrivateKey();
       const mnemonics = await WalletHelper.getMnemonics(account.address);
 
@@ -206,7 +206,7 @@ export class SolanaHelper {
       //   transaction,
       //   [myKeyPair]
       // );
-      // console.log('signature====', signature);
+      console.log('signature====', signature);
       let payload = {
         txid: signature,
         from: from,
@@ -222,6 +222,7 @@ export class SolanaHelper {
           Authorization: account.jwtToken,
         },
       });
+      console.log("myResponse====> ", myResponse);
 
       return myResponse.data;
     } catch (error) {
@@ -342,7 +343,7 @@ export class SolanaHelper {
       // );
 
       const PRIORITY_FEE_INSTRUCTIONS =
-        ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 25000 });
+        ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 35000 });
 
       const transaction = new Transaction().add(
         splToken.Token.createTransferInstruction(

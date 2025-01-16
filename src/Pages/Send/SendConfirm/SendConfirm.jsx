@@ -236,7 +236,10 @@ function SendConfirm() {
         }
       } else if (!chain.isEVM && chain.currencyName === "SOL") {
         const solanaHelper = new SolanaHelper(chain.rpcUrl);
+        console.log("CONFIRMMMMMMMMMMMMMMMMMMMMM amount ", amount, " fiatGasFee :",fiatGasFee, " coin : ", coin);
+        
         if (coin?.coin?.token_address) {
+          console.log("IN TOKEN CASSE");
           const response =
             await solanaHelper.generateRawTransactionForTokenAndBroadcast(
               to,
@@ -254,7 +257,7 @@ function SendConfirm() {
               coin.coin.token_type,
               coin.balance
             );
-          // console.log("SOLLLLL RSP ", response);
+          console.log("SOLLLLL RSP ", response);
 
           if (!response) {
             store.dispatch(setLoading(false));
@@ -263,6 +266,8 @@ function SendConfirm() {
             );
           }
         } else {
+          console.log("INCOIN CASSE");
+          
           const response =
             await solanaHelper.generateRawTransactionForCoinAndBroadcast(
               to,
@@ -276,13 +281,16 @@ function SendConfirm() {
               `solana/${coin.coin.coin_symbol}`, //chain.slug,
               chain.chainId
             );
-          // console.log("RRRRR solana--- ", response);
+          console.log("RRRRR solana--- ", response);
 
           if (!response) {
             store.dispatch(setLoading(false));
             return messageApi.error(
               "Insufficient funds to perform transaction."
             );
+          }else {
+            messageApi.success(response?.message)
+            store.dispatch(setLoading(false));
           }
         }
       } else if (!chain.isEVM && chain.currencyName === "BTC") {
