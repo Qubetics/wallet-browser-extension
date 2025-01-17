@@ -53,7 +53,7 @@ function SettingImportWalletPrivatekey() {
                 />
               </div>
             </div>
-            <div className="setPassword__footerbutton">
+            <div className="setPassword__footerbutton bottomBtn">
               <ButtonComp
                 onClick={async () => {
                   store.dispatch(setLoading(false));
@@ -92,7 +92,7 @@ function SettingImportWalletPrivatekey() {
                   navigate("/wallet");
                 }}
                 text={"Create"}
-                maxWidth="100%"
+                maxWidth="352px"
               />
             </div>
           </div>

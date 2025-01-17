@@ -434,11 +434,11 @@ code {
   }
 }
 .manageWalletHeight {
-  min-height: calc(-348px + 100vh);
+  // min-height: calc(-348px + 100vh);
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  gap: 20px;
+  // justify-content: space-between;
+  // gap: 20px;
 }
 .manageTabHeight {
   min-height: calc(-397px + 100vh) !important;
@@ -475,4 +475,14 @@ code {
     width: 100%;
   }
 }
-
+.bottomBtn {
+  bottom: 32px;
+  left: 0;
+  position: absolute;
+  width: 100%;
+  background-image: url("./Assets/main-bg.png");
+  background-repeat: no-repeat;
+  background-position: bottom;
+  // height: 82px;
+  // padding-top: 12px;
+}

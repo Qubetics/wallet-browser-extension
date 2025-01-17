@@ -62,7 +62,7 @@ function AddNewWallet() {
                 </div>
               </div>
             </div>
-            <div className="setPassword__footerbutton">
+            <div className="setPassword__footerbutton bottomBtn">
               <ButtonComp
                 onClick={async () => {
                   try {
@@ -146,7 +146,7 @@ function AddNewWallet() {
                   // }
                 }}
                 text={state?.type=="import"?"Import":"Create"}
-                maxWidth="100%"
+                maxWidth="352px"
               />
             </div>
           </div>

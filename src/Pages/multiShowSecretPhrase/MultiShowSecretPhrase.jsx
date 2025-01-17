@@ -64,7 +64,7 @@ function MultiShowSecretPhrase() {
                   >
                     {contextHolder}
                     <img src={CopyIcon} width={14} height={16} />
-                    <span>Copy</span>
+                    <span style={{color:"#fff"}}>Copy</span>
                   </div>
 
                   <div

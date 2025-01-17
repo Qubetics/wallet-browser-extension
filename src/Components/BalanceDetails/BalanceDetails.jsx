@@ -586,7 +586,7 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
           <span>Receive</span>
         </Link>
 
-        {!coin ? (
+        {/* {!coin ? (
           <Link
             to="/buy-sell"
             // to="#"
@@ -669,7 +669,7 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
             </div>
             <span>{account.isWatchOnly ? "Buy" : "Buy/Sell"} </span>
           </Link>
-        ) : null}
+        ) : null} */}
         <Link
           to="/swap"
           className={

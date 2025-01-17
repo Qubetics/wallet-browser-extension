@@ -271,10 +271,9 @@ function ManageWallet() {
         </div>
 
         <div className={`flexedContent manageWalletHeight`}>
-          <div>
-            {" "}
+        
             {Array.isArray(data) && data.map((data, idx) => (
-              <div className="listItems">
+              <div className="listItems pdRemove">
                 <ul>
                   <li key={idx} className="currency_click">
                     <div
@@ -329,14 +328,13 @@ function ManageWallet() {
                 </ul>
               </div>
             ))}
-          </div>
-          <div>
+          <div  className="bottomBtn">
             <ButtonComp
               onClick={async () => {
                 setIsModalOpen3(true);
               }}
               text={"Add Wallet"}
-              maxWidth={"100%"}
+              maxWidth={"352px"}
             />
           </div>
         </div>
@@ -357,7 +355,7 @@ function ManageWallet() {
       >
         <InputFieldOnly
           placeholder={selectedAccount?.name}
-          label="Wallet"
+          label="Wallet Name"
           checkForSymbols={true}
           value={name}
           placeholderBaseColor={true}

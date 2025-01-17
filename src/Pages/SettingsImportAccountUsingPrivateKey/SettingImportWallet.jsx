@@ -58,7 +58,7 @@ function SettingImportWallet() {
                 </div>
               </div>
             </div>
-            <div className="setPassword__footerbutton">
+            <div className="setPassword__footerbutton bottomBtn">
               <ButtonComp
                 onClick={async () => {
                   if (!name) {
@@ -106,7 +106,7 @@ function SettingImportWallet() {
                   });
                 }}
                 text={"Continue"}
-                maxWidth="100%"
+                maxWidth="352px"
               />
             </div>
           </div>

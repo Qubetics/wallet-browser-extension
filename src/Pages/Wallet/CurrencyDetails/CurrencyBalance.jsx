@@ -582,7 +582,7 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin }) {
             </div>
             <span>{account.isWatchOnly ? "Buy" : "Buy/Sell"} </span>
           </Link> */}
-          <Link
+          {/* <Link
             // to="/buy-sell"
             to="#"
             onClick={(e) => {
@@ -610,7 +610,7 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin }) {
               <img src={Darkotherbuy} alt="" />
             </div>
             <span>{"Buy"} </span>
-          </Link>
+          </Link> */}
           {coin?.coin?.for_swap && <Link
             onClick={(e) => {
               e.preventDefault();

@@ -33,7 +33,7 @@ function AddContact() {
   const [selectedChain, setSelectedChain] = useState(chain);
 
   console.log("ADDDDDDDDDDDDD FROM SEND ", state?.coin, state?.redirectTo);
-  
+
   const selectAfterTo = (
     <div className={"addonAfter"}>
       <Select
@@ -86,14 +86,15 @@ function AddContact() {
     const { chains } = await chrome.storage.local.get("chains");
     setChains(chains);
     console.log("CCCCCCCCCC ", state?.coin?.coin_family, chains);
-    
-    if (state?.coin?.coin_family){
-      const selectedChain = chains.find((el) => el.coinFamily == state?.coin?.coin_family);
-          setSelectedChain(selectedChain);
+
+    if (state?.coin?.coin_family) {
+      const selectedChain = chains.find(
+        (el) => el.coinFamily == state?.coin?.coin_family
+      );
+      setSelectedChain(selectedChain);
     }
   };
 
-  
   useEffect(() => {
     init();
   }, []);
@@ -159,149 +160,148 @@ function AddContact() {
         title={"Address Book"}
       />
       <div className={`flexedContent manageWalletHeight`}>
-        <div>
-          <div className={style.token}>
-            <InputField
-              placeholder={selectedChain.chainName}
-              label="Network"
-              readonly={true}
-              addonAfter={selectAfterTo}
-            />
-            <InputFieldOnly
-              placeholder="Enter Address Name"
-              label="Address Name"
-              getData={(name) => {
-                if (name.length <= 25) {
-                  if (/^\s/.test(name)) {
-                    setName("");
-                  } else {
-                    setName(name);
-                  }
-                } else {
-                  return;
-                }
-              }}
-              value={name}
-              checkForSymbols={true}
-            />
-
-            <InputField
-              placeholder="Wallet Address"
-              label="Address or Naming Service"
-              getData={(address) => {
-                setAddress(address);
-              }}
-              value={address}
-              checkForSymbols={true}
-              addonAfter={
-                <div className={style.token__selectStyle}>
-                  <span
-                    style={{ color: "#fff" }}
-                    className={style.token__pasteText}
-                    onClick={async () => {
-                      const data = await navigator.clipboard.readText();
-                      setAddress(data);
-                    }}
-                  >
-                    Paste
-                  </span>
-                </div>
-              }
-            />
-          </div>
-        </div>
-        <Link
-          to="/manage"
-          onClick={async (e) => {
-            e.preventDefault();
-
-            if (!address) {
-              return messageApi.error("Address for the contact is required.");
-            }
-
-            if (!name) {
-              return messageApi.error("Name for the contact is required.");
-            }
-
-            if (name.trim().length === 0) {
-              return messageApi.error(
-                "Name should have a minimum of 2 characters."
-              );
-            }
-
-            if (name.length < 2) {
-              return messageApi.error(
-                "Name should have a minimum of 2 characters."
-              );
-            }
-
-            if (name.length > 25) {
-              return messageApi.error(
-                "Name should not have more than 25 characters."
-              );
-            }
-
-            // const format = /[!@#$%^`&*()_+\-=\[\]{};':"\\|,.<>\/?]+/;
-
-            // if (format.test(name)) {
-            //   return messageApi.error(
-            //     "Name should not contain any special characters."
-            //   );
-            // }
-
-            if (selectedChain.isEVM) {
-              const valid = ethers.utils.isAddress(address);
-              if (!valid)
-                return messageApi.error(
-                  `Please provide a valid ${selectedChain.chainName} address.`
-                );
-            } else if (
-              !selectedChain.isEVM &&
-              selectedChain.currencyName === "SOL"
-            ) {
-              const regexPattern = /^([1-9A-HJ-NP-Za-km-z]{32,44})$/;
-              if (!regexPattern.test(address)) {
-                return messageApi.error(
-                  `Please provide a valid ${selectedChain.chainName} address.`
-                );
-              }
-            } else if (
-              !selectedChain.isEVM &&
-              selectedChain.currencyName === "BTC"
-            ) {
-              const valid = validate(address);
-              if (!valid) {
-                return messageApi.error(
-                  `Please provide a valid ${selectedChain.chainName} address.`
-                );
-              }
-            } else if (
-              !selectedChain.isEVM &&
-              selectedChain.currencyName === "ADA"
-            ) {
-              const valid = WAValidator.validate(address, "ada");
-              if (!valid) {
-                return messageApi.error(
-                  `Please provide a valid ${selectedChain.chainName} address.`
-                );
-              }
-            }
-
-            await handleSubmit();
-          }}
-        >
-          {" "}
-          <ButtonComp
-            text={
-              state
-                ? state.index >= 0
-                  ? "Edit Contact"
-                  : "Confirm"
-                : "Confirm"
-            }
-            maxWidth={"100%"}
+        <div className={style.token}>
+          <InputField
+            placeholder={selectedChain.chainName}
+            label="Network"
+            readonly={true}
+            addonAfter={selectAfterTo}
           />
-        </Link>
+          <InputFieldOnly
+            placeholder="Enter Address Name"
+            label="Address Name"
+            getData={(name) => {
+              if (name.length <= 25) {
+                if (/^\s/.test(name)) {
+                  setName("");
+                } else {
+                  setName(name);
+                }
+              } else {
+                return;
+              }
+            }}
+            value={name}
+            checkForSymbols={true}
+          />
+
+          <InputField
+            placeholder="Wallet Address"
+            label="Address or Naming Service"
+            getData={(address) => {
+              setAddress(address);
+            }}
+            value={address}
+            checkForSymbols={true}
+            addonAfter={
+              <div className={style.token__selectStyle}>
+                <span
+                  style={{ color: "#fff" }}
+                  className={style.token__pasteText}
+                  onClick={async () => {
+                    const data = await navigator.clipboard.readText();
+                    setAddress(data);
+                  }}
+                >
+                  Paste
+                </span>
+              </div>
+            }
+          />
+          <Link
+            className="bottomBtn"
+            to="/manage"
+            onClick={async (e) => {
+              e.preventDefault();
+
+              if (!address) {
+                return messageApi.error("Address for the contact is required.");
+              }
+
+              if (!name) {
+                return messageApi.error("Name for the contact is required.");
+              }
+
+              if (name.trim().length === 0) {
+                return messageApi.error(
+                  "Name should have a minimum of 2 characters."
+                );
+              }
+
+              if (name.length < 2) {
+                return messageApi.error(
+                  "Name should have a minimum of 2 characters."
+                );
+              }
+
+              if (name.length > 25) {
+                return messageApi.error(
+                  "Name should not have more than 25 characters."
+                );
+              }
+
+              // const format = /[!@#$%^`&*()_+\-=\[\]{};':"\\|,.<>\/?]+/;
+
+              // if (format.test(name)) {
+              //   return messageApi.error(
+              //     "Name should not contain any special characters."
+              //   );
+              // }
+
+              if (selectedChain.isEVM) {
+                const valid = ethers.utils.isAddress(address);
+                if (!valid)
+                  return messageApi.error(
+                    `Please provide a valid ${selectedChain.chainName} address.`
+                  );
+              } else if (
+                !selectedChain.isEVM &&
+                selectedChain.currencyName === "SOL"
+              ) {
+                const regexPattern = /^([1-9A-HJ-NP-Za-km-z]{32,44})$/;
+                if (!regexPattern.test(address)) {
+                  return messageApi.error(
+                    `Please provide a valid ${selectedChain.chainName} address.`
+                  );
+                }
+              } else if (
+                !selectedChain.isEVM &&
+                selectedChain.currencyName === "BTC"
+              ) {
+                const valid = validate(address);
+                if (!valid) {
+                  return messageApi.error(
+                    `Please provide a valid ${selectedChain.chainName} address.`
+                  );
+                }
+              } else if (
+                !selectedChain.isEVM &&
+                selectedChain.currencyName === "ADA"
+              ) {
+                const valid = WAValidator.validate(address, "ada");
+                if (!valid) {
+                  return messageApi.error(
+                    `Please provide a valid ${selectedChain.chainName} address.`
+                  );
+                }
+              }
+
+              await handleSubmit();
+            }}
+          >
+            {" "}
+            <ButtonComp
+              text={
+                state
+                  ? state.index >= 0
+                    ? "Edit Contact"
+                    : "Confirm"
+                  : "Confirm"
+              }
+              maxWidth={'352px'}
+            />
+          </Link>
+        </div>
       </div>
     </div>
   );

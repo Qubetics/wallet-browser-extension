@@ -3104,7 +3104,7 @@ function Swap() {
             width: "100%",
             display: "flex",
             flexDirection: "column",
-            justifyContent: "space-between",
+            // justifyContent: "space-between",
           }}
         >
           <div
@@ -3184,6 +3184,7 @@ function Swap() {
           <ButtonComp
             text={"Done"}
             maxWidth={"50%"}
+            marginTop={"40px"}
             alignSelf="center"
             onClick={() => {
               if (customSlippage == 0) {
