@@ -271,64 +271,66 @@ function ManageWallet() {
         </div>
 
         <div className={`flexedContent manageWalletHeight`}>
-        
-            {Array.isArray(data) && data.map((data, idx) => (
-              <div className="listItems pdRemove">
-                <ul>
-                  <li key={idx} className="currency_click">
+
+          {Array.isArray(data) && data.map((data, idx) => (
+            <div className="listItems pdRemove">
+              <ul>
+                <li key={idx} className="currency_click">
+                  <div
+                    style={{ display: "flex", alignItems: "center" }}
+                    onClick={async (e) => {
+                      e.preventDefault();
+                      if (!data?.default) {
+                        setDefaultAccount(data);
+                        navigate("/wallet");
+                      } else {
+                        navigate("/wallet");
+                      }
+                    }}
+                  >
+                    <img src={Logo} alt="" />
                     <div
-                      style={{ display: "flex", alignItems: "center" }}
-                      onClick={async (e) => {
-                        e.preventDefault();
-                        if (!data?.default) {
-                          setDefaultAccount(data);
-                          navigate("/wallet");
-                        }
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "flex-start",
+                        gap: "0",
                       }}
                     >
-                      <img src={Logo} alt="" />
-                      <div
-                        style={{
-                          display: "flex",
-                          flexDirection: "column",
-                          alignItems: "flex-start",
-                          gap: "0",
-                        }}
-                      >
-                        <p className="walletName">
-                          {data?.name?.length > 10
-                            ? `${data.name.substring(0, 7)}...`
-                            : data?.name}{" "}
-                          <span style={{ color: "#00aeef", fontSize: 15 }}>
-                            {data?.default ? " (Default)" : ""}
-                          </span>
-                        </p>
-                        <p className="walletAdd">
-                          {data.address.substring(0, 7)}.....
-                          {data.address.substring(
-                            data.address.length - 7,
-                            data.address.length
-                          )}
-                        </p>
-                      </div>
+                      <p className="walletName">
+                        {data?.name?.length > 10
+                          ? `${data.name.substring(0, 7)}...`
+                          : data?.name}{" "}
+                        <span style={{ color: "#00aeef", fontSize: 15 }}>
+                          {data?.default ? " (Default)" : ""}
+                        </span>
+                      </p>
+                      <p className="walletAdd">
+                        {data.address.substring(0, 7)}.....
+                        {data.address.substring(
+                          data.address.length - 7,
+                          data.address.length
+                        )}
+                      </p>
                     </div>
-                    {state?.from !== "myWallet" && (
-                      <img
-                        onClick={async (e) => {
-                          e.preventDefault();
-                          setDrawer(true);
-                          setSelectedAccount(data);
-                          setName(data?.name);
-                        }}
-                        src={WalletIBtn}
-                        alt="I"
-                      />
-                    )}
-                  </li>
-                </ul>
-              </div>
-            ))}
-          <div  className="bottomBtn">
+                  </div>
+                  {state?.from !== "myWallet" && (
+                    <img
+                      onClick={async (e) => {
+                        e.preventDefault();
+                        setDrawer(true);
+                        setSelectedAccount(data);
+                        setName(data?.name);
+                      }}
+                      src={WalletIBtn}
+                      alt="I"
+                    />
+                  )}
+                </li>
+              </ul>
+            </div>
+          ))}
+          <div className="bottomBtn">
             <ButtonComp
               onClick={async () => {
                 setIsModalOpen3(true);

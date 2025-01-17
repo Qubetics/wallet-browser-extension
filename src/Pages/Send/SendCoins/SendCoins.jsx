@@ -39,7 +39,7 @@ import {
   getTokenBalance,
 } from "../../../helpers/common.helper";
 import TransactionFeeSlider from "../../../Components/TransactionFeeSlider/TransactionFeeSlider";
-import ReactSlider from "react-slider";
+// import ReactSlider from "react-slider";
 import AddressTableSend from "../../../Components/AddressTable/AddressTableSend";
 
 let inputCount = 0;
@@ -1095,7 +1095,7 @@ function SendCoins() {
                         )) >
                       546
                     ) {
-                      console.log("1111111111"); 
+                      console.log("1111111111");
                       transaction.change(coin.wallet_address);
                       console.log("11111111112");
                     }
@@ -1140,7 +1140,7 @@ function SendCoins() {
                     console.log("Come to sign...success");
                     const rawTransaction = transaction.serialize();
                     console.log("'rawTransaction---> ", rawTransaction);
-                    
+
                     store.dispatch(setLoading(false));
 
                     navigate("/confirmCurrency", {

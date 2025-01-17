@@ -101,6 +101,7 @@ function Swap() {
   const [balance, setBalance] = useState(0);
   const [balance2, setBalance2] = useState(0);
   const [slippage, setSlippage] = useState(1);
+  const [slippageNew, setSlippageNew] = useState(1);
   const [customSlippage, setCustomSlippage] = useState(null);
   const [slippageDrawer, setSlippageDrawer] = useState(false);
   const [disclaimer, setDisclaimer] = useState(false);
@@ -855,8 +856,8 @@ function Swap() {
 
       const result = originalNumber * percent;
 
-      console.log("TTTTTTTTTTTTTTTTTTT ",result, " PLPLPL ", token1);
-      
+      console.log("TTTTTTTTTTTTTTTTTTT ", result, " PLPLPL ", token1);
+
       // Step 3: Add the result to the original number
       finalFee = getFlooredFixed(
         result / token1.coin.native_coin_market_data.current_price,
@@ -877,7 +878,7 @@ function Swap() {
     }
 
     console.log("HERRRRRRRRRRRRR ", BL_CODE[token1.coinFamily].toLowerCase());
-    
+
     const gasPrice = await Web3Helper.getGasPrice(
       // token1.coinFamily == 1 ? "eth" : token1.coinFamily == 9 ? "pls" : "bnb",
       BL_CODE[token1.coinFamily].toLowerCase(),
@@ -1143,7 +1144,7 @@ function Swap() {
       finalGasFeeForTransaction
     );
     // console.log(" FEEEEEEEEEEEEEEEE ", finalFee, " finalGasFeeForTransaction : ", finalGasFeeForTransaction);
-    
+
     setTradingFee(parseFloat(finalFee) + finalGasFeeForTransaction);
     return getFlooredFixed(parseFloat(finalFee) + finalGasFeeForTransaction, 5);
   };
@@ -2707,7 +2708,7 @@ function Swap() {
                           "Insufficient balance to proceed with the transaction."
                         );
                       }
-                      
+
                       store.dispatch(overAllLoader(false));
 
                       let swapDetailed = {
@@ -3080,9 +3081,11 @@ function Swap() {
         title="Slippage Tolerance"
         placement="bottom"
         onClose={() => {
-          if (customSlippage == 0) {
-            return messageApi.error("Please enter a valid slippage value.");
-          }
+          // if (customSlippage == 0) {
+          //   return messageApi.error("Please enter a valid slippage value.");
+          // }
+          setSlippageNew(slippage);
+          setCustomSlippage(null);
           setSlippageDrawer(false);
         }}
         open={slippageDrawer}
@@ -3117,9 +3120,10 @@ function Swap() {
           >
             <div className="myvalues">
               <p
-                className={slippage === 1 ? "myValuesActive" : ""}
+                className={slippageNew === 1 ? "myValuesActive" : ""}
                 onClick={() => {
-                  setSlippage(1);
+                  // setSlippage(1);
+                  setSlippageNew(1);
                   setCustomSlippage(null);
                 }}
               >
@@ -3129,9 +3133,10 @@ function Swap() {
 
             <div className="myvalues">
               <p
-                className={slippage === 2 ? "myValuesActive" : ""}
+                className={slippageNew === 2 ? "myValuesActive" : ""}
                 onClick={() => {
-                  setSlippage(2);
+                  // setSlippage(2);
+                  setSlippageNew(2);
                   setCustomSlippage(null);
                 }}
               >
@@ -3140,9 +3145,10 @@ function Swap() {
             </div>
             <div className="myvalues">
               <p
-                className={slippage === 3 ? "myValuesActive" : ""}
+                className={slippageNew === 3 ? "myValuesActive" : ""}
                 onClick={() => {
-                  setSlippage(3);
+                  // setSlippage(3);
+                  setSlippageNew(3);
                   setCustomSlippage(null);
                 }}
               >
@@ -3169,12 +3175,14 @@ function Swap() {
                 }
                 getData={(value) => {
                   if (!value || value === "") {
-                    setSlippage(1);
+                    // setSlippage(1);
+                    setSlippageNew(1);
                     setCustomSlippage(null);
                   }
 
                   if (parseFloat(value) <= 50 && value.toString().length <= 5) {
-                    setSlippage(null);
+                    // setSlippage(null);
+                    setSlippageNew(null);
                     setCustomSlippage(value);
                   }
                 }}
@@ -3191,6 +3199,7 @@ function Swap() {
                 return messageApi.error("Please enter a valid slippage value.");
               }
               setSlippageDrawer(false);
+              setSlippage(slippageNew);
               handleChangeForInput1(amount);
             }}
           />

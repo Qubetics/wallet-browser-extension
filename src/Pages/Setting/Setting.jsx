@@ -181,7 +181,7 @@ function Setting() {
     {
       setinglist: "Transactions History",
       to: "/history",
-      path:"settings", 
+      path: "settings",
       ticketcheck:
         theme == "darkTheme" ? Transactionhistory : Transactionhistory,
       RightArow: "RightArow",
