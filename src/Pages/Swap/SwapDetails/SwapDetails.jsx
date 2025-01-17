@@ -270,17 +270,23 @@ function SwapDetails() {
 
   const handleSwap = async () => {
     try {
+      console.log("TOKENNNNNNNNNNNNNNN ", token1 , token1?.coin?.token_address);
+      console.log("XXXXXXXXXXXXXXXXXXXX ", token2);
+      
+      
       const bal = token1?.balance*token1?.coin?.fiat_price_data?.value;
-      const totalAmt = (parseFloat(amount)+parseFloat(networkPrice)) * token1?.coin?.fiat_price_data?.value
+      // const totalAmt = (parseFloat(amount)+parseFloat(networkPrice)) * token1?.coin?.fiat_price_data?.value
+      const totalAmt = (parseFloat(amount) * token1?.coin?.fiat_price_data?.value)+parseFloat(networkPriceFiat)
+      console.log('ppppppppppppppppp', token1, " amount : ", amount ,  " networkPrice : ", networkPrice, " networkPriceFiat ", networkPriceFiat);
 
       console.log("SEND DETAIL : ", bal, totalAmt);
       
-      if(bal<totalAmt){
+      if(bal<totalAmt && token1?.coin?.token_address){
         return messageApi.error(
           "Insufficient balance to proceed with the transaction."
         );
       }
-      // console.log('ppppppppppppppppp',requireApproval, token1, " networkPrice : ", networkPrice ,  token1?.balance < amount+networkPrice);
+      
  
       const uniHelper = new UniswapHelper(token1.rpc);
 
