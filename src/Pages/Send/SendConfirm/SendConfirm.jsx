@@ -222,7 +222,9 @@ function SendConfirm() {
                 ? process.env.REACT_APP_BNB_RPC
                 : coin.coin.coin_family == 2
                 ? process.env.REACT_APP_ETH_RPC
-                : process.env.REACT_APP_MATIC_RPC,
+                : coin.coin.coin_family == 4
+                ? process.env.REACT_APP_MATIC_RPC
+                :process.env.REACT_APP_QUBETIC_RPC,
               "",
               gasPriceType
             );

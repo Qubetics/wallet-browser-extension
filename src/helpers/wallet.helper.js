@@ -675,6 +675,11 @@ export class WalletHelper {
               address: solanaAddress,
               coin_family: 5,
             },
+            {
+              symbol: "tics",
+              address: address,
+              coin_family: 7,
+            },
           ],
         },
         {
@@ -703,14 +708,16 @@ export class WalletHelper {
             3: bitcoinAddress,
             4: address,
             5: solanaAddress,
+            7: address,
           },
-          coinFamilies: [1, 2, 3, 4, 5],
+          coinFamilies: [1, 2, 3, 4, 5, 7],
           addressLists: [
             address,
             address,
             bitcoinAddress,
             address,
             solanaAddress,
+            address
           ],
           userId: createWallet.data.data.userId,
           jwtToken:
@@ -851,7 +858,12 @@ export class WalletHelper {
             //   symbol: 'trx',
             //   address: tronAddress,
             //   coin_family: 6,
-            // }
+            // },
+            {
+              symbol: "tics",
+              address: address,
+              coin_family: 7,
+            },
           ],
         },
         {
@@ -885,8 +897,9 @@ export class WalletHelper {
             3: bitcoinAddress,
             4: address,
             5: solanaAddress,
+            7: address
           },
-          coinFamilies: [1, 2, 3, 4, 5],
+          coinFamilies: [1, 2, 3, 4, 5, 7],
           addressLists: [
             address,
             address,

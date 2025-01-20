@@ -237,7 +237,7 @@ const AllocationChart = () => {
                 <div className="coinsTable1__left__icon">
                   {itm?.coin?.coin_image ? (
                     <img
-                      style={{ height: 35, width: 35 }}
+                      style={{ height: 35, width: 35, borderRadius:50 }}
                       src={itm?.coin?.coin_image}
                       alt=""
                     />

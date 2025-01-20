@@ -420,6 +420,8 @@ function CrossChain() {
               ? process.env.REACT_APP_MATIC_RPC
               : token?.coin_data?.coin_family == 5
               ? process.env.REACT_APP_SOL_RPC
+              : token?.coin_data?.coin_family == 7
+              ? process.env.REACT_APP_QUBETIC_RPC
               : "",
         };
       });
@@ -492,6 +494,8 @@ function CrossChain() {
               ? process.env.REACT_APP_MATIC_RPC
               : token?.coin_data?.coin_family == 5
               ? process.env.REACT_APP_SOL_RPC
+              : token?.coin_data?.coin_family == 7
+              ? process.env.REACT_APP_QUBETIC_RPC
               : "",
         };
       });

@@ -276,6 +276,9 @@ function SendCoins() {
         case 5:
           rpc = process.env.REACT_APP_SOL_RPC;
           break;
+        case 7:
+          rpc = process.env.REACT_APP_QUBETIC_RPC;
+          break;
         default:
           rpc = process.env.REACT_APP_TRON_RPC;
       }
@@ -877,7 +880,9 @@ function SendCoins() {
                     ? process.env.REACT_APP_BNB_RPC
                     : coin.coin.coin_family == 2
                       ? process.env.REACT_APP_ETH_RPC
-                      : process.env.REACT_APP_MATIC_RPC
+                      : coin.coin.coin_family == 4
+                        ? process.env.REACT_APP_MATIC_RPC
+                        : process.env.REACT_APP_QUBETIC_RPC
                 );
 
                 const nativeCoinBalance = new BigNumber(nativeCoinResponse);
@@ -1095,7 +1100,7 @@ function SendCoins() {
                         )) >
                       546
                     ) {
-                      console.log("1111111111"); 
+                      console.log("1111111111");
                       transaction.change(coin.wallet_address);
                       console.log("11111111112");
                     }
@@ -1140,7 +1145,7 @@ function SendCoins() {
                     console.log("Come to sign...success");
                     const rawTransaction = transaction.serialize();
                     console.log("'rawTransaction---> ", rawTransaction);
-                    
+
                     store.dispatch(setLoading(false));
 
                     navigate("/confirmCurrency", {

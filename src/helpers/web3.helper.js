@@ -555,7 +555,8 @@ export class Web3Helper {
         ? process.env.REACT_APP_BNB_RPC
         : coinFamily == 2
           ? process.env.REACT_APP_ETH_RPC
-          : process.env.REACT_APP_MATIC_RPC
+          : coinFamily == 4 ? process.env.REACT_APP_MATIC_RPC :
+            process.env.REACT_APP_QUBETIC_RPC
     );
 
     const transaction = {
@@ -1029,7 +1030,7 @@ export class Web3Helper {
       const gasPrice = gasPriceRes.fast * Math.pow(10, 9);
       const nonce = await this.getNonce(slug, 1, tokenAddress, null, from);
       const gaslimit = (gaslimits * 2).toFixed(0);
-      
+
       const transaction = {
         nonce,
         gasPrice: web3.utils.toHex(gasPrice),
@@ -1112,8 +1113,8 @@ export class Web3Helper {
       const privateKey = await WalletHelper.getPrivateKey();
       if (!privateKey) {
         return false;
-      } 
-      const gasPriceRes = nftGasData; 
+      }
+      const gasPriceRes = nftGasData;
       const gaslimits = gasPriceRes.estimate;
 
       const gasPrice = gasPriceRes.fast * Math.pow(10, 9);
@@ -1135,7 +1136,7 @@ export class Web3Helper {
         chainId,
       };
 
-      console.log("TRANSACTIONNNNNNNNNNNNNN NFT: ", transaction); 
+      console.log("TRANSACTIONNNNNNNNNNNNNN NFT: ", transaction);
       const signedTransaction = await web3.eth.accounts.signTransaction(
         transaction,
         privateKey

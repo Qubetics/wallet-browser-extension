@@ -270,18 +270,27 @@ function SwapDetails() {
 
   const handleSwap = async () => {
     try {
-      console.log("TOKENNNNNNNNNNNNNNN ", token1 , token1?.coin?.token_address);
-      console.log("XXXXXXXXXXXXXXXXXXXX ", token2);
-      
-      
+      // console.log("TOKENNNNNNNNNNNNNNN ", token1 , token1?.coin?.token_address);
+      // console.log("XXXXXXXXXXXXXXXXXXXX ", token2);
+      let amtTosend = amount;
       const bal = token1?.balance*token1?.coin?.fiat_price_data?.value;
       // const totalAmt = (parseFloat(amount)+parseFloat(networkPrice)) * token1?.coin?.fiat_price_data?.value
-      const totalAmt = (parseFloat(amount) * token1?.coin?.fiat_price_data?.value)+parseFloat(networkPriceFiat)
-      console.log('ppppppppppppppppp', token1, " amount : ", amount ,  " networkPrice : ", networkPrice, " networkPriceFiat ", networkPriceFiat);
+      const totalAmt = (parseFloat(amount) * token1?.coin?.fiat_price_data?.value)+parseFloat(networkPriceFiat);
+      // console.log('ppppppppppppppppp', token1, " amount : ", amount ,  " networkPrice : ", networkPrice, " networkPriceFiat ", networkPriceFiat);
+      // console.log("SEND DETAIL : ", bal, totalAmt);
+      // console.log("COME CHECK COIN");
+      if((parseFloat(token1?.balance) < (parseFloat(amount)+parseFloat(networkPrice))) && !token1?.coin?.token_address){
+        amtTosend = parseFloat(amount) - parseFloat(networkPrice*1.5);
+      }
+      // if(bal<totalAmt && !token1?.coin?.token_address){
+      //   return messageApi.error(
+      //     "Insufficient balance to proceed with the transaction."
+      //   );
+      // }
 
-      console.log("SEND DETAIL : ", bal, totalAmt);
-      
-      if(bal<totalAmt && token1?.coin?.token_address){
+      const totalAmtToken = (parseFloat(amount) * token1?.coin?.fiat_price_data?.value);
+      // console.log("COME CHECK TOKEN");
+      if(bal<totalAmtToken && token1?.coin?.token_address){
         return messageApi.error(
           "Insufficient balance to proceed with the transaction."
         );
@@ -342,7 +351,7 @@ function SwapDetails() {
         const data = await uniHelper.sendSwapTransaction(
           route,
           token1.address,
-          amount,
+          amtTosend,
           token1,
           token1.chain.slug,
           token1.symbol.toLowerCase(),
