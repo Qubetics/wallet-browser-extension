@@ -214,16 +214,18 @@ function NftSend() {
       <div className="scrollableCont">
         <div className="flexedContent manageWalletHeight ">
           <div className="nftSend">
-            <div className="nftSend_superInfluencers">
+            <div className="nftSend_superInfluencers" style={{display:'flex', gap:30, flexDirection:'column'}}>
               <img src={nftDetails?.image} alt="Send NFT" />
-              <div>
+              <div style={{width:'100%'}}>
                 <h3>{nftDetails?.name}</h3>
+                <div style={{display:'flex', alignItems:'center', justifyContent:'space-between'}}>
                 <p>
                   <span>Token ID:</span> {nftDetails?.token_id}
                 </p>
                 <p>
                   <span>Standard:</span> {nftDetails?.token_type}
                 </p>
+                </div>
               </div>
             </div>
             <div>

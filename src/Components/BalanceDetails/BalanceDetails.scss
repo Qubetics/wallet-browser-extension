@@ -261,6 +261,8 @@
   }
 }
 .myWallet{
+  height: calc(100vh - 326px) !important;
+  overflow: auto;
   .flexedContent{
     padding-top: 0px !important;
   }

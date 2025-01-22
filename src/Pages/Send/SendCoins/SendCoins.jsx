@@ -502,7 +502,7 @@ function SendCoins() {
         title={`Send ${coin.coin.coin_symbol.toUpperCase()}`}
         coin={coin}
       />
-      <div className={`flexedContent manageWalletHeight `}>
+      <div className={`flexedContent manageWalletHeight `} style={{gap:'30px'}}>
         <div>
           <InputField
             placeholder={"Wallet Address"}

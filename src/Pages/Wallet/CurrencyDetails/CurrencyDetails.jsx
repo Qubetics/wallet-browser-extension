@@ -45,9 +45,7 @@ function CurrencyDetails() {
   const navigate = useNavigate();
 
   const { state } = useLocation();
-  const {
-    state: { coin },
-  } = useLocation();
+  const { state: { coin }, ...rest } = useLocation();
 
   // const { state } = useLocation();
 
@@ -175,7 +173,7 @@ function CurrencyDetails() {
                   justifyContent: "center",
                   alignItems: "center",
                   border: "1px solid",
-                  color:"black"
+                  color: "black"
                 }}
               >
                 {coin?.coin?.coin_name &&
@@ -198,9 +196,12 @@ function CurrencyDetails() {
           </span>
         }
         chartIcon={() => {
+
+          console.log("coincoincoin ", coin, " itemsitemsitemsitems ", rest);
           if (coin?.coin?.graph_pair) {
             chrome.tabs.create({
-              url: `https://trading-view.qubetics.work/?key=${coin?.coin?.graph_pair?.toUpperCase()}`,
+              // url: `https://trading-view.qubetics.work/?key=${coin?.coin?.graph_pair?.toUpperCase()}&item=${JSON.stringify(coin?.coin)}&account=${JSON.stringify(account)}`,
+              url: `http://127.0.0.1:5500/index.html?key=${encodeURIComponent(coin?.coin?.graph_pair?.toUpperCase())}&item=${encodeURIComponent(JSON.stringify(coin?.coin))}&account=${encodeURIComponent(JSON.stringify(account))}&wallet_address=${encodeURIComponent(coin?.wallet_address)}&token=${encodeURIComponent(account?.jwtToken)}`,
             });
           } else {
             return messageApi.error("Key pair not exists")
@@ -294,7 +295,7 @@ function CurrencyDetails() {
                 </span>
               </p>
             </div>
-            <div style={{ textAlign: "center", margin: "12px auto", display:'flex', justifyContent:'center' }}>
+            <div style={{ textAlign: "center", margin: "12px auto", display: 'flex', justifyContent: 'center' }}>
               {coin?.coin?.coin_image ?
                 <img style={{ height: 50, width: 50 }} src={coin?.coin?.coin_image} alt="usdt" />
                 :

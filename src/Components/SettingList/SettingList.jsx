@@ -31,7 +31,8 @@ function SettingList(props) {
     switchToggle,
     changeTheme,
     RightArow,
-    path
+    path,
+    from
   } = props;
   const [isModalOpen, setOpenmodal] = useState(false);
   const [isLogoutModalOpen, setLogoutOpenmodal] = useState(false);
@@ -258,7 +259,7 @@ function SettingList(props) {
             }
 
 
-            return navigate(to, { state: { path: path ?? '' } });
+            return navigate(to, { state: { path: path ?? '', from : from ?? '' } });
           }}
         >
           <div className="settingList">

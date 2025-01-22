@@ -153,6 +153,7 @@ function Setting() {
       to: "/manage-wallet",
       ticketcheck: theme == "darkTheme" ? CurrencyIcons : CurrencyIcons,
       RightArow: "true",
+      from:"myWallet"
     },
     {
       setinglist: "Security",
@@ -224,6 +225,7 @@ function Setting() {
             switchToggle={data.switchToggle}
             RightArow={data.RightArow}
             path={data?.path}
+            from={data?.from}
           />
         ))}
 
