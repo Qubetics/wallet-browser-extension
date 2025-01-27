@@ -196,14 +196,14 @@ function FilterHistory() {
                   label: <span className="flexedItemSelect">All</span>,
                 },
 
-                {
-                  value: "buy",
-                  label: <span className="flexedItemSelect">Buy</span>,
-                },
-                {
-                  value: "sell",
-                  label: <span className="flexedItemSelect">Sell</span>,
-                },
+                // {
+                //   value: "buy",
+                //   label: <span className="flexedItemSelect">Buy</span>,
+                // },
+                // {
+                //   value: "sell",
+                //   label: <span className="flexedItemSelect">Sell</span>,
+                // },
                 {
                   value: "swap",
                   label: <span className="flexedItemSelect">Swap</span>,

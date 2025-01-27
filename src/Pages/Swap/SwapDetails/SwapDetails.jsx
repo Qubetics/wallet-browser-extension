@@ -7,6 +7,7 @@ import BTC from "../../../Assets/Coins/BTC.png";
 import ETH from "../../../Assets/Coins/ETH.png";
 import ArrowDashedLine from "../../../Assets/ArrowDashedLine.svg";
 import ButtonComp from "../../../Components/ButtonComp/ButtonComp";
+import arr from "../../../Assets/arr.svg"
 import { useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useEffect } from "react";
@@ -164,6 +165,9 @@ function SwapDetails() {
         token1.symbol.toLowerCase()
       );
 
+      console.log("GASSSSSSSSSSSSSSS ", gasPrice);
+      
+
       setGasPrice(gasPrice.fast);
 
       let estimatedGasUsed;
@@ -176,6 +180,10 @@ function SwapDetails() {
         (gasPrice.fast * Math.pow(10, 9) * parseInt(estimatedGasUsed) * 1.5) /
         Math.pow(10, 18);
 
+        console.log("SINALLLLLLLLLLL ", finalGasFee, finalFee);
+        console.log("parentCoinparentCoin ", parentCoin);
+        
+        
       setNetworkPrice(
         addCommasToNumber(
           getFlooredFixed(Number(finalGasFee) + Number(finalFee), 6)
@@ -402,7 +410,7 @@ function SwapDetails() {
                   {token1?.symbol.split("")[0]}
                 </div>
               )}
-              <img src={ArrowDashedLine} width={144} height={12} />
+              <img src={arr} width={144} height={12} />
               {token2.image ? (
                 <img src={token2.image} width={30} height={30} />
               ) : (
@@ -425,14 +433,12 @@ function SwapDetails() {
             </div>
             <div className="swapDetails__valueText">
               <p className="swapDetails__valueText__text">
-                <span>From</span>
-                <br />
+                <p style={{margin:0}}>From</p> 
                 {addCommasToNumber(getFlooredFixed(parseFloat(amount), 8))}{" "}
                 {token1.symbol}
               </p>
               <p className="swapDetails__valueText__text">
-                <span>To</span>
-                <br />
+                <p style={{margin:0}}>To</p> 
                 {addCommasToNumber(getFlooredFixed(parseFloat(amount2), 6))}
                 {token2.symbol}
               </p>

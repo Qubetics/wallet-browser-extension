@@ -57,7 +57,8 @@ export const ExternalConnection = () => {
           const tab = tabs[0];
           const url = new URL(tab.url);
           const queryParams = new URLSearchParams(url.search);
-
+          console.log("QUERYYYYYYYYYY PARAMS ", queryParams);
+          
           const method = queryParams.get('method');
 
           const data = queryParams.get('data')

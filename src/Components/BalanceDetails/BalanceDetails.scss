@@ -267,6 +267,7 @@
     padding-top: 0px !important;
   }
   .manageWalletHeight{
-    min-height: calc(-427px + 100vh) !important;
+    height: 460px !important;
+    overflow-y: scroll !important;
   }
 }

@@ -199,9 +199,14 @@ function CurrencyDetails() {
 
           console.log("coincoincoin ", coin, " itemsitemsitemsitems ", rest);
           if (coin?.coin?.graph_pair) {
+            let pay = {
+              coin_id:coin?.coin?.coin_id,
+              cmc_id:coin?.coin?.cmc_id,
+              coin_family:coin?.coin?.coin_family
+            } 
             chrome.tabs.create({
               // url: `https://trading-view.qubetics.work/?key=${coin?.coin?.graph_pair?.toUpperCase()}&item=${JSON.stringify(coin?.coin)}&account=${JSON.stringify(account)}`,
-              url: `http://127.0.0.1:5500/index.html?key=${encodeURIComponent(coin?.coin?.graph_pair?.toUpperCase())}&item=${encodeURIComponent(JSON.stringify(coin?.coin))}&account=${encodeURIComponent(JSON.stringify(account))}&wallet_address=${encodeURIComponent(coin?.wallet_address)}&token=${encodeURIComponent(account?.jwtToken)}`,
+              url: `https://trading-view.qubetics.work/?key=${encodeURIComponent(coin?.coin?.graph_pair?.toUpperCase())}&item=${encodeURIComponent(JSON.stringify(pay))}&account=${encodeURIComponent(JSON.stringify(account))}&wallet_address=${encodeURIComponent(coin?.wallet_address)}&token=${encodeURIComponent(account?.jwtToken)}&currency=${currency?.name}`,
             });
           } else {
             return messageApi.error("Key pair not exists")

@@ -153,7 +153,8 @@ function Setting() {
       to: "/manage-wallet",
       ticketcheck: theme == "darkTheme" ? CurrencyIcons : CurrencyIcons,
       RightArow: "true",
-      from:"myWallet"
+      // from:"myWallet"
+      from:"settings"
     },
     {
       setinglist: "Security",

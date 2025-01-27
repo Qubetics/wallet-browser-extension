@@ -91,8 +91,8 @@ function ReceiveCurrency() {
               {/* <h5>{selectedCoin.wallet_address?.substring(0, 15)}...</h5> */}
               <h5>
                 {isReceiveCurrencyRoute
-                  ? `${account?.coinFamilyAndAddress[2].slice(0, 15)}...`
-                  : `${selectedCoin.wallet_address.slice(0, 15)}...`}
+                  ? `${account?.coinFamilyAndAddress[2].slice(0, 22)}...`
+                  : `${selectedCoin.wallet_address.slice(0, 22)}...`}
               </h5>
             </div>
             <ButtonComp

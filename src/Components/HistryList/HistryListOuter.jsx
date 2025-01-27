@@ -8,6 +8,9 @@ import { DURATION } from "../../config/message.config";
 import { capitalize } from "../../helpers/conversion.helper";
 import "./HistryList.scss";
 // import TickIcon from "../../Assets/TickIcon.svg"
+import recieveIcon from "../../Assets/ReceiveIcon.svg"
+import swapIcon from "../../Assets/SwapIcon.svg"
+
 function HistoryListOuter(props) {
   const { chain, account, currency } = useSelector((state) => state);
 
@@ -35,6 +38,8 @@ function HistoryListOuter(props) {
     duration: DURATION,
   });
 
+  console.log("typetypetypetypetype", type);
+  
 
   const updateExp = (e) => {
     e.preventDefault(); 
@@ -98,7 +103,9 @@ function HistoryListOuter(props) {
       <div className="histryList" onClick={(e) => updateExp(e)}>
         <div className="statusCurrency">
           <div className="Status">
-            <img src={TickIcon}></img>
+           {type =='deposit' && <img src={recieveIcon}></img>}
+           {type =='withdraw' && <img src={TickIcon}></img>}
+           {type =='swap' && <img src={swapIcon}></img>}
             <div className="send">
               <p className="sendRecieve">
                 {sendRecieve}{' '}

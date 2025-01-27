@@ -185,12 +185,12 @@ function ManageWallet() {
   };
 
   console.log("state?.fromstate?.fromstate?.from ", state?.from);
-  
+
   return (
     <>
       {contextHolder}
       <div
-      // style={{height: state?.from == "myWallet" && "calc(100vh - 326px)"}}
+        // style={{height: state?.from == "myWallet" && "calc(100vh - 326px)"}}
         className={
           state?.from == "myWallet"
             ? `scrollableCont myWallet`
@@ -273,10 +273,11 @@ function ManageWallet() {
           )}
         </div>
 
-        <div className={`manageWalletHeight`} style={{padding: "20px 24px 0"}}>
+        <div className={`manageWalletHeight mwheight`} style={{ padding: "20px 24px 0" }}>
 
           {Array.isArray(data) && data.map((data, idx) => (
-            <div className="listItems pdRemove">
+            <div className="listItems pdRemove mwheight_inner" 
+            >
               <ul>
                 <li key={idx} className="currency_click">
                   <div
@@ -315,18 +316,21 @@ function ManageWallet() {
                       </p>
                     </div>
                   </div>
-                  {state?.from !== "myWallet" && (
+                  <span
+                    className="infoICon"
+                    onClick={async (e) => {
+                      e.preventDefault();
+                      setDrawer(true);
+                      setSelectedAccount(data);
+                      setName(data?.name);
+                    }}
+                  >{state?.from !== "myWallet" && (
                     <img
-                      onClick={async (e) => {
-                        e.preventDefault();
-                        setDrawer(true);
-                        setSelectedAccount(data);
-                        setName(data?.name);
-                      }}
+                    
                       src={WalletIBtn}
                       alt="I"
                     />
-                  )}
+                  )}</span>
                 </li>
               </ul>
             </div>

@@ -130,7 +130,7 @@ function SetPasswordScreen() {
       if (correct) {
         store.dispatch(setLoading(true));
         const { name } = await chrome.storage.session.get("name");
-        // console.log("=================> ", mnemonics);
+        console.log("=================> ", mnemonics);
 
         await WalletHelper.generateAndSetWallet(mnemonics, name);
         store.dispatch(setLoading(false));
