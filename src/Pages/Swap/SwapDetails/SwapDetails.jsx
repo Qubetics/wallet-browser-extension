@@ -410,7 +410,7 @@ function SwapDetails() {
                   {token1?.symbol.split("")[0]}
                 </div>
               )}
-              <img src={arr} width={144} height={12} />
+              <img src={ArrowDashedLine} width={144} height={12} />
               {token2.image ? (
                 <img src={token2.image} width={30} height={30} />
               ) : (

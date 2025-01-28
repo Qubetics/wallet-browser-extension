@@ -200,7 +200,7 @@ console.log("PREVVVVVVVVVVVVVV ", {
               className="swapDetails__valueText__text"
             >
               {/* <span>To</span> */}
-              <span>From</span>
+              <p style={{margin:0}}>From</p>
               <br />
               {addCommasToNumber(getFlooredFixed(parseFloat(amount), 6))}{" "}
               {token1.symbol}
@@ -209,13 +209,13 @@ console.log("PREVVVVVVVVVVVVVV ", {
               style={{ textAlign: "center" }}
               className="swapDetails__valueText__text"
             >
-              <span>To</span>
+              <p style={{margin:0}}>To</p>
               {/* <span>From</span> */}
               {addCommasToNumber(getFlooredFixed(parseFloat(amount2), 4))}{" "}
               {token2.symbol}
             </p>
           </div>
-          <div className="swapDetails__border"></div>
+          {/* <div className="swapDetails__border"></div> */}
           <div className="swapDetails__address">
             <p className="swapDetails__address__key">From</p>
             <p className="swapDetails__address__val">
@@ -239,7 +239,7 @@ console.log("PREVVVVVVVVVVVVVV ", {
               </sapn>
             </p>
           </div>
-          <div className="swapDetails__border"></div>
+          {/* <div className="swapDetails__border"></div> */}
           <div className="swapDetails__keyValuesText">
             <div className="swapDetails__keyValuesText__inner">
               <p className="swapDetails__keyValuesText__key">Type</p>

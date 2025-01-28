@@ -9,7 +9,8 @@ import { capitalize } from "../../helpers/conversion.helper";
 import "./HistryList.scss";
 // import TickIcon from "../../Assets/TickIcon.svg"
 import recieveIcon from "../../Assets/ReceiveIcon.svg"
-import swapIcon from "../../Assets/SwapIcon.svg"
+import swapIcon1 from "../../Assets/SwapIcon.svg"
+import swapIcon from "../../Assets/SwapIconWhite.svg"
 
 function HistoryListOuter(props) {
   const { chain, account, currency } = useSelector((state) => state);
@@ -106,9 +107,21 @@ function HistoryListOuter(props) {
            {type =='deposit' && <img src={recieveIcon}></img>}
            {type =='withdraw' && <img src={TickIcon}></img>}
            {type =='swap' && <img src={swapIcon}></img>}
+           {type =='cross_chain' && <img src={swapIcon}></img>}
+           {type =='dapp' && <img src={swapIcon}></img>}
+           {type=='Approve' && <img src={swapIcon}></img>}
+           
+           
             <div className="send">
               <p className="sendRecieve">
-                {sendRecieve}{' '}
+                {/* {sendRecieve} */}
+                {type =='deposit' && <span>Deposit</span>}
+                {type =='withdraw' && <span>Withdraw</span>}
+                {type =='swap' && <span>Swap</span>}
+                {type =='cross_chain' && <span>Cross Chain</span>}
+                {type =='dapp' && <span>dApp</span>}
+                {type=='Approve' && <span>Approval</span>}
+                {' '}
                 {valueCurrency}
               </p>
               <div className="histryStatus">
