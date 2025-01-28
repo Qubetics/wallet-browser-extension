@@ -11,6 +11,8 @@ import "./HistryList.scss";
 import recieveIcon from "../../Assets/ReceiveIcon.svg"
 import swapIcon1 from "../../Assets/SwapIcon.svg"
 import swapIcon from "../../Assets/SwapIconWhite.svg"
+import dAppIcon from "../../Assets/datatransfer.svg";
+
 
 function HistoryListOuter(props) {
   const { chain, account, currency } = useSelector((state) => state);
@@ -108,7 +110,7 @@ function HistoryListOuter(props) {
            {type =='withdraw' && <img src={TickIcon}></img>}
            {type =='swap' && <img src={swapIcon}></img>}
            {type =='cross_chain' && <img src={swapIcon}></img>}
-           {type =='dapp' && <img src={swapIcon}></img>}
+           {type =='dapp' && <img src={dAppIcon}></img>}
            {type=='Approve' && <img src={swapIcon}></img>}
            
            

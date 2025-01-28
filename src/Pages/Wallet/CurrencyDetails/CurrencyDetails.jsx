@@ -419,7 +419,7 @@ function CurrencyDetails() {
                           ? "Sent"
                           : data.type.toLowerCase() === "swap"
                             ? "Swap"
-                            : "Withdraw";
+                            : data.type.toLowerCase() === "cross_chain"?"Cross Chain": "Approve";
 
                   return (
                     <HistryList

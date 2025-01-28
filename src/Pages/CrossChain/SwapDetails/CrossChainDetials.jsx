@@ -137,6 +137,8 @@ console.log("PREVVVVVVVVVVVVVV ", {
       coinSymbol
     );
 
+    console.log("AAAAAAAAAAA datadata ", data);
+    
     if (!data) {
       setSwapModal(false);
       return messageApi.error(

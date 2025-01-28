@@ -6,8 +6,14 @@ import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { DURATION } from "../../config/message.config";
 import { capitalize } from "../../helpers/conversion.helper";
-import "./HistryList.scss";
-import ReceiveIcon from "../../Assets/ReceiveIcon.svg"
+import "./HistryList.scss"; 
+import recieveIcon from "../../Assets/ReceiveIcon.svg"
+import swapIcon1 from "../../Assets/SwapIcon.svg"
+import swapIcon from "../../Assets/SwapIconWhite.svg"
+import dAppIcon from "../../Assets/datatransfer.svg";
+
+
+
 function HistryList(props) {
   const { chain, account, currency } = useSelector((state) => state);
 
@@ -117,7 +123,12 @@ function HistryList(props) {
         }}
       >
         <div className="Status">
-          <img src={TickIcon}></img>
+          {sendRecieve =='Received' && <img src={recieveIcon}></img>}
+          {sendRecieve =='Sent' && <img src={TickIcon}></img>}
+          {sendRecieve =='Swap' && <img src={swapIcon}></img>}
+          {sendRecieve =='Smart Contract' && <img src={dAppIcon}></img>}
+          {sendRecieve =='Approve' && <img src={swapIcon}></img>}
+
           <div className="histryList_Status__Send">
             <p className="withSend">
               {sendRecieve === "WITHDRAW"

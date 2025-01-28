@@ -99,7 +99,7 @@ function SwapDetails() {
   });
 
   const [requireApproval, setRequireApproval] = useState(
-    token1.coinFamily == 4 ? false : true
+    true
   );
   const [isLogoutModalOpen, setLogoutOpenmodal] = useState(false);
   const [swapModal, setSwapModal] = useState(false);
@@ -107,7 +107,7 @@ function SwapDetails() {
   const [gasEstimate, setGasEstimate] = useState(50000);
   const [approvalHash, setApprovalHash] = useState(null);
   const [approvalConfirmed, setApprovalConfirmed] = useState(
-    token1.coinFamily == 4 ? true : false
+    false
   );
   const [loading, setLoading] = useState(true);
   const [sessionPassword, setPassword] = useState(null);
@@ -166,7 +166,7 @@ function SwapDetails() {
       );
 
       console.log("GASSSSSSSSSSSSSSS ", gasPrice);
-      
+
 
       setGasPrice(gasPrice.fast);
 
@@ -180,10 +180,10 @@ function SwapDetails() {
         (gasPrice.fast * Math.pow(10, 9) * parseInt(estimatedGasUsed) * 1.5) /
         Math.pow(10, 18);
 
-        console.log("SINALLLLLLLLLLL ", finalGasFee, finalFee);
-        console.log("parentCoinparentCoin ", parentCoin);
-        
-        
+      console.log("SINALLLLLLLLLLL ", finalGasFee, finalFee);
+      console.log("parentCoinparentCoin ", parentCoin);
+
+
       setNetworkPrice(
         addCommasToNumber(
           getFlooredFixed(Number(finalGasFee) + Number(finalFee), 6)
@@ -199,6 +199,9 @@ function SwapDetails() {
         )
       );
 
+      console.log("token1.tokenAddress-----> ", token1.tokenAddress);
+      console.log("token1.address-----> ", token1.address);
+
       if (token1.isToken) {
         const approvedAmount = await Web3Helper.checkApproval(
           token1.tokenAddress, // token add
@@ -207,6 +210,7 @@ function SwapDetails() {
           token1.rpc
         );
         console.log("🚀 ~ init ~ approvedAmount:", approvedAmount);
+        console.log("approvedAmount === false:::", approvedAmount === false);
 
         if (approvedAmount === false) {
           setLoading(false);
@@ -216,12 +220,12 @@ function SwapDetails() {
         }
 
         const approvedAmountBig = new BigNumber(approvedAmount);
-        // console.log(approvedAmountBig.toFixed(10));
+        console.log("approvedAmountBig>>>", approvedAmountBig.toFixed(10));
         const amountBig = new BigNumber(amount);
         // console.log(amountBig.toFixed(10));
 
         if (approvedAmountBig.isGreaterThan(amountBig)) {
-          // console.log("Inside Here");
+          console.log("Inside Here");
           setRequireApproval(false);
           setApprovalConfirmed(true);
           setLoading(false);
@@ -281,14 +285,14 @@ function SwapDetails() {
       // console.log("TOKENNNNNNNNNNNNNNN ", token1 , token1?.coin?.token_address);
       // console.log("XXXXXXXXXXXXXXXXXXXX ", token2);
       let amtTosend = amount;
-      const bal = token1?.balance*token1?.coin?.fiat_price_data?.value;
+      const bal = token1?.balance * token1?.coin?.fiat_price_data?.value;
       // const totalAmt = (parseFloat(amount)+parseFloat(networkPrice)) * token1?.coin?.fiat_price_data?.value
-      const totalAmt = (parseFloat(amount) * token1?.coin?.fiat_price_data?.value)+parseFloat(networkPriceFiat);
+      const totalAmt = (parseFloat(amount) * token1?.coin?.fiat_price_data?.value) + parseFloat(networkPriceFiat);
       // console.log('ppppppppppppppppp', token1, " amount : ", amount ,  " networkPrice : ", networkPrice, " networkPriceFiat ", networkPriceFiat);
       // console.log("SEND DETAIL : ", bal, totalAmt);
       // console.log("COME CHECK COIN");
-      if((parseFloat(token1?.balance) < (parseFloat(amount)+parseFloat(networkPrice))) && !token1?.coin?.token_address){
-        amtTosend = parseFloat(amount) - parseFloat(networkPrice*1.5);
+      if ((parseFloat(token1?.balance) < (parseFloat(amount) + parseFloat(networkPrice))) && !token1?.coin?.token_address) {
+        amtTosend = parseFloat(amount) - parseFloat(networkPrice * 1.5);
       }
       // if(bal<totalAmt && !token1?.coin?.token_address){
       //   return messageApi.error(
@@ -298,17 +302,25 @@ function SwapDetails() {
 
       const totalAmtToken = (parseFloat(amount) * token1?.coin?.fiat_price_data?.value);
       // console.log("COME CHECK TOKEN");
-      if(bal<totalAmtToken && token1?.coin?.token_address){
+      if (bal < totalAmtToken && token1?.coin?.token_address) {
         return messageApi.error(
           "Insufficient balance to proceed with the transaction."
         );
       }
-      
- 
+
+
       const uniHelper = new UniswapHelper(token1.rpc);
 
       if (requireApproval) {
         setLogoutOpenmodal(true);
+        console.log("ZZZZZZZZZZZZ ", token1.tokenAddress,
+          token1.address,
+          "0x1111111254eeb25477b68fb85ed929f73a960582",
+          token1.chain.slug,
+          token1.isToken ? token1.tokenAddress : token1.symbol.toLowerCase(),
+          token1.isToken,
+          parseInt(token1.chain.chainId));
+
         const data = await uniHelper.sendForApproval(
           token1.tokenAddress,
           token1.address,
@@ -320,7 +332,7 @@ function SwapDetails() {
         );
 
         console.log("ccccccccccccccccccc", data);
-        
+
         if (!data) {
           setSwapModal(false);
           setLogoutOpenmodal(false);
@@ -343,7 +355,7 @@ function SwapDetails() {
           );
 
           console.log("approvalapproval ", approval, " :: amount :: ", amount);
-          
+
           if (
             parseFloat(approval) <= parseFloat(amount) ||
             approval === false
@@ -369,7 +381,7 @@ function SwapDetails() {
         );
 
         console.log("SWAAAAAAAAAAAAAAAAa ", data);
-        
+
         if (!data) {
           setSwapModal(false);
           return messageApi.error("Something went wrong.");
@@ -410,7 +422,7 @@ function SwapDetails() {
                   {token1?.symbol.split("")[0]}
                 </div>
               )}
-              <img src={ArrowDashedLine} width={144} height={12} />
+              <img src={arr} width={144} height={12} />
               {token2.image ? (
                 <img src={token2.image} width={30} height={30} />
               ) : (
@@ -433,12 +445,12 @@ function SwapDetails() {
             </div>
             <div className="swapDetails__valueText">
               <p className="swapDetails__valueText__text">
-                <p style={{margin:0}}>From</p> 
+                <p style={{ margin: 0 }}>From</p>
                 {addCommasToNumber(getFlooredFixed(parseFloat(amount), 8))}{" "}
                 {token1.symbol}
               </p>
               <p className="swapDetails__valueText__text">
-                <p style={{margin:0}}>To</p> 
+                <p style={{ margin: 0 }}>To</p>
                 {addCommasToNumber(getFlooredFixed(parseFloat(amount2), 6))}
                 {token2.symbol}
               </p>

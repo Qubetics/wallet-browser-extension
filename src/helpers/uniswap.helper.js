@@ -91,6 +91,7 @@ export class UniswapHelper {
     chainId
   ) {
     try {
+      slug = slug=='matic'?'polygon':slug;
       const { account } = store.getState();
       const WALLET_SECRET = await WalletHelper.getPrivateKey();
       console.log(
@@ -199,6 +200,7 @@ export class UniswapHelper {
     commision
   ) {
     try {
+      slug = slug == 'matic' ? "polygon" : slug
       if (route) {
         const { account } = store.getState();
 
@@ -242,6 +244,8 @@ export class UniswapHelper {
           walletAddress
         );
 
+        console.log("NONCE-----> ", nonce);
+        
         const increasedGasLimitDecimal = (
           Number(data.data.tx.gas) * 1.5
         ).toFixed(0);
@@ -260,6 +264,9 @@ export class UniswapHelper {
         const wallet = new ethers.Wallet(WALLET_SECRET, this.web3Provider);
         const signedTransaction = await wallet.signTransaction(transaction);
 
+        console.log("signedTransactionsignedTransaction ", signedTransaction);
+        
+        
         const response = await server.post(
           `${slug}/${isToken ? token1.tokenAddress : symbol}/send`,
           {

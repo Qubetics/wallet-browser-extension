@@ -125,6 +125,8 @@ export class Web3Helper {
   static getNonce = async (slug, isToken, tokenAddress, symbol, address) => {
     const { account } = store.getState();
     try {
+
+      slug = slug=='matic'?"polygon":slug;
       const { data } = await server.post(
         `/${slug}/${isToken ? tokenAddress : symbol}/nonce`,
         {
