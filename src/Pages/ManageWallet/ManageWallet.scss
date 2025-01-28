@@ -75,8 +75,11 @@
 }
 
 .mwheight {
-  height: calc(-455px + 100vh) !important;
+  height: calc(100vh - 430px) !important;
   overflow-y: scroll;
+  @media screen and (height: 600px) {
+    min-height: calc(100vh - 196px) !important;
+  }
   &_inner{
     position: relative;
     cursor: pointer;

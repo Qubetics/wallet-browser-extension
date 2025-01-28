@@ -69,7 +69,7 @@ body::-webkit-scrollbar {
 
 //stickyheader//
 .scrollableCont {
-  // height: 100%;
+  height: 100%;
   // overflow: hidden;
   .stickyHeader {
     position: sticky;
@@ -85,7 +85,6 @@ body::-webkit-scrollbar {
   .flexedContent {
     padding: 20px 24px 0;
     overflow-y: auto;
-    height: 100%;
 
     :where(.css-acm2ia).ant-checkbox-wrapper:not(
         .ant-checkbox-wrapper-disabled
