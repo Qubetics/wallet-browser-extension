@@ -480,9 +480,16 @@ code {
   left: 0;
   position: absolute;
   width: 100%;
+  z-index: 2;
   // background-image: url("./Assets/main-bg.png");
   // background-repeat: no-repeat;
   // background-position: bottom;
   // height: 82px;
   // padding-top: 12px;
+  .ButtonStyle{
+    &:hover{
+      opacity: 1.6 !important;
+    
+    }
+  }
 }

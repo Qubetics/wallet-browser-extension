@@ -75,17 +75,20 @@
 }
 
 .mwheight {
-  height: calc(100vh - 430px) !important;
+  height: calc(100vh - 415px) !important;
   overflow-y: scroll;
-  @media screen and (height: 600px) {
-    min-height: calc(100vh - 196px) !important;
+
+  @media (max-height:600px) {
+    height: calc(100vh - 193px) !important;
   }
-  &_inner{
+
+  &_inner {
     position: relative;
     cursor: pointer;
     z-index: 1;
   }
-  .infoICon{
+
+  .infoICon {
     position: absolute;
     right: 17px;
     z-index: 99;

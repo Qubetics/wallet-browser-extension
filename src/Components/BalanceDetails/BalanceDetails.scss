@@ -261,7 +261,8 @@
   }
 }
 .myWallet{
-  height: calc(100vh - 326px) !important;
+  // height: calc(100vh - 326px) !important;
+
   overflow: auto;
   .flexedContent{
     padding-top: 0px !important;
@@ -269,5 +270,9 @@
   .manageWalletHeight{
     height: 460px !important;
     overflow-y: scroll !important;
+    @media screen and (height: 600px) {
+      height: 315px !important;
+    }
+
   }
 }
