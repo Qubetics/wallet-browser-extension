@@ -66,12 +66,13 @@ function History() {
           : undefined,
         date_from: state
           ? state.fromDate
-            ? moment(state.fromDate).startOf("day")
+            // ? moment(state.fromDate).startOf("day")
+            ? moment(state.fromDate).format("YYYY-MM-DD")
             : undefined
           : undefined,
         date_to: state
           ? state.toDate
-            ? moment(state.toDate).endOf("day")
+            ? moment(state.toDate).format("YYYY-MM-DD")
             : undefined
           : undefined,
         trnx_type: state ? (state.type ? state.type : undefined) : undefined,

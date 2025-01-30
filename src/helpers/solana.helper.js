@@ -215,8 +215,8 @@ export class SolanaHelper {
         gas_price: "0.000005",
         tx_type: type || "withdraw",
       };
-      payload["orderId"] = orderId;
-
+      payload["order_id"] = orderId;
+      slug= slug=='matic'?"polygon":slug;
       const myResponse = await server.post(`${slug}/send`, payload, {
         headers: {
           Authorization: account.jwtToken,
@@ -413,8 +413,8 @@ export class SolanaHelper {
         gas_price: "0.000005",
         tx_type: type || "withdraw",
       };
-      payload["orderId"] = orderId;
-
+      payload["order_id"] = orderId;
+      slug = slug =='matic' ? "polygon" : slug;
       const myResponse = await server.post(
         `${slug}/send`,
         payload,

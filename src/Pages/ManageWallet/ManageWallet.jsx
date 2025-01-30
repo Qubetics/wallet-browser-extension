@@ -483,12 +483,11 @@ function ManageWallet() {
                     "This wallet name already exists. Use a different name."
                   );
                 }
-              }
-
+              } 
               const updating = await WalletHelper.updateWalletName(
                 name.trim(),
-
-                state ? state.id : selectedAccount.id
+                
+                state?.id ? state.id : selectedAccount.id
               );
 
               if (!updating) {

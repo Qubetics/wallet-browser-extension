@@ -1029,7 +1029,7 @@ export class WalletHelper {
       if (!decryptedAccounts) {
         return false;
       }
-
+ 
       const updateAccounts = JSON.parse(decryptedAccounts).map((el) => {
         if (el.id == id) {
           el.name = name;

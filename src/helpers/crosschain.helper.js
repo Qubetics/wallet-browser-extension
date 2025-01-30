@@ -410,6 +410,8 @@ export class CrossChainHelper {
         );
       }
 
+      console.log("HASH-------------> ", hash);
+      
       if (!hash) {
         return false;
       }

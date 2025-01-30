@@ -299,9 +299,12 @@ function FilterHistory() {
                 }
                 placeholder="From"
                 onChange={(value) => {
+                  console.log("CCCCCCCCCCC ", value.format("YYYY-MM-DD"), " ----- ", value);
+                  console.log("daysssss ", dayjs(value).format("YYYY-MM-DD"));
+                  
                   setFilterValue({
                     ...filterValue,
-                    fromDate: value ? value.format("YYYY-MM-DD") : null,
+                    fromDate: value ? dayjs(value).format("YYYY-MM-DD") : null,
                   });
                 }}
                 disabledDate={(current) =>
@@ -331,7 +334,7 @@ function FilterHistory() {
                 onChange={(value) => {
                   setFilterValue({
                     ...filterValue,
-                    toDate: value ? value.format("YYYY-MM-DD") : null,
+                    toDate: value ? dayjs(value).format("YYYY-MM-DD") : null,
                   });
                 }}
                 disabledDate={(current) =>

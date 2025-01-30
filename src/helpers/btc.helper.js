@@ -196,7 +196,7 @@ export class BTCHelper {
         gas_price: "", //gasPriceRes.fast * Math.pow(10, 9),//gasInEth,
         tx_type: type || "withdraw",
       };
-      payload["orderId"] = orderId;
+      payload["order_id"] = orderId;
       const myResponse = await server.post(`${slug}/send`, payload, {
         headers: {
           Authorization: account.jwtToken,

@@ -388,7 +388,10 @@ export class Web3Helper {
         null,
         symbol
       );
+      console.log("gassssssss ", gasPriceRes);
+      
       const nonce = await this.getNonce(slug, false, null, symbol, from);
+      console.log("Nonce======> ", nonce);
       const gaslimit = gasPriceRes.estimate;
       const gsFee =
         gasPriceType == 1
@@ -401,7 +404,12 @@ export class Web3Helper {
         symbol == "eth"
           ? 1.5 * gsFee * Math.pow(10, 9)
           : gsFee * Math.pow(10, 9);
+      console.log("GASETHHHHHHH ", gasInEth, gasPrice);
+      
       const totalAmount = +gasInEth + +amount;
+
+      console.log("TOTALLLLLLLL AMT ", totalAmount);
+      
       const balance = await this.getCoinBalance(from, rpc);
       console.log("🚀 ~ Web3Helper ~ balance:", balance);
 
@@ -466,7 +474,8 @@ export class Web3Helper {
         gas_price: gasPriceInWei, //gsFee * Math.pow(10, 9),//gasInEth,
         tx_type: type || "withdraw",
       };
-      payload["orderId"] = orderId;
+      payload["order_id"] = orderId;
+      slug= slug=='matic'?"polygon":slug;
       const response = await server.post(`${slug}/${symbol}/send`, payload, {
         headers: {
           Authorization: account.jwtToken,
@@ -702,8 +711,9 @@ export class Web3Helper {
       };
 
       if (orderId) {
-        payload["orderId"] = orderId;
+        payload["order_id"] = orderId;
       }
+      slug = slug=="matic"?"polygon":slug;
       const response = await server.post(
         `${slug}/${tokenAddress}/send`,
         payload,
