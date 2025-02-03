@@ -127,6 +127,7 @@ function HistryList(props) {
           {sendRecieve =='Sent' && <img src={TickIcon}></img>}
           {sendRecieve =='Swap' && <img src={swapIcon}></img>}
           {sendRecieve =='Smart Contract' && <img src={dAppIcon}></img>}
+          {sendRecieve =='Cross Chain' && <img src={swapIcon}></img>}
           {sendRecieve =='Approve' && <img src={swapIcon}></img>}
 
           <div className="histryList_Status__Send">

@@ -41,6 +41,7 @@ import {
 import TransactionFeeSlider from "../../../Components/TransactionFeeSlider/TransactionFeeSlider";
 import ReactSlider from "react-slider";
 import AddressTableSend from "../../../Components/AddressTable/AddressTableSend";
+import { BL_CODE } from "../../../helpers/constant";
 
 let inputCount = 0;
 let transactionSize = 0;
@@ -94,6 +95,8 @@ function SendCoins() {
     safe: 0,
   });
 
+  console.log("----------> ", coin?.coin?.coin_family);
+  
   const fetchNativePrice = async () => {
     const parentCoin = await server.post(
       "/wallet/nativeCoinFiatPrice",
@@ -648,7 +651,7 @@ function SendCoins() {
           renderThumb={(props, state) => <div {...props}>{state.valueNow}</div>}
         /> */}
           <div className="transactionFee">
-            <h4>Transaction Fee</h4>
+            <h4>Transaction Fee ({BL_CODE[coin?.coin?.coin_family] ?? ''})</h4>
 
             {coin?.coin?.coin_family == 3 || coin?.coin?.coin_family == 5 ? (
               <InputFieldOnly

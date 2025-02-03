@@ -332,7 +332,9 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
                 >
                   <p>
                     {account.name.charAt(0).toUpperCase() +
-                      account.name.slice(1)}
+                      account.name.length<10? <p> {account.name} </p> : <p> {account.name.slice(0,6)}...</p>}
+
+                      { }
                     <img
                       style={{ marginLeft: "10px" }}
                       src={downeIcon}

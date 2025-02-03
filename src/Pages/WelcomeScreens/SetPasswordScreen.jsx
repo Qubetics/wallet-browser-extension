@@ -152,6 +152,9 @@ function SetPasswordScreen() {
       if (!terms) {
         return popError("Please accept the terms and conditions.");
       }
+      if(!getMnemonicsData){
+        return popError("Please enter mnemonics.");
+      }
 
       const isValid = WalletHelper.checkMnemonics(getMnemonicsData.trim());
       const { accounts } = await chrome.storage.session.get("accounts"); 

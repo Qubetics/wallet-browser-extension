@@ -43,13 +43,14 @@ function ShowPrivateKey() {
     4: "POL",
     5: "SOL",
     6: "TRX",
+    7: "TICS"
   };
 
   const [solKey, setSolKey] = useState(null);
   const [btcKey, setBtcKey] = useState(null);
 
   const get_privateKey = async () => {
-    console.log("INNNNNNNN", account?.coinFamilyAndAddress);
+    console.log("INNNNNNNN", account);
     if (account?.coinFamilyAndAddress) {
       const evmAddress = account.coinFamilyAndAddress["1"];
 

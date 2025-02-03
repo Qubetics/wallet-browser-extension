@@ -181,7 +181,7 @@ function Setting() {
       RightArow: "true",
     },
     {
-      setinglist: "Transactions History",
+      setinglist: "Transaction History",
       to: "/history",
       path:"settings", 
       ticketcheck:

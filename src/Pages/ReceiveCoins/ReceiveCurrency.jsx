@@ -112,7 +112,7 @@ function ReceiveCurrency() {
 
           <p className="receiveCurrency_sendCoin">
 
-            Send only {`${location?.state?.symbol?.toUpperCase()}`} to this address. Sending any other coins may result in permanent loss.
+            Send only {`${(location?.state?.symbol)?.toUpperCase()??'Ethereum Nft'}`} to this address. Sending any other coins may result in permanent loss.
           </p>
         </div>
         {/* <div style={{ padding: "0 24px" }}>

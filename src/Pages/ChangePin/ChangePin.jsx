@@ -166,6 +166,12 @@ function ChangePin() {
           <ButtonComp
             text={"Update"}
             onClick={async () => {
+              if (!oldPassword) {
+                return messageApi.error("Password fields are required.");
+              }
+              if (!newPassword) {
+                return messageApi.error("New password is required.");
+              }
               if (confirmPassword !== newPassword) {
                 return messageApi.error("The passwords do not match.");
               }

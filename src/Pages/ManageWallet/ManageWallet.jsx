@@ -470,6 +470,12 @@ function ManageWallet() {
                   "Name should not have more than 25 characters."
                 );
               }
+              const nameRegex = /^[A-Za-z]+$/;
+              if (!nameRegex.test(name)) {
+                return messageApi.error(
+                  "Name should contain only alphabetic characters."
+                );
+              }
 
               const { accounts } = await chrome.storage.session.get("accounts");
 

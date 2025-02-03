@@ -210,11 +210,15 @@ function FilterHistory() {
                 },
                 {
                   value: "withdraw",
-                  label: <span className="flexedItemSelect">Withdraw</span>,
+                  label: <span className="flexedItemSelect">Withdrawal</span>,
                 },
                 {
                   value: "deposit",
                   label: <span className="flexedItemSelect">Deposit</span>,
+                },
+                {
+                  value: "dapp",
+                  label: <span className="flexedItemSelect">dApp</span>,
                 },
               ]}
             />

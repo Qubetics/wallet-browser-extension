@@ -86,11 +86,21 @@ function CurrencyPrefrence() {
           </div> */}
           {data.map((data) => (
             <div
+              onClick={async () => {
+                await WalletHelper.setCurrencyPreference({
+                  name: data.name,
+                  symbol: data.symbol,
+                });
+
+                message.success("Currency updated successfully")
+                navigate('/setting');
+              }}
               className="listItems"
               style={{
                 display: "flex",
                 flexDirection: 'column',
-                gap: "25px"
+                gap: "25px",
+                cursor: "pointer"
               }}
             >
               <div style={{
@@ -99,15 +109,7 @@ function CurrencyPrefrence() {
                 gap: "13px",
                 justifyContent: "space-between",
               }}>
-                <div onClick={async () => {
-                  await WalletHelper.setCurrencyPreference({
-                    name: data.name,
-                    symbol: data.symbol,
-                  });
-
-                  message.success("Currency updated successfully")
-                  navigate('/setting');
-                }} style={{ display: "flex", alignItems: "center", gap: "13px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "13px" }}>
                   <img style={{ height: 30, width: 30 }} src={data?.img} alt="img" />
                   <span className="Currencyname">{data?.name}</span>
                 </div>
