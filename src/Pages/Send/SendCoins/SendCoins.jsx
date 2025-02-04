@@ -934,13 +934,15 @@ function SendCoins() {
                 }
 
                 store.dispatch(setLoading(false));
+
+                let prc = gasPriceType == 1 ? myGasPrice?.safe : gasPriceType == 2 ? myGasPrice?.propose : myGasPrice?.fast
                 navigate("/confirmCurrency", {
                   state: {
                     to: address,
                     amount: amount,
                     coin,
                     networkFee: (
-                      (myGasPrice?.estimate * myGasPrice?.fast) /
+                      (myGasPrice?.estimate * prc) /
                       10 ** 9
                     )?.toFixed(5),
                     ENSName,

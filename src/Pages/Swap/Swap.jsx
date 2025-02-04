@@ -102,6 +102,9 @@ function Swap() {
   const [balance2, setBalance2] = useState(0);
   const [slippage, setSlippage] = useState(1);
   const [customSlippage, setCustomSlippage] = useState(null);
+  const [slippage1, setSlippage1] = useState(1);
+  const [customSlippage1, setCustomSlippage1] = useState(null);
+
   const [slippageDrawer, setSlippageDrawer] = useState(false);
   const [disclaimer, setDisclaimer] = useState(false);
   const navigate = useNavigate();
@@ -3117,10 +3120,10 @@ function Swap() {
           >
             <div className="myvalues">
               <p
-                className={slippage === 1 ? "myValuesActive" : ""}
+                className={slippage1 === 1 ? "myValuesActive" : ""}
                 onClick={() => {
-                  setSlippage(1);
-                  setCustomSlippage(null);
+                  setSlippage1(1);
+                  setCustomSlippage1(null);
                 }}
               >
                 1%
@@ -3129,10 +3132,10 @@ function Swap() {
 
             <div className="myvalues">
               <p
-                className={slippage === 2 ? "myValuesActive" : ""}
+                className={slippage1 === 2 ? "myValuesActive" : ""}
                 onClick={() => {
-                  setSlippage(2);
-                  setCustomSlippage(null);
+                  setSlippage1(2);
+                  setCustomSlippage1(null);
                 }}
               >
                 2%
@@ -3140,10 +3143,10 @@ function Swap() {
             </div>
             <div className="myvalues">
               <p
-                className={slippage === 3 ? "myValuesActive" : ""}
+                className={slippage1 === 3 ? "myValuesActive" : ""}
                 onClick={() => {
-                  setSlippage(3);
-                  setCustomSlippage(null);
+                  setSlippage1(3);
+                  setCustomSlippage1(null);
                 }}
               >
                 3%
@@ -3153,7 +3156,7 @@ function Swap() {
               <InputField
                 coloredBg={"transparent"}
                 placeholder={"Custom"}
-                value={customSlippage}
+                value={customSlippage1}
                 type="number"
                 addonBefore={
                   <span>
@@ -3169,13 +3172,13 @@ function Swap() {
                 }
                 getData={(value) => {
                   if (!value || value === "") {
-                    setSlippage(1);
-                    setCustomSlippage(null);
+                    setSlippage1(1);
+                    setCustomSlippage1(null);
                   }
 
                   if (parseFloat(value) <= 50 && value.toString().length <= 5) {
-                    setSlippage(null);
-                    setCustomSlippage(value);
+                    setSlippage1(null);
+                    setCustomSlippage1(value);
                   }
                 }}
               />
@@ -3190,6 +3193,8 @@ function Swap() {
               if (customSlippage == 0) {
                 return messageApi.error("Please enter a valid slippage value.");
               }
+              setSlippage(slippage1);
+              setCustomSlippage(customSlippage1);
               setSlippageDrawer(false);
               handleChangeForInput1(amount);
             }}

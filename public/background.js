@@ -204,6 +204,27 @@ const networks = [
   //   slug: 'pls',
   //   status: true,
   // },
+  {
+    id: uuidv4(),
+    chainName: 'Qubetics',
+    chainId: 'qubetics_9008-1',
+    currencyName: 'TICS',
+    currencySymbol: 'TICS',
+    currencyDecimals: 18,//-----
+    rpcUrl: 'https://dev-evm-rpc.qubetics.work/',
+    rpcApiKey: null,
+    blockUrl: 'https://dev-explorer.qubetics.work/',
+    default: false,
+    image: 'https://stage-qubetics-wallet.obs.ap-southeast-4.myhuaweicloud.com/tics.png',
+    tokenType: 'ERC20',
+    testnet: false,
+    swap: false,
+    isEVM: true,
+    supportTokens: true,
+    coinFamily: 7,
+    slug: 'tics',
+    status: true,
+  },
 ];
 
 const currency = {

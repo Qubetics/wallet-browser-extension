@@ -373,7 +373,7 @@ function PancakeSwapDetails() {
       </ModalCustom>
 
       <ModalCustom
-        title={"Confirm Transaction"}
+        title={"Enter password"}
         handleCancel={handleCancel}
         isModalOpen={isModalOpen}
         handleOk={handleOk}

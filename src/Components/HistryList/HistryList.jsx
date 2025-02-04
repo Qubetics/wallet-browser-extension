@@ -141,7 +141,7 @@ function HistryList(props) {
             </p>
             <div className="histryStatus">
               <p className="withStatus">
-                {spritz ? null : "To | "}
+                {spritz ? null : sendRecieve == 'Sent'?"To | ":"From | "}
                 {address}
               </p>
             </div>

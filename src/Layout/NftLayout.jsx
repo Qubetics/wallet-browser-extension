@@ -2,7 +2,7 @@
 import { Layout } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-import NftFixes from '../Assets/backg.png';
+import NftFixes from '../Assets/backg.svg';
 import useCurrentHeight from '../CustomHooks/useCurrentHeight';
 import BackArrowIcon from '../Assets/BackArrowIcon.svg';
 import { useSelector } from 'react-redux';
