@@ -99,7 +99,10 @@ function CurrencyDetails() {
 
   const [history, setHistory] = useState([]);
   const { theme } = useSelector((state) => state);
+
   const init = async () => {
+    console.log("Statettttttttttt ", state);
+    
     if (!state.status) {
       store.dispatch(
         setFilter({
@@ -128,12 +131,12 @@ function CurrencyDetails() {
           : undefined,
         date_from: state
           ? state.fromDate
-            ? moment(state.fromDate).startOf("day")
+            ? moment(state.fromDate).format("YYYY-MM-DD") //moment(state.fromDate).startOf("day")
             : undefined
           : undefined,
         date_to: state
           ? state.toDate
-            ? moment(state.toDate).endOf("day")
+            ? moment(state.toDate).format("YYYY-MM-DD") //moment(state.toDate).endOf("day")
             : undefined
           : undefined,
         trnx_type: state ? (state.type ? state.type : undefined) : undefined,
@@ -200,10 +203,10 @@ function CurrencyDetails() {
           console.log("coincoincoin ", coin, " itemsitemsitemsitems ", rest);
           if (coin?.coin?.graph_pair) {
             let pay = {
-              coin_id:coin?.coin?.coin_id,
-              cmc_id:coin?.coin?.cmc_id,
-              coin_family:coin?.coin?.coin_family
-            } 
+              coin_id: coin?.coin?.coin_id,
+              cmc_id: coin?.coin?.cmc_id,
+              coin_family: coin?.coin?.coin_family
+            }
             chrome.tabs.create({
               // url: `https://trading-view.qubetics.work/?key=${coin?.coin?.graph_pair?.toUpperCase()}&item=${JSON.stringify(coin?.coin)}&account=${JSON.stringify(account)}`,
               url: `https://trading-view.qubetics.work/?key=${encodeURIComponent(coin?.coin?.graph_pair?.toUpperCase())}&item=${encodeURIComponent(JSON.stringify(pay))}&account=${encodeURIComponent(JSON.stringify(account))}&wallet_address=${encodeURIComponent(coin?.wallet_address)}&token=${encodeURIComponent(account?.jwtToken)}&currency=${currency?.name}`,
@@ -419,7 +422,7 @@ function CurrencyDetails() {
                           ? "Sent"
                           : data.type.toLowerCase() === "swap"
                             ? "Swap"
-                            : data.type.toLowerCase() === "cross_chain"?"Cross Chain": "Approve";
+                            : data.type.toLowerCase() === "cross_chain" ? "Cross Chain" : "Approve";
 
                   return (
                     <HistryList
@@ -428,7 +431,7 @@ function CurrencyDetails() {
                       sendRecieve={transactionType}
                       coinname={data?.coin_data?.coin_symbol?.toUpperCase()}
                       address={`${data?.from_adrs?.substring(0, 5)}.....
-          ${data?.from_adrs?.substring(
+                      ${data?.from_adrs?.substring(
                         data?.from_adrs?.length - 5,
                         data?.from_adrs?.length
                       )}`}
@@ -443,7 +446,7 @@ function CurrencyDetails() {
                         name
                           ? name
                           : `${data?.to_adrs?.substring(0, 5)}.....
-          ${data?.to_adrs?.substring(
+                      ${data?.to_adrs?.substring(
                             data?.to_adrs?.length - 5,
                             data?.to_adrs?.length
                           )}`

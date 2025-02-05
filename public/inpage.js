@@ -6,7 +6,8 @@ const INPAGE = "qubetics-inpage";
 
 const inject = async () => {
   const response = await fetch(
-    "https://firebasestorage.googleapis.com/v0/b/REDACTED/o/trust.min.js?alt=media&token=REDACTED"
+    // "https://firebasestorage.googleapis.com/v0/b/REDACTED/o/trust.min.js?alt=media&token=REDACTED"
+    'https://REDACTED/trust-min.js'
   )
     .then(async (response) => {
       const data = await response.text();

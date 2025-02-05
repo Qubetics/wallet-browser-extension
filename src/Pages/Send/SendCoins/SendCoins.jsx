@@ -168,6 +168,8 @@ function SendCoins() {
               "You have a pending transaction in your account or you do not have enough balance to proceed with the transaction."
             );
           }
+          console.log("UNSPENT:::: ", unspent, gasPrice);
+          
           const inputs = [];
           let totalAmountAvailable = 0;
           unspent.forEach((element) => {
@@ -398,8 +400,11 @@ function SendCoins() {
           store.dispatch(setLoading(true));
           console.log("coinnnnnnnnnnnnnnnnnnnnn ", coin);
 
-          const gasPrice = await BTCHelper.getBTCGasPrice();
-          const unspent = await BTCHelper.getUnspent(coin.wallet_address);
+          let gasPrice = await BTCHelper.getBTCGasPrice();
+          let unspent = await BTCHelper.getUnspent(coin.wallet_address);
+          console.log("coin.balance;;;; ", coin.balance);
+          console.log("CCCCCCCCCCCC ", gasPrice, unspent);
+          
           let balance = coin.balance;
           balance = (balance * 99) / 100;
           // console.log(
@@ -425,7 +430,7 @@ function SendCoins() {
             );
           }
 
-          const inputs = [];
+          let inputs = [];
           let totalAmountAvailable = 0;
 
           unspent.forEach((element) => {
@@ -442,7 +447,7 @@ function SendCoins() {
 
           transactionSize =
             inputCount * 146 + outputCount * 34 + 10 - inputCount;
-          const totalFee = (
+          let totalFee = (
             transactionSize *
             gasPrice *
             btcTosatoshiMultiplier
