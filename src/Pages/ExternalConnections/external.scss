@@ -79,6 +79,7 @@
   }
   &__address {
     text-align: center;
+    flex-direction: column;
     // margin-bottom: 21px;
     &:last-child {
       margin-bottom: 0;

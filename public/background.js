@@ -305,7 +305,6 @@ class Background {
           req
         );
         if (req.method === 'requestAccounts') {
-          console.log('requestAccounts');
           try {
             const { password } = await chrome.storage.session.get('password');
             if (password) {
@@ -392,6 +391,101 @@ class Background {
               }
             }
           } catch (err) {
+            console.log("ERRor:::",err);
+            res.error = {
+              code: err.code || -1,
+              message: err.message || 'Unknown error occurred',
+              data: err.data,
+            };
+          }
+        } else if (req.method === 'nativeConnect') {
+          try {
+            const { password } = await chrome.storage.session.get('password');
+            if (password) {
+              const { accounts } = await chrome.storage.session.get('accounts');
+              const defaultAccount = accounts.find((el) => el.default === true);
+              const account =
+                req.network === 'solana'
+                  ? defaultAccount.coinFamilyAndAddress[4]
+                  : defaultAccount.address;
+              res.result = [account];
+              res.method = req.method;
+              res.network = req.network;
+
+              const { connectedDapps } = await chrome.storage.session.get(
+                'connectedDapps'
+              );
+
+              const checkIfAlreadyThere = (connectedDapps || []).find(
+                (el) => el.url === req.url
+              );
+
+              if (!checkIfAlreadyThere) {
+                await chrome.storage.session.set({
+                  connectedDapps: [
+                    ...(connectedDapps || []),
+                    {
+                      url: req.url,
+                      image: req.image,
+                      title: req.title,
+                      time: new Date(),
+                    },
+                  ],
+                });
+              }
+            } else {
+              const response = await new Promise(async (resolve, reject) => {
+                const requestData = encodeURIComponent(JSON.stringify(req));
+                chrome.windows.create({
+                  url: `index.html?method=nativeConnect&data=${requestData}`,
+                  type: 'popup',
+                  focused: true,
+                  width: 439,
+                  height: 746,
+                });
+
+                chrome.runtime.onMessage.addListener(
+                  (message, sender, sendResponse) => {
+                    if (message.method === 'nativeConnect') {
+                      resolve(message.result);
+                    }
+                  }
+                );
+              });
+
+              if (response) {
+                res.result = response;
+                res.method = req.method;
+                res.network = req.network;
+                const { connectedDapps } = await chrome.storage.session.get(
+                  'connectedDapps'
+                );
+
+                const checkIfAlreadyThere = (connectedDapps || []).find(
+                  (el) => el.url === req.url
+                );
+
+                if (!checkIfAlreadyThere) {
+                  await chrome.storage.session.set({
+                    connectedDapps: [
+                      ...(connectedDapps || []),
+                      {
+                        url: req.url,
+                        image: req.image,
+                        title: req.title,
+                        time: new Date(),
+                      },
+                    ],
+                  });
+                }
+              } else {
+                res.result = [];
+                res.method = req.method;
+                res.error = true;
+              }
+            }
+          } catch (err) {
+            console.log("ERRor:::",err);
             res.error = {
               code: err.code || -1,
               message: err.message || 'Unknown error occurred',
@@ -496,7 +590,239 @@ class Background {
             res.address = null;
             res.error = true;
           }
-        } else {
+        }else if (req.method === 'createValidator') {
+          const response = await new Promise((resolve, reject) => {
+            const requestData = encodeURIComponent(JSON.stringify(req));
+
+            chrome.windows.create({
+              url: `index.html?method=createValidator&data=${requestData}`,
+              type: 'popup',
+              focused: true,
+              width: 439,
+              height: 746,
+            });
+
+            chrome.runtime.onMessage.addListener(
+              (message, sender, sendResponse) => {
+                if (message.method === 'createValidator') {
+                  resolve(message.result);
+                }
+              }
+            );
+          });
+
+          if (response) {
+            res.result = response;
+            res.method = req.method;
+          } else {
+            res.result = null;
+            res.method = req.method;
+            res.error = true;
+          }
+        }else if (req.method === 'editValidator') {
+          const response = await new Promise((resolve, reject) => {
+            const requestData = encodeURIComponent(JSON.stringify(req));
+
+            chrome.windows.create({
+              url: `index.html?method=editValidator&data=${requestData}`,
+              type: 'popup',
+              focused: true,
+              width: 439,
+              height: 746,
+            });
+
+            chrome.runtime.onMessage.addListener(
+              (message, sender, sendResponse) => {
+                if (message.method === 'editValidator') {
+                  resolve(message.result);
+                }
+              }
+            );
+          });
+
+          if (response) {
+            res.result = response;
+            res.method = req.method;
+          } else {
+            res.result = null;
+            res.method = req.method;
+            res.error = true;
+          }
+        } else if (req.method === 'bondMoreFunds') {
+          const response = await new Promise((resolve, reject) => {
+            const requestData = encodeURIComponent(JSON.stringify(req));
+
+            chrome.windows.create({
+              url: `index.html?method=bondMoreFunds&data=${requestData}`,
+              type: 'popup',
+              focused: true,
+              width: 439,
+              height: 746,
+            });
+
+            chrome.runtime.onMessage.addListener(
+              (message, sender, sendResponse) => {
+                if (message.method === 'bondMoreFunds') {
+                  resolve(message.result);
+                }
+              }
+            );
+          });
+
+          if (response) {
+            res.result = response;
+            res.method = req.method;
+          } else {
+            res.result = null;
+            res.method = req.method;
+            res.error = true;
+          }
+        }else if (req.method === 'delegatorBondMoreFunds') {
+          const response = await new Promise((resolve, reject) => {
+            const requestData = encodeURIComponent(JSON.stringify(req));
+
+            chrome.windows.create({
+              url: `index.html?method=delegatorBondMoreFunds&data=${requestData}`,
+              type: 'popup',
+              focused: true,
+              width: 439,
+              height: 746,
+            });
+
+            chrome.runtime.onMessage.addListener(
+              (message, sender, sendResponse) => {
+                if (message.method === 'delegatorBondMoreFunds') {
+                  resolve(message.result);
+                }
+              }
+            );
+          });
+
+          if (response) {
+            res.result = response;
+            res.method = req.method;
+          } else {
+            res.result = null;
+            res.method = req.method;
+            res.error = true;
+          }
+        }else if (req.method === 'redelegate') {
+          const response = await new Promise((resolve, reject) => {
+            const requestData = encodeURIComponent(JSON.stringify(req));
+
+            chrome.windows.create({
+              url: `index.html?method=redelegate&data=${requestData}`,
+              type: 'popup',
+              focused: true,
+              width: 439,
+              height: 746,
+            });
+
+            chrome.runtime.onMessage.addListener(
+              (message, sender, sendResponse) => {
+                if (message.method === 'redelegate') {
+                  resolve(message.result);
+                }
+              }
+            );
+          });
+
+          if (response) {
+            res.result = response;
+            res.method = req.method;
+          } else {
+            res.result = null;
+            res.method = req.method;
+            res.error = true;
+          }
+        }else if (req.method === 'unBondFunds') {
+          const response = await new Promise((resolve, reject) => {
+            const requestData = encodeURIComponent(JSON.stringify(req));
+
+            chrome.windows.create({
+              url: `index.html?method=unBondFunds&data=${requestData}`,
+              type: 'popup',
+              focused: true,
+              width: 439,
+              height: 746,
+            });
+
+            chrome.runtime.onMessage.addListener(
+              (message, sender, sendResponse) => {
+                if (message.method === 'unBondFunds') {
+                  resolve(message.result);
+                }
+              }
+            );
+          });
+
+          if (response) {
+            res.result = response;
+            res.method = req.method;
+          } else {
+            res.result = null;
+            res.method = req.method;
+            res.error = true;
+          }
+        }else if (req.method === 'stopValidator') {
+          const response = await new Promise((resolve, reject) => {
+            const requestData = encodeURIComponent(JSON.stringify(req));
+
+            chrome.windows.create({
+              url: `index.html?method=stopValidator&data=${requestData}`,
+              type: 'popup',
+              focused: true,
+              width: 439,
+              height: 746,
+            });
+
+            chrome.runtime.onMessage.addListener(
+              (message, sender, sendResponse) => {
+                if (message.method === 'stopValidator') {
+                  resolve(message.result);
+                }
+              }
+            );
+          });
+
+          if (response) {
+            res.result = response;
+            res.method = req.method;
+          } else {
+            res.result = null;
+            res.method = req.method;
+            res.error = true;
+          }
+        }else if (req.method === 'unJailValidator') {
+          const response = await new Promise((resolve, reject) => {
+            const requestData = encodeURIComponent(JSON.stringify(req));
+
+            chrome.windows.create({
+              url: `index.html?method=unJailValidator&data=${requestData}`,
+              type: 'popup',
+              focused: true,
+              width: 439,
+              height: 746,
+            });
+
+            chrome.runtime.onMessage.addListener(
+              (message, sender, sendResponse) => {
+                if (message.method === 'unJailValidator') {
+                  resolve(message.result);
+                }
+              }
+            );
+          });
+
+          if (response) {
+            res.result = response;
+            res.method = req.method;
+          } else {
+            res.result = null;
+            res.method = req.method;
+            res.error = true;
+          }
+        }else {
           await next();
         }
       })
@@ -521,6 +847,7 @@ class Background {
 
   handleAllEthereumEvents = async () => {
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+      console.log("MESSG::",message, "SENDER::",sender);
       if (sender.tab) {
         if (message.type === 'JSON-RPC') {
           engine.handle(message.payload, (err, result) => {

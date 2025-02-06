@@ -1,16 +1,16 @@
 /* eslint-disable no-eval */
-import LocalMessageDuplexStream from "post-message-stream";
+import LocalMessageDuplexStream from 'post-message-stream';
 
-const CONTENT_SCRIPT = "qubetics-contentscript";
-const INPAGE = "qubetics-inpage";
+const CONTENT_SCRIPT = 'qubetics-contentscript';
+const INPAGE = 'qubetics-inpage';
 
 const inject = async () => {
   const response = await fetch(
-    "https://firebasestorage.googleapis.com/v0/b/REDACTED/o/trust.min.js?alt=media&token=REDACTED"
+    'https://REDACTED/trust-min.js'
   )
     .then(async (response) => {
       const data = await response.text();
-      let source = "";
+      let source = '';
       source = `
         ${data}
         (function() {
@@ -34,7 +34,7 @@ const inject = async () => {
       return source;
     })
     .catch((err) => {
-      console.log(err, "err");
+      console.log(err, 'err');
     });
 
   return response;
@@ -42,25 +42,47 @@ const inject = async () => {
 
 var getFavicon = function () {
   var favicon = undefined;
-  var nodeList = document.getElementsByTagName("link");
+  var nodeList = document.getElementsByTagName('link');
   for (var i = 0; i < nodeList.length; i++) {
     if (
-      nodeList[i].getAttribute("rel") == "icon" ||
-      nodeList[i].getAttribute("rel") == "shortcut icon"
+      nodeList[i].getAttribute('rel') == 'icon' ||
+      nodeList[i].getAttribute('rel') == 'shortcut icon'
     ) {
-      favicon = nodeList[i].getAttribute("href");
+      favicon = nodeList[i].getAttribute('href');
     }
   }
   return favicon;
 };
+
+const callbackMapping = {};
 
 const initializeStreams = () => {
   const connectionStream = new LocalMessageDuplexStream({
     name: INPAGE,
     target: CONTENT_SCRIPT,
   });
+  const sendResponse = (id, result) => {
+    const callback = callbackMapping[id];
+    callback(null, result);
+    delete callbackMapping[id];
+  };
+  const sendRequest = (method, data, callback) => {
+    const id = window.crypto.randomUUID();
+    callbackMapping[id] = callback;
 
-  window.addEventListener("message", (message) => {
+    connectionStream.write({
+      ...data,
+      name: method,
+      id,
+      network: 'qubetics',
+    });
+  };
+
+  window.qubetics = {
+    sendRequest,
+    sendResponse,
+  };
+  window.addEventListener('message', (message) => {
     if (message.data) {
       try {
         const response = JSON.parse(message.data);
@@ -78,8 +100,19 @@ const initializeStreams = () => {
     }
   });
 
-  connectionStream.on("data", (data) => {
-    // console.log('Publishing Data: ', data);
+  connectionStream.on('data', (data) => {
+    console.log('Publishing Data: ', data);
+    if (window.qubetics) {
+      window.qubetics.sendResponse(data.id, data.result);
+    }
+    if (data.method === 'nativeConnect') {
+      console.log(data);
+      if (data.network && data.network === 'solana') {
+        window.trustwallet.solana.setAddress(data.result[0]);
+      } else {
+        window.trustwallet.ethereum.setAddress(data.result[0]);
+      }
+    }
 
     if (window.trustwallet.ethereum) {
       if (data.error) {
@@ -98,7 +131,7 @@ const initializeStreams = () => {
         }
       }
 
-      if (data.method === "switchEthereumChain") {
+      if (data.method === 'switchEthereumChain') {
         window.trustwallet.ethereum.setConfig({
           ethereum: {
             chainId: data.chainId,
@@ -107,8 +140,8 @@ const initializeStreams = () => {
           },
         });
         window.trustwallet.ethereum.emitChainChanged(data.chainId);
-        window.localStorage.setItem("qubetics_chain_id", data.chainId);
-        window.localStorage.setItem("qubetics_rpc_url", data.rpcUrl);
+        window.localStorage.setItem('qubetics_chain_id', data.chainId);
+        window.localStorage.setItem('qubetics_rpc_url', data.rpcUrl);
       }
 
       if (data.network && data.network === 'solana') {
