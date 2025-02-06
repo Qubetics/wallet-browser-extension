@@ -96,7 +96,7 @@ export class Web3Helper {
     });
     const { account } = store.getState();
     try {
-      slug = slug == 'matic' ? 'polygon':slug; 
+      slug = slug == 'matic' ? 'polygon':slug == 'tics'?"qubetics":slug; 
       const { data } = await server.post(
         `/${slug}/${isToken ? tokenAddress : symbol}/gas_estimation`,
         {
