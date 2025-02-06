@@ -42,6 +42,7 @@ function SecretPhrase({ children, mnemonics, termsCheck, isShare, setIsShare, is
             ))}
           </div>
         </div>
+        <div className="newCreateCopy">
         <div
           onClick={copyToClipboard}
           className="setPassword__secretPharse__copyField"
@@ -49,6 +50,7 @@ function SecretPhrase({ children, mnemonics, termsCheck, isShare, setIsShare, is
           {contextHolder}
           <span>Copy</span>
           <img src={CopyIcon} width={16} height={18} />
+        </div>
         </div>
         {/* <div>
           <p className='setPassword__secretPharse__grayText'>

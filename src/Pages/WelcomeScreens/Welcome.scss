@@ -242,7 +242,7 @@
         background: transparent;
         position: relative;
         height: 46px !important;
-        max-width: 108px;
+        width: 108px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -483,4 +483,8 @@
   font-weight: 400;
   line-height: 22px;
   text-align: left;
+}
+.newCreateCopy{
+  display: flex;
+  justify-content: center;
 }
