@@ -111,7 +111,11 @@ function HistoryListOuter(props) {
            {type =='swap' && <img src={swapIcon}></img>}
            {type =='cross_chain' && <img src={swapIcon}></img>}
            {type =='dapp' && <img src={dAppIcon}></img>}
-           {type=='Approve' && <img src={swapIcon}></img>}
+           {type=='approve' && <img src={swapIcon}></img>}
+           {/* Default case added  */}
+           {!['deposit', 'withdraw', 'swap', 'cross_chain', 'dapp', 'approve'].includes(type) && (
+            <img src={TickIcon} />
+           )}
            
            
             <div className="send">
@@ -122,7 +126,11 @@ function HistoryListOuter(props) {
                 {type =='swap' && <span>Swap</span>}
                 {type =='cross_chain' && <span>Cross Chain</span>}
                 {type =='dapp' && <span>dApp</span>}
-                {type=='Approve' && <span>Approval</span>}
+                {type=='approve' && <span>Approval</span>}
+                {/* Default case added  */}
+                {!['deposit', 'withdraw', 'swap', 'cross_chain', 'dapp', 'approve'].includes(type) && (
+                 <span>Withdraw</span>
+                 )}
                 {' '}
                 {valueCurrency}
               </p>

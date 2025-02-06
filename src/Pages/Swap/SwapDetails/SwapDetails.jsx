@@ -371,7 +371,8 @@ function SwapDetails() {
         const data = await uniHelper.sendSwapTransaction(
           route,
           token1.address,
-          amtTosend,
+          // amtTosend,
+          amount,
           token1,
           token1.chain.slug,
           token1.symbol.toLowerCase(),
