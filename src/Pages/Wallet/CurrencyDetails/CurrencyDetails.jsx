@@ -212,7 +212,7 @@ function CurrencyDetails() {
               url: `https://trading-view.qubetics.work/?key=${encodeURIComponent(coin?.coin?.graph_pair?.toUpperCase())}&item=${encodeURIComponent(JSON.stringify(pay))}&account=${encodeURIComponent(JSON.stringify(account))}&wallet_address=${encodeURIComponent(coin?.wallet_address)}&token=${encodeURIComponent(account?.jwtToken)}&currency=${currency?.name}`,
             });
           } else {
-            return messageApi.error("Key pair not exists")
+            return messageApi.error("Graph is not available for this asset.")
           }
         }}
         // stared={() => {

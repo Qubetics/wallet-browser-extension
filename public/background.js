@@ -207,8 +207,8 @@ const networks = [
   {
     id: uuidv4(),
     chainName: 'Qubetics',
-    chainId: 'qubetics_9008-1',
-    currencyName: 'TICS',
+    chainId: 9009,
+    currencyName: 'qubetics',
     currencySymbol: 'TICS',
     currencyDecimals: 18,//-----
     rpcUrl: 'https://dev-evm-rpc.qubetics.work/',

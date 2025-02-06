@@ -84,8 +84,8 @@ export const ExternalConnection = () => {
             let rpc =
               myDefaultChain?.chainId == 1
                 ? process.env.REACT_APP_ETH_RPC :
-                myDefaultChain?.chainId == 56 ? process.env.REACT_APP_BNB_RPC
-                  : myDefaultChain?.chainId == 137 ? process.env.REACT_APP_MATIC_RPC : process.env.REACT_APP_QUBETIC_RPC;
+                myDefaultChain?.chainId == 9009 ? process.env.REACT_APP_QUBETIC_RPC
+                  : myDefaultChain?.chainId == 137 ? process.env.REACT_APP_MATIC_RPC : process.env.REACT_APP_BNB_RPC;
             const provider = new Web3.providers.HttpProvider(rpc);
             const web3 = new Web3(provider);
             let gasEstimate = '';

@@ -215,7 +215,7 @@ function SendConfirm() {
               fiatGasFee,
               currency.name,
               toName,
-              chain.slug == "matic" ? "polygon" : chain.slug,
+              chain.slug == "0" ? "polygon" : chain.slug,
               chain.chainId,
               coin.coin.coin_symbol,
               coin.coin.coin_family == 1

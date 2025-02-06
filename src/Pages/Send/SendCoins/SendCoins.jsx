@@ -96,7 +96,7 @@ function SendCoins() {
   });
 
   console.log("----------> ", coin?.coin?.coin_family);
-  
+
   const fetchNativePrice = async () => {
     const parentCoin = await server.post(
       "/wallet/nativeCoinFiatPrice",
@@ -169,7 +169,7 @@ function SendCoins() {
             );
           }
           console.log("UNSPENT:::: ", unspent, gasPrice);
-          
+
           const inputs = [];
           let totalAmountAvailable = 0;
           unspent.forEach((element) => {
@@ -404,7 +404,7 @@ function SendCoins() {
           let unspent = await BTCHelper.getUnspent(coin.wallet_address);
           console.log("coin.balance;;;; ", coin.balance);
           console.log("CCCCCCCCCCCC ", gasPrice, unspent);
-          
+
           let balance = coin.balance;
           balance = (balance * 99) / 100;
           // console.log(
@@ -510,7 +510,7 @@ function SendCoins() {
         title={`Send ${coin.coin.coin_symbol.toUpperCase()}`}
         coin={coin}
       />
-      <div className={`flexedContent manageWalletHeight `} style={{gap:'30px'}}>
+      <div className={`flexedContent manageWalletHeight `} style={{ gap: '30px' }}>
         <div>
           <InputField
             placeholder={"Wallet Address"}
@@ -666,7 +666,7 @@ function SendCoins() {
                 readonly={true}
                 placeholderBaseColor={true}
               />
-            ) : coin?.coin?.coin_family == 2 ? (
+            ) : (coin?.coin?.coin_family == 2 || coin?.coin?.coin_family == 7) ? (
               <>
                 <InputFieldOnly
                   placeholder={"Transaction Fee"}
@@ -677,6 +677,8 @@ function SendCoins() {
                   readonly={true}
                   placeholderBaseColor={true}
                 />
+                {console.log("MMMMMMMMMMMMMM ", myGasPrice)}
+                
               </>
             ) : (
               <>

@@ -96,7 +96,7 @@ export class Web3Helper {
     });
     const { account } = store.getState();
     try {
-      slug = slug == 'matic' ? 'polygon':slug == 'tics'?"qubetics":slug; 
+      slug = slug == 'matic' ? 'polygon' : slug == 'tics' ? "qubetics" : slug;
       const { data } = await server.post(
         `/${slug}/${isToken ? tokenAddress : symbol}/gas_estimation`,
         {
@@ -110,12 +110,24 @@ export class Web3Helper {
           },
         }
       );
-      return {
-        estimate: data.gas_estimate,
-        fast: data.resultList.fast_gas_price,
-        propose: data.resultList.propose_gas_price,
-        safe: data.resultList.safe_gas_price,
-      };
+      console.log("XXXXQQQQQ ",slug, data);
+      
+      if (slug == 'qubetics') {
+        console.log("TICSSSS "); 
+        return {
+          estimate: data.gas_estimate,
+          fast: data.gas_price,
+          propose: data.gas_price,
+          safe: data.gas_price,
+        };
+      } else {
+        return {
+          estimate: data.gas_estimate,
+          fast: data.resultList.fast_gas_price,
+          propose: data.resultList.propose_gas_price,
+          safe: data.resultList.safe_gas_price,
+        };
+      }
     } catch (error) {
       console.log("Error ", error);
       return false;
@@ -126,7 +138,7 @@ export class Web3Helper {
     const { account } = store.getState();
     try {
 
-      slug = slug=='matic'?"polygon":slug;
+      slug = slug == 'matic' ? 'polygon' : slug == 'tics' ? "qubetics" : slug;
       const { data } = await server.post(
         `/${slug}/${isToken ? tokenAddress : symbol}/nonce`,
         {
@@ -389,7 +401,7 @@ export class Web3Helper {
         symbol
       );
       console.log("gassssssss ", gasPriceRes);
-      
+
       const nonce = await this.getNonce(slug, false, null, symbol, from);
       console.log("Nonce======> ", nonce);
       const gaslimit = gasPriceRes.estimate;
@@ -405,11 +417,11 @@ export class Web3Helper {
           ? 1.5 * gsFee * Math.pow(10, 9)
           : gsFee * Math.pow(10, 9);
       console.log("GASETHHHHHHH ", gasInEth, gasPrice);
-      
+
       const totalAmount = +gasInEth + +amount;
 
       console.log("TOTALLLLLLLL AMT ", totalAmount);
-      
+
       const balance = await this.getCoinBalance(from, rpc);
       console.log("🚀 ~ Web3Helper ~ balance:", balance);
 
@@ -438,7 +450,9 @@ export class Web3Helper {
         chainId,
       };
 
-      console.log({
+      console.log("transaction ", transaction);
+      
+      console.log("OBJJJJJJJJJJJJ ",{
         nonce,
         gasPrice: web3.utils.toHex(gsFee * Math.pow(10, 9)),
         gasLimit: web3.utils.toHex(gaslimit),
@@ -475,7 +489,7 @@ export class Web3Helper {
         tx_type: type || "withdraw",
       };
       payload["order_id"] = orderId;
-      slug= slug=='matic'?"polygon":slug;
+      slug = slug == 'matic' ? 'polygon' : slug == 'tics' ? "qubetics" : slug;
       const response = await server.post(`${slug}/${symbol}/send`, payload, {
         headers: {
           Authorization: account.jwtToken,
@@ -484,7 +498,7 @@ export class Web3Helper {
 
       return response.data.tx_hash;
     } catch (error) {
-      console.log(error);
+      console.log('error occure----> ',error);
       return false;
     }
   };
@@ -713,7 +727,7 @@ export class Web3Helper {
       if (orderId) {
         payload["order_id"] = orderId;
       }
-      slug = slug=="matic"?"polygon":slug;
+      slug = slug == "matic" ? "polygon" : slug;
       const response = await server.post(
         `${slug}/${tokenAddress}/send`,
         payload,
