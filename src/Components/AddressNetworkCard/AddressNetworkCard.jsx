@@ -269,6 +269,7 @@ function AddressNetworkCard(props) {
               </span> */}
               <span onClick={() => setViewAddress(!viewAddress)}>
                 <img
+                className={viewAddress ?"rotateItem":"noRotate"}
                   style={{ cursor: "pointer" }}
                   src={DownArrowSuffix}
                   alt="DownArrowSuffix"

@@ -493,3 +493,14 @@ code {
     }
   }
 }
+.rotateItem{
+  transform: rotate(180deg);
+  transition: 1s all;
+}
+.noRotate{
+  transition: 1s all;
+}
+.apexcharts-tooltip{
+  top: 20px !important;
+  left: 50px !important;
+}

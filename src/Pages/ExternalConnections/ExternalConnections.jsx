@@ -13,7 +13,7 @@ import { store } from '../..';
 import { setLoading } from '../../actions/loading';
 import InputFieldSimple from '../../Components/InputField/InputFieldSimple';
 import ButtonComp from '../../Components/ButtonComp/ButtonComp';
-import ArrowDashedLine from '../../Assets/ArrowDashedLine.svg';
+import ArrowDashedLine from '../../Assets/arr.svg';
 import BigNumber from 'bignumber.js';
 import { addCommasToNumber } from '../../helpers/conversion.helper';
 import { SolanaHelper } from '../../helpers/solana.helper';

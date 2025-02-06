@@ -4,7 +4,7 @@
 import React from "react";
 import MenuRestofHeaders from "../../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders";
 import "./CrossChainDetials.scss";
-import ArrowDashedLine from "../../../Assets/ArrowDashedLine.svg";
+import ArrowDashedLine from "../../../Assets/arr.svg";
 import ButtonComp from "../../../Components/ButtonComp/ButtonComp";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -213,12 +213,13 @@ console.log("PREVVVVVVVVVVVVVV ", {
             >
               <p style={{margin:0}}>To</p>
               {/* <span>From</span> */}
+              <br />
               {addCommasToNumber(getFlooredFixed(parseFloat(amount2), 4))}{" "}
               {token2.symbol}
             </p>
           </div>
           {/* <div className="swapDetails__border"></div> */}
-          <div className="swapDetails__address">
+          <div className="swapDetails__address" style={{ marginTop: "16px" }}>
             <p className="swapDetails__address__key">From</p>
             <p className="swapDetails__address__val">
               <sapn>{`${token1.address.substring(0, 8)}.....
@@ -242,7 +243,7 @@ console.log("PREVVVVVVVVVVVVVV ", {
             </p>
           </div>
           {/* <div className="swapDetails__border"></div> */}
-          <div className="swapDetails__keyValuesText">
+          <div className="swapDetails__keyValuesText" style={{ marginTop: "0" }}>
             <div className="swapDetails__keyValuesText__inner">
               <p className="swapDetails__keyValuesText__key">Type</p>
               <p className="swapDetails__keyValuesText__val">Cross-Chain</p>

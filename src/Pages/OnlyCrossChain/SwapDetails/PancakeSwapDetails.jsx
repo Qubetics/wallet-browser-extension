@@ -5,7 +5,7 @@ import MenuRestofHeaders from "../../../Components/BalanceDetails/MenuRestofHead
 import style from "./style.module.scss";
 import BTC from "../../../Assets/Coins/BTC.png";
 import ETH from "../../../Assets/Coins/ETH.png";
-import ArrowDashedLine from "../../../Assets/ArrowDashedLine.svg";
+import ArrowDashedLine from "../../../Assets/arr.svg";
 import ButtonComp from "../../../Components/ButtonComp/ButtonComp";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
