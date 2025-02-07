@@ -127,6 +127,14 @@ function SendCoins() {
       setValue(value);
       setPrice(price.value);
     }
+    return () => {
+      inputCount = 0;
+      inputCount = 0;
+      transactionSize = 0;
+      outputCount = 2;
+      btcTosatoshi = 100000000;
+      btcTosatoshiMultiplier = 0.00000001;
+    }
   }, []);
 
   const init = async () => {
@@ -168,7 +176,9 @@ function SendCoins() {
               "You have a pending transaction in your account or you do not have enough balance to proceed with the transaction."
             );
           }
-          console.log("UNSPENT:::: ", unspent, gasPrice);
+          console.log("UNSPENT:::: ", unspent, gasPrice,);
+          console.log("inputCount : ", inputCount);
+
 
           const inputs = [];
           let totalAmountAvailable = 0;
@@ -678,7 +688,7 @@ function SendCoins() {
                   placeholderBaseColor={true}
                 />
                 {console.log("MMMMMMMMMMMMMM ", myGasPrice)}
-                
+
               </>
             ) : (
               <>
