@@ -101,7 +101,7 @@ function CurrencyDetails() {
   const { theme } = useSelector((state) => state);
 
   const init = async () => {
-    console.log("Statettttttttttt ", state);
+    // console.log("Statettttttttttt ", state);
     
     if (!state.status) {
       store.dispatch(
@@ -200,7 +200,7 @@ function CurrencyDetails() {
         }
         chartIcon={() => {
 
-          console.log("coincoincoin ", coin, " itemsitemsitemsitems ", rest);
+          // console.log("coincoincoin ", coin, " itemsitemsitemsitems ", rest);
           if (coin?.coin?.graph_pair) {
             let pay = {
               coin_id: coin?.coin?.coin_id,

@@ -244,7 +244,7 @@ export class UniswapHelper {
           walletAddress
         );
 
-        console.log("NONCE-----> ", nonce);
+        // console.log("NONCE-----> ", nonce);
         
         const increasedGasLimitDecimal = (
           Number(data.data.tx.gas) * 1.5
@@ -264,7 +264,7 @@ export class UniswapHelper {
         const wallet = new ethers.Wallet(WALLET_SECRET, this.web3Provider);
         const signedTransaction = await wallet.signTransaction(transaction);
 
-        console.log("signedTransactionsignedTransaction ", signedTransaction);
+        // console.log("signedTransactionsignedTransaction ", signedTransaction);
         
         
         const response = await server.post(

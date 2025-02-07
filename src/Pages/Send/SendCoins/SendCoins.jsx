@@ -196,19 +196,19 @@ function SendCoins() {
           transactionSize =
             inputCount * 146 + outputCount * 34 + 10 - inputCount;
           let fee = transactionSize * gasPrice;
-          console.log("btc feee::::::", fee);
+          // console.log("btc feee::::::", fee);
 
           const totalFee = (
             transactionSize *
             gasPrice *
             btcTosatoshiMultiplier
           ).toFixed(8);
-          console.log("btc Totalfeee::::::", totalFee);
+          // console.log("btc Totalfeee::::::", totalFee);
 
           setSelectedGasPriceSol(totalFee);
         } catch (error) {
           store.dispatch(setLoading(false));
-          console.log("btc errrr:::::::", error);
+          // console.log("btc errrr:::::::", error);
         }
       }
       if (!chain.isEVM && chain.currencyName === "SOL") {
@@ -408,12 +408,12 @@ function SendCoins() {
       } else if (!chain.isEVM && chain.currencyName === 'BTC') {
         try {
           store.dispatch(setLoading(true));
-          console.log("coinnnnnnnnnnnnnnnnnnnnn ", coin);
+          // console.log("coinnnnnnnnnnnnnnnnnnnnn ", coin);
 
           let gasPrice = await BTCHelper.getBTCGasPrice();
           let unspent = await BTCHelper.getUnspent(coin.wallet_address);
-          console.log("coin.balance;;;; ", coin.balance);
-          console.log("CCCCCCCCCCCC ", gasPrice, unspent);
+          // console.log("coin.balance;;;; ", coin.balance);
+          // console.log("CCCCCCCCCCCC ", gasPrice, unspent);
 
           let balance = coin.balance;
           balance = (balance * 99) / 100;
@@ -687,7 +687,7 @@ function SendCoins() {
                   readonly={true}
                   placeholderBaseColor={true}
                 />
-                {console.log("MMMMMMMMMMMMMM ", myGasPrice)}
+                {/* {console.log("MMMMMMMMMMMMMM ", myGasPrice)} */}
 
               </>
             ) : (
@@ -809,7 +809,7 @@ function SendCoins() {
                 );
               }
 
-              console.log("AMTTTTT : ", amount, myBalance);
+              // console.log("AMTTTTT : ", amount, myBalance);
               const finalAmount = new BigNumber(amount);
               const balance = new BigNumber(myBalance);
 
@@ -981,13 +981,13 @@ function SendCoins() {
                 }
                 store.dispatch(setLoading(false));
 
-                console.log("ITMMMMMMMMMMMMMMM ", {
-                  to: address,
-                  amount: amount,
-                  coin,
-                  networkFee: gasPrice,
-                  redirectTo
-                });
+                // console.log("ITMMMMMMMMMMMMMMM ", {
+                //   to: address,
+                //   amount: amount,
+                //   coin,
+                //   networkFee: gasPrice,
+                //   redirectTo
+                // });
 
                 navigate("/confirmCurrency", {
                   state: {
@@ -1030,7 +1030,7 @@ function SendCoins() {
                     inputs.push(utxo);
                   });
 
-                  console.log("--------inputs-------> ", inputs);
+                  // console.log("--------inputs-------> ", inputs);
 
                   transactionSize =
                     inputCount * 146 + outputCount * 34 + 10 - inputCount;
@@ -1052,7 +1052,7 @@ function SendCoins() {
                     totalAmount
                   );
 
-                  console.log("MyBALAnCEEEEEEEEE ", myBalance);
+                  // console.log("MyBALAnCEEEEEEEEE ", myBalance);
 
 
                   if (totalAmount > myBalance) {
@@ -1062,13 +1062,13 @@ function SendCoins() {
                     );
                   }
 
-                  console.log("BTC TRANSACTION CASE : ",
-                    totalAmountAvailable,
-                    Math.round(amount * btcTosatoshi),
-                    btcTosatoshi,
-                    fee,
-                    amount
-                  );
+                  // console.log("BTC TRANSACTION CASE : ",
+                  //   totalAmountAvailable,
+                  //   Math.round(amount * btcTosatoshi),
+                  //   btcTosatoshi,
+                  //   fee,
+                  //   amount
+                  // );
                   if (
                     totalAmountAvailable -
                     Math.round(amount * btcTosatoshi) -
@@ -1122,9 +1122,7 @@ function SendCoins() {
                         )) >
                       546
                     ) {
-                      console.log("1111111111");
                       transaction.change(coin.wallet_address);
-                      console.log("11111111112");
                     }
                     if (
                       satoshis -
@@ -1133,12 +1131,9 @@ function SendCoins() {
                           Math.round(amount * btcTosatoshi).toString()
                         )) >
                       546
-                    ) {
-                      console.log("22222222222");
+                    ) { 
                       transaction.fee(fee);
-                      console.log("222222222223");
-                    } else {
-                      console.log("333333333333");
+                    } else { 
                       transaction.fee(
                         fee +
                         (satoshis -
@@ -1146,8 +1141,7 @@ function SendCoins() {
                             parseInt(
                               Math.round(amount * btcTosatoshi).toString()
                             )))
-                      );
-                      console.log("333333333334");
+                      ); 
                     }
                     const btcPrivateKey =
                       await WalletHelper.getBitcoinPrivateKey();
@@ -1164,9 +1158,9 @@ function SendCoins() {
                     }
                     console.log("Come to sign...");
                     transaction.sign(btcPrivateKey);
-                    console.log("Come to sign...success");
+                    // console.log("Come to sign...success");
                     const rawTransaction = transaction.serialize();
-                    console.log("'rawTransaction---> ", rawTransaction);
+                    // console.log("'rawTransaction---> ", rawTransaction);
 
                     store.dispatch(setLoading(false));
 
@@ -1262,7 +1256,7 @@ function SendCoins() {
                     });
                   }
                 } catch (error) {
-                  console.log("CATCHHHHHHHH ", error);
+                  console.log("Error :--> ", error);
                 }
               }
             }}

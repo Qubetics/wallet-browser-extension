@@ -83,16 +83,16 @@ function SwapDetails() {
     },
   } = useLocation();
 
-  console.log({
-    route,
-    token1,
-    token2,
-    amount,
-    amount2,
-    feeAmount,
-    slippage,
-    isWrap,
-  });
+  // console.log({
+  //   route,
+  //   token1,
+  //   token2,
+  //   amount,
+  //   amount2,
+  //   feeAmount,
+  //   slippage,
+  //   isWrap,
+  // });
   const navigate = useNavigate();
   const [messageApi, contextHolder] = message.useMessage({
     duration: DURATION,
@@ -165,7 +165,7 @@ function SwapDetails() {
         token1.symbol.toLowerCase()
       );
 
-      console.log("GASSSSSSSSSSSSSSS ", gasPrice);
+      // console.log("GASSSSSSSSSSSSSSS ", gasPrice);
 
 
       setGasPrice(gasPrice.fast);
@@ -180,8 +180,8 @@ function SwapDetails() {
         (gasPrice.fast * Math.pow(10, 9) * parseInt(estimatedGasUsed) * 1.5) /
         Math.pow(10, 18);
 
-      console.log("SINALLLLLLLLLLL ", finalGasFee, finalFee);
-      console.log("parentCoinparentCoin ", parentCoin);
+      // console.log("SINALLLLLLLLLLL ", finalGasFee, finalFee);
+      // console.log("parentCoinparentCoin ", parentCoin);
 
 
       setNetworkPrice(
@@ -199,8 +199,8 @@ function SwapDetails() {
         )
       );
 
-      console.log("token1.tokenAddress-----> ", token1.tokenAddress);
-      console.log("token1.address-----> ", token1.address);
+      // console.log("token1.tokenAddress-----> ", token1.tokenAddress);
+      // console.log("token1.address-----> ", token1.address);
 
       if (token1.isToken) {
         const approvedAmount = await Web3Helper.checkApproval(
@@ -209,8 +209,8 @@ function SwapDetails() {
           "0x1111111254eeb25477b68fb85ed929f73a960582",
           token1.rpc
         );
-        console.log("🚀 ~ init ~ approvedAmount:", approvedAmount);
-        console.log("approvedAmount === false:::", approvedAmount === false);
+        // console.log("🚀 ~ init ~ approvedAmount:", approvedAmount);
+        // console.log("approvedAmount === false:::", approvedAmount === false);
 
         if (approvedAmount === false) {
           setLoading(false);
@@ -220,12 +220,12 @@ function SwapDetails() {
         }
 
         const approvedAmountBig = new BigNumber(approvedAmount);
-        console.log("approvedAmountBig>>>", approvedAmountBig.toFixed(10));
+        // console.log("approvedAmountBig>>>", approvedAmountBig.toFixed(10));
         const amountBig = new BigNumber(amount);
         // console.log(amountBig.toFixed(10));
 
         if (approvedAmountBig.isGreaterThan(amountBig)) {
-          console.log("Inside Here");
+          // console.log("Inside Here");
           setRequireApproval(false);
           setApprovalConfirmed(true);
           setLoading(false);
@@ -381,7 +381,7 @@ function SwapDetails() {
           commision
         );
 
-        console.log("SWAAAAAAAAAAAAAAAAa ", data);
+        // console.log("SWAAAAAAAAAAAAAAAAa ", data);
 
         if (!data) {
           setSwapModal(false);

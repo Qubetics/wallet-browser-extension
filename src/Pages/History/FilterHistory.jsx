@@ -303,8 +303,8 @@ function FilterHistory() {
                 }
                 placeholder="From"
                 onChange={(value) => {
-                  console.log("CCCCCCCCCCC ", value.format("YYYY-MM-DD"), " ----- ", value);
-                  console.log("daysssss ", dayjs(value).format("YYYY-MM-DD"));
+                  // console.log("CCCCCCCCCCC ", value.format("YYYY-MM-DD"), " ----- ", value);
+                  // console.log("daysssss ", dayjs(value).format("YYYY-MM-DD"));
                   
                   setFilterValue({
                     ...filterValue,
