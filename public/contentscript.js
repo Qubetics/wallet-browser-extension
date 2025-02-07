@@ -56,6 +56,13 @@ const setupPageStreams = () => {
       }
     }
   });
+  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.method === 'switchChain') {
+      window.postMessage({ method: 'switchChain', payload: message.payload }, '*');
+      sendResponse({ success: true });
+    }
+  });
+  
 };
 
 const initStreams = () => {

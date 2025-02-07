@@ -391,7 +391,7 @@ class Background {
               }
             }
           } catch (err) {
-            console.log("ERRor:::",err);
+            console.log('ERRor:::', err);
             res.error = {
               code: err.code || -1,
               message: err.message || 'Unknown error occurred',
@@ -485,7 +485,7 @@ class Background {
               }
             }
           } catch (err) {
-            console.log("ERRor:::",err);
+            console.log('ERRor:::', err);
             res.error = {
               code: err.code || -1,
               message: err.message || 'Unknown error occurred',
@@ -590,7 +590,7 @@ class Background {
             res.address = null;
             res.error = true;
           }
-        }else if (req.method === 'createValidator') {
+        } else if (req.method === 'createValidator') {
           const response = await new Promise((resolve, reject) => {
             const requestData = encodeURIComponent(JSON.stringify(req));
 
@@ -619,7 +619,7 @@ class Background {
             res.method = req.method;
             res.error = true;
           }
-        }else if (req.method === 'editValidator') {
+        } else if (req.method === 'editValidator') {
           const response = await new Promise((resolve, reject) => {
             const requestData = encodeURIComponent(JSON.stringify(req));
 
@@ -639,6 +639,7 @@ class Background {
               }
             );
           });
+          console.log('RESPONSE BACK::', response);
 
           if (response) {
             res.result = response;
@@ -677,7 +678,7 @@ class Background {
             res.method = req.method;
             res.error = true;
           }
-        }else if (req.method === 'delegatorBondMoreFunds') {
+        } else if (req.method === 'delegatorBondMoreFunds') {
           const response = await new Promise((resolve, reject) => {
             const requestData = encodeURIComponent(JSON.stringify(req));
 
@@ -706,7 +707,7 @@ class Background {
             res.method = req.method;
             res.error = true;
           }
-        }else if (req.method === 'redelegate') {
+        } else if (req.method === 'redelegate') {
           const response = await new Promise((resolve, reject) => {
             const requestData = encodeURIComponent(JSON.stringify(req));
 
@@ -735,7 +736,7 @@ class Background {
             res.method = req.method;
             res.error = true;
           }
-        }else if (req.method === 'unBondFunds') {
+        } else if (req.method === 'unBondFunds') {
           const response = await new Promise((resolve, reject) => {
             const requestData = encodeURIComponent(JSON.stringify(req));
 
@@ -764,7 +765,7 @@ class Background {
             res.method = req.method;
             res.error = true;
           }
-        }else if (req.method === 'stopValidator') {
+        } else if (req.method === 'stopValidator') {
           const response = await new Promise((resolve, reject) => {
             const requestData = encodeURIComponent(JSON.stringify(req));
 
@@ -793,7 +794,7 @@ class Background {
             res.method = req.method;
             res.error = true;
           }
-        }else if (req.method === 'unJailValidator') {
+        } else if (req.method === 'unJailValidator') {
           const response = await new Promise((resolve, reject) => {
             const requestData = encodeURIComponent(JSON.stringify(req));
 
@@ -822,7 +823,21 @@ class Background {
             res.method = req.method;
             res.error = true;
           }
-        }else {
+        } else if (req.method === 'disconnect') {
+          const response = await new Promise(async (resolve, reject) => {
+            await chrome.storage.session.remove(['accounts', 'password']);
+            resolve(true);
+          });
+
+          if (response) {
+            res.result = response;
+            res.method = req.method;
+          } else {
+            res.result = null;
+            res.method = req.method;
+            res.error = true;
+          }
+        } else {
           await next();
         }
       })
@@ -847,7 +862,7 @@ class Background {
 
   handleAllEthereumEvents = async () => {
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-      console.log("MESSG::",message, "SENDER::",sender);
+      console.log('MESSG::', message, 'SENDER::', sender);
       if (sender.tab) {
         if (message.type === 'JSON-RPC') {
           engine.handle(message.payload, (err, result) => {

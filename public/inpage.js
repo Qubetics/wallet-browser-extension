@@ -62,8 +62,15 @@ const initializeStreams = () => {
     target: CONTENT_SCRIPT,
   });
   const sendResponse = (id, result) => {
+    
+    console.log("RESULET::::",result);
     const callback = callbackMapping[id];
-    callback(null, result);
+    if (result.type==='error') {
+      callback(result.data, null);
+    }else{
+      callback(null, result.data);
+    }
+   
     delete callbackMapping[id];
   };
   const sendRequest = (method, data, callback) => {
@@ -103,16 +110,12 @@ const initializeStreams = () => {
   connectionStream.on('data', (data) => {
     console.log('Publishing Data: ', data);
     if (window.qubetics) {
-      window.qubetics.sendResponse(data.id, data.result);
+      window.qubetics.sendResponse(data.id, { type: 'success', data: data.result });
+      // handleResponse({ type: 'success', data: extractDataFromResp })
     }
-    if (data.method === 'nativeConnect') {
-      console.log(data);
-      if (data.network && data.network === 'solana') {
-        window.trustwallet.solana.setAddress(data.result[0]);
-      } else {
-        window.trustwallet.ethereum.setAddress(data.result[0]);
-      }
-    }
+    // if (data.method === 'nativeConnect') {
+ 
+    // }
 
     if (window.trustwallet.ethereum) {
       if (data.error) {

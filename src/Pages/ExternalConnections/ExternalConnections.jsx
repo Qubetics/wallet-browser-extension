@@ -185,11 +185,15 @@ export const ExternalConnection = () => {
     );
   };
   // console.log('EXT DATA::', data);
-  const handleResponse = (result) => {
+  const handleResponse = (result, error) => {
     console.log(
       '🚀 ~ file: ExternalConnections.jsx:187 ~ handleResponse ~ result 11',
       result
     );
+
+    // `Result: ${result}`
+    // `Error: ${error}`
+
     chrome.runtime.sendMessage({ method, result }, (response) => {
       chrome.windows.getCurrent(function (window) {
         chrome.windows.remove(window.id);
@@ -237,20 +241,20 @@ export const ExternalConnection = () => {
               rawLog: response.rawLog,
               code: response.code,
             };
-            handleResponse(extractDataFromResp);
+            handleResponse({ type: 'success', data: extractDataFromResp });
             store.dispatch(setLoading(false));
           } else {
             store.dispatch(setLoading(false));
             return message.error('Error in create validator');
           }
-        }else if (data.method === 'editValidator') {
+        } else if (data.method === 'editValidator') {
           // store.dispatch(setLoading(true));
           const response = await editValidator(
             data.mnemonics,
             data.primaryValues,
             data.nodeUrl,
             data.valoperAddress,
-            data.hideCommissionField,
+            data.hideCommissionField
           );
           if (response) {
             const extractDataFromResp = {
@@ -258,8 +262,9 @@ export const ExternalConnection = () => {
               rawLog: response?.rawLog,
               code: response.code,
             };
-console.log("result:::editValidator",response);
-            handleResponse(extractDataFromResp);
+
+            console.log('result:::editValidator', response);
+            handleResponse({ type: 'success', data: extractDataFromResp });
             store.dispatch(setLoading(false));
             return;
           }
@@ -273,7 +278,7 @@ console.log("result:::editValidator",response);
             data.nodeUrl
           );
           if (response) {
-            handleResponse(response);
+            handleResponse({ type: 'success', data: response });
             store.dispatch(setLoading(false));
             return;
           }
@@ -287,8 +292,8 @@ console.log("result:::editValidator",response);
             data.nodeUrl
           );
           if (response) {
-            console.log("RESPO:::",response);
-            handleResponse(response);
+            console.log('RESPO:::', response);
+            handleResponse({ type: 'success', data: response });
             store.dispatch(setLoading(false));
             return;
           }
@@ -301,18 +306,18 @@ console.log("result:::editValidator",response);
             data.stakeAmount,
             data.nodeUrl
           );
-          console.log("RESPO: redelegate::",response);
+          console.log('RESPO: redelegate::', response);
           if (response) {
             const extractDataFromResp = {
               transactionHash: response.transactionHash,
               rawLog: response.rawLog,
               code: response.code,
             };
-            handleResponse(extractDataFromResp);
+            handleResponse({ type: 'success', data: extractDataFromResp });
             store.dispatch(setLoading(false));
             return;
           }
-        }else if (data.method === 'unBondFunds') {
+        } else if (data.method === 'unBondFunds') {
           console.log('I am unBondFunds called::', data);
           const response = await unBondFunds(
             data.mnemonics,
@@ -325,7 +330,7 @@ console.log("result:::editValidator",response);
           );
           console.log('RETURN RESP unBondFunds::', response);
           if (response) {
-            handleResponse(response);
+            handleResponse({ type: 'success', data: response });
             store.dispatch(setLoading(false));
           }
         } else if (data.method === 'stopValidator') {
@@ -339,7 +344,7 @@ console.log("result:::editValidator",response);
           );
           console.log('RETURN RESP stopValidator::', response);
           if (response) {
-            handleResponse(response);
+            handleResponse({ type: 'success', data: response });
             store.dispatch(setLoading(false));
           }
         } else if (data.method === 'unJailValidator') {
@@ -350,7 +355,7 @@ console.log("result:::editValidator",response);
           );
           console.log('RETURN RESP unJailValidator::', response);
           if (response) {
-            handleResponse(response);
+            handleResponse({ type: 'success', data: response });
             store.dispatch(setLoading(false));
           }
         }
@@ -948,10 +953,15 @@ console.log("result:::editValidator",response);
 
       <ModalCustom
         title={'Request Accounts'}
-        isModalOpen={method === 'nativeConnect'}
+        isModalOpen={account && method === 'nativeConnect'}
         customClass='customClassModal'
-        handleCancel={() => {
+        handleCancel={async () => {
           setMethod(null);
+          handleResponse({
+            type: 'error',
+            data: { message: 'Rejected by user' },
+          });
+          await chrome.storage.session.remove(['accounts', 'password']);
         }}
       >
         {account && method === 'nativeConnect' ? (
@@ -1028,7 +1038,14 @@ console.log("result:::editValidator",response);
                       <ButtonComp
                         maxWidth='100%'
                         onClick={async () => {
-                          handleResponse([]);
+                          handleResponse({
+                            type: 'error',
+                            data: { message: 'Rejected by user' },
+                          });
+                          await chrome.storage.session.remove([
+                            'accounts',
+                            'password',
+                          ]);
                         }}
                         text='Reject'
                       />
@@ -1044,10 +1061,14 @@ console.log("result:::editValidator",response);
       {/* **** Create validators **** */}
       <ModalCustom
         title={'Create Validator'}
-        isModalOpen={method === 'createValidator'}
+        isModalOpen={account && method === 'createValidator'}
         customClass='customClassModal'
         handleCancel={() => {
           setMethod(null);
+          handleResponse({
+            type: 'error',
+            data: { message: 'Rejected by user' },
+          });
         }}
       >
         {account && method === 'createValidator' && data ? (
@@ -1135,7 +1156,10 @@ console.log("result:::editValidator",response);
                       <ButtonComp
                         maxWidth='100%'
                         onClick={async () => {
-                          handleResponse(null);
+                          handleResponse({
+                            type: 'error',
+                            data: { message: 'Rejected by user' },
+                          });
                         }}
                         text='Reject'
                       />
@@ -1148,13 +1172,17 @@ console.log("result:::editValidator",response);
         ) : null}
       </ModalCustom>
 
-       {/* **** Edit Validator **** */}
-       <ModalCustom
+      {/* **** Edit Validator **** */}
+      <ModalCustom
         title={'Edit Validator'}
-        isModalOpen={method === 'editValidator'}
+        isModalOpen={account && method === 'editValidator'}
         customClass='customClassModal'
         handleCancel={() => {
           setMethod(null);
+          handleResponse({
+            type: 'error',
+            data: { message: 'Rejected by user' },
+          });
         }}
       >
         {account && method === 'editValidator' && data ? (
@@ -1242,7 +1270,10 @@ console.log("result:::editValidator",response);
                       <ButtonComp
                         maxWidth='100%'
                         onClick={async () => {
-                          handleResponse(null);
+                          handleResponse({
+                            type: 'error',
+                            data: { message: 'Rejected by user' },
+                          });
                         }}
                         text='Reject'
                       />
@@ -1258,10 +1289,14 @@ console.log("result:::editValidator",response);
       {/* **** bondMoreFunds **** */}
       <ModalCustom
         title={'Bond More Funds'}
-        isModalOpen={method === 'bondMoreFunds'}
+        isModalOpen={account && method === 'bondMoreFunds'}
         customClass='customClassModal'
         handleCancel={() => {
           setMethod(null);
+          handleResponse({
+            type: 'error',
+            data: { message: 'Rejected by user' },
+          });
         }}
       >
         {account && method === 'bondMoreFunds' && data ? (
@@ -1347,7 +1382,10 @@ console.log("result:::editValidator",response);
                       <ButtonComp
                         maxWidth='100%'
                         onClick={async () => {
-                          handleResponse(null);
+                          handleResponse({
+                            type: 'error',
+                            data: { message: 'Rejected by user' },
+                          });
                         }}
                         text='Reject'
                       />
@@ -1363,10 +1401,14 @@ console.log("result:::editValidator",response);
       {/* **** Delegator And bondMoreFunds **** */}
       <ModalCustom
         title={'Bond More Funds'}
-        isModalOpen={method === 'delegatorBondMoreFunds'}
+        isModalOpen={account && method === 'delegatorBondMoreFunds'}
         customClass='customClassModal'
         handleCancel={() => {
           setMethod(null);
+          handleResponse({
+            type: 'error',
+            data: { message: 'Rejected by user' },
+          });
         }}
       >
         {account && method === 'delegatorBondMoreFunds' && data ? (
@@ -1452,7 +1494,10 @@ console.log("result:::editValidator",response);
                       <ButtonComp
                         maxWidth='100%'
                         onClick={async () => {
-                          handleResponse(null);
+                          handleResponse({
+                            type: 'error',
+                            data: { message: 'Rejected by user' },
+                          });
                         }}
                         text='Reject'
                       />
@@ -1468,10 +1513,14 @@ console.log("result:::editValidator",response);
       {/* **** Delegator And bondMoreFunds **** */}
       <ModalCustom
         title={'Redelegate'}
-        isModalOpen={method === 'redelegate'}
+        isModalOpen={account && method === 'redelegate'}
         customClass='customClassModal'
         handleCancel={() => {
           setMethod(null);
+          handleResponse({
+            type: 'error',
+            data: { message: 'Rejected by user' },
+          });
         }}
       >
         {account && method === 'redelegate' && data ? (
@@ -1524,7 +1573,7 @@ console.log("result:::editValidator",response);
                       Address
                     </div>
                     <div className={'confirmCurrency__keyValues__value'}>
-                      {data.selectedAccout}
+                      {data.selectedAccount}
                     </div>
                   </div>
 
@@ -1557,7 +1606,10 @@ console.log("result:::editValidator",response);
                       <ButtonComp
                         maxWidth='100%'
                         onClick={async () => {
-                          handleResponse(null);
+                          handleResponse({
+                            type: 'error',
+                            data: { message: 'Rejected by user' },
+                          });
                         }}
                         text='Reject'
                       />
@@ -1573,10 +1625,14 @@ console.log("result:::editValidator",response);
       {/* **** unBondFunds **** */}
       <ModalCustom
         title={'Un Bond Funds'}
-        isModalOpen={method === 'unBondFunds'}
+        isModalOpen={account && method === 'unBondFunds'}
         customClass='customClassModal'
         handleCancel={() => {
           setMethod(null);
+          handleResponse({
+            type: 'error',
+            data: { message: 'Rejected by user' },
+          });
         }}
       >
         {account && method === 'unBondFunds' && data ? (
@@ -1662,7 +1718,10 @@ console.log("result:::editValidator",response);
                       <ButtonComp
                         maxWidth='100%'
                         onClick={async () => {
-                          handleResponse(null);
+                          handleResponse({
+                            type: 'error',
+                            data: { message: 'Rejected by user' },
+                          });
                         }}
                         text='Reject'
                       />
@@ -1679,10 +1738,14 @@ console.log("result:::editValidator",response);
 
       <ModalCustom
         title={'Stop Validator'}
-        isModalOpen={method === 'stopValidator'}
+        isModalOpen={account && method === 'stopValidator'}
         customClass='customClassModal'
         handleCancel={() => {
           setMethod(null);
+          handleResponse({
+            type: 'error',
+            data: { message: 'Rejected by user' },
+          });
         }}
       >
         {account && method === 'stopValidator' && data ? (
@@ -1768,7 +1831,10 @@ console.log("result:::editValidator",response);
                       <ButtonComp
                         maxWidth='100%'
                         onClick={async () => {
-                          handleResponse(null);
+                          handleResponse({
+                            type: 'error',
+                            data: { message: 'Rejected by user' },
+                          });
                         }}
                         text='Reject'
                       />
@@ -1784,10 +1850,14 @@ console.log("result:::editValidator",response);
       {/* **** unJailValidator **** */}
       <ModalCustom
         title={'Un Jail Validator'}
-        isModalOpen={method === 'unJailValidator'}
+        isModalOpen={account && method === 'unJailValidator'}
         customClass='customClassModal'
         handleCancel={() => {
           setMethod(null);
+          handleResponse({
+            type: 'error',
+            data: { message: 'Rejected by user' },
+          });
         }}
       >
         {account && method === 'unJailValidator' && data ? (
@@ -1864,7 +1934,10 @@ console.log("result:::editValidator",response);
                       <ButtonComp
                         maxWidth='100%'
                         onClick={async () => {
-                          handleResponse(null);
+                          handleResponse({
+                            type: 'error',
+                            data: { message: 'Rejected by user' },
+                          });
                         }}
                         text='Reject'
                       />
@@ -1880,10 +1953,14 @@ console.log("result:::editValidator",response);
       {/* **** stopDeactivating **** */}
       <ModalCustom
         title={'Stop Deactivating'}
-        isModalOpen={method === 'stopDeactivating'}
+        isModalOpen={account && method === 'stopDeactivating'}
         customClass='customClassModal'
         handleCancel={() => {
           setMethod(null);
+          handleResponse({
+            type: 'error',
+            data: { message: 'Rejected by user' },
+          });
         }}
       >
         {account && method === 'stopDeactivating' && data ? (
@@ -1960,7 +2037,10 @@ console.log("result:::editValidator",response);
                       <ButtonComp
                         maxWidth='100%'
                         onClick={async () => {
-                          handleResponse(null);
+                          handleResponse({
+                            type: 'error',
+                            data: { message: 'Rejected by user' },
+                          });
                         }}
                         text='Reject'
                       />
