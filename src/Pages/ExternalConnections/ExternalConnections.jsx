@@ -58,7 +58,7 @@ export const ExternalConnection = () => {
           const url = new URL(tab.url);
           const queryParams = new URLSearchParams(url.search);
           console.log("QUERYYYYYYYYYY PARAMS ", queryParams);
-          
+
           const method = queryParams.get('method');
 
           const data = queryParams.get('data')
@@ -70,7 +70,7 @@ export const ExternalConnection = () => {
             setMethod('requestAccounts');
             store.dispatch(setLoading(false));
           } else if (method === 'signTransaction' && account) {
-            const symbol = myDefaultChain.slug == 'polygon' ? "pol" : myDefaultChain.slug == "ethereum" ? "eth" : myDefaultChain.slug == "binancesmartchain" ? "bnb" : ""
+            const symbol = (myDefaultChain.slug == 'matic' || myDefaultChain.slug == 'polygon') ? "pol" : myDefaultChain.slug == "ethereum" ? "eth" : myDefaultChain.slug == "binancesmartchain" ? "bnb" : ""
             const gasPriceRes = await Web3Helper.getGasPrice(
               myDefaultChain.slug,
               data.from,
@@ -190,7 +190,7 @@ export const ExternalConnection = () => {
         // console.log("gasLimit TRX ", gasLimit);
         const { chains } = await chrome.storage.local.get('chains');
         const myDefaultChain = chains.find((el) => el.default);
-        const symbol = myDefaultChain.slug == 'polygon' ? "pol" : myDefaultChain.slug == "ethereum" ? "eth" : myDefaultChain.slug == "binancesmartchain" ? "bnb" : ""
+        const symbol = (myDefaultChain.slug == 'polygon' || myDefaultChain.slug == 'matic') ? "pol" : myDefaultChain.slug == "ethereum" ? "eth" : myDefaultChain.slug == "binancesmartchain" ? "bnb" : ""
         const hash =
           await Web3Helper.generateRawTransactionForTokenAndBroadcastExternalCopy(
             data.to,

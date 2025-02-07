@@ -110,10 +110,10 @@ export class Web3Helper {
           },
         }
       );
-      console.log("XXXXQQQQQ ",slug, data);
-      
+      console.log("XXXXQQQQQ ", slug, data);
+
       if (slug == 'qubetics') {
-        console.log("TICSSSS "); 
+        console.log("TICSSSS ");
         return {
           estimate: data.gas_estimate,
           fast: data.gas_price,
@@ -451,8 +451,8 @@ export class Web3Helper {
       };
 
       console.log("transaction ", transaction);
-      
-      console.log("OBJJJJJJJJJJJJ ",{
+
+      console.log("OBJJJJJJJJJJJJ ", {
         nonce,
         gasPrice: web3.utils.toHex(gsFee * Math.pow(10, 9)),
         gasLimit: web3.utils.toHex(gaslimit),
@@ -498,7 +498,7 @@ export class Web3Helper {
 
       return response.data.tx_hash;
     } catch (error) {
-      console.log('error occure----> ',error);
+      console.log('error occure----> ', error);
       return false;
     }
   };
@@ -767,24 +767,24 @@ export class Web3Helper {
     value
   ) => {
     try {
-      console.log("PPPPPPPPPPPPPGGGGGGGGGG", {
-        to,
-        from,
-        amount,
-        coinId,
-        fiatPrice,
-        networkFeeInFiat,
-        fiatType,
-        contact,
-        slug,
-        chainId,
-        tokenAddress,
-        decimals,
-        tokenType,
-        data,
-        gasLimit,
-        coinFamily,
-      });
+      // console.log("PPPPPPPPPPPPPGGGGGGGGGG", {
+      //   to,
+      //   from,
+      //   amount,
+      //   coinId,
+      //   fiatPrice,
+      //   networkFeeInFiat,
+      //   fiatType,
+      //   contact,
+      //   slug,
+      //   chainId,
+      //   tokenAddress,
+      //   decimals,
+      //   tokenType,
+      //   data,
+      //   gasLimit,
+      //   coinFamily,
+      // });
       const { account } = store.getState();
       console.log(
         "🚀 ~ file: web3.helper.js:271 ~ Web3Helper ~ account:",
@@ -892,6 +892,7 @@ export class Web3Helper {
     symbol
   ) => {
     try {
+      slug = slug == 'matic' ? 'polygon' : slug;
       // console.log("PPPPPPPPPPPPPGGGGGGGGGG", {
       //   to,
       //   from,
@@ -917,7 +918,19 @@ export class Web3Helper {
         account
       );
 
-      const web3 = new Web3();
+      const rpc = coinFamily == 1
+        ? process.env.REACT_APP_BNB_RPC
+        : coinFamily == 2
+          ? process.env.REACT_APP_ETH_DAPP_RPC
+          : coinFamily == 4 ? process.env.REACT_APP_MATIC_RPC :
+            '';
+       
+            console.log("RPCCCCCCCC ", rpc);
+            
+        const provider = new Web3.providers.HttpProvider(rpc);
+        const web3 = new Web3(provider);
+   
+
 
       const privateKey = await WalletHelper.getPrivateKey();
       console.log(
@@ -951,7 +964,7 @@ export class Web3Helper {
 
       const transaction = {
         nonce,
-        gasPrice: web3.utils.toHex(gasPrice),
+        gasPrice: web3.utils.toHex(gasPrice*2),
         gasLimit: web3.utils.toHex(gaslimit),
         to: tokenAddress,
         value: value,
@@ -972,6 +985,7 @@ export class Web3Helper {
         "🚀 ~ file: web3.helper.js:339 ~ Web3Helper ~ signedTransaction:",
         signedTransaction
       );
+
 
       const myResponse = await server.post(
         `${slug}/${symbol}/send`,

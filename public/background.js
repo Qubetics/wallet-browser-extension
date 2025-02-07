@@ -506,7 +506,10 @@ class Background {
             const defaultAccount = accounts.find((el) => el.default);
             res.result = null;
             res.method = req.method;
-            res.chainId = defaultChain.chainId;
+            // res.chainId = defaultChain.chainId;
+            res.chainId = parseInt(defaultChain.chainId)
+              .toString(16)
+              .toUpperCase();
             res.rpcUrl = defaultChain.rpcUrl;
             res.address = defaultAccount.address;
           } else {
@@ -577,7 +580,7 @@ class Background {
           deviceId: uuidv4(),
           autoLock: true,
         },
-        () => {}
+        () => { }
       );
     });
   };
