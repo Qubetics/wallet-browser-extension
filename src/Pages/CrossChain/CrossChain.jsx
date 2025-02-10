@@ -1484,7 +1484,7 @@ function CrossChain() {
                   )}
                 </p>
               </div>
-              <div>
+              <div style={{textAlign:"right"}}>
                 <Select
                   suffixIcon={<img src={DownArrowSuffix} />}
                   style={{
@@ -1566,7 +1566,7 @@ function CrossChain() {
                 />
                 <div className="swap_onChain_pay">
                   {/* <p>You Pay</p> */}
-                  <p>
+                  <p style={{ textAlign: "right" }}>
                     Balance{" "}
                     <span>
                       {addCommasToNumber(
@@ -1626,7 +1626,7 @@ function CrossChain() {
                   )}
                 </p>
               </div>
-              <div>
+              <div style={{ textAlign: "right" }}>
                 <Select
                   suffixIcon={<img src={DownArrowSuffix} />}
                   style={{
@@ -1711,7 +1711,7 @@ function CrossChain() {
                   className="swap_onChain_pay"
                 >
                   {/* <p>You Receive</p> */}
-                  <p>
+                  <p style={{ textAlign: "right" }}>
                     Balance{" "}
                     <span>
                       {addCommasToNumber(

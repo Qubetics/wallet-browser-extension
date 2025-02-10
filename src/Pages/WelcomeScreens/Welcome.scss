@@ -220,13 +220,13 @@
         justify-content: center;
         flex-wrap: wrap;
         .InnerFild {
-          font-size: 14px;
+          font-size: 12px;
           text-transform: capitalize;
           padding: 10px 20px;
           color: $white;
           font-weight: 500;
           text-align: center;
-          width: calc(33% - 53px);
+          width: calc(33% - 30px);
           background-color: #18171f;
           white-space: nowrap;
           line-height: 25px;

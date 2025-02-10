@@ -258,7 +258,6 @@ function Swap() {
       // console.log("currencycurrency ", currency);
       // console.log("STATTTTTTTTTT ", state);
 
-
       const { data } = await server.post(
         `/wallet/swap_coinlist`,
         {
@@ -299,7 +298,7 @@ function Swap() {
           balance: token.wallets[0] ? toFixed(token.wallets[0].balance) : 0,
           type: token_type(token.coin_family),
           jupiter_fee_address: null,
-          rpc: rpc_chain(token.coin_family)
+          rpc: rpc_chain(token.coin_family),
         };
       });
 
@@ -388,7 +387,7 @@ function Swap() {
               balance: token.wallets[0] ? toFixed(token.wallets[0].balance) : 0,
               type: token_type(token.coin_family),
               jupiter_fee_address: null,
-              rpc: rpc_chain(token.coin_family)
+              rpc: rpc_chain(token.coin_family),
             };
           });
 
@@ -500,7 +499,7 @@ function Swap() {
               chain: chains.find(
                 (chain) => chain?.coinFamily == token?.coin_family
               ),
-              rpc: rpc_chain(token.coin_family)
+              rpc: rpc_chain(token.coin_family),
             };
           });
 
@@ -587,7 +586,7 @@ function Swap() {
             balance: token.wallets[0] ? toFixed(token.wallets[0].balance) : 0,
             type: token_type(token.coin_family),
             jupiter_fee_address: null,
-            rpc: rpc_chain(token.coin_family)
+            rpc: rpc_chain(token.coin_family),
           };
         });
 
@@ -638,7 +637,7 @@ function Swap() {
               chain: chains.find(
                 (chain) => chain?.coinFamily == token?.coin_family
               ),
-              rpc: rpc_chain(token.coin_family)
+              rpc: rpc_chain(token.coin_family),
             };
           });
 
@@ -783,7 +782,7 @@ function Swap() {
           chain: chains.find(
             (chain) => chain?.coinFamily == token?.coin_family
           ),
-          rpc: rpc_chain(token.coin_family)
+          rpc: rpc_chain(token.coin_family),
         };
       });
 
@@ -838,10 +837,10 @@ function Swap() {
       token1.coinFamily == 1
         ? el.network === "bnb"
         : token1.coinFamily == 2
-          ? el.network === "eth"
-          : token1.coinFamily == 4
-            ? el.network === "pol"
-            : el.network === ""
+        ? el.network === "eth"
+        : token1.coinFamily == 4
+        ? el.network === "pol"
+        : el.network === ""
     );
 
     let finalFee = 0;
@@ -858,8 +857,8 @@ function Swap() {
 
       const result = originalNumber * percent;
 
-      console.log("TTTTTTTTTTTTTTTTTTT ",result, " PLPLPL ", token1);
-      
+      console.log("TTTTTTTTTTTTTTTTTTT ", result, " PLPLPL ", token1);
+
       // Step 3: Add the result to the original number
       finalFee = getFlooredFixed(
         result / token1.coin.native_coin_market_data.current_price,
@@ -880,7 +879,7 @@ function Swap() {
     }
 
     console.log("HERRRRRRRRRRRRR ", BL_CODE[token1.coinFamily].toLowerCase());
-    
+
     const gasPrice = await Web3Helper.getGasPrice(
       // token1.coinFamily == 1 ? "eth" : token1.coinFamily == 9 ? "pls" : "bnb",
       BL_CODE[token1.coinFamily].toLowerCase(),
@@ -1146,7 +1145,7 @@ function Swap() {
       finalGasFeeForTransaction
     );
     // console.log(" FEEEEEEEEEEEEEEEE ", finalFee, " finalGasFeeForTransaction : ", finalGasFeeForTransaction);
-    
+
     setTradingFee(parseFloat(finalFee) + finalGasFeeForTransaction);
     return getFlooredFixed(parseFloat(finalFee) + finalGasFeeForTransaction, 5);
   };
@@ -1339,15 +1338,14 @@ function Swap() {
               textVal: `1 ${token2.symbol} = ${addCommasToNumber(
                 getFlooredFixed(
                   parseFloat(route.quote.toFixed(token1.decimals)) /
-                  parseFloat(amount),
+                    parseFloat(amount),
                   12
                 )
               )} ${token1.symbol}`,
             },
             {
               text: "Trading Fees",
-              textVal: `${tradingFee} ${(BL_CODE[token1?.coinFamily])
-                }`,
+              textVal: `${tradingFee} ${BL_CODE[token1?.coinFamily]}`,
             },
             {
               text: "Slippage Tolerance",
@@ -1433,15 +1431,16 @@ function Swap() {
               textVal: `1 ${token2.symbol} = ${addCommasToNumber(
                 getFlooredFixed(
                   parseFloat(route.outAmount.toFixed(token1.decimals)) /
-                  parseFloat(amount),
+                    parseFloat(amount),
                   12
                 )
               )} ${token1.symbol}`,
             },
             {
               text: "Trading Fees",
-              textVal: `${tradingFee} ${token1.coinFamily == 1 ? "ETH" : "BNB"
-                }`,
+              textVal: `${tradingFee} ${
+                token1.coinFamily == 1 ? "ETH" : "BNB"
+              }`,
             },
             {
               text: "Slippage Tolerance",
@@ -1501,19 +1500,20 @@ function Swap() {
               textVal: `1 ${token2.symbol} = ${addCommasToNumber(
                 getFlooredFixed(
                   parseFloat(route.outAmount.toFixed(token1.decimals)) /
-                  parseFloat(amount),
+                    parseFloat(amount),
                   12
                 )
               )} ${token1.symbol}`,
             },
             {
               text: "Trading Fees",
-              textVal: `${tradingFee} ${token1.coinFamily == 1
-                ? "ETH"
-                : token1.coinFamily == 9
+              textVal: `${tradingFee} ${
+                token1.coinFamily == 1
+                  ? "ETH"
+                  : token1.coinFamily == 9
                   ? "PLS"
                   : "BNB"
-                }`,
+              }`,
             },
             {
               text: "Slippage Tolerance",
@@ -1967,8 +1967,9 @@ function Swap() {
               <Maintanance text="On chain swap is in under maintenance" />
             ) : (
               <div
-                className={`${"fixedContent height-571"} ${height <= 600 ? "fixedContentOuterExt" : ""
-                  }`}
+                className={`${"fixedContent height-571"} ${
+                  height <= 600 ? "fixedContentOuterExt" : ""
+                }`}
               >
                 <div style={{ width: "100%" }} className="swap ">
                   <div className="swap_onChain">
@@ -2023,7 +2024,7 @@ function Swap() {
                           {addCommasToNumber(
                             getFlooredFixed(
                               parseFloat(amount ? amount : 0) *
-                              parseFloat(token1 ? token1.price : 0),
+                                parseFloat(token1 ? token1.price : 0),
                               2
                             )
                           )}
@@ -2113,7 +2114,7 @@ function Swap() {
                         />
                         <div className="swap_onChain_pay">
                           {/* <p>You Pay</p> */}
-                          <p>
+                          <p style={{ textAlign: "right" }}>
                             Balance{" "}
                             <span>
                               {addCommasToNumber(
@@ -2284,11 +2285,11 @@ function Swap() {
                       style={
                         loading
                           ? {
-                            pointerEvents: "none",
-                          }
+                              pointerEvents: "none",
+                            }
                           : {
-                            pointerEvents: "auto",
-                          }
+                              pointerEvents: "auto",
+                            }
                       }
                       onClick={() => {
                         if (token2?.iHave) {
@@ -2357,7 +2358,7 @@ function Swap() {
                           {addCommasToNumber(
                             getFlooredFixed(
                               parseFloat(amount2 ? amount2 : 0) *
-                              parseFloat(token2 ? token2.price : 0),
+                                parseFloat(token2 ? token2.price : 0),
                               2
                             )
                           )}
@@ -2447,7 +2448,7 @@ function Swap() {
                         />
                         <div className="swap_onChain_pay">
                           {/* <p>You Receive</p> */}
-                          <p>
+                          <p style={{ textAlign: "right" }}>
                             Balance{" "}
                             <span>
                               {addCommasToNumber(
@@ -2697,10 +2698,17 @@ function Swap() {
                       const balanceExtraToAddIfFromIsNativeCoin =
                         feeAmount.plus(amountToAdd);
 
-                      console.log('nativeBalance :: ', parseFloat(nativeBalance));
-                      console.log('feeAmount :: ', parseFloat(feeAmount));
-                      console.log(' amountToAdd ', parseFloat(amountToAdd), " balanceExtraToAddIfFromIsNativeCoin ", parseFloat(balanceExtraToAddIfFromIsNativeCoin));
-
+                      console.log(
+                        "nativeBalance :: ",
+                        parseFloat(nativeBalance)
+                      );
+                      console.log("feeAmount :: ", parseFloat(feeAmount));
+                      console.log(
+                        " amountToAdd ",
+                        parseFloat(amountToAdd),
+                        " balanceExtraToAddIfFromIsNativeCoin ",
+                        parseFloat(balanceExtraToAddIfFromIsNativeCoin)
+                      );
 
                       if (
                         balanceExtraToAddIfFromIsNativeCoin.gt(nativeBalance)
@@ -2710,7 +2718,7 @@ function Swap() {
                           "Insufficient balance to proceed with the transaction."
                         );
                       }
-                      
+
                       store.dispatch(overAllLoader(false));
 
                       let swapDetailed = {
@@ -2739,8 +2747,8 @@ function Swap() {
                         : token1?.id == token2?.id &&
                           token1 != null &&
                           token2 != null
-                          ? "Please select a different token"
-                          : "Swap"
+                        ? "Please select a different token"
+                        : "Swap"
                     }
                     maxWidth={"100%"}
                     disabled={
@@ -2934,14 +2942,14 @@ function Swap() {
 
                           if (
                             token.tokenAddress ===
-                            "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c" &&
+                              "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c" &&
                             !token2.tokenAddress
                           ) {
                             setIsWrap(true);
                             myWrap = true;
                           } else if (
                             token.tokenAddress ===
-                            "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2" &&
+                              "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2" &&
                             !token2.tokenAddress
                           ) {
                             setIsWrap(true);
@@ -2969,14 +2977,14 @@ function Swap() {
 
                           if (
                             token.tokenAddress ===
-                            "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c" &&
+                              "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c" &&
                             !token1.tokenAddress
                           ) {
                             setIsWrap(true);
                             myWrap = true;
                           } else if (
                             token.tokenAddress ===
-                            "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2" &&
+                              "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2" &&
                             !token1.tokenAddress
                           ) {
                             setIsWrap(true);

@@ -130,9 +130,9 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
 
     tokens.forEach((token) => {
       const price = token.coin.fiat_price_data || null;
-      if (price) { 
-        const fiatValue = parseFloat(token.balance) * parseFloat(price.value); 
-        total += fiatValue; 
+      if (price) {
+        const fiatValue = parseFloat(token.balance) * parseFloat(price.value);
+        total += fiatValue;
       }
     });
     setTotal(total);
@@ -306,8 +306,9 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
   const height = useCurrentHeight();
   return (
     <div
-      className={`${"balanceDetails"} ${mt0 ? mt0 : ""}    ${height <= 600 ? "balanceDetailsOuterExt" : ""
-        }`}
+      className={`${"balanceDetails"} ${mt0 ? mt0 : ""}    ${
+        height <= 600 ? "balanceDetailsOuterExt" : ""
+      }`}
       style={{ position: "relative" }}
     >
       {contextHolder}
@@ -328,13 +329,18 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
               <div>
                 <Link
                   to={"/my-wallets"}
-                //  onClick={(e) => e.preventDefault()}
+                  //  onClick={(e) => e.preventDefault()}
                 >
-                  <p>
+                  <p style={{ display: "flex" }}>
                     {account.name.charAt(0).toUpperCase() +
-                      account.name.length<10? <p> {account.name} </p> : <p> {account.name.slice(0,6)}...</p>}
+                      account.name.length <
+                    10 ? (
+                      <p> {account.name} </p>
+                    ) : (
+                      <p> {account.name.slice(0, 6)}...</p>
+                    )}
 
-                      { }
+                    {}
                     <img
                       style={{ marginLeft: "10px" }}
                       src={downeIcon}
@@ -411,13 +417,13 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
           >
             {coin
               ? `${addCommasToNumber(
-                getFlooredFixed(coin.balance, 5)
-              )} ${coin.coin.coin_symbol.toUpperCase()}`
+                  getFlooredFixed(coin.balance, 5)
+                )} ${coin.coin.coin_symbol.toUpperCase()}`
               : balanceIn
-                ? `${currency.symbol}${addCommasToNumber(
+              ? `${currency.symbol}${addCommasToNumber(
                   getFlooredFixed(total, 2)
                 )}`
-                : "****"}
+              : "****"}
           </h3>
 
           {path !== "currencyDetails" ? (
@@ -479,8 +485,9 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
         ) : null}
       </div>
       <div
-        className={`${"balanceDetails__itemsOuter"} ${className ? className : ""
-          }`}
+        className={`${"balanceDetails__itemsOuter"} ${
+          className ? className : ""
+        }`}
         style={
           coin
             ? { justifyContent: "center" }
@@ -690,7 +697,7 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
             onClick={(e) => {
               e.preventDefault();
               if (path === "currencyDetails") {
-                showModal()
+                showModal();
               } else {
                 navigate("/history", { state: { path: "/wallet" } });
                 store.dispatch(
