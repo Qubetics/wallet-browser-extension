@@ -141,8 +141,17 @@ function HistryList(props) {
             </p>
             <div className="histryStatus">
               <p className="withStatus">
-                {spritz ? null : sendRecieve == 'Sent'?"To | ":"From | "}
-                {address}
+                {spritz ? null : sendRecieve == 'Sent' ? "To | ":"From | "}
+                {/* {address} */}
+                {sendRecieve == 'Sent' ? `${allData?.to_adrs?.substring(0, 5)}.....
+                      ${allData?.to_adrs?.substring(
+                        allData?.to_adrs?.length - 5,
+                        allData?.to_adrs?.length
+                      )}`  : `${allData?.from_adrs?.substring(0, 5)}.....
+                      ${allData?.from_adrs?.substring(
+                        allData?.from_adrs?.length - 5,
+                        allData?.from_adrs?.length
+                      )}`}
               </p>
             </div>
           </div>

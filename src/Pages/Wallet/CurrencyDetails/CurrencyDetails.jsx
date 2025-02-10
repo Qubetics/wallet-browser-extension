@@ -148,6 +148,8 @@ function CurrencyDetails() {
       }
     );
 
+    console.log("XXXXXCCCCCCCCCC : ", transactionList?.data?.data);
+    
     setHistory(transactionList?.data?.data);
   };
 

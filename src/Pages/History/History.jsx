@@ -136,7 +136,7 @@ function History() {
             const price = data?.coin_data?.fiat_price_data;
 
             let transactionType =
-              data.type === "dapp"
+              data.type == "dapp"
                 ? "Smart Contract"
                 : data.type === "deposit"
                   ? "Received"

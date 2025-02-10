@@ -125,7 +125,7 @@ function HistoryListOuter(props) {
                 {type =='withdraw' && <span>Withdraw</span>}
                 {type =='swap' && <span>Swap</span>}
                 {type =='cross_chain' && <span>Cross Chain</span>}
-                {type =='dapp' && <span>dApp</span>}
+                {type =='dapp' && <span>Smart Contract</span>}
                 {type=='approve' && <span>Approval</span>}
                 {/* Default case added  */}
                 {!['deposit', 'withdraw', 'swap', 'cross_chain', 'dapp', 'approve'].includes(type) && (

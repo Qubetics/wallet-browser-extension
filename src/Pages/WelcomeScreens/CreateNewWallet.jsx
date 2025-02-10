@@ -29,7 +29,7 @@ function CreateNewWallet() {
         {contextHolder}
         <div className="cardWhite__linkOuter">
           {layoutHeader}
-          <div style={{marginTop:"16px"}}>
+          <div style={{ marginTop: "16px" }}>
             <InputFieldOnly
               placeholder={"Enter here"}
               value={name}
@@ -38,7 +38,7 @@ function CreateNewWallet() {
               placeholderBaseColor={true}
               coloredBg={true}
               getData={(name) => {
-                const hasEmoji =/[\p{Extended_Pictographic}]/u.test(name);
+                const hasEmoji = /[\p{Extended_Pictographic}]/u.test(name);
                 if (hasEmoji) { return false }
                 if (name.length <= 25) {
                   if (/^\s/.test(name)) {
@@ -91,6 +91,13 @@ function CreateNewWallet() {
               );
             }
 
+            const nameRegex = /^[A-Za-z]+$/;
+            if (!nameRegex.test(name)) {
+              return messageApi.error(
+                "Name should contain only alphabetic characters."
+              );
+            }
+
             const { accounts } = await chrome.storage.session.get("accounts");
 
             if (accounts) {
@@ -121,7 +128,7 @@ function CreateNewWallet() {
 
             mnemonics = await WalletHelper.generateNewMnemonics();
 
-            const finalData = createWalletMnemonics || mnemonics; 
+            const finalData = createWalletMnemonics || mnemonics;
             navigate("/setPassword", {
               state: {
                 type,
