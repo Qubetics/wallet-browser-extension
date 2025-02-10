@@ -681,7 +681,7 @@ export const ExternalConnection = () => {
                   </div>
                   <div className={'swapDetails__iconsTop'}>
                     <img src={fromChain?.image} width={30} height={30} />
-                    <img src={ArrowDashedLine} width={144} height={12} />
+                    <img className='arrowDashedLine' src={ArrowDashedLine} width="90px" height={12} />
                     <img src={toChain?.image} width={30} height={30} />
                   </div>
                   <div className={'swapDetails__border'}></div>
