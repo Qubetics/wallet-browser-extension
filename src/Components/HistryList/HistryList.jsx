@@ -74,8 +74,8 @@ function HistryList(props) {
         explorer = `https://cardanoscan.io/transaction/${transactionHash}`;
         break;
       case 7:
-        coinFamily = 'AVAX';
-        explorer = `https://snowtrace.io/tx/${transactionHash}`;
+        coinFamily = 'TICS';
+        explorer = `https://dev-explorer.qubetics.work/tx/${transactionHash}`;
         break;
       case 8:
         coinFamily = 'CRO';

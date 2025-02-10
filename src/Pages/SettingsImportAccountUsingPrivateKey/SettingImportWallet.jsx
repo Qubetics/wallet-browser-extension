@@ -85,9 +85,14 @@ function SettingImportWallet() {
                     );
                   }
 
-                  const { accounts } = await chrome.storage.session.get(
-                    "accounts"
-                  );
+                  const nameRegex = /^[A-Za-z]+$/;
+                  if (!nameRegex.test(name)) {
+                    return messageApi.error(
+                      "Name should contain only alphabetic characters."
+                    );
+                  }
+                  
+                  const { accounts } = await chrome.storage.session.get("accounts");
 
                   const checkIfExists = await accounts.find(
                     (el) => el.name.toLowerCase() === name.toLowerCase()
