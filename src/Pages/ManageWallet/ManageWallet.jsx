@@ -1,31 +1,31 @@
 /*global chrome*/
-import React, { useEffect, useState } from "react";
-import Logo from "../../Assets/logo.png";
-import "./ManageWallet.scss";
-import MenuRestofHeaders from "../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders";
-import { useLocation, useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
-import { store } from "../..";
-import { setLoading } from "../../actions/loading";
-import { Checkbox, Drawer, message } from "antd";
-import ModalCloseIcon from "../../Assets/ModalCloseIcon.svg";
-import darkclose from "../../Assets/darkclose.svg";
-import BackupMnemonics from "../../Assets/Backup-Mnemonics.png";
-import Privatekey from "../../Assets/Backup-Private-Qubetics.png";
+import React, { useEffect, useState } from 'react';
+import Logo from '../../Assets/logo.png';
+import './ManageWallet.scss';
+import MenuRestofHeaders from '../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { store } from '../..';
+import { setLoading } from '../../actions/loading';
+import { Checkbox, Drawer, message } from 'antd';
+import ModalCloseIcon from '../../Assets/ModalCloseIcon.svg';
+import darkclose from '../../Assets/darkclose.svg';
+import BackupMnemonics from '../../Assets/Backup-Mnemonics.png';
+import Privatekey from '../../Assets/Backup-Private-Qubetics.png';
 import InputFieldSimple, {
   InputFieldOnly,
-} from "../../Components/InputField/InputFieldSimple";
-import ButtonComp from "../../Components/ButtonComp/ButtonComp";
-import ModalCustom from "../../Components/ModalCustom/ModalCustom";
-import { WalletHelper } from "../../helpers/wallet.helper";
-import warning from "../../Assets/PNG/warning.png";
-import WalletIBtn from "../../Assets/WalletIBtn.svg";
-import DarkArrowRightIcon from "../../Assets/DarkArrowRightIcon.svg";
-import { server } from "../../server";
-import OpenDark from "../../Assets/open-dark.svg";
-import CloseDark from "../../Assets/close-dark.svg";
-import { setBalancesIn } from "../../actions/balance-off-out";
-import { SecurityHelper } from "../../helpers/security.helper";
+} from '../../Components/InputField/InputFieldSimple';
+import ButtonComp from '../../Components/ButtonComp/ButtonComp';
+import ModalCustom from '../../Components/ModalCustom/ModalCustom';
+import { WalletHelper } from '../../helpers/wallet.helper';
+import warning from '../../Assets/PNG/warning.png';
+import WalletIBtn from '../../Assets/WalletIBtn.svg';
+import DarkArrowRightIcon from '../../Assets/DarkArrowRightIcon.svg';
+import { server } from '../../server';
+import OpenDark from '../../Assets/open-dark.svg';
+import CloseDark from '../../Assets/close-dark.svg';
+import { setBalancesIn } from '../../actions/balance-off-out';
+import { SecurityHelper } from '../../helpers/security.helper';
 
 function ManageWallet() {
   const [data, setData] = useState([]);
@@ -38,7 +38,7 @@ function ManageWallet() {
   const { account, tokens, currency, balanceIn } = useSelector(
     (state) => state
   );
-  const [name, setName] = useState("");
+  const [name, setName] = useState('');
   const [password, setPassword] = useState(null);
   const [messageApi, contextHolder] = message.useMessage();
   const [isModalOpen1, setIsModalOpen1] = useState(false);
@@ -87,9 +87,9 @@ function ManageWallet() {
 
   const init = async () => {
     store.dispatch(setLoading(true));
-    let { accounts } = await chrome.storage.session.get("accounts");
+    let { accounts } = await chrome.storage.session.get('accounts');
     setData(accounts);
-    if (state?.from == "myWallet") {
+    if (state?.from == 'myWallet') {
       let ids = [];
       // console.log("ACCCCCCCCCCCCCCCCCCCCC ", accounts);
       accounts.map((itm) => {
@@ -107,7 +107,7 @@ function ManageWallet() {
       {
         userIds: ids,
         fiatType: currency.name,
-        fetchFrom: "extension",
+        fetchFrom: 'extension',
       },
       {
         headers: {
@@ -143,18 +143,18 @@ function ManageWallet() {
   const setDefaultAccount = async (selectedAccount) => {
     try {
       store.dispatch(setLoading(true));
-      const { accounts } = await chrome.storage.session.get("accounts");
+      const { accounts } = await chrome.storage.session.get('accounts');
       if (accounts) {
         accounts.map((acc) => ({
           ...acc,
           default: acc.id === selectedAccount.id,
         }));
 
-        console.log("ACCCCCC ", accounts);
-        console.log("ACCCCCCselectedAccount ", selectedAccount);
+        console.log('ACCCCCC ', accounts);
+        console.log('ACCCCCCselectedAccount ', selectedAccount);
 
-        const { mnemonics } = await chrome.storage.local.get("mnemonics");
-        const { password } = await chrome.storage.session.get("password");
+        const { mnemonics } = await chrome.storage.local.get('mnemonics');
+        const { password } = await chrome.storage.session.get('password');
         const decryptedMnemonics = SecurityHelper.decrypt(mnemonics, password);
 
         const updatesMnemonics = JSON.parse(decryptedMnemonics).map((el) => {
@@ -166,7 +166,10 @@ function ManageWallet() {
           return el;
         });
 
-        const encryptedMnemonics = SecurityHelper.encrypt(updatesMnemonics, password);
+        const encryptedMnemonics = SecurityHelper.encrypt(
+          updatesMnemonics,
+          password
+        );
         chrome.storage.local.set({
           mnemonics: encryptedMnemonics,
           registered: true,
@@ -175,16 +178,27 @@ function ManageWallet() {
         await WalletHelper.setWalletPreference(selectedAccount.id);
 
         await init();
-        messageApi.success("Default account updated successfully!");
+        messageApi.success('Default account updated successfully!');
       }
     } catch (error) {
-      messageApi.error("Failed to update the default account.");
+      messageApi.error('Failed to update the default account.');
     } finally {
       store.dispatch(setLoading(false));
     }
   };
 
-  console.log("state?.fromstate?.fromstate?.from ", state?.from);
+  console.log('state?.fromstate?.fromstate?.from ', state?.from);
+
+  const sendDataToInpage = (data) => {
+    console.log("DATA::",data);
+    handleResponse({ type: 'success', data: data });
+  };
+
+
+  const handleResponse = (result, error) => {
+    chrome.runtime.sendMessage({ method:'switchAccount', result }, (response) => {});
+  };
+  // return <button onClick={sendDataToInpage}>Send Data</button>;
 
   return (
     <>
@@ -192,30 +206,30 @@ function ManageWallet() {
       <div
         // style={{height: state?.from == "myWallet" && "calc(100vh - 326px)"}}
         className={
-          state?.from == "myWallet"
+          state?.from == 'myWallet'
             ? `scrollableCont myWallet`
             : `scrollableCont`
         }
       >
-        <div className="searchBarFixed">
+        <div className='searchBarFixed'>
           <MenuRestofHeaders
-            backTo={state?.from == "myWallet" ? "/wallet" : "/setting"}
-            title={state?.from == "myWallet" ? "My Wallet" : "Manage Wallet"}
+            backTo={state?.from == 'myWallet' ? '/wallet' : '/setting'}
+            title={state?.from == 'myWallet' ? 'My Wallet' : 'Manage Wallet'}
           />
 
-          {state?.from == "myWallet" && (
-            <div className="myWalletsBalance">
-              <div className="myWalletsBalance_value">
+          {state?.from == 'myWallet' && (
+            <div className='myWalletsBalance'>
+              <div className='myWalletsBalance_value'>
                 <h4>Total Balance</h4>
                 <h1
                   style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "20px",
-                    justifyContent: "space-between",
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '20px',
+                    justifyContent: 'space-between',
                   }}
                 >
-                  {currency?.symbol} {balanceIn ? totalAmt?.toFixed(2) : "****"}
+                  {currency?.symbol} {balanceIn ? totalAmt?.toFixed(2) : '****'}
                   {/* <span onClick={() => setShow(!show)}> */}
                   {/* {show ? <img style={{ height: '20px' }}
                     src={OpenDark}
@@ -226,7 +240,7 @@ function ManageWallet() {
                   {balanceIn ? (
                     <img
                       src={OpenDark}
-                      alt=""
+                      alt=''
                       onClick={async () => {
                         await chrome.storage.local.set({
                           balanceIn: false,
@@ -238,16 +252,16 @@ function ManageWallet() {
                         store.dispatch(setBalancesIn(false));
                       }}
                       style={{
-                        width: "25px",
-                        marginLeft: "9px",
-                        position: "relative",
-                        top: "-7px",
+                        width: '25px',
+                        marginLeft: '9px',
+                        position: 'relative',
+                        top: '-7px',
                       }}
                     />
                   ) : (
                     <img
                       src={CloseDark}
-                      alt=""
+                      alt=''
                       onClick={async () => {
                         await chrome.storage.local.set({
                           balanceIn: true,
@@ -259,10 +273,10 @@ function ManageWallet() {
                         store.dispatch(setBalancesIn(true));
                       }}
                       style={{
-                        width: "25px",
-                        marginLeft: "9px",
-                        position: "relative",
-                        top: "-7px",
+                        width: '25px',
+                        marginLeft: '9px',
+                        position: 'relative',
+                        top: '-7px',
                       }}
                     />
                   )}
@@ -273,88 +287,88 @@ function ManageWallet() {
           )}
         </div>
 
-        <div className={`manageWalletHeight mwheight`} style={{ padding: "20px 24px 0" }}>
-
-          {Array.isArray(data) && data.map((data, idx) => (
-            <div className="listItems pdRemove mwheight_inner" 
-            >
-              <ul>
-                <li key={idx} className="currency_click">
-                  <div
-                    style={{ display: "flex", alignItems: "center" }}
-                    onClick={async (e) => {
-                      e.preventDefault();
-                      if (!data?.default) {
-                        setDefaultAccount(data);
-                        navigate("/wallet");
-                      }
-                    }}
-                  >
-                    <img src={Logo} alt="" />
+        <div
+          className={`manageWalletHeight mwheight`}
+          style={{ padding: '20px 24px 0' }}
+        >
+          {Array.isArray(data) &&
+            data.map((data, idx) => (
+              <div className='listItems pdRemove mwheight_inner' onClick={()=>!data?.default && sendDataToInpage(data.address)}>
+                <ul>
+                  <li key={idx} className='currency_click'>
                     <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "flex-start",
-                        gap: "0",
+                      style={{ display: 'flex', alignItems: 'center' }}
+                      onClick={async (e) => {
+                        e.preventDefault();
+                        if (!data?.default) {
+                          setDefaultAccount(data);
+                          navigate('/wallet');
+                        }
                       }}
                     >
-                      <p className="walletName">
-                        {data?.name?.length > 10
-                          ? `${data.name.substring(0, 7)}...`
-                          : data?.name}{" "}
-                        <span style={{ color: "#00aeef", fontSize: 15 }}>
-                          {data?.default ? " (Default)" : ""}
-                        </span>
-                      </p>
-                      <p className="walletAdd">
-                        {data.address.substring(0, 7)}.....
-                        {data.address.substring(
-                          data.address.length - 7,
-                          data.address.length
-                        )}
-                      </p>
+                      <img src={Logo} alt='' />
+                      <div
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'flex-start',
+                          gap: '0',
+                        }}
+                      >
+                        <p className='walletName'>
+                          {data?.name?.length > 10
+                            ? `${data.name.substring(0, 7)}...`
+                            : data?.name}{' '}
+                          <span style={{ color: '#00aeef', fontSize: 15 }}>
+                            {data?.default ? ' (Default)' : ''}
+                          </span>
+                        </p>
+                        <p className='walletAdd'>
+                          {data.address.substring(0, 7)}.....
+                          {data.address.substring(
+                            data.address.length - 7,
+                            data.address.length
+                          )}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                  <span
-                    className="infoICon"
-                    onClick={async (e) => {
-                      e.preventDefault();
-                      setDrawer(true);
-                      setSelectedAccount(data);
-                      setName(data?.name);
-                    }}
-                  >{state?.from !== "myWallet" && (
-                    <img
-                    
-                      src={WalletIBtn}
-                      alt="I"
-                    />
-                  )}</span>
-                </li>
-              </ul>
-            </div>
-          ))}
-
+                    <span
+                      className='infoICon'
+                      onClick={async (e) => {
+                        e.preventDefault();
+                        setDrawer(true);
+                        setSelectedAccount(data);
+                        setName(data?.name);
+                      }}
+                    >
+                      {state?.from !== 'myWallet' && (
+                        <img src={WalletIBtn} alt='I' />
+                      )}
+                    </span>
+                  </li>
+                </ul>
+              </div>
+            ))}
         </div>
-        <div className="bottomBtn">
+        <div className='bottomBtn'>
           <ButtonComp
             onClick={async () => {
               setIsModalOpen3(true);
+              // sendDataToInpage();
             }}
-            text={"Add Wallet"}
-            maxWidth={"352px"}
+            text={'Add Wallet'}
+            maxWidth={'352px'}
           />
         </div>
       </div>
 
       <Drawer
-        title="Wallet"
-        placement="bottom"
+        title='Wallet'
+        placement='bottom'
         onClose={onClose}
         open={drawer}
         closeIcon={
-          theme == "darkTheme" ? (
+          theme == 'darkTheme' ? (
             <img src={darkclose} />
           ) : (
             <img src={ModalCloseIcon} />
@@ -363,14 +377,14 @@ function ManageWallet() {
       >
         <InputFieldOnly
           placeholder={selectedAccount?.name}
-          label="Wallet Name"
+          label='Wallet Name'
           checkForSymbols={true}
           value={name}
           placeholderBaseColor={true}
           getData={(name) => {
             if (name.length <= 25) {
               if (/^\s/.test(name)) {
-                setName("");
+                setName('');
               } else {
                 setName(name);
               }
@@ -379,68 +393,68 @@ function ManageWallet() {
             }
           }}
         />
-        <div className="textInfoBaseColor">
+        <div className='textInfoBaseColor'>
           Max Limit: {name ? name.length : 0}/25
         </div>
         <div className={`flexedContent`}>
-          <div className="listItems">
+          <div className='listItems'>
             <ul>
               <li
-                className="currencyClick"
+                className='currencyClick'
                 onClick={async () => {
                   setIsModalOpen4(true);
                 }}
-              // onClick={async () => {
-              //   isModalOpen4(true);
-              // }}
+                // onClick={async () => {
+                //   isModalOpen4(true);
+                // }}
               >
-                <div style={{ display: "flex", alignItems: "center" }}>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
                   <img
                     style={{
-                      width: "20px",
-                      height: "20px",
+                      width: '20px',
+                      height: '20px',
                     }}
                     src={BackupMnemonics}
-                    alt=""
+                    alt=''
                   />
                   <div
                     style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "flex-start",
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'flex-start',
                     }}
                   >
                     <p>Backup Mnemonics</p>
                   </div>
                 </div>
-                <img src={DarkArrowRightIcon} alt="Arrow" />
+                <img src={DarkArrowRightIcon} alt='Arrow' />
               </li>
               <li
-                className="currencyClick"
+                className='currencyClick'
                 onClick={async () => {
                   setIsModalOpen2(true);
                 }}
               >
-                <div style={{ display: "flex", alignItems: "center" }}>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
                   <img
                     style={{
-                      width: "20px",
-                      height: "20px",
+                      width: '20px',
+                      height: '20px',
                     }}
                     src={Privatekey}
-                    alt=""
+                    alt=''
                   />
                   <div
                     style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "flex-start",
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'flex-start',
                     }}
                   >
                     <p>Backup Private key</p>
                   </div>
                 </div>
-                <img src={DarkArrowRightIcon} alt="Arrow" />
+                <img src={DarkArrowRightIcon} alt='Arrow' />
               </li>
             </ul>
           </div>
@@ -449,29 +463,29 @@ function ManageWallet() {
             onClick={async () => {
               if (!name) {
                 return messageApi.error(
-                  "Please enter a valid name to proceed."
+                  'Please enter a valid name to proceed.'
                 );
               }
 
               if (name.trim().length === 0) {
                 return messageApi.error(
-                  "Name should have a minimum of 3 characters."
+                  'Name should have a minimum of 3 characters.'
                 );
               }
 
               if (name.length < 3) {
                 return messageApi.error(
-                  "Name should have a minimum of 3 characters."
+                  'Name should have a minimum of 3 characters.'
                 );
               }
 
               if (name.length > 25) {
                 return messageApi.error(
-                  "Name should not have more than 25 characters."
+                  'Name should not have more than 25 characters.'
                 );
               }
 
-              const { accounts } = await chrome.storage.session.get("accounts");
+              const { accounts } = await chrome.storage.session.get('accounts');
 
               if (accounts) {
                 const checkIfExists = accounts.find(
@@ -480,40 +494,40 @@ function ManageWallet() {
 
                 if (checkIfExists) {
                   return messageApi.error(
-                    "This wallet name already exists. Use a different name."
+                    'This wallet name already exists. Use a different name.'
                   );
                 }
-              } 
+              }
               const updating = await WalletHelper.updateWalletName(
                 name.trim(),
-                
+
                 state?.id ? state.id : selectedAccount.id
               );
 
               if (!updating) {
-                return messageApi.error("Unable to update name at the moment.");
+                return messageApi.error('Unable to update name at the moment.');
               }
 
               setDrawer(false);
 
               init();
             }}
-            text={"Update Wallet"}
-            maxWidth={"352px"}
-            marginBottom={"10px"}
+            text={'Update Wallet'}
+            maxWidth={'352px'}
+            marginBottom={'10px'}
           />
 
           <ButtonComp
             deletebordered
             onClick={async () => {
               if (account.id === selectedAccount.id) {
-                return messageApi.error("Unable to delete default wallet");
+                return messageApi.error('Unable to delete default wallet');
               }
 
               setDeleteModal(true);
             }}
-            text={"Delete Wallet"}
-            maxWidth={"100%"}
+            text={'Delete Wallet'}
+            maxWidth={'100%'}
           />
           {/* <ButtonComp
             onClick={async () => {
@@ -535,12 +549,12 @@ function ManageWallet() {
       </Drawer>
 
       <Drawer
-        title="Add Account"
-        placement="bottom"
+        title='Add Account'
+        placement='bottom'
         onClose={handleCancel3}
         open={isModalOpen3}
         closeIcon={
-          theme == "darkTheme" ? (
+          theme == 'darkTheme' ? (
             <img src={darkclose} />
           ) : (
             <img src={ModalCloseIcon} />
@@ -548,117 +562,117 @@ function ManageWallet() {
         }
       >
         <div className={`flexedContent`}>
-          <div className="">
+          <div className=''>
             <ul>
               <li
                 style={{
-                  backgroundColor: "#040205",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  cursor: "pointer",
+                  backgroundColor: '#040205',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  cursor: 'pointer',
                 }}
-                className="currency_click listItems "
+                className='currency_click listItems '
                 onClick={async () => {
-                  navigate("/add-new-wallet", {
-                    state: { type: "create", addNew: true },
+                  navigate('/add-new-wallet', {
+                    state: { type: 'create', addNew: true },
                   });
                 }}
               >
                 <div
-                  style={{ display: "flex", alignItems: "center", gap: "10px" }}
+                  style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
                 >
-                  <img src={Logo} alt="" />
+                  <img src={Logo} alt='' />
                   <div
                     style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "flex-start",
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'flex-start',
                     }}
                   >
-                    <p style={{ color: "#fff" }}>New Account</p>
+                    <p style={{ color: '#fff' }}>New Account</p>
                   </div>
                 </div>
                 <p>
                   <svg
-                    viewBox="0 0 24 24"
+                    viewBox='0 0 24 24'
                     height={20}
                     width={20}
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
+                    fill='none'
+                    xmlns='http://www.w3.org/2000/svg'
                   >
-                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                    <g id='SVGRepo_bgCarrier' stroke-width='0'></g>
                     <g
-                      id="SVGRepo_tracerCarrier"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
+                      id='SVGRepo_tracerCarrier'
+                      stroke-linecap='round'
+                      stroke-linejoin='round'
                     ></g>
-                    <g id="SVGRepo_iconCarrier">
-                      {" "}
+                    <g id='SVGRepo_iconCarrier'>
+                      {' '}
                       <path
-                        d="M10 7L15 12L10 17"
-                        stroke="#fff"
-                        stroke-width="1.5"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      ></path>{" "}
+                        d='M10 7L15 12L10 17'
+                        stroke='#fff'
+                        stroke-width='1.5'
+                        stroke-linecap='round'
+                        stroke-linejoin='round'
+                      ></path>{' '}
                     </g>
                   </svg>
                 </p>
               </li>
               <li
                 style={{
-                  backgroundColor: "#040205",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  cursor: "pointer",
+                  backgroundColor: '#040205',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  cursor: 'pointer',
                 }}
-                className="currency_click listItems"
+                className='currency_click listItems'
                 onClick={async () => {
                   // navigate("/import-wallet-name");
-                  navigate("/add-new-wallet", {
-                    state: { type: "import", addNewImport: true },
+                  navigate('/add-new-wallet', {
+                    state: { type: 'import', addNewImport: true },
                   });
                 }}
               >
                 <div
-                  style={{ display: "flex", alignItems: "center", gap: "10px" }}
+                  style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
                 >
-                  <img src={Logo} alt="" />
+                  <img src={Logo} alt='' />
                   <div
                     style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "flex-start",
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'flex-start',
                     }}
                   >
-                    <p style={{ color: "#fff" }}>Existing Account</p>
+                    <p style={{ color: '#fff' }}>Existing Account</p>
                   </div>
                 </div>
                 <p>
                   <svg
-                    viewBox="0 0 24 24"
+                    viewBox='0 0 24 24'
                     height={20}
                     width={20}
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
+                    fill='none'
+                    xmlns='http://www.w3.org/2000/svg'
                   >
-                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                    <g id='SVGRepo_bgCarrier' stroke-width='0'></g>
                     <g
-                      id="SVGRepo_tracerCarrier"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
+                      id='SVGRepo_tracerCarrier'
+                      stroke-linecap='round'
+                      stroke-linejoin='round'
                     ></g>
-                    <g id="SVGRepo_iconCarrier">
-                      {" "}
+                    <g id='SVGRepo_iconCarrier'>
+                      {' '}
                       <path
-                        d="M10 7L15 12L10 17"
-                        stroke="#fff"
-                        stroke-width="1.5"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      ></path>{" "}
+                        d='M10 7L15 12L10 17'
+                        stroke='#fff'
+                        stroke-width='1.5'
+                        stroke-linecap='round'
+                        stroke-linejoin='round'
+                      ></path>{' '}
                     </g>
                   </svg>
                 </p>
@@ -669,20 +683,20 @@ function ManageWallet() {
       </Drawer>
 
       <ModalCustom
-        title={"Delete Address"}
+        title={'Delete Address'}
         isModalOpen={deleteModal}
-        customClass="customClassModal"
+        customClass='customClassModal'
         handleCancel={() => {
           setDeleteModal(false);
         }}
       >
-        <div className="viewphrases">
-          <div className="viewphrases__iInner">
+        <div className='viewphrases'>
+          <div className='viewphrases__iInner'>
             <p
               style={{
-                fontSize: "20px",
+                fontSize: '20px',
 
-                color: "white",
+                color: 'white',
               }}
             >
               Are you sure you want to delete this wallet?
@@ -691,15 +705,15 @@ function ManageWallet() {
 
           <div
             style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              marginTop: "30px",
-              gap: "20px",
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginTop: '30px',
+              gap: '20px',
             }}
           >
             <ButtonComp
-              maxWidth="100%"
+              maxWidth='100%'
               onClick={async () => {
                 try {
                   store.dispatch(setLoading(true));
@@ -719,15 +733,15 @@ function ManageWallet() {
                   store.dispatch(setLoading(false));
                 }
               }}
-              text="Yes"
+              text='Yes'
             />
-            <div className="cancelBtn">
+            <div className='cancelBtn'>
               <ButtonComp
-                maxWidth="100%"
+                maxWidth='100%'
                 onClick={() => {
                   setDeleteModal(false);
                 }}
-                text="No"
+                text='No'
               />
             </div>
           </div>
@@ -735,15 +749,15 @@ function ManageWallet() {
       </ModalCustom>
 
       <ModalCustom
-        title={"Show Secret Phrase"}
+        title={'Show Secret Phrase'}
         handleCancel={handleCancel1}
         isModalOpen={isModalOpen1}
         handleOk={handleOk1}
-        customClass="customClassModal"
+        customClass='customClassModal'
       >
-        <div className={"viewphrases"}>
+        <div className={'viewphrases'}>
           <InputFieldSimple
-            placeholder="Password"
+            placeholder='Password'
             getData={setPassword}
             value={password}
             customFunction={async () => {
@@ -754,17 +768,17 @@ function ManageWallet() {
                 selectedAccount.coinFamilyAndAddress[1]
               );
               if (!response) {
-                return messageApi.error("Please enter a valid password.");
+                return messageApi.error('Please enter a valid password.');
               }
-              navigate("/showSecretPhrase", {
+              navigate('/showSecretPhrase', {
                 state: {
                   mnemonics: response,
-                  backTo: "/manage-wallet",
+                  backTo: '/manage-wallet',
                 },
               });
             }}
           />
-          <div className={"viewphrases__iInner"}>
+          <div className={'viewphrases__iInner'}>
             <img src={warning} />
             <div>
               <p>Do Not share your secret Phrase!</p>
@@ -772,8 +786,8 @@ function ManageWallet() {
             </div>
           </div>
           <ButtonComp
-            text={"Proceed"}
-            maxWidth={"100%"}
+            text={'Proceed'}
+            maxWidth={'100%'}
             onClick={async () => {
               await chrome.storage.session.set({
                 password,
@@ -782,12 +796,12 @@ function ManageWallet() {
                 selectedAccount.coinFamilyAndAddress[1]
               );
               if (!response) {
-                return messageApi.error("Please enter a valid password.");
+                return messageApi.error('Please enter a valid password.');
               }
-              navigate("/showSecretPhrase", {
+              navigate('/showSecretPhrase', {
                 state: {
                   mnemonics: response,
-                  backTo: "/manage-wallet",
+                  backTo: '/manage-wallet',
                 },
               });
             }}
@@ -796,32 +810,32 @@ function ManageWallet() {
       </ModalCustom>
 
       <ModalCustom
-        title={"Backup Private key"}
+        title={'Backup Private key'}
         handleCancel={handleCancel2}
         isModalOpen={isModalOpen2}
         handleOk={handleOk2}
-        customClass="customClassModal"
+        customClass='customClassModal'
       >
-        <div className={"viewphrases"}>
+        <div className={'viewphrases'}>
           <InputFieldSimple
-            placeholder="Password"
+            placeholder='Password'
             getData={setPassword}
             value={password}
             customFunction={async () => {
               const res = await WalletHelper.verifyPassword(password);
               if (!res) {
-                return messageApi.error("Invalid Password");
+                return messageApi.error('Invalid Password');
               }
 
-              navigate("/show-private-key", {
+              navigate('/show-private-key', {
                 state: {
                   account: selectedAccount,
-                  backTo: "/manage-wallet",
+                  backTo: '/manage-wallet',
                 },
               });
             }}
           />
-          <div className={"viewphrases__iInner"}>
+          <div className={'viewphrases__iInner'}>
             <img src={warning} />
             <div>
               <p>Do Not share your private key!</p>
@@ -829,18 +843,18 @@ function ManageWallet() {
             </div>
           </div>
           <ButtonComp
-            text={"Proceed"}
-            maxWidth={"100%"}
+            text={'Proceed'}
+            maxWidth={'100%'}
             onClick={async () => {
               const res = await WalletHelper.verifyPassword(password);
               if (!res) {
-                return messageApi.error("Invalid Password");
+                return messageApi.error('Invalid Password');
               }
 
-              navigate("/show-private-key", {
+              navigate('/show-private-key', {
                 state: {
                   account: selectedAccount,
-                  backTo: "/manage-wallet",
+                  backTo: '/manage-wallet',
                 },
               });
             }}
@@ -848,12 +862,12 @@ function ManageWallet() {
         </div>
       </ModalCustom>
       <Drawer
-        title="This secret phrase is the master key to your wallet"
-        placement="bottom"
+        title='This secret phrase is the master key to your wallet'
+        placement='bottom'
         onClose={handleCancel4}
         open={isModalOpen4}
         closeIcon={
-          theme == "darkTheme" ? (
+          theme == 'darkTheme' ? (
             <img src={darkclose} />
           ) : (
             <img src={ModalCloseIcon} />
@@ -861,7 +875,7 @@ function ManageWallet() {
         }
       >
         <div className={`flexedContent`}>
-          <div className="secretMasterKey">
+          <div className='secretMasterKey'>
             <p>
               Tap on all checkboxes to confirm you understand the importance of
               your secret phrase
@@ -882,23 +896,23 @@ function ManageWallet() {
             >
               <p>Qubetics Wallet support will NEVER reach out to ask for it.</p>
             </Checkbox>
-            <div className="secretMasterKey_btns">
-              <div className="cancelBtn">
+            <div className='secretMasterKey_btns'>
+              <div className='cancelBtn'>
                 <ButtonComp
-                  maxWidth="100%"
+                  maxWidth='100%'
                   onClick={() => {
                     handleCancel4();
                   }}
-                  text="Cancel"
+                  text='Cancel'
                 />
               </div>
               <ButtonComp
-                maxWidth="100%"
+                maxWidth='100%'
                 onClick={async () => {
                   setIsModalOpen1(true);
                 }}
                 disabled={!ischecked1 || !ischecked2}
-                text="Continue"
+                text='Continue'
               />
             </div>
           </div>

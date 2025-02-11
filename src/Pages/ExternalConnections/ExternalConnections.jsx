@@ -26,6 +26,7 @@ import { SecurityHelper } from '../../helpers/security.helper';
 import editValidator from '../../helpers/editValidator';
 import delagteAndBondMore from '../../helpers/delegatorBondMoreFunds';
 import { redelegate } from '../../helpers/redelegation';
+import TruncatedAddress from './TruncatedAddress';
 
 function getFlooredFixed(v, d) {
   return (Math.floor(v * Math.pow(10, d)) / Math.pow(10, d)).toFixed(d);
@@ -419,7 +420,7 @@ export const ExternalConnection = () => {
       handleResponse(true);
     }
   };
-  console.log('method:::', method);
+  // console.log('method:::', method);
   useEffect(() => {
     init();
   }, [account]);
@@ -1341,7 +1342,8 @@ export const ExternalConnection = () => {
                       Event
                     </div>
                     <div className={'confirmCurrency__keyValues__value'}>
-                      {data.name}
+                      {/* {data.name} */}
+                      bondMore
                     </div>
                   </div>
                   <div className={'confirmCurrency__keyValues'}>
@@ -1453,7 +1455,8 @@ export const ExternalConnection = () => {
                       Event
                     </div>
                     <div className={'confirmCurrency__keyValues__value'}>
-                      {data.name}
+                      {/* {data.name} */}
+                      bondMore
                     </div>
                   </div>
                   <div className={'confirmCurrency__keyValues'}>
@@ -1461,7 +1464,8 @@ export const ExternalConnection = () => {
                       Address
                     </div>
                     <div className={'confirmCurrency__keyValues__value'}>
-                      {data.userAddress}
+                      {/* {data.userAddress} */}
+                      <TruncatedAddress address={data.userAddress}/>
                     </div>
                   </div>
 
@@ -1573,7 +1577,8 @@ export const ExternalConnection = () => {
                       Address
                     </div>
                     <div className={'confirmCurrency__keyValues__value'}>
-                      {data.selectedAccount}
+                      {/* {data.selectedAccount} */}
+                      <TruncatedAddress address={data.selectedAccount}/>
                     </div>
                   </div>
 
@@ -1677,7 +1682,8 @@ export const ExternalConnection = () => {
                       Event
                     </div>
                     <div className={'confirmCurrency__keyValues__value'}>
-                      {data.name}
+                      {/* {data.name} */}
+                      unBond
                     </div>
                   </div>
                   <div className={'confirmCurrency__keyValues'}>
@@ -1685,7 +1691,8 @@ export const ExternalConnection = () => {
                       Address
                     </div>
                     <div className={'confirmCurrency__keyValues__value'}>
-                      {data.userAddress}
+                      {/* {data.userAddress} */}
+                      <TruncatedAddress address={data.userAddress}/>
                     </div>
                   </div>
 
@@ -1798,7 +1805,8 @@ export const ExternalConnection = () => {
                       Address
                     </div>
                     <div className={'confirmCurrency__keyValues__value'}>
-                      {data.userAddress}
+                      {/* {data.userAddress} */}
+                      <TruncatedAddress address={data.userAddress}/>
                     </div>
                   </div>
 
@@ -1910,7 +1918,8 @@ export const ExternalConnection = () => {
                       Address
                     </div>
                     <div className={'confirmCurrency__keyValues__value'}>
-                      {data.address}
+                      {/* {data.address} */}
+                      <TruncatedAddress address={data.address}/>
                     </div>
                   </div>
                   <div className={'swapDetails__border'}></div>
@@ -2005,7 +2014,8 @@ export const ExternalConnection = () => {
                       Event
                     </div>
                     <div className={'confirmCurrency__keyValues__value'}>
-                      {data.name}
+                      {/* {data.name} */}
+                      stopDeactivate
                     </div>
                   </div>
                   <div className={'confirmCurrency__keyValues'}>
@@ -2013,7 +2023,8 @@ export const ExternalConnection = () => {
                       Address
                     </div>
                     <div className={'confirmCurrency__keyValues__value'}>
-                      {data.address}
+                      {/* {data.address} */}
+                      <TruncatedAddress address={data.address}/>
                     </div>
                   </div>
                   <div className={'swapDetails__border'}></div>

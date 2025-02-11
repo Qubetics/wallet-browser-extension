@@ -32,11 +32,18 @@ const setupPageStreams = () => {
         chrome.runtime.sendMessage(
           { type: 'JSON-RPC', payload: { ...data, method: data.name } },
           (response) => {
-            console.log('🚀 ~ file: contentscript.js:50 ~ pageStream.on ~ response', response);
+            console.log(
+              '🚀 ~ file: contentscript.js:50 ~ pageStream.on ~ response',
+              response
+            );
             if (chrome.runtime.lastError) {
               reject(chrome.runtime.lastError);
             } else if (response && response.type === 'JSON-RPC') {
-              resolve(response.payload);    console.log('🚀 ~ file: contentscript.js:50 ~ pageStream.on ~ data:', data);
+              resolve(response.payload);
+              console.log(
+                '🚀 ~ file: contentscript.js:50 ~ pageStream.on ~ data:',
+                data
+              );
             } else {
               reject(new Error('Invalid response received'));
             }
@@ -56,13 +63,20 @@ const setupPageStreams = () => {
       }
     }
   });
+  // content.js
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    if (message.method === 'switchChain') {
-      window.postMessage({ method: 'switchChain', payload: message.payload }, '*');
-      sendResponse({ success: true });
+    console.log('Message: ', message);
+    window.postMessage({ type: message.method, data: message }, '*');
+  });
+
+  // Listen for messages from inpage.js
+  window.addEventListener('message', (event) => {
+    if (event.source !== window || !event.data.type) return;
+
+    if (event.data.type === 'FROM_INPAGE') {
+      console.log('Received from inpage.js:', event.data.data);
     }
   });
-  
 };
 
 const initStreams = () => {

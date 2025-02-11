@@ -73,6 +73,26 @@ const initializeStreams = () => {
    
     delete callbackMapping[id];
   };
+
+  // only support single cb for particular event
+  // implement further for more advance handling
+  class Events {
+    events = {};
+
+    on = (event, cb) => {
+      this.events[event] = cb;
+    };
+
+    emit = (event, data) => {
+      const cb = this.events[event];
+      if(cb) cb(data)
+    }
+
+    remove = (event) => {
+      delete this.events[event];
+    }
+  }
+
   const sendRequest = (method, data, callback) => {
     const id = window.crypto.randomUUID();
     callbackMapping[id] = callback;
@@ -85,9 +105,12 @@ const initializeStreams = () => {
     });
   };
 
+  const eventEmitter = new Events()
+
   window.qubetics = {
     sendRequest,
     sendResponse,
+    events: eventEmitter
   };
   window.addEventListener('message', (message) => {
     if (message.data) {
@@ -154,6 +177,15 @@ const initializeStreams = () => {
       window.trustwallet.ethereum.sendResponse(data.id, data.result);
     }
   });
+
+  window.addEventListener("message", (event) => {
+    if (event.source !== window || !event.data.type) return;
+
+    if (event.data.type === "switchAccount") {
+        console.log("Received from content.js:", event.data.data);
+        eventEmitter.emit(event.data.type, event.data.data)
+    }
+});
 };
 
 const start = async () => {

@@ -863,6 +863,16 @@ class Background {
   handleAllEthereumEvents = async () => {
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       console.log('MESSG::', message, 'SENDER::', sender);
+      
+      if (message.method === 'switchAccount') {
+        // Process the request and prepare the data to send to content script
+        chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
+          if(tabs.length) {
+            const id = tabs[0].id;
+            chrome.tabs.sendMessage(id, message)
+          }
+        })
+      }
       if (sender.tab) {
         if (message.type === 'JSON-RPC') {
           engine.handle(message.payload, (err, result) => {
