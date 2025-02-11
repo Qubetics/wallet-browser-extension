@@ -276,7 +276,7 @@ export class UniswapHelper {
             to: "0x1111111254eeb25477b68fb85ed929f73a960582",
             amount: amount,
             gas_estimate: +increasedGasLimitDecimal,
-            gas_price: gasPrice?.fast,
+            gas_price: gasPrice?.fast* Math.pow(10, 9),
             //estimate:gasPrice?.estimate
             // fast: gasPrice?.fast,
             // propose: gasPrice?.propose,

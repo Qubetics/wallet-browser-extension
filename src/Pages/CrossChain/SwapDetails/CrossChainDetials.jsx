@@ -64,19 +64,19 @@ function CrossChainDetails() {
     },
   } = useLocation();
   console.log("TOKEN !!! 1", token1);
-console.log("PREVVVVVVVVVVVVVV ", {
-  token1,
-  token2,
-  amount,
-  amount2,
-  tokenChain,
-  networkFee,
-  walletAddress,
-  token1Price,
-  parentCoin,
-  rpc,
-  coinSymbol,
-});
+  console.log("PREVVVVVVVVVVVVVV ", {
+    token1,
+    token2,
+    amount,
+    amount2,
+    tokenChain,
+    networkFee,
+    walletAddress,
+    token1Price,
+    parentCoin,
+    rpc,
+    coinSymbol,
+  });
 
   const [isModalOpen1, setIsModalOpen1] = useState(false);
 
@@ -138,7 +138,7 @@ console.log("PREVVVVVVVVVVVVVV ", {
     );
 
     console.log("AAAAAAAAAAA datadata ", data);
-    
+
     if (!data) {
       setSwapModal(false);
       return messageApi.error(
@@ -198,11 +198,11 @@ console.log("PREVVVVVVVVVVVVVV ", {
           </div>
           <div className="swapDetails__valueText">
             <p
-              style={{ textAlign: "center" }}
+              style={{ textAlign: "center", paddingLeft: "12px" }}
               className="swapDetails__valueText__text"
             >
               {/* <span>To</span> */}
-              <p style={{margin:0}}>From</p>
+              <p style={{ margin: 0 }}>From</p>
               <br />
               {addCommasToNumber(getFlooredFixed(parseFloat(amount), 6))}{" "}
               {token1.symbol}
@@ -211,7 +211,7 @@ console.log("PREVVVVVVVVVVVVVV ", {
               style={{ textAlign: "center" }}
               className="swapDetails__valueText__text"
             >
-              <p style={{margin:0}}>To</p>
+              <p style={{ margin: 0 }}>To</p>
               {/* <span>From</span> */}
               <br />
               {addCommasToNumber(getFlooredFixed(parseFloat(amount2), 4))}{" "}
@@ -224,9 +224,9 @@ console.log("PREVVVVVVVVVVVVVV ", {
             <p className="swapDetails__address__val">
               <sapn>{`${token1.address.substring(0, 8)}.....
           ${token1.address.substring(
-            token1.address.length - 8,
-            token1.address.length
-          )}`}</sapn>
+                token1.address.length - 8,
+                token1.address.length
+              )}`}</sapn>
             </p>
           </div>
           <div className="swapDetails__address">
@@ -236,9 +236,9 @@ console.log("PREVVVVVVVVVVVVVV ", {
                 {" "}
                 {`${token2.address.substring(0, 8)}.....
           ${token2.address.substring(
-            token2.address.length - 8,
-            token2.address.length
-          )}`}
+                  token2.address.length - 8,
+                  token2.address.length
+                )}`}
               </sapn>
             </p>
           </div>
@@ -252,7 +252,7 @@ console.log("PREVVVVVVVVVVVVVV ", {
               <p className="swapDetails__keyValuesText__key">Network Fee</p>
               <p className="swapDetails__keyValuesText__val">
                 {console.log()}
-                {addCommasToNumber(getFlooredFixed(networkFee, 6))}{" "}
+                {addCommasToNumber(getFlooredFixed(networkFee, 10))}{" "}
                 {tokenChain.currencySymbol} / ({currency.symbol}{" "}
                 {addCommasToNumber(
                   getFlooredFixed(parentCoin?.value * networkFee, 2)

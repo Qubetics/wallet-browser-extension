@@ -124,6 +124,8 @@ export class CrossChainHelper {
         }
       );
 
+      console.log("resssssssssssssssssssss ", response);
+      
       const orderData = response.data.data.data;
 
       let hash = "";
@@ -239,6 +241,11 @@ export class CrossChainHelper {
               transaction
             );
 
+            console.log("orderDataorderDataorderData ", orderData);
+            console.log("depositAmount :::: ", depositAmount);
+            console.log("btcTosatoshi::::: ", btcTosatoshi);
+            
+            
             transaction.to(
               orderData?.platformAddr,
               parseInt(Math.round(depositAmount * btcTosatoshi).toString())
@@ -248,17 +255,17 @@ export class CrossChainHelper {
             //   address
             // );
 
-            // console.log(
-            //   "🚀 ~ file: SendCoins.jsx:637 ~ transaction:",
-            //   transaction
-            // );
+            console.log(
+              "🚀 ~ file: SendCoins.jsx:637 ~ transaction:",
+              transaction
+            );
             // console.log(
             //   "🚀 ~ file: SendCoins.jsx:636 ~ transaction:",
             //   transaction
             // );
             let satoshis = 0;
             for (var i = 0; i < inputs.length; i++) {
-              satoshis = inputs[i].satoshis + satoshis;
+              satoshis = inputs[i]?.satoshis + satoshis;
             }
             if (
               satoshis -
@@ -270,6 +277,8 @@ export class CrossChainHelper {
             ) {
               transaction.change(walletAddress);
             }
+            console.log("walletAddresswalletAddress ",walletAddress);
+            
             if (
               satoshis -
                 (fee +
@@ -289,13 +298,16 @@ export class CrossChainHelper {
                       )))
               );
             }
+
+            console.log("transaction==========> ",transaction);
+            
             const btcPrivateKey = await WalletHelper.getBitcoinPrivateKey();
 
             // console.log(
             //   "🚀 ~ file: SendCoins.jsx:656 ~ btcPrivateKey:",
             //   btcPrivateKey
             // );
-
+            console.log("btcPrivateKey==========> ",btcPrivateKey);
             if (!btcPrivateKey) {
               // store.dispatch(setLoading(false));
               return console.error(

@@ -157,7 +157,7 @@ function HistryList(props) {
           </div>
         </div>
         <div className="Currency">
-          <p className="curncyStatus">{valueCurrency}</p>
+          <p className="curncyStatus">{sendRecieve !='Smart Contract' && valueCurrency}</p>
           <p className="withStatus">{date}</p>
         </div>
       </div>

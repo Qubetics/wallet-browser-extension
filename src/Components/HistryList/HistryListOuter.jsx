@@ -132,7 +132,7 @@ function HistoryListOuter(props) {
                  <span>Withdraw</span>
                  )}
                 {' '}
-                {valueCurrency}
+                {type !='dapp' && valueCurrency}
               </p>
               <div className="histryStatus">
                 <p>{date}</p>

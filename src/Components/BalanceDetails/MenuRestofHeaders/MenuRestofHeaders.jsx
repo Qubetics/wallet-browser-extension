@@ -47,6 +47,7 @@ function MenuRestofHeaders({
   settingTo,
   FilterIcon,
   chartIcon,
+  pairExist,
   addIcon,
   showFun,
   mnemonics,
@@ -372,7 +373,7 @@ function MenuRestofHeaders({
             )}
           </Link>
         )}
-        {chartIcon && (
+        {chartIcon && pairExist && (
           <span style={{ cursor: "pointer" }} to={void 0} onClick={chartIcon}>
             {theme == "darkTheme" ? (
               <img src={DarkChartIcon} />

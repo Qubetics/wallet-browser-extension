@@ -201,8 +201,6 @@ function CurrencyDetails() {
           </span>
         }
         chartIcon={() => {
-
-          // console.log("coincoincoin ", coin, " itemsitemsitemsitems ", rest);
           if (coin?.coin?.graph_pair) {
             let pay = {
               coin_id: coin?.coin?.coin_id,
@@ -220,6 +218,7 @@ function CurrencyDetails() {
         // stared={() => {
         //   navigate("/watch-list-tokens");
         // }}
+        pairExist = {coin?.coin?.graph_pair}
         stared={async () => {
           try {
             await server.post(
@@ -263,7 +262,7 @@ function CurrencyDetails() {
               >
 
                 {coin?.coin?.token_address !== null ? token_type(coin?.coin?.coin_family) : 'Coin'}
-                {/* {coin.coin.coin_family === 1 ? "BEP20" : coin.coin.coin_family === 2 ? "ERC20" : coin.coin.coin_family === 4 ? "ERC20" : coin.coin.coin_family === 5 ? "SPL" : coin.coin.coin_family === 6 ? "TRC20" : ""} */}
+                {/* {coin.coin.coin_family === 1 ? "BEP20" : currDetails currencyCardcoin.coin.coin_family === 2 ? "ERC20" : coin.coin.coin_family === 4 ? "ERC20" : coin.coin.coin_family === 5 ? "SPL" : coin.coin.coin_family === 6 ? "TRC20" : ""} */}
               </p>
               <p
                 className="currDetails__card__text"

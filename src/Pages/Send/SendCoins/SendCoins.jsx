@@ -683,7 +683,7 @@ function SendCoins() {
                   label=""
                   value={parseFloat(
                     (myGasPrice?.estimate * myGasPrice?.fast) / 10 ** 9
-                  )?.toFixed(5)}
+                  )?.toFixed(coin?.coin?.coin_family == 7 ? 15 : 5)}
                   readonly={true}
                   placeholderBaseColor={true}
                 />
@@ -1131,9 +1131,9 @@ function SendCoins() {
                           Math.round(amount * btcTosatoshi).toString()
                         )) >
                       546
-                    ) { 
+                    ) {
                       transaction.fee(fee);
-                    } else { 
+                    } else {
                       transaction.fee(
                         fee +
                         (satoshis -
@@ -1141,7 +1141,7 @@ function SendCoins() {
                             parseInt(
                               Math.round(amount * btcTosatoshi).toString()
                             )))
-                      ); 
+                      );
                     }
                     const btcPrivateKey =
                       await WalletHelper.getBitcoinPrivateKey();
@@ -1181,9 +1181,14 @@ function SendCoins() {
                     });
                   }
                 } catch (error) {
-                  console.log(error);
+                  console.log("jhantttttt", error);
                   store.dispatch(setLoading(false));
-                  return messageApi.error(error.message);
+                  if (error.message.includes("Dust amount detected in one output")) {
+                    // Handle the specific error
+                    return messageApi.error("Transaction amount is below the dust threshold. Please enter a higher amount.");
+                  } else {
+                    return messageApi.error(error.message);
+                  }
                 }
               } else if (!chain.isEVM && chain.currencyName === "ADA") {
                 try {

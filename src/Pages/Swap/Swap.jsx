@@ -2014,7 +2014,6 @@ function Swap() {
                               }
                             }
                             setAount(amount);
-
                             handleChangeForInput1(amount);
                           }}
                           value={amount}
@@ -2293,10 +2292,12 @@ function Swap() {
                       }
                       onClick={() => {
                         if (token2?.iHave) {
+                          setAmount2(0);
+                          setAount(0);
+
                           setToken1(token2);
                           setToken2(token1);
-                          setAmount2(null);
-                          setAount(null);
+                           
                           setPercent(0);
                           setInfoData([]);
                         } else {
