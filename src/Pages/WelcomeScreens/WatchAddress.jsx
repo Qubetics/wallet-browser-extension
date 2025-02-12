@@ -154,7 +154,7 @@ function WatchAddress() {
                     //   );
                     // }
 
-                    const nameRegex = /^[A-Za-z]+$/;
+                    const nameRegex = /^[A-Za-z\s]+$/;
                     if (!nameRegex.test(name)) {
                       return messageApi.error(
                         "Name should contain only alphabetic characters."
