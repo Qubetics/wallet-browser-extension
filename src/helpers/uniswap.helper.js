@@ -172,7 +172,7 @@ export class UniswapHelper {
           to: spenderAddress,
           amount: 0,
           gas_estimate: gasLimitRequired.toNumber(),
-          gas_price: gasPrice?.fast,
+          gas_price: gasPrice?.fast * Math.pow(10, 9),
           tx_type: "approve",
         },
         {

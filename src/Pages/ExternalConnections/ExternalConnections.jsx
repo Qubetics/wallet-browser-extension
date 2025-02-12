@@ -65,6 +65,9 @@ export const ExternalConnection = () => {
             ? JSON.parse(decodeURIComponent(queryParams.get('data')))
             : null;
           setData(data);
+          console.log("MMMMMMMMMMMMMMMmethod ", method);
+          console.log("XXXXXXXXXXdataXXXXXXXXX ", Web3.utils.toDecimal(data.chainId), data);
+
 
           if (method === 'requestAccounts' && account) {
             setMethod('requestAccounts');
@@ -136,13 +139,21 @@ export const ExternalConnection = () => {
             store.dispatch(setLoading(false));
           } else if (method === 'switchEthereumChain' && account) {
             const { chains } = await chrome.storage.local.get('chains');
+            console.log("CHAINNNNNNNNNNNNN ", chains);
+
             const switchChain = chains.find(
               (el) => el.chainId == Web3.utils.toDecimal(data.chainId)
             );
+
             setFromChain(myDefaultChain);
-            setToChain(switchChain);
+            console.log("switchChainswitchChainswitchChain ", switchChain);
+
+            // setToChain(switchChain);
+            // await chrome.storage.local.set({
+            //   chains: switchChain,
+            // });
             setMethod('switchEthereumChain');
-            // console.log("DATA SETTING ", data);
+            console.log("DATA SETTING ", data);
             setData(data);
           }
         } catch (error) {
@@ -157,7 +168,7 @@ export const ExternalConnection = () => {
     console.log('🚀 ~ file: ExternalConnections.jsx:105 ~ handleResponse ~ result', result);
     chrome.runtime.sendMessage({ method, result }, (response) => {
       chrome.windows.getCurrent(function (window) {
-        chrome.windows.remove(window.id);
+        // chrome.windows.remove(window.id);
       });
     });
   };
@@ -189,6 +200,10 @@ export const ExternalConnection = () => {
         const gasLimit = Web3.utils.toDecimal(data.gas);
         // console.log("gasLimit TRX ", gasLimit);
         const { chains } = await chrome.storage.local.get('chains');
+        console.log("CHHHHHHHHHHHHHh ", chains);
+        console.log("XXXXCHAINXXXXXXXXX ", chain);
+
+
         const myDefaultChain = chains.find((el) => el.default);
         const symbol = (myDefaultChain.slug == 'polygon' || myDefaultChain.slug == 'matic') ? "pol" : myDefaultChain.slug == "ethereum" ? "eth" : myDefaultChain.slug == "binancesmartchain" ? "bnb" : ""
         const hash =

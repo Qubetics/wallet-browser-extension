@@ -48,7 +48,7 @@ function ConfirmSecretPhrase({
       <div
         onClick={() => setBlankArray([])}
         className="setPassword__secretPharse__copyField"
-        style={{ marginBottom: "20px" }}
+        style={{ margin: "0 auto 24px auto" }}
       >
         <span style={{ marginLeft: "0px" }}>Clear</span>
       </div>

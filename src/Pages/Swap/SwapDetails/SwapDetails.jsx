@@ -444,7 +444,7 @@ function SwapDetails() {
                 </div>
               )}
             </div>
-            <div className="swapDetails__valueText">
+            <div style={{ paddingLeft: "5px", paddingRight: "16px" }} className="swapDetails__valueText ">
               <p className="swapDetails__valueText__text">
                 <p style={{ margin: 0 }}>From</p>
                 {addCommasToNumber(getFlooredFixed(parseFloat(amount), 8))}{" "}

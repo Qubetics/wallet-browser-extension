@@ -246,7 +246,7 @@ function PancakeSwapDetails() {
             <img src={ArrowDashedLine} width={144} height={12} />
             <img src={token2.image} width={30} height={30} />
           </div>
-          <div className="swapDetails__valueText">
+          <div className="swapDetails__valueText asdffg">
             <p
               style={{ textAlign: "center" }}
               className="swapDetails__valueText__text"
