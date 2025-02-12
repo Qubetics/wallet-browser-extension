@@ -50,7 +50,7 @@ function AddressTableSend({ dataArray, setAddress, setContact }) {
                     <img
                       className={bookName==ele?.name ? "rotateItem" : "noRotate"}
                       style={{ cursor: "pointer" }}
-                      src={DownArrowSuffix}
+                      src={DownArrowSuffix} 
                       alt="DownArrowSuffix"
                     />
                   </span>
