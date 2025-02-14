@@ -1,4 +1,5 @@
 import { message } from 'antd';
+import './external.scss';
 import CopyIcon from '../../Assets/CopyIcon.svg';
 
 const TruncatedAddress = ({ address }) => {
@@ -18,11 +19,19 @@ const TruncatedAddress = ({ address }) => {
     <div
       onClick={copyToClipboard}
       className='setPassword__secretPharse__copyField'
+      style={{ display: 'flex', alignItems: 'center', gap: '3px' }}
     >
       {contextHolder}
       <span>{truncateAddress(address)}</span>
       <span className='copy-icon'>
-        <img className='copy-icon' src={CopyIcon} height={14} width={16} alt='Copy Icon' />
+        <img
+          className='copy-icon'
+          src={CopyIcon}
+          height={14}
+          width={16}
+          alt='Copy Icon'
+          style={{ cursor: 'pointer' }}
+        />
       </span>
     </div>
   );

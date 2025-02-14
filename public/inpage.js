@@ -132,13 +132,12 @@ const initializeStreams = () => {
 
   connectionStream.on('data', (data) => {
     console.log('Publishing Data: ', data);
-    if (window.qubetics) {
+    // window.qubetics && data.network ==='qubetics')
+    if (window.qubetics && data.network ==='qubetics') {
       window.qubetics.sendResponse(data.id, { type: 'success', data: data.result });
+      return;
       // handleResponse({ type: 'success', data: extractDataFromResp })
     }
-    // if (data.method === 'nativeConnect') {
- 
-    // }
 
     if (window.trustwallet.ethereum) {
       if (data.error) {

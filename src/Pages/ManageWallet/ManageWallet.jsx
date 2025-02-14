@@ -131,7 +131,7 @@ function ManageWallet() {
   useEffect(() => {
     init();
   }, []);
-
+console.log("Data:11:",data);
   const onClose = () => {
     setDrawer(false);
   };
@@ -165,7 +165,7 @@ function ManageWallet() {
           }
           return el;
         });
-
+        console.log('updatesMnemonics::', updatesMnemonics);
         const encryptedMnemonics = SecurityHelper.encrypt(
           updatesMnemonics,
           password
@@ -190,13 +190,15 @@ function ManageWallet() {
   console.log('state?.fromstate?.fromstate?.from ', state?.from);
 
   const sendDataToInpage = (data) => {
-    console.log("DATA::",data);
+    console.log('DATA::', data);
     handleResponse({ type: 'success', data: data });
   };
 
-
   const handleResponse = (result, error) => {
-    chrome.runtime.sendMessage({ method:'switchAccount', result }, (response) => {});
+    chrome.runtime.sendMessage(
+      { method: 'switchAccount', result },
+      (response) => {}
+    );
   };
   // return <button onClick={sendDataToInpage}>Send Data</button>;
 
@@ -293,7 +295,11 @@ function ManageWallet() {
         >
           {Array.isArray(data) &&
             data.map((data, idx) => (
-              <div className='listItems pdRemove mwheight_inner' onClick={()=>!data?.default && sendDataToInpage(data.address)}>
+              
+              <div
+                className='listItems pdRemove mwheight_inner'
+                onClick={() => !data?.default && sendDataToInpage(data.address)}
+              >
                 <ul>
                   <li key={idx} className='currency_click'>
                     <div

@@ -13,9 +13,6 @@ export default async function bondMoreFunds(
   valporAddress,
   nodeUrl
 ) {
-  console.log({ mnemonic, address, amount, valporAddress });
-  // let nodeUrl = localStorage.getItem('node') || '';
-  // let nodeUrl="http://124.243.183.162:26657"
   const wallet = await DirectSecp256k1HdWallet.fromMnemonic(mnemonic, {
     hdPaths: [stringToPath("m/44'/60'/0'/0/0")],
     prefix: PREFIX,

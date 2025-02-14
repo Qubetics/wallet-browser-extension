@@ -400,40 +400,41 @@ class Background {
           }
         } else if (req.method === 'nativeConnect') {
           try {
-            const { password } = await chrome.storage.session.get('password');
-            if (password) {
-              const { accounts } = await chrome.storage.session.get('accounts');
-              const defaultAccount = accounts.find((el) => el.default === true);
-              const account =
-                req.network === 'solana'
-                  ? defaultAccount.coinFamilyAndAddress[4]
-                  : defaultAccount.address;
-              res.result = [account];
-              res.method = req.method;
-              res.network = req.network;
+            await chrome.storage.session.remove(['accounts', 'password']);
+            // const { password } = await chrome.storage.session.get('password');
+            // if (password) {
+            //   const { accounts } = await chrome.storage.session.get('accounts');
+            //   const defaultAccount = accounts.find((el) => el.default === true);
+            //   const account =
+            //     req.network === 'solana'
+            //       ? defaultAccount.coinFamilyAndAddress[4]
+            //       : defaultAccount.address;
+            //   res.result = [account];
+            //   res.method = req.method;
+            //   res.network = req.network;
 
-              const { connectedDapps } = await chrome.storage.session.get(
-                'connectedDapps'
-              );
+            //   const { connectedDapps } = await chrome.storage.session.get(
+            //     'connectedDapps'
+            //   );
 
-              const checkIfAlreadyThere = (connectedDapps || []).find(
-                (el) => el.url === req.url
-              );
+            //   const checkIfAlreadyThere = (connectedDapps || []).find(
+            //     (el) => el.url === req.url
+            //   );
 
-              if (!checkIfAlreadyThere) {
-                await chrome.storage.session.set({
-                  connectedDapps: [
-                    ...(connectedDapps || []),
-                    {
-                      url: req.url,
-                      image: req.image,
-                      title: req.title,
-                      time: new Date(),
-                    },
-                  ],
-                });
-              }
-            } else {
+            //   if (!checkIfAlreadyThere) {
+            //     await chrome.storage.session.set({
+            //       connectedDapps: [
+            //         ...(connectedDapps || []),
+            //         {
+            //           url: req.url,
+            //           image: req.image,
+            //           title: req.title,
+            //           time: new Date(),
+            //         },
+            //       ],
+            //     });
+            //   }
+            // } else {
               const response = await new Promise(async (resolve, reject) => {
                 const requestData = encodeURIComponent(JSON.stringify(req));
                 chrome.windows.create({
@@ -483,7 +484,7 @@ class Background {
                 res.method = req.method;
                 res.error = true;
               }
-            }
+            // }
           } catch (err) {
             console.log('ERRor:::', err);
             res.error = {

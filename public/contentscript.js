@@ -24,7 +24,7 @@ const setupPageStreams = () => {
 
     if (data.name) {
       if (lastId == data.id) {
-        return console.log('Request already under process.u');
+        return console.log('Request already under process.');
       }
       lastId = data.id;
       console.log('Please wait starting to resolve.');

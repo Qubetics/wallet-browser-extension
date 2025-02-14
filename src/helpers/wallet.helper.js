@@ -37,6 +37,7 @@ import { spritzHelper } from "./spritz.helper";
 import { spritzAccounts, spritzKyc, spritzLogin } from "../actions/spritz";
 import { setLoading } from "../actions/loading";
 import { TronHelper } from "./tron.helper";
+import { getUserAddress } from './getAddress';
 const BIP84 = require("bip84");
 const privateKeyToAddress = require("ethereum-private-key-to-address");
 
@@ -765,7 +766,9 @@ export class WalletHelper {
   };
 
   static generateAndSetWallet = async (newMnemonics, name, type) => {
+  
     try {
+      console.log("FUNC newMnemonics:::",newMnemonics);
       const { password } = await chrome.storage.session.get("password");
       let { accounts } = await chrome.storage.session.get("accounts");
       const { chains } = await chrome.storage.local.get("chains");
@@ -797,8 +800,6 @@ export class WalletHelper {
         // `m/44'/60'/0'/0/${accounts.length}`
         `m/44'/60'/0'/0/0`
       );
-
-
       // console.log(`m/44'/60'/0'/0/${accounts.length}`);
 
       if (!mnemonics) {

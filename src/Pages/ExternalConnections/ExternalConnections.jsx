@@ -27,6 +27,8 @@ import editValidator from '../../helpers/editValidator';
 import delagteAndBondMore from '../../helpers/delegatorBondMoreFunds';
 import { redelegate } from '../../helpers/redelegation';
 import TruncatedAddress from './TruncatedAddress';
+import { getUserAddress } from '../../helpers/getAddress';
+import fetchValoperAddress from '../../helpers/fetchValoperAddress';
 
 function getFlooredFixed(v, d) {
   return (Math.floor(v * Math.pow(10, d)) / Math.pow(10, d)).toFixed(d);
@@ -44,6 +46,12 @@ export const ExternalConnection = () => {
   const [chain, setChain] = useState(null);
   const [gasLimitNew, setGaslimitNew] = useState(null);
   const [mnemonics, setMnemonics] = useState(null);
+  const [defaultAccount, setDefaultAccounts] = useState(null);
+  const defaultAddressPhrase =
+    (mnemonics &&
+      JSON.parse(mnemonics).find((obj) => obj.address === defaultAccount)
+        ?.phrase) ||
+    '';
   let price = null;
 
   const handleOk = () => {
@@ -56,14 +64,20 @@ export const ExternalConnection = () => {
 
   const init = async () => {
     const { chains } = await chrome.storage.local.get('chains');
+    let { accounts } = await chrome.storage.session.get('accounts');
+
     const { password } = await chrome.storage.session.get('password');
     const { mnemonics } = await chrome.storage.local.get('mnemonics');
     const decryptMnemonics = SecurityHelper.decrypt(mnemonics, password);
+    const defaultAddress = accounts?.find((item) => item.default)?.address;
+    if (defaultAddress) {
+      setDefaultAccounts(defaultAddress);
+    }
+    // console.log("Dec:::Mn::",decryptMnemonics,'accounts::',accounts?.find((item)=>item.default)?.address,"defaultAddress::",defaultAddress);
     setMnemonics(decryptMnemonics);
     setChain(chains.find((el) => el.default));
 
     const myDefaultChain = chains.find((el) => el.default);
-
     chrome.tabs.query(
       { active: true, currentWindow: true },
       async function (tabs) {
@@ -84,8 +98,22 @@ export const ExternalConnection = () => {
           console.log('EXTERNAL CONN DATA::', data);
 
           if (data.network === 'qubetics') {
-            setMethod(method);
-            setData(data);
+            if (method === 'nativeConnect') {
+              const valoperAddress = await fetchValoperAddress(
+                defaultAddressPhrase
+              );
+              const address = await getUserAddress(
+                defaultAddressPhrase,
+                data.nodeUrl
+              );
+              setData({ ...data, valoperAddress, address });
+              setMethod(method);
+              // console.log("DATA DAT:::",data,valoperAddress,address);
+            } else {
+              setMethod(method);
+              setData(data);
+            }
+
             return;
           }
 
@@ -185,15 +213,11 @@ export const ExternalConnection = () => {
       }
     );
   };
-  // console.log('EXT DATA::', data);
-  const handleResponse = (result, error) => {
+  const handleResponse = async (result, error) => {
     console.log(
       '🚀 ~ file: ExternalConnections.jsx:187 ~ handleResponse ~ result 11',
       result
     );
-
-    // `Result: ${result}`
-    // `Error: ${error}`
 
     chrome.runtime.sendMessage({ method, result }, (response) => {
       chrome.windows.getCurrent(function (window) {
@@ -228,7 +252,8 @@ export const ExternalConnection = () => {
       } else if (data.network === 'qubetics') {
         if (data.method === 'createValidator') {
           const response = await createValidator(
-            data.mnemonics,
+            // data.mnemonics,
+            defaultAddressPhrase,
             data.primaryValues,
             data.secondaryValues,
             data.nodeUrl,
@@ -251,7 +276,8 @@ export const ExternalConnection = () => {
         } else if (data.method === 'editValidator') {
           // store.dispatch(setLoading(true));
           const response = await editValidator(
-            data.mnemonics,
+            // data.mnemonics,
+            defaultAddressPhrase,
             data.primaryValues,
             data.nodeUrl,
             data.valoperAddress,
@@ -272,7 +298,8 @@ export const ExternalConnection = () => {
         } else if (data.method === 'bondMoreFunds') {
           // store.dispatch(setLoading(true));
           const response = await bondMoreFunds(
-            data.mnemonics,
+            // data.mnemonics,
+            defaultAddressPhrase,
             data.userAddress,
             data.bondAmount,
             data.valoperAddress,
@@ -286,7 +313,8 @@ export const ExternalConnection = () => {
         } else if (data.method === 'delegatorBondMoreFunds') {
           // store.dispatch(setLoading(true));
           const response = await delagteAndBondMore(
-            data.mnemonics,
+            // data.mnemonics,
+            defaultAddressPhrase,
             data.userAddress,
             data.stakeAmount,
             data.valoperAddress,
@@ -301,7 +329,8 @@ export const ExternalConnection = () => {
         } else if (data.method === 'redelegate') {
           // store.dispatch(setLoading(true));
           const response = await redelegate(
-            data.mnemonics,
+            // data.mnemonics,
+            defaultAddressPhrase,
             data.selectedAccount,
             data.valoperAddress,
             data.stakeAmount,
@@ -321,7 +350,8 @@ export const ExternalConnection = () => {
         } else if (data.method === 'unBondFunds') {
           console.log('I am unBondFunds called::', data);
           const response = await unBondFunds(
-            data.mnemonics,
+            // data.mnemonics,
+            defaultAddressPhrase,
             data.userAddress,
             data.valoperAddress,
             data.unBoundAmt,
@@ -337,7 +367,8 @@ export const ExternalConnection = () => {
         } else if (data.method === 'stopValidator') {
           console.log('I am stopValidator called::', data);
           const response = await unBondFunds(
-            data.mnemonics,
+            // data.mnemonics,
+            defaultAddressPhrase,
             data.userAddress,
             data.valoperAddress,
             data.unBoundAmt,
@@ -350,7 +381,8 @@ export const ExternalConnection = () => {
           }
         } else if (data.method === 'unJailValidator') {
           const response = await unJailValidator(
-            data.mnmeonics,
+            // data.mnmeonics,
+            defaultAddressPhrase,
             data.valoperAddress,
             data.nodeUrl
           );
@@ -1027,11 +1059,10 @@ export const ExternalConnection = () => {
                     <ButtonComp
                       maxWidth='100%'
                       onClick={async () => {
-                        handleResponse([
-                          data?.network === 'solana'
-                            ? account.coinFamilyAndAddress[4]
-                            : account.address,
-                        ]);
+                        handleResponse({
+                          type: 'success',
+                          data: data,
+                        });
                       }}
                       text='Accept'
                     />
@@ -1351,7 +1382,8 @@ export const ExternalConnection = () => {
                       Address
                     </div>
                     <div className={'confirmCurrency__keyValues__value'}>
-                      {data.userAddress}
+                      {/* {data.userAddress} */}
+                      <TruncatedAddress address={data.userAddress} />
                     </div>
                   </div>
 
@@ -1465,7 +1497,7 @@ export const ExternalConnection = () => {
                     </div>
                     <div className={'confirmCurrency__keyValues__value'}>
                       {/* {data.userAddress} */}
-                      <TruncatedAddress address={data.userAddress}/>
+                      <TruncatedAddress address={data.userAddress} />
                     </div>
                   </div>
 
@@ -1578,7 +1610,7 @@ export const ExternalConnection = () => {
                     </div>
                     <div className={'confirmCurrency__keyValues__value'}>
                       {/* {data.selectedAccount} */}
-                      <TruncatedAddress address={data.selectedAccount}/>
+                      <TruncatedAddress address={data.selectedAccount} />
                     </div>
                   </div>
 
@@ -1692,7 +1724,7 @@ export const ExternalConnection = () => {
                     </div>
                     <div className={'confirmCurrency__keyValues__value'}>
                       {/* {data.userAddress} */}
-                      <TruncatedAddress address={data.userAddress}/>
+                      <TruncatedAddress address={data.userAddress} />
                     </div>
                   </div>
 
@@ -1806,7 +1838,7 @@ export const ExternalConnection = () => {
                     </div>
                     <div className={'confirmCurrency__keyValues__value'}>
                       {/* {data.userAddress} */}
-                      <TruncatedAddress address={data.userAddress}/>
+                      <TruncatedAddress address={data.userAddress} />
                     </div>
                   </div>
 
@@ -1919,7 +1951,7 @@ export const ExternalConnection = () => {
                     </div>
                     <div className={'confirmCurrency__keyValues__value'}>
                       {/* {data.address} */}
-                      <TruncatedAddress address={data.address}/>
+                      <TruncatedAddress address={data.address} />
                     </div>
                   </div>
                   <div className={'swapDetails__border'}></div>
@@ -2024,7 +2056,7 @@ export const ExternalConnection = () => {
                     </div>
                     <div className={'confirmCurrency__keyValues__value'}>
                       {/* {data.address} */}
-                      <TruncatedAddress address={data.address}/>
+                      <TruncatedAddress address={data.address} />
                     </div>
                   </div>
                   <div className={'swapDetails__border'}></div>

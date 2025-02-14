@@ -42,11 +42,13 @@
   }
 }
 
-.copy-icon {
-  width: 20px !important;
-  height: 20px !important;
+.setPassword__secretPharse__copyField{
+  .copy-icon {
+    width: 20px !important;
+    height: 20px !important;
+  }
+  
 }
-
 .viewphrases__iInner {
   display: flex;
   justify-content: center;
