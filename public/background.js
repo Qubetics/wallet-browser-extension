@@ -615,6 +615,7 @@ class Background {
           if (response) {
             res.result = response;
             res.method = req.method;
+            res.network = req.network;
           } else {
             res.result = null;
             res.method = req.method;
@@ -645,6 +646,7 @@ class Background {
           if (response) {
             res.result = response;
             res.method = req.method;
+            res.network = req.network;
           } else {
             res.result = null;
             res.method = req.method;
@@ -674,6 +676,7 @@ class Background {
           if (response) {
             res.result = response;
             res.method = req.method;
+            res.network = req.network;
           } else {
             res.result = null;
             res.method = req.method;
@@ -703,6 +706,7 @@ class Background {
           if (response) {
             res.result = response;
             res.method = req.method;
+            res.network = req.network;
           } else {
             res.result = null;
             res.method = req.method;
@@ -732,6 +736,7 @@ class Background {
           if (response) {
             res.result = response;
             res.method = req.method;
+            res.network = req.network;
           } else {
             res.result = null;
             res.method = req.method;
@@ -761,6 +766,7 @@ class Background {
           if (response) {
             res.result = response;
             res.method = req.method;
+            res.network = req.network;
           } else {
             res.result = null;
             res.method = req.method;
@@ -790,6 +796,7 @@ class Background {
           if (response) {
             res.result = response;
             res.method = req.method;
+            res.network = req.network;
           } else {
             res.result = null;
             res.method = req.method;
@@ -819,6 +826,7 @@ class Background {
           if (response) {
             res.result = response;
             res.method = req.method;
+            res.network = req.network;
           } else {
             res.result = null;
             res.method = req.method;
@@ -833,6 +841,7 @@ class Background {
           if (response) {
             res.result = response;
             res.method = req.method;
+            res.network = req.network;
           } else {
             res.result = null;
             res.method = req.method;
