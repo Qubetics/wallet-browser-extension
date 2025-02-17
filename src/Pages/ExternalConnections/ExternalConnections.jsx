@@ -148,8 +148,7 @@ export const ExternalConnection = () => {
 
             setFromChain(myDefaultChain);
             console.log("switchChainswitchChainswitchChain ", switchChain);
-
-            // setToChain(switchChain);
+            setToChain(switchChain);
             // await chrome.storage.local.set({
             //   chains: switchChain,
             // });
@@ -169,7 +168,7 @@ export const ExternalConnection = () => {
     console.log('🚀 ~ file: ExternalConnections.jsx:105 ~ handleResponse ~ result', result);
     chrome.runtime.sendMessage({ method, result }, (response) => {
       chrome.windows.getCurrent(function (window) {
-        // chrome.windows.remove(window.id);
+        chrome.windows.remove(window.id);
       });
     });
   };
@@ -247,12 +246,19 @@ export const ExternalConnection = () => {
   };
 
   const handleChainSwitch = async () => {
-    if (toChain) {
-      store.dispatch(setLoading(true));
-      await WalletHelper.setNetworkPreference(toChain.chainId);
-      store.dispatch(setLoading(false));
-      handleResponse(true);
+    try {
+      console.log("toChain ::::::::: ", toChain);
+      
+      if (toChain) {
+        store.dispatch(setLoading(true));
+        await WalletHelper.setNetworkPreference(toChain.chainId);
+        store.dispatch(setLoading(false));
+        handleResponse(true);
+      }
+    } catch (error) {
+      console.log("Error BB ", error); 
     }
+
   };
 
   useEffect(() => {
