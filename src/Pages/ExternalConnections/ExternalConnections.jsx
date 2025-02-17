@@ -195,7 +195,7 @@ export const ExternalConnection = () => {
 
     chrome.runtime.sendMessage({ method, result }, (response) => {
       chrome.windows.getCurrent(function (window) {
-        // chrome.windows.remove(window.id);
+        chrome.windows.remove(window.id);
       });
     });
   };
