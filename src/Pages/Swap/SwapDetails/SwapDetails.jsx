@@ -165,7 +165,7 @@ function SwapDetails() {
         token1.symbol.toLowerCase()
       );
 
-      // console.log("GASSSSSSSSSSSSSSS ", gasPrice);
+      console.log("GASSSSSSSSSSSSSSS ", gasPrice);
 
 
       setGasPrice(gasPrice.fast);
@@ -175,13 +175,14 @@ function SwapDetails() {
       // estimatedGasUsed = route.estimatedGasUsed.toString() * 2;
       estimatedGasUsed = route.gas.toString();
       setGasEstimate(estimatedGasUsed);
+      console.log("estimatedGasUsedestimatedGasUsed ", estimatedGasUsed);
 
       let finalGasFee =
-        (gasPrice.fast * Math.pow(10, 9) * parseInt(estimatedGasUsed) * 1.5) /
+        ((gasPrice.fast * Math.pow(10, 9) * parseInt(estimatedGasUsed)) * 1.5) /
         Math.pow(10, 18);
 
-      // console.log("SINALLLLLLLLLLL ", finalGasFee, finalFee);
-      // console.log("parentCoinparentCoin ", parentCoin);
+      console.log("SINALLLLLLLLLLL ", finalGasFee, finalFee);
+      console.log("parentCoinparentCoin ", parentCoin);
 
 
       setNetworkPrice(
@@ -381,11 +382,11 @@ function SwapDetails() {
           commision
         );
 
-        // console.log("SWAAAAAAAAAAAAAAAAa ", data);
+        console.log("SWAAAAAAAAAAAAAAAAa ", data);
 
-        if (!data) {
+        if (!data || data?.message) {
           setSwapModal(false);
-          return messageApi.error("Something went wrong.");
+          return messageApi.error(data?.message ? data?.message : "Something went wrong.");
         }
         setSwapModal(false);
         setIsModalOpen1(true);
@@ -403,55 +404,61 @@ function SwapDetails() {
       <div className={`flexedContent`}>
         <div className="swapDetails">
           <div className="swapDetails-bg">
-            <div className="swapDetails__iconsTop">
-              {token1.image ? (
-                <img src={token1.image} width={30} height={30} />
-              ) : (
-                <div
-                  style={{
-                    alignItems: "center",
-                    backgroundColor: "rgba(98,126,234,.2)",
-                    borderRadius: "49%",
-                    display: "flex",
-                    height: "29px",
-                    justifyContent: "center",
-                    width: "29px",
-                    marginRight: "15px",
-                  }}
-                >
-                  {" "}
-                  {token1?.symbol.split("")[0]}
-                </div>
-              )}
-              <img src={arr} width={144} height={12} />
-              {token2.image ? (
-                <img src={token2.image} width={30} height={30} />
-              ) : (
-                <div
-                  style={{
-                    alignItems: "center",
-                    backgroundColor: "rgba(98,126,234,.2)",
-                    borderRadius: "49%",
-                    display: "flex",
-                    height: "29px",
-                    justifyContent: "center",
-                    width: "29px",
-                    marginRight: "15px",
-                  }}
-                >
-                  {" "}
-                  {token2?.symbol.split("")[0]}
-                </div>
-              )}
-            </div>
-            <div style={{ paddingLeft: "5px", paddingRight: "16px" }} className="swapDetails__valueText ">
-              <p className="swapDetails__valueText__text">
+            <div className="swapDetails__iconsTop swapDetails__iconsTop-specific">
+              <div>
+                {token1.image ? (
+                  <img src={token1.image} width={30} height={30} />
+                ) : (
+                  <div
+                    style={{
+                      alignItems: "center",
+                      backgroundColor: "rgba(98,126,234,.2)",
+                      borderRadius: "49%",
+                      display: "flex",
+                      height: "29px",
+                      justifyContent: "center",
+                      width: "29px",
+                      marginRight: "15px",
+                    }}
+                  >
+                    {" "}
+                    {token1?.symbol.split("")[0]}
+                  </div>
+                )}
                 <p style={{ margin: 0 }}>From</p>
+              </div>
+              <img src={arr} width={144} height={12} style={{marginTop: 10}} />
+              <div>
+                {token2.image ? (
+                  <img src={token2.image} width={30} height={30} />
+                ) : (
+                  <div
+                    style={{
+                      alignItems: "center",
+                      backgroundColor: "rgba(98,126,234,.2)",
+                      borderRadius: "49%",
+                      display: "flex",
+                      height: "29px",
+                      justifyContent: "center",
+                      width: "29px",
+                      marginRight: "15px",
+                    }}
+                  >
+                    {" "}
+                    {token2?.symbol.split("")[0]}
+                  </div>
+                )}
+                <p style={{ margin: 0 }}>To</p>
+              </div>
+            </div>
+            <div className="swapDetails__valueText swapDetails__valueText-specific ">
+              <p className="swapDetails__valueText__text swapDetails__valueText-specific-text">
+                {/* <p style={{ margin: 0 }}>From</p> */}
                 {addCommasToNumber(getFlooredFixed(parseFloat(amount), 8))}{" "}
                 {token1.symbol}
               </p>
-              <p className="swapDetails__valueText__text">
-                <p style={{ margin: 0 }}>To</p>
+              <p className="swapDetails__valueText__text swapDetails__valueText-specific-text">
+                {/* <p style={{ margin: 0 }}>To</p> */}
                 {addCommasToNumber(getFlooredFixed(parseFloat(amount2), 6))}
                 {token2.symbol}
               </p>

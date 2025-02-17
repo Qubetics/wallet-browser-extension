@@ -15,6 +15,15 @@
     justify-content: center;
     gap: 8px;
     margin-bottom: 8px;
+
+    &-specific {
+      align-items: flex-start !important;
+      p {
+        color: #fff !important;
+        font-weight: 600;
+        font-size: 14px;
+      }
+    }
   }
   &__valueText {
     display: flex;
@@ -22,6 +31,15 @@
     align-items: center;
     gap: 15px;
     padding: 0 20px;
+    &-specific {
+      align-items: flex-start !important;
+      padding: 0 !important;
+      gap: 35px;
+      &-text {
+        width: 50%;
+        word-break: break-word;
+      }
+    }
     &__text {
       font-size: 14px;
       font-weight: 800;

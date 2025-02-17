@@ -17,7 +17,8 @@
     "background",
     "idle",
     "sidePanel",
-    "nativeMessaging"
+    "nativeMessaging",
+    "web3"
   ],
   "side_panel": {
     "default_path": "index.html"

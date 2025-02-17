@@ -24,6 +24,7 @@ function getFlooredFixed(v, d) {
 export const ExternalConnection = () => {
   const { account, currency } = useSelector((state) => state);
   const [method, setMethod] = useState(null);
+  const [chainID, setChainID] = useState(null)
   const [data, setData] = useState(null);
   const [feeInEth, setFeeInEth] = useState(0);
   const [messageApi, contextHolder] = message.useMessage();
@@ -67,7 +68,7 @@ export const ExternalConnection = () => {
           setData(data);
           console.log("MMMMMMMMMMMMMMMmethod ", method);
           console.log("XXXXXXXXXXdataXXXXXXXXX ", Web3.utils.toDecimal(data.chainId), data);
-
+          setChainID(Web3.utils.toDecimal(data.chainId))
 
           if (method === 'requestAccounts' && account) {
             setMethod('requestAccounts');
@@ -479,6 +480,7 @@ export const ExternalConnection = () => {
                     }}
                   >
                     <ButtonComp
+                      disabled={!!chainID}
                       maxWidth="100%"
                       onClick={async () => {
                         setOpenmodal(true);
@@ -625,6 +627,7 @@ export const ExternalConnection = () => {
                   >
                     <ButtonComp
                       maxWidth="100%"
+                      disabled={!!chainID}
                       onClick={async () => {
                         setOpenmodal(true);
                       }}

@@ -289,11 +289,13 @@ export class UniswapHelper {
             },
           }
         );
+        console.log();
+        
         return response.data.tx_hash;
       }
     } catch (error) {
-      console.log(error);
-      return false;
+      console.log("SEND ERROR : ", error?.response?.data?.message);
+      return error?.response?.data?.message?error?.response?.data:false;
     }
   }
 

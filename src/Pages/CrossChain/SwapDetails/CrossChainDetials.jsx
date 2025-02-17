@@ -156,64 +156,60 @@ function CrossChainDetails() {
       <MenuRestofHeaders backTo={"/swap"} title={"Swap"} />
       <div className={`flexedContent`}>
         <div className="swapDetails">
-          <div className="swapDetails__iconsTop">
-            {token1.image ? (
-              <img src={token1.image} width={30} height={30} />
-            ) : (
-              <div
-                className="randb"
-                style={{
-                  height: "35px",
-                  width: "35px",
-                  background: "#fff",
-                  borderRadius: "50%",
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                {token1.symbol.split("")[0]}
-              </div>
-            )}
-
-            <img src={ArrowDashedLine} width={144} height={12} />
-            {token2.image ? (
-              <img src={token2.image} width={30} height={30} />
-            ) : (
-              <div
-                className="randb"
-                style={{
-                  height: "35px",
-                  width: "35px",
-                  background: "#fff",
-                  borderRadius: "50%",
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                {token2.symbol.split("")[0]}
-              </div>
-            )}
-          </div>
-          <div className="swapDetails__valueText">
-            <p
-              style={{ textAlign: "center", paddingLeft: "12px" }}
-              className="swapDetails__valueText__text"
-            >
-              {/* <span>To</span> */}
+          <div className="swapDetails__iconsTop swapDetails__iconsTop-specific">
+            <div>
+              {token1.image ? (
+                <img src={token1.image} width={30} height={30} />
+              ) : (
+                <div
+                  className="randb"
+                  style={{
+                    height: "35px",
+                    width: "35px",
+                    background: "#fff",
+                    borderRadius: "50%",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  {token1.symbol.split("")[0]}
+                </div>
+              )}
               <p style={{ margin: 0 }}>From</p>
-              <br />
+            </div>
+            <img src={ArrowDashedLine} width={144} height={12} style={{ marginTop: 10 }} />
+            <div>
+              {token2.image ? (
+                <img src={token2.image} width={30} height={30} />
+              ) : (
+                <div
+                  className="randb"
+                  style={{
+                    height: "35px",
+                    width: "35px",
+                    background: "#fff",
+                    borderRadius: "50%",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  {token2.symbol.split("")[0]}
+                </div>
+              )}
+              <p style={{ margin: 0 }}>To</p>
+            </div>
+          </div>
+          <div className="swapDetails__valueText swapDetails__valueText-specific ">
+            <p className="swapDetails__valueText__text swapDetails__valueText-specific-text">
+              {/* <p style={{ margin: 0 }}>From</p> */}
+              {/* <br /> */}
               {addCommasToNumber(getFlooredFixed(parseFloat(amount), 6))}{" "}
               {token1.symbol}
             </p>
-            <p
-              style={{ textAlign: "center" }}
-              className="swapDetails__valueText__text"
-            >
-              <p style={{ margin: 0 }}>To</p>
-              {/* <span>From</span> */}
-              <br />
+            <p className="swapDetails__valueText__text swapDetails__valueText-specific-text">
+              {/* <p style={{ margin: 0 }}>To</p> */}
               {addCommasToNumber(getFlooredFixed(parseFloat(amount2), 4))}{" "}
               {token2.symbol}
             </p>
