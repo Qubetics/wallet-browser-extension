@@ -17,6 +17,18 @@ import ArrowDashedLine from '../../Assets/arr.svg';
 import BigNumber from 'bignumber.js';
 import { addCommasToNumber } from '../../helpers/conversion.helper';
 import { SolanaHelper } from '../../helpers/solana.helper';
+import createValidator from '../../helpers/createValidator';
+import bondMoreFunds from '../../helpers/bondMoreFunds';
+import unBondFunds from '../../helpers/unBondFunds';
+import unJailValidator from '../../helpers/unjailValidator';
+import stopDeactivating from '../../helpers/stopDeactivating';
+import { SecurityHelper } from '../../helpers/security.helper';
+import editValidator from '../../helpers/editValidator';
+import delagteAndBondMore from '../../helpers/delegatorBondMoreFunds';
+import { redelegate } from '../../helpers/redelegation';
+import TruncatedAddress from './TruncatedAddress';
+import { getUserAddress } from '../../helpers/getAddress';
+import fetchValoperAddress from '../../helpers/fetchValoperAddress';
 
 function getFlooredFixed(v, d) {
   return (Math.floor(v * Math.pow(10, d)) / Math.pow(10, d)).toFixed(d);
@@ -34,7 +46,13 @@ export const ExternalConnection = () => {
   const [toChain, setToChain] = useState(null);
   const [chain, setChain] = useState(null);
   const [gasLimitNew, setGaslimitNew] = useState(null);
-
+  const [mnemonics, setMnemonics] = useState(null);
+  const [defaultAccount, setDefaultAccounts] = useState(null);
+  const defaultAddressPhrase =
+    (mnemonics &&
+      JSON.parse(mnemonics).find((obj) => obj.address === defaultAccount)
+        ?.phrase) ||
+    '';
   let price = null;
 
   const handleOk = () => {
@@ -47,27 +65,32 @@ export const ExternalConnection = () => {
 
   const init = async () => {
     const { chains } = await chrome.storage.local.get('chains');
+    let { accounts } = await chrome.storage.session.get('accounts');
+
+    const { password } = await chrome.storage.session.get('password');
+    const { mnemonics } = await chrome.storage.local.get('mnemonics');
+    const decryptMnemonics = SecurityHelper.decrypt(mnemonics, password);
+    const defaultAddress = accounts?.find((item) => item.default)?.address;
+    if (defaultAddress) {
+      setDefaultAccounts(defaultAddress);
+    }
+    // console.log("Dec:::Mn::",decryptMnemonics,'accounts::',accounts?.find((item)=>item.default)?.address,"defaultAddress::",defaultAddress);
+    setMnemonics(decryptMnemonics);
     setChain(chains.find((el) => el.default));
 
     const myDefaultChain = chains.find((el) => el.default);
-
     chrome.tabs.query(
       { active: true, currentWindow: true },
       async function (tabs) {
         try {
           const tab = tabs[0];
           const url = new URL(tab.url);
-          const queryParams = new URLSearchParams(url.search);
-          console.log("QUERYYYYYYYYYY PARAMS ", queryParams);
-
-          const method = queryParams.get('method');
-
+          const queryParams = new URLSearchParams(url.search);   
+          const method = queryParams.get('method'); 
           const data = queryParams.get('data')
             ? JSON.parse(decodeURIComponent(queryParams.get('data')))
-            : null;
-          setData(data);
-          console.log("MMMMMMMMMMMMMMMmethod ", method);
-          console.log("XXXXXXXXXXdataXXXXXXXXX ", Web3.utils.toDecimal(data.chainId), data);
+            : null; 
+          setData(data); 
           setChainID(Web3.utils.toDecimal(data.chainId))
 
           if (method === 'requestAccounts' && account) {
@@ -164,9 +187,12 @@ export const ExternalConnection = () => {
       }
     );
   };
+  const handleResponse = async (result, error) => {
+    console.log(
+      '🚀 ~ file: ExternalConnections.jsx:187 ~ handleResponse ~ result 11',
+      result
+    );
 
-  const handleResponse = (result) => {
-    console.log('🚀 ~ file: ExternalConnections.jsx:105 ~ handleResponse ~ result', result);
     chrome.runtime.sendMessage({ method, result }, (response) => {
       chrome.windows.getCurrent(function (window) {
         // chrome.windows.remove(window.id);
@@ -196,6 +222,149 @@ export const ExternalConnection = () => {
         } else {
           store.dispatch(setLoading(false));
           return message.error('Error signing transaction');
+        }
+      } else if (data.network === 'qubetics') {
+        if (data.method === 'createValidator') {
+          const response = await createValidator(
+            // data.mnemonics,
+            defaultAddressPhrase,
+            data.primaryValues,
+            data.secondaryValues,
+            data.nodeUrl,
+            data.valoperAddressFromBlockChain,
+            data.publicKey
+          );
+          console.log('RETURN RESP createValidator::', response);
+          if (response) {
+            const extractDataFromResp = {
+              transactionHash: response.transactionHash,
+              rawLog: response.rawLog,
+              code: response.code,
+            };
+            handleResponse({ type: 'success', data: extractDataFromResp });
+            store.dispatch(setLoading(false));
+          } else {
+            store.dispatch(setLoading(false));
+            return message.error('Error in create validator');
+          }
+        } else if (data.method === 'editValidator') {
+          // store.dispatch(setLoading(true));
+          const response = await editValidator(
+            // data.mnemonics,
+            defaultAddressPhrase,
+            data.primaryValues,
+            data.nodeUrl,
+            data.valoperAddress,
+            data.hideCommissionField
+          );
+          if (response) {
+            const extractDataFromResp = {
+              transactionHash: response.transactionHash,
+              rawLog: response?.rawLog,
+              code: response.code,
+            };
+
+            console.log('result:::editValidator', response);
+            handleResponse({ type: 'success', data: extractDataFromResp });
+            store.dispatch(setLoading(false));
+            return;
+          }
+        } else if (data.method === 'bondMoreFunds') {
+          // store.dispatch(setLoading(true));
+          const response = await bondMoreFunds(
+            // data.mnemonics,
+            defaultAddressPhrase,
+            data.userAddress,
+            data.bondAmount,
+            data.valoperAddress,
+            data.nodeUrl
+          );
+          if (response) {
+            handleResponse({ type: 'success', data: response });
+            store.dispatch(setLoading(false));
+            return;
+          }
+        } else if (data.method === 'delegatorBondMoreFunds') {
+          // store.dispatch(setLoading(true));
+          const response = await delagteAndBondMore(
+            // data.mnemonics,
+            defaultAddressPhrase,
+            data.userAddress,
+            data.stakeAmount,
+            data.valoperAddress,
+            data.nodeUrl
+          );
+          if (response) {
+            console.log('RESPO:::', response);
+            handleResponse({ type: 'success', data: response });
+            store.dispatch(setLoading(false));
+            return;
+          }
+        } else if (data.method === 'redelegate') {
+          // store.dispatch(setLoading(true));
+          const response = await redelegate(
+            // data.mnemonics,
+            defaultAddressPhrase,
+            data.selectedAccount,
+            data.valoperAddress,
+            data.stakeAmount,
+            data.nodeUrl
+          );
+          console.log('RESPO: redelegate::', response);
+          if (response) {
+            const extractDataFromResp = {
+              transactionHash: response.transactionHash,
+              rawLog: response.rawLog,
+              code: response.code,
+            };
+            handleResponse({ type: 'success', data: extractDataFromResp });
+            store.dispatch(setLoading(false));
+            return;
+          }
+        } else if (data.method === 'unBondFunds') {
+          console.log('I am unBondFunds called::', data);
+          const response = await unBondFunds(
+            // data.mnemonics,
+            defaultAddressPhrase,
+            data.userAddress,
+            data.valoperAddress,
+            data.unBoundAmt,
+            data.nodeUrl
+            // data.maxClicked,
+            // data.totalAmount
+          );
+          console.log('RETURN RESP unBondFunds::', response);
+          if (response) {
+            handleResponse({ type: 'success', data: response });
+            store.dispatch(setLoading(false));
+          }
+        } else if (data.method === 'stopValidator') {
+          console.log('I am stopValidator called::', data);
+          const response = await unBondFunds(
+            // data.mnemonics,
+            defaultAddressPhrase,
+            data.userAddress,
+            data.valoperAddress,
+            data.unBoundAmt,
+            data.nodeUrl
+          );
+          console.log('RETURN RESP stopValidator::', response);
+          if (response) {
+            handleResponse({ type: 'success', data: response });
+            store.dispatch(setLoading(false));
+          }
+        } else if (data.method === 'unJailValidator') {
+          const response = await unJailValidator(
+            // data.mnmeonics,
+            defaultAddressPhrase,
+            data.valoperAddress,
+            data.nodeUrl
+          );
+          console.log('RETURN RESP unJailValidator::', response);
+          if (response) {
+            handleResponse({ type: 'success', data: response });
+            store.dispatch(setLoading(false));
+          }
         }
       } else {
         const gasLimit = Web3.utils.toDecimal(data.gas);
@@ -254,7 +423,7 @@ export const ExternalConnection = () => {
       handleResponse(true);
     }
   };
-
+  // console.log('method:::', method);
   useEffect(() => {
     init();
   }, [account]);
@@ -322,15 +491,15 @@ export const ExternalConnection = () => {
                   <div className={'swapDetails__border'}></div>
                   <div
                     style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      marginTop: "30px",
-                      gap: "20px"
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginTop: '30px',
+                      gap: '20px',
                     }}
                   >
                     <ButtonComp
-                      maxWidth="100%"
+                      maxWidth='100%'
                       onClick={async () => {
                         handleResponse([
                           data?.network === 'solana'
@@ -338,15 +507,15 @@ export const ExternalConnection = () => {
                             : account.address,
                         ]);
                       }}
-                      text="Accept"
+                      text='Accept'
                     />
-                    <div className="cancelBtn">
+                    <div className='cancelBtn'>
                       <ButtonComp
-                        maxWidth="100%"
+                        maxWidth='100%'
                         onClick={async () => {
                           handleResponse([]);
                         }}
-                        text="Reject"
+                        text='Reject'
                       />
                     </div>
                   </div>
@@ -440,17 +609,17 @@ export const ExternalConnection = () => {
                     <div className={'confirmCurrency__keyValues__value'}>
                       {data.value
                         ? addCommasToNumber(
-                          getFlooredFixed(
-                            new BigNumber(data.value)
-                              .dividedBy(new BigNumber(10).pow(18))
-                              .plus(new BigNumber(feeInEth))
-                              .toString(),
-                            5
+                            getFlooredFixed(
+                              new BigNumber(data.value)
+                                .dividedBy(new BigNumber(10).pow(18))
+                                .plus(new BigNumber(feeInEth))
+                                .toString(),
+                              5
+                            )
                           )
-                        )
                         : addCommasToNumber(getFlooredFixed(feeInEth, 5)) +
-                        ' ' +
-                        chain.currencySymbol}{' '}
+                          ' ' +
+                          chain.currencySymbol}{' '}
                     </div>
                   </div>
 
@@ -465,18 +634,13 @@ export const ExternalConnection = () => {
 
                   <div className={'swapDetails__border'}></div>
 
-
-
-
-
-
                   <div
                     style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      marginTop: "30px",
-                      gap: "20px"
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginTop: '30px',
+                      gap: '20px',
                     }}
                   >
                     <ButtonComp
@@ -485,15 +649,15 @@ export const ExternalConnection = () => {
                       onClick={async () => {
                         setOpenmodal(true);
                       }}
-                      text="Accept"
+                      text='Accept'
                     />
-                    <div className="cancelBtn">
+                    <div className='cancelBtn'>
                       <ButtonComp
-                        maxWidth="100%"
+                        maxWidth='100%'
                         onClick={async () => {
                           handleResponse(null);
                         }}
-                        text="Reject"
+                        text='Reject'
                       />
                     </div>
                   </div>
@@ -594,14 +758,14 @@ export const ExternalConnection = () => {
                     <div className={'confirmCurrency__keyValues__value'}>
                       {data.value
                         ? addCommasToNumber(
-                          getFlooredFixed(
-                            new BigNumber(data.value)
-                              .dividedBy(new BigNumber(10).pow(18))
-                              .plus(new BigNumber(feeInEth))
-                              .toString(),
-                            6
+                            getFlooredFixed(
+                              new BigNumber(data.value)
+                                .dividedBy(new BigNumber(10).pow(18))
+                                .plus(new BigNumber(feeInEth))
+                                .toString(),
+                              6
+                            )
                           )
-                        )
                         : 0}{' '}
                     </div>
                   </div>
@@ -618,11 +782,11 @@ export const ExternalConnection = () => {
                   <div className={'swapDetails__border'}></div>
                   <div
                     style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      marginTop: "30px",
-                      gap: "20px"
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginTop: '30px',
+                      gap: '20px',
                     }}
                   >
                     <ButtonComp
@@ -631,15 +795,15 @@ export const ExternalConnection = () => {
                       onClick={async () => {
                         setOpenmodal(true);
                       }}
-                      text="Accept"
+                      text='Accept'
                     />
-                    <div className="cancelBtn">
+                    <div className='cancelBtn'>
                       <ButtonComp
-                        maxWidth="100%"
+                        maxWidth='100%'
                         onClick={async () => {
                           handleResponse(null);
                         }}
-                        text="Reject"
+                        text='Reject'
                       />
                     </div>
                   </div>
@@ -704,30 +868,29 @@ export const ExternalConnection = () => {
                   </div>
                   <div className={'swapDetails__border'}></div>
 
-
                   <div
                     style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      marginTop: "30px",
-                      gap: "20px"
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginTop: '30px',
+                      gap: '20px',
                     }}
                   >
                     <ButtonComp
-                      maxWidth="100%"
+                      maxWidth='100%'
                       onClick={async () => {
                         handleChainSwitch();
                       }}
-                      text="Accept"
+                      text='Accept'
                     />
-                    <div className="cancelBtn">
+                    <div className='cancelBtn'>
                       <ButtonComp
-                        maxWidth="100%"
+                        maxWidth='100%'
                         onClick={async () => {
                           handleResponse(false);
                         }}
-                        text="Reject"
+                        text='Reject'
                       />
                     </div>
                   </div>
@@ -788,6 +951,1122 @@ export const ExternalConnection = () => {
             }}
           />
         </div>
+      </ModalCustom>
+
+      {/* ******************** Start ********************** */}
+
+      {/* **** Native Connect ***** */}
+
+      <ModalCustom
+        title={'Request Accounts'}
+        isModalOpen={account && method === 'nativeConnect'}
+        customClass='customClassModal'
+        handleCancel={async () => {
+          setMethod(null);
+          handleResponse({
+            type: 'error',
+            data: { message: 'Rejected by user' },
+          });
+          await chrome.storage.session.remove(['accounts', 'password']);
+        }}
+      >
+        {account && method === 'nativeConnect' ? (
+          <div className={'viewphrases'}>
+            <div className={'viewphrases__iInner'}>
+              <div className={`flexedContent`}>
+                <div className={'swapDetails'}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      width: '100%',
+                      marginBottom: '14px',
+                    }}
+                  >
+                    <img
+                      src={logo}
+                      alt=''
+                      style={{
+                        height: '70px',
+                        width: '70px',
+                        objectFit: 'contain',
+                        marginTop: '7px',
+                      }}
+                    />
+                  </div>
+                  <div className={'swapDetails__address'}>
+                    <p className={'swapDetails__address__key'}>
+                      In order to proceed, access to your account is necessary.
+                    </p>
+                    <p className={'swapDetails__address__val'}>
+                      <sapn>
+                        Please grant access only to trusted websites that
+                        require access to your information. Once your account
+                        has been provided, the website will be able to access
+                        public data such as your balance and other relevant
+                        information.
+                      </sapn>
+                    </p>
+                  </div>
+                  <div className={'swapDetails__address'}>
+                    <p className={'swapDetails__address__key'}>Address</p>
+                    <p className={'swapDetails__address__val'}>
+                      <sapn>
+                        {data?.network === 'solana'
+                          ? account.coinFamilyAndAddress[4]
+                          : account.address}
+                      </sapn>
+                    </p>
+                  </div>
+                  <div className={'swapDetails__border'}></div>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginTop: '30px',
+                      gap: '20px',
+                    }}
+                  >
+                    <ButtonComp
+                      maxWidth='100%'
+                      onClick={async () => {
+                        handleResponse({
+                          type: 'success',
+                          data: data,
+                        });
+                      }}
+                      text='Accept'
+                    />
+                    <div className='cancelBtn'>
+                      <ButtonComp
+                        maxWidth='100%'
+                        onClick={async () => {
+                          handleResponse({
+                            type: 'error',
+                            data: { message: 'Rejected by user' },
+                          });
+                          await chrome.storage.session.remove([
+                            'accounts',
+                            'password',
+                          ]);
+                        }}
+                        text='Reject'
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : null}
+      </ModalCustom>
+
+      {/* **** Create validators **** */}
+      <ModalCustom
+        title={'Create Validator'}
+        isModalOpen={account && method === 'createValidator'}
+        customClass='customClassModal'
+        handleCancel={() => {
+          setMethod(null);
+          handleResponse({
+            type: 'error',
+            data: { message: 'Rejected by user' },
+          });
+        }}
+      >
+        {account && method === 'createValidator' && data ? (
+          <div className={'viewphrases'}>
+            <div className={'viewphrases__iInner'}>
+              <div className={`flexedContent`}>
+                <div className={'swapDetails'}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      width: '100%',
+                      marginBottom: '14px',
+                    }}
+                  >
+                    <img
+                      src={logo}
+                      alt=''
+                      style={{
+                        height: '70px',
+                        width: '70px',
+                        objectFit: 'contain',
+                        marginTop: '7px',
+                      }}
+                    />
+                  </div>
+                  <div className={'swapDetails__address'}>
+                    <p className={'swapDetails__address__key'}>
+                      Please enter your password to confirm the transaction.
+                    </p>
+                    <p className={'swapDetails__address__val'}>
+                      <sapn>
+                        Please be sure that the request has been originated from
+                        a verified source, before signing the transaction.
+                      </sapn>
+                    </p>
+                  </div>
+
+                  <div className={'confirmCurrency__keyValues'}>
+                    <div className={'confirmCurrency__keyValues__key'}>
+                      Event
+                    </div>
+                    <div className={'confirmCurrency__keyValues__value'}>
+                      {data.name}
+                    </div>
+                  </div>
+
+                  <div className={'confirmCurrency__keyValues'}>
+                    <div className={'confirmCurrency__keyValues__key'}>
+                      Stake Amount
+                    </div>
+                    <div className={'confirmCurrency__keyValues__value'}>
+                      {data.secondaryValues.Bond_Amount}
+                    </div>
+                  </div>
+
+                  <div className={'confirmCurrency__keyValues'}>
+                    <div className={'confirmCurrency__keyValues__key'}>
+                      Commission
+                    </div>
+                    <div className={'confirmCurrency__keyValues__value'}>
+                      {data.secondaryValues.Commission_Rate}
+                    </div>
+                  </div>
+                  <div className={'swapDetails__border'}></div>
+
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginTop: '30px',
+                      gap: '20px',
+                    }}
+                  >
+                    <ButtonComp
+                      maxWidth='100%'
+                      onClick={async () => {
+                        setOpenmodal(true);
+                      }}
+                      text='Accept'
+                    />
+                    <div className='cancelBtn'>
+                      <ButtonComp
+                        maxWidth='100%'
+                        onClick={async () => {
+                          handleResponse({
+                            type: 'error',
+                            data: { message: 'Rejected by user' },
+                          });
+                        }}
+                        text='Reject'
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : null}
+      </ModalCustom>
+
+      {/* **** Edit Validator **** */}
+      <ModalCustom
+        title={'Edit Validator'}
+        isModalOpen={account && method === 'editValidator'}
+        customClass='customClassModal'
+        handleCancel={() => {
+          setMethod(null);
+          handleResponse({
+            type: 'error',
+            data: { message: 'Rejected by user' },
+          });
+        }}
+      >
+        {account && method === 'editValidator' && data ? (
+          <div className={'viewphrases'}>
+            <div className={'viewphrases__iInner'}>
+              <div className={`flexedContent`}>
+                <div className={'swapDetails'}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      width: '100%',
+                      marginBottom: '14px',
+                    }}
+                  >
+                    <img
+                      src={logo}
+                      alt=''
+                      style={{
+                        height: '70px',
+                        width: '70px',
+                        objectFit: 'contain',
+                        marginTop: '7px',
+                      }}
+                    />
+                  </div>
+                  <div className={'swapDetails__address'}>
+                    <p className={'swapDetails__address__key'}>
+                      Please enter your password to confirm the transaction.
+                    </p>
+                    <p className={'swapDetails__address__val'}>
+                      <sapn>
+                        Please be sure that the request has been originated from
+                        a verified source, before signing the transaction.
+                      </sapn>
+                    </p>
+                  </div>
+
+                  <div className={'confirmCurrency__keyValues'}>
+                    <div className={'confirmCurrency__keyValues__key'}>
+                      Event
+                    </div>
+                    <div className={'confirmCurrency__keyValues__value'}>
+                      {data.name}
+                    </div>
+                  </div>
+
+                  <div className={'confirmCurrency__keyValues'}>
+                    <div className={'confirmCurrency__keyValues__key'}>
+                      Stake Amount
+                    </div>
+                    <div className={'confirmCurrency__keyValues__value'}>
+                      {/* {data.secondaryValues.Bond_Amount} */}
+                    </div>
+                  </div>
+
+                  <div className={'confirmCurrency__keyValues'}>
+                    <div className={'confirmCurrency__keyValues__key'}>
+                      Commission
+                    </div>
+                    <div className={'confirmCurrency__keyValues__value'}>
+                      {/* {data.secondaryValues.Commission_Rate} */}
+                    </div>
+                  </div>
+                  <div className={'swapDetails__border'}></div>
+
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginTop: '30px',
+                      gap: '20px',
+                    }}
+                  >
+                    <ButtonComp
+                      maxWidth='100%'
+                      onClick={async () => {
+                        setOpenmodal(true);
+                      }}
+                      text='Accept'
+                    />
+                    <div className='cancelBtn'>
+                      <ButtonComp
+                        maxWidth='100%'
+                        onClick={async () => {
+                          handleResponse({
+                            type: 'error',
+                            data: { message: 'Rejected by user' },
+                          });
+                        }}
+                        text='Reject'
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : null}
+      </ModalCustom>
+
+      {/* **** bondMoreFunds **** */}
+      <ModalCustom
+        title={'Bond More Funds'}
+        isModalOpen={account && method === 'bondMoreFunds'}
+        customClass='customClassModal'
+        handleCancel={() => {
+          setMethod(null);
+          handleResponse({
+            type: 'error',
+            data: { message: 'Rejected by user' },
+          });
+        }}
+      >
+        {account && method === 'bondMoreFunds' && data ? (
+          <div className={'viewphrases'}>
+            <div className={'viewphrases__iInner'}>
+              <div className={`flexedContent`}>
+                <div className={'swapDetails'}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      width: '100%',
+                      marginBottom: '14px',
+                    }}
+                  >
+                    <img
+                      src={logo}
+                      alt=''
+                      style={{
+                        height: '70px',
+                        width: '70px',
+                        objectFit: 'contain',
+                        marginTop: '7px',
+                      }}
+                    />
+                  </div>
+                  <div className={'swapDetails__address'}>
+                    <p className={'swapDetails__address__key'}>
+                      Please enter your password to confirm the transaction.
+                    </p>
+                    <p className={'swapDetails__address__val'}>
+                      <sapn>
+                        Please be sure that the request has been originated from
+                        a verified source, before signing the transaction.
+                      </sapn>
+                    </p>
+                  </div>
+
+                  <div className={'confirmCurrency__keyValues'}>
+                    <div className={'confirmCurrency__keyValues__key'}>
+                      Event
+                    </div>
+                    <div className={'confirmCurrency__keyValues__value'}>
+                      {/* {data.name} */}
+                      bondMore
+                    </div>
+                  </div>
+                  <div className={'confirmCurrency__keyValues'}>
+                    <div className={'confirmCurrency__keyValues__key'}>
+                      Address
+                    </div>
+                    <div className={'confirmCurrency__keyValues__value'}>
+                      {/* {data.userAddress} */}
+                      <TruncatedAddress address={data.userAddress} />
+                    </div>
+                  </div>
+
+                  <div className={'confirmCurrency__keyValues'}>
+                    <div className={'confirmCurrency__keyValues__key'}>
+                      Amount
+                    </div>
+                    <div className={'confirmCurrency__keyValues__value'}>
+                      {data.bondAmount}
+                    </div>
+                  </div>
+                  <div className={'swapDetails__border'}></div>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginTop: '30px',
+                      gap: '20px',
+                    }}
+                  >
+                    <ButtonComp
+                      maxWidth='100%'
+                      onClick={async () => {
+                        setOpenmodal(true);
+                      }}
+                      text='Accept'
+                    />
+                    <div className='cancelBtn'>
+                      <ButtonComp
+                        maxWidth='100%'
+                        onClick={async () => {
+                          handleResponse({
+                            type: 'error',
+                            data: { message: 'Rejected by user' },
+                          });
+                        }}
+                        text='Reject'
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : null}
+      </ModalCustom>
+
+      {/* **** Delegator And bondMoreFunds **** */}
+      <ModalCustom
+        title={'Bond More Funds'}
+        isModalOpen={account && method === 'delegatorBondMoreFunds'}
+        customClass='customClassModal'
+        handleCancel={() => {
+          setMethod(null);
+          handleResponse({
+            type: 'error',
+            data: { message: 'Rejected by user' },
+          });
+        }}
+      >
+        {account && method === 'delegatorBondMoreFunds' && data ? (
+          <div className={'viewphrases'}>
+            <div className={'viewphrases__iInner'}>
+              <div className={`flexedContent`}>
+                <div className={'swapDetails'}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      width: '100%',
+                      marginBottom: '14px',
+                    }}
+                  >
+                    <img
+                      src={logo}
+                      alt=''
+                      style={{
+                        height: '70px',
+                        width: '70px',
+                        objectFit: 'contain',
+                        marginTop: '7px',
+                      }}
+                    />
+                  </div>
+                  <div className={'swapDetails__address'}>
+                    <p className={'swapDetails__address__key'}>
+                      Please enter your password to confirm the transaction.
+                    </p>
+                    <p className={'swapDetails__address__val'}>
+                      <sapn>
+                        Please be sure that the request has been originated from
+                        a verified source, before signing the transaction.
+                      </sapn>
+                    </p>
+                  </div>
+
+                  <div className={'confirmCurrency__keyValues'}>
+                    <div className={'confirmCurrency__keyValues__key'}>
+                      Event
+                    </div>
+                    <div className={'confirmCurrency__keyValues__value'}>
+                      {/* {data.name} */}
+                      bondMore
+                    </div>
+                  </div>
+                  <div className={'confirmCurrency__keyValues'}>
+                    <div className={'confirmCurrency__keyValues__key'}>
+                      Address
+                    </div>
+                    <div className={'confirmCurrency__keyValues__value'}>
+                      {/* {data.userAddress} */}
+                      <TruncatedAddress address={data.userAddress} />
+                    </div>
+                  </div>
+
+                  <div className={'confirmCurrency__keyValues'}>
+                    <div className={'confirmCurrency__keyValues__key'}>
+                      Amount
+                    </div>
+                    <div className={'confirmCurrency__keyValues__value'}>
+                      {data.stakeAmount}
+                    </div>
+                  </div>
+                  <div className={'swapDetails__border'}></div>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginTop: '30px',
+                      gap: '20px',
+                    }}
+                  >
+                    <ButtonComp
+                      maxWidth='100%'
+                      onClick={async () => {
+                        setOpenmodal(true);
+                      }}
+                      text='Accept'
+                    />
+                    <div className='cancelBtn'>
+                      <ButtonComp
+                        maxWidth='100%'
+                        onClick={async () => {
+                          handleResponse({
+                            type: 'error',
+                            data: { message: 'Rejected by user' },
+                          });
+                        }}
+                        text='Reject'
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : null}
+      </ModalCustom>
+
+      {/* **** Delegator And bondMoreFunds **** */}
+      <ModalCustom
+        title={'Redelegate'}
+        isModalOpen={account && method === 'redelegate'}
+        customClass='customClassModal'
+        handleCancel={() => {
+          setMethod(null);
+          handleResponse({
+            type: 'error',
+            data: { message: 'Rejected by user' },
+          });
+        }}
+      >
+        {account && method === 'redelegate' && data ? (
+          <div className={'viewphrases'}>
+            <div className={'viewphrases__iInner'}>
+              <div className={`flexedContent`}>
+                <div className={'swapDetails'}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      width: '100%',
+                      marginBottom: '14px',
+                    }}
+                  >
+                    <img
+                      src={logo}
+                      alt=''
+                      style={{
+                        height: '70px',
+                        width: '70px',
+                        objectFit: 'contain',
+                        marginTop: '7px',
+                      }}
+                    />
+                  </div>
+                  <div className={'swapDetails__address'}>
+                    <p className={'swapDetails__address__key'}>
+                      Please enter your password to confirm the transaction.
+                    </p>
+                    <p className={'swapDetails__address__val'}>
+                      <sapn>
+                        Please be sure that the request has been originated from
+                        a verified source, before signing the transaction.
+                      </sapn>
+                    </p>
+                  </div>
+
+                  <div className={'confirmCurrency__keyValues'}>
+                    <div className={'confirmCurrency__keyValues__key'}>
+                      Event
+                    </div>
+                    <div className={'confirmCurrency__keyValues__value'}>
+                      {data.name}
+                    </div>
+                  </div>
+                  <div className={'confirmCurrency__keyValues'}>
+                    <div className={'confirmCurrency__keyValues__key'}>
+                      Address
+                    </div>
+                    <div className={'confirmCurrency__keyValues__value'}>
+                      {/* {data.selectedAccount} */}
+                      <TruncatedAddress address={data.selectedAccount} />
+                    </div>
+                  </div>
+
+                  <div className={'confirmCurrency__keyValues'}>
+                    <div className={'confirmCurrency__keyValues__key'}>
+                      Amount
+                    </div>
+                    <div className={'confirmCurrency__keyValues__value'}>
+                      {data.stakeAmount}
+                    </div>
+                  </div>
+                  <div className={'swapDetails__border'}></div>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginTop: '30px',
+                      gap: '20px',
+                    }}
+                  >
+                    <ButtonComp
+                      maxWidth='100%'
+                      onClick={async () => {
+                        setOpenmodal(true);
+                      }}
+                      text='Accept'
+                    />
+                    <div className='cancelBtn'>
+                      <ButtonComp
+                        maxWidth='100%'
+                        onClick={async () => {
+                          handleResponse({
+                            type: 'error',
+                            data: { message: 'Rejected by user' },
+                          });
+                        }}
+                        text='Reject'
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : null}
+      </ModalCustom>
+
+      {/* **** unBondFunds **** */}
+      <ModalCustom
+        title={'Un Bond Funds'}
+        isModalOpen={account && method === 'unBondFunds'}
+        customClass='customClassModal'
+        handleCancel={() => {
+          setMethod(null);
+          handleResponse({
+            type: 'error',
+            data: { message: 'Rejected by user' },
+          });
+        }}
+      >
+        {account && method === 'unBondFunds' && data ? (
+          <div className={'viewphrases'}>
+            <div className={'viewphrases__iInner'}>
+              <div className={`flexedContent`}>
+                <div className={'swapDetails'}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      width: '100%',
+                      marginBottom: '14px',
+                    }}
+                  >
+                    <img
+                      src={logo}
+                      alt=''
+                      style={{
+                        height: '70px',
+                        width: '70px',
+                        objectFit: 'contain',
+                        marginTop: '7px',
+                      }}
+                    />
+                  </div>
+                  <div className={'swapDetails__address'}>
+                    <p className={'swapDetails__address__key'}>
+                      Please enter your password to confirm the transaction.
+                    </p>
+                    <p className={'swapDetails__address__val'}>
+                      <sapn>
+                        Please be sure that the request has been originated from
+                        a verified source, before signing the transaction.
+                      </sapn>
+                    </p>
+                  </div>
+
+                  <div className={'confirmCurrency__keyValues'}>
+                    <div className={'confirmCurrency__keyValues__key'}>
+                      Event
+                    </div>
+                    <div className={'confirmCurrency__keyValues__value'}>
+                      {/* {data.name} */}
+                      unBond
+                    </div>
+                  </div>
+                  <div className={'confirmCurrency__keyValues'}>
+                    <div className={'confirmCurrency__keyValues__key'}>
+                      Address
+                    </div>
+                    <div className={'confirmCurrency__keyValues__value'}>
+                      {/* {data.userAddress} */}
+                      <TruncatedAddress address={data.userAddress} />
+                    </div>
+                  </div>
+
+                  <div className={'confirmCurrency__keyValues'}>
+                    <div className={'confirmCurrency__keyValues__key'}>
+                      Amount
+                    </div>
+                    <div className={'confirmCurrency__keyValues__value'}>
+                      {data.unBoundAmt}
+                    </div>
+                  </div>
+                  <div className={'swapDetails__border'}></div>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginTop: '30px',
+                      gap: '20px',
+                    }}
+                  >
+                    <ButtonComp
+                      maxWidth='100%'
+                      onClick={async () => {
+                        setOpenmodal(true);
+                      }}
+                      text='Accept'
+                    />
+                    <div className='cancelBtn'>
+                      <ButtonComp
+                        maxWidth='100%'
+                        onClick={async () => {
+                          handleResponse({
+                            type: 'error',
+                            data: { message: 'Rejected by user' },
+                          });
+                        }}
+                        text='Reject'
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : null}
+      </ModalCustom>
+
+      {/* **** stopValidator */}
+
+      <ModalCustom
+        title={'Stop Validator'}
+        isModalOpen={account && method === 'stopValidator'}
+        customClass='customClassModal'
+        handleCancel={() => {
+          setMethod(null);
+          handleResponse({
+            type: 'error',
+            data: { message: 'Rejected by user' },
+          });
+        }}
+      >
+        {account && method === 'stopValidator' && data ? (
+          <div className={'viewphrases'}>
+            <div className={'viewphrases__iInner'}>
+              <div className={`flexedContent`}>
+                <div className={'swapDetails'}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      width: '100%',
+                      marginBottom: '14px',
+                    }}
+                  >
+                    <img
+                      src={logo}
+                      alt=''
+                      style={{
+                        height: '70px',
+                        width: '70px',
+                        objectFit: 'contain',
+                        marginTop: '7px',
+                      }}
+                    />
+                  </div>
+                  <div className={'swapDetails__address'}>
+                    <p className={'swapDetails__address__key'}>
+                      Please enter your password to confirm the transaction.
+                    </p>
+                    <p className={'swapDetails__address__val'}>
+                      <sapn>
+                        Please be sure that the request has been originated from
+                        a verified source, before signing the transaction.
+                      </sapn>
+                    </p>
+                  </div>
+
+                  <div className={'confirmCurrency__keyValues'}>
+                    <div className={'confirmCurrency__keyValues__key'}>
+                      Event
+                    </div>
+                    <div className={'confirmCurrency__keyValues__value'}>
+                      {data.name}
+                    </div>
+                  </div>
+                  <div className={'confirmCurrency__keyValues'}>
+                    <div className={'confirmCurrency__keyValues__key'}>
+                      Address
+                    </div>
+                    <div className={'confirmCurrency__keyValues__value'}>
+                      {/* {data.userAddress} */}
+                      <TruncatedAddress address={data.userAddress} />
+                    </div>
+                  </div>
+
+                  <div className={'confirmCurrency__keyValues'}>
+                    <div className={'confirmCurrency__keyValues__key'}>
+                      Amount
+                    </div>
+                    <div className={'confirmCurrency__keyValues__value'}>
+                      {data.unBoundAmt}
+                    </div>
+                  </div>
+                  <div className={'swapDetails__border'}></div>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginTop: '30px',
+                      gap: '20px',
+                    }}
+                  >
+                    <ButtonComp
+                      maxWidth='100%'
+                      onClick={async () => {
+                        setOpenmodal(true);
+                      }}
+                      text='Accept'
+                    />
+                    <div className='cancelBtn'>
+                      <ButtonComp
+                        maxWidth='100%'
+                        onClick={async () => {
+                          handleResponse({
+                            type: 'error',
+                            data: { message: 'Rejected by user' },
+                          });
+                        }}
+                        text='Reject'
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : null}
+      </ModalCustom>
+
+      {/* **** unJailValidator **** */}
+      <ModalCustom
+        title={'Un Jail Validator'}
+        isModalOpen={account && method === 'unJailValidator'}
+        customClass='customClassModal'
+        handleCancel={() => {
+          setMethod(null);
+          handleResponse({
+            type: 'error',
+            data: { message: 'Rejected by user' },
+          });
+        }}
+      >
+        {account && method === 'unJailValidator' && data ? (
+          <div className={'viewphrases'}>
+            <div className={'viewphrases__iInner'}>
+              <div className={`flexedContent`}>
+                <div className={'swapDetails'}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      width: '100%',
+                      marginBottom: '14px',
+                    }}
+                  >
+                    <img
+                      src={logo}
+                      alt=''
+                      style={{
+                        height: '70px',
+                        width: '70px',
+                        objectFit: 'contain',
+                        marginTop: '7px',
+                      }}
+                    />
+                  </div>
+                  <div className={'swapDetails__address'}>
+                    <p className={'swapDetails__address__key'}>
+                      Please enter your password to confirm the transaction.
+                    </p>
+                    <p className={'swapDetails__address__val'}>
+                      <sapn>
+                        Please be sure that the request has been originated from
+                        a verified source, before signing the transaction.
+                      </sapn>
+                    </p>
+                  </div>
+
+                  <div className={'confirmCurrency__keyValues'}>
+                    <div className={'confirmCurrency__keyValues__key'}>
+                      Event
+                    </div>
+                    <div className={'confirmCurrency__keyValues__value'}>
+                      {data.name}
+                    </div>
+                  </div>
+                  <div className={'confirmCurrency__keyValues'}>
+                    <div className={'confirmCurrency__keyValues__key'}>
+                      Address
+                    </div>
+                    <div className={'confirmCurrency__keyValues__value'}>
+                      {/* {data.address} */}
+                      <TruncatedAddress address={data.address} />
+                    </div>
+                  </div>
+                  <div className={'swapDetails__border'}></div>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginTop: '30px',
+                      gap: '20px',
+                    }}
+                  >
+                    <ButtonComp
+                      maxWidth='100%'
+                      onClick={async () => {
+                        setOpenmodal(true);
+                      }}
+                      text='Accept'
+                    />
+                    <div className='cancelBtn'>
+                      <ButtonComp
+                        maxWidth='100%'
+                        onClick={async () => {
+                          handleResponse({
+                            type: 'error',
+                            data: { message: 'Rejected by user' },
+                          });
+                        }}
+                        text='Reject'
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : null}
+      </ModalCustom>
+
+      {/* **** stopDeactivating **** */}
+      <ModalCustom
+        title={'Stop Deactivating'}
+        isModalOpen={account && method === 'stopDeactivating'}
+        customClass='customClassModal'
+        handleCancel={() => {
+          setMethod(null);
+          handleResponse({
+            type: 'error',
+            data: { message: 'Rejected by user' },
+          });
+        }}
+      >
+        {account && method === 'stopDeactivating' && data ? (
+          <div className={'viewphrases'}>
+            <div className={'viewphrases__iInner'}>
+              <div className={`flexedContent`}>
+                <div className={'swapDetails'}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      width: '100%',
+                      marginBottom: '14px',
+                    }}
+                  >
+                    <img
+                      src={logo}
+                      alt=''
+                      style={{
+                        height: '70px',
+                        width: '70px',
+                        objectFit: 'contain',
+                        marginTop: '7px',
+                      }}
+                    />
+                  </div>
+                  <div className={'swapDetails__address'}>
+                    <p className={'swapDetails__address__key'}>
+                      Please enter your password to confirm the transaction.
+                    </p>
+                    <p className={'swapDetails__address__val'}>
+                      <sapn>
+                        Please be sure that the request has been originated from
+                        a verified source, before signing the transaction.
+                      </sapn>
+                    </p>
+                  </div>
+
+                  <div className={'confirmCurrency__keyValues'}>
+                    <div className={'confirmCurrency__keyValues__key'}>
+                      Event
+                    </div>
+                    <div className={'confirmCurrency__keyValues__value'}>
+                      {/* {data.name} */}
+                      stopDeactivate
+                    </div>
+                  </div>
+                  <div className={'confirmCurrency__keyValues'}>
+                    <div className={'confirmCurrency__keyValues__key'}>
+                      Address
+                    </div>
+                    <div className={'confirmCurrency__keyValues__value'}>
+                      {/* {data.address} */}
+                      <TruncatedAddress address={data.address} />
+                    </div>
+                  </div>
+                  <div className={'swapDetails__border'}></div>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginTop: '30px',
+                      gap: '20px',
+                    }}
+                  >
+                    <ButtonComp
+                      maxWidth='100%'
+                      onClick={async () => {
+                        setOpenmodal(true);
+                      }}
+                      text='Accept'
+                    />
+                    <div className='cancelBtn'>
+                      <ButtonComp
+                        maxWidth='100%'
+                        onClick={async () => {
+                          handleResponse({
+                            type: 'error',
+                            data: { message: 'Rejected by user' },
+                          });
+                        }}
+                        text='Reject'
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : null}
       </ModalCustom>
     </>
   );

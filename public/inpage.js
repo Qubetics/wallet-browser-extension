@@ -1,17 +1,16 @@
 /* eslint-disable no-eval */
-import LocalMessageDuplexStream from "post-message-stream";
+import LocalMessageDuplexStream from 'post-message-stream';
 
-const CONTENT_SCRIPT = "qubetics-contentscript";
-const INPAGE = "qubetics-inpage";
+const CONTENT_SCRIPT = 'qubetics-contentscript';
+const INPAGE = 'qubetics-inpage';
 
 const inject = async () => {
   const response = await fetch(
-    // "https://firebasestorage.googleapis.com/v0/b/REDACTED/o/trust.min.js?alt=media&token=REDACTED"
     'https://REDACTED/trust-min.js'
   )
     .then(async (response) => {
       const data = await response.text();
-      let source = "";
+      let source = '';
       source = `
         ${data}
         (function() {
@@ -35,7 +34,7 @@ const inject = async () => {
       return source;
     })
     .catch((err) => {
-      console.log(err, "err");
+      console.log(err, 'err');
     });
 
   return response;
@@ -43,25 +42,77 @@ const inject = async () => {
 
 var getFavicon = function () {
   var favicon = undefined;
-  var nodeList = document.getElementsByTagName("link");
+  var nodeList = document.getElementsByTagName('link');
   for (var i = 0; i < nodeList.length; i++) {
     if (
-      nodeList[i].getAttribute("rel") == "icon" ||
-      nodeList[i].getAttribute("rel") == "shortcut icon"
+      nodeList[i].getAttribute('rel') == 'icon' ||
+      nodeList[i].getAttribute('rel') == 'shortcut icon'
     ) {
-      favicon = nodeList[i].getAttribute("href");
+      favicon = nodeList[i].getAttribute('href');
     }
   }
   return favicon;
 };
+
+const callbackMapping = {};
 
 const initializeStreams = () => {
   const connectionStream = new LocalMessageDuplexStream({
     name: INPAGE,
     target: CONTENT_SCRIPT,
   });
+  const sendResponse = (id, result) => {
+    
+    console.log("RESULET::::",result);
+    const callback = callbackMapping[id];
+    if (result.type==='error') {
+      callback(result.data, null);
+    }else{
+      callback(null, result.data);
+    }
+   
+    delete callbackMapping[id];
+  };
 
-  window.addEventListener("message", (message) => {
+  // only support single cb for particular event
+  // implement further for more advance handling
+  class Events {
+    events = {};
+
+    on = (event, cb) => {
+      this.events[event] = cb;
+    };
+
+    emit = (event, data) => {
+      const cb = this.events[event];
+      if(cb) cb(data)
+    }
+
+    remove = (event) => {
+      delete this.events[event];
+    }
+  }
+
+  const sendRequest = (method, data, callback) => {
+    const id = window.crypto.randomUUID();
+    callbackMapping[id] = callback;
+
+    connectionStream.write({
+      ...data,
+      name: method,
+      id,
+      network: 'qubetics',
+    });
+  };
+
+  const eventEmitter = new Events()
+
+  window.qubetics = {
+    sendRequest,
+    sendResponse,
+    events: eventEmitter
+  };
+  window.addEventListener('message', (message) => {
     if (message.data) {
       try {
         const response = JSON.parse(message.data);
@@ -79,8 +130,14 @@ const initializeStreams = () => {
     }
   });
 
-  connectionStream.on("data", (data) => {
-    // console.log('Publishing Data: ', data);
+  connectionStream.on('data', (data) => {
+    console.log('Publishing Data: ', data);
+    // window.qubetics && data.network ==='qubetics')
+    if (window.qubetics && data.network ==='qubetics') {
+      window.qubetics.sendResponse(data.id, { type: 'success', data: data.result });
+      return;
+      // handleResponse({ type: 'success', data: extractDataFromResp })
+    }
 
     if (window.trustwallet.ethereum) {
       if (data.error) {
@@ -99,7 +156,7 @@ const initializeStreams = () => {
         }
       }
 
-      if (data.method === "switchEthereumChain") {
+      if (data.method === 'switchEthereumChain') {
         window.trustwallet.ethereum.setConfig({
           ethereum: {
             chainId: data.chainId,
@@ -108,8 +165,8 @@ const initializeStreams = () => {
           },
         });
         window.trustwallet.ethereum.emitChainChanged(data.chainId);
-        window.localStorage.setItem("qubetics_chain_id", data.chainId);
-        window.localStorage.setItem("qubetics_rpc_url", data.rpcUrl);
+        window.localStorage.setItem('qubetics_chain_id', data.chainId);
+        window.localStorage.setItem('qubetics_rpc_url', data.rpcUrl);
       }
 
       if (data.network && data.network === 'solana') {
@@ -119,6 +176,15 @@ const initializeStreams = () => {
       window.trustwallet.ethereum.sendResponse(data.id, data.result);
     }
   });
+
+  window.addEventListener("message", (event) => {
+    if (event.source !== window || !event.data.type) return;
+
+    if (event.data.type === "switchAccount") {
+        console.log("Received from content.js:", event.data.data);
+        eventEmitter.emit(event.data.type, event.data.data)
+    }
+});
 };
 
 const start = async () => {

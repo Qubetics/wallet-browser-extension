@@ -74,3 +74,16 @@ export const SWIFT_ERROR = {
   114: 'You have reached the daily upper limit for $Cube. The swap is temporarily unavailable.',
   115: 'Insufficient liquidity',
 };
+
+
+export const DENOM = process.env.REACT_APP_DENOM;
+export const PREFIX = "qubetics";
+export const FEE = process.env.REACT_APP_FEE_DEDUCTION;
+export const nodeUrl = process.env.REACT_APP_NODE_URL;
+
+
+export const BASE_URL = {
+  EXPLORER_API_URL: process.env.REACT_APP_EXPLORER_API_URL,
+  EXPLORER_NAVIGATION_URL: process.env.REACT_APP_EXPLORER_NAVIGATION_URL,
+  VALIDATOR_API: process.env.REACT_APP_VALIDATOR_API,
+};
