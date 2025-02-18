@@ -212,13 +212,23 @@ const currency = {
 };
 
 let intervalId; // Declare a variable to store the interval ID
-
 class Background {
   port;
 
   constructor() {
     this.storeDefaultNetworks();
-
+    function sendMessageToContentScript(message) {
+      console.log('i am called!!');
+      chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+        if (tabs.length > 0) {
+          console.log('Tabs::', tabs);
+          // message.id = tabs[0].id;
+          chrome.tabs.sendMessage(tabs[0].id, message);
+        } else {
+          console.log('No active tab found.');
+        }
+      });
+    }
     // chrome.runtime.onConnect.addListener(function (port) {
     //   if (port.name === 'popup') {
     //     port.onDisconnect.addListener(async function () {
@@ -251,7 +261,6 @@ class Background {
           clearInterval(intervalId); // Clear the existing interval if it exists
           intervalId = null; // Reset intervalId to ensure it's not cleared again
         }
-
         intervalId = setInterval(async () => {
           await chrome.storage.session.remove(['accounts', 'password']);
         }, 300000);
@@ -401,89 +410,72 @@ class Background {
         } else if (req.method === 'nativeConnect') {
           try {
             await chrome.storage.session.remove(['accounts', 'password']);
-            // const { password } = await chrome.storage.session.get('password');
-            // if (password) {
-            //   const { accounts } = await chrome.storage.session.get('accounts');
-            //   const defaultAccount = accounts.find((el) => el.default === true);
-            //   const account =
-            //     req.network === 'solana'
-            //       ? defaultAccount.coinFamilyAndAddress[4]
-            //       : defaultAccount.address;
-            //   res.result = [account];
-            //   res.method = req.method;
-            //   res.network = req.network;
+            const response = await new Promise(async (resolve, reject) => {
+              const requestData = encodeURIComponent(JSON.stringify(req));
 
-            //   const { connectedDapps } = await chrome.storage.session.get(
-            //     'connectedDapps'
-            //   );
-
-            //   const checkIfAlreadyThere = (connectedDapps || []).find(
-            //     (el) => el.url === req.url
-            //   );
-
-            //   if (!checkIfAlreadyThere) {
-            //     await chrome.storage.session.set({
-            //       connectedDapps: [
-            //         ...(connectedDapps || []),
-            //         {
-            //           url: req.url,
-            //           image: req.image,
-            //           title: req.title,
-            //           time: new Date(),
-            //         },
-            //       ],
-            //     });
-            //   }
-            // } else {
-              const response = await new Promise(async (resolve, reject) => {
-                const requestData = encodeURIComponent(JSON.stringify(req));
-                chrome.windows.create({
-                  url: `index.html?method=nativeConnect&data=${requestData}`,
-                  type: 'popup',
-                  focused: true,
-                  width: 439,
-                  height: 746,
-                });
-
-                chrome.runtime.onMessage.addListener(
-                  (message, sender, sendResponse) => {
-                    if (message.method === 'nativeConnect') {
-                      resolve(message.result);
-                    }
-                  }
-                );
+              chrome.windows.create({
+                url: `index.html?method=nativeConnect&data=${requestData}`,
+                type: 'popup',
+                focused: true,
+                width: 439,
+                height: 746,
               });
 
-              if (response) {
-                res.result = response;
-                res.method = req.method;
-                res.network = req.network;
-                const { connectedDapps } = await chrome.storage.session.get(
-                  'connectedDapps'
+              chrome.windows.onRemoved.addListener(async () => {
+                const { isApproved } = await chrome.storage.local.get(
+                  'isApproved'
                 );
-
-                const checkIfAlreadyThere = (connectedDapps || []).find(
-                  (el) => el.url === req.url
-                );
-
-                if (!checkIfAlreadyThere) {
-                  await chrome.storage.session.set({
-                    connectedDapps: [
-                      ...(connectedDapps || []),
-                      {
-                        url: req.url,
-                        image: req.image,
-                        title: req.title,
-                        time: new Date(),
-                      },
-                    ],
+                console.log('isApproved:::', isApproved);
+                if (!isApproved)
+                  sendMessageToContentScript({
+                    method: 'user_rejected',
+                    message: 'Rejected by user',
+                    network: 'qubetics',
+                    id: req.id,
                   });
+                else await chrome.storage.local.set({ isApproved: false });
+              });
+
+              chrome.runtime.onMessage.addListener(
+                (message, sender, sendResponse) => {
+                  if (message.method === 'nativeConnect') {
+                    resolve(message.result);
+                    // chrome.windows.onRemoved.removeListener(function(){});
+                  }
                 }
-              } else {
-                res.result = [];
-                res.method = req.method;
-                res.error = true;
+              );
+            });
+
+            if (response) {
+              res.result = response;
+              res.method = req.method;
+              res.network = req.network;
+              const { connectedDapps } = await chrome.storage.session.get(
+                'connectedDapps'
+              );
+
+              const checkIfAlreadyThere = (connectedDapps || []).find(
+                (el) => el.url === req.url
+              );
+
+              if (!checkIfAlreadyThere) {
+                await chrome.storage.session.set({
+                  connectedDapps: [
+                    ...(connectedDapps || []),
+                    {
+                      url: req.url,
+                      image: req.image,
+                      title: req.title,
+                      time: new Date(),
+                    },
+                  ],
+                });
               }
+            } else {
+              res.result = [];
+              res.method = req.method;
+              res.error = true;
+            }
             // }
           } catch (err) {
             console.log('ERRor:::', err);
@@ -603,6 +595,21 @@ class Background {
               height: 746,
             });
 
+            chrome.windows.onRemoved.addListener(async () => {
+              const { isApproved } = await chrome.storage.local.get(
+                'isApproved'
+              );
+              console.log('isApproved:::', isApproved);
+              if (!isApproved)
+                sendMessageToContentScript({
+                  method: 'user_rejected',
+                  message: 'Rejected by user',
+                  network: 'qubetics',
+                  id: req.id,
+                });
+              else await chrome.storage.local.set({ isApproved: false });
+            });
+
             chrome.runtime.onMessage.addListener(
               (message, sender, sendResponse) => {
                 if (message.method === 'createValidator') {
@@ -631,6 +638,21 @@ class Background {
               focused: true,
               width: 439,
               height: 746,
+            });
+
+            chrome.windows.onRemoved.addListener(async () => {
+              const { isApproved } = await chrome.storage.local.get(
+                'isApproved'
+              );
+              console.log('isApproved:::', isApproved);
+              if (!isApproved)
+                sendMessageToContentScript({
+                  method: 'user_rejected',
+                  message: 'Rejected by user',
+                  network: 'qubetics',
+                  id: req.id,
+                });
+              else await chrome.storage.local.set({ isApproved: false });
             });
 
             chrome.runtime.onMessage.addListener(
@@ -664,6 +686,21 @@ class Background {
               height: 746,
             });
 
+            chrome.windows.onRemoved.addListener(async () => {
+              const { isApproved } = await chrome.storage.local.get(
+                'isApproved'
+              );
+              console.log('isApproved:::', isApproved);
+              if (!isApproved)
+                sendMessageToContentScript({
+                  method: 'user_rejected',
+                  message: 'Rejected by user',
+                  network: 'qubetics',
+                  id: req.id,
+                });
+              else await chrome.storage.local.set({ isApproved: false });
+            });
+
             chrome.runtime.onMessage.addListener(
               (message, sender, sendResponse) => {
                 if (message.method === 'bondMoreFunds') {
@@ -692,6 +729,21 @@ class Background {
               focused: true,
               width: 439,
               height: 746,
+            });
+
+            chrome.windows.onRemoved.addListener(async () => {
+              const { isApproved } = await chrome.storage.local.get(
+                'isApproved'
+              );
+              console.log('isApproved:::', isApproved);
+              if (!isApproved)
+                sendMessageToContentScript({
+                  method: 'user_rejected',
+                  message: 'Rejected by user',
+                  network: 'qubetics',
+                  id: req.id,
+                });
+              else await chrome.storage.local.set({ isApproved: false });
             });
 
             chrome.runtime.onMessage.addListener(
@@ -724,6 +776,21 @@ class Background {
               height: 746,
             });
 
+            chrome.windows.onRemoved.addListener(async () => {
+              const { isApproved } = await chrome.storage.local.get(
+                'isApproved'
+              );
+              console.log('isApproved:::', isApproved);
+              if (!isApproved)
+                sendMessageToContentScript({
+                  method: 'user_rejected',
+                  message: 'Rejected by user',
+                  network: 'qubetics',
+                  id: req.id,
+                });
+              else await chrome.storage.local.set({ isApproved: false });
+            });
+
             chrome.runtime.onMessage.addListener(
               (message, sender, sendResponse) => {
                 if (message.method === 'redelegate') {
@@ -752,6 +819,21 @@ class Background {
               focused: true,
               width: 439,
               height: 746,
+            });
+
+            chrome.windows.onRemoved.addListener(async () => {
+              const { isApproved } = await chrome.storage.local.get(
+                'isApproved'
+              );
+              console.log('isApproved:::', isApproved);
+              if (!isApproved)
+                sendMessageToContentScript({
+                  method: 'user_rejected',
+                  message: 'Rejected by user',
+                  network: 'qubetics',
+                  id: req.id,
+                });
+              else await chrome.storage.local.set({ isApproved: false });
             });
 
             chrome.runtime.onMessage.addListener(
@@ -784,6 +866,21 @@ class Background {
               height: 746,
             });
 
+            chrome.windows.onRemoved.addListener(async () => {
+              const { isApproved } = await chrome.storage.local.get(
+                'isApproved'
+              );
+              console.log('isApproved:::', isApproved);
+              if (!isApproved)
+                sendMessageToContentScript({
+                  method: 'user_rejected',
+                  message: 'Rejected by user',
+                  network: 'qubetics',
+                  id: req.id,
+                });
+              else await chrome.storage.local.set({ isApproved: false });
+            });
+
             chrome.runtime.onMessage.addListener(
               (message, sender, sendResponse) => {
                 if (message.method === 'stopValidator') {
@@ -814,6 +911,21 @@ class Background {
               height: 746,
             });
 
+            chrome.windows.onRemoved.addListener(async () => {
+              const { isApproved } = await chrome.storage.local.get(
+                'isApproved'
+              );
+              console.log('isApproved:::', isApproved);
+              if (!isApproved)
+                sendMessageToContentScript({
+                  method: 'user_rejected',
+                  message: 'Rejected by user',
+                  network: 'qubetics',
+                  id: req.id,
+                });
+              else await chrome.storage.local.set({ isApproved: false });
+            });
+
             chrome.runtime.onMessage.addListener(
               (message, sender, sendResponse) => {
                 if (message.method === 'unJailValidator') {
@@ -835,6 +947,9 @@ class Background {
         } else if (req.method === 'disconnect') {
           const response = await new Promise(async (resolve, reject) => {
             await chrome.storage.session.remove(['accounts', 'password']);
+            await chrome.storage.local.set({
+              isApproved: null,
+            });
             resolve(true);
           });
 
@@ -873,15 +988,15 @@ class Background {
   handleAllEthereumEvents = async () => {
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       console.log('MESSG::', message, 'SENDER::', sender);
-      
+
       if (message.method === 'switchAccount') {
         // Process the request and prepare the data to send to content script
-        chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-          if(tabs.length) {
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+          if (tabs.length) {
             const id = tabs[0].id;
-            chrome.tabs.sendMessage(id, message)
+            chrome.tabs.sendMessage(id, message);
           }
-        })
+        });
       }
       if (sender.tab) {
         if (message.type === 'JSON-RPC') {
