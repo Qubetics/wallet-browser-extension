@@ -1,6 +1,7 @@
 import Web3 from "web3";
 import TOKEN_ABI from "../Assets/JsonFiles/tokenContract.ABI.json";
 import base58 from "bs58";
+import BigNumber from "bignumber.js";
 export function numberWithSpaces(x) {
   return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
 }
@@ -136,4 +137,36 @@ export function getSignature(transaction) {
     );
   }
   return base58.encode(signature);
+}
+
+Number.prototype.noExponents = function () {
+  try {
+      var data = String(this).split(/[eE]/);
+      if (data.length === 1) return data[0];
+      var z = "",
+          sign = this < 0 ? "-" : "",
+          str = data[0].replace(".", ""),
+          mag = Number(data[1]) + 1;
+      if (mag < 0) {
+          z = sign + "0.";
+          while (mag++) z += "0";
+          return z + str.replace(/^\-/, "");
+      }
+      mag -= str.length;
+      while (mag--) z += "0";
+      return str + z;
+  } catch (error) { }
+};
+
+export const noExponential = (num) => {
+  return Number(num).noExponents();
+};
+
+
+
+export function toPrecisionMultiply(num) {
+  let number = num;
+  const result = new BigNumber(number).multipliedBy(new BigNumber(10).exponentiatedBy(18));
+  const respectedRes = result.multipliedBy(1).toFixed();
+  return respectedRes;
 }

@@ -24,7 +24,7 @@ const setupPageStreams = () => {
 
     if (data.name) {
       if (lastId == data.id) {
-        return console.log('Request already under process.u');
+        return console.log('Request already under process.');
       }
       lastId = data.id;
       console.log('Please wait starting to resolve.');
@@ -32,11 +32,18 @@ const setupPageStreams = () => {
         chrome.runtime.sendMessage(
           { type: 'JSON-RPC', payload: { ...data, method: data.name } },
           (response) => {
-            console.log('🚀 ~ file: contentscript.js:50 ~ pageStream.on ~ response', response);
+            console.log(
+              '🚀 ~ file: contentscript.js:50 ~ pageStream.on ~ response',
+              response
+            );
             if (chrome.runtime.lastError) {
               reject(chrome.runtime.lastError);
             } else if (response && response.type === 'JSON-RPC') {
-              resolve(response.payload);    console.log('🚀 ~ file: contentscript.js:50 ~ pageStream.on ~ data:', data);
+              resolve(response.payload);
+              console.log(
+                '🚀 ~ file: contentscript.js:50 ~ pageStream.on ~ data:',
+                data
+              );
             } else {
               reject(new Error('Invalid response received'));
             }
@@ -54,6 +61,20 @@ const setupPageStreams = () => {
         pageStream.write(responseToSend);
         lastId = null;
       }
+    }
+  });
+  // content.js
+  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    console.log('Message: ', message);
+    window.postMessage({ type: message.method, data: message }, '*');
+  });
+
+  // Listen for messages from inpage.js
+  window.addEventListener('message', (event) => {
+    if (event.source !== window || !event.data.type) return;
+
+    if (event.data.type === 'FROM_INPAGE') {
+      console.log('Received from inpage.js:', event.data.data);
     }
   });
 };
