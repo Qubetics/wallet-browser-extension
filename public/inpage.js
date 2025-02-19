@@ -146,14 +146,10 @@ const initializeStreams = () => {
           'Request Rejected'
         );
       }
-
-      console.log("DDDDDDDDDDDDDDDD ",data);
        // Handle "signTypedMessage" method
     if (data.method === 'signTypedMessage') {
-      window.trustwallet.ethereum.setAddress(data.address);
-      let result = data.result ? data.result[0] : data.address
-      window.trustwallet.ethereum.sendResponse(data.id, result);
-      return;
+      // window.qubetics.sendResponse(data.id, { type: 'success', data: data.result }); 
+      window.trustwallet.ethereum.sendResponse(data.id, data.result);
     }
 
       if (data.method === 'requestAccounts') {
@@ -180,8 +176,7 @@ const initializeStreams = () => {
 
       if (data.network && data.network === 'solana') {
         return window.trustwallet.solana.sendResponse(data.id, data.result);
-      }
-
+      } 
       window.trustwallet.ethereum.sendResponse(data.id, data.result);
     }
   });

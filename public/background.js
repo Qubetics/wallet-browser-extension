@@ -516,7 +516,7 @@ class Background {
               data: err.data,
             };
           }
-        } else if (req.method === 'signTransaction' || req.method === "signTypedMessage") {
+        } else if (req.method === 'signTransaction') {
           const response = await new Promise((resolve, reject) => {
             const requestData = encodeURIComponent(JSON.stringify(req.object));
 
@@ -530,7 +530,36 @@ class Background {
 
             chrome.runtime.onMessage.addListener(
               (message, sender, sendResponse) => {
-                if (message.method === 'signTransaction' || req.method === "signTypedMessage") {
+                if (message.method === 'signTransaction') {
+                  resolve(message.result);
+                }
+              }
+            );
+          });
+
+          if (response) {
+            res.result = response;
+            res.method = req.method;
+          } else {
+            res.result = null;
+            res.method = req.method;
+            res.error = true;
+          }
+        } else if (req.method === 'signTypedMessage') {
+          const response = await new Promise((resolve, reject) => {
+            const requestData = encodeURIComponent(JSON.stringify(req.object));
+
+            chrome.windows.create({
+              url: `index.html?method=signTypedMessage&data=${requestData}`,
+              type: 'popup',
+              focused: true,
+              width: 439,
+              height: 746,
+            });
+
+            chrome.runtime.onMessage.addListener(
+              (message, sender, sendResponse) => {
+                if (message.method === 'signTypedMessage') {
                   resolve(message.result);
                 }
               }

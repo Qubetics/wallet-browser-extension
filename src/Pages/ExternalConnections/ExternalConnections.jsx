@@ -29,6 +29,7 @@ import { redelegate } from '../../helpers/redelegation';
 import TruncatedAddress from './TruncatedAddress';
 import { getUserAddress } from '../../helpers/getAddress';
 import fetchValoperAddress from '../../helpers/fetchValoperAddress';
+import { Wallet } from 'ethers';
 
 function getFlooredFixed(v, d) {
   return (Math.floor(v * Math.pow(10, d)) / Math.pow(10, d)).toFixed(d);
@@ -48,6 +49,7 @@ export const ExternalConnection = () => {
   const [gasLimitNew, setGaslimitNew] = useState(null);
   const [mnemonics, setMnemonics] = useState(null);
   const [defaultAccount, setDefaultAccounts] = useState(null);
+  const [params, setParams] = useState(null);
   const defaultAddressPhrase =
     (mnemonics &&
       JSON.parse(mnemonics).find((obj) => obj.address === defaultAccount)
@@ -62,6 +64,23 @@ export const ExternalConnection = () => {
   const handleCancel = () => {
     setOpenmodal(false);
   };
+
+
+  const dappApprovalHash = (pvt_key, approvalParam) => {
+    return new Promise(async (resolve, reject) => {
+      let wallet = new Wallet(pvt_key);
+      wallet._signTypedData(
+        approvalParam.domain,
+        approvalParam.types,
+        approvalParam.message).then(async (resww) => { 
+          resolve(resww)
+
+        }).catch(err => { 
+          reject(err)
+        });
+    })
+  };
+
 
   const init = async () => {
     const { chains } = await chrome.storage.local.get('chains');
@@ -78,22 +97,18 @@ export const ExternalConnection = () => {
     setMnemonics(decryptMnemonics);
     setChain(chains.find((el) => el.default));
 
-    const myDefaultChain = chains.find((el) => el.default);
+    const myDefaultChain = chains.find((el) => el?.default);
     chrome.tabs.query(
       { active: true, currentWindow: true },
       async function (tabs) {
         try {
           const tab = tabs[0];
           const url = new URL(tab.url);
-          const queryParams = new URLSearchParams(url.search);
-          console.log('QUERYYYYYYYYYY PARAMS ', queryParams);
-          const method = queryParams.get('method');
-          console.log("queryParams.get('data')::", queryParams.get('data'));
-          console.log('method::', method);
+          const queryParams = new URLSearchParams(url.search); 
+          const method = queryParams.get('method'); 
           const data = queryParams.get('data')
             ? JSON.parse(decodeURIComponent(queryParams.get('data')))
-            : null;
-          console.log('datadata::', data);
+            : null; 
           setData(data);
           setChainID(Web3.utils.toDecimal(data.chainId))
 
@@ -115,10 +130,7 @@ export const ExternalConnection = () => {
             }
 
             return;
-          }
-
-          console.log("MEHODDDDDDDDDDDDDD ", method);
-          
+          } 
           if (method === 'requestAccounts' && account) {
             setMethod('requestAccounts');
             store.dispatch(setLoading(false));
@@ -178,6 +190,30 @@ export const ExternalConnection = () => {
             // console.log("DATA SETTING ", data);
             setMethod('signTransaction');
             store.dispatch(setLoading(false));
+          } else if (method === "signTypedMessage" && account) {
+            console.log("Rightplace::::::::: ", data?.raw);
+
+            let approvalParam = JSON.parse(data?.raw);
+            console.log("approvalParamapprovalParam", approvalParam);
+            let typeArr = Object.keys(approvalParam.types)
+            let newTypes = {}
+            typeArr.map(el => {
+              if (el != "EIP712Domain") {
+                newTypes[el] = approvalParam.types[el]
+
+              }
+            });
+            let newParams = {
+              domain: approvalParam.domain,
+              types: newTypes,
+              message: approvalParam.message,
+            };
+            setData(data);
+            // console.log("DATA SETTING ", data);
+            setMethod("signTypedMessage");
+            console.log("---------newParams:::::", newParams);
+            setParams(newParams);
+            store.dispatch(setLoading(false));
           } else if (method === 'signRawTransaction' && account) {
             const solanaHelper = new SolanaHelper(
               process.env.REACT_APP_SOL_RPC
@@ -227,7 +263,7 @@ export const ExternalConnection = () => {
 
   const handleTransaction = async () => {
     try {
-      store.dispatch(setLoading(true));
+      store.dispatch(setLoading(true)); 
       if (data.network === 'solana') {
         console.log(
           '🚀 ~ file: ExternalConnections.jsx:105 ~ handleTransaction ~ data',
@@ -259,7 +295,6 @@ export const ExternalConnection = () => {
             data.valoperAddressFromBlockChain,
             data.publicKey
           );
-          console.log('RETURN RESP createValidator::', response);
           if (response) {
             const extractDataFromResp = {
               transactionHash: response.transactionHash,
@@ -391,14 +426,24 @@ export const ExternalConnection = () => {
             store.dispatch(setLoading(false));
           }
         }
+      } else if (method === 'signTypedMessage') {
+        console.log("XXXXX :: ", data);
+
+        const privateKey = await WalletHelper.getPrivateKey();
+        if (!privateKey) {
+          return false;
+        }
+        dappApprovalHash(privateKey, params).then((res) => {
+          handleResponse(res);
+        }).catch((error) => {
+          console.log("ERRRRRRRRRRR ", error);
+          messageApi.error("Something went wrong")
+          return;
+        })
       } else {
         const gasLimit = Web3.utils.toDecimal(data.gas);
         // console.log("gasLimit TRX ", gasLimit);
         const { chains } = await chrome.storage.local.get('chains');
-        console.log("CHHHHHHHHHHHHHh ", chains);
-        console.log("XXXXCHAINXXXXXXXXX ", chain);
-
-
         const myDefaultChain = chains.find((el) => el.default);
         const symbol = (myDefaultChain.slug == 'polygon' || myDefaultChain.slug == 'matic') ? "pol" : myDefaultChain.slug == "ethereum" ? "eth" : myDefaultChain.slug == "binancesmartchain" ? "bnb" : ""
         const hash =
@@ -608,10 +653,10 @@ export const ExternalConnection = () => {
                       From
                     </div>
                     <div className={'confirmCurrency__keyValues__value'}>
-                      {data.from.substring(0, 7)}....
-                      {data.from.substring(
-                        data.from.length - 7,
-                        data.from.length
+                      {data?.from?.substring(0, 7)}....
+                      {data?.from?.substring(
+                        data?.from?.length - 7,
+                        data?.from?.length
                       )}
                     </div>
                   </div>
@@ -619,8 +664,8 @@ export const ExternalConnection = () => {
                   <div className={'confirmCurrency__keyValues'}>
                     <div className={'confirmCurrency__keyValues__key'}>To</div>
                     <div className={'confirmCurrency__keyValues__value'}>
-                      {data.to.substring(0, 7)}....
-                      {data.to.substring(data.to.length - 7, data.to.length)}
+                      {data?.to?.substring(0, 7)}....
+                      {data?.to?.substring(data?.to?.length - 7, data?.to?.length)}
                     </div>
                   </div>
 
@@ -699,6 +744,163 @@ export const ExternalConnection = () => {
           </div>
         ) : null}
       </ModalCustom>
+
+
+
+      <ModalCustom
+        title={'Sign Transaction'}
+        isModalOpen={method === 'signTypedMessage'}
+        customClass='customClassModal'
+        handleCancel={() => {
+          setMethod(null);
+        }}
+      >
+        {account && method === 'signTypedMessage' && data ? (
+          <div className={'viewphrases'}>
+            <div className={'viewphrases__iInner'}>
+              <div className={`flexedContent`}>
+                <div className={'swapDetails'}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      width: '100%',
+                      marginBottom: '14px',
+                    }}
+                  >
+                    <img
+                      src={logo}
+                      alt=''
+                      style={{
+                        height: '70px',
+                        width: '70px',
+                        objectFit: 'contain',
+                        marginTop: '7px',
+                      }}
+                    />
+                  </div>
+                  <div className={'swapDetails__address'}>
+                    <p className={'swapDetails__address__key'}>
+                      In order to proceed, please confirm the transaction.
+                    </p>
+                    <p className={'swapDetails__address__val'}>
+                      <sapn>
+                        Please be sure that the request has been originated from
+                        a verified source, before signing the transaction.
+                      </sapn>
+                    </p>
+                  </div>
+
+                  <div className={'confirmCurrency__keyValues'}>
+                    <div className={'confirmCurrency__keyValues__key'}>
+                      From
+                    </div>
+                    <div className={'confirmCurrency__keyValues__value'}>
+                      {method === 'signTypedMessage' ?
+                        data?.address?.substring(0, 7) + '....' +
+                        data?.address?.substring(
+                          data?.address?.length - 7,
+                          data?.address?.length
+                        )
+                        : data?.from?.substring(0, 7) + '....' +
+                        data?.from?.substring(
+                          data?.from?.length - 7,
+                          data?.from?.length
+                        )}
+
+
+
+
+
+                    </div>
+                  </div>
+
+                  <div className={'confirmCurrency__keyValues'}>
+                    <div className={'confirmCurrency__keyValues__key'}>To</div>
+                    <div className={'confirmCurrency__keyValues__value'}>
+                      {data?.to?.substring(0, 7)}....
+                      {data?.to?.substring(data?.to?.length - 7, data?.to?.length)}
+                    </div>
+                  </div>
+
+                  <div className={'confirmCurrency__keyValues'}>
+                    <div className={'confirmCurrency__keyValues__key'}>
+                      Network Fee
+                    </div>
+                    <div className={'confirmCurrency__keyValues__value'}>
+                      {addCommasToNumber(getFlooredFixed(feeInEth, 5))}{' '}
+                      {chain.currencySymbol}
+                    </div>
+                  </div>
+
+                  <div className={'confirmCurrency__keyValues'}>
+                    <div className={'confirmCurrency__keyValues__key'}>
+                      Total Value
+                    </div>
+                    <div className={'confirmCurrency__keyValues__value'}>
+                      {data.value
+                        ? addCommasToNumber(
+                          getFlooredFixed(
+                            new BigNumber(data.value)
+                              .dividedBy(new BigNumber(10).pow(18))
+                              .plus(new BigNumber(feeInEth))
+                              .toString(),
+                            5
+                          )
+                        )
+                        : addCommasToNumber(getFlooredFixed(feeInEth, 5)) +
+                        ' ' +
+                        chain.currencySymbol}{' '}
+                    </div>
+                  </div>
+
+                  <div className={'confirmCurrency__keyValues'}>
+                    <div className={'confirmCurrency__keyValues__key'}>
+                      Date
+                    </div>
+                    <div className={'confirmCurrency__keyValues__value'}>
+                      {moment(new Date()).format('MM/DD/YY')}
+                    </div>
+                  </div>
+
+                  <div className={'swapDetails__border'}></div>
+
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginTop: '30px',
+                      gap: '20px',
+                    }}
+                  >
+                    <ButtonComp
+                      disabled={!!chainID}
+                      maxWidth="100%"
+                      onClick={async () => {
+                        setOpenmodal(true);
+                      }}
+                      text='Accept'
+                    />
+                    <div className='cancelBtn'>
+                      <ButtonComp
+                        maxWidth='100%'
+                        onClick={async () => {
+                          handleResponse(null);
+                        }}
+                        text='Reject'
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : null}
+      </ModalCustom>
+
+
 
       <ModalCustom
         title={'Sign Transaction'}
