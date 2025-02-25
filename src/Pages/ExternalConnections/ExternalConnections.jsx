@@ -111,6 +111,7 @@ export const ExternalConnection = () => {
             : null; 
           setData(data);
           setChainID(Web3.utils.toDecimal(data.chainId))
+          console.log('EXTERNAL CONN DATA::', data,"account::",account);
 
           if (data.network === 'qubetics') {
             if (method === 'nativeConnect') {
@@ -121,7 +122,7 @@ export const ExternalConnection = () => {
                 defaultAddressPhrase,
                 data.nodeUrl
               );
-              setData({ ...data, valoperAddress, address });
+              setData({ ...data, valoperAddress, address,evmAddress:account.address });
               setMethod(method);
               // console.log("DATA DAT:::",data,valoperAddress,address);
             } else {
@@ -249,13 +250,17 @@ export const ExternalConnection = () => {
     );
   };
   const handleResponse = async (result, error) => {
+    // await chrome.storage.session.set({ isApproved: true });
+    const { isApproved } = await chrome.storage.local.get(
+      'isApproved'
+    );
     console.log(
       '🚀 ~ file: ExternalConnections.jsx:187 ~ handleResponse ~ result 11',
-      result
+      result,"isApproved::",isApproved
     );
-
-    chrome.runtime.sendMessage({ method, result }, (response) => {
-      chrome.windows.getCurrent(function (window) {
+    chrome.runtime.sendMessage({ method, result },(response) => {
+      chrome.windows.getCurrent(async function (window) {
+        await chrome.storage.local.set({ isApproved: true });
         chrome.windows.remove(window.id);
       });
     });
@@ -1270,6 +1275,7 @@ export const ExternalConnection = () => {
                           type: 'success',
                           data: data,
                         });
+                        
                       }}
                       text='Accept'
                     />

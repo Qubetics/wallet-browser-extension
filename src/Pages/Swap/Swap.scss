@@ -366,11 +366,12 @@
   border: 1px solid #f5da76;
   .innerslip {
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     width: 100%;
     color: #f5da76;
     align-items: center;
-    gap: 6px;
+    gap: 10px;
+
     svg {
       width: 20px;
       height: 20px;
