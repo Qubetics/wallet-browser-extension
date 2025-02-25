@@ -404,7 +404,7 @@ function SwapDetails() {
           <div className="swapDetails-bg">
             <div className="swapDetails__iconsTop">
               {token1.image ? (
-                <img src={token1.image} width={30} height={30} />
+                <img src={token1.image} width={30} height={30} style={{borderRadius:'50%'}} />
               ) : (
                 <div
                   style={{
@@ -424,7 +424,7 @@ function SwapDetails() {
               )}
               <img src={arr} width={144} height={12} />
               {token2.image ? (
-                <img src={token2.image} width={30} height={30} />
+                <img src={token2.image} width={30} height={30} style={{borderRadius:'50%'}} />
               ) : (
                 <div
                   style={{

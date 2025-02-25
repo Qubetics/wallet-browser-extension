@@ -3038,6 +3038,7 @@ function Swap() {
                           style={{
                             width: '29px',
                             marginRight: '15px',
+                            borderRadius:'50%'
                           }}
                           src={token.image}
                           alt=''
