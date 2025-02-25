@@ -1,92 +1,93 @@
 /*global chrome */
-import "react-tabs/style/react-tabs.css";
-import "./Swap.scss";
-import ModalCloseIcon from "../../Assets/ModalCloseIcon.svg";
-import darkclose from "../../Assets/darkclose.svg";
-import { Drawer, message, Select, Tooltip } from "antd";
+import 'react-tabs/style/react-tabs.css';
+import './Swap.scss';
+import ModalCloseIcon from '../../Assets/ModalCloseIcon.svg';
+import darkclose from '../../Assets/darkclose.svg';
+import { Drawer, message, Select, Tooltip } from 'antd';
 import {
   EditOutlined,
   InfoCircleOutlined,
   SettingOutlined,
-} from "@ant-design/icons";
+} from '@ant-design/icons';
 // import DarkLogo from "../../Assets/skymarvelLogo.png";
 // import Logo from "../../Assets/skymarvelLogo.png";
-import React from "react";
-import MenuRestofHeaders from "../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders";
-import { InputField } from "../../Components/InputField/InputFieldSimple";
-import BTC from "../../Assets/Coins/BTC.png";
-import DownArrowSuffix from "../../Assets/DownArrowSuffix.svg";
-import Cog from "../../Assets/cog.png";
-import Search from "../../Assets/SearchIcon.svg";
-import Edit from "../../Assets/edit.svg";
+import React from 'react';
+import MenuRestofHeaders from '../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders';
+import { InputField } from '../../Components/InputField/InputFieldSimple';
+import BTC from '../../Assets/Coins/BTC.png';
+import DownArrowSuffix from '../../Assets/DownArrowSuffix.svg';
+import InfoIcon from '../../Assets/info1.png';
+import Cog from '../../Assets/cog.png';
+import Search from '../../Assets/SearchIcon.svg';
+import Edit from '../../Assets/edit.svg';
 // import Search from "../../Assets/SearchIcon.svg";
-import ETH from "../../Assets/Coins/ETH.png";
-import ADA from "../../Assets/Coins/ADA.png";
-import SwapVerticalIcon from "../../Assets/SwapVerticalIcon.svg";
-import ButtonComp from "../../Components/ButtonComp/ButtonComp";
-import { useLocation, useNavigate } from "react-router-dom";
-import { UniswapHelper } from "../../helpers/uniswap.helper";
-import { useEffect } from "react";
-import { useState } from "react";
-import { Web3Helper } from "../../helpers/web3.helper";
-import { useSelector } from "react-redux";
-import { store } from "../..";
-import { setLoading as externalLoading } from "../../actions/loading";
-import { Loader } from "../../Components/Loader/Loader";
-import { ClipLoader } from "react-spinners";
-import { useRef } from "react";
-import { Tabs, TabList, Tab, TabPanel } from "react-tabs";
-import CrossChain from "../CrossChain/CrossChain";
-import { DURATION } from "../../config/message.config";
-import BigNumber from "bignumber.js";
-import { SolanaHelper } from "../../helpers/solana.helper";
-import { BTCHelper } from "../../helpers/btc.helper";
-import warning from "../../Assets/PNG/danger.png";
-
+import ETH from '../../Assets/Coins/ETH.png';
+import ADA from '../../Assets/Coins/ADA.png';
+import SwapVerticalIcon from '../../Assets/SwapVerticalIcon.svg';
+import ButtonComp from '../../Components/ButtonComp/ButtonComp';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { UniswapHelper } from '../../helpers/uniswap.helper';
+import { useEffect } from 'react';
+import { useState } from 'react';
+import { Web3Helper } from '../../helpers/web3.helper';
+import { useSelector } from 'react-redux';
+import { store } from '../..';
+import { setLoading as externalLoading } from '../../actions/loading';
+import { Loader } from '../../Components/Loader/Loader';
+import { ClipLoader } from 'react-spinners';
+import { useRef } from 'react';
+import { Tabs, TabList, Tab, TabPanel } from 'react-tabs';
+import CrossChain from '../CrossChain/CrossChain';
+import { DURATION } from '../../config/message.config';
+import BigNumber from 'bignumber.js';
+import { SolanaHelper } from '../../helpers/solana.helper';
+import { BTCHelper } from '../../helpers/btc.helper';
+import warning from '../../Assets/PNG/danger.png';
+import infoBg from '../../Assets/bgRedinfo.png';
 import {
   balanceToFiatConversion,
   toFixed,
-} from "../../helpers/conversion.helper";
-import { server } from "../../server";
-import Web3 from "web3";
-import { PancakeHelper } from "../../helpers/pancake.helper";
-import ModalCustom from "../../Components/ModalCustom/ModalCustom";
-import { setLoading as overAllLoader } from "../../actions/loading";
-import { PulseChainHelper } from "../../helpers/pulsechain.helper";
-import debounce from "lodash.debounce";
-import { UNISWAP_NATIVE_WRAPPED_TOKEN_ADDRESSES } from "../../config/uniswap.config";
-import { PANCAKE_NATIVE_WRAPPED_TOKEN_ADDRESSES } from "../../config/pancake.config";
-import Bignumber from "bignumber.js";
-import { generateString } from "../../helpers/common.helper";
+} from '../../helpers/conversion.helper';
+import { server } from '../../server';
+import Web3 from 'web3';
+import { PancakeHelper } from '../../helpers/pancake.helper';
+import ModalCustom from '../../Components/ModalCustom/ModalCustom';
+import { setLoading as overAllLoader } from '../../actions/loading';
+import { PulseChainHelper } from '../../helpers/pulsechain.helper';
+import debounce from 'lodash.debounce';
+import { UNISWAP_NATIVE_WRAPPED_TOKEN_ADDRESSES } from '../../config/uniswap.config';
+import { PANCAKE_NATIVE_WRAPPED_TOKEN_ADDRESSES } from '../../config/pancake.config';
+import Bignumber from 'bignumber.js';
+import { generateString } from '../../helpers/common.helper';
 // import useCheckMaintanace from "../../CustomHooks/checkMaintanance";
-import { WalletHelper } from "../../helpers/wallet.helper";
-import Maintanance from "../../Components/Maintanance/Maintanance";
-import { swapDetailAc } from "../../actions/swap";
-import useCurrentHeight from "../../CustomHooks/useCurrentHeight";
-import { BL_CODE, rpc_chain, token_type } from "../../helpers/constant";
+import { WalletHelper } from '../../helpers/wallet.helper';
+import Maintanance from '../../Components/Maintanance/Maintanance';
+import { swapDetailAc } from '../../actions/swap';
+import useCurrentHeight from '../../CustomHooks/useCurrentHeight';
+import { BL_CODE, rpc_chain, token_type } from '../../helpers/constant';
 function getFlooredFixed(v, d) {
   return (Math.floor(v * Math.pow(10, d)) / Math.pow(10, d)).toFixed(d);
 }
 let randomString = generateString(15).trim();
 
 function addCommasToNumber(number) {
-  var parts = number.toString().split(".");
+  var parts = number.toString().split('.');
   var integerPart = parts[0];
-  var decimalPart = parts[1] || ""; // Handle cases where there is no decimal part
+  var decimalPart = parts[1] || ''; // Handle cases where there is no decimal part
 
   // Add commas to the integer part
-  integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 
   // Combine the integer and decimal parts
-  if (decimalPart !== "") {
-    return integerPart + "." + decimalPart;
+  if (decimalPart !== '') {
+    return integerPart + '.' + decimalPart;
   } else {
     return integerPart;
   }
 }
 
 function Swap() {
-  const [infoMessage, setInfoMessage] = useState("");
+  const [infoMessage, setInfoMessage] = useState(false);
   const { chain, account, currency, swapDetail } = useSelector(
     (state) => state
   );
@@ -126,6 +127,7 @@ function Swap() {
   const [show, setShow] = useState(true);
   const [selectedCF, setSelectedCF] = useState(false);
   const [isWrap, setIsWrap] = useState(null);
+  const [confirmSlippageAlert, setConfirmSlippageAlert] = useState(false);
   const height = useCurrentHeight();
 
   const [reverse, setReverse] = useState(false);
@@ -163,12 +165,11 @@ function Swap() {
   }, []);
 
   useEffect(() => {
-    if ((amount == null || amount == "") && amount2 != null) {
+    if ((amount == null || amount == '') && amount2 != null) {
       setAmount2(null);
       setInfoData([]);
     }
   }, [amount]);
-
   function showFiatConversion(amount, token1Price, amount2, token2Price) {
     const fromAmount =
       parseFloat(amount ? amount : 0) * parseFloat(token1Price);
@@ -237,13 +238,13 @@ function Swap() {
       }
     } catch (error) {
       store.dispatch(overAllLoader(false));
-      return messageApi.error("Something went wrong.");
+      return messageApi.error('Something went wrong.');
     }
   };
   const init = async () => {
-    const { chains } = await chrome.storage.local.get("chains");
+    const { chains } = await chrome.storage.local.get('chains');
     try {
-      const comissionData = await server.get("/on-chain/commision_data", {
+      const comissionData = await server.get('/on-chain/commision_data', {
         headers: {
           Authorization: account.jwtToken,
         },
@@ -254,7 +255,6 @@ function Swap() {
       // console.log("ccaaaaaaa ", account);
       // console.log("currencycurrency ", currency);
       // console.log("STATTTTTTTTTT ", state);
-
 
       const { data } = await server.post(
         `/wallet/swap_coinlist`,
@@ -296,7 +296,7 @@ function Swap() {
           balance: token.wallets[0] ? toFixed(token.wallets[0].balance) : 0,
           type: token_type(token.coin_family),
           jupiter_fee_address: null,
-          rpc: rpc_chain(token.coin_family)
+          rpc: rpc_chain(token.coin_family),
         };
       });
 
@@ -310,7 +310,7 @@ function Swap() {
 
       if (!uniToken1 && !uniToken2) {
         if (tokens.length === 0) {
-          return messageApi.error("Please enable tokens in your wallet.");
+          return messageApi.error('Please enable tokens in your wallet.');
         }
 
         let myToken1 = tokens.find(
@@ -385,17 +385,17 @@ function Swap() {
               balance: token.wallets[0] ? toFixed(token.wallets[0].balance) : 0,
               type: token_type(token.coin_family),
               jupiter_fee_address: null,
-              rpc: rpc_chain(token.coin_family)
+              rpc: rpc_chain(token.coin_family),
             };
           });
 
           //assign the object to my state token
           const myStateToken = newTokens[0];
 
-          console.log("newTokensnewTokensnewTokens ", newTokens);
+          console.log('newTokensnewTokensnewTokens ', newTokens);
 
           if (!myStateToken) {
-            messageApi.error("Token not available for swap.");
+            messageApi.error('Token not available for swap.');
           }
 
           if (myStateToken) {
@@ -407,7 +407,7 @@ function Swap() {
                   [`uniToken1_${account.id}`]: myStateToken,
                 });
               } else {
-                messageApi.error("Cannot set the same tokens on both sides.");
+                messageApi.error('Cannot set the same tokens on both sides.');
               }
             } else {
               if (myToken1.id != myStateToken.id) {
@@ -417,12 +417,12 @@ function Swap() {
                   [`uniToken2_${account.id}`]: myStateToken,
                 });
               } else {
-                messageApi.error("Cannot set the same tokens on both sides.");
+                messageApi.error('Cannot set the same tokens on both sides.');
               }
             }
           }
           if (state.coinFamily) {
-            console.log("WWWWWWWWWW ", myToken1);
+            console.log('WWWWWWWWWW ', myToken1);
 
             setToken1(myToken1);
             handleToken1Change(myStateToken);
@@ -497,7 +497,7 @@ function Swap() {
               chain: chains.find(
                 (chain) => chain?.coinFamily == token?.coin_family
               ),
-              rpc: rpc_chain(token.coin_family)
+              rpc: rpc_chain(token.coin_family),
             };
           });
 
@@ -584,7 +584,7 @@ function Swap() {
             balance: token.wallets[0] ? toFixed(token.wallets[0].balance) : 0,
             type: token_type(token.coin_family),
             jupiter_fee_address: null,
-            rpc: rpc_chain(token.coin_family)
+            rpc: rpc_chain(token.coin_family),
           };
         });
 
@@ -635,7 +635,7 @@ function Swap() {
               chain: chains.find(
                 (chain) => chain?.coinFamily == token?.coin_family
               ),
-              rpc: rpc_chain(token.coin_family)
+              rpc: rpc_chain(token.coin_family),
             };
           });
 
@@ -643,7 +643,7 @@ function Swap() {
           const myStateToken = newTokens[0];
 
           if (!myStateToken) {
-            messageApi.error("Token not available for swap.");
+            messageApi.error('Token not available for swap.');
           }
 
           if (myStateToken) {
@@ -655,7 +655,7 @@ function Swap() {
                   [`uniToken1_${account.id}`]: myStateToken,
                 });
               } else {
-                messageApi.error("Cannot set the same tokens on both sides.");
+                messageApi.error('Cannot set the same tokens on both sides.');
               }
             } else {
               if (uniToken1.id != myStateToken.id) {
@@ -665,7 +665,7 @@ function Swap() {
                   [`uniToken2_${account.id}`]: myStateToken,
                 });
               } else {
-                messageApi.error("Cannot set the same tokens on both sides.");
+                messageApi.error('Cannot set the same tokens on both sides.');
               }
             }
           }
@@ -689,7 +689,7 @@ function Swap() {
       setLoading(false);
     } catch (error) {
       console.log(error);
-      messageApi.error("Something went wrong.");
+      messageApi.error('Something went wrong.');
       setLoading(false);
       // navigate(-1);
     }
@@ -698,22 +698,22 @@ function Swap() {
   useEffect(() => {
     if (token1 && token2) {
       if (
-        "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c" === token1.tokenAddress &&
+        '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c' === token1.tokenAddress &&
         !token2.tokenAddress
       ) {
         setIsWrap(true);
       } else if (
-        "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2" === token1.tokenAddress &&
+        '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2' === token1.tokenAddress &&
         !token2.tokenAddress
       ) {
         setIsWrap(true);
       } else if (
-        "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c" === token2.tokenAddress &&
+        '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c' === token2.tokenAddress &&
         !token1.tokenAddress
       ) {
         setIsWrap(true);
       } else if (
-        "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2" === token2.tokenAddress &&
+        '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2' === token2.tokenAddress &&
         !token1.tokenAddress
       ) {
         setIsWrap(true);
@@ -739,7 +739,7 @@ function Swap() {
   };
 
   const getInactiveTokens = async () => {
-    const { chains } = await chrome.storage.local.get("chains");
+    const { chains } = await chrome.storage.local.get('chains');
     try {
       store.dispatch(overAllLoader(true));
       const { data } = await server.post(
@@ -780,7 +780,7 @@ function Swap() {
           chain: chains.find(
             (chain) => chain?.coinFamily == token?.coin_family
           ),
-          rpc: rpc_chain(token.coin_family)
+          rpc: rpc_chain(token.coin_family),
         };
       });
 
@@ -802,7 +802,7 @@ function Swap() {
     } catch (error) {
       store.dispatch(overAllLoader(false));
       console.log(error);
-      messageApi.error("Something went wrong.");
+      messageApi.error('Something went wrong.');
       navigate(-1);
     }
   };
@@ -813,9 +813,14 @@ function Swap() {
     }
   }, [selected, selectedCF]);
 
-  useEffect(() => {
-    // init();
-  }, []);
+  // useEffect(() => {
+  //   if (
+  //     (slippage >= 2 && !slippageDrawer) ||
+  //     (Number(customSlippage) >= 2 && !slippageDrawer)
+  //   ) {
+  //     setConfirmSlippageAlert(true);
+  //   }
+  // }, [slippage, slippageDrawer]);
 
   const handleTokensSwapChangePosition = async () => {
     if (token1 && token2) {
@@ -825,7 +830,7 @@ function Swap() {
   };
 
   const calculateTradingFee = async (route, amount, reverse) => {
-    const { data } = await server.get("/wallet/get_admin_swap_fees", {
+    const { data } = await server.get('/wallet/get_admin_swap_fees', {
       headers: {
         Authorization: account.jwtToken,
       },
@@ -833,12 +838,12 @@ function Swap() {
 
     const myAdminFee = data.data.find((el) =>
       token1.coinFamily == 1
-        ? el.network === "bnb"
+        ? el.network === 'bnb'
         : token1.coinFamily == 2
-          ? el.network === "eth"
-          : token1.coinFamily == 4
-            ? el.network === "pol"
-            : el.network === ""
+        ? el.network === 'eth'
+        : token1.coinFamily == 4
+        ? el.network === 'pol'
+        : el.network === ''
     );
 
     let finalFee = 0;
@@ -855,8 +860,8 @@ function Swap() {
 
       const result = originalNumber * percent;
 
-      console.log("TTTTTTTTTTTTTTTTTTT ",result, " PLPLPL ", token1);
-      
+      console.log('TTTTTTTTTTTTTTTTTTT ', result, ' PLPLPL ', token1);
+
       // Step 3: Add the result to the original number
       finalFee = getFlooredFixed(
         result / token1.coin.native_coin_market_data.current_price,
@@ -876,8 +881,8 @@ function Swap() {
       return getFlooredFixed(finalFeeSol, 9);
     }
 
-    console.log("HERRRRRRRRRRRRR ", BL_CODE[token1.coinFamily].toLowerCase());
-    
+    console.log('HERRRRRRRRRRRRR ', BL_CODE[token1.coinFamily].toLowerCase());
+
     const gasPrice = await Web3Helper.getGasPrice(
       // token1.coinFamily == 1 ? "eth" : token1.coinFamily == 9 ? "pls" : "bnb",
       BL_CODE[token1.coinFamily].toLowerCase(),
@@ -899,7 +904,7 @@ function Swap() {
           UNISWAP_NATIVE_WRAPPED_TOKEN_ADDRESSES[1].address,
           token1.address,
           token1.rpc,
-          token1.isToken ? "withdraw" : "deposit",
+          token1.isToken ? 'withdraw' : 'deposit',
           new BigNumber(amount).multipliedBy(
             new BigNumber(10).pow(
               UNISWAP_NATIVE_WRAPPED_TOKEN_ADDRESSES[1].decimals
@@ -914,7 +919,7 @@ function Swap() {
       if (finalFee) {
         if (token1.isToken) {
           const gasPrice = await Web3Helper.getGasPrice(
-            "eth",
+            'eth',
             token1.address,
             token1.address,
             1,
@@ -954,7 +959,7 @@ function Swap() {
           PANCAKE_NATIVE_WRAPPED_TOKEN_ADDRESSES[56].address,
           token1.address,
           token1.rpc,
-          token1.isToken ? "withdraw" : "deposit",
+          token1.isToken ? 'withdraw' : 'deposit',
           new BigNumber(amount).multipliedBy(
             new BigNumber(10).pow(
               PANCAKE_NATIVE_WRAPPED_TOKEN_ADDRESSES[56].decimals
@@ -981,7 +986,7 @@ function Swap() {
           if (finalFee) {
             if (token1.isToken) {
               const gasPrice = await Web3Helper.getGasPrice(
-                "bnb",
+                'bnb',
                 token1.address,
                 token1.address,
                 1,
@@ -1015,7 +1020,7 @@ function Swap() {
         if (finalFee) {
           if (token1.isToken) {
             const gasPrice = await Web3Helper.getGasPrice(
-              "bnb",
+              'bnb',
               token1.address,
               token1.address,
               1,
@@ -1071,7 +1076,7 @@ function Swap() {
           if (finalFee) {
             if (token1.isToken) {
               const gasPrice = await Web3Helper.getGasPrice(
-                "pls",
+                'pls',
                 token1.address,
                 token1.address,
                 1,
@@ -1106,7 +1111,7 @@ function Swap() {
         if (finalFee) {
           if (token1.isToken) {
             const gasPrice = await Web3Helper.getGasPrice(
-              "pls",
+              'pls',
               token1.address,
               token1.address,
               1,
@@ -1137,13 +1142,13 @@ function Swap() {
     }
 
     console.log(
-      "parseFloat(finalFee) finalGasFeeForTransaction ",
+      'parseFloat(finalFee) finalGasFeeForTransaction ',
       parseFloat(finalFee),
-      "   :: ",
+      '   :: ',
       finalGasFeeForTransaction
     );
     // console.log(" FEEEEEEEEEEEEEEEE ", finalFee, " finalGasFeeForTransaction : ", finalGasFeeForTransaction);
-    
+
     setTradingFee(parseFloat(finalFee) + finalGasFeeForTransaction);
     return getFlooredFixed(parseFloat(finalFee) + finalGasFeeForTransaction, 5);
   };
@@ -1239,8 +1244,8 @@ function Swap() {
         const uniHelper = new UniswapHelper(token1.rpc);
         const route = await uniHelper.getQuoteAndRoute(
           token1.chain.chainId,
-          token1.tokenAddress || "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-          token2.tokenAddress || "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+          token1.tokenAddress || '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+          token2.tokenAddress || '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
           new BigNumber(amount)
             .multipliedBy(Math.pow(10, token1.decimals))
             .toString(),
@@ -1250,7 +1255,7 @@ function Swap() {
         if (!route) {
           setLoading(false);
           return messageApi.error(
-            "This pair is not available for swap at the moment. Please try again later."
+            'This pair is not available for swap at the moment. Please try again later.'
           );
         }
 
@@ -1279,19 +1284,19 @@ function Swap() {
             const tradingFee = await calculateTradingFee(null, amount, true);
             setInfoData([
               {
-                text: "Price",
+                text: 'Price',
                 textVal: `1 ${token2.symbol} = 1 ${token1.symbol}`,
               },
               {
-                text: "Trading Fees",
+                text: 'Trading Fees',
                 textVal: `${tradingFee} ETH`,
               },
               {
-                text: "Slippage Tolerance",
+                text: 'Slippage Tolerance',
                 textVal: `5%`,
               },
               {
-                text: "Route",
+                text: 'Route',
                 textVal: `${token1.symbol} > ${token2.symbol}`,
               },
             ]);
@@ -1313,7 +1318,7 @@ function Swap() {
           if (!route) {
             setLoading(false);
             return messageApi.error(
-              "This pair is not available for swap at the moment. Please try again later."
+              'This pair is not available for swap at the moment. Please try again later.'
             );
           }
 
@@ -1326,35 +1331,34 @@ function Swap() {
           if (!tradingFee || tradingFee.status) {
             setLoading(false);
             return messageApi.error(
-              tradingFee.status ? tradingFee.message : "Pair not supported."
+              tradingFee.status ? tradingFee.message : 'Pair not supported.'
             );
           }
 
           setInfoData([
             {
-              text: "Price",
+              text: 'Price',
               textVal: `1 ${token2.symbol} = ${addCommasToNumber(
                 getFlooredFixed(
                   parseFloat(route.quote.toFixed(token1.decimals)) /
-                  parseFloat(amount),
+                    parseFloat(amount),
                   12
                 )
               )} ${token1.symbol}`,
             },
             {
-              text: "Trading Fees",
-              textVal: `${tradingFee} ${(BL_CODE[token1?.coinFamily])
-                }`,
+              text: 'Trading Fees',
+              textVal: `${tradingFee} ${BL_CODE[token1?.coinFamily]}`,
             },
             {
-              text: "Slippage Tolerance",
+              text: 'Slippage Tolerance',
               textVal: `${slippage ? slippage : customSlippage}%`,
             },
             {
-              text: "Route",
+              text: 'Route',
               textVal: route.route[0].tokenPath
                 .map((el) => el.symbol)
-                .join(">"),
+                .join('>'),
             },
           ]);
 
@@ -1368,19 +1372,19 @@ function Swap() {
 
             setInfoData([
               {
-                text: "Price",
+                text: 'Price',
                 textVal: `1 ${token2.symbol} = 1 ${token1.symbol}`,
               },
               {
-                text: "Trading Fees",
+                text: 'Trading Fees',
                 textVal: `${tradingFee} BNB`,
               },
               {
-                text: "Slippage Tolerance",
+                text: 'Slippage Tolerance',
                 textVal: `0%`,
               },
               {
-                text: "Route",
+                text: 'Route',
                 textVal: `${token1.symbol} > ${token2.symbol}`,
               },
             ]);
@@ -1402,7 +1406,7 @@ function Swap() {
           if (!route) {
             setLoading(false);
             return messageApi.error(
-              "Unable to perform swap: 403. Please try again later."
+              'Unable to perform swap: 403. Please try again later.'
             );
           }
 
@@ -1420,37 +1424,38 @@ function Swap() {
             setLoading(false);
             setInfoData([]);
             return messageApi.error(
-              tradingFee.status ? tradingFee.message : "Pair not supported."
+              tradingFee.status ? tradingFee.message : 'Pair not supported.'
             );
           }
 
           setInfoData([
             {
-              text: "Price",
+              text: 'Price',
               textVal: `1 ${token2.symbol} = ${addCommasToNumber(
                 getFlooredFixed(
                   parseFloat(route.outAmount.toFixed(token1.decimals)) /
-                  parseFloat(amount),
+                    parseFloat(amount),
                   12
                 )
               )} ${token1.symbol}`,
             },
             {
-              text: "Trading Fees",
-              textVal: `${tradingFee} ${token1.coinFamily == 1 ? "ETH" : "BNB"
-                }`,
+              text: 'Trading Fees',
+              textVal: `${tradingFee} ${
+                token1.coinFamily == 1 ? 'ETH' : 'BNB'
+              }`,
             },
             {
-              text: "Slippage Tolerance",
+              text: 'Slippage Tolerance',
               textVal: `${slippage ? slippage : customSlippage}%`,
             },
             {
-              text: "Route",
+              text: 'Route',
               // textVal: route.route.routeText,
               textVal:
                 route.route.routes.length === 1
-                  ? route.route.routes[0].path.map((el) => el.symbol).join(">")
-                  : "Complex Composite Route",
+                  ? route.route.routes[0].path.map((el) => el.symbol).join('>')
+                  : 'Complex Composite Route',
             },
           ]);
 
@@ -1469,7 +1474,7 @@ function Swap() {
           if (!route) {
             setLoading(false);
             return messageApi.error(
-              "This pair is not available for swap at the moment. Please try again later."
+              'This pair is not available for swap at the moment. Please try again later.'
             );
           }
 
@@ -1488,36 +1493,37 @@ function Swap() {
             setLoading(false);
             setInfoData([]);
             return messageApi.error(
-              tradingFee.status ? tradingFee.message : "Pair not supported."
+              tradingFee.status ? tradingFee.message : 'Pair not supported.'
             );
           }
 
           setInfoData([
             {
-              text: "Price",
+              text: 'Price',
               textVal: `1 ${token2.symbol} = ${addCommasToNumber(
                 getFlooredFixed(
                   parseFloat(route.outAmount.toFixed(token1.decimals)) /
-                  parseFloat(amount),
+                    parseFloat(amount),
                   12
                 )
               )} ${token1.symbol}`,
             },
             {
-              text: "Trading Fees",
-              textVal: `${tradingFee} ${token1.coinFamily == 1
-                ? "ETH"
-                : token1.coinFamily == 9
-                  ? "PLS"
-                  : "BNB"
-                }`,
+              text: 'Trading Fees',
+              textVal: `${tradingFee} ${
+                token1.coinFamily == 1
+                  ? 'ETH'
+                  : token1.coinFamily == 9
+                  ? 'PLS'
+                  : 'BNB'
+              }`,
             },
             {
-              text: "Slippage Tolerance",
+              text: 'Slippage Tolerance',
               textVal: `${slippage ? slippage : customSlippage}%`,
             },
             {
-              text: "Route",
+              text: 'Route',
               textVal: route.route.routeText,
             },
           ]);
@@ -1526,7 +1532,7 @@ function Swap() {
         } else if (token1.coinFamily == 5) {
           try {
             const response = await server.get(
-              "https://quote-api.jup.ag/v6/quote",
+              'https://quote-api.jup.ag/v6/quote',
               {
                 params: {
                   amount: new BigNumber(amount)
@@ -1534,17 +1540,17 @@ function Swap() {
                     .toFixed(0),
                   inputMint:
                     token1.tokenAddress ||
-                    "So11111111111111111111111111111111111111112",
+                    'So11111111111111111111111111111111111111112',
                   outputMint:
                     token2.tokenAddress ||
-                    "So11111111111111111111111111111111111111112",
+                    'So11111111111111111111111111111111111111112',
                   platformFeeBps: token1.jupiter_fee_address ? 100 : 0,
                   slippageBps: new Bignumber(
                     slippage ? slippage : customSlippage
                   )
                     .multipliedBy(100)
                     .toFixed(0),
-                  swapMode: "ExactOut",
+                  swapMode: 'ExactOut',
                 },
               }
             );
@@ -1561,24 +1567,24 @@ function Swap() {
 
             setInfoData([
               {
-                text: "Price",
+                text: 'Price',
                 textVal: `1 ${token2.symbol} = ${addCommasToNumber(
                   getFlooredFixed(parseFloat(inAmount) / parseFloat(amount), 12)
                 )} ${token1.symbol}`,
               },
               {
-                text: "Trading Fees",
+                text: 'Trading Fees',
                 textVal: `${tradingFee} SOL`,
               },
               {
-                text: "Slippage Tolerance",
+                text: 'Slippage Tolerance',
                 textVal: `${slippage ? slippage : customSlippage}%`,
               },
               {
-                text: "Route",
+                text: 'Route',
                 textVal: response.data.routePlan
                   .map((el) => el.swapInfo.label)
-                  .join(">"),
+                  .join('>'),
               },
             ]);
           } catch (error) {
@@ -1586,12 +1592,12 @@ function Swap() {
             if (error?.response?.data?.error) {
               messageApi.error(
                 error.response.data.error ===
-                  "Query parameter amount cannot be parsed: ParseIntError { kind: PosOverflow }"
-                  ? "Please enter a smaller amount to proceed"
+                  'Query parameter amount cannot be parsed: ParseIntError { kind: PosOverflow }'
+                  ? 'Please enter a smaller amount to proceed'
                   : error.response.data.error
               );
             } else {
-              messageApi.error("Something went wrong");
+              messageApi.error('Something went wrong');
             }
           }
         }
@@ -1642,15 +1648,15 @@ function Swap() {
   // }
 
   const selectAfter = (
-    <div className={"addonAfter"}>
+    <div className={'addonAfter'}>
       {token1?.isToken ? (
         <span
-          className="send__pasteText"
+          className='send__pasteText'
           style={{
-            position: "relative",
-            top: "-1px",
-            left: "-5px",
-            borderLeft: "0px",
+            position: 'relative',
+            top: '-1px',
+            left: '-5px',
+            borderLeft: '0px',
           }}
           onClick={async () => {
             await calculateAccordingly(100);
@@ -1683,33 +1689,33 @@ function Swap() {
           {
             value: token1?.id,
             label: (
-              <span className="flexedItemSelect">
+              <span className='flexedItemSelect'>
                 {!token1?.image ? (
                   <div
                     style={{
-                      alignItems: "center",
-                      backgroundColor: "rgba(98,126,234,.2)",
-                      borderRadius: "49%",
-                      display: "flex",
-                      height: "29px",
-                      justifyContent: "center",
-                      width: "29px",
-                      marginRight: "15px",
+                      alignItems: 'center',
+                      backgroundColor: 'rgba(98,126,234,.2)',
+                      borderRadius: '49%',
+                      display: 'flex',
+                      height: '29px',
+                      justifyContent: 'center',
+                      width: '29px',
+                      marginRight: '15px',
                     }}
                   >
-                    {" "}
-                    {token1?.name.split("")[0]}
+                    {' '}
+                    {token1?.name.split('')[0]}
                   </div>
                 ) : (
                   <img
                     style={{
-                      height: "30px",
-                      width: "30px",
-                      objectFit: "contain",
-                      position: "relative",
-                      borderRadius: "15px",
+                      height: '30px',
+                      width: '30px',
+                      objectFit: 'contain',
+                      position: 'relative',
+                      borderRadius: '15px',
                     }}
-                    alt=""
+                    alt=''
                     src={token1?.image}
                   />
                 )}
@@ -1771,16 +1777,16 @@ function Swap() {
             return {
               value: token?.id,
               label: (
-                <span className="flexedItemSelect">
+                <span className='flexedItemSelect'>
                   <img
                     style={{
-                      height: "20px",
-                      width: "20px",
-                      objectFit: "contain",
-                      marginLeft: "20px",
-                      marginRight: "20px",
+                      height: '20px',
+                      width: '20px',
+                      objectFit: 'contain',
+                      marginLeft: '20px',
+                      marginRight: '20px',
                     }}
-                    alt=""
+                    alt=''
                     src={token?.image}
                   />
                   {token?.symbol}
@@ -1916,21 +1922,21 @@ function Swap() {
   return (
     <div className={`scrollableCont`}>
       {contextHolder}
-      <MenuRestofHeaders backTo={"/wallet"} title={"Swap"} />
+      <MenuRestofHeaders backTo={'/wallet'} title={'Swap'} />
       <div className={`flexedContent`}>
         <Tabs selectedIndex={sel}>
           <TabList
-            className="swapTabList "
+            className='swapTabList '
             style={{
-              border: "none",
-              borderRadius: "14px",
-              display: "flex",
-              justifyContent: "space-evenly",
-              listStyle: "none",
+              border: 'none',
+              borderRadius: '14px',
+              display: 'flex',
+              justifyContent: 'space-evenly',
+              listStyle: 'none',
             }}
           >
             <Tab
-              className="swapTab"
+              className='swapTab'
               onClick={() => {
                 if (swapDetail) {
                   store.dispatch(swapDetailAc(null));
@@ -1941,12 +1947,12 @@ function Swap() {
               On-Chain
             </Tab>
             <Tab
-              className="swapTab"
+              className='swapTab'
               disabled={chain.testnet}
               onClick={() => {
                 if (chain.testnet) {
                   return messageApi.error(
-                    "Cross chain swapping is only available in mainnet."
+                    'Cross chain swapping is only available in mainnet.'
                   );
                 }
                 if (swapDetail) {
@@ -1961,26 +1967,27 @@ function Swap() {
 
           <TabPanel>
             {onChainSwapM?.is_maintenance ? (
-              <Maintanance text="On chain swap is in under maintenance" />
+              <Maintanance text='On chain swap is in under maintenance' />
             ) : (
               <div
-                className={`${"fixedContent height-571"} ${height <= 600 ? "fixedContentOuterExt" : ""
-                  }`}
+                className={`${'fixedContent height-571'} ${
+                  height <= 600 ? 'fixedContentOuterExt' : ''
+                }`}
               >
-                <div style={{ width: "100%" }} className="swap ">
-                  <div className="swap_onChain">
-                    <div className="swap_onChain_balance">
+                <div style={{ width: '100%' }} className='swap '>
+                  <div className='swap_onChain'>
+                    <div className='swap_onChain_balance'>
                       <div>
                         <input
-                          type="number"
-                          className="myInput"
-                          placeholder="0.000"
+                          type='number'
+                          className='myInput'
+                          placeholder='0.000'
                           onChange={({ target: { value: amount } }) => {
                             if (percent != null) {
                               setPercent(null);
                             }
 
-                            const afterDecimal = amount.split(".")[1];
+                            const afterDecimal = amount.split('.')[1];
 
                             // Get the maximum allowed characters before the decimal point (15 characters)
                             const maxCharactersBeforeDecimal = 15;
@@ -1996,7 +2003,7 @@ function Swap() {
                               }
 
                               // Check if the characters before the decimal exceed the maximum allowed
-                              const beforeDecimal = amount.split(".")[0];
+                              const beforeDecimal = amount.split('.')[0];
                               if (
                                 beforeDecimal.toString().length >
                                 maxCharactersBeforeDecimal
@@ -2015,18 +2022,18 @@ function Swap() {
                           }}
                           value={amount}
                         />
-                        <p style={{ marginTop: "8px" }}>
+                        <p style={{ marginTop: '8px' }}>
                           {currency.symbol}
                           {addCommasToNumber(
                             getFlooredFixed(
                               parseFloat(amount ? amount : 0) *
-                              parseFloat(token1 ? token1.price : 0),
+                                parseFloat(token1 ? token1.price : 0),
                               2
                             )
                           )}
                         </p>
                       </div>
-                      <div style={{ textAlign: "right" }}>
+                      <div style={{ textAlign: 'right' }}>
                         <Select
                           suffixIcon={<img src={DownArrowSuffix} />}
                           style={{
@@ -2043,32 +2050,32 @@ function Swap() {
                             {
                               value: token1?.id,
                               label: (
-                                <span className="flexedItemSelect">
+                                <span className='flexedItemSelect'>
                                   {!token1?.image ? (
                                     <div
                                       style={{
-                                        alignItems: "center",
-                                        backgroundColor: "rgba(98,126,234,.2)",
-                                        borderRadius: "49%",
-                                        display: "flex",
-                                        height: "29px",
-                                        justifyContent: "center",
-                                        width: "29px",
-                                        marginRight: "15px",
+                                        alignItems: 'center',
+                                        backgroundColor: 'rgba(98,126,234,.2)',
+                                        borderRadius: '49%',
+                                        display: 'flex',
+                                        height: '29px',
+                                        justifyContent: 'center',
+                                        width: '29px',
+                                        marginRight: '15px',
                                       }}
                                     >
-                                      {token1?.name.split("")[0]}
+                                      {token1?.name.split('')[0]}
                                     </div>
                                   ) : (
                                     <img
                                       style={{
-                                        height: "30px",
-                                        width: "30px",
-                                        objectFit: "contain",
-                                        position: "relative",
-                                        borderRadius: "15px",
+                                        height: '30px',
+                                        width: '30px',
+                                        objectFit: 'contain',
+                                        position: 'relative',
+                                        borderRadius: '15px',
                                       }}
-                                      alt=""
+                                      alt=''
                                       src={token1?.image}
                                     />
                                   )}
@@ -2091,14 +2098,14 @@ function Swap() {
                               return {
                                 value: token?.id,
                                 label: (
-                                  <span className="flexedItemSelect">
+                                  <span className='flexedItemSelect'>
                                     <img
                                       style={{
-                                        height: "20px",
-                                        width: "20px",
-                                        objectFit: "contain",
-                                        marginLeft: "20px",
-                                        marginRight: "20px",
+                                        height: '20px',
+                                        width: '20px',
+                                        objectFit: 'contain',
+                                        marginLeft: '20px',
+                                        marginRight: '20px',
                                       }}
                                       src={token?.image}
                                     />
@@ -2108,15 +2115,15 @@ function Swap() {
                               };
                             })}
                         />
-                        <div className="swap_onChain_pay">
+                        <div className='swap_onChain_pay'>
                           {/* <p>You Pay</p> */}
                           <p>
-                            Balance{" "}
+                            Balance{' '}
                             <span>
                               {addCommasToNumber(
                                 parseFloat(getFlooredFixed(balance || 0, 6))
-                              )}{" "}
-                              {token1?.symbol}{" "}
+                              )}{' '}
+                              {token1?.symbol}{' '}
                             </span>
                           </p>
                         </div>
@@ -2272,20 +2279,20 @@ function Swap() {
                   </div>
                 ) : null} */}
 
-                  <div className="swap__icon">
+                  <div className='swap__icon'>
                     <img
                       src={SwapVerticalIcon}
                       width={44}
-                      alt=""
+                      alt=''
                       height={44}
                       style={
                         loading
                           ? {
-                            pointerEvents: "none",
-                          }
+                              pointerEvents: 'none',
+                            }
                           : {
-                            pointerEvents: "auto",
-                          }
+                              pointerEvents: 'auto',
+                            }
                       }
                       onClick={() => {
                         if (token2?.iHave) {
@@ -2303,20 +2310,20 @@ function Swap() {
                       }}
                     />
                   </div>
-                  <div className="swap_onChain">
-                    <div className="swap_onChain_balance">
+                  <div className='swap_onChain'>
+                    <div className='swap_onChain_balance'>
                       <div>
                         <input
-                          type="number"
-                          className="myInput"
-                          placeholder="0.000"
+                          type='number'
+                          className='myInput'
+                          placeholder='0.000'
                           value={amount2}
                           readOnly={true}
                           onChange={({ target: { value: amount } }) => {
                             if (percent != null) {
                               setPercent(null);
                             }
-                            const afterDecimal = amount.split(".")[1];
+                            const afterDecimal = amount.split('.')[1];
 
                             // Get the maximum allowed characters before the decimal point (15 characters)
                             const maxCharactersBeforeDecimal = 15;
@@ -2332,7 +2339,7 @@ function Swap() {
                               }
 
                               // Check if the characters before the decimal exceed the maximum allowed
-                              const beforeDecimal = amount.split(".")[0];
+                              const beforeDecimal = amount.split('.')[0];
                               if (
                                 beforeDecimal.toString().length >
                                 maxCharactersBeforeDecimal
@@ -2349,18 +2356,18 @@ function Swap() {
                             handleChangeForInput2(amount);
                           }}
                         />
-                        <p style={{ marginTop: "8px" }}>
+                        <p style={{ marginTop: '8px' }}>
                           {currency.symbol}
                           {addCommasToNumber(
                             getFlooredFixed(
                               parseFloat(amount2 ? amount2 : 0) *
-                              parseFloat(token2 ? token2.price : 0),
+                                parseFloat(token2 ? token2.price : 0),
                               2
                             )
                           )}
                         </p>
                       </div>
-                      <div style={{ textAlign: "right" }}>
+                      <div style={{ textAlign: 'right' }}>
                         <Select
                           suffixIcon={<img src={DownArrowSuffix} />}
                           style={{
@@ -2377,32 +2384,32 @@ function Swap() {
                             {
                               value: token2?.id,
                               label: (
-                                <span className="flexedItemSelect">
+                                <span className='flexedItemSelect'>
                                   {!token2?.image ? (
                                     <div
                                       style={{
-                                        alignItems: "center",
-                                        backgroundColor: "rgba(98,126,234,.2)",
-                                        borderRadius: "49%",
-                                        display: "flex",
-                                        height: "29px",
-                                        justifyContent: "center",
-                                        width: "29px",
-                                        marginRight: "15px",
+                                        alignItems: 'center',
+                                        backgroundColor: 'rgba(98,126,234,.2)',
+                                        borderRadius: '49%',
+                                        display: 'flex',
+                                        height: '29px',
+                                        justifyContent: 'center',
+                                        width: '29px',
+                                        marginRight: '15px',
                                       }}
                                     >
-                                      {token2?.name.split("")[0]}
+                                      {token2?.name.split('')[0]}
                                     </div>
                                   ) : (
                                     <img
                                       style={{
-                                        height: "30px",
-                                        width: "30px",
-                                        objectFit: "contain",
-                                        position: "relative",
-                                        borderRadius: "15px",
+                                        height: '30px',
+                                        width: '30px',
+                                        objectFit: 'contain',
+                                        position: 'relative',
+                                        borderRadius: '15px',
                                       }}
-                                      alt=""
+                                      alt=''
                                       src={token2?.image}
                                     />
                                   )}
@@ -2425,14 +2432,14 @@ function Swap() {
                               return {
                                 value: token?.id,
                                 label: (
-                                  <span className="flexedItemSelect">
+                                  <span className='flexedItemSelect'>
                                     <img
                                       style={{
-                                        height: "20px",
-                                        width: "20px",
-                                        objectFit: "contain",
-                                        marginLeft: "20px",
-                                        marginRight: "20px",
+                                        height: '20px',
+                                        width: '20px',
+                                        objectFit: 'contain',
+                                        marginLeft: '20px',
+                                        marginRight: '20px',
                                       }}
                                       src={token?.image}
                                     />
@@ -2442,16 +2449,16 @@ function Swap() {
                               };
                             })}
                         />
-                        <div className="swap_onChain_pay">
+                        <div className='swap_onChain_pay'>
                           {/* <p>You Receive</p> */}
                           <p>
-                            Balance{" "}
+                            Balance{' '}
                             <span>
                               {addCommasToNumber(
                                 parseFloat(
                                   getFlooredFixed(token2?.balance || 0, 6)
                                 )
-                              )}{" "}
+                              )}{' '}
                               {token2?.symbol}
                             </span>
                           </p>
@@ -2460,12 +2467,12 @@ function Swap() {
                     </div>
                   </div>
                   {token1?.isToken && (
-                    <div className="swap_percentage">
+                    <div className='swap_percentage'>
                       {percentages.map((percentage, index) => (
                         <p
-                          style={{ cursor: "pointer" }}
+                          style={{ cursor: 'pointer' }}
                           key={index}
-                          className={activeIndex === index ? "active" : ""}
+                          className={activeIndex === index ? 'active' : ''}
                           onClick={() => {
                             setActiveIndex(index);
                             setPercent(percentage);
@@ -2548,13 +2555,13 @@ function Swap() {
                   </div>
                 </div>
                 <div className="send__infoText"></div> */}
-                  <div className="swap__infoText">
+                  <div className='swap__infoText'>
                     {loading ? (
                       <>
-                        <ClipLoader size={20} color="#fff" />{" "}
+                        <ClipLoader size={20} color='#fff' />{' '}
                         <p
                           style={{
-                            marginLeft: "7px",
+                            marginLeft: '7px',
                           }}
                         >
                           Fetching best price. Please wait...
@@ -2627,28 +2634,34 @@ function Swap() {
                   </div>
                 ) : null} */}
                 </div>
-                <div style={{ width: "100%" }}>
+                <div style={{ width: '100%' }}>
                   {infoData.length > 0 ? null : (
-                    <div className="slipPageSec">
-                      <div className="innerslip">
-                        <span
-                          style={{
-                            fontSize: "16px",
-                            fontWeight: 700,
-                            cursor: "pointer",
-                          }}
-                          onClick={() => {
-                            setSlippageDrawer(true);
-                          }}
-                        >
-                          {" "}
-                          SET SLIPPAGE {slippage || customSlippage}%
-                          {/* <EditOutlined /> */}
-                        </span>
-                        <SettingOutlined
-                          onClick={() => {
-                            setSlippageDrawer(true);
-                          }}
+                    <div className='slipPageSec'>
+                      <div className='innerslip'>
+                        <div className='innerslip'>
+                          <span
+                            style={{
+                              fontSize: '16px',
+                              fontWeight: 700,
+                              cursor: 'pointer',
+                            }}
+                            onClick={() => {
+                              setSlippageDrawer(true);
+                            }}
+                          >
+                            {' '}
+                            SET SLIPPAGE {slippage || customSlippage}%
+                            {/* <EditOutlined /> */}
+                          </span>
+                          <SettingOutlined
+                            onClick={() => {
+                              setSlippageDrawer(true);
+                            }}
+                          />
+                        </div>
+                        <InfoCircleOutlined
+                          style={{ cursor: 'pointer' }}
+                          onClick={() => setInfoMessage(true)}
                         />
                       </div>
                     </div>
@@ -2657,11 +2670,18 @@ function Swap() {
                   <ButtonComp
                     onClick={async () => {
                       if (
+                        (slippage >= 2 && !slippageDrawer) ||
+                        (Number(customSlippage) >= 2 && !slippageDrawer)
+                      ) {
+                        setConfirmSlippageAlert(true);
+                        return;
+                      }
+                      if (
                         isNaN(parseFloat(amount)) ||
                         isNaN(parseFloat(amount2))
                       ) {
                         return messageApi.error(
-                          "Please enter a valid amount to proceed."
+                          'Please enter a valid amount to proceed.'
                         );
                       }
 
@@ -2670,7 +2690,7 @@ function Swap() {
                         const amountBig = new BigNumber(amount);
                         if (balanceBig.isLessThan(amountBig)) {
                           return messageApi.error(
-                            "Insufficient balance to proceed with the transaction."
+                            'Insufficient balance to proceed with the transaction.'
                           );
                         }
                       }
@@ -2694,20 +2714,27 @@ function Swap() {
                       const balanceExtraToAddIfFromIsNativeCoin =
                         feeAmount.plus(amountToAdd);
 
-                      console.log('nativeBalance :: ', parseFloat(nativeBalance));
+                      console.log(
+                        'nativeBalance :: ',
+                        parseFloat(nativeBalance)
+                      );
                       console.log('feeAmount :: ', parseFloat(feeAmount));
-                      console.log(' amountToAdd ', parseFloat(amountToAdd), " balanceExtraToAddIfFromIsNativeCoin ", parseFloat(balanceExtraToAddIfFromIsNativeCoin));
-
+                      console.log(
+                        ' amountToAdd ',
+                        parseFloat(amountToAdd),
+                        ' balanceExtraToAddIfFromIsNativeCoin ',
+                        parseFloat(balanceExtraToAddIfFromIsNativeCoin)
+                      );
 
                       if (
                         balanceExtraToAddIfFromIsNativeCoin.gt(nativeBalance)
                       ) {
                         store.dispatch(overAllLoader(false));
                         return messageApi.error(
-                          "Insufficient balance to proceed with the transaction."
+                          'Insufficient balance to proceed with the transaction.'
                         );
                       }
-                      
+
                       store.dispatch(overAllLoader(false));
 
                       let swapDetailed = {
@@ -2724,7 +2751,7 @@ function Swap() {
                       };
 
                       store.dispatch(swapDetailAc(swapDetailed));
-                      navigate("/swapDetails", {
+                      navigate('/swapDetails', {
                         state: swapDetailed,
                       });
                     }}
@@ -2732,14 +2759,14 @@ function Swap() {
                       new BigNumber(amount).isGreaterThan(
                         new BigNumber(balance)
                       )
-                        ? "Insufficient Balance"
+                        ? 'Insufficient Balance'
                         : token1?.id == token2?.id &&
                           token1 != null &&
                           token2 != null
-                          ? "Please select a different token"
-                          : "Swap"
+                        ? 'Please select a different token'
+                        : 'Swap'
                     }
-                    maxWidth={"100%"}
+                    maxWidth={'100%'}
                     disabled={
                       !amount ||
                       !amount2 ||
@@ -2756,7 +2783,7 @@ function Swap() {
           </TabPanel>
           <TabPanel>
             {crossChainM?.is_maintenance ? (
-              <Maintanance text="Cross chain swap is in under maintenance" />
+              <Maintanance text='Cross chain swap is in under maintenance' />
             ) : (
               <CrossChain />
             )}
@@ -2764,17 +2791,17 @@ function Swap() {
         </Tabs>
       </div>
       <Drawer
-        title="Select Token"
-        placement="bottom"
+        title='Select Token'
+        placement='bottom'
         onClose={() => {
           setOpen(false);
-          setKeyword("");
+          setKeyword('');
           setFilteredTokens(allToken);
         }}
         open={open}
         // eslint-disable-next-line jsx-a11y/alt-text
         closeIcon={
-          theme == "darkTheme" ? (
+          theme == 'darkTheme' ? (
             <img src={darkclose} />
           ) : (
             <img src={ModalCloseIcon} />
@@ -2783,19 +2810,19 @@ function Swap() {
         height={500}
       >
         <div
-          className="contain"
+          className='contain'
           style={{
-            height: "100%",
-            width: "100%",
-            display: "flex",
-            flexDirection: "column",
+            height: '100%',
+            width: '100%',
+            display: 'flex',
+            flexDirection: 'column',
           }}
         >
           {show ? (
-            <div className="search" style={{ marginBottom: "30px" }}>
+            <div className='search' style={{ marginBottom: '30px' }}>
               <InputField
-                placeholder={"Search name or paste address"}
-                coloredBg={"#eef3f9"}
+                placeholder={'Search name or paste address'}
+                coloredBg={'#eef3f9'}
                 value={keyword}
                 checkForSymbols={true}
                 addonBefore={
@@ -2803,9 +2830,9 @@ function Swap() {
                     <img
                       src={Search}
                       style={{
-                        width: "17px",
+                        width: '17px',
                       }}
-                      alt=""
+                      alt=''
                     />
                   </span>
                 }
@@ -2840,10 +2867,10 @@ function Swap() {
           ) : null}
 
           <div
-            className="right"
+            className='right'
             style={{
               flex: 1,
-              overflow: "scroll",
+              overflow: 'scroll',
             }}
           >
             {filteredTokens
@@ -2886,32 +2913,32 @@ function Swap() {
                 })
                 .map((token) => (
                   <div
-                    className="design"
+                    className='design'
                     style={{
-                      width: "100%",
+                      width: '100%',
                     }}
                   >
                     <div
-                      className="token"
+                      className='token'
                       style={{
-                        display: "flex",
-                        justifyContent: "flex-start",
-                        alignItems: "center",
-                        marginBottom: "20px",
-                        padding: "8px",
-                        borderRadius: "30px",
-                        marginLeft: "7px",
-                        fontSize: "11px",
-                        cursor: "pointer",
-                        width: "100%;",
+                        display: 'flex',
+                        justifyContent: 'flex-start',
+                        alignItems: 'center',
+                        marginBottom: '20px',
+                        padding: '8px',
+                        borderRadius: '30px',
+                        marginLeft: '7px',
+                        fontSize: '11px',
+                        cursor: 'pointer',
+                        width: '100%;',
                         backgroundColor:
                           token1?.id == token.id || token2?.id == token.id
-                            ? "transparent"
-                            : "transparent",
+                            ? 'transparent'
+                            : 'transparent',
                         color:
                           token1?.id == token.id || token2?.id == token.id
-                            ? "#000"
-                            : "#000",
+                            ? '#000'
+                            : '#000',
                       }}
                       onClick={() => {
                         if (token1?.id == token.id || token2?.id == token.id) {
@@ -2920,10 +2947,10 @@ function Swap() {
 
                         if (selected == 1) {
                           if (token2?.id == token.id) {
-                            setKeyword("");
+                            setKeyword('');
                             setFilteredTokens(allToken);
                             return messageApi.error(
-                              "You cannot select the same tokens on both sides. Please select a different token."
+                              'You cannot select the same tokens on both sides. Please select a different token.'
                             );
                           }
 
@@ -2931,14 +2958,14 @@ function Swap() {
 
                           if (
                             token.tokenAddress ===
-                            "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c" &&
+                              '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c' &&
                             !token2.tokenAddress
                           ) {
                             setIsWrap(true);
                             myWrap = true;
                           } else if (
                             token.tokenAddress ===
-                            "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2" &&
+                              '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2' &&
                             !token2.tokenAddress
                           ) {
                             setIsWrap(true);
@@ -2956,24 +2983,24 @@ function Swap() {
                           setSelectedCF(true);
                         } else {
                           if (token1?.id == token.id) {
-                            setKeyword("");
+                            setKeyword('');
                             setFilteredTokens(allToken);
                             return messageApi.error(
-                              "You cannot select the same tokens on both sides. Please select a different token."
+                              'You cannot select the same tokens on both sides. Please select a different token.'
                             );
                           }
                           let myWrap = false;
 
                           if (
                             token.tokenAddress ===
-                            "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c" &&
+                              '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c' &&
                             !token1.tokenAddress
                           ) {
                             setIsWrap(true);
                             myWrap = true;
                           } else if (
                             token.tokenAddress ===
-                            "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2" &&
+                              '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2' &&
                             !token1.tokenAddress
                           ) {
                             setIsWrap(true);
@@ -2993,42 +3020,42 @@ function Swap() {
                       {!token.image ? (
                         <div
                           style={{
-                            alignItems: "center",
-                            backgroundColor: "rgba(98,126,234,.2)",
-                            borderRadius: "49%",
-                            display: "flex",
-                            height: "29px",
-                            justifyContent: "center",
-                            width: "29px",
-                            marginRight: "15px",
+                            alignItems: 'center',
+                            backgroundColor: 'rgba(98,126,234,.2)',
+                            borderRadius: '49%',
+                            display: 'flex',
+                            height: '29px',
+                            justifyContent: 'center',
+                            width: '29px',
+                            marginRight: '15px',
                           }}
                         >
-                          {" "}
-                          {token.name.split("")[0]}
+                          {' '}
+                          {token.name.split('')[0]}
                         </div>
                       ) : (
                         <img
                           style={{
-                            width: "29px",
-                            marginRight: "15px",
+                            width: '29px',
+                            marginRight: '15px',
                           }}
                           src={token.image}
-                          alt=""
+                          alt=''
                         />
                       )}
 
                       <p>
                         <span
-                          style={{ fontSize: "17px" }}
-                          className="noAddress"
+                          style={{ fontSize: '17px' }}
+                          className='noAddress'
                         >
-                          {token.name}{" "}
+                          {token.name}{' '}
                         </span>
                         <span
-                          className="noAddress"
+                          className='noAddress'
                           style={{
-                            fontSize: "11px",
-                            marginLeft: "5px",
+                            fontSize: '11px',
+                            marginLeft: '5px',
                           }}
                         >
                           {token.type ? `/ ${token.type}` : null}
@@ -3040,36 +3067,36 @@ function Swap() {
             ) : (
               <div
                 style={{
-                  textAlign: "center",
+                  textAlign: 'center',
                 }}
               >
                 <p
-                  className="noAddress"
+                  className='noAddress'
                   style={{
-                    marginTop: "4%",
-                    marginBottom: "15px",
-                    fontWeight: "bold",
-                    fontSize: "15px",
+                    marginTop: '4%',
+                    marginBottom: '15px',
+                    fontWeight: 'bold',
+                    fontSize: '15px',
                   }}
                 >
                   Asset not found
                 </p>
                 <ButtonComp
-                  text={"Add Tokens"}
+                  text={'Add Tokens'}
                   onClick={() => {
                     if (!token1) {
                       return messageApi.error(
-                        "Please select a blockchain/token first."
+                        'Please select a blockchain/token first.'
                       );
                     }
-                    navigate("/add-token", {
+                    navigate('/add-token', {
                       state: {
                         swap: token1?.coinFamily,
                         selected,
                       },
                     });
                   }}
-                  maxWidth={"50%"}
+                  maxWidth={'50%'}
                 />
               </div>
             )}
@@ -3077,11 +3104,11 @@ function Swap() {
         </div>
       </Drawer>
       <Drawer
-        title="Slippage Tolerance"
-        placement="bottom"
+        title='Slippage Tolerance'
+        placement='bottom'
         onClose={() => {
           if (customSlippage == 0) {
-            return messageApi.error("Please enter a valid slippage value.");
+            return messageApi.error('Please enter a valid slippage value.');
           }
           setSlippageDrawer(false);
         }}
@@ -3089,7 +3116,7 @@ function Swap() {
         closable={true}
         // eslint-disable-next-line jsx-a11y/alt-text
         closeIcon={
-          theme == "darkTheme" ? (
+          theme == 'darkTheme' ? (
             <img src={darkclose} />
           ) : (
             <img src={ModalCloseIcon} />
@@ -3098,26 +3125,26 @@ function Swap() {
         height={292}
       >
         <div
-          className="contain"
+          className='contain'
           style={{
-            height: "100%",
-            width: "100%",
-            display: "flex",
-            flexDirection: "column",
+            height: '100%',
+            width: '100%',
+            display: 'flex',
+            flexDirection: 'column',
             // justifyContent: "space-between",
           }}
         >
           <div
             style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-evenly",
-              gap: "6px",
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-evenly',
+              gap: '6px',
             }}
           >
-            <div className="myvalues">
+            <div className='myvalues'>
               <p
-                className={slippage === 1 ? "myValuesActive" : ""}
+                className={slippage === 1 ? 'myValuesActive' : ''}
                 onClick={() => {
                   setSlippage(1);
                   setCustomSlippage(null);
@@ -3127,9 +3154,9 @@ function Swap() {
               </p>
             </div>
 
-            <div className="myvalues">
+            <div className='myvalues'>
               <p
-                className={slippage === 2 ? "myValuesActive" : ""}
+                className={slippage === 2 ? 'myValuesActive' : ''}
                 onClick={() => {
                   setSlippage(2);
                   setCustomSlippage(null);
@@ -3138,9 +3165,9 @@ function Swap() {
                 2%
               </p>
             </div>
-            <div className="myvalues">
+            <div className='myvalues'>
               <p
-                className={slippage === 3 ? "myValuesActive" : ""}
+                className={slippage === 3 ? 'myValuesActive' : ''}
                 onClick={() => {
                   setSlippage(3);
                   setCustomSlippage(null);
@@ -3149,26 +3176,26 @@ function Swap() {
                 3%
               </p>
             </div>
-            <div className="pthel_input">
+            <div className='pthel_input'>
               <InputField
-                coloredBg={"transparent"}
-                placeholder={"Custom"}
+                coloredBg={'transparent'}
+                placeholder={'Custom'}
                 value={customSlippage}
-                type="number"
+                type='number'
                 addonBefore={
                   <span>
                     <img
                       src={Search}
                       style={{
-                        width: "17px",
-                        marginTop: "5px",
+                        width: '17px',
+                        marginTop: '5px',
                       }}
-                      alt=""
+                      alt=''
                     />
                   </span>
                 }
                 getData={(value) => {
-                  if (!value || value === "") {
+                  if (!value || value === '') {
                     setSlippage(1);
                     setCustomSlippage(null);
                   }
@@ -3182,13 +3209,13 @@ function Swap() {
             </div>
           </div>
           <ButtonComp
-            text={"Done"}
-            maxWidth={"50%"}
-            marginTop={"40px"}
-            alignSelf="center"
+            text={'Done'}
+            maxWidth={'50%'}
+            marginTop={'40px'}
+            alignSelf='center'
             onClick={() => {
               if (customSlippage == 0) {
-                return messageApi.error("Please enter a valid slippage value.");
+                return messageApi.error('Please enter a valid slippage value.');
               }
               setSlippageDrawer(false);
               handleChangeForInput1(amount);
@@ -3200,17 +3227,20 @@ function Swap() {
       {infoMessage && (
         <ModalCustom
           isModalOpen={infoMessage}
-          title={""}
-          handleCancel={() => setInfoMessage("")}
-          customClass={"disclamerModalSec "}
+          title={'Slippage Alert'}
+          handleCancel={() => setInfoMessage(false)}
+          customClass={'customClassModal '}
         >
           {/* <div className="mainTanceSecModal">
-            {theme == "darkTheme" ? <img src={DarkLogo} /> : <img src={Logo} />}
+            {theme == "darkTheme" ? <img src={DarkLogo} /> : <img src={Logo} />} */}
 
-            <p className={theme == "darkTheme" ? "lightText" : "darkText"}>
-              {infoMessage}
-            </p>
-            <ButtonComp
+          <p style={{ color: '#fff' }}>
+            Slippage is the price change between order placement and execution.
+            Higher slippage helps prevent failed transactions, particularly in
+            fast moving markets. For taxed tokens, we recommend you set slippage
+            at least 1% above the tax rate of the token.
+          </p>
+          {/* <ButtonComp
               maxWidth={"100%"}
               marginTop={"25px"}
               text={"Ok"}
@@ -3222,16 +3252,16 @@ function Swap() {
       {disclaimer ? (
         <ModalCustom
           isModalOpen={disclaimer}
-          title={"Disclaimer"}
+          title={'Disclaimer'}
           // handleOk={handleOk}
           handleCancel={() => setDisclaimer(false)}
-          customClass={"disclamerModalSec "}
+          customClass={'disclamerModalSec '}
         >
-          <div className="disclaimerModal">
-            <div className="left" style={{ flex: 1 }}>
-              <img src={warning} alt="" style={{ width: "27px" }} />
+          <div className='disclaimerModal'>
+            <div className='left' style={{ flex: 1 }}>
+              <img src={warning} alt='' style={{ width: '27px' }} />
             </div>
-            <div className="right" style={{ flex: 7 }}>
+            <div className='right' style={{ flex: 7 }}>
               {/* <img
               src={warning}
               alt=''
@@ -3242,16 +3272,16 @@ function Swap() {
                 and Jupiter on Qubetics Wallet. While we strive for optimal routing
                 and low fees, due to decentralization, we cannot guarantee it.
                 Users must verify token numbers and gas fees before swapping and
-                assume responsibility for charges or losses. Visit our{" "}
+                assume responsibility for charges or losses. Visit our{' '}
                 <span
                   style={{
-                    color: "#00aeef",
-                    cursor: "pointer",
-                    textDecoration: "underline",
+                    color: '#00aeef',
+                    cursor: 'pointer',
+                    textDecoration: 'underline',
                   }}
                   onClick={async () => {
                     const checkUserToNavigate = await server.post(
-                      "/wallet/open_faq",
+                      '/wallet/open_faq',
                       {
                         wallet_address: account.address,
                       },
@@ -3273,18 +3303,150 @@ function Swap() {
                   }}
                 >
                   Help Center
-                </span>{" "}
+                </span>{' '}
                 for more information.
               </p>
             </div>
           </div>
           <ButtonComp
-            text={"Back to Swap"}
+            text={'Back to Swap'}
             onClick={() => setDisclaimer(false)}
-            maxWidth={"100%"}
+            maxWidth={'100%'}
           />
         </ModalCustom>
       ) : null}
+
+      {confirmSlippageAlert && (
+        <ModalCustom
+          isModalOpen={confirmSlippageAlert}
+          // title={'Slippage Alert'}
+          handleCancel={() => setConfirmSlippageAlert(false)}
+          customClass={'customClassModal '}
+        >
+          <div className='mainTanceSecModal'>
+            {/* {theme == 'darkTheme' ? <img src={InfoCircleOutlined} /> : <img src={InfoCircleOutlined} />} */}
+            {/* <InfoCircleOutlined /> */}
+            <img
+              src={infoBg}
+              alt='alert icon'
+              height={35}
+              style={{ width: '35px' }}
+            />
+            <p style={{ color: '#fff', fontSize: '20px', textAlign: 'center' }}>
+              Slippage is too high
+            </p>
+            <ButtonComp
+              maxWidth={'100%'}
+              marginTop={'25px'}
+              text={'Continue At Your Own Risk'}
+              customClass={'customClassModal '}
+              onClick={async () => {
+                if (isNaN(parseFloat(amount)) || isNaN(parseFloat(amount2))) {
+                  return messageApi.error(
+                    'Please enter a valid amount to proceed.'
+                  );
+                }
+
+                if (percent != 100) {
+                  const balanceBig = new BigNumber(balance);
+                  const amountBig = new BigNumber(amount);
+                  if (balanceBig.isLessThan(amountBig)) {
+                    return messageApi.error(
+                      'Insufficient balance to proceed with the transaction.'
+                    );
+                  }
+                }
+
+                store.dispatch(overAllLoader(true));
+
+                const getNativeBalance = await Web3Helper.getCoinBalance(
+                  token1?.address,
+                  token1?.rpc
+                );
+
+                // Assuming nativeBalance and tradingFee are strings or numbers
+                const nativeBalance = new BigNumber(getNativeBalance); // Replace with your actual value
+
+                const feeAmount = new BigNumber(tradingFee); // Replace with your actual value
+
+                const amountToAdd = new BigNumber(
+                  token1?.tokenAddress ? 0 : amount
+                );
+
+                const balanceExtraToAddIfFromIsNativeCoin =
+                  feeAmount.plus(amountToAdd);
+
+                console.log('nativeBalance :: ', parseFloat(nativeBalance));
+                console.log('feeAmount :: ', parseFloat(feeAmount));
+                console.log(
+                  ' amountToAdd ',
+                  parseFloat(amountToAdd),
+                  ' balanceExtraToAddIfFromIsNativeCoin ',
+                  parseFloat(balanceExtraToAddIfFromIsNativeCoin)
+                );
+
+                if (balanceExtraToAddIfFromIsNativeCoin.gt(nativeBalance)) {
+                  store.dispatch(overAllLoader(false));
+                  return messageApi.error(
+                    'Insufficient balance to proceed with the transaction.'
+                  );
+                }
+
+                store.dispatch(overAllLoader(false));
+
+                let swapDetailed = {
+                  route,
+                  token1,
+                  token2,
+                  amount,
+                  amount2,
+                  feeAmount,
+                  isWrap,
+                  tab: sel,
+                  slippage: slippage ? slippage : customSlippage,
+                  commision,
+                };
+                setConfirmSlippageAlert(false);
+                store.dispatch(swapDetailAc(swapDetailed));
+                navigate('/swapDetails', {
+                  state: swapDetailed,
+                });
+              }}
+              // text={
+              //   new BigNumber(amount).isGreaterThan(
+              //     new BigNumber(balance)
+              //   )
+              //     ? 'Insufficient Balance'
+              //     : token1?.id == token2?.id &&
+              //       token1 != null &&
+              //       token2 != null
+              //     ? 'Please select a different token'
+              //     : 'Swap'
+              // }
+              // maxWidth={'100%'}
+              // disabled={
+              //   !amount ||
+              //   !amount2 ||
+              //   amount <= 0 ||
+              //   amount2 <= 0 ||
+              //   loading ||
+              //   parseFloat(amount) > parseFloat(balance) ||
+              //   token1?.id == token2?.id
+              // }
+            />
+            <ButtonComp
+              maxWidth={'100%'}
+              bordered={true}
+              marginTop={'25px'}
+              text={'Reduce Slippage'}
+              onClick={() => {
+                setConfirmSlippageAlert(false);
+                setSlippageDrawer(true);
+              }}
+            />
+          </div>
+        </ModalCustom>
+      )}
     </div>
   );
 }
