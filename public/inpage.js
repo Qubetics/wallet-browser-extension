@@ -62,9 +62,9 @@ const initializeStreams = () => {
     target: CONTENT_SCRIPT,
   });
   const sendResponse = (id, result) => {
-
-    console.log("RESULET::::", result);
+    console.log('RESULET::::', result, id, callbackMapping);
     const callback = callbackMapping[id];
+    if(!callback) return;
     if (result.type === 'error') {
       callback(result.data, null);
     } else {
@@ -85,15 +85,16 @@ const initializeStreams = () => {
 
     emit = (event, data) => {
       const cb = this.events[event];
-      if (cb) cb(data)
-    }
+      if (cb) cb(data);
+    };
 
     remove = (event) => {
       delete this.events[event];
-    }
+    };
   }
 
   const sendRequest = (method, data, callback) => {
+    console.log("CALLBACKK::",callback);
     const id = window.crypto.randomUUID();
     callbackMapping[id] = callback;
 
@@ -105,17 +106,20 @@ const initializeStreams = () => {
     });
   };
 
-  const eventEmitter = new Events()
+  const eventEmitter = new Events();
 
   window.qubetics = {
     sendRequest,
     sendResponse,
-    events: eventEmitter
+    events: eventEmitter,
   };
+  
   window.addEventListener('message', (message) => {
     if (message.data) {
       try {
-        const response = JSON.parse(message.data);
+        console.log('message:::', message, typeof message);
+        const response =
+          typeof message == 'string' ? JSON.parse(message.data) : message.data;
         if (response) {
           if (response.id) {
             const title = document.title;
@@ -125,6 +129,7 @@ const initializeStreams = () => {
           }
         }
       } catch (error) {
+        console.log('Error in Another windows event listner: ', error);
         return false;
       }
     }
@@ -181,12 +186,31 @@ const initializeStreams = () => {
     }
   });
 
-  window.addEventListener("message", (event) => {
-    if (event.source !== window || !event.data.type) return;
+  window.addEventListener('message', (event) => {
+    try {
+      if (event.source !== window || !event.data.type) return;
 
-    if (event.data.type === "switchAccount") {
-      console.log("Received from content.js:", event.data.data);
-      eventEmitter.emit(event.data.type, event.data.data)
+      if (event.data.type === 'switchAccount') {
+        console.log('Received from content.js:', event.data.data);
+        eventEmitter.emit(event.data.type, event.data.data);
+      }
+      // This will run when user click manually on cross button of extention
+      if (event.data.type === 'user_rejected') {
+        console.log('user_rejected is runnning');
+
+        if (window.qubetics && event.data.data.network === 'qubetics') {
+          console.log('Until Error Line');
+          window.qubetics.sendResponse(event.data.data.id, {
+            data: {
+              type: 'error',
+              data: { message: 'Rejected by user' },
+            },
+          });
+          // handleResponse({ type: 'success', data: extractDataFromResp })
+        }
+      }
+    } catch (error) {
+      console.error('Error in second events listner: ', error);
     }
   });
 };

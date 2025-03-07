@@ -14,6 +14,7 @@ export default async function delagteAndBondMore(
   nodeUrl
 ) {
   // let nodeUrl = NODE_NAME;
+ try {
   const wallet = await DirectSecp256k1HdWallet.fromMnemonic(mnemonic, {
     hdPaths: [stringToPath("m/44'/60'/0'/0/0")],
     prefix: PREFIX,
@@ -28,6 +29,8 @@ export default async function delagteAndBondMore(
       gasPrice: gasPrice,
     }
   );
+  console.log("gasPrice:::",gasPrice,"client:::",client);
+  
   const fee = {
     amount: [{ denom: DENOM, amount: "3800000000000000000" }],
     gas: "800000",
@@ -50,5 +53,11 @@ export default async function delagteAndBondMore(
     fee,
     "make delegator"
   );
+  console.log("REEEEEEEEEEEEEEE",txResult);
+  
   return txResult;
+ } catch (error) {
+  console.log("Error in delagteAndBondMore::: ",error);
+  
+ }
 }

@@ -403,11 +403,11 @@ function SwapDetails() {
       <MenuRestofHeaders backTo={"/swap"} title={"Confirm Swap"} />
       <div className={`flexedContent`}>
         <div className="swapDetails">
-          <div className="swapDetails-bg">
+          <div className="swapDetails-bg"> 
             <div className="swapDetails__iconsTop swapDetails__iconsTop-specific">
               <div>
                 {token1.image ? (
-                  <img src={token1.image} width={30} height={30} />
+                  <img src={token1.image} width={30} height={30} style={{borderRadius:'50%'}} />
                 ) : (
                   <div
                     style={{
@@ -424,13 +424,13 @@ function SwapDetails() {
                     {" "}
                     {token1?.symbol.split("")[0]}
                   </div>
-                )}
+                )} 
                 <p style={{ margin: 0 }}>From</p>
               </div>
               <img src={arr} width={144} height={12} style={{marginTop: 10}} />
               <div>
                 {token2.image ? (
-                  <img src={token2.image} width={30} height={30} />
+                  <img src={token2.image} width={30} height={30} style={{borderRadius:'50%'}} />
                 ) : (
                   <div
                     style={{
