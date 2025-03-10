@@ -55,6 +55,8 @@ export const ExternalConnection = () => {
       JSON.parse(mnemonics).find((obj) => obj.address === defaultAccount)
         ?.phrase) ||
     '';
+    // console.log("defaultAddressPhrase6756756:::",defaultAddressPhrase);
+    
   let price = null;
 
   const handleOk = () => {
@@ -119,7 +121,7 @@ export const ExternalConnection = () => {
           console.log('EXTERNAL CONN DATA::', data,"account::",account);
 
           if (data.network === 'qubetics') {
-            if (method === 'nativeConnect') {
+            if (method === 'nativeConnect' && defaultAddressPhrase) {
               const valoperAddress = await fetchValoperAddress(
                 defaultAddressPhrase
               );
@@ -127,6 +129,8 @@ export const ExternalConnection = () => {
                 defaultAddressPhrase,
                 data.nodeUrl
               );
+              console.log("valoperAddress:::",valoperAddress,"addressaddress:::",address,"defaultAddressPhrase::",defaultAddressPhrase);
+              
               setData({ ...data, valoperAddress, address,evmAddress:account.address });
               setMethod(method);
               // console.log("DATA DAT:::",data,valoperAddress,address);

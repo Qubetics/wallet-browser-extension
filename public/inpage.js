@@ -113,13 +113,12 @@ const initializeStreams = () => {
     sendResponse,
     events: eventEmitter,
   };
-  
   window.addEventListener('message', (message) => {
     if (message.data) {
       try {
         console.log('message:::', message, typeof message);
         const response =
-          typeof message == 'string' ? JSON.parse(message.data) : message.data;
+          (typeof message == 'string' || typeof message?.data) ? JSON.parse(message?.data) : message?.data;
         if (response) {
           if (response.id) {
             const title = document.title;
