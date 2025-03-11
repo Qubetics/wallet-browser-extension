@@ -306,7 +306,7 @@ function CurrencyDetails() {
             </div>
             <div style={{ textAlign: "center", margin: "12px auto", display: 'flex', justifyContent: 'center' }}>
               {coin?.coin?.coin_image ?
-                <img style={{ height: 50, width: 50 }} src={coin?.coin?.coin_image} alt="usdt" />
+                <img style={{ height: 50, width: 50,borderRadius:'50%' }} src={coin?.coin?.coin_image} alt="usdt" />
                 :
                 <div
                   className="randb extra borderDarkLight"
