@@ -97,31 +97,28 @@ function SetPasswordScreen() {
       return popError("Please meet all password criteria.");
     }
 
-    await chrome.storage.session.set({ password: password.trim() });
+    // await chrome.storage.session.set({ password: password.trim() });
 
     if (type === "create") {
-      await WalletHelper.setPasswordInSession(password);
+      console.log('CREATE NEW WALLET')
+      // await WalletHelper.setPasswordInSession(password);
       if (state?.addNew) {
-        // createWalletMnemonics, createShuffledMnemonics
         setMnemonics(createWalletMnemonics);
         setShuffledMnemonics(
           createWalletMnemonics.split(" ").sort(() => Math.random() - 0.5)
         );
       } else {
-        const mnemonics = await WalletHelper.getMnemonics();
+        console.log('IMPORT NEW WALLET')
+        const mnemonics = await WalletHelper.getMnemonicsByPassword(password);
         setMnemonics(mnemonics);
         setShuffledMnemonics(
           mnemonics.split(" ").sort(() => Math.random() - 0.5)
         );
       }
-
       setActiveTab("secretPhrase");
     } else {
       setActiveTab("confirmSecretPhrase");
     }
-
-    setPassword("");
-    setConfirmPassword("");
     setValidation(validatePassword(""));
   };
 
@@ -130,9 +127,7 @@ function SetPasswordScreen() {
       if (correct) {
         store.dispatch(setLoading(true));
         const { name } = await chrome.storage.session.get("name");
-        console.log("=================> ", mnemonics);
-
-        await WalletHelper.generateAndSetWallet(mnemonics, name);
+        await WalletHelper.generateAndSetWallet(mnemonics, name,"CREATE",password);
         store.dispatch(setLoading(false));
         setActiveTab("congrats");
       } else {
@@ -140,10 +135,12 @@ function SetPasswordScreen() {
         popError("Please check the phrase order and try again.");
       }
     } catch (error) {
-      console.log("Create error--> ", error);
+      console.log("Error Confirm Secret Phrase:", error);
       store.dispatch(setLoading(false));
     }
 
+    setPassword("");
+    setConfirmPassword("");
   };
 
   const handleImportSecretPhrase = async () => {
@@ -160,7 +157,7 @@ function SetPasswordScreen() {
       const { accounts } = await chrome.storage.session.get("accounts"); 
       if (
         accounts &&
-        (await WalletHelper.checkIfAlreadyThere(getMnemonicsData.trim()))
+        (await WalletHelper.checkIfAlreadyThere(getMnemonicsData.trim(),password))
       ) {
         return popError("Mnemonics already exist.");
       }
@@ -171,7 +168,8 @@ function SetPasswordScreen() {
         await WalletHelper.generateAndSetWallet(
           getMnemonicsData.trim(),
           name,
-          "IMPORT"
+          "IMPORT",
+          password
         );
         messageApi.success("Wallet imported successfully.")
         setActiveTab("congrats");
@@ -184,6 +182,8 @@ function SetPasswordScreen() {
       store.dispatch(setLoading(false));
       popError(e ? e : "An error occurred. Please try again.");
     }
+    setPassword("");
+    setConfirmPassword("");
   };
 
   return (
@@ -326,7 +326,7 @@ function SetPasswordScreen() {
             {/* <h1>ALL DONE!</h1>
             <p>Wallet Created Successfully</p> */}
             <ButtonComp
-              onClick={() => navigate("/wallet")}
+              onClick={() => navigate("/wallet" , { state : {password : password} })}
               text="Open Wallet"
             />
           </CongratulationsScreen>

@@ -6,19 +6,12 @@
   "permissions": [
     "storage",
     "tabs",
-    "webNavigation",
-    "webRequest",
     "clipboardRead",
-    "notifications",
-    "alarms",
     "unlimitedStorage",
     "activeTab",
-    "scripting",
-    "background",
     "idle",
-    "sidePanel",
-    "nativeMessaging",
-    "web3"
+    "alarms",
+    "scripting"
   ],
   "side_panel": {
     "default_path": "index.html"

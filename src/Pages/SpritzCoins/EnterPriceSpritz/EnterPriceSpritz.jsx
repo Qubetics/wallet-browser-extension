@@ -73,10 +73,10 @@ function EnterPriceSpritz() {
         deliveryMethod
       );
 
-      console.log(
-        "paymentRequestpaymentRequestpaymentRequest ",
-        paymentRequest.amount
-      );
+      // console.log(
+      //   "paymentRequestpaymentRequestpaymentRequest ",
+      //   paymentRequest.amount
+      // );
 
       setShowValue(
         new BigNumber(paymentRequest.amount || 0)
@@ -268,10 +268,10 @@ function EnterPriceSpritz() {
                     }
                   );
 
-                  console.log(
-                    "nativeCoinResponsenativeCoinResponse ",
-                    nativeCoinResponse
-                  );
+                  // console.log(
+                  //   "nativeCoinResponsenativeCoinResponse ",
+                  //   nativeCoinResponse
+                  // );
 
                   if (chain.isEVM) {
                     const paymentRequest =
@@ -291,10 +291,10 @@ function EnterPriceSpritz() {
                         deliveryMethod
                       );
 
-                    console.log(
-                      "paymentRequestpaymentRequestpaymentRequest ",
-                      paymentRequest
-                    );
+                    // console.log(
+                    //   "paymentRequestpaymentRequestpaymentRequest ",
+                    //   paymentRequest
+                    // );
 
                     if (paymentRequest && paymentRequest?.error) {
                       store.dispatch(setLoading(false));
@@ -312,19 +312,19 @@ function EnterPriceSpritz() {
                       0
                     );
 
-                    console.log("gasDatagasDatagasData ", gasData);
+                    // console.log("gasDatagasDatagasData ", gasData);
                     const nativeCoinBalance = new BigNumber(
                       nativeCoinResponse?.data?.data?.balance
                     );
-                    console.log(
-                      "nativeCoinBalancenativeCoinBalance ",
-                      nativeCoinBalance
-                    );
+                    // console.log(
+                    //   "nativeCoinBalancenativeCoinBalance ",
+                    //   nativeCoinBalance
+                    // );
                     const finalAmount = new BigNumber(
                       paymentRequest?.amount
                     ).dividedBy(new BigNumber(coin?.coin_data?.decimals));
 
-                    console.log("finalAmountfinalAmount ", finalAmount);
+                    // console.log("finalAmountfinalAmount ", finalAmount);
 
                     let gasEstimate = new BigNumber(paymentRequest?.gasLimit);
                     const gasPrice = new BigNumber(gasData?.price).times(

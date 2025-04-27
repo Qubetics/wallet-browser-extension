@@ -61,6 +61,8 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
     }
   );
 
+  const {state} =  useLocation()
+
   const [accounts, setAccounts] = useState([]);
 
   const fetchAccounts = async () => {
@@ -435,7 +437,7 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
                   await chrome.storage.local.set({
                     balanceIn: false,
                   });
-                  await WalletHelper.updateBalanceInShow(false, account.id);
+                  await WalletHelper.updateBalanceInShow(false, account.id, state?.password);
                   store.dispatch(setBalancesIn(false));
                 }}
                 style={{
@@ -453,7 +455,7 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
                   await chrome.storage.local.set({
                     balanceIn: true,
                   });
-                  await WalletHelper.updateBalanceInShow(true, account.id);
+                  await WalletHelper.updateBalanceInShow(true, account.id,state?.password);
                   store.dispatch(setBalancesIn(true));
                 }}
                 style={{

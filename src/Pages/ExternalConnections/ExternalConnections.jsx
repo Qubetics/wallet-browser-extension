@@ -111,14 +111,14 @@ export const ExternalConnection = () => {
           const queryParams = new URLSearchParams(url.search); 
           const method = queryParams.get('method'); 
 
-          console.log("METHODDDDDDDDDDDDDDDDDD External_conn ", method);
+          // console.log("METHODDDDDDDDDDDDDDDDDD External_conn ", method);
           
           const data = queryParams.get('data')
             ? JSON.parse(decodeURIComponent(queryParams.get('data')))
             : null; 
           setData(data);
           setChainID(Web3.utils.toDecimal(data.chainId))
-          console.log('EXTERNAL CONN DATA::', data,"account::",account);
+          // console.log('EXTERNAL CONN DATA::', data,"account::",account);
 
           if (data.network === 'qubetics') {
             if (method === 'nativeConnect' && defaultAddressPhrase) {
@@ -129,7 +129,7 @@ export const ExternalConnection = () => {
                 defaultAddressPhrase,
                 data.nodeUrl
               );
-              console.log("valoperAddress:::",valoperAddress,"addressaddress:::",address,"defaultAddressPhrase::",defaultAddressPhrase);
+              // console.log("valoperAddress:::",valoperAddress,"addressaddress:::",address,"defaultAddressPhrase::",defaultAddressPhrase);
               
               setData({ ...data, valoperAddress, address,evmAddress:account.address });
               setMethod(method);
@@ -501,7 +501,7 @@ export const ExternalConnection = () => {
 
   const handleChainSwitch = async () => {
     try {
-      console.log("toChain ::::::::: ", toChain);
+      // console.log("toChain ::::::::: ", toChain);
 
       if (toChain) {
         store.dispatch(setLoading(true));

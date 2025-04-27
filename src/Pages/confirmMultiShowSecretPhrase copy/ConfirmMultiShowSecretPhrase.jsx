@@ -1,12 +1,10 @@
 /*global chrome*/
-import React, { useRef, useState } from "react";
-import CopyIcon from "../../Assets/CopyIconBlue.svg";
-import { Checkbox, message } from "antd";
+import React, { useState } from "react";
+import { message } from "antd";
 import style from "./style.module.scss";
 import ButtonComp from "../../Components/ButtonComp/ButtonComp";
 import MenuRestofHeaders from "../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import ConfirmSecretPhrase from "../WelcomeScreens/ConfirmSecretPhrase";
+import { useLocation, useNavigate } from "react-router-dom";
 import { store } from "../..";
 import { setLoading } from "../../actions/loading";
 import { WalletHelper } from "../../helpers/wallet.helper";

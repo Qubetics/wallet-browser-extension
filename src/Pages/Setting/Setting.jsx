@@ -248,21 +248,20 @@ function Setting() {
                 }
               }}
               customFunction={async () => {
-                const { password: sessionPassword } =
-                  await chrome.storage.session.get("password");
-
-                if (sessionPassword !== password) {
+                const isCorrectPassword = await WalletHelper.verifyPassword(password);
+                if (!isCorrectPassword) {
                   return messageApi.error("Incorrect password provided.");
                 }
-
-                store.dispatch(setLoading(true));
-                await WalletHelper.logout();
-                store.dispatch(setLoading(false));
-                navigate("/", {
-                  state: {
-                    logout: true,
-                  },
-                });
+                else{
+                  store.dispatch(setLoading(true));
+                  await WalletHelper.logout();
+                  store.dispatch(setLoading(false));
+                  navigate("/", {
+                    state: {
+                      logout: true,
+                    },
+                  });
+                }
               }}
             />
             <div style={{ marginTop: "10px" }}></div>
@@ -270,14 +269,12 @@ function Setting() {
               text={"Proceed"}
               maxWidth={"100%"}
               onClick={async () => {
-                const { password: sessionPassword } =
-                  await chrome.storage.session.get("password");
-
-                if (sessionPassword !== password) {
+                const isCorrectPassword = await WalletHelper.verifyPassword(password);
+                if (!isCorrectPassword) {
                   return messageApi.error("Incorrect password provided.");
                 }
-
-                store.dispatch(setLoading(true));
+                else{
+                  store.dispatch(setLoading(true));
                 await WalletHelper.logout();
                 store.dispatch(setLoading(false));
                 navigate("/", {
@@ -285,6 +282,7 @@ function Setting() {
                     logout: true,
                   },
                 });
+                }
               }}
             />
           </div>

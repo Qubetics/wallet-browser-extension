@@ -27,13 +27,13 @@ function EnterPrice() {
     state: { coin, type, balanceDetail },
   } = useLocation();
 
-  console.log("🚀 ~ EnterPrice ~ balanceDetail:", balanceDetail);
+  // console.log("🚀 ~ EnterPrice ~ balanceDetail:", balanceDetail);
 
   const navigate = useNavigate();
   const { account, chain, currency } = useSelector((state) => state);
   const [amount, setAmount] = useState(type === "BUY" ? 100 : null);
 
-  console.log("🚀 ~ file: EnterPrice.jsx:34 ~ EnterPrice ~ amount:", amount);
+  // console.log("🚀 ~ file: EnterPrice.jsx:34 ~ EnterPrice ~ amount:", amount);
   const [messageApi, contextHolder] = message.useMessage({
     duration: DURATION,
   });

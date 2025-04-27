@@ -1,68 +1,33 @@
 /* eslint-disable jsx-a11y/alt-text */
 /*global chrome*/
-import React from "react";
-import MenuRestofHeaders from "../../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders";
-import "./SwapDetails.scss";
-import BTC from "../../../Assets/Coins/BTC.png";
-import ETH from "../../../Assets/Coins/ETH.png";
-import ArrowDashedLine from "../../../Assets/arr.svg";
-import ButtonComp from "../../../Components/ButtonComp/ButtonComp";
-import arr from "../../../Assets/arr.svg"
-import { useLocation, useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
-import { useEffect } from "react";
-import { useRef } from "react";
-import { Web3Helper } from "../../../helpers/web3.helper";
-import {
-  UNI_MAINNET_ROUTER,
-  UNI_TESTNET_ROUTER,
-} from "../../../config/uniswap.config";
-import { message, Tooltip } from "antd";
-import { useState } from "react";
-import { UniswapHelper } from "../../../helpers/uniswap.helper";
-import ModalCustom from "../../../Components/ModalCustom/ModalCustom";
-import { ClipLoader } from "react-spinners";
-import { Loader } from "../../../Components/Loader/Loader";
-import { DURATION } from "../../../config/message.config";
-import warning from "../../../Assets/PNG/warning.png";
-import DarkLogo from "../../../Assets/DarkLogo.svg";
-import Logo from "../../../Assets/logo.png";
-import InputFieldSimple from "../../../Components/InputField/InputFieldSimple";
-import BigNumber from "bignumber.js";
-import { PancakeHelper } from "../../../helpers/pancake.helper";
-import { CAKE_MAINNET_ROUTER } from "../../../config/pancake.config";
+import React from 'react';
+import MenuRestofHeaders from '../../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders';
+import './SwapDetails.scss';
+import ButtonComp from '../../../Components/ButtonComp/ButtonComp';
+import arr from '../../../Assets/arr.svg';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { useEffect } from 'react';
+import { Web3Helper } from '../../../helpers/web3.helper';
+import { message, Tooltip } from 'antd';
+import { useState } from 'react';
+import { UniswapHelper } from '../../../helpers/uniswap.helper';
+import ModalCustom from '../../../Components/ModalCustom/ModalCustom';
+import { ClipLoader } from 'react-spinners';
+import { Loader } from '../../../Components/Loader/Loader';
+import { DURATION } from '../../../config/message.config';
+import warning from '../../../Assets/PNG/warning.png';
+import DarkLogo from '../../../Assets/DarkLogo.svg';
+import Logo from '../../../Assets/logo.png';
+import InputFieldSimple from '../../../Components/InputField/InputFieldSimple';
+import BigNumber from 'bignumber.js';
 import {
   addCommasToNumber,
   getFlooredFixed,
-} from "../../../helpers/conversion.helper";
-import { server } from "../../../server";
-import { WalletHelper } from "../../../helpers/wallet.helper";
-import { PulseChainHelper } from "../../../helpers/pulsechain.helper";
-import { PULSE_MAINNET_ROUTER } from "../../../config/pulsechain.config";
-import {
-  Native,
-  ChainId,
-  CurrencyAmount,
-  TradeType,
-  Percent,
-  ERC20Token,
-} from "@pancakeswap/sdk";
-import {
-  SmartRouter,
-  SmartRouterTrade,
-  SMART_ROUTER_ADDRESSES,
-  SwapRouter,
-} from "@pancakeswap/smart-router/evm";
-import { UNISWAP_NATIVE_WRAPPED_TOKEN_ADDRESSES } from "../../../config/uniswap.config";
-import { PANCAKE_NATIVE_WRAPPED_TOKEN_ADDRESSES } from "../../../config/pancake.config";
-import axios from "axios";
-import { SolanaHelper } from "../../../helpers/solana.helper";
-import { PublicKey } from "@solana/web3.js";
-import {
-  EditOutlined,
-  InfoCircleOutlined,
-  SettingOutlined,
-} from "@ant-design/icons";
+} from '../../../helpers/conversion.helper';
+import { server } from '../../../server';
+import { WalletHelper } from '../../../helpers/wallet.helper';
+import { ChainId } from '@pancakeswap/sdk';
 
 function SwapDetails() {
   const { chain, account, currency, theme } = useSelector((state) => state);
@@ -98,17 +63,13 @@ function SwapDetails() {
     duration: DURATION,
   });
 
-  const [requireApproval, setRequireApproval] = useState(
-    true
-  );
+  const [requireApproval, setRequireApproval] = useState(true);
   const [isLogoutModalOpen, setLogoutOpenmodal] = useState(false);
   const [swapModal, setSwapModal] = useState(false);
   const [gasPrice, setGasPrice] = useState(null);
   const [gasEstimate, setGasEstimate] = useState(50000);
   const [approvalHash, setApprovalHash] = useState(null);
-  const [approvalConfirmed, setApprovalConfirmed] = useState(
-    false
-  );
+  const [approvalConfirmed, setApprovalConfirmed] = useState(false);
   const [loading, setLoading] = useState(true);
   const [sessionPassword, setPassword] = useState(null);
   const [isModalOpen, setOpenmodal] = useState(false);
@@ -137,13 +98,13 @@ function SwapDetails() {
   };
   const handleCancel1 = () => {
     setIsModalOpen1(false);
-    return navigate("/wallet");
+    return navigate('/wallet');
   };
 
   const init = async () => {
     try {
       const parentCoin = await server.post(
-        "/wallet/nativeCoinFiatPrice",
+        '/wallet/nativeCoinFiatPrice',
         {
           coin_family: token1.coinFamily,
           fiat_currency: currency.name,
@@ -165,9 +126,6 @@ function SwapDetails() {
         token1.symbol.toLowerCase()
       );
 
-      console.log("GASSSSSSSSSSSSSSS ", gasPrice);
-
-
       setGasPrice(gasPrice.fast);
 
       let estimatedGasUsed;
@@ -175,15 +133,10 @@ function SwapDetails() {
       // estimatedGasUsed = route.estimatedGasUsed.toString() * 2;
       estimatedGasUsed = route.gas.toString();
       setGasEstimate(estimatedGasUsed);
-      console.log("estimatedGasUsedestimatedGasUsed ", estimatedGasUsed);
 
       let finalGasFee =
-        ((gasPrice.fast * Math.pow(10, 9) * parseInt(estimatedGasUsed)) * 1.5) /
+        (gasPrice.fast * Math.pow(10, 9) * parseInt(estimatedGasUsed) * 1.5) /
         Math.pow(10, 18);
-
-      console.log("SINALLLLLLLLLLL ", finalGasFee, finalFee);
-      console.log("parentCoinparentCoin ", parentCoin);
-
 
       setNetworkPrice(
         addCommasToNumber(
@@ -194,7 +147,7 @@ function SwapDetails() {
         addCommasToNumber(
           getFlooredFixed(
             (Number(finalGasFee) + Number(finalFee)) *
-            parseFloat(parentCoin.data.data.fiatCoinPrice.value),
+              parseFloat(parentCoin.data.data.fiatCoinPrice.value),
             4
           )
         )
@@ -207,7 +160,7 @@ function SwapDetails() {
         const approvedAmount = await Web3Helper.checkApproval(
           token1.tokenAddress, // token add
           token1.address, // owner add
-          "0x1111111254eeb25477b68fb85ed929f73a960582",
+          '0x1111111254eeb25477b68fb85ed929f73a960582',
           token1.rpc
         );
         // console.log("🚀 ~ init ~ approvedAmount:", approvedAmount);
@@ -216,7 +169,7 @@ function SwapDetails() {
         if (approvedAmount === false) {
           setLoading(false);
           return messageApi.error(
-            "Unable to fetch approval amount. Please try again later."
+            'Unable to fetch approval amount. Please try again later.'
           );
         }
 
@@ -240,9 +193,9 @@ function SwapDetails() {
       // console.log("END OF FUNCTION");
       setLoading(false);
     } catch (error) {
-      console.log("Swap error : ", error);
+      console.log('Swap error : ', error);
       setLoading(false);
-      return messageApi.error("Something went wrong");
+      return messageApi.error('Something went wrong');
     }
   };
 
@@ -288,11 +241,17 @@ function SwapDetails() {
       let amtTosend = amount;
       const bal = token1?.balance * token1?.coin?.fiat_price_data?.value;
       // const totalAmt = (parseFloat(amount)+parseFloat(networkPrice)) * token1?.coin?.fiat_price_data?.value
-      const totalAmt = (parseFloat(amount) * token1?.coin?.fiat_price_data?.value) + parseFloat(networkPriceFiat);
+      const totalAmt =
+        parseFloat(amount) * token1?.coin?.fiat_price_data?.value +
+        parseFloat(networkPriceFiat);
       // console.log('ppppppppppppppppp', token1, " amount : ", amount ,  " networkPrice : ", networkPrice, " networkPriceFiat ", networkPriceFiat);
       // console.log("SEND DETAIL : ", bal, totalAmt);
       // console.log("COME CHECK COIN");
-      if ((parseFloat(token1?.balance) < (parseFloat(amount) + parseFloat(networkPrice))) && !token1?.coin?.token_address) {
+      if (
+        parseFloat(token1?.balance) <
+          parseFloat(amount) + parseFloat(networkPrice) &&
+        !token1?.coin?.token_address
+      ) {
         amtTosend = parseFloat(amount) - parseFloat(networkPrice * 1.5);
       }
       // if(bal<totalAmt && !token1?.coin?.token_address){
@@ -301,44 +260,42 @@ function SwapDetails() {
       //   );
       // }
 
-      const totalAmtToken = (parseFloat(amount) * token1?.coin?.fiat_price_data?.value);
+      const totalAmtToken =
+        parseFloat(amount) * token1?.coin?.fiat_price_data?.value;
       // console.log("COME CHECK TOKEN");
       if (bal < totalAmtToken && token1?.coin?.token_address) {
         return messageApi.error(
-          "Insufficient balance to proceed with the transaction."
+          'Insufficient balance to proceed with the transaction.'
         );
       }
-
 
       const uniHelper = new UniswapHelper(token1.rpc);
 
       if (requireApproval) {
         setLogoutOpenmodal(true);
-        console.log("ZZZZZZZZZZZZ ", token1.tokenAddress,
-          token1.address,
-          "0x1111111254eeb25477b68fb85ed929f73a960582",
-          token1.chain.slug,
-          token1.isToken ? token1.tokenAddress : token1.symbol.toLowerCase(),
-          token1.isToken,
-          parseInt(token1.chain.chainId));
+        // console.log("ZZZZZZZZZZZZ ", token1.tokenAddress,
+        //   token1.address,
+        //   "0x1111111254eeb25477b68fb85ed929f73a960582",
+        //   token1.chain.slug,
+        //   token1.isToken ? token1.tokenAddress : token1.symbol.toLowerCase(),
+        //   token1.isToken,
+        //   parseInt(token1.chain.chainId));
 
         const data = await uniHelper.sendForApproval(
           token1.tokenAddress,
           token1.address,
-          "0x1111111254eeb25477b68fb85ed929f73a960582",
+          '0x1111111254eeb25477b68fb85ed929f73a960582',
           token1.chain.slug,
           token1.isToken ? token1.tokenAddress : token1.symbol.toLowerCase(),
           token1.isToken,
           parseInt(token1.chain.chainId)
         );
 
-        console.log("ccccccccccccccccccc", data);
-
         if (!data) {
           setSwapModal(false);
           setLogoutOpenmodal(false);
           return messageApi.error(
-            "Insufficient balance in wallet for gas fee."
+            'Insufficient balance in wallet for gas fee.'
           );
         }
         setLogoutOpenmodal(false);
@@ -351,11 +308,9 @@ function SwapDetails() {
           const approval = await Web3Helper.checkApproval(
             token1.tokenAddress, // token add
             token1.address, // owner add
-            "0x1111111254eeb25477b68fb85ed929f73a960582",
+            '0x1111111254eeb25477b68fb85ed929f73a960582',
             token1.rpc
           );
-
-          console.log("approvalapproval ", approval, " :: amount :: ", amount);
 
           if (
             parseFloat(approval) <= parseFloat(amount) ||
@@ -363,7 +318,7 @@ function SwapDetails() {
           ) {
             setSwapModal(false);
             return messageApi.error(
-              "Please wait for approval to be completed."
+              'Please wait for approval to be completed.'
             );
           }
         }
@@ -382,17 +337,17 @@ function SwapDetails() {
           commision
         );
 
-        console.log("SWAAAAAAAAAAAAAAAAa ", data);
-
         if (!data || data?.message) {
           setSwapModal(false);
-          return messageApi.error(data?.message ? data?.message : "Something went wrong.");
+          return messageApi.error(
+            data?.message ? data?.message : 'Something went wrong.'
+          );
         }
         setSwapModal(false);
         setIsModalOpen1(true);
       }
     } catch (error) {
-      console.log("Confirm transaction error : ", error);
+      console.log('Confirm transaction error : ', error);
     }
   };
 
@@ -400,52 +355,67 @@ function SwapDetails() {
     <div className={`scrollableCont`}>
       {loading ? <Loader /> : null}
       {contextHolder}
-      <MenuRestofHeaders backTo={"/swap"} title={"Confirm Swap"} />
+      <MenuRestofHeaders backTo={'/swap'} title={'Confirm Swap'} />
       <div className={`flexedContent`}>
         <div className="swapDetails">
-          <div className="swapDetails-bg"> 
+          <div className="swapDetails-bg">
             <div className="swapDetails__iconsTop swapDetails__iconsTop-specific">
               <div>
                 {token1.image ? (
-                  <img src={token1.image} width={30} height={30} style={{borderRadius:'50%'}} />
+                  <img
+                    src={token1.image}
+                    width={30}
+                    height={30}
+                    style={{ borderRadius: '50%' }}
+                  />
                 ) : (
                   <div
                     style={{
-                      alignItems: "center",
-                      backgroundColor: "rgba(98,126,234,.2)",
-                      borderRadius: "49%",
-                      display: "flex",
-                      height: "29px",
-                      justifyContent: "center",
-                      width: "29px",
-                      marginRight: "15px",
+                      alignItems: 'center',
+                      backgroundColor: 'rgba(98,126,234,.2)',
+                      borderRadius: '49%',
+                      display: 'flex',
+                      height: '29px',
+                      justifyContent: 'center',
+                      width: '29px',
+                      marginRight: '15px',
                     }}
                   >
-                    {" "}
-                    {token1?.symbol.split("")[0]}
+                    {' '}
+                    {token1?.symbol.split('')[0]}
                   </div>
-                )} 
+                )}
                 <p style={{ margin: 0 }}>From</p>
               </div>
-              <img src={arr} width={144} height={12} style={{marginTop: 10}} />
+              <img
+                src={arr}
+                width={144}
+                height={12}
+                style={{ marginTop: 10 }}
+              />
               <div>
                 {token2.image ? (
-                  <img src={token2.image} width={30} height={30} style={{borderRadius:'50%'}} />
+                  <img
+                    src={token2.image}
+                    width={30}
+                    height={30}
+                    style={{ borderRadius: '50%' }}
+                  />
                 ) : (
                   <div
                     style={{
-                      alignItems: "center",
-                      backgroundColor: "rgba(98,126,234,.2)",
-                      borderRadius: "49%",
-                      display: "flex",
-                      height: "29px",
-                      justifyContent: "center",
-                      width: "29px",
-                      marginRight: "15px",
+                      alignItems: 'center',
+                      backgroundColor: 'rgba(98,126,234,.2)',
+                      borderRadius: '49%',
+                      display: 'flex',
+                      height: '29px',
+                      justifyContent: 'center',
+                      width: '29px',
+                      marginRight: '15px',
                     }}
                   >
-                    {" "}
-                    {token2?.symbol.split("")[0]}
+                    {' '}
+                    {token2?.symbol.split('')[0]}
                   </div>
                 )}
                 <p style={{ margin: 0 }}>To</p>
@@ -454,7 +424,7 @@ function SwapDetails() {
             <div className="swapDetails__valueText swapDetails__valueText-specific ">
               <p className="swapDetails__valueText__text swapDetails__valueText-specific-text">
                 {/* <p style={{ margin: 0 }}>From</p> */}
-                {addCommasToNumber(getFlooredFixed(parseFloat(amount), 8))}{" "}
+                {addCommasToNumber(getFlooredFixed(parseFloat(amount), 8))}{' '}
                 {token1.symbol}
               </p>
               <p className="swapDetails__valueText__text swapDetails__valueText-specific-text">
@@ -465,7 +435,7 @@ function SwapDetails() {
             </div>
           </div>
           {/* <div className="swapDetails__border"></div> */}
-          <div style={{ marginTop: "16px" }} className="swapDetails-bg">
+          <div style={{ marginTop: '16px' }} className="swapDetails-bg">
             <div className="swapDetails__address">
               <p className="swapDetails__address__key">From</p>
               <p className="swapDetails__address__val">
@@ -508,14 +478,14 @@ function SwapDetails() {
               <p className="swapDetails__keyValuesText__key">Network Fee</p>
               <p className="swapDetails__keyValuesText__val">
                 <span>
-                  {networkPrice}{" "}
+                  {networkPrice}{' '}
                   {token1.coinFamily == 1
-                    ? "BNB"
+                    ? 'BNB'
                     : token1.coinFamily == 2
-                      ? "ETH"
-                      : token1.coinFamily == 4
-                        ? "POL"
-                        : "BNB"}{" "}
+                    ? 'ETH'
+                    : token1.coinFamily == 4
+                    ? 'POL'
+                    : 'BNB'}{' '}
                   ({currency.symbol}
                   {networkPriceFiat})
                 </span>
@@ -529,17 +499,17 @@ function SwapDetails() {
             disabled={!approvalConfirmed && approvalHash}
             text={
               requireApproval
-                ? "Approve"
+                ? 'Approve'
                 : approvalConfirmed
-                  ? "Swap"
-                  : "Approval Pending"
+                ? 'Swap'
+                : 'Approval Pending'
             }
-            maxWidth={"100%"}
+            maxWidth={'100%'}
           />
         </div>
       </div>
       <ModalCustom
-        title={"Approval Request"}
+        title={'Approval Request'}
         isModalOpen={isLogoutModalOpen}
         customClass="customClassModal"
       >
@@ -548,13 +518,13 @@ function SwapDetails() {
             <ClipLoader size={65} color="#00adee" />
             <div
               style={{
-                marginTop: "20px",
-                textAlign: "center",
+                marginTop: '20px',
+                textAlign: 'center',
               }}
             >
               <p
                 style={{
-                  textAlign: "center",
+                  textAlign: 'center',
                 }}
               >
                 Approval request has been processed successfully. Waiting for
@@ -566,7 +536,7 @@ function SwapDetails() {
       </ModalCustom>
 
       <ModalCustom
-        title={"Swap Transaction"}
+        title={'Swap Transaction'}
         isModalOpen={swapModal}
         customClass="customClassModal"
       >
@@ -574,22 +544,22 @@ function SwapDetails() {
           <div
             className=""
             style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
             }}
           >
             <ClipLoader size={65} color="#00adee" />
             <div
               style={{
-                marginTop: "20px",
-                textAlign: "center",
+                marginTop: '20px',
+                textAlign: 'center',
               }}
             >
               <p
                 className="noAddress"
                 style={{
-                  textAlign: "center",
+                  textAlign: 'center',
                 }}
               >
                 Swap request sent. Waiting for blockchain confirmation.
@@ -600,7 +570,7 @@ function SwapDetails() {
       </ModalCustom>
 
       <ModalCustom
-        title={"Enter password"}
+        title={'Enter password'}
         handleCancel={handleCancel}
         isModalOpen={isModalOpen}
         handleOk={handleOk}
@@ -609,8 +579,8 @@ function SwapDetails() {
         <div className="viewphrases">
           <div
             style={{
-              marginBottom: "36px",
-              width: "100%",
+              marginBottom: '36px',
+              width: '100%',
             }}
           >
             <InputFieldSimple
@@ -618,12 +588,15 @@ function SwapDetails() {
               getData={setPassword}
               value={sessionPassword}
               customFunction={async () => {
-                const { password } = await chrome.storage.session.get(
-                  "password"
+                const isCorrectPassword = await WalletHelper.verifyPassword(
+                  sessionPassword
                 );
-
-                if (sessionPassword !== password) {
-                  return messageApi.error("Incorrect password provided.");
+                console.log(
+                  'isCorrectPassword on Button Click',
+                  isCorrectPassword
+                );
+                if (!isCorrectPassword) {
+                  return messageApi.error('Incorrect password provided.');
                 }
 
                 setOpenmodal(false);
@@ -641,13 +614,18 @@ function SwapDetails() {
             </div>
           </div>
           <ButtonComp
-            text={"Proceed"}
-            maxWidth={"100%"}
+            text={'Proceed'}
+            maxWidth={'100%'}
             onClick={async () => {
-              const { password } = await chrome.storage.session.get("password");
-
-              if (sessionPassword !== password) {
-                return messageApi.error("Incorrect password provided.");
+              const isCorrectPassword = await WalletHelper.verifyPassword(
+                sessionPassword
+              );
+              console.log(
+                'isCorrectPassword on Button Click',
+                isCorrectPassword
+              );
+              if (!isCorrectPassword) {
+                return messageApi.error('Incorrect password provided.');
               }
 
               setOpenmodal(false);
@@ -666,30 +644,30 @@ function SwapDetails() {
         handleOk={handleOk1}
         customClass="customClassModal"
       >
-        <div className={"confirmationsModal"}>
-          <div className={"iInner"}>
-            {theme == "darkTheme" ? (
+        <div className={'confirmationsModal'}>
+          <div className={'iInner'}>
+            {theme == 'darkTheme' ? (
               <img src={DarkLogo} />
             ) : (
               <img
                 src={Logo}
                 style={{
-                  height: "100px",
+                  height: '100px',
                 }}
               />
             )}
             <div>
               <p>
-                Swap request of {addCommasToNumber(getFlooredFixed(amount, 5))}{" "}
+                Swap request of {addCommasToNumber(getFlooredFixed(amount, 5))}{' '}
                 {token1.symbol.toUpperCase()} has been processed successfully.
               </p>
             </div>
           </div>
           <ButtonComp
-            text={"OK"}
-            maxWidth={"100%"}
+            text={'OK'}
+            maxWidth={'100%'}
             onClick={() => {
-              return navigate("/wallet");
+              return navigate('/wallet');
             }}
           />
         </div>
@@ -697,21 +675,21 @@ function SwapDetails() {
       {infoMessage && (
         <ModalCustom
           isModalOpen={infoMessage}
-          title={""}
-          handleCancel={() => setInfoMessage("")}
-          customClass={"disclamerModalSec "}
+          title={''}
+          handleCancel={() => setInfoMessage('')}
+          customClass={'disclamerModalSec '}
         >
           <div className="mainTanceSecModal">
-            {theme == "darkTheme" ? <img src={DarkLogo} /> : <img src={Logo} />}
+            {theme == 'darkTheme' ? <img src={DarkLogo} /> : <img src={Logo} />}
 
-            <p className={theme == "darkTheme" ? "lightText" : "darkText"}>
+            <p className={theme == 'darkTheme' ? 'lightText' : 'darkText'}>
               {infoMessage}
             </p>
             <ButtonComp
-              maxWidth={"100%"}
-              marginTop={"25px"}
-              text={"Ok"}
-              onClick={() => setInfoMessage("")}
+              maxWidth={'100%'}
+              marginTop={'25px'}
+              text={'Ok'}
+              onClick={() => setInfoMessage('')}
             />
           </div>
         </ModalCustom>

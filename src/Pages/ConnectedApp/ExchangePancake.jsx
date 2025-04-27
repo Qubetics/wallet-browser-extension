@@ -77,10 +77,10 @@ const ExchangePancake = () => {
             const finalList = connectedDapps.filter(
               (el) => el.url != state.connection.url
             );
-            console.log(
-              '🚀 ~ file: ExchangePancake.jsx:73 ~ onClick={ ~ finalList:',
-              finalList
-            );
+            // console.log(
+            //   '🚀 ~ file: ExchangePancake.jsx:73 ~ onClick={ ~ finalList:',
+            //   finalList
+            // );
 
             await chrome.storage.session.set({
               connectedDapps: finalList,

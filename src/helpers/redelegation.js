@@ -15,11 +15,11 @@ export async function redelegate(
   amount,
   nodeUrl
 ) {
-  console.log('i am called::',{mnemonic,
-    srcValoperAddress,
-    desValoperAddress,
-    amount,
-    nodeUrl});
+  // console.log('i am called::',{mnemonic,
+  //   srcValoperAddress,
+  //   desValoperAddress,
+  //   amount,
+  //   nodeUrl});
   try {
     const wallet = await DirectSecp256k1HdWallet.fromMnemonic(mnemonic, {
       hdPaths: [stringToPath("m/44'/60'/0'/0/0")],

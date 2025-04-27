@@ -1,6 +1,6 @@
 /*global chrome*/
 
-import { Route, Routes, Navigate, useNavigate } from "react-router-dom";
+import { Route, Routes, Navigate, useNavigate, useLocation } from "react-router-dom";
 import "./App.scss";
 import FixWidthLayout from "./Layout/FixWidthLayout";
 import OnlyContent from "./Layout/OnlyContent";
@@ -73,9 +73,6 @@ import ChangePin from "./Pages/ChangePin/ChangePin";
 import { setCreate } from "./actions/create";
 import { useIdleTimer } from "react-idle-timer";
 import NftDetail from "./Pages/Nft/NftDetail";
-import NftLayout from "./Layout/NftLayout";
-import NftAddress from "./Pages/Nft/NftAddress";
-import ConfirmNft from "./Pages/Nft/ConfirmNft";
 import Lock from "./Pages/Lock/Lock";
 import SendConfirm from "./Pages/Send/SendConfirm/SendConfirm";
 import ConnectedApp from "./Pages/ConnectedApp/ConnectedApp";
@@ -106,15 +103,16 @@ function App() {
   const [count, setCount] = useState(0);
   const [remaining, setRemaining] = useState(0);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const onIdle = async () => {
     const { autoLock } = await chrome.storage.local.get("autoLock");
     if (!autoLock) return;
 
-    let { password } = await chrome?.storage?.session.get("password");
+    const { accounts } = await chrome.storage.session.get("accounts");
     const { registered } = await chrome?.storage?.local.get("registered");
 
-    if (password && registered) {
+    if (accounts && registered) {
       navigate("/verify", {
         state: {
           lock: true,
@@ -151,9 +149,9 @@ function App() {
     setInterval(async () => {
       const { autoLock } = await chrome.storage.local.get("autoLock");
       if (!autoLock) return;
-      const { password } = await chrome.storage.session.get("password");
+      const { accounts } = await chrome.storage.session.get("accounts");
       const { registered } = await chrome.storage.local.get("registered");
-      if (!password && registered) {
+      if (!accounts && registered) {
         navigate("/verify", {
           state: {
             lock: true,
@@ -193,7 +191,6 @@ function App() {
     }
 
     const { accounts } = await chrome?.storage?.session.get("accounts");
-    console.log("🚀 ~ init ~ accounts:", accounts);
     const { chains } = await chrome?.storage?.local.get("chains");
     const { currency } = await chrome?.storage?.local.get("currency");
     const { appTheme } = await chrome?.storage?.local.get("appTheme");
@@ -267,7 +264,8 @@ function App() {
 
   useEffect(() => {
     init();
-  }, []);
+    console.log('location',location?.pathname)
+  }, [location]);
 
   //
 
@@ -467,6 +465,7 @@ function App() {
             element={<CurrencyPrefrence />}
           />
           <Route index path="/manage-wallet" element={<ManageWallet />} />
+          {/*show-private-key */}
           <Route index path="/show-private-key" element={<ShowPrivateKey />} />
           <Route index path="/add-new-wallet" element={<AddNewWallet />} />
           <Route index path="/my-wallets" element={<MyWallets />} />

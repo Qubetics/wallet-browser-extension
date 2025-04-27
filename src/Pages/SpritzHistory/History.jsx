@@ -18,9 +18,7 @@ import { setSpritzFilter } from "../../actions/filter";
 function HistorySpritz() {
   const [payments, setPayments] = useState([]);
   const { spritzBank } = useSelector((state) => state);
-
   const { state } = useLocation();
-  console.log("state:::", state);
   const init = async () => {
     if (!state) {
       store.dispatch(setSpritzFilter(null));

@@ -278,8 +278,6 @@ export class PancakeHelper {
         }
       );
 
-      console.log("TTTTTTTTT BNB ", response);
-
       return response.data.tx_hash;
     } catch (error) {
       console.log(error);
@@ -385,8 +383,6 @@ export class PancakeHelper {
           },
         }
       );
-
-      console.log("TTTTTTTTT BNB 222 ", response);
 
       return response.data.tx_hash;
     } catch (error) {

@@ -38,15 +38,15 @@ function CreditCard() {
       }
       store.dispatch(setLoading(false));
 
-      console.log("result::", result);
+      // console.log("result::", result);
     } catch (error) {
       messageApi.error(error.message);
       store.dispatch(setLoading(false));
     }
   };
 
-  console.log("cardNumber::", cardNumber);
-  console.log("state cre:::", state);
+  // console.log("cardNumber::", cardNumber);
+  // console.log("state cre:::", state);
   return (
     <>
       <MenuRestofHeaders backTo={"/withdraw"} title={state?.billName?.name} />

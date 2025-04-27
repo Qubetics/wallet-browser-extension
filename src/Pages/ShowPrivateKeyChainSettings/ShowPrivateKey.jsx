@@ -4,9 +4,7 @@ import React, { useEffect, useState } from "react";
 import MenuRestofHeaders from "../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders";
 import "./NewAddress.scss";
 import { useLocation } from "react-router-dom";
-import { InputFieldOnly } from "../../Components/InputField/InputFieldSimple";
 import { message } from "antd";
-import { useSelector } from "react-redux";
 import { DURATION } from "../../config/message.config";
 import CopyIcon from "../../Assets/CopyIconBlue.svg";
 import { WalletHelper } from "../../helpers/wallet.helper";
@@ -17,17 +15,16 @@ function ShowPrivateKey() {
   const [messageApi, contextHolder] = message.useMessage({
     duration: DURATION,
   });
-  console.log("ADDRESS", address);
   const {
-    state: { account },
+    state: { account , password },
   } = useLocation();
-  console.log("account", account);
 
   const init = () => {
     setAddress(account.privateKey);
   };
 
   useEffect(() => {
+    console.log("PASSWORD FOR PRIVATE KEY :",password);
     init();
   }, []);
 
@@ -50,25 +47,18 @@ function ShowPrivateKey() {
   const [btcKey, setBtcKey] = useState(null);
 
   const get_privateKey = async () => {
-    console.log("INNNNNNNN", account);
     if (account?.coinFamilyAndAddress) {
       const evmAddress = account.coinFamilyAndAddress["1"];
-
       // const btcAddress = account.coinFamilyAndAddress["3"];
       // const solAddress = account.coinFamilyAndAddress["5"];
-      // console.log("btcAddress", btcAddress);
-      console.log("evmAddress", evmAddress);
 
       const btcK = await WalletHelper.getBitcoinPrivateKeyWithAddress(
-        evmAddress
+        evmAddress,password
       );
       setBtcKey(btcK);
-      console.log("btcK", btcK);
-
       const solPrivateKeyData =
-        await WalletHelper.getSolanaPrivateKeyWithAddress(evmAddress);
+        await WalletHelper.getSolanaPrivateKeyWithAddress(evmAddress,password);
       const privateKey = bs58.encode(solPrivateKeyData);
-      console.log("SolprivateKey", privateKey);
       setSolKey(privateKey);
     } else {
       console.error("coinFamilyAndAddress data is missing");

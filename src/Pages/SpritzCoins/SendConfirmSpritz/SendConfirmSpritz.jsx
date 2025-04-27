@@ -28,6 +28,7 @@ import {
 } from "../../../helpers/conversion.helper";
 import { server } from "../../../server";
 import { ClipLoader } from "react-spinners";
+import { WalletHelper } from "../../../helpers/wallet.helper";
 
 function SendConfirmSpritz() {
   const {
@@ -331,7 +332,6 @@ function SendConfirmSpritz() {
     }
   };
 
-  console.log("CONFIRM SCrEENNNN : ", bankAccount, coin);
   return (
     <div className={`scrollableCont`}>
       {contextHolder}
@@ -454,11 +454,17 @@ function SendConfirmSpritz() {
             getData={setPassword}
             value={sessionPassword}
             customFunction={async () => {
-              const { password } = await chrome.storage.session.get("password");
+              const isCorrectPassword = await WalletHelper.verifyPassword(
+                sessionPassword
+              );
+              console.log(
+                'isCorrectPassword on Enter in send confirm',
+                isCorrectPassword
+              );
 
               if (sessionPassword != null) {
-                if (sessionPassword !== password) {
-                  return messageApi.error("Incorrect password provided.");
+                if (!isCorrectPassword) {
+                  return messageApi.error('Incorrect password provided.');
                 }
               } else {
                 return messageApi.error("Please enter password.");
@@ -481,11 +487,17 @@ function SendConfirmSpritz() {
             text={"Proceed"}
             maxWidth={"100%"}
             onClick={async () => {
-              const { password } = await chrome.storage.session.get("password");
+              const isCorrectPassword = await WalletHelper.verifyPassword(
+                sessionPassword
+              );
+              console.log(
+                'isCorrectPassword on Button Click in send confirm',
+                isCorrectPassword
+              );
 
               if (sessionPassword != null) {
-                if (sessionPassword !== password) {
-                  return messageApi.error("Incorrect password provided.");
+                if (!isCorrectPassword) {
+                  return messageApi.error('Incorrect password provided.');
                 }
               } else {
                 return messageApi.error("Please enter password.");

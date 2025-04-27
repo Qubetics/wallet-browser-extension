@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from "react";
-import closeXicon from "../../Assets/closeXicon.svg";
+import React, { useState } from "react";
 import "./Welcome.scss";
 function ConfirmSecretPhrase({
   children,
@@ -7,8 +6,6 @@ function ConfirmSecretPhrase({
   shuffledMnemonics,
   checkIfCorrect,
 }) {
-  console.log("🚀 ~ shuffledMnemonics:", shuffledMnemonics);
-  console.log("🚀 ~ mnemonics mere wala mnemonic :", mnemonics);
   const [blankArray, setBlankArray] = useState([]);
   const phrases = shuffledMnemonics;
   const pushData = (ele) => {

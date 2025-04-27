@@ -44,11 +44,11 @@ function VerifyPassword() {
       store.dispatch(setLoading(false));
       return messageApi.error("Invalid password. Please try again.");
     }
-    await chrome.storage.session.set({
-      password,
-    });
+    // await chrome.storage.session.set({
+    //   password,
+    // });
     store.dispatch(setLoading(false));
-    navigate("/wallet");
+    navigate("/wallet",{ state : { password }});
   };
   const height = useCurrentHeight();
 

@@ -27,6 +27,7 @@ import { Loader } from "../../../Components/Loader/Loader";
 import { DURATION } from "../../../config/message.config";
 import InputFieldSimple from "../../../Components/InputField/InputFieldSimple";
 import warning from "../../../Assets/PNG/warning.png";
+import { WalletHelper } from "../../../helpers/wallet.helper";
 
 function getFlooredFixed(v, d) {
   return (Math.floor(v * Math.pow(10, d)) / Math.pow(10, d)).toFixed(d);
@@ -397,10 +398,15 @@ function PancakeSwapDetails() {
             text={"Proceed"}
             maxWidth={"100%"}
             onClick={async () => {
-              const { password } = await chrome.storage.session.get("password");
-
-              if (sessionPassword !== password) {
-                return messageApi.error("Incorrect password provided.");
+              const isCorrectPassword = await WalletHelper.verifyPassword(
+                sessionPassword
+              );
+              console.log(
+                'isCorrectPassword on Button Click',
+                isCorrectPassword
+              );
+              if (!isCorrectPassword) {
+                return messageApi.error('Incorrect password provided.');
               }
 
               setOpenmodal(false);

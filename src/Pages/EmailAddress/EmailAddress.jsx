@@ -27,6 +27,9 @@ function EmailAddress() {
   const [email, setEmail] = useState(null);
   const [messageApi, contextHolder] = message.useMessage();
   const [user, setUser] = useState(null);
+  const [sessionPassword,setSessionPassword]=useState('');
+  const [isPasswordModal,SetPasswordModal]=useState(false);
+
   const navigate = useNavigate();
   const { account } = useSelector((state) => state);
   const checkOtp = async () => {
@@ -131,7 +134,7 @@ function EmailAddress() {
       return messageApi.error("Verification code is invalid.");
     }
 
-    const { password } = await chrome.storage.session.get("password");
+    const password  = sessionPassword ; 
     const encryptedData = SecurityHelper.encrypt({ ...user, key }, password);
 
     await chrome.storage.local.set({
@@ -201,33 +204,12 @@ function EmailAddress() {
       <div>
         <ButtonComp
           onClick={async () => {
-            generateUser();
+            SetPasswordModal(true);
           }}
           marginTop={"24px"}
           text={"Submit"}
         />
       </div>
-
-      {/* <div>
-        <ButtonComp
-          onClick={async () => {
-            handleVerify("ak_N2JjMjdjYzMtYjU0Zi00NTIwLWI1YmUtYzViZTA1YzYzMzFj");
-          }}
-          marginTop={"24px"}
-          text={"Enter with API key"}
-        />
-      </div> */}
-
-      {/* <div className='already_acc'>
-        <a
-          className='navi_class'
-          onClick={() => {
-            navigate('/apiKey');
-          }}
-        >
-          Already have an account?
-        </a>
-      </div> */}
 
       <ModalCustom
         title={"Qubetics Banking"}
@@ -306,6 +288,58 @@ function EmailAddress() {
           )}
         </div>
       </ModalCustom>
+
+
+      <ModalCustom
+          title={"Password"}
+          handleCancel={()=> {
+            SetPasswordModal(fasle);
+          }}
+          isModalOpen={isPasswordModal}
+          handleOk={()=> {
+            if(sessionPassword === ''){
+              return messageApi.error('Please enter your password')
+            }
+            else{
+              generateUser();
+            }
+          }}
+          customClass="customClassModal"
+        >
+          <div className="viewphrases">
+            <InputFieldSimple
+              placeholder="Password"
+              getData={(value) => {
+                const hasEmoji = /[\p{Extended_Pictographic}]/u.test(value);
+                if (value.length <= 100 && !hasEmoji) {
+                  setSessionPassword(value);
+                }
+              }}
+              customFunction={async () => {
+                if(sessionPassword === ''){
+                  return messageApi.error('Please enter your password')
+                }
+                else{
+                  generateUser();
+                }
+
+              }}
+            />
+            <div style={{ marginTop: "10px" }}></div>
+            <ButtonComp
+              text={"Proceed"}
+              maxWidth={"100%"}
+              onClick={async () => {
+                if(sessionPassword === ''){
+                  return messageApi.error('Please enter your password')
+                }
+                else{
+                  generateUser();
+                }
+              }}
+            />
+          </div>
+        </ModalCustom>
 
       {email && (
         <TokenDrawer

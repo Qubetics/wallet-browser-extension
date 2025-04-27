@@ -11,20 +11,17 @@ import { useSelector } from "react-redux";
 import { useEffect } from "react";
 import { useRef } from "react";
 import { Web3Helper } from "../../../helpers/web3.helper";
-
 import { message } from "antd";
 import { useState } from "react";
-import { UniswapHelper } from "../../../helpers/uniswap.helper";
 import ModalCustom from "../../../Components/ModalCustom/ModalCustom";
 import { ClipLoader } from "react-spinners";
 import { Loader } from "../../../Components/Loader/Loader";
 import { CrossChainHelper } from "../../../helpers/crosschain.helper";
 import { DURATION } from "../../../config/message.config";
-import warning from "../../../Assets/PNG/warning.png";
 import InputFieldSimple from "../../../Components/InputField/InputFieldSimple";
-
 import DarkLogo from "../../../Assets/DarkLogo.svg";
 import Logo from "../../../Assets/logo.png";
+import { WalletHelper } from "../../../helpers/wallet.helper";
 
 function getFlooredFixed(v, d) {
   return (Math.floor(v * Math.pow(10, d)) / Math.pow(10, d)).toFixed(d);
@@ -63,20 +60,6 @@ function CrossChainDetails() {
       coinSymbol,
     },
   } = useLocation();
-  console.log("TOKEN !!! 1", token1);
-  console.log("PREVVVVVVVVVVVVVV ", {
-    token1,
-    token2,
-    amount,
-    amount2,
-    tokenChain,
-    networkFee,
-    walletAddress,
-    token1Price,
-    parentCoin,
-    rpc,
-    coinSymbol,
-  });
 
   const [isModalOpen1, setIsModalOpen1] = useState(false);
 
@@ -136,8 +119,6 @@ function CrossChainDetails() {
       rpc,
       coinSymbol
     );
-
-    console.log("AAAAAAAAAAA datadata ", data);
 
     if (!data) {
       setSwapModal(false);
@@ -247,7 +228,6 @@ function CrossChainDetails() {
             <div className="swapDetails__keyValuesText__inner">
               <p className="swapDetails__keyValuesText__key">Network Fee</p>
               <p className="swapDetails__keyValuesText__val">
-                {console.log()}
                 {addCommasToNumber(getFlooredFixed(networkFee, 10))}{" "}
                 {tokenChain.currencySymbol} / ({currency.symbol}{" "}
                 {addCommasToNumber(
@@ -324,12 +304,15 @@ function CrossChainDetails() {
               getData={setPassword}
               value={sessionPassword}
               customFunction={async () => {
-                const { password } = await chrome.storage.session.get(
-                  "password"
+                const isCorrectPassword = await WalletHelper.verifyPassword(
+                  sessionPassword
                 );
-
-                if (sessionPassword !== password) {
-                  return messageApi.error("Incorrect password provided.");
+                console.log(
+                  'isCorrectPassword on Button Click',
+                  isCorrectPassword
+                );
+                if (!isCorrectPassword) {
+                  return messageApi.error('Incorrect password provided.');
                 }
 
                 setOpenmodal(false);
@@ -342,10 +325,15 @@ function CrossChainDetails() {
             text={"Proceed"}
             maxWidth={"100%"}
             onClick={async () => {
-              const { password } = await chrome.storage.session.get("password");
-
-              if (sessionPassword !== password) {
-                return messageApi.error("Incorrect password provided.");
+              const isCorrectPassword = await WalletHelper.verifyPassword(
+                sessionPassword
+              );
+              console.log(
+                'isCorrectPassword on Button Click',
+                isCorrectPassword
+              );
+              if (!isCorrectPassword) {
+                return messageApi.error('Incorrect password provided.');
               }
 
               setOpenmodal(false);

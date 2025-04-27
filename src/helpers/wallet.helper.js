@@ -1,17 +1,12 @@
 /*global chrome*/
 import { SecurityHelper } from "./security.helper";
 import * as ethers from "ethers";
-import Web3 from "web3";
 import { store } from "..";
 import { setAccount } from "../actions/accounts";
 import { setChain } from "../actions/chains";
 import { v4 as uuidv4 } from "uuid";
 import { setCurrency } from "../actions/currency";
-import { Web3Helper } from "./web3.helper";
-import { setTransactions } from "../actions/transactions";
-import moment from "moment";
 import { setAuth } from "../actions/auth";
-import { setPrices } from "../actions/prices";
 import { SolanaHelper } from "./solana.helper";
 import nacl from "tweetnacl";
 import * as bip39 from "@scure/bip39";
@@ -20,24 +15,12 @@ import { Account } from "@solana/web3.js";
 import { BTCHelper } from "./btc.helper";
 import { IS_PRODUCTION } from "../config/bitcoin.config";
 import { AdaHelper } from "./ada.helper";
-import { ETHTokenArray } from "../config/eth.config";
-import { BNBTokens } from "../config/bnb.config";
-import { AVAXTokens } from "../config/avax.config";
-import { MaticTokens } from "../config/matic.config";
-import { CROTokens } from "../config/cro.config";
-import { SOlToken } from "../config/sol.config";
 import { setAlerts } from "../actions/alerts";
-import { cloneArrayOfObjects } from "./clone.helper";
-import axios from "axios";
 import { setBalancesIn } from "../actions/balance-off-out";
 import { setNfts } from "../actions/nfts";
 import { setTokens } from "../actions/tokens";
 import { server } from "../server";
-import { spritzHelper } from "./spritz.helper";
-import { spritzAccounts, spritzKyc, spritzLogin } from "../actions/spritz";
 import { setLoading } from "../actions/loading";
-import { TronHelper } from "./tron.helper";
-import { getUserAddress } from './getAddress';
 const BIP84 = require("bip84");
 const privateKeyToAddress = require("ethereum-private-key-to-address");
 
@@ -77,9 +60,9 @@ export class WalletHelper {
         (el) => el.default
       );
 
-      await chrome.storage.session.set({
-        password,
-      });
+      // await chrome.storage.session.set({
+      //   password,
+      // });
       await chrome.storage.session.set({
         accounts: JSON.parse(decryptedAccounts),
       });
@@ -113,25 +96,60 @@ export class WalletHelper {
   };
 
   static getMnemonics = async (address) => {
+    // console.log('GET MNEMONICS FUNCTION', address)
     try {
       const { password } = await chrome.storage.session.get("password");
       const { mnemonics } = await chrome.storage.local.get("mnemonics");
       if (mnemonics) {
+        // console.log('FOUND MNEMONICS', address)
         const decryptedMnemonics = SecurityHelper.decrypt(mnemonics, password);
 
         // Parse the decrypted mnemonics
         const mnemonicsList = JSON.parse(decryptedMnemonics);
-        console.log("mnemonicsList", mnemonicsList);
+        // console.log("mnemonicsList", mnemonicsList);
         // Find the mnemonic matching the provided address
         const matchedMnemonic = mnemonicsList.find(
           (mnemonic) => mnemonic.address.toLowerCase() === address.toLowerCase()
         );
-        console.log("matchedMnemonic", matchedMnemonic);
+        // console.log("matchedMnemonic", matchedMnemonic);
 
         // Return the matched mnemonic phrase, or the default if no match
         const defaultMnemonics = matchedMnemonic || mnemonicsList[0];
         return defaultMnemonics.phrase;
       } else {
+        // console.log('GENETRATE MNEMONICS', address)
+        // Generate a new mnemonic if none are found
+        const { phrase } = ethers.Wallet.createRandom().mnemonic;
+        return phrase;
+      }
+    } catch (error) {
+      return false;
+    }
+  };
+
+
+  static getMnemonicsByPassword = async (address,password) => {
+    // console.log('GET MNEMONICS FUNCTION', address)
+    try {
+      const { mnemonics } = await chrome.storage.local.get("mnemonics");
+      if (mnemonics) {
+        // console.log('FOUND MNEMONICS', address)
+        const decryptedMnemonics = SecurityHelper.decrypt(mnemonics, password);
+
+        // Parse the decrypted mnemonics
+        const mnemonicsList = JSON.parse(decryptedMnemonics);
+        // console.log("mnemonicsList", mnemonicsList);
+        // Find the mnemonic matching the provided address
+        const matchedMnemonic = mnemonicsList.find(
+          (mnemonic) => mnemonic.address.toLowerCase() === address.toLowerCase()
+        );
+        // console.log("matchedMnemonic", matchedMnemonic);
+
+        // Return the matched mnemonic phrase, or the default if no match
+        const defaultMnemonics = matchedMnemonic || mnemonicsList[0];
+        return defaultMnemonics.phrase;
+      } else {
+        // console.log('GENETRATE MNEMONICS', address)
         // Generate a new mnemonic if none are found
         const { phrase } = ethers.Wallet.createRandom().mnemonic;
         return phrase;
@@ -150,44 +168,35 @@ export class WalletHelper {
     }
   };
 
-  static getSolanaPrivateKey = async () => {
-    try {
-      const { password } = await chrome.storage.session.get("password");
-      const { mnemonics } = await chrome.storage.local.get("mnemonics");
-      const decryptedMnemonics = SecurityHelper.decrypt(mnemonics, password);
-      const defaultMnemonics = JSON.parse(decryptedMnemonics).find(
-        (el) => el.default
-      );
-      const seed = await bip39.mnemonicToSeed(defaultMnemonics.phrase);
-      const path = `m/44'/501'/0'`;
-      const derivedSeed = derivePath(path, seed).key;
-      const account = new Account(
-        nacl.sign.keyPair.fromSeed(derivedSeed).secretKey
-      );
-      console.log("lllllllllllDDDDDDDDDDDDDDdddd ");
+  // static getSolanaPrivateKey = async () => {
+  //   try {
+  //     const { password } = await chrome.storage.session.get("passwords");
+  //     const { mnemonics } = await chrome.storage.local.get("mnemonics");
+  //     const decryptedMnemonics = SecurityHelper.decrypt(mnemonics, password);
+  //     const defaultMnemonics = JSON.parse(decryptedMnemonics).find(
+  //       (el) => el.default
+  //     );
+  //     const seed = await bip39.mnemonicToSeed(defaultMnemonics.phrase);
+  //     const path = `m/44'/501'/0'`;
+  //     const derivedSeed = derivePath(path, seed).key;
+  //     const account = new Account(
+  //       nacl.sign.keyPair.fromSeed(derivedSeed).secretKey
+  //     );
+  //     return account.secretKey;
+  //   } catch (error) {
+  //     return false;
+  //   }
+  // };
 
-      return account.secretKey;
-    } catch (error) {
-      return false;
-    }
-  };
-
-  static getSolanaPrivateKeyWithAddress = async (address) => {
-    console.log("addressInSolana", address);
-    const mnemonics = await WalletHelper.getMnemonics(address);
-    console.log("mnemonicsinsolana", mnemonics);
+  static getSolanaPrivateKeyWithAddress = async (address,password) => {
+    const mnemonics = await WalletHelper.getMnemonicsByPassword(address,password);
     try {
-      // const { password } = await chrome.storage.session.get("password");
-      // const { mnemonics } = await chrome.storage.local.get("mnemonics");
-      // const decryptedMnemonics = SecurityHelper.decrypt(mnemonics, password);
-      // const defaultMnemonics = JSON.parse(mnemonics).find((el) => el.default);
       const seed = await bip39.mnemonicToSeed(mnemonics);
       const path = `m/44'/501'/0'`;
       const derivedSeed = derivePath(path, seed).key;
       const account = new Account(
         nacl.sign.keyPair.fromSeed(derivedSeed).secretKey
       );
-
       return account.secretKey;
     } catch (error) {
       return false;
@@ -217,23 +226,31 @@ export class WalletHelper {
     }
   };
 
-  static getBitcoinPrivateKeyWithAddress = async (address) => {
-    console.log("addressInBtc", address);
-
-    const mnemonics = await WalletHelper.getMnemonics(address);
-    console.log("mnemonics", mnemonics);
+  static getBitcoinPrivateKeyWithPassword = async (password) => {
     try {
-      // const { password } = await chrome.storage.session.get("password");
-      // const { mnemonics } = await chrome.storage.local.get("mnemonics");
+      const { mnemonics } = await chrome.storage.local.get("mnemonics");
 
-      // const decryptedMnemonics = SecurityHelper.decrypt(mnemonics, password);
-      // console.log("decryptedMnemonics", decryptedMnemonics);
+      const decryptedMnemonics = SecurityHelper.decrypt(mnemonics, password);
 
-      // const defaultMnemonics = JSON.parse(decryptedMnemonics).find(
-      //   (el) => el.default
-      // );
-      // console.log("defaultMnemonics", defaultMnemonics);
+      const defaultMnemonics = JSON.parse(decryptedMnemonics).find(
+        (el) => el.default
+      );
+      var root = new BIP84.fromSeed(
+        defaultMnemonics.phrase,
+        "",
+        !IS_PRODUCTION
+      );
+      var child0 = root.deriveAccount(0);
+      var account0 = new BIP84.fromZPrv(child0);
+      return account0.getPrivateKey(0);
+    } catch (error) {
+      return false;
+    }
+  };
 
+  static getBitcoinPrivateKeyWithAddress = async (address,password) => {
+    const mnemonics = await WalletHelper.getMnemonicsByPassword(address,password);
+    try {
       var root = new BIP84.fromSeed(mnemonics, "", !IS_PRODUCTION);
       var child0 = root.deriveAccount(0);
       var account0 = new BIP84.fromZPrv(child0);
@@ -243,20 +260,20 @@ export class WalletHelper {
     }
   };
 
-  static getAdaPrivateKey = async () => {
-    try {
-      const { password } = await chrome.storage.session.get("password");
-      const { mnemonics } = await chrome.storage.local.get("mnemonics");
-      const decryptedMnemonics = SecurityHelper.decrypt(mnemonics, password);
-      const defaultMnemonics = JSON.parse(decryptedMnemonics).find(
-        (el) => el.default
-      );
-      const response = AdaHelper.generateWalletAddress(defaultMnemonics.phrase);
-      return response;
-    } catch (error) {
-      return false;
-    }
-  };
+  // static getAdaPrivateKey = async () => {
+  //   try {
+  //     const { password } = await chrome.storage.session.get("passwords");
+  //     const { mnemonics } = await chrome.storage.local.get("mnemonics");
+  //     const decryptedMnemonics = SecurityHelper.decrypt(mnemonics, password);
+  //     const defaultMnemonics = JSON.parse(decryptedMnemonics).find(
+  //       (el) => el.default
+  //     );
+  //     const response = AdaHelper.generateWalletAddress(defaultMnemonics.phrase);
+  //     return response;
+  //   } catch (error) {
+  //     return false;
+  //   }
+  // };
 
   static getChains = async () => {
     const { chains } = await chrome.storage.local.get("chains");
@@ -277,8 +294,7 @@ export class WalletHelper {
   };
 
 
-  static checkIfAlreadyThere = async (newMnemonics) => {
-    const { password } = await chrome.storage.session.get("password");
+  static checkIfAlreadyThere = async (newMnemonics,password) => {
     let { mnemonics } = await chrome.storage.local.get("mnemonics");
     const decryptMnemonics = SecurityHelper.decrypt(mnemonics, password);
     // console.log("mnemonicsmnemonicsmnemonics ", mnemonics);
@@ -423,16 +439,16 @@ export class WalletHelper {
         balanceIn: account.balanceIn,
       };
 
-      console.log(
-        "🚀 ~ file: wallet.helper.js:973 ~ WalletHelper ~ updatedAccount:",
-        updatedAccount
-      );
+      // console.log(
+      //   "🚀 ~ file: wallet.helper.js:973 ~ WalletHelper ~ updatedAccount:",
+      //   updatedAccount
+      // );
 
       const foundIndex = accounts.findIndex((x) => x.id == updatedAccount.id);
-      console.log(
-        "🚀 ~ file: wallet.helper.js:983 ~ WalletHelper ~ foundIndex:",
-        foundIndex
-      );
+      // console.log(
+      //   "🚀 ~ file: wallet.helper.js:983 ~ WalletHelper ~ foundIndex:",
+      //   foundIndex
+      // );
       accounts[foundIndex] = updatedAccount;
 
       const encryptedAccounts = SecurityHelper.encrypt(accounts, password);
@@ -735,7 +751,7 @@ export class WalletHelper {
         },
       ];
 
-      console.log("FNLLLLLLLLLLLLLL ", finalAccounts);
+      // console.log("FNLLLLLLLLLLLLLL ", finalAccounts);
 
       const encryptedAccounts = SecurityHelper.encrypt(finalAccounts, password);
 
@@ -765,11 +781,10 @@ export class WalletHelper {
     }
   };
 
-  static generateAndSetWallet = async (newMnemonics, name, type) => {
+  static generateAndSetWallet = async (newMnemonics, name, type,password) => {
   
     try {
-      console.log("FUNC newMnemonics:::",newMnemonics);
-      const { password } = await chrome.storage.session.get("password");
+      // console.log("FUNC newMnemonics:::",newMnemonics);
       let { accounts } = await chrome.storage.session.get("accounts");
       const { chains } = await chrome.storage.local.get("chains");
       const { currency } = await chrome.storage.local.get("currency");
@@ -877,7 +892,7 @@ export class WalletHelper {
         }
       );
 
-      console.log("Createeeeeeeeee ", createWallet);
+      // console.log("Createeeeeeeeee ", createWallet);
       const id = uuidv4();
 
       const finalAccounts = [
@@ -924,7 +939,7 @@ export class WalletHelper {
         password
       );
 
-      console.log("finalAccountsfinalAccounts ", finalAccounts);
+      // console.log("finalAccountsfinalAccounts ", finalAccounts);
 
       const encryptedAccounts = SecurityHelper.encrypt(finalAccounts, password);
 
@@ -1134,8 +1149,10 @@ export class WalletHelper {
     }
   };
 
-  static updateBalanceInShow = async (status, id) => {
-    const { password } = await chrome.storage.session.get("password");
+  static updateBalanceInShow = async (status, id,password) => {
+
+    console.log("updateBalanceInShow :",status, id,password)
+   
     try {
       const { accounts } = await chrome.storage.local.get("accounts");
       const decryptedAccounts = SecurityHelper.decrypt(accounts, password);
@@ -1290,12 +1307,12 @@ export class WalletHelper {
 
       // Parse the decrypted mnemonics
       const mnemonicsList = JSON.parse(decryptedMnemonics);
-      console.log("mnemonicsList", mnemonicsList);
+      // console.log("mnemonicsList", mnemonicsList);
       // Find the mnemonic matching the provided address
       const unmatchedMnemonic = mnemonicsList.filter(
         (mnemonic) => mnemonic.address.toLowerCase() !== address.toLowerCase()
       );
-      console.log("unmatchedMnemonic", unmatchedMnemonic);
+      // console.log("unmatchedMnemonic", unmatchedMnemonic);
       // if (unmatchedMnemonic.length == 1) {
       // const encryptedAgain = SecurityHelper.encrypt([unmatchedMnemonic[unmatchedMnemonic.length-1]], password);
       // chrome.storage.local.set({
@@ -1305,7 +1322,7 @@ export class WalletHelper {
       // } else {
       const encryptedAgain = SecurityHelper.encrypt(unmatchedMnemonic, password);
 
-      console.log("encryptedAgain", encryptedAgain);
+      // console.log("encryptedAgain", encryptedAgain);
       chrome.storage.local.set({
         mnemonics: encryptedAgain,
         registered: true,
@@ -1417,10 +1434,10 @@ export class WalletHelper {
   };
 
   static removeAlert = async (uuid) => {
-    console.log(
-      "🚀 ~ file: wallet.helper.js:1649 ~ WalletHelper ~ removeAlert= ~ uuid:",
-      uuid
-    );
+    // console.log(
+    //   "🚀 ~ file: wallet.helper.js:1649 ~ WalletHelper ~ removeAlert= ~ uuid:",
+    //   uuid
+    // );
     try {
       let { alerts } = await chrome.storage.local.get("alerts");
 

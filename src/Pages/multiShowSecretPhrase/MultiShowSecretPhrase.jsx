@@ -12,7 +12,7 @@ function MultiShowSecretPhrase() {
     duration: DURATION,
   });
   const { state } = useLocation();
-  const { mnemonics } = state;
+  const { mnemonics,password } = state;
   const navigate = useNavigate();
   const phrases = mnemonics.split(" ");
   function copyToClipboard() {
@@ -26,6 +26,8 @@ function MultiShowSecretPhrase() {
   const onChange = (e) => {
     setTerms(e.target.checked);
   };
+
+  console.log('password in secret phrase multi : ',password)
 
   return (
     <>

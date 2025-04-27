@@ -3,9 +3,8 @@ import 'react-tabs/style/react-tabs.css';
 import './Swap.scss';
 import ModalCloseIcon from '../../Assets/ModalCloseIcon.svg';
 import darkclose from '../../Assets/darkclose.svg';
-import { Drawer, message, Select, Tooltip } from 'antd';
+import { Drawer, message, Select } from 'antd';
 import {
-  EditOutlined,
   InfoCircleOutlined,
   SettingOutlined,
 } from '@ant-design/icons';
@@ -14,15 +13,9 @@ import {
 import React from 'react';
 import MenuRestofHeaders from '../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders';
 import { InputField } from '../../Components/InputField/InputFieldSimple';
-import BTC from '../../Assets/Coins/BTC.png';
 import DownArrowSuffix from '../../Assets/DownArrowSuffix.svg';
-import InfoIcon from '../../Assets/info1.png';
-import Cog from '../../Assets/cog.png';
 import Search from '../../Assets/SearchIcon.svg';
-import Edit from '../../Assets/edit.svg';
 // import Search from "../../Assets/SearchIcon.svg";
-import ETH from '../../Assets/Coins/ETH.png';
-import ADA from '../../Assets/Coins/ADA.png';
 import SwapVerticalIcon from '../../Assets/SwapVerticalIcon.svg';
 import ButtonComp from '../../Components/ButtonComp/ButtonComp';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -32,35 +25,27 @@ import { useState } from 'react';
 import { Web3Helper } from '../../helpers/web3.helper';
 import { useSelector } from 'react-redux';
 import { store } from '../..';
-import { setLoading as externalLoading } from '../../actions/loading';
-import { Loader } from '../../Components/Loader/Loader';
 import { ClipLoader } from 'react-spinners';
 import { useRef } from 'react';
 import { Tabs, TabList, Tab, TabPanel } from 'react-tabs';
 import CrossChain from '../CrossChain/CrossChain';
 import { DURATION } from '../../config/message.config';
 import BigNumber from 'bignumber.js';
-import { SolanaHelper } from '../../helpers/solana.helper';
-import { BTCHelper } from '../../helpers/btc.helper';
 import warning from '../../Assets/PNG/danger.png';
 import infoBg from '../../Assets/bgRedinfo.png';
 import {
-  balanceToFiatConversion,
   toFixed,
 } from '../../helpers/conversion.helper';
 import { server } from '../../server';
-import Web3 from 'web3';
 import { PancakeHelper } from '../../helpers/pancake.helper';
 import ModalCustom from '../../Components/ModalCustom/ModalCustom';
 import { setLoading as overAllLoader } from '../../actions/loading';
 import { PulseChainHelper } from '../../helpers/pulsechain.helper';
-import debounce from 'lodash.debounce';
 import { UNISWAP_NATIVE_WRAPPED_TOKEN_ADDRESSES } from '../../config/uniswap.config';
 import { PANCAKE_NATIVE_WRAPPED_TOKEN_ADDRESSES } from '../../config/pancake.config';
 import Bignumber from 'bignumber.js';
 import { generateString } from '../../helpers/common.helper';
 // import useCheckMaintanace from "../../CustomHooks/checkMaintanance";
-import { WalletHelper } from '../../helpers/wallet.helper';
 import Maintanance from '../../Components/Maintanance/Maintanance';
 import { swapDetailAc } from '../../actions/swap';
 import useCurrentHeight from '../../CustomHooks/useCurrentHeight';
@@ -395,7 +380,7 @@ function Swap() {
           //assign the object to my state token
           const myStateToken = newTokens[0];
 
-          console.log('newTokensnewTokensnewTokens ', newTokens);
+          // console.log('newTokensnewTokensnewTokens ', newTokens);
 
           if (!myStateToken) {
             messageApi.error('Token not available for swap.');
@@ -425,7 +410,7 @@ function Swap() {
             }
           }
           if (state.coinFamily) {
-            console.log('WWWWWWWWWW ', myToken1);
+            // console.log('WWWWWWWWWW ', myToken1);
 
             setToken1(myToken1);
             handleToken1Change(myStateToken);
@@ -804,7 +789,7 @@ function Swap() {
       store.dispatch(overAllLoader(false));
     } catch (error) {
       store.dispatch(overAllLoader(false));
-      console.log(error);
+      console.log('get Inactive Token:',error);
       messageApi.error('Something went wrong.');
       navigate(-1);
     }
@@ -863,7 +848,7 @@ function Swap() {
 
       const result = originalNumber * percent;
 
-      console.log("TTTTTTTTTTTTTTTTTTT ", result, " PLPLPL ", token1);
+      // console.log("TTTTTTTTTTTTTTTTTTT ", result, " PLPLPL ", token1);
 
       // Step 3: Add the result to the original number
       finalFee = getFlooredFixed(
@@ -884,7 +869,7 @@ function Swap() {
       return getFlooredFixed(finalFeeSol, 9);
     }
 
-    console.log("HERRRRRRRRRRRRR ", BL_CODE[token1.coinFamily].toLowerCase());
+    // console.log("HERRRRRRRRRRRRR ", BL_CODE[token1.coinFamily].toLowerCase());
 
     const gasPrice = await Web3Helper.getGasPrice(
       // token1.coinFamily == 1 ? "eth" : token1.coinFamily == 9 ? "pls" : "bnb",
@@ -2718,17 +2703,17 @@ function Swap() {
                       const balanceExtraToAddIfFromIsNativeCoin =
                         feeAmount.plus(amountToAdd);
 
-                      console.log(
-                        "nativeBalance :: ",
-                        parseFloat(nativeBalance)
-                      );
-                      console.log("feeAmount :: ", parseFloat(feeAmount));
-                      console.log(
-                        " amountToAdd ",
-                        parseFloat(amountToAdd),
-                        " balanceExtraToAddIfFromIsNativeCoin ",
-                        parseFloat(balanceExtraToAddIfFromIsNativeCoin)
-                      );
+                      // console.log(
+                      //   "nativeBalance :: ",
+                      //   parseFloat(nativeBalance)
+                      // );
+                      // console.log("feeAmount :: ", parseFloat(feeAmount));
+                      // console.log(
+                      //   " amountToAdd ",
+                      //   parseFloat(amountToAdd),
+                      //   " balanceExtraToAddIfFromIsNativeCoin ",
+                      //   parseFloat(balanceExtraToAddIfFromIsNativeCoin)
+                      // );
 
                       if (
                         balanceExtraToAddIfFromIsNativeCoin.gt(nativeBalance)
@@ -3383,14 +3368,14 @@ function Swap() {
                 const balanceExtraToAddIfFromIsNativeCoin =
                   feeAmount.plus(amountToAdd);
 
-                console.log('nativeBalance :: ', parseFloat(nativeBalance));
-                console.log('feeAmount :: ', parseFloat(feeAmount));
-                console.log(
-                  ' amountToAdd ',
-                  parseFloat(amountToAdd),
-                  ' balanceExtraToAddIfFromIsNativeCoin ',
-                  parseFloat(balanceExtraToAddIfFromIsNativeCoin)
-                );
+                // console.log('nativeBalance :: ', parseFloat(nativeBalance));
+                // console.log('feeAmount :: ', parseFloat(feeAmount));
+                // console.log(
+                //   ' amountToAdd ',
+                //   parseFloat(amountToAdd),
+                //   ' balanceExtraToAddIfFromIsNativeCoin ',
+                //   parseFloat(balanceExtraToAddIfFromIsNativeCoin)
+                // );
 
                 if (balanceExtraToAddIfFromIsNativeCoin.gt(nativeBalance)) {
                   store.dispatch(overAllLoader(false));

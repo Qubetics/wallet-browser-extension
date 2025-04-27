@@ -251,17 +251,13 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin }) {
         // Convert the numbers to BigNumber instances
         const myPrice = new BigNumber(firstPrice ? firstPrice.value : 0);
         const balance = new BigNumber(coin.balance);
-
         // Perform the multiplication
         const result = myPrice.times(balance);
-
         // Get the result as a string with the desired precision
         const formattedResult = getFlooredFixed(result.toString(), 2);
-
-        // console.log(formattedResult, "formattedResult"); // Output: "0.21"
         setFiatValue(formattedResult);
       } catch (error) {
-        console.log(error, "error");
+        console.log("Error in currency balance",error);
       }
     }
   }, [tokens]);

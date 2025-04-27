@@ -1,15 +1,9 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect } from "react";
 import "./Welcome.scss";
 import CopyIcon from "../../Assets/CopyIcon.svg";
 import { Checkbox, message } from "antd";
 import { DURATION } from "../../config/message.config";
-import ErroeImg from "../../Assets/ErroeImg.svg";
-import TickImg from "../../Assets/TickImg.svg";
-import style from "./Welcome.scss";
 function SecretPhrase({ children, mnemonics, termsCheck, isShare, setIsShare, isSupport, setIsSupport }) {
-  console.log("🚀 ~ SecretPhrase ~ mnemonics:", mnemonics);
-  console.log("🚀 ~ SecretPhrase ~ termsCheck:", termsCheck);
-  
   const [messageApi, contextHolder] = message.useMessage({
     duration: DURATION,
   });
@@ -19,12 +13,6 @@ function SecretPhrase({ children, mnemonics, termsCheck, isShare, setIsShare, is
     navigator.clipboard.writeText(str);
     messageApi.success("Phrase Copied");
   }
-  // const onChange = (e) => {
-  //   termsCheck(e.target.checked);
-  // };
-  const onChange = (e) => {
-    console.log(`checked = ${e.target.checked}`);
-  };
 
   useEffect(() => {
     termsCheck(true);

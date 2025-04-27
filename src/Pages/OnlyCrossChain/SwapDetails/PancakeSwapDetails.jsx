@@ -392,10 +392,15 @@ function PancakeSwapDetails() {
             text={"Proceed"}
             maxWidth={"100%"}
             onClick={async () => {
-              const { password } = await chrome.storage.session.get("password");
-
-              if (sessionPassword !== password) {
-                return messageApi.error("Incorrect password provided.");
+              const isCorrectPassword = await WalletHelper.verifyPassword(
+                sessionPassword
+              );
+              console.log(
+                'isCorrectPassword on Button Click',
+                isCorrectPassword
+              );
+              if (!isCorrectPassword) {
+                return messageApi.error('Incorrect password provided.');
               }
 
               handleSwap();

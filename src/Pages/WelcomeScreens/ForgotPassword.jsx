@@ -191,12 +191,10 @@ function ForgotPassword() {
                 }
 
                 if (password) {
-                  await chrome.storage.session.set({
-                    password,
-                  });
+                 
                   if (type === "create") {
                     await WalletHelper.setPasswordInSession(password);
-                    const mnemonics = await WalletHelper.getMnemonics();
+                    const mnemonics = await WalletHelper.getMnemonicsByPassword('',password);
                     setMnemonics(mnemonics);
                     setShuffledMnemonics(
                       mnemonics.split(" ").sort(() => Math.random() - 0.5)
@@ -294,11 +292,6 @@ function ForgotPassword() {
             }
           >
             <div className="setPassword__footerbuttons">
-              {/* <ButtonComp
-                onClick={() => setActiveTab("setPassword")}
-                text={"Back"}
-                bordered={true}
-              /> */}
               <ButtonComp
                 onClick={async () => {
                   if (!terms) {
@@ -320,10 +313,6 @@ function ForgotPassword() {
                     const response = await WalletHelper.generateAndSetWallet(
                       getMnemonicsData,
                       "Account 1"
-                    );
-                    console.log(
-                      "🚀 ~ file: ForgotPassword.jsx:311 ~ onClick={ ~ response:",
-                      response
                     );
                     if (!response) {
                       store.dispatch(setLoading(false));

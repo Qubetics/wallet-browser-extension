@@ -1,11 +1,9 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef } from "react";
 import "./Welcome.scss";
 import { useNavigate } from "react-router-dom";
 import { Checkbox, Input, message } from "antd";
 import CopyIconBlueN from "../../Assets/CopyIconBlueN.svg";
-import { InputFieldOnly } from "../../Components/InputField/InputFieldSimple";
 import { DURATION } from "../../config/message.config";
-import ButtonComp from "../../Components/ButtonComp/ButtonComp";
 
 function SecretPhrasePaste({ children, termsCheck, getMnemonics, type }) {
   const MAX_WORDS_LIMIT = 12;
@@ -2083,16 +2081,12 @@ function SecretPhrasePaste({ children, termsCheck, getMnemonics, type }) {
     }
     // Update state with the input value
     setMnemonics(value);
-    console.log("mmmmmmmmmmmmmmmmmmmmmmmmm ", mnemonics);
-    
     getMnemonics(value);
 
     // If the value is empty, clear the sorted word list
     if (!value || value.length === 0) {
       return setSortedWordList([]);
     }
-
-    console.log(value);
 
     // Split the input value into words
     const txtArr = value.split(" ");
@@ -2126,7 +2120,7 @@ function SecretPhrasePaste({ children, termsCheck, getMnemonics, type }) {
       setVisibleWordCount(10);
       textAreaRef.current.focus();
     } catch (err) {
-      console.log("ERROR_----", err);
+      console.log("Select Mnemonics Word :", err);
     }
   };
 

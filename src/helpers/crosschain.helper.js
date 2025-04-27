@@ -277,7 +277,6 @@ export class CrossChainHelper {
             ) {
               transaction.change(walletAddress);
             }
-            console.log("walletAddresswalletAddress ",walletAddress);
             
             if (
               satoshis -
@@ -299,15 +298,12 @@ export class CrossChainHelper {
               );
             }
 
-            console.log("transaction==========> ",transaction);
-            
             const btcPrivateKey = await WalletHelper.getBitcoinPrivateKey();
 
             // console.log(
             //   "🚀 ~ file: SendCoins.jsx:656 ~ btcPrivateKey:",
             //   btcPrivateKey
             // );
-            console.log("btcPrivateKey==========> ",btcPrivateKey);
             if (!btcPrivateKey) {
               // store.dispatch(setLoading(false));
               return console.error(

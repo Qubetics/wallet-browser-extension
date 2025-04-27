@@ -2,11 +2,9 @@
 
 import React, { useEffect, useState } from 'react';
 import './WalletListing.scss';
-import walletIcon from '../../Assets/walletIcon.svg';
 import MyWallet from '../../Assets/myWallet.svg';
 import InfoIcon from '../../Assets/info1.png';
 import warning from '../../Assets/PNG/warning.png';
-
 import { server } from '../../server';
 import { useSelector } from 'react-redux';
 import {
@@ -22,13 +20,9 @@ import { Dropdown, message, Switch } from 'antd';
 import ModalCustom from '../../Components/ModalCustom/ModalCustom';
 import InputFieldSimple from '../../Components/InputField/InputFieldSimple';
 import ButtonComp from '../../Components/ButtonComp/ButtonComp';
-import { Draggable } from 'react-drag-reorder';
 
-import Reorder, {
+import {
   reorder,
-  reorderImmutable,
-  reorderFromTo,
-  reorderFromToImmutable,
 } from 'react-reorder';
 function WalletListing() {
   const [data, setData] = useState([]);
@@ -101,8 +95,6 @@ function WalletListing() {
 
       let overallFinalBalance = 0;
 
-      console.log(accounts);
-
       const finalData = accounts.map((account, index) => {
         let fiatBalance = 0;
         account.coinFamilies.forEach((coinFamily) => {
@@ -111,18 +103,18 @@ function WalletListing() {
             ? balances.data.data[
               `${coinFamily}_${address.toLowerCase()}`
             ].forEach((token) => {
-              console.log(
-                account.isWatchOnly &&
-                token.watch_only_wallet_addresses_data &&
-                account.name ===
-                token.watch_only_wallet_addresses_data.wallet_name
-              );
-              console.log(
-                account.isWatchOnly,
-                token?.watch_only_wallet_addresses_data,
-                account.name,
-                token?.watch_only_wallet_addresses_data?.wallet_name
-              );
+              // console.log(
+              //   account.isWatchOnly &&
+              //   token.watch_only_wallet_addresses_data &&
+              //   account.name ===
+              //   token.watch_only_wallet_addresses_data.wallet_name
+              // );
+              // console.log(
+              //   account.isWatchOnly,
+              //   token?.watch_only_wallet_addresses_data,
+              //   account.name,
+              //   token?.watch_only_wallet_addresses_data?.wallet_name
+              // );
               if (
                 account.isWatchOnly &&
                 token.watch_only_wallet_addresses_data &&
@@ -162,7 +154,6 @@ function WalletListing() {
         setBalance(addCommasToNumber(getFlooredFixed(overallFinalBalance, 2)))
       );
 
-      console.log('finalData', finalData);
       await WalletHelper.setWalletPreference(
         finalData.find((el) => el.default).id
       );
@@ -547,7 +538,6 @@ function WalletListing() {
                       onClick={async (e) => {
                         e.stopPropagation();
                         setClickedUp(true);
-                        console.log('index', index);
                         if (index === 0) return;
                         const previousIndex = index;
                         const nextIndex = index - 1;
@@ -611,7 +601,6 @@ function WalletListing() {
                       onClick={async (e) => {
                         e.stopPropagation();
                         setClickedDown(true);
-                        console.log('index', index);
                         if (index === data.length - 1) return;
                         const previousIndex = index;
                         const nextIndex = index + 1;
@@ -713,12 +702,9 @@ function WalletListing() {
               if (!password) {
                 return messageApi.error('Please enter a valid password.', 1);
               }
-
-              await chrome.storage.session.set({
-                password,
-              });
-              const response = await WalletHelper.getMnemonics(
-                selected.coinFamilyAndAddress[1]
+              const response = await WalletHelper.getMnemonicsByPassword(
+                selected.coinFamilyAndAddress[1],
+                password
               );
               if (!response) {
                 return messageApi.error('Please enter a valid password.');
@@ -745,12 +731,9 @@ function WalletListing() {
               if (!password) {
                 return messageApi.error('Please enter a valid password.');
               }
-
-              await chrome.storage.session.set({
-                password,
-              });
-              const response = await WalletHelper.getMnemonics(
-                selected.coinFamilyAndAddress[1]
+              const response = await WalletHelper.getMnemonicsByPassword(
+                selected.coinFamilyAndAddress[1],
+                password
               );
               if (!response) {
                 return messageApi.error('Please enter a valid password.');
@@ -759,6 +742,7 @@ function WalletListing() {
                 state: {
                   mnemonics: response,
                   backTo: '/wallet',
+                  password:password
                 },
               });
             }}
@@ -807,18 +791,18 @@ function WalletListing() {
 
                 await WalletHelper.deleteWallet(selected.id, selected.address);
 
-                console.log({
-                  is_watch_only: selected.isWatchOnly ? 1 : 0,
-                  wallet_name: selected.name,
-                  address_list_array: Object.keys(selected.coinFamilyAndAddress)
-                    .map((key) => {
-                      return {
-                        coin_family: key,
-                        wallet_address: selected.coinFamilyAndAddress[key],
-                      };
-                    })
-                    .filter((el) => el.wallet_address),
-                });
+                // console.log({
+                //   is_watch_only: selected.isWatchOnly ? 1 : 0,
+                //   wallet_name: selected.name,
+                //   address_list_array: Object.keys(selected.coinFamilyAndAddress)
+                //     .map((key) => {
+                //       return {
+                //         coin_family: key,
+                //         wallet_address: selected.coinFamilyAndAddress[key],
+                //       };
+                //     })
+                //     .filter((el) => el.wallet_address),
+                // });
 
                 await server.post(
                   `/wallet/delete_wallet`,

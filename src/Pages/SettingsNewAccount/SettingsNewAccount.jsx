@@ -111,20 +111,7 @@ function AddNewWallet() {
 
                     store.dispatch(setLoading(true));
                     await chrome.storage.session.set({ name: name.trim(), });
-                    // const mnemonics = await WalletHelper.getMnemonics(
-                    //   account.address
-                    // );
-
-
-                    // const response = await WalletHelper.generateAndSetWallet(
-                    //   mnemonics,
-                    //   name
-                    // );
-                    // await WalletHelper.setWalletPreference(response);
                     const newMnemonic = await WalletHelper.generateNewMnemonics()
-
-
-                    // navigate("/createNewWallet",{state:{type:"create", createWalletMnemonics:newMnemonic}});
 
                     navigate("/setPassword", {
                       state: {
@@ -143,12 +130,6 @@ function AddNewWallet() {
                     messageApi.error("An error occurred. Please try again.");
                     store.dispatch(setLoading(false));
                   }
-                  //  finally { 
-                  //   const delay = 3000;
-                  //   const startTime = Date.now();
-                  //   while (Date.now() - startTime < delay) { }
-                  //   store.dispatch(setLoading(false));
-                  // }
                 }}
                 text={state?.type=="import"?"Import":"Create"}
                 maxWidth="352px"

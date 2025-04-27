@@ -15,10 +15,10 @@ export default async function unBondFunds(
   // maxClicked,
   // totalAmount
 ) {
-console.log("UNBOND FUNC CALL::",{mnemonic,
-  address,
-  valporAddress,
-  unbondAmount,});
+// console.log("UNBOND FUNC CALL::",{mnemonic,
+//   address,
+//   valporAddress,
+//   unbondAmount,});
   // let nodeUrl = localStorage.getItem("node") || "";
   const wallet = await DirectSecp256k1HdWallet.fromMnemonic(mnemonic, {
     hdPaths: [stringToPath("m/44'/60'/0'/0/0")],

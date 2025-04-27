@@ -121,25 +121,23 @@ export class SolanaHelper {
     slug,
     chainId,
     orderId,
-    type
+    type,
+    password
   ) => {
     try {
       const { account } = store.getState();
-      console.log('-------------account', account);
-      // const privateKey = await WalletHelper.getSolanaPrivateKey();
-      const mnemonics = await WalletHelper.getMnemonics(account.address);
-
+      console.log("GENERATE ROW TRANSACTION :",password)
+      const mnemonics = await WalletHelper.getMnemonicsByPassword(account.address,password);
       if (!mnemonics) {
         return false;
       }
       const myKeyPair = await this.generateSolanaAddress1(mnemonics);
-      console.log("🚀 ~ SolanaHelper ~ myKeyPair:", myKeyPair);
 
       const lastValidBlockHeight = await this.connection.getSlot("finalized");
 
       let blockhash = (await this.connection.getLatestBlockhash("finalized"))
         .blockhash;
-      console.log("🚀 ~ SolanaHelper ~ blockhash:", blockhash);
+      // console.log("🚀 ~ SolanaHelper ~ blockhash:", blockhash);
 
       const solValue = new BigNumber(amount);
 
@@ -157,26 +155,26 @@ export class SolanaHelper {
           lamports: lamports,
         })
       );
-      console.log("🚀 ~ SolanaHelper ~ transaction:", transaction);
+      // console.log("🚀 ~ SolanaHelper ~ transaction:", transaction);
 
       transaction.recentBlockhash = blockhash;
 
       transaction.sign(myKeyPair);
-      console.log(transaction);
+      // console.log(transaction);
 
       const signature = getSignature(transaction);
-      console.log("🚀 ~ SolanaHelper ~ signature:", signature);
+      // console.log("🚀 ~ SolanaHelper ~ signature:", signature);
       const serializedTransaction = Buffer.from(transaction.serialize());
-      console.log(
-        "🚀 ~ SolanaHelper ~ serializedTransaction:",
-        serializedTransaction
-      );
-      console.log("🚀 ~ SolanaHelper ~ blockhash:", blockhash);
+      // console.log(
+      //   "🚀 ~ SolanaHelper ~ serializedTransaction:",
+      //   serializedTransaction
+      // );
+      // console.log("🚀 ~ SolanaHelper ~ blockhash:", blockhash);
 
-      console.log({
-        blockhash,
-        lastValidBlockHeight: lastValidBlockHeight,
-      });
+      // console.log({
+      //   blockhash,
+      //   lastValidBlockHeight: lastValidBlockHeight,
+      // });
       const transactionResponse =
         await this.transactionSenderAndConfirmationWaiter({
           connection: this.connection,
@@ -186,7 +184,6 @@ export class SolanaHelper {
             lastValidBlockHeight: lastValidBlockHeight,
           },
         });
-      console.log("----------------KKKKKKKK----------", transactionResponse);
 
       if (!transactionResponse) {
         console.error("Transaction not confirmed");
@@ -206,7 +203,6 @@ export class SolanaHelper {
       //   transaction,
       //   [myKeyPair]
       // );
-      console.log('signature====', signature);
       let payload = {
         txid: signature,
         from: from,
@@ -222,7 +218,6 @@ export class SolanaHelper {
           Authorization: account.jwtToken,
         },
       });
-      console.log("myResponse====> ", myResponse);
 
       return myResponse.data;
     } catch (error) {
@@ -259,12 +254,12 @@ export class SolanaHelper {
   };
 
   async createdAssociatedAccounts(toAddress, tokenAddress, myKeyPair) {
-    console.log(
-      "🚀 ~ SolanaHelper ~ createdAssociatedAccounts ~ toAddress, tokenAddress, myKeyPair:",
-      toAddress,
-      tokenAddress,
-      myKeyPair
-    );
+    // console.log(
+    //   "🚀 ~ SolanaHelper ~ createdAssociatedAccounts ~ toAddress, tokenAddress, myKeyPair:",
+    //   toAddress,
+    //   tokenAddress,
+    //   myKeyPair
+    // );
     const tokenMint = new PublicKey(tokenAddress);
     const myToken = new splToken.Token(
       this.connection,
@@ -303,17 +298,18 @@ export class SolanaHelper {
     balance,
     orderId,
     type,
-    gasPriceType
+    gasPriceType,
+    password
   ) => {
     try {
       const { account } = store.getState();
-
-      const mnemonics = await WalletHelper.getMnemonics(account.address);
+      console.log("GENERATE ROW TRANSACTION :",password)
+      const mnemonics = await WalletHelper.getMnemonicsByPassword(account.address,password);
       if (!mnemonics) {
         return false;
       }
       const myKeyPair = await this.generateSolanaAddress1(mnemonics);
-      console.log("🚀 ~ SolanaHelper ~ myKeyPair:", myKeyPair);
+      // console.log("🚀 ~ SolanaHelper ~ myKeyPair:", myKeyPair);
       const tokenBalance = balance;
       // console.log('AMOUNT::', amount, 'TOKEN BALANCE::', tokenBalance);
       if (amount > tokenBalance) {
@@ -644,18 +640,18 @@ export class SolanaHelper {
       console.log(transaction);
 
       const signature = getSignature(transaction);
-      console.log("🚀 ~ SolanaHelper ~ signature:", signature);
+      // console.log("🚀 ~ SolanaHelper ~ signature:", signature);
       const serializedTransaction = Buffer.from(transaction.serialize());
-      console.log(
-        "🚀 ~ SolanaHelper ~ serializedTransaction:",
-        serializedTransaction
-      );
-      console.log("🚀 ~ SolanaHelper ~ blockhash:", blockhash);
+      // console.log(
+      //   "🚀 ~ SolanaHelper ~ serializedTransaction:",
+      //   serializedTransaction
+      // );
+      // console.log("🚀 ~ SolanaHelper ~ blockhash:", blockhash);
 
-      console.log({
-        blockhash,
-        lastValidBlockHeight: lastValidBlockHeight,
-      });
+      // console.log({
+      //   blockhash,
+      //   lastValidBlockHeight: lastValidBlockHeight,
+      // });
       const transactionResponse =
         await this.transactionSenderAndConfirmationWaiter({
           connection: this.connection,
@@ -761,12 +757,12 @@ export class SolanaHelper {
       const { account } = store.getState();
 
       const mnemonics = await WalletHelper.getMnemonics(account.address);
-      console.log("🚀 ~ SolanaHelper ~ mnemonics:", mnemonics);
+      // console.log("🚀 ~ SolanaHelper ~ mnemonics:", mnemonics);
       if (!mnemonics) {
         return false;
       }
       const myKeyPair = await this.generateSolanaAddress1(mnemonics);
-      console.log("🚀 ~ SolanaHelper ~ myKeyPair:", myKeyPair);
+      // console.log("🚀 ~ SolanaHelper ~ myKeyPair:", myKeyPair);
 
       const connection = new Connection(
         process.env.REACT_APP_SOL_RPC,
@@ -777,29 +773,29 @@ export class SolanaHelper {
         swapTransaction.swapTransaction,
         "base64"
       );
-      console.log(
-        "🚀 ~ SolanaHelper ~ swapTransactionBuf:",
-        swapTransactionBuf
-      );
+      // console.log(
+      //   "🚀 ~ SolanaHelper ~ swapTransactionBuf:",
+      //   swapTransactionBuf
+      // );
       let transaction = VersionedTransaction.deserialize(swapTransactionBuf);
-      console.log("🚀 ~ SolanaHelper ~ transaction:", transaction);
+      // console.log("🚀 ~ SolanaHelper ~ transaction:", transaction);
 
       // sign the transaction
       transaction.sign([myKeyPair]);
       const signature = getSignature(transaction);
-      console.log("🚀 ~ SolanaHelper ~ signature:", signature);
+      // console.log("🚀 ~ SolanaHelper ~ signature:", signature);
       const serializedTransaction = Buffer.from(transaction.serialize());
-      console.log(
-        "🚀 ~ SolanaHelper ~ serializedTransaction:",
-        serializedTransaction
-      );
+      // console.log(
+      //   "🚀 ~ SolanaHelper ~ serializedTransaction:",
+      //   serializedTransaction
+      // );
       const blockhash = transaction.message.recentBlockhash;
-      console.log("🚀 ~ SolanaHelper ~ blockhash:", blockhash);
+      // console.log("🚀 ~ SolanaHelper ~ blockhash:", blockhash);
 
-      console.log({
-        blockhash,
-        lastValidBlockHeight: swapTransaction?.lastValidBlockHeight,
-      });
+      // console.log({
+      //   blockhash,
+      //   lastValidBlockHeight: swapTransaction?.lastValidBlockHeight,
+      // });
       const transactionResponse =
         await this.transactionSenderAndConfirmationWaiter({
           connection,

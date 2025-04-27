@@ -27,8 +27,8 @@ function NewAddress() {
     state: { chain, walletId },
   } = useLocation();
 
-  console.log(chain);
-  console.log(walletId);
+  // console.log(chain);
+  // console.log(walletId);
 
   return (
     <div>

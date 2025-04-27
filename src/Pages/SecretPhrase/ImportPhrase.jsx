@@ -13,12 +13,13 @@ import CopyIconBlue from "../../Assets/CopyIconBlue.svg";
 import { store } from "../../index.js";
 import { setLoading } from "../../actions/loading.js";
 import { WalletHelper } from "../../helpers/wallet.helper.js";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { DURATION } from "../../config/message.config.js";
 function ImportPhrase() {
   const [messageApi, contextHolder] = message.useMessage({
     duration: DURATION,
   });
+  const {state} = useLocation();
   const navigate = useNavigate();
   const [mnemonics, setMnemonics] = useState(null);
   const [terms, setTerms] = useState(false);
@@ -26,6 +27,9 @@ function ImportPhrase() {
   const onChange = (e) => {
     setTerms(e.target.checked);
   };
+
+
+  console.log('PASSWORD IN INPORT PHRASE :',state.password)
 
   return (
     <div>
@@ -86,7 +90,8 @@ function ImportPhrase() {
                 store.dispatch(setLoading(true));
 
                 const checkIfThere = await WalletHelper.checkIfAlreadyThere(
-                  mnemonics
+                  mnemonics,
+                  state.password
                 );
 
                 if (checkIfThere) {

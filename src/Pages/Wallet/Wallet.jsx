@@ -4,14 +4,10 @@ import React, { useEffect, useRef, useState } from "react";
 import "./Wallet.scss";
 import FilterIcon from "../../Assets/twoLine.svg";
 import LightManage from "../../Assets/light-manage.svg";
-import CoinsTable from "../../Components/CoinsTable/CoinsTable";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import nftIcon from "../../Assets/nftIcon.svg";
-import Reset from "../../Assets/ResetIcon.svg";
-import ResetWhite from "../../Assets/ResetIconWhite.svg";
 import { store } from "../..";
-import { setLoading } from "../../actions/loading";
 import BigNumber from "bignumber.js";
 import { server } from "../../server";
 import {
@@ -22,11 +18,8 @@ import {
 } from "../../helpers/conversion.helper";
 import { setTokens } from "../../actions/tokens";
 import useCurrentHeight from "../../CustomHooks/useCurrentHeight";
-import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
-import NFTappear from "../Nft/NFTappear";
 import CoinsTableDraggable from "../../Components/CoinsTable/CoinsTableDraggable";
 import ButtonComp from "../../Components/ButtonComp/ButtonComp";
-import UserPlusRounded from "../../Assets/UserPlusRounded.svg";
 function Wallet() {
   const { account, currency, tokens, balanceIn, theme } = useSelector(
     (state) => state

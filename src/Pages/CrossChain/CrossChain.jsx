@@ -4,13 +4,11 @@ import "./CrossChain.scss";
 
 import { Drawer, message, Select } from "antd";
 import React from "react";
-import MenuRestofHeaders from "../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders";
 import { InputField } from "../../Components/InputField/InputFieldSimple";
 import DownArrowSuffix from "../../Assets/DownArrowSuffix.svg";
 import SwapVerticalIcon from "../../Assets/SwapVerticalIcon.svg";
 import ButtonComp from "../../Components/ButtonComp/ButtonComp";
 import { useNavigate } from "react-router-dom";
-import { UniswapHelper } from "../../helpers/uniswap.helper";
 import { useEffect } from "react";
 import { useState } from "react";
 import { Web3Helper } from "../../helpers/web3.helper";
@@ -25,12 +23,9 @@ import ModalCloseIcon from "../../Assets/ModalCloseIcon.svg";
 import Search from "../../Assets/SearchIcon.svg";
 import { SolanaHelper } from "../../helpers/solana.helper";
 import { BTCHelper } from "../../helpers/btc.helper";
-import { AdaHelper } from "../../helpers/ada.helper";
 import { DURATION } from "../../config/message.config";
 import BigNumber from "bignumber.js";
 import {
-  balanceToFiatConversion,
-  exponential_to_decimal,
   newBalanceToFiatConversion,
   toFixed,
 } from "../../helpers/conversion.helper";

@@ -81,12 +81,12 @@ function BuyCoins() {
     );
 
     let rtk = walletsList.data.data.filter((el) => {
-      console.log(filterOutTheCoins(el, "BUY"), filterOutTheCoins(el, "SELL"));
+      // console.log(filterOutTheCoins(el, "BUY"), filterOutTheCoins(el, "SELL"));
       if (filterOutTheCoins(el, "BUY") || filterOutTheCoins(el, "SELL")) {
         return el;
       }
     });
-    console.log("walletsListwalletsList ", walletsList, rtk);
+    // console.log("walletsListwalletsList ", walletsList, rtk);
 
     setMyTokens(rtk);
     setFilteredTokens(

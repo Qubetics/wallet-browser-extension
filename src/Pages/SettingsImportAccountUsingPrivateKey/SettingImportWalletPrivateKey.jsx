@@ -65,7 +65,6 @@ function SettingImportWalletPrivatekey() {
                   const { accounts } = await chrome.storage.session.get(
                     "accounts"
                   );
-                  console.log("🚀 ~ onClick={ ~ accounts:", accounts);
 
                   const checkIfExists = await accounts.find(
                     (el) => el.privateKey.toLowerCase() === name.toLowerCase()

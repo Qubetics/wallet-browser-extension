@@ -101,8 +101,6 @@ function CurrencyDetails() {
   const { theme } = useSelector((state) => state);
 
   const init = async () => {
-    // console.log("Statettttttttttt ", state);
-    
     if (!state.status) {
       store.dispatch(
         setFilter({
@@ -147,8 +145,6 @@ function CurrencyDetails() {
         },
       }
     );
-
-    console.log("XXXXXCCCCCCCCCC : ", transactionList?.data?.data);
     
     setHistory(transactionList?.data?.data);
   };

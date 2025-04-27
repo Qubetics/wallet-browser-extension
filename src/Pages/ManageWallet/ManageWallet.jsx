@@ -29,8 +29,6 @@ import { SecurityHelper } from '../../helpers/security.helper';
 
 function ManageWallet() {
   const [data, setData] = useState([]);
-  // const [show, setShow] = useState(true);
-
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [deleteModal, setDeleteModal] = useState(false);
   const [drawer, setDrawer] = useState(false);
@@ -46,6 +44,7 @@ function ManageWallet() {
   const [ischecked1, setIschecked1] = useState(false);
   const [ischecked2, setIschecked2] = useState(false);
   const [totalAmt, setTotalAmt] = useState(0);
+  
 
   const handleOk1 = () => {
     setIsModalOpen1(false);
@@ -131,7 +130,7 @@ function ManageWallet() {
   useEffect(() => {
     init();
   }, []);
-console.log("Data:11:",data);
+// console.log("Data:11:",data);
   const onClose = () => {
     setDrawer(false);
   };
@@ -144,14 +143,12 @@ console.log("Data:11:",data);
     try {
       store.dispatch(setLoading(true));
       const { accounts } = await chrome.storage.session.get('accounts');
+
       if (accounts) {
         accounts.map((acc) => ({
           ...acc,
           default: acc.id === selectedAccount.id,
         }));
-
-        console.log('ACCCCCC ', accounts);
-        console.log('ACCCCCCselectedAccount ', selectedAccount);
 
         const { mnemonics } = await chrome.storage.local.get('mnemonics');
         const { password } = await chrome.storage.session.get('password');
@@ -165,7 +162,6 @@ console.log("Data:11:",data);
           }
           return el;
         });
-        console.log('updatesMnemonics::', updatesMnemonics);
         const encryptedMnemonics = SecurityHelper.encrypt(
           updatesMnemonics,
           password
@@ -187,10 +183,7 @@ console.log("Data:11:",data);
     }
   };
 
-  console.log('state?.fromstate?.fromstate?.from ', state?.from);
-
   const sendDataToInpage = (data) => {
-    console.log('DATA::', data);
     handleResponse({ type: 'success', data: data });
   };
 
@@ -200,7 +193,22 @@ console.log("Data:11:",data);
       (response) => {}
     );
   };
-  // return <button onClick={sendDataToInpage}>Send Data</button>;
+
+  const handleShowPrivateKey = async (password)=> {
+    console.log('PASSWORD ENTER TO SHOW PRIVATE KEY :',password)
+      const res = await WalletHelper.verifyPassword(password);
+      if (!res) {
+        return messageApi.error('Invalid Password');
+      }
+
+      navigate('/show-private-key', {
+        state: {
+          account: selectedAccount,
+          backTo: '/manage-wallet',
+          password : password
+        },
+      });
+  }
 
   return (
     <>
@@ -773,11 +781,12 @@ console.log("Data:11:",data);
             getData={setPassword}
             value={password}
             customFunction={async () => {
-              await chrome.storage.session.set({
-                password,
-              });
-              const response = await WalletHelper.getMnemonics(
-                selectedAccount.coinFamilyAndAddress[1]
+              // await chrome.storage.session.set({
+              //   password,
+              // });
+              const response =WalletHelper.getMnemonicsByPassword(
+                selectedAccount.coinFamilyAndAddress[1],
+                password
               );
               if (!response) {
                 return messageApi.error('Please enter a valid password.');
@@ -801,11 +810,12 @@ console.log("Data:11:",data);
             text={'Proceed'}
             maxWidth={'100%'}
             onClick={async () => {
-              await chrome.storage.session.set({
-                password,
-              });
-              const response = await WalletHelper.getMnemonics(
-                selectedAccount.coinFamilyAndAddress[1]
+              // await chrome.storage.session.set({
+              //   password,
+              // });
+              const response = await WalletHelper.getMnemonicsByPassword(
+                selectedAccount.coinFamilyAndAddress[1],
+                password
               );
               if (!response) {
                 return messageApi.error('Please enter a valid password.');
@@ -833,19 +843,7 @@ console.log("Data:11:",data);
             placeholder='Password'
             getData={setPassword}
             value={password}
-            customFunction={async () => {
-              const res = await WalletHelper.verifyPassword(password);
-              if (!res) {
-                return messageApi.error('Invalid Password');
-              }
-
-              navigate('/show-private-key', {
-                state: {
-                  account: selectedAccount,
-                  backTo: '/manage-wallet',
-                },
-              });
-            }}
+            customFunction={async () => handleShowPrivateKey(password)}
           />
           <div className={'viewphrases__iInner'}>
             <img src={warning} />
@@ -857,19 +855,7 @@ console.log("Data:11:",data);
           <ButtonComp
             text={'Proceed'}
             maxWidth={'100%'}
-            onClick={async () => {
-              const res = await WalletHelper.verifyPassword(password);
-              if (!res) {
-                return messageApi.error('Invalid Password');
-              }
-
-              navigate('/show-private-key', {
-                state: {
-                  account: selectedAccount,
-                  backTo: '/manage-wallet',
-                },
-              });
-            }}
+            onClick={async () => handleShowPrivateKey(password)}
           />
         </div>
       </ModalCustom>

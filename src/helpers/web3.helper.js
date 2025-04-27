@@ -334,26 +334,26 @@ export class Web3Helper {
   };
 
   static getCoinBalance = async (owner, rpc) => {
-    console.log("🚀 ~ Web3Helper ~ getCoinBalance= ~ owner:", owner);
-    console.log("🚀 ~ Web3Helper ~ getCoinBalance= ~ rpc:", rpc);
+    // console.log("🚀 ~ Web3Helper ~ getCoinBalance= ~ owner:", owner);
+    // console.log("🚀 ~ Web3Helper ~ getCoinBalance= ~ rpc:", rpc);
     try {
       const provider = new Web3.providers.HttpProvider(rpc);
       const web3 = new Web3(provider);
 
       const balance = await web3.eth.getBalance(owner);
-      console.log("🚀 ~ Web3Helper ~ getCoinBalance= ~ balance:", balance);
+      // console.log("🚀 ~ Web3Helper ~ getCoinBalance= ~ balance:", balance);
 
       const originalNumber = balance;
-      console.log(
-        "🚀 ~ Web3Helper ~ getCoinBalance= ~ originalNumber:",
-        originalNumber
-      );
+      // console.log(
+      //   "🚀 ~ Web3Helper ~ getCoinBalance= ~ originalNumber:",
+      //   originalNumber
+      // );
       const bigNumber = new BigNumber(originalNumber);
       const inputAmount = bigNumber
         .dividedBy(new BigNumber(10).pow(18))
         .toString();
 
-      console.log(inputAmount);
+      // console.log(inputAmount);
 
       return inputAmount;
     } catch (error) {
@@ -380,13 +380,13 @@ export class Web3Helper {
     orderId
   ) => {
     try {
-      console.log("gasPriceType---------> ", gasPriceType);
-      console.log("SYMBOLLLL", symbol);
+      // console.log("gasPriceType---------> ", gasPriceType);
+      // console.log("SYMBOLLLL", symbol);
       const { account } = store.getState();
       const web3 = new Web3();
 
       const privateKey = await WalletHelper.getPrivateKey();
-      console.log("🚀 ~ Web3Helper ~ privateKey:", privateKey);
+      // console.log("🚀 ~ Web3Helper ~ privateKey:", privateKey);
 
       if (!privateKey) {
         return false;

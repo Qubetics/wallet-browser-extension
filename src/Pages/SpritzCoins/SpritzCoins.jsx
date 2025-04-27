@@ -30,7 +30,6 @@ function SpritzTokens() {
   const { state } = useLocation();
 
   const init = async () => {
-    console.log("ACCCCCCCCC : ", state);
     try {
       store.dispatch(setLoading(true));
       const walletsList = await server.post(

@@ -4,7 +4,7 @@ import CoinsTable from '../../Components/CoinsTable/CoinsTable';
 import './Receive.scss';
 import { useSelector } from 'react-redux';
 import { InputField } from '../../Components/InputField/InputFieldSimple';
-import { Link, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import Search from '../../Assets/SearchIcon.svg';
 import BigNumber from 'bignumber.js';
 import {
@@ -15,14 +15,9 @@ import {
 } from '../../helpers/conversion.helper';
 import { server } from '../../server';
 import { store } from '../..';
-import { setTokens } from '../../actions/tokens';
-import { QRCode } from 'react-qrcode-logo';
 import { message } from 'antd';
 import { DURATION } from '../../config/message.config';
-import CopyIconBlue from '../../Assets/CopyIconBlue.svg';
-import ModalCustom from '../../Components/ModalCustom/ModalCustom';
 import { setLoading } from '../../actions/loading';
-import ButtonComp from '../../Components/ButtonComp/ButtonComp';
 import { token_type } from '../../helpers/constant';
 
 function AddWatchList() {
@@ -146,7 +141,6 @@ function AddWatchList() {
               const result = myPrice.times(balance);
               const formattedResult = result.toString();
 
-              // {console.log("token========++++++++++++++++", token);}
               return {
                 position: token.sort_order,
                 coinIcon: token.coin_image,

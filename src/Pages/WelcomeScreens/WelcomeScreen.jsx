@@ -23,9 +23,7 @@ function WelcomeScreen() {
     const isSidePanelOpen = await chrome.storage.local.get("openSidePanel");
 
     const { legalPolicy } = await chrome.storage.local.get("legalPolicy");
-    // console.log("Init Legal:::",legalPolicy);
     if (legalPolicy === undefined) {
-      // console.log("in tha condi:::");
       await chrome.storage.local.set({
         legalPolicy: true,
       });
@@ -52,7 +50,7 @@ function WelcomeScreen() {
       navigate("/wallet");
     }
   }, []);
-  // console.log("isLegalAppear:::", isLegalAppear);
+  
   return (
     <div className="cardWhite">
       <h2 className="cardWhite__title">Welcome to Qubetics</h2>
