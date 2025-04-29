@@ -229,7 +229,7 @@ function SetPasswordScreen() {
                 ? 'Tap the words to put them next to each other in the correct order.'
                 : '')}
       </p>
-
+     { console.log('activeTab',activeTab, 'state',state) }
       {/* Content Area */}
       {activeTab === 'setPassword' && (!state?.addNew || !state?.addNewImport) && (
         <div>

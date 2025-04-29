@@ -40,8 +40,6 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
 
   const {state} =  useLocation();
 
-  console.log('STATE IN BALANCE DETAILS :',state)
-
   const [accounts, setAccounts] = useState([]);
 
   const fetchAccounts = async () => {

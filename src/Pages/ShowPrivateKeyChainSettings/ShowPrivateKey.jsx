@@ -1,14 +1,14 @@
 /*global chrome*/
 
-import React, { useEffect, useState } from "react";
-import MenuRestofHeaders from "../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders";
-import "./NewAddress.scss";
-import { useLocation } from "react-router-dom";
-import { message } from "antd";
-import { DURATION } from "../../config/message.config";
-import CopyIcon from "../../Assets/CopyIconBlue.svg";
-import { WalletHelper } from "../../helpers/wallet.helper";
-const bs58 = require("bs58");
+import React, { useEffect, useState } from 'react';
+import MenuRestofHeaders from '../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders';
+import './NewAddress.scss';
+import { useLocation } from 'react-router-dom';
+import { message } from 'antd';
+import { DURATION } from '../../config/message.config';
+import CopyIcon from '../../Assets/CopyIconBlue.svg';
+import { WalletHelper } from '../../helpers/wallet.helper';
+import bs58 from 'bs58';
 
 function ShowPrivateKey() {
   const [address, setAddress] = useState(null);
@@ -16,33 +16,32 @@ function ShowPrivateKey() {
     duration: DURATION,
   });
   const {
-    state: { account , password },
+    state: { account, password },
   } = useLocation();
 
   const init = async () => {
     const key = await WalletHelper.getPrivateKeyWithPassword(password);
-    console.log('key',key)
-    setAddress(key || '');
+    const privateKey = bs58.encode(key);
+    setAddress(privateKey || '');
   };
 
   useEffect(() => {
-    console.log("PASSWORD FOR PRIVATE KEY :", account , password );
     init();
   }, []);
 
   function copyToClipboard(address) {
     navigator.clipboard.writeText(address);
-    messageApi.success("Private key copied to clipboard");
+    messageApi.success('Private key copied to clipboard');
   }
 
   const coin = {
-    1: "BNB",
-    2: "ETH",
-    3: "BTC",
-    4: "POL",
-    5: "SOL",
-    6: "TRX",
-    7: "TICS"
+    1: 'BNB',
+    2: 'ETH',
+    3: 'BTC',
+    4: 'POL',
+    5: 'SOL',
+    6: 'TRX',
+    7: 'TICS',
   };
 
   const [solKey, setSolKey] = useState(null);
@@ -50,22 +49,21 @@ function ShowPrivateKey() {
 
   const get_privateKey = async () => {
     if (account?.coinFamilyAndAddress) {
-      const evmAddress = account.coinFamilyAndAddress["1"];
+      const evmAddress = account.coinFamilyAndAddress['1'];
       // const btcAddress = account.coinFamilyAndAddress["3"];
       // const solAddress = account.coinFamilyAndAddress["5"];
 
       const btcK = await WalletHelper.getBitcoinPrivateKeyWithAddress(
-        evmAddress,password
+        evmAddress,
+        password
       );
-      console.log('btcK',btcK)
       setBtcKey(btcK);
       const solPrivateKeyData =
-        await WalletHelper.getSolanaPrivateKeyWithAddress(evmAddress,password);
+        await WalletHelper.getSolanaPrivateKeyWithAddress(evmAddress, password);
       const privateKey = bs58.encode(solPrivateKeyData);
-      console.log('privateKey sol',privateKey)
       setSolKey(privateKey);
     } else {
-      console.error("coinFamilyAndAddress data is missing");
+      console.error('coinFamilyAndAddress data is missing');
     }
   };
 
@@ -77,19 +75,19 @@ function ShowPrivateKey() {
     <div>
       {contextHolder}
       <div className={`scrollableCont`}>
-        <MenuRestofHeaders backTo={"/manage-wallet"} title={"Private key"} />
+        <MenuRestofHeaders backTo={'/manage-wallet'} title={'Private key'} />
         <div className={`flexedContent`}>
           <div className="editWallet privateWallet">
-            <h2 style={{ color: "#fff", marginBottom: 25 }}>
+            <h2 style={{ color: '#fff', marginBottom: 25 }}>
               Keep your private key safe!
             </h2>
             {account &&
               address &&
               account?.coinFamilies.map((data, idx) => {
                 let displayAddress;
-                if (coin[`${data}`] === "BTC") {
+                if (coin[`${data}`] === 'BTC') {
                   displayAddress = btcKey;
-                } else if (coin[`${data}`] === "SOL") {
+                } else if (coin[`${data}`] === 'SOL') {
                   displayAddress = solKey;
                 } else {
                   displayAddress = address;
@@ -100,27 +98,27 @@ function ShowPrivateKey() {
                     className="editWallet__linkOuter"
                     key={idx}
                     style={{
-                      display: "flex",
-                      alignItems: "center",
-                      backgroundColor: "#295a72",
+                      display: 'flex',
+                      alignItems: 'center',
+                      backgroundColor: '#295a72',
                       borderRadius: 25,
-                      justifyContent: "space-between",
-                      marginBottom: "16px",
-                      padding: "15px 24px",
+                      justifyContent: 'space-between',
+                      marginBottom: '16px',
+                      padding: '15px 24px',
                     }}
                   >
-                    <span style={{ color: "white" }}>
+                    <span style={{ color: 'white' }}>
                       {displayAddress?.slice(0, 15)}...
                     </span>
                     <div className="secretkeyss">
                       <span
                         style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "4px",
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
                         }}
                       >
-                        <span style={{ color: "white" }}>
+                        <span style={{ color: 'white' }}>
                           {coin[`${data}`]}
                         </span>
                         <img

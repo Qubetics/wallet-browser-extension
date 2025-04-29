@@ -39,6 +39,7 @@
     "bitcore-lib": "^10.8.10",
     "bn.js": "=5.2.1",
     "browserify-fs": "^1.0.0",
+    "bs58": "^6.0.0",
     "buffer": "^6.0.3",
     "console-browserify": "^1.2.0",
     "constants-browserify": "^1.0.0",

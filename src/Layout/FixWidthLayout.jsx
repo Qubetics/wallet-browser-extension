@@ -28,7 +28,7 @@ function FixWidthLayout() {
   const { Content } = Layout;
   const getLocation = useLocation();
   const {state} = useLocation();
-  console.log('LOCATION IN FIX LAYOUT :',getLocation,state);
+
   const path = getLocation.pathname.replace("/", "");
   const navigate = useNavigate();
   const height = useCurrentHeight();

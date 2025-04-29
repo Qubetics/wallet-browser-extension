@@ -48,6 +48,7 @@ function ManageWallet() {
   const [isModalOpen2, setIsModalOpen2] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState(null);
   const [sessionPassword, setSessionPassword] = useState(null);
+  const [accountSelected, setAccountSelected] = useState(null);
 
   const handleCancel1 = () => {
     setSecretPhraseModal(false);
@@ -121,16 +122,56 @@ function ManageWallet() {
 
   const { state } = useLocation();
 
+  // const setDefaultAccount = async (selectedAccount) => {
+  //   try {
+  //     store.dispatch(setLoading(true));
+  //     const { accounts } = await chrome.storage.session.get('accounts');
+
+  //     if (accounts) {
+  //       accounts.map((acc) => ({
+  //         ...acc,
+  //         default: acc.id === selectedAccount.id,
+  //       }));
+
+  //       const updatedAccount = accounts.map((el) => {
+  //         if (el.address === selectedAccount?.address) {
+  //           el.default = true;
+  //         } else {
+  //           el.default = false;
+  //         }
+  //         return el;
+  //       });
+  
+  //       chrome.storage.local.set({
+  //         mnemonics: updatedAccount,
+  //         registered: true,
+  //       });
+
+  //       await WalletHelper.setWalletPreference(selectedAccount.id);
+
+  //       await init();
+  //       messageApi.success('Default account updated successfully!');
+  //     }
+  //   } catch (error) {
+  //     messageApi.error('Failed to update the default account.');
+  //   } finally {
+  //     store.dispatch(setLoading(false));
+  //   }
+  // };
+
+
   const setDefaultAccount = async (selectedAccount) => {
     try {
       store.dispatch(setLoading(true));
       const { accounts } = await chrome.storage.session.get('accounts');
-
       if (accounts) {
         accounts.map((acc) => ({
           ...acc,
           default: acc.id === selectedAccount.id,
         }));
+
+        console.log('ACCCCCC ', accounts);
+        console.log('ACCCCCCselectedAccount ', selectedAccount);
 
         const { mnemonics } = await chrome.storage.local.get('mnemonics');
         const decryptedMnemonics = SecurityHelper.decrypt(mnemonics, sessionPassword);
@@ -143,9 +184,10 @@ function ManageWallet() {
           }
           return el;
         });
+        console.log('updatesMnemonics::', updatesMnemonics);
         const encryptedMnemonics = SecurityHelper.encrypt(
           updatesMnemonics,
-          password
+          sessionPassword
         );
         chrome.storage.local.set({
           mnemonics: encryptedMnemonics,
@@ -162,7 +204,9 @@ function ManageWallet() {
     } finally {
       store.dispatch(setLoading(false));
     }
+    setAccountSelected(null);
   };
+
 
   const sendDataToInpage = (data) => {
     handleResponse({ type: 'success', data: data });
@@ -298,6 +342,7 @@ function ManageWallet() {
                       onClick={async (e) => {
                         e.preventDefault();
                         if (!data?.default) {
+                          setAccountSelected(data);
                             setModalOpen(true);
                         }
                       }}
@@ -899,21 +944,6 @@ function ManageWallet() {
       <ModalCustom
           title={"Password"}
           isModalOpen={isModalOpen}
-          handleOk={async ()=> {
-            const isCorrectPassword = await WalletHelper.verifyPassword(
-              sessionPassword
-            );
-            console.log(
-              'isCorrectPassword on Button Click',
-              isCorrectPassword
-            );
-            if (!isCorrectPassword) {
-              return messageApi.error('Incorrect password provided.');
-            }
-            setModalOpen(false);
-            setDefaultAccount(data);
-            navigate('/wallet');
-          }}
           customClass="customClassModal"
         >
           <div className="viewphrases">
@@ -940,7 +970,7 @@ function ManageWallet() {
 
 
                 setModalOpen(false)
-                setDefaultAccount(data);
+                setDefaultAccount(accountSelected);
                 navigate('/wallet');
               }}
             />
@@ -960,7 +990,7 @@ function ManageWallet() {
                   return messageApi.error('Incorrect password provided.');
                 }
                 setModalOpen(false)
-                setDefaultAccount(data);
+                setDefaultAccount(accountSelected);
                 navigate('/wallet');
               }}
             />

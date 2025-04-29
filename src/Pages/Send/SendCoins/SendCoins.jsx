@@ -627,6 +627,7 @@ function SendCoins() {
       );
 
       const nativeCoinBalance = new BigNumber(nativeCoinResponse);
+
       const finalAmount = new BigNumber(amount);
       console.log('🚀 ~ finalAmount:', finalAmount.toString());
 
