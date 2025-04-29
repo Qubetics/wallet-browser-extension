@@ -1,69 +1,38 @@
 /*global chrome*/
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import SettingList from "../../Components/SettingList/SettingList.jsx";
-import Download from "../../Assets/download.svg";
-import Useredit from "../../Assets/useredit.svg";
-import Eyes from "../../Assets/eyes.svg";
 import CurrencyIcons from "../../Assets/settings/currency.svg";
 import NativeCurrency from "../../Assets/settings/NativeCurrency.svg";
-import Editable from "../../Assets/editable.svg";
 import AddressBook from "../../Assets/settings/address.svg";
-import HelpDark from "../../Assets/help-dark.png";
-import HelpLight from "../../Assets/help-light.png";
 // import Security from "../../Assets/settings/ic_privcay.png";
 import ModalCustom from "../../Components/ModalCustom/ModalCustom.jsx";
 import InputFieldSimple from "../../Components/InputField/InputFieldSimple.jsx";
 import ButtonComp from "../../Components/ButtonComp/ButtonComp";
 import "./Setting.scss";
 import warning from "../../Assets/PNG/warning.png";
-import LogoutIcon from "../../Assets/settings/logout.svg";
-import DarkLogout from "../../Assets/settings/darkLogout.svg";
-import ModalCloseIcon from "../../Assets/ModalCloseIcon.svg";
-import darkclose from "../../Assets/darkclose.svg";
-import JoinCom from "../../Assets/joinIcon.svg";
-import ThemeIcon from "../../Assets/themeIcon.svg";
-import Create from "../../Assets/settings/create.png";
-import Price from "../../Assets/settings/price.png";
-import Terms from "../../Assets/settings/term.svg";
-import darkterm from "../../Assets/settings/Darkterms.svg";
-import Wallets from "../../Assets/settings/wallet1.svg";
-import WatchOnly from "../../Assets/settings/watch-only.png";
-import darkCurrencyIcons from "../../Assets/settings/darkCurrencyIcons.svg";
-import Insta from "../../Assets/Insta.svg";
-import SnapChat from "../../Assets/snapchat.svg";
-import facebookIcon from "../../Assets/facebook.svg";
-import twiter from "../../Assets/twitter.svg";
-import linkin from "../../Assets/linkIn.svg";
-import HistoryList from "../../Assets/his.svg";
-import darkChangePin from "../../Assets/settings/darkChangeoin.svg";
-import ChangePin from "../../Assets/settings/changepin.svg";
-import darkAddressBook from "../../Assets/settings/DarkAdressBook.svg";
-import darkHistoryList from "../../Assets/settings/DarkTransaction.svg";
-import darkThemeIcon from "../../Assets/settings/DarkTheme.svg";
-import darkJoinCom from "../../Assets/settings/DarkJoin.svg";
 // import darkSecurity from "../../Assets/settings/DarkPrivacy.svg";
-import watsapp from "../../Assets/watsapp.svg";
-import { Link, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { WalletHelper } from "../../helpers/wallet.helper.js";
-import { Drawer, message } from "antd";
+import { message } from "antd";
 import { store } from "../../index.js";
 import { setLoading } from "../../actions/loading.js";
 import { DURATION } from "../../config/message.config.js";
 import { useSelector } from "react-redux";
 import { server } from "../../server.js";
 import { generateString } from "../../helpers/common.helper.js";
-import { setAuth } from "../../actions/auth.js";
 import Security from "../../Assets/settings/Security.svg";
-import AboutUs from "../../Assets/settings/AboutUs.svg";
 import PrivacyPolicy from "../../Assets/settings/PrivacyPolicy.svg";
 import Transactionhistory from "../../Assets/settings/Transactionhistory.svg";
-import Preference from "../../Assets/settings/Preference.svg";
 import Logout from "../../Assets/settings/Logout.svg";
 
 function Setting() {
   const ZENDESK_KEY = "REDACTED";
   const [open, setOpen] = useState(false);
   const [openHelp, setOpenHelp] = useState(false);
+
+  const { state } = useLocation();
+
+  console.log("state", state)
 
   const { chain, account } = useSelector((state) => state);
   const navigate = useNavigate();

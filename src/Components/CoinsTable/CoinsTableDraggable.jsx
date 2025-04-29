@@ -1,55 +1,35 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import "./CoinsTable.scss";
-import Mercuryo from "../../Assets/Coins/Mercuryo.png";
-import Transak from "../../Assets/Coins/Transak.png";
-import Simplex from "../../Assets/Simplex.png";
-import Alchemy from "../../Assets/Coins/Alchemy.png";
-import EDIT from "../../Assets/edit.png";
 import Edit from "../../Assets/edit.svg";
-import bin from "../../Assets/delete.png";
 import { store } from "../..";
 import { setLoading } from "../../actions/loading";
 import { WalletHelper } from "../../helpers/wallet.helper";
 import ModalCustom from "../ModalCustom/ModalCustom";
 import { capitalize } from "../../helpers/conversion.helper";
 import DummyEle from "./DummyEle";
-import { Draggable } from "react-drag-reorder";
-import { server } from "../../server";
-import Reorder, {
-  reorder,
-  reorderImmutable,
-  reorderFromTo,
-  reorderFromToImmutable,
-} from "react-reorder";
 import { token_type } from "../../helpers/constant";
 import ButtonComp from "../ButtonComp/ButtonComp";
+
 function CoinsTableDraggable({ dataArray, refresh }) {
   const navigate = useNavigate();
-  const { account } = useSelector((state) => state);
-
+  const { state } = useLocation();
+  const { account, currency, chain, balanceIn } = useSelector((state) => state);
   const [openModal, setOpenModal] = useState(false);
-  const { currency } = useSelector((state) => state);
-  const { chain, balanceIn } = useSelector((state) => state);
   const [deleteModal, setDeleteModal] = useState(false);
   const [selected, setSelected] = useState(null);
-  const [positionChange, setPositionChnage] = useState(null);
-
   const [data, setData] = useState(dataArray);
-  const [clickedUp, setClickedUp] = useState(false);
-  const [clickedDown, setClickedDown] = useState(false);
+
   useEffect(() => {
     setData(dataArray);
   }, [dataArray, data, setData]);
 
   const handleClick = (ele) => {
-    let routes = Object.keys(ele).includes("routeTo");
+    const hasRoute = Object.keys(ele).includes("routeTo");
 
-    if (routes) {
-      if (ele.showModal) {
-        return ele.showModal(ele.coin);
-      }
+    if (hasRoute) {
+      if (ele.showModal) return ele.showModal(ele.coin);
 
       if (ele.routeTo === "no-where") {
         if (ele.sent === true || ele.sent === false) {
@@ -77,13 +57,11 @@ function CoinsTableDraggable({ dataArray, refresh }) {
           symbol: ele.coinName,
           image: ele.coinIcon,
           type: ele.type,
-          coin: ele.coin,
+          coin: ele.coin
         },
       });
     } else {
-      if (ele.setSelectedCoin) {
-        ele.setSelectedCoin(ele.id);
-      }
+      if (ele.setSelectedCoin) ele.setSelectedCoin(ele.id);
       setOpenModal(ele.openModal());
     }
   };
@@ -92,12 +70,10 @@ function CoinsTableDraggable({ dataArray, refresh }) {
     <>
       {data.map((ele, index) => (
         <li
+          key={index}
           className="coinsTable1 flex-item"
           onClick={() => handleClick(ele)}
-          style={{
-            cursor: "pointer",
-            position: "relative",
-          }}
+          style={{ cursor: "pointer", position: "relative" }}
         >
           <div className="coinsTable1__left">
             <div className="coinsTable1__left__icon">
@@ -133,8 +109,7 @@ function CoinsTableDraggable({ dataArray, refresh }) {
                 style={{ cursor: "pointer" }}
               >
                 <span className="coinNname">
-                  {ele?.coinSubName?.length > 10 &&
-                  ele?.coin?.coin?.token_address
+                  {ele?.coinSubName?.length > 10 && ele?.coin?.coin?.token_address
                     ? `${ele.coinSubName.substring(0, 7)}...`
                     : ele?.coinSubName}
                 </span>
@@ -149,76 +124,33 @@ function CoinsTableDraggable({ dataArray, refresh }) {
                     ? token_type(ele?.coin?.coin?.coin_family)
                     : ""}
                 </span>
-                <div className={`${"coinsTable1__grayText12"} textBold`}></div>
               </div>
-              <div
-                style={{ color: "#98969B" }}
-                className="grayText1 test-class"
-              >
+
+              <div className="grayText1 test-class" style={{ color: "#98969B" }}>
                 <span>{ele.routeTo === "no-where" ? "" : currency.symbol}</span>
-                <div
-                  dangerouslySetInnerHTML={{ __html: ele.coinPrice }}
-                ></div>{" "}
+                <div dangerouslySetInnerHTML={{ __html: ele.coinPrice }}></div>
                 <span>&nbsp;| </span>
                 <div
-                  className={`${"coinsTable1__grayText12"} ${
-                    ele.coinStatus <= 0 ? "negitiveText" : "positiveText"
-                  }`}
+                  className={`coinsTable1__grayText12 ${ele.coinStatus <= 0 ? "negitiveText" : "positiveText"}`}
                   style={{ marginLeft: "3px" }}
                 >
                   {ele.coinStatus < 0 ? "" : "+"}
                   {ele.coinStatus}%
                 </div>
               </div>
-              {/* {ele.sent === true || ele.sent === false ? (
-                  <div className='coinsTable1__grayText12'>
-                    Status: {ele.sent ? "Sent" : "Pending"}
-                    <img
-                      onClick={async () => {
-                        store.dispatch(setLoading(true));
-                        setDeleteModal(true);
-                        setSelected(ele.alertId);
-                        store.dispatch(setLoading(false));
-                      }}
-                      src={bin}
-                      style={{
-                        height: "16px",
-                        width: "16px",
-                        marginLeft: "10px",
-                      }}
-                      alt=''
-                    />
-                    <img
-                      onClick={async () => {
 
-                      }}
-                      src={EDIT}
-                      style={{
-                        height: "16px",
-                        width: "16px",
-                        marginLeft: "10px",
-                      }}
-                      alt=''
-                    />
-                  </div>
-                ) : null} */}
-              {ele.provider ? (
+              {ele.provider && (
                 <div
                   className="coinsTable1__grayText12"
-                  style={{
-                    marginTop: "7px",
-                  }}
+                  style={{ marginTop: "7px" }}
                 ></div>
-              ) : null}
+              )}
             </div>
           </div>
+
           <div
             className="coinsTable1__left__textSec"
-            style={{
-              position: "absolute",
-              // left: '-37px',
-              right: "0px",
-            }}
+            style={{ position: "absolute", right: "0px" }}
           >
             <div
               className="coinsTable1__textTop"
@@ -226,150 +158,14 @@ function CoinsTableDraggable({ dataArray, refresh }) {
                 cursor: "pointer",
                 display: "flex",
                 flexDirection: "column",
-                // position: 'relative',
-                // top: '-7px',
                 justifyContent: "space-between",
                 height: "44px",
               }}
             >
-              {/* <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="25"
-                height="25"
-                viewBox="0 0 24 24"
-                onClick={async (e) => {
-                  e.stopPropagation();
-                  setClickedUp(true);
-                  setClickedDown(false); // reset other button
-                  console.log("index", index);
-                  if (index === 0) return;
-                  const previousIndex = index;
-                  const nextIndex = index - 1;
-
-                  const finalData = reorder(data, previousIndex, nextIndex);
-                  await server.post(
-                    `/wallet/sort_order_token`,
-                    {
-                      sort_order_list: finalData.map((item, index) => ({
-                        id: item.coin.id,
-                        coin_id: item.coin.coin_id,
-                        sort_order: index + 1,
-                      })),
-                      is_watch_only: account?.isWatchOnly ? 1 : 0,
-                      wallet_name: account?.name,
-                    },
-                    { headers: { Authorization: account.jwtToken } }
-                  );
-                  setClickedUp(false);
-                  refresh(new Date());
-                }}
-                style={{
-                  position: "relative",
-                }}
-                className="hover_only"
-              >
-                <g
-                  id="Group_171587"
-                  data-name="Group 171587"
-                  transform="translate(-15782 -7374)"
-                >
-                  <g
-                    id="Rectangle_59676"
-                    data-name="Rectangle 59676"
-                    transform="translate(15782 7374)"
-                    fill="#fff"
-                    stroke="#223f70"
-                    strokeWidth="1"
-                    opacity="0"
-                  >
-                    <rect width="24" height="24" stroke="none" />
-                    <rect x="0.5" y="0.5" width="23" height="23" fill="none" />
-                  </g>
-                  <g
-                    id="Layer_2"
-                    data-name="Layer 2"
-                    transform="translate(15780.268 7375.118)"
-                  >
-                    <path
-                      id="Path_111695"
-                      data-name="Path 111695"
-                      d="M18.749,9.449a.714.714,0,0,1-.507-.21L13.733,4.73,9.223,9.239A.716.716,0,1,1,8.21,8.226L13.226,3.21a.716.716,0,0,1,1.013,0l5.016,5.016a.717.717,0,0,1-.507,1.223Z"
-                      fill={clickedUp ? "#00aeef" : "#bbb"} // Change color on click
-                    />
-                  </g>
-                </g>
-              </svg>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="25"
-                height="25"
-                viewBox="0 0 24 24"
-                className="hover_only"
-                onClick={async (e) => {
-                  e.stopPropagation();
-                  setClickedDown(true);
-                  setClickedUp(false); // reset other button
-                  console.log("index", index);
-                  if (index === data.length - 1) return;
-                  const previousIndex = index;
-                  const nextIndex = index + 1;
-
-                  const finalData = reorder(data, previousIndex, nextIndex);
-                  await server.post(
-                    `/wallet/sort_order_token`,
-                    {
-                      sort_order_list: finalData.map((item, index) => ({
-                        id: item.coin.id,
-                        coin_id: item.coin.coin_id,
-                        sort_order: index + 1,
-                      })),
-                      is_watch_only: account?.isWatchOnly ? 1 : 0,
-                      wallet_name: account?.name,
-                    },
-                    { headers: { Authorization: account.jwtToken } }
-                  );
-                  setClickedDown(false);
-                  refresh(new Date());
-                }}
-                style={{
-                  marginTop: "-20px",
-                  position: "relative",
-                }}
-              >
-                <g
-                  id="Group_171587"
-                  data-name="Group 171587"
-                  transform="translate(-15782 -7374)"
-                >
-                  <g
-                    id="Rectangle_59676"
-                    data-name="Rectangle 59676"
-                    transform="translate(15782 7374)"
-                    fill="#fff"
-                    stroke="#223f70"
-                    strokeWidth="1"
-                    opacity="0"
-                  >
-                    <rect width="24" height="24" stroke="none" />
-                    <rect x="0.5" y="0.5" width="23" height="23" fill="none" />
-                  </g>
-                  <g
-                    id="Layer_2"
-                    data-name="Layer 2"
-                    transform="translate(15780.268 7375.118)"
-                  >
-                    <path
-                      id="Path_111694"
-                      data-name="Path 111694"
-                      d="M13.733,26.449a.714.714,0,0,1-.507-.21L8.21,21.224A.716.716,0,1,1,9.223,20.21l4.509,4.509,4.509-4.509a.716.716,0,1,1,1.013,1.013l-5.016,5.015a.714.714,0,0,1-.507.21Z"
-                      transform="translate(0 -7.685)"
-                      fill={clickedDown ? "#00aeef" : "#bbb"} // Change color on click
-                    />
-                  </g>
-                </g>
-              </svg> */}
+              {/* Reorder Up/Down Buttons - currently commented */}
             </div>
           </div>
+
           <div className="coinsTable1__right">
             <div>
               <DummyEle ele={ele} />
@@ -377,8 +173,7 @@ function CoinsTableDraggable({ dataArray, refresh }) {
                 className="coinsTable1__grayText12 textElipsis"
                 style={{ justifyContent: "flex-end" }}
               >
-                {ele.currDollerBal === "ABOVE" ||
-                ele.currDollerBal === "BELOW" ? (
+                {ele.currDollerBal === "ABOVE" || ele.currDollerBal === "BELOW" ? (
                   `Price ${capitalize(ele.currDollerBal)}`
                 ) : (
                   <>
@@ -392,7 +187,8 @@ function CoinsTableDraggable({ dataArray, refresh }) {
                     {ele.currDollerBal}
                   </>
                 )}
-                {ele.sent === true || ele.sent === false ? (
+
+                {ele.sent === true || ele.sent === false && (
                   <div
                     className="coinsTable1__grayText12 textElipsis"
                     style={{
@@ -402,10 +198,11 @@ function CoinsTableDraggable({ dataArray, refresh }) {
                   >
                     {ele.sent ? "Completed" : "Pending"}
                   </div>
-                ) : null}
+                )}
               </div>
             </div>
-            {ele.sent === true || ele.sent === false ? (
+
+            {ele.sent === true || ele.sent === false && (
               <div className="editBtn">
                 <img
                   src={Edit}
@@ -425,68 +222,43 @@ function CoinsTableDraggable({ dataArray, refresh }) {
                   alt=""
                 />
               </div>
-            ) : null}
+            )}
           </div>
         </li>
       ))}
 
+      {/* Modal for Deleting an Alert */}
       <ModalCustom
         title={"Price Alerts"}
         isModalOpen={deleteModal}
         customClass="customClassModal"
-        handleCancel={() => {
-          setDeleteModal(false);
-        }}
+        handleCancel={() => setDeleteModal(false)}
       >
         <div className="viewphrases">
           <div className="viewphrases__iInner">
-            <p
-              style={{
-                fontSize: "20px",
-                color: "white",
-              }}
-            >
+            <p style={{ fontSize: "20px", color: "white" }}>
               Are you sure you want to Delete this Alert?
             </p>
           </div>
 
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              marginTop: "30px",
-              gap: "20px"
-            }}
-          >
+          <div className="modalActions">
             <ButtonComp
               maxWidth="100%"
+              text="Yes"
               onClick={async () => {
                 store.dispatch(setLoading(true));
                 await WalletHelper.removeAlert(selected);
                 store.dispatch(setLoading(false));
                 setDeleteModal(false);
               }}
-              text="Yes"
             />
             <div className="cancelBtn">
               <ButtonComp
                 maxWidth="100%"
-                onClick={() => {
-                  setDeleteModal(false);
-                }}
                 text="No"
+                onClick={() => setDeleteModal(false)}
               />
             </div>
-            </div>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              marginTop: "30px",
-            }}
-          > 
           </div>
         </div>
       </ModalCustom>

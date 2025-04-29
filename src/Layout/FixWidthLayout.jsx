@@ -3,12 +3,10 @@
 import { Layout } from "antd";
 import React, { useEffect, useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import LogoHorizontal from "../Assets/PNG/LogoHorizontal.png";
 import BalanceDetails from "../Components/BalanceDetails/BalanceDetails";
 import MenuRestofHeaders from "../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders";
 import MenuFooter from "../Components/MenuFooter/MenuFooter";
 import darkWallet from "../Assets/darkWallet.svg";
-// import style from "./style.module.scss";
 import "./style.scss";
 import walletIcon from "../Assets/walletIcon.svg";
 import { useSelector } from "react-redux";
@@ -18,8 +16,6 @@ import DarkEyeOpen from "../Assets/DarkEyeOpen.svg";
 import OpenLight from "../Assets/open-light.png";
 import DarkCloseLight from "../Assets/DarkCloseLight.svg";
 import CloseLight from "../Assets/close-light.png";
-import OpenDark from "../Assets/open-dark.svg";
-import CloseDark from "../Assets/close-dark.svg";
 import { setBalanceOfOut } from "../actions/balance-off-out";
 import useCurrentHeight from "../CustomHooks/useCurrentHeight";
 import { swapDetailAc } from "../actions/swap";
@@ -31,7 +27,8 @@ function FixWidthLayout() {
 
   const { Content } = Layout;
   const getLocation = useLocation();
-  const { state } = useLocation();
+  const {state} = useLocation();
+  console.log('LOCATION IN FIX LAYOUT :',getLocation,state);
   const path = getLocation.pathname.replace("/", "");
   const navigate = useNavigate();
   const height = useCurrentHeight();

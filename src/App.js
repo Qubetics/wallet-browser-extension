@@ -227,10 +227,10 @@ function App() {
     store.dispatch(setTheme(appTheme || "lightTheme"));
     setDefaultHomePage(defaultHomePage || false);
 
-    if (!password) {
+    if (!accounts) {
       setExpired(true);
     } else {
-      if (accounts) {
+      // if (accounts) {
         const defaultChain = chains.find((el) => el.default);
         if (!defaultChain) {
           await WalletHelper.setNetworkPreference(chains[0].chainId);
@@ -254,9 +254,9 @@ function App() {
 
         store.dispatch(setAuth());
         setExpired(false);
-      } else {
-        setExpired(true);
-      }
+      // } else {
+      //   setExpired(true);
+      // }
     }
 
     return setRegistered(true);

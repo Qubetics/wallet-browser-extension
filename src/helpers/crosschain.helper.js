@@ -124,7 +124,7 @@ export class CrossChainHelper {
         }
       );
 
-      console.log("resssssssssssssssssssss ", response);
+      // console.log("resssssssssssssssssssss ", response);
       
       const orderData = response.data.data.data;
 

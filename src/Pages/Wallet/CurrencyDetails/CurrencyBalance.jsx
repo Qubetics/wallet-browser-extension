@@ -60,6 +60,8 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin }) {
     }
   );
 
+  const { state } = useLocation();
+
   const [accounts, setAccounts] = useState([]);
 
   const fetchAccounts = async () => {
@@ -70,6 +72,7 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin }) {
           <Link
             to="/"
             onClick={async (e) => {
+              console.log('PASSWORD CURRENCY BALANCE :',state)
               e.preventDefault();
               await WalletHelper.setWalletPreference(account.id);
             }}

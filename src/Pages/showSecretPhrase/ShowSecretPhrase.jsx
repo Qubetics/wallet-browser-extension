@@ -1,10 +1,9 @@
-import React, { useRef, useState } from "react";
+import React, {  } from "react";
 import CopyIcon from "../../Assets/CopyIconBlue.svg";
-import { Checkbox, message } from "antd";
+import { message } from "antd";
 import "./ShowSecretPhrase.scss";
-import ButtonComp from "../../Components/ButtonComp/ButtonComp";
 import MenuRestofHeaders from "../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders";
-import { Link, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { DURATION } from "../../config/message.config";
 
 function ShowSecretPhrase() {

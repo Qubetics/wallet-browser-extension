@@ -187,10 +187,6 @@ function ChangePin() {
                 );
               }
 
-              await chrome.storage.session.set({
-                password: newPassword.trim(),
-              });
-
               const result = await WalletHelper.updatePassword(
                 oldPassword,
                 newPassword

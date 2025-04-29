@@ -1,28 +1,28 @@
 /*global chrome*/
-import { SecurityHelper } from "./security.helper";
-import * as ethers from "ethers";
-import { store } from "..";
-import { setAccount } from "../actions/accounts";
-import { setChain } from "../actions/chains";
-import { v4 as uuidv4 } from "uuid";
-import { setCurrency } from "../actions/currency";
-import { setAuth } from "../actions/auth";
-import { SolanaHelper } from "./solana.helper";
-import nacl from "tweetnacl";
-import * as bip39 from "@scure/bip39";
-import { derivePath } from "ed25519-hd-key";
-import { Account } from "@solana/web3.js";
-import { BTCHelper } from "./btc.helper";
-import { IS_PRODUCTION } from "../config/bitcoin.config";
-import { AdaHelper } from "./ada.helper";
-import { setAlerts } from "../actions/alerts";
-import { setBalancesIn } from "../actions/balance-off-out";
-import { setNfts } from "../actions/nfts";
-import { setTokens } from "../actions/tokens";
-import { server } from "../server";
-import { setLoading } from "../actions/loading";
-const BIP84 = require("bip84");
-const privateKeyToAddress = require("ethereum-private-key-to-address");
+import { SecurityHelper } from './security.helper';
+import * as ethers from 'ethers';
+import { store } from '..';
+import { setAccount } from '../actions/accounts';
+import { setChain } from '../actions/chains';
+import { v4 as uuidv4 } from 'uuid';
+import { setCurrency } from '../actions/currency';
+import { setAuth } from '../actions/auth';
+import { SolanaHelper } from './solana.helper';
+import nacl from 'tweetnacl';
+import * as bip39 from '@scure/bip39';
+import { derivePath } from 'ed25519-hd-key';
+import { Account } from '@solana/web3.js';
+import { BTCHelper } from './btc.helper';
+import { IS_PRODUCTION } from '../config/bitcoin.config';
+import { AdaHelper } from './ada.helper';
+import { setAlerts } from '../actions/alerts';
+import { setBalancesIn } from '../actions/balance-off-out';
+import { setNfts } from '../actions/nfts';
+import { setTokens } from '../actions/tokens';
+import { server } from '../server';
+import { setLoading } from '../actions/loading';
+const BIP84 = require('bip84');
+const privateKeyToAddress = require('ethereum-private-key-to-address');
 
 export class WalletHelper {
   static accounts = null;
@@ -37,9 +37,9 @@ export class WalletHelper {
   };
 
   static verifyPassword = async (password) => {
-    const { accounts } = await chrome.storage.local.get("accounts");
-    const decryptedAccounts = SecurityHelper.decrypt(accounts, password);
-    if (!decryptedAccounts) {
+    const { mnemonics } = await chrome.storage.local.get('mnemonics');
+    const decryptedMnemonics = SecurityHelper.decrypt(mnemonics, password);
+    if (!decryptedMnemonics) {
       return false;
     }
 
@@ -48,24 +48,23 @@ export class WalletHelper {
 
   static unlockWallet = async (password) => {
     try {
-      const { accounts } = await chrome.storage.local.get("accounts");
-      const { chains } = await chrome.storage.local.get("chains");
-      const { currency } = await chrome.storage.local.get("currency");
+      const { accounts } = await chrome.storage.local.get('accounts');
+      const { chains } = await chrome.storage.local.get('chains');
+      const { currency } = await chrome.storage.local.get('currency');
 
-      const decryptedAccounts = SecurityHelper.decrypt(accounts, password);
-      if (!decryptedAccounts) {
+      const isVerified = await this.verifyPassword(password);
+      
+      if (!isVerified) {
         return false;
       }
-      const defaultAccount = JSON.parse(decryptedAccounts).find(
+      const defaultAccount = accounts.find(
         (el) => el.default
       );
 
-      // await chrome.storage.session.set({
-      //   password,
-      // });
       await chrome.storage.session.set({
-        accounts: JSON.parse(decryptedAccounts),
+        accounts: accounts,
       });
+
       store.dispatch(setAccount(defaultAccount));
 
       store.dispatch(setChain(chains.find((el) => el.default) || chains[0]));
@@ -84,12 +83,6 @@ export class WalletHelper {
     }
   };
 
-  static setPasswordInSession = (password) => {
-    return chrome.storage.session.set({
-      password,
-    });
-  };
-
   static generateNewMnemonics = () => {
     const { phrase } = ethers.Wallet.createRandom().mnemonic;
     return phrase;
@@ -98,8 +91,8 @@ export class WalletHelper {
   static getMnemonics = async (address) => {
     // console.log('GET MNEMONICS FUNCTION', address)
     try {
-      const { password } = await chrome.storage.session.get("password");
-      const { mnemonics } = await chrome.storage.local.get("mnemonics");
+      const { password } = await chrome.storage.session.get('password');
+      const { mnemonics } = await chrome.storage.local.get('mnemonics');
       if (mnemonics) {
         // console.log('FOUND MNEMONICS', address)
         const decryptedMnemonics = SecurityHelper.decrypt(mnemonics, password);
@@ -127,30 +120,18 @@ export class WalletHelper {
     }
   };
 
-
-  static getMnemonicsByPassword = async (address,password) => {
-    // console.log('GET MNEMONICS FUNCTION', address)
+  static getMnemonicsByPassword = async (address, password) => {
     try {
-      const { mnemonics } = await chrome.storage.local.get("mnemonics");
+      const { mnemonics } = await chrome.storage.local.get('mnemonics');
       if (mnemonics) {
-        // console.log('FOUND MNEMONICS', address)
         const decryptedMnemonics = SecurityHelper.decrypt(mnemonics, password);
-
-        // Parse the decrypted mnemonics
         const mnemonicsList = JSON.parse(decryptedMnemonics);
-        // console.log("mnemonicsList", mnemonicsList);
-        // Find the mnemonic matching the provided address
         const matchedMnemonic = mnemonicsList.find(
           (mnemonic) => mnemonic.address.toLowerCase() === address.toLowerCase()
         );
-        // console.log("matchedMnemonic", matchedMnemonic);
-
-        // Return the matched mnemonic phrase, or the default if no match
         const defaultMnemonics = matchedMnemonic || mnemonicsList[0];
         return defaultMnemonics.phrase;
       } else {
-        // console.log('GENETRATE MNEMONICS', address)
-        // Generate a new mnemonic if none are found
         const { phrase } = ethers.Wallet.createRandom().mnemonic;
         return phrase;
       }
@@ -159,13 +140,23 @@ export class WalletHelper {
     }
   };
 
-  static getPrivateKey = async () => {
+  static getPrivateKey = () => {
     try {
       const { account } = store.getState();
       return account.privateKey;
     } catch (error) {
       return false;
     }
+  };
+
+  static getPrivateKeyWithPassword = async (password) => {
+    const { privateKey } = await chrome.storage.local.get('privateKey');
+    const decryptedKey = SecurityHelper.decrypt(privateKey, password);
+    if (!decryptedKey) {
+      return false;
+    }
+    const cleanKey = decryptedKey.replace(/^"(.*)"$/, '$1');
+    return cleanKey;
   };
 
   // static getSolanaPrivateKey = async () => {
@@ -188,8 +179,11 @@ export class WalletHelper {
   //   }
   // };
 
-  static getSolanaPrivateKeyWithAddress = async (address,password) => {
-    const mnemonics = await WalletHelper.getMnemonicsByPassword(address,password);
+  static getSolanaPrivateKeyWithAddress = async (address, password) => {
+    const mnemonics = await WalletHelper.getMnemonicsByPassword(
+      address,
+      password
+    );
     try {
       const seed = await bip39.mnemonicToSeed(mnemonics);
       const path = `m/44'/501'/0'`;
@@ -205,8 +199,8 @@ export class WalletHelper {
 
   static getBitcoinPrivateKey = async () => {
     try {
-      const { password } = await chrome.storage.session.get("password");
-      const { mnemonics } = await chrome.storage.local.get("mnemonics");
+      const { password } = await chrome.storage.session.get('password');
+      const { mnemonics } = await chrome.storage.local.get('mnemonics');
 
       const decryptedMnemonics = SecurityHelper.decrypt(mnemonics, password);
 
@@ -215,7 +209,7 @@ export class WalletHelper {
       );
       var root = new BIP84.fromSeed(
         defaultMnemonics.phrase,
-        "",
+        '',
         !IS_PRODUCTION
       );
       var child0 = root.deriveAccount(0);
@@ -228,7 +222,7 @@ export class WalletHelper {
 
   static getBitcoinPrivateKeyWithPassword = async (password) => {
     try {
-      const { mnemonics } = await chrome.storage.local.get("mnemonics");
+      const { mnemonics } = await chrome.storage.local.get('mnemonics');
 
       const decryptedMnemonics = SecurityHelper.decrypt(mnemonics, password);
 
@@ -237,7 +231,7 @@ export class WalletHelper {
       );
       var root = new BIP84.fromSeed(
         defaultMnemonics.phrase,
-        "",
+        '',
         !IS_PRODUCTION
       );
       var child0 = root.deriveAccount(0);
@@ -248,10 +242,13 @@ export class WalletHelper {
     }
   };
 
-  static getBitcoinPrivateKeyWithAddress = async (address,password) => {
-    const mnemonics = await WalletHelper.getMnemonicsByPassword(address,password);
+  static getBitcoinPrivateKeyWithAddress = async (address, password) => {
+    const mnemonics = await WalletHelper.getMnemonicsByPassword(
+      address,
+      password
+    );
     try {
-      var root = new BIP84.fromSeed(mnemonics, "", !IS_PRODUCTION);
+      var root = new BIP84.fromSeed(mnemonics, '', !IS_PRODUCTION);
       var child0 = root.deriveAccount(0);
       var account0 = new BIP84.fromZPrv(child0);
       return account0.getPrivateKey(0);
@@ -276,38 +273,29 @@ export class WalletHelper {
   // };
 
   static getChains = async () => {
-    const { chains } = await chrome.storage.local.get("chains");
+    const { chains } = await chrome.storage.local.get('chains');
     return chains;
   };
 
   static logout = async () => {
     await chrome.storage.local.remove([
-      "accounts",
-      "mnemonics",
-      "registered",
-      "alerts",
-      "legalPolicy",
+      'accounts',
+      'mnemonics',
+      'registered',
+      'alerts',
+      'legalPolicy',
     ]);
-    await chrome.storage.session.remove(["accounts", "password"]);
-    // await chrome.runtime.reload(true);
+    await chrome.storage.session.remove(['accounts']);
     window.location.reload(true);
   };
 
-
-  static checkIfAlreadyThere = async (newMnemonics,password) => {
-    let { mnemonics } = await chrome.storage.local.get("mnemonics");
+  static isAccountExistWithMnemonics = async (newMnemonics, password) => {
+    let { mnemonics } = await chrome.storage.local.get('mnemonics');
     const decryptMnemonics = SecurityHelper.decrypt(mnemonics, password);
-    // console.log("mnemonicsmnemonicsmnemonics ", mnemonics);
-    // console.log("newMnemonicsnewMnemonicsnewMnemonicsnewMnemonics ", newMnemonics);
-    // console.log('JSON.parse(decryptMnemonics)JSON.parse(decryptMnemonics) ', JSON.parse(decryptMnemonics));
-
-
     if (decryptMnemonics) {
       const checkIfThere = JSON.parse(decryptMnemonics).find(
         (el) => el.phrase === newMnemonics
       );
-      // console.log("checkIfTherecheckIfThere ", checkIfThere);
-
       if (checkIfThere) return true;
       return false;
     } else {
@@ -318,51 +306,51 @@ export class WalletHelper {
   static generateAndSetWalletForWatchOnlySameWallet = async (
     coinFamily,
     address,
-    accountId
+    accountId,
+    password
   ) => {
-    let coinSymbol = "ETH";
+    let coinSymbol = 'ETH';
 
     switch (coinFamily) {
       case 1:
-        coinSymbol = "ETH";
+        coinSymbol = 'ETH';
         break;
       case 2:
-        coinSymbol = "BTC";
+        coinSymbol = 'BTC';
         break;
       case 3:
-        coinSymbol = "BNB";
+        coinSymbol = 'BNB';
         break;
       case 4:
-        coinSymbol = "SOL";
+        coinSymbol = 'SOL';
         break;
       case 5:
-        coinSymbol = "ADA";
+        coinSymbol = 'ADA';
         break;
       case 6:
-        coinSymbol = "POL";
+        coinSymbol = 'POL';
         break;
       case 7:
-        coinSymbol = "AVAX";
+        coinSymbol = 'AVAX';
         break;
       case 8:
-        coinSymbol = "CRO";
+        coinSymbol = 'CRO';
         break;
       case 9:
-        coinSymbol = "PLS";
+        coinSymbol = 'PLS';
         break;
       default:
         break;
     }
 
     try {
-      const { password } = await chrome.storage.session.get("password");
-      let { accounts } = await chrome.storage.session.get("accounts");
-      const { chains } = await chrome.storage.local.get("chains");
-      const { currency } = await chrome.storage.local.get("currency");
+      let { accounts } = await chrome.storage.session.get('accounts');
+      const { chains } = await chrome.storage.local.get('chains');
+      const { currency } = await chrome.storage.local.get('currency');
 
       const account = accounts.find((el) => el.id == accountId);
 
-      const { deviceId } = await chrome.storage.local.get("deviceId");
+      const { deviceId } = await chrome.storage.local.get('deviceId');
 
       await server.post(
         `${process.env.REACT_APP_BASE_URL}/wallet/create`,
@@ -376,9 +364,9 @@ export class WalletHelper {
             },
           ],
           wallet_name: account.name,
-          device_token: "chrome",
+          device_token: 'chrome',
           is_default: 1,
-          device_type: "android",
+          device_type: 'android',
           is_watch_only: 1,
           coin_family: coinFamily,
           device_id: deviceId,
@@ -392,7 +380,7 @@ export class WalletHelper {
       );
 
       await server.post(
-        "/wallet/reterive_wallet_balance",
+        '/wallet/reterive_wallet_balance',
         {
           address_list: [
             {
@@ -401,7 +389,7 @@ export class WalletHelper {
               wallet_address: address,
             },
           ],
-          fiat_currency: "USD",
+          fiat_currency: 'USD',
           is_watch_only: 1,
           wallet_address: address,
         },
@@ -482,53 +470,53 @@ export class WalletHelper {
   static generateAndSetWalletForWatchOnly = async (
     name,
     coinFamily,
-    address
+    address,
+    password
   ) => {
-    let coinSymbol = "ETH";
+    let coinSymbol = 'ETH';
 
     switch (coinFamily) {
       case 1:
-        coinSymbol = "ETH";
+        coinSymbol = 'ETH';
         break;
       case 2:
-        coinSymbol = "BTC";
+        coinSymbol = 'BTC';
         break;
       case 3:
-        coinSymbol = "BNB";
+        coinSymbol = 'BNB';
         break;
       case 4:
-        coinSymbol = "SOL";
+        coinSymbol = 'SOL';
         break;
       case 5:
-        coinSymbol = "ADA";
+        coinSymbol = 'ADA';
         break;
       case 6:
-        coinSymbol = "POL";
+        coinSymbol = 'POL';
         break;
       case 7:
-        coinSymbol = "AVAX";
+        coinSymbol = 'AVAX';
         break;
       case 8:
-        coinSymbol = "CRO";
+        coinSymbol = 'CRO';
         break;
       case 9:
-        coinSymbol = "PLS";
+        coinSymbol = 'PLS';
         break;
       default:
         break;
     }
 
     try {
-      const { password } = await chrome.storage.session.get("password");
-      let { accounts } = await chrome.storage.session.get("accounts");
-      const { chains } = await chrome.storage.local.get("chains");
-      const { currency } = await chrome.storage.local.get("currency");
+      let { accounts } = await chrome.storage.session.get('accounts');
+      const { chains } = await chrome.storage.local.get('chains');
+      const { currency } = await chrome.storage.local.get('currency');
 
       if (!accounts) {
         accounts = [];
       }
 
-      const { deviceId } = await chrome.storage.local.get("deviceId");
+      const { deviceId } = await chrome.storage.local.get('deviceId');
       const createWallet = await server.post(
         `${process.env.REACT_APP_BASE_URL}/wallet/create`,
         {
@@ -541,9 +529,9 @@ export class WalletHelper {
             },
           ],
           wallet_name: name,
-          device_token: "chrome",
+          device_token: 'chrome',
           is_default: 1,
-          device_type: "android",
+          device_type: 'android',
           is_watch_only: 1,
           coin_family: coinFamily,
           device_id: deviceId,
@@ -557,7 +545,7 @@ export class WalletHelper {
       );
 
       await server.post(
-        "/wallet/reterive_wallet_balance",
+        '/wallet/reterive_wallet_balance',
         {
           address_list: [
             {
@@ -566,7 +554,7 @@ export class WalletHelper {
               wallet_address: address,
             },
           ],
-          fiat_currency: "USD",
+          fiat_currency: 'USD',
           is_watch_only: 1,
           wallet_address: address,
         },
@@ -642,10 +630,10 @@ export class WalletHelper {
 
   static generateAndSetWalletPrivateKey = async (privateKey, name) => {
     try {
-      const { password } = await chrome.storage.session.get("password");
-      let { accounts } = await chrome.storage.session.get("accounts");
-      const { chains } = await chrome.storage.local.get("chains");
-      const { currency } = await chrome.storage.local.get("currency");
+      const { password } = await chrome.storage.session.get('password');
+      let { accounts } = await chrome.storage.session.get('accounts');
+      const { chains } = await chrome.storage.local.get('chains');
+      const { currency } = await chrome.storage.local.get('currency');
 
       if (!accounts) {
         accounts = [];
@@ -656,44 +644,44 @@ export class WalletHelper {
         await SolanaHelper.generateSolanaAddressFromPrivateKey(privateKey);
       const bitcoinAddress = await BTCHelper.generateBitcoinAddress(privateKey);
 
-      const { deviceId } = await chrome.storage.local.get("deviceId");
+      const { deviceId } = await chrome.storage.local.get('deviceId');
 
       const createWallet = await server.post(
         `${process.env.REACT_APP_BASE_URL}/user/create/wallet`,
         {
           device_id: deviceId,
           wallet_address: address,
-          device_token: "chrome",
+          device_token: 'chrome',
           wallet_name: name,
-          referral_code: "",
+          referral_code: '',
           addressList: [
             {
-              symbol: "bnb",
+              symbol: 'bnb',
               address: address,
               coin_family: 1,
             },
             {
-              symbol: "eth",
+              symbol: 'eth',
               address: address,
               coin_family: 2,
             },
             {
-              symbol: "btc",
+              symbol: 'btc',
               address: bitcoinAddress,
               coin_family: 3,
             },
             {
-              symbol: "matic",
+              symbol: 'matic',
               address: address,
               coin_family: 4,
             },
             {
-              symbol: "sol",
+              symbol: 'sol',
               address: solanaAddress,
               coin_family: 5,
             },
             {
-              symbol: "tics",
+              symbol: 'tics',
               address: address,
               coin_family: 7,
             },
@@ -734,7 +722,7 @@ export class WalletHelper {
             bitcoinAddress,
             address,
             solanaAddress,
-            address
+            address,
           ],
           userId: createWallet.data.data.userId,
           jwtToken:
@@ -781,14 +769,13 @@ export class WalletHelper {
     }
   };
 
-  static generateAndSetWallet = async (newMnemonics, name, type,password) => {
-  
+  static generateAndSetWallet = async (newMnemonics, name, type, password) => {
     try {
       // console.log("FUNC newMnemonics:::",newMnemonics);
-      let { accounts } = await chrome.storage.session.get("accounts");
-      const { chains } = await chrome.storage.local.get("chains");
-      const { currency } = await chrome.storage.local.get("currency");
-      let { mnemonics } = await chrome.storage.local.get("mnemonics");
+      let { accounts } = await chrome.storage.session.get('accounts');
+      const { chains } = await chrome.storage.local.get('chains');
+      const { currency } = await chrome.storage.local.get('currency');
+      let { mnemonics } = await chrome.storage.local.get('mnemonics');
       // console.log("MNEMONICS in generateAndSetWallet", mnemonics);
       const solanaAddress = await SolanaHelper.generateSolanaAddress(
         newMnemonics
@@ -823,7 +810,7 @@ export class WalletHelper {
         mnemonics = SecurityHelper.decrypt(mnemonics, password);
         mnemonics = JSON.parse(mnemonics);
         if (!Array.isArray(mnemonics)) {
-          mnemonics = [mnemonics]
+          mnemonics = [mnemonics];
         }
       }
       const finalMnemonics = [
@@ -836,39 +823,39 @@ export class WalletHelper {
       ];
       // console.log("Finallll ", finalMnemonics);
 
-      const { deviceId } = await chrome.storage.local.get("deviceId");
+      const { deviceId } = await chrome.storage.local.get('deviceId');
 
       const createWallet = await server.post(
         `${process.env.REACT_APP_BASE_URL}/user/create/wallet`,
         {
           device_id: deviceId,
           wallet_address: address,
-          device_token: "chrome",
+          device_token: 'chrome',
           wallet_name: name,
-          referral_code: "",
+          referral_code: '',
           addressList: [
             {
-              symbol: "bnb",
+              symbol: 'bnb',
               address: address,
               coin_family: 1,
             },
             {
-              symbol: "eth",
+              symbol: 'eth',
               address: address,
               coin_family: 2,
             },
             {
-              symbol: "btc",
+              symbol: 'btc',
               address: bitcoinAddress,
               coin_family: 3,
             },
             {
-              symbol: "pol",
+              symbol: 'pol',
               address: address,
               coin_family: 4,
             },
             {
-              symbol: "sol",
+              symbol: 'sol',
               address: solanaAddress,
               coin_family: 5,
             },
@@ -878,7 +865,7 @@ export class WalletHelper {
             //   coin_family: 6,
             // },
             {
-              symbol: "tics",
+              symbol: 'tics',
               address: address,
               coin_family: 7,
             },
@@ -892,7 +879,7 @@ export class WalletHelper {
         }
       );
 
-      // console.log("Createeeeeeeeee ", createWallet);
+      console.log('WALLET CREATED : ', createWallet);
       const id = uuidv4();
 
       const finalAccounts = [
@@ -904,7 +891,7 @@ export class WalletHelper {
           id,
           address: address,
           isWatchOnly: false,
-          privateKey,
+          privateKey: null,
           path: `m/44'/60'/0'/0/${accounts.length + 1}`,
           name,
           // default: accounts.length === 0 ? true : false,
@@ -915,7 +902,7 @@ export class WalletHelper {
             3: bitcoinAddress,
             4: address,
             5: solanaAddress,
-            7: address
+            7: address,
           },
           coinFamilies: [1, 2, 3, 4, 5, 7],
           addressLists: [
@@ -924,7 +911,7 @@ export class WalletHelper {
             bitcoinAddress,
             address,
             solanaAddress,
-            address
+            address,
           ],
           userId: createWallet.data.data.userId,
           jwtToken: createWallet.data.data.token,
@@ -939,20 +926,28 @@ export class WalletHelper {
         password
       );
 
-      // console.log("finalAccountsfinalAccounts ", finalAccounts);
+      const encryptedPrivateKey = SecurityHelper.encrypt(
+        privateKey,
+        password
+      );
 
-      const encryptedAccounts = SecurityHelper.encrypt(finalAccounts, password);
+      console.log('finalAccountsfinalAccounts ', finalAccounts);
+
+      // const encryptedAccounts = SecurityHelper.encrypt(finalAccounts, password);
 
       await chrome.storage.local.set({
-        accounts: encryptedAccounts,
+        accounts: finalAccounts,
         mnemonics: encryptedMnemonics,
+        privateKey:encryptedPrivateKey,
         registered: true,
       });
 
-      await chrome.storage.session.set({ accounts: finalAccounts }); 
+      await chrome.storage.session.set({ accounts: finalAccounts });
 
-      store.dispatch(setAccount(finalAccounts.find((el) => el?.default))); 
-      chains && chains && store.dispatch(setChain(chains.find((el) => el?.default))); 
+      store.dispatch(setAccount(finalAccounts.find((el) => el?.default)));
+      chains &&
+        chains &&
+        store.dispatch(setChain(chains.find((el) => el?.default)));
 
       store.dispatch(
         setCurrency({
@@ -966,17 +961,17 @@ export class WalletHelper {
     } catch (error) {
       console.log(error);
       // return false;
-      throw error?.response?.data?.message || "Something went wrong.";
+      throw error?.response?.data?.message || 'Something went wrong.';
     }
   };
 
   static generateAndSetWalletToRefreshToken = async () => {
     try {
-      const { password } = await chrome.storage.session.get("password");
-      let { accounts } = await chrome.storage.session.get("accounts");
-      const { chains } = await chrome.storage.local.get("chains");
-      const { currency } = await chrome.storage.local.get("currency");
-      const { deviceId } = await chrome.storage.local.get("deviceId");
+
+      let { accounts } = await chrome.storage.session.get('accounts');
+      const { chains } = await chrome.storage.local.get('chains');
+      const { currency } = await chrome.storage.local.get('currency');
+      const { deviceId } = await chrome.storage.local.get('deviceId');
       const defaultAccount = accounts.find((el) => el.default);
 
       const response = await server.post(
@@ -1003,13 +998,8 @@ export class WalletHelper {
         }
       });
 
-      const encryptedAccounts = SecurityHelper.encrypt(
-        updateAccounts,
-        password
-      );
-
       await chrome.storage.local.set({
-        accounts: encryptedAccounts,
+        accounts: updateAccounts,
         registered: true,
       });
 
@@ -1037,16 +1027,14 @@ export class WalletHelper {
   };
 
   static updateWalletName = async (name, id) => {
-    const { password } = await chrome.storage.session.get("password");
     try {
-      const { accounts } = await chrome.storage.local.get("accounts");
-      const decryptedAccounts = SecurityHelper.decrypt(accounts, password);
+      const { accounts } = await chrome.storage.local.get('accounts');
 
-      if (!decryptedAccounts) {
+      if (!accounts) {
         return false;
       }
- 
-      const updateAccounts = JSON.parse(decryptedAccounts).map((el) => {
+
+      const updateAccounts = accounts.map((el) => {
         if (el.id == id) {
           el.name = name;
           return el;
@@ -1054,13 +1042,8 @@ export class WalletHelper {
         return el;
       });
 
-      const encryptedAccounts = SecurityHelper.encrypt(
-        updateAccounts,
-        password
-      );
-
       await chrome.storage.local.set({
-        accounts: encryptedAccounts,
+        accounts: updateAccounts,
       });
       await chrome.storage.session.set({
         accounts: updateAccounts,
@@ -1068,45 +1051,25 @@ export class WalletHelper {
       store.dispatch(setAccount(updateAccounts.find((el) => el.default)));
       return true;
     } catch (error) {
+      console.log('error',error)
       return false;
     }
   };
 
   static updatePassword = async (oldPassword, newPassword) => {
     try {
-      const { accounts } = await chrome.storage.local.get("accounts");
-      const { mnemonics } = await chrome.storage.local.get("mnemonics");
-
+      const { mnemonics } = await chrome.storage.local.get('mnemonics');
       const decryptedMnemonics = SecurityHelper.decrypt(mnemonics, oldPassword);
-      const decryptedAccounts = SecurityHelper.decrypt(accounts, oldPassword);
-
-      if (!decryptedAccounts) {
-        return false;
-      }
-
       if (!decryptedMnemonics) {
         return false;
       }
-
-      const encryptedAccounts = SecurityHelper.encrypt(
-        JSON.parse(decryptedAccounts),
-        newPassword
-      );
-
       const encryptedMnemonics = SecurityHelper.encrypt(
         JSON.parse(decryptedMnemonics),
         newPassword
       );
-
       await chrome.storage.local.set({
-        accounts: encryptedAccounts,
         mnemonics: encryptedMnemonics,
       });
-
-      await chrome.storage.session.set({
-        password: newPassword,
-      });
-
       return true;
     } catch (error) {
       return false;
@@ -1114,16 +1077,14 @@ export class WalletHelper {
   };
 
   static updateShowTotalBalance = async (status, id) => {
-    const { password } = await chrome.storage.session.get("password");
     try {
-      const { accounts } = await chrome.storage.local.get("accounts");
-      const decryptedAccounts = SecurityHelper.decrypt(accounts, password);
+      const { accounts } = await chrome.storage.local.get('accounts');
 
-      if (!decryptedAccounts) {
+      if (!accounts) {
         return false;
       }
 
-      const updateAccounts = JSON.parse(decryptedAccounts).map((el) => {
+      const updateAccounts = accounts.map((el) => {
         if (el.id == id) {
           el.totalBalanceShow = status;
           return el;
@@ -1131,13 +1092,8 @@ export class WalletHelper {
         return el;
       });
 
-      const encryptedAccounts = SecurityHelper.encrypt(
-        updateAccounts,
-        password
-      );
-
       await chrome.storage.local.set({
-        accounts: encryptedAccounts,
+        accounts: updateAccounts,
       });
       await chrome.storage.session.set({
         accounts: updateAccounts,
@@ -1149,19 +1105,17 @@ export class WalletHelper {
     }
   };
 
-  static updateBalanceInShow = async (status, id,password) => {
+  static updateBalanceInShow = async (status, id) => {
+    console.log('updateBalanceInShow :', status, id);
 
-    console.log("updateBalanceInShow :",status, id,password)
-   
     try {
-      const { accounts } = await chrome.storage.local.get("accounts");
-      const decryptedAccounts = SecurityHelper.decrypt(accounts, password);
+      const { accounts } = await chrome.storage.local.get('accounts');
 
-      if (!decryptedAccounts) {
+      if (!accounts) {
         return false;
       }
 
-      const updateAccounts = JSON.parse(decryptedAccounts).map((el) => {
+      const updateAccounts = accounts.map((el) => {
         if (el.id == id) {
           el.balanceIn = status;
           return el;
@@ -1169,14 +1123,10 @@ export class WalletHelper {
         return el;
       });
 
-      const encryptedAccounts = SecurityHelper.encrypt(
-        updateAccounts,
-        password
-      );
-
       await chrome.storage.local.set({
-        accounts: encryptedAccounts,
+        accounts: updateAccounts,
       });
+
       await chrome.storage.session.set({
         accounts: updateAccounts,
       });
@@ -1187,42 +1137,42 @@ export class WalletHelper {
     }
   };
 
-  static updateTokens = async (jwtToken, refreshToken) => {
-    const { password } = await chrome.storage.session.get("password");
-    try {
-      const { accounts } = await chrome.storage.local.get("accounts");
-      const decryptedAccounts = SecurityHelper.decrypt(accounts, password);
+  // static updateTokens = async (jwtToken, refreshToken) => {
+  //   const { password } = await chrome.storage.session.get("passwords");
+  //   try {
+  //     const { accounts } = await chrome.storage.local.get("accounts");
+  //     const decryptedAccounts = SecurityHelper.decrypt(accounts, password);
 
-      if (!decryptedAccounts) {
-        return false;
-      }
+  //     if (!decryptedAccounts) {
+  //       return false;
+  //     }
 
-      const updateAccounts = JSON.parse(decryptedAccounts).map((el) => {
-        if (el.default) {
-          el.jwtToken = jwtToken;
-          el.refreshToken = refreshToken;
-          return el;
-        }
-        return el;
-      });
+  //     const updateAccounts = JSON.parse(decryptedAccounts).map((el) => {
+  //       if (el.default) {
+  //         el.jwtToken = jwtToken;
+  //         el.refreshToken = refreshToken;
+  //         return el;
+  //       }
+  //       return el;
+  //     });
 
-      const encryptedAccounts = SecurityHelper.encrypt(
-        updateAccounts,
-        password
-      );
+  //     const encryptedAccounts = SecurityHelper.encrypt(
+  //       updateAccounts,
+  //       password
+  //     );
 
-      await chrome.storage.local.set({
-        accounts: encryptedAccounts,
-      });
-      await chrome.storage.session.set({
-        accounts: updateAccounts,
-      });
-      store.dispatch(setAccount(updateAccounts.find((el) => el.default)));
-      return true;
-    } catch (error) {
-      return false;
-    }
-  };
+  //     await chrome.storage.local.set({
+  //       accounts: encryptedAccounts,
+  //     });
+  //     await chrome.storage.session.set({
+  //       accounts: updateAccounts,
+  //     });
+  //     store.dispatch(setAccount(updateAccounts.find((el) => el.default)));
+  //     return true;
+  //   } catch (error) {
+  //     return false;
+  //   }
+  // };
 
   static setCurrencyPreference = async (currency) => {
     await chrome.storage.local.set({
@@ -1232,7 +1182,7 @@ export class WalletHelper {
   };
 
   static setNetworkPreference = async (chainId) => {
-    const { chains } = await chrome.storage.local.get("chains");
+    const { chains } = await chrome.storage.local.get('chains');
 
     const updatedChains = chains.map((el) => {
       if (el.chainId == chainId) {
@@ -1252,11 +1202,11 @@ export class WalletHelper {
 
   static setWalletPreference = async (walletId) => {
     try {
-      // console.log(walletId, "walletId>>>>>>>>>>");
-      const { password } = await chrome.storage.session.get("password");
-      const { accounts } = await chrome.storage.local.get("accounts");
+      const { accounts } = await chrome.storage.local.get('accounts');
 
-      const decryptedAccounts = SecurityHelper.decrypt(accounts, password);
+      // const decryptedAccounts = SecurityHelper.decrypt(accounts, password);
+
+      const decryptedAccounts = accounts;
 
       const updatesAccounts = JSON.parse(decryptedAccounts).map((el) => {
         if (el.id === walletId) {
@@ -1266,13 +1216,9 @@ export class WalletHelper {
         }
         return el;
       });
-      const encryptedAccounts = SecurityHelper.encrypt(
-        updatesAccounts,
-        password
-      );
 
       await chrome.storage.local.set({
-        accounts: encryptedAccounts,
+        accounts: updatesAccounts,
       });
 
       store.dispatch(
@@ -1297,11 +1243,8 @@ export class WalletHelper {
     }
   };
 
-
-  static removeMnemonic = async (address) => {
-
-    const { password } = await chrome.storage.session.get("password");
-    const { mnemonics } = await chrome.storage.local.get("mnemonics");
+  static removeMnemonic = async (address, password) => {
+    const { mnemonics } = await chrome.storage.local.get('mnemonics');
     if (mnemonics) {
       const decryptedMnemonics = SecurityHelper.decrypt(mnemonics, password);
 
@@ -1320,7 +1263,10 @@ export class WalletHelper {
       //   registered: true,
       // });
       // } else {
-      const encryptedAgain = SecurityHelper.encrypt(unmatchedMnemonic, password);
+      const encryptedAgain = SecurityHelper.encrypt(
+        unmatchedMnemonic,
+        password
+      );
 
       // console.log("encryptedAgain", encryptedAgain);
       chrome.storage.local.set({
@@ -1328,25 +1274,19 @@ export class WalletHelper {
         registered: true,
       });
       // }
-
     }
-  }
+  };
 
   static deleteWallet = async (id, evmAddress) => {
-    const { password } = await chrome.storage.session.get("password");
-    const { accounts } = await chrome.storage.local.get("accounts");
-    const decryptedAccounts = SecurityHelper.decrypt(accounts, password);
+    console.log('DELETE WALLET :', id, evmAddress);
+    const { accounts } = await chrome.storage.local.get('accounts');
 
-    console.log("decryptedAccounts-----------> ", decryptedAccounts);
+    console.log('decryptedAccounts-----------> ', accounts);
 
-    const newAccounts = JSON.parse(decryptedAccounts).filter(
-      (el) => el.id !== id
-    );
-
-    const newAccountsEncrypted = SecurityHelper.encrypt(newAccounts, password);
+    const newAccounts = accounts.filter((el) => el.id !== id);
 
     await chrome.storage.local.set({
-      accounts: newAccountsEncrypted,
+      accounts: newAccounts,
     });
 
     await chrome.storage.session.set({
@@ -1357,13 +1297,10 @@ export class WalletHelper {
   };
 
   static reorderWallet = async (accounts) => {
-    const { password } = await chrome.storage.session.get("password");
-
     const newAccounts = accounts;
 
-    const newAccountsEncrypted = SecurityHelper.encrypt(newAccounts, password);
     await chrome.storage.local.set({
-      accounts: newAccountsEncrypted,
+      accounts: newAccounts,
     });
 
     await chrome.storage.session.set({
@@ -1383,7 +1320,7 @@ export class WalletHelper {
     selectedToken
   ) => {
     try {
-      let { alerts } = await chrome.storage.local.get("alerts");
+      let { alerts } = await chrome.storage.local.get('alerts');
 
       alerts.push({
         id: uuidv4(),
@@ -1409,7 +1346,7 @@ export class WalletHelper {
 
   static editAlert = async (uuid, type, price) => {
     try {
-      let { alerts } = await chrome.storage.local.get("alerts");
+      let { alerts } = await chrome.storage.local.get('alerts');
 
       const list = alerts.map((el) => {
         if (el.id == uuid) {
@@ -1439,7 +1376,7 @@ export class WalletHelper {
     //   uuid
     // );
     try {
-      let { alerts } = await chrome.storage.local.get("alerts");
+      let { alerts } = await chrome.storage.local.get('alerts');
 
       const list = alerts.filter((el) => el.id != uuid);
       alerts = list;

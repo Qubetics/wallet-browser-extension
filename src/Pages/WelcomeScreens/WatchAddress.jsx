@@ -213,18 +213,19 @@ function WatchAddress() {
                     }
 
                     store.dispatch(setLoading(true));
-                    const response =
-                      await WalletHelper.generateAndSetWalletForWatchOnly(
-                        name,
-                        chain.coinFamily,
-                        address
-                      );
-                    if (!response) {
-                      store.dispatch(setLoading(false));
-                      return messageApi.error(
-                        "Unable to create a wallet. Please try again later."
-                      );
-                    }
+                    // const response =
+                    //   await WalletHelper.generateAndSetWalletForWatchOnly(
+                    //     name,
+                    //     chain.coinFamily,
+                    //     address,
+                    //     password
+                    //   );
+                    // if (!response) {
+                    //   store.dispatch(setLoading(false));
+                    //   return messageApi.error(
+                    //     "Unable to create a wallet. Please try again later."
+                    //   );
+                    // }
 
                     store.dispatch(setLoading(false));
                     navigate("/wallet");

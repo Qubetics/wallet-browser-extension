@@ -17,7 +17,7 @@ function ConfirmMultiShowSecretPhrase() {
   });
   const navigate = useNavigate();
   const {
-    state: { mnemonics },
+    state: { mnemonics,password },
   } = useLocation();
 
   const [shuffledMnemonics, setShuffledMnemonics] = useState(
@@ -110,7 +110,7 @@ function ConfirmMultiShowSecretPhrase() {
                     if (blankArray.join(" ") === mnemonics) {
                       store.dispatch(setLoading(true));
                       const checkIfThere =
-                        await WalletHelper.checkIfAlreadyThere(mnemonics);
+                        await WalletHelper.isAccountExistWithMnemonics(mnemonics,password);
 
                       if (checkIfThere) {
                         store.dispatch(setLoading(false));

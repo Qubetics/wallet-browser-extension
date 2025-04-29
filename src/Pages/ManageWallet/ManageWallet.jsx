@@ -29,60 +29,42 @@ import { SecurityHelper } from '../../helpers/security.helper';
 
 function ManageWallet() {
   const [data, setData] = useState([]);
-  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [deleteModal, setDeleteModal] = useState(false);
   const [drawer, setDrawer] = useState(false);
   const { theme } = useSelector((state) => state);
-  const { account, tokens, currency, balanceIn } = useSelector(
+  const { account, currency, balanceIn } = useSelector(
     (state) => state
   );
   const [name, setName] = useState('');
   const [password, setPassword] = useState(null);
   const [messageApi, contextHolder] = message.useMessage();
-  const [isModalOpen1, setIsModalOpen1] = useState(false);
-  const [isModalOpen4, setIsModalOpen4] = useState(false);
+  const [isSecretPhraseModal, setSecretPhraseModal] = useState(false);
+  const [mnemonicsModal, setMnemonicsModal] = useState(false);
   const [ischecked1, setIschecked1] = useState(false);
   const [ischecked2, setIschecked2] = useState(false);
   const [totalAmt, setTotalAmt] = useState(0);
-  
-
-  const handleOk1 = () => {
-    setIsModalOpen1(false);
-  };
-  const handleCancel1 = () => {
-    setIsModalOpen1(false);
-    setPassword(null);
-  };
-  const handleOk4 = () => {
-    setIsModalOpen4(false);
-  };
-  const handleCancel4 = () => {
-    setIsModalOpen4(false);
-    setPassword(null);
-  };
-
+  const [isModalOpen,setModalOpen]=useState(false);
+  const [isModalOpen3, setIsModalOpen3] = useState(false);
   const [isModalOpen2, setIsModalOpen2] = useState(false);
+  const [selectedAccount, setSelectedAccount] = useState(null);
+  const [sessionPassword, setSessionPassword] = useState(null);
 
-  const handleOk2 = () => {
-    setIsModalOpen2(false);
+  const handleCancel1 = () => {
+    setSecretPhraseModal(false);
   };
+
+  const handleCancel4 = () => {
+    setMnemonicsModal(false);
+  };
+
   const handleCancel2 = () => {
     setIsModalOpen3(false);
     setIsModalOpen2(false);
-    setPassword(null);
   };
 
-  const [isModalOpen3, setIsModalOpen3] = useState(false);
-
-  const handleOk3 = () => {
-    setIsModalOpen3(false);
-  };
   const handleCancel3 = () => {
     setIsModalOpen3(false);
-    setPassword(null);
   };
-
-  const [selectedAccount, setSelectedAccount] = useState(null);
 
   const init = async () => {
     store.dispatch(setLoading(true));
@@ -90,7 +72,7 @@ function ManageWallet() {
     setData(accounts);
     if (state?.from == 'myWallet') {
       let ids = [];
-      // console.log("ACCCCCCCCCCCCCCCCCCCCC ", accounts);
+      console.log("ACCCCCCCCCCCCCCCCCCCCC ", accounts);
       accounts.map((itm) => {
         ids.push(itm.userId);
       });
@@ -151,8 +133,7 @@ function ManageWallet() {
         }));
 
         const { mnemonics } = await chrome.storage.local.get('mnemonics');
-        const { password } = await chrome.storage.session.get('password');
-        const decryptedMnemonics = SecurityHelper.decrypt(mnemonics, password);
+        const decryptedMnemonics = SecurityHelper.decrypt(mnemonics, sessionPassword);
 
         const updatesMnemonics = JSON.parse(decryptedMnemonics).map((el) => {
           if (el.address === selectedAccount?.address) {
@@ -257,7 +238,8 @@ function ManageWallet() {
                         });
                         await WalletHelper.updateBalanceInShow(
                           false,
-                          account.id
+                          account.id,
+                          password
                         );
                         store.dispatch(setBalancesIn(false));
                       }}
@@ -278,7 +260,8 @@ function ManageWallet() {
                         });
                         await WalletHelper.updateBalanceInShow(
                           true,
-                          account.id
+                          account.id,
+                          password
                         );
                         store.dispatch(setBalancesIn(true));
                       }}
@@ -315,8 +298,7 @@ function ManageWallet() {
                       onClick={async (e) => {
                         e.preventDefault();
                         if (!data?.default) {
-                          setDefaultAccount(data);
-                          navigate('/wallet');
+                            setModalOpen(true);
                         }
                       }}
                     >
@@ -416,11 +398,9 @@ function ManageWallet() {
               <li
                 className='currencyClick'
                 onClick={async () => {
-                  setIsModalOpen4(true);
+                  setPassword('');
+                  setMnemonicsModal(true);
                 }}
-                // onClick={async () => {
-                //   isModalOpen4(true);
-                // }}
               >
                 <div style={{ display: 'flex', alignItems: 'center' }}>
                   <img
@@ -446,6 +426,7 @@ function ManageWallet() {
               <li
                 className='currencyClick'
                 onClick={async () => {
+                  setPassword('');
                   setIsModalOpen2(true);
                 }}
               >
@@ -520,9 +501,10 @@ function ManageWallet() {
               }
               const updating = await WalletHelper.updateWalletName(
                 name.trim(),
-
                 state?.id ? state.id : selectedAccount.id
               );
+
+              console.log('updating',updating)
 
               if (!updating) {
                 return messageApi.error('Unable to update name at the moment.');
@@ -540,6 +522,7 @@ function ManageWallet() {
           <ButtonComp
             deletebordered
             onClick={async () => {
+              console.log(account, selectedAccount, "OPEN DELETE POPUP")
               if (account.id === selectedAccount.id) {
                 return messageApi.error('Unable to delete default wallet');
               }
@@ -743,7 +726,8 @@ function ManageWallet() {
                     account.address
                   );
                   await WalletHelper.removeMnemonic(
-                    selectedAccount.coinFamilyAndAddress[1]
+                    selectedAccount.coinFamilyAndAddress[1],
+
                   );
                   setDrawer(false);
                   init();
@@ -771,8 +755,7 @@ function ManageWallet() {
       <ModalCustom
         title={'Show Secret Phrase'}
         handleCancel={handleCancel1}
-        isModalOpen={isModalOpen1}
-        handleOk={handleOk1}
+        isModalOpen={isSecretPhraseModal}
         customClass='customClassModal'
       >
         <div className={'viewphrases'}>
@@ -781,10 +764,7 @@ function ManageWallet() {
             getData={setPassword}
             value={password}
             customFunction={async () => {
-              // await chrome.storage.session.set({
-              //   password,
-              // });
-              const response =WalletHelper.getMnemonicsByPassword(
+              const response = await WalletHelper.getMnemonicsByPassword(
                 selectedAccount.coinFamilyAndAddress[1],
                 password
               );
@@ -810,9 +790,6 @@ function ManageWallet() {
             text={'Proceed'}
             maxWidth={'100%'}
             onClick={async () => {
-              // await chrome.storage.session.set({
-              //   password,
-              // });
               const response = await WalletHelper.getMnemonicsByPassword(
                 selectedAccount.coinFamilyAndAddress[1],
                 password
@@ -835,7 +812,6 @@ function ManageWallet() {
         title={'Backup Private key'}
         handleCancel={handleCancel2}
         isModalOpen={isModalOpen2}
-        handleOk={handleOk2}
         customClass='customClassModal'
       >
         <div className={'viewphrases'}>
@@ -859,11 +835,12 @@ function ManageWallet() {
           />
         </div>
       </ModalCustom>
+
       <Drawer
         title='This secret phrase is the master key to your wallet'
         placement='bottom'
         onClose={handleCancel4}
-        open={isModalOpen4}
+        open={mnemonicsModal}
         closeIcon={
           theme == 'darkTheme' ? (
             <img src={darkclose} />
@@ -907,7 +884,7 @@ function ManageWallet() {
               <ButtonComp
                 maxWidth='100%'
                 onClick={async () => {
-                  setIsModalOpen1(true);
+                  setSecretPhraseModal(true);
                 }}
                 disabled={!ischecked1 || !ischecked2}
                 text='Continue'
@@ -916,6 +893,79 @@ function ManageWallet() {
           </div>
         </div>
       </Drawer>
+
+
+
+      <ModalCustom
+          title={"Password"}
+          isModalOpen={isModalOpen}
+          handleOk={async ()=> {
+            const isCorrectPassword = await WalletHelper.verifyPassword(
+              sessionPassword
+            );
+            console.log(
+              'isCorrectPassword on Button Click',
+              isCorrectPassword
+            );
+            if (!isCorrectPassword) {
+              return messageApi.error('Incorrect password provided.');
+            }
+            setModalOpen(false);
+            setDefaultAccount(data);
+            navigate('/wallet');
+          }}
+          customClass="customClassModal"
+        >
+          <div className="viewphrases">
+            <InputFieldSimple
+              placeholder="Password"
+              getData={(value) => {
+                const hasEmoji = /[\p{Extended_Pictographic}]/u.test(value);
+                if (value.length <= 100 && !hasEmoji) {
+                  setSessionPassword(value);
+                }
+              }}
+              customFunction={async () => {
+               
+                const isCorrectPassword = await WalletHelper.verifyPassword(
+                  sessionPassword
+                );
+                console.log(
+                  'isCorrectPassword on Button Click',
+                  isCorrectPassword
+                );
+                if (!isCorrectPassword) {
+                  return messageApi.error('Incorrect password provided.');
+                }
+
+
+                setModalOpen(false)
+                setDefaultAccount(data);
+                navigate('/wallet');
+              }}
+            />
+            <div style={{ marginTop: "10px" }}></div>
+            <ButtonComp
+              text={"Proceed"}
+              maxWidth={"100%"}
+              onClick={async () => {
+                const isCorrectPassword = await WalletHelper.verifyPassword(
+                  sessionPassword
+                );
+                console.log(
+                  'isCorrectPassword on Button Click',
+                  isCorrectPassword
+                );
+                if (!isCorrectPassword) {
+                  return messageApi.error('Incorrect password provided.');
+                }
+                setModalOpen(false)
+                setDefaultAccount(data);
+                navigate('/wallet');
+              }}
+            />
+          </div>
+        </ModalCustom>
     </>
   );
 }

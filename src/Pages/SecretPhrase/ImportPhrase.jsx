@@ -89,7 +89,7 @@ function ImportPhrase() {
 
                 store.dispatch(setLoading(true));
 
-                const checkIfThere = await WalletHelper.checkIfAlreadyThere(
+                const checkIfThere = await WalletHelper.isAccountExistWithMnemonics(
                   mnemonics,
                   state.password
                 );

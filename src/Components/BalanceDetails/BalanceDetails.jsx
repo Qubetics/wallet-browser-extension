@@ -3,54 +3,31 @@ import React, { useEffect, useState } from "react";
 import "./BalanceDetails.scss";
 import SendIcon from "../../Assets/SendIcon.svg";
 import RecieveIcon from "../../Assets/RecieveIcon.svg";
-import SwapIcon from "../../Assets/SwapIcon.svg";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import ModalCustom from "../ModalCustom/ModalCustom";
 import CopyIconBlue from "../../Assets/CopyIconBlue.svg";
-import JustLogo from "../../Assets/JustLogo.svg";
-import InfoIcon from "../../Assets/InfoIcon.svg";
-import PlusBordredIcon from "../../Assets/PlusBordredIcon.svg";
 import SendIconWhite from "../../Assets/SendIconWhite.svg";
 import RecieveIconWhite from "../../Assets/RecieveIconWhite.svg";
-import BuyIconWhite from "../../Assets/Newbuy.png";
-import SwapIconWhite from "../../Assets/SwapIconWhite.svg";
 import DarkSendIcon from "../../Assets/DarkSendIcon.svg";
 import DarkRecieveIcon from "../../Assets/DarkRecieveIcon.svg";
-import Darkotherbuy from "../../Assets/Newbuy.png";
-import DarkSwapIcon from "../../Assets/DarkSwapIcon.svg";
-import Buy from "../../Assets/Newbuy.png";
-import { Dropdown, message } from "antd";
+import { message } from "antd";
 import { WalletHelper } from "../../helpers/wallet.helper";
 import { useSelector } from "react-redux";
 import { QRCode } from "react-qrcode-logo";
 import { store } from "../..";
-import { Drawer } from "antd";
-import ModalCloseIcon from "../../Assets/ModalCloseIcon.svg";
 import OpenDark from "../../Assets/open-dark.svg";
 import CloseDark from "../../Assets/close-dark.svg";
 import { DURATION } from "../../config/message.config";
 import { setLoading } from "../../actions/loading";
-import CoinsTable from "../CoinsTable/CoinsTable";
 import BigNumber from "bignumber.js";
-import Logo from "../../Assets/logo.png";
-import aName from "../../Assets/aName.svg";
 import {
   addCommasToNumber,
-  formatSmallNumber,
   getFlooredFixed,
 } from "../../helpers/conversion.helper";
-import InputFieldSimple from "../InputField/InputFieldSimple";
-import darkclose from "../../Assets/darkclose.svg";
-import DarkLogo from "../../Assets/DarkLogo.svg";
-import warning from "../../Assets/PNG/warning.png";
-import ButtonComp from "../ButtonComp/ButtonComp";
 import { setBalancesIn } from "../../actions/balance-off-out";
-import { server } from "../../server";
-import { SolanaHelper } from "../../helpers/solana.helper";
 import downeIcon from "../../Assets/downeIcon.svg";
 import history from "../../Assets/history.svg";
 import Trade from "../../Assets/Trade.svg";
-import Bell from "../../Assets/Bell.svg";
 import useCurrentHeight from "../../CustomHooks/useCurrentHeight";
 import { setFilter } from "../../actions/filter";
 
@@ -61,7 +38,9 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
     }
   );
 
-  const {state} =  useLocation()
+  const {state} =  useLocation();
+
+  console.log('STATE IN BALANCE DETAILS :',state)
 
   const [accounts, setAccounts] = useState([]);
 
@@ -437,7 +416,7 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
                   await chrome.storage.local.set({
                     balanceIn: false,
                   });
-                  await WalletHelper.updateBalanceInShow(false, account.id, state?.password);
+                  await WalletHelper.updateBalanceInShow(false, account.id);
                   store.dispatch(setBalancesIn(false));
                 }}
                 style={{
@@ -455,7 +434,7 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
                   await chrome.storage.local.set({
                     balanceIn: true,
                   });
-                  await WalletHelper.updateBalanceInShow(true, account.id,state?.password);
+                  await WalletHelper.updateBalanceInShow(true, account.id);
                   store.dispatch(setBalancesIn(true));
                 }}
                 style={{

@@ -95,6 +95,7 @@ function MultiShowSecretPhrase() {
                         navigate("/confirmMultiShowSecretPhrase", {
                           state: {
                             mnemonics,
+                            password: password || ''
                           },
                         });
                       }}

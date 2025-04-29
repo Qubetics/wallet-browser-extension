@@ -193,7 +193,6 @@ function ForgotPassword() {
                 if (password) {
                  
                   if (type === "create") {
-                    await WalletHelper.setPasswordInSession(password);
                     const mnemonics = await WalletHelper.getMnemonicsByPassword('',password);
                     setMnemonics(mnemonics);
                     setShuffledMnemonics(

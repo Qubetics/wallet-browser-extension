@@ -19,12 +19,14 @@ function ShowPrivateKey() {
     state: { account , password },
   } = useLocation();
 
-  const init = () => {
-    setAddress(account.privateKey);
+  const init = async () => {
+    const key = await WalletHelper.getPrivateKeyWithPassword(password);
+    console.log('key',key)
+    setAddress(key || '');
   };
 
   useEffect(() => {
-    console.log("PASSWORD FOR PRIVATE KEY :",password);
+    console.log("PASSWORD FOR PRIVATE KEY :", account , password );
     init();
   }, []);
 
@@ -55,10 +57,12 @@ function ShowPrivateKey() {
       const btcK = await WalletHelper.getBitcoinPrivateKeyWithAddress(
         evmAddress,password
       );
+      console.log('btcK',btcK)
       setBtcKey(btcK);
       const solPrivateKeyData =
         await WalletHelper.getSolanaPrivateKeyWithAddress(evmAddress,password);
       const privateKey = bs58.encode(solPrivateKeyData);
+      console.log('privateKey sol',privateKey)
       setSolKey(privateKey);
     } else {
       console.error("coinFamilyAndAddress data is missing");

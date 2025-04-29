@@ -24,7 +24,6 @@ function Wallet() {
   const { account, currency, tokens, balanceIn, theme } = useSelector(
     (state) => state
   );
-
   const [isSidePanelOpen, setIsSidePanelOpen] = useState(false);
 
   const getSidePanelStatus = async () => {
@@ -36,13 +35,15 @@ function Wallet() {
     getSidePanelStatus();
   }, [isSidePanelOpen]);
 
-  const stateLocation = useLocation();
+  const {state} = useLocation();
+
+  // console.log("LOCATION STATE IN WALLET DAHBOARD :",state)
 
   const [currentPage, setCurrentPage] = useState(1);
   const [isFetchingData, setIsFetchingData] = useState(false);
   const [total, setTotal] = useState(0);
   const [sel, setSel] = useState(
-    stateLocation.state ? (stateLocation.state.showNftTrue ? 1 : 0) : 0
+    state ? (state?.showNftTrue ? 1 : 0) : 0
   );
   const [refresh, setRefresh] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);

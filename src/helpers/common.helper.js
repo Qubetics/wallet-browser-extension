@@ -83,7 +83,7 @@ export const getContractObject = async (tokenAddress, blockChain, abi) => {
 // ***************************  get user token balance ********************************
 
 export const getTokenBalance = async (tokenAddress, address, blockChain) => {
-  console.log("chk tokenAddresss::::::", tokenAddress, address, blockChain);
+  // console.log("chk tokenAddresss::::::", tokenAddress, address, blockChain);
   try {
     const contract = await getContractObject(
       tokenAddress,
@@ -91,7 +91,7 @@ export const getTokenBalance = async (tokenAddress, address, blockChain) => {
       TOKEN_ABI
     );
     let result = await contract.methods.balanceOf(address).call();
-    console.log("chk result::::::", result);
+    // console.log("chk result::::::", result);
     return result;
   } catch (error) {
     console.log("Error XXXXXX==>> :", error);

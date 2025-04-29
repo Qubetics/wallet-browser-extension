@@ -100,18 +100,19 @@ function NewAddressWatchOnly() {
                   }
 
                   store.dispatch(setLoading(true));
-                  const response =
-                    await WalletHelper.generateAndSetWalletForWatchOnlySameWallet(
-                      chain.coinFamily,
-                      address,
-                      account.id
-                    );
-                  if (!response) {
-                    store.dispatch(setLoading(false));
-                    return messageApi.error(
-                      'Unable to create wallet. Please try again later.'
-                    );
-                  }
+                  // const response =
+                  //   await WalletHelper.generateAndSetWalletForWatchOnlySameWallet(
+                  //     chain.coinFamily,
+                  //     address,
+                  //     account.id,
+                  //     password
+                  //   );
+                  // if (!response) {
+                  //   store.dispatch(setLoading(false));
+                  //   return messageApi.error(
+                  //     'Unable to create wallet. Please try again later.'
+                  //   );
+                  // }
 
                   store.dispatch(setLoading(false));
                   navigate('/wallet');
