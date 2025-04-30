@@ -110,8 +110,9 @@ function SetPasswordScreen() {
           createWalletMnemonics.split(' ').sort(() => Math.random() - 0.5)
         );
       } else {
-        const mnemonics = await WalletHelper.getMnemonicsByPassword(password);
+        const mnemonics = await WalletHelper.generateNewMnemonics();
         setMnemonics(mnemonics);
+        console.log('mnemonics',mnemonics)
         setShuffledMnemonics(
           mnemonics.split(' ').sort(() => Math.random() - 0.5)
         );
@@ -229,7 +230,6 @@ function SetPasswordScreen() {
                 ? 'Tap the words to put them next to each other in the correct order.'
                 : '')}
       </p>
-     { console.log('activeTab',activeTab, 'state',state) }
       {/* Content Area */}
       {activeTab === 'setPassword' && (!state?.addNew || !state?.addNewImport) && (
         <div>

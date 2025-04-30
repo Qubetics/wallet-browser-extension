@@ -37,7 +37,7 @@ function SendConfirm() {
       theme,
       redirectTo,
       gasPriceType,
-      sessionPassword
+      sessionPassword,
     },
   } = useLocation();
 
@@ -188,6 +188,7 @@ function SendConfirm() {
             );
           }
         } else {
+          console.log('PASSWORD IN BNB CASE : ', sessionPassword);
           const response =
             await Web3Helper.generateRawTransactionForCoinAndBroadcast(
               to,
@@ -209,9 +210,14 @@ function SendConfirm() {
                 ? process.env.REACT_APP_MATIC_RPC
                 : process.env.REACT_APP_QUBETIC_RPC,
               '',
-              gasPriceType
+              gasPriceType,
+              undefined,
+              sessionPassword
             );
-
+          console.log(
+            'RESPONSE FROM FUNCTION MAKING RAW TRANSACTION :',
+            response
+          );
           if (!response) {
             store.dispatch(setLoading(false));
             return messageApi.error(
@@ -221,10 +227,7 @@ function SendConfirm() {
         }
       } else if (!chain.isEVM && chain.currencyName === 'SOL') {
         const solanaHelper = new SolanaHelper(chain.rpcUrl);
-        // console.log("CONFIRMMMMMMMMMMMMMMMMMMMMM amount ", amount, " fiatGasFee :",fiatGasFee, " coin : ", coin);
-
         if (coin?.coin?.token_address) {
-          // console.log("IN TOKEN CASSE");
           const response =
             await solanaHelper.generateRawTransactionForTokenAndBroadcast(
               to,
@@ -243,8 +246,6 @@ function SendConfirm() {
               coin.balance,
               sessionPassword
             );
-          // console.log("SOLLLLL RSP ", response);
-
           if (!response) {
             store.dispatch(setLoading(false));
             return messageApi.error(
@@ -252,8 +253,7 @@ function SendConfirm() {
             );
           }
         } else {
-          // console.log("INCOIN CASSE");
-
+          console.log('INCOIN CASSE');
           const response =
             await solanaHelper.generateRawTransactionForCoinAndBroadcast(
               to,
@@ -379,7 +379,7 @@ function SendConfirm() {
           </div>
           <div>
             <ButtonComp
-              onClick={async () =>  handleTransaction()}
+              onClick={async () => handleTransaction()}
               text={'Confirm'}
               maxWidth={'100%'}
             />
@@ -388,7 +388,6 @@ function SendConfirm() {
       </div>
 
       <ModalCustom
-        // title={"Show Secret Phrase"}
         handleCancel={handleCancel1}
         isModalOpen={isModalOpen1}
         handleOk={handleOk1}
@@ -397,9 +396,6 @@ function SendConfirm() {
       >
         <div className={'confirmationsModal'}>
           <div className={'iInner'}>
-            {/* {theme == "darkTheme" ? (
-              <img src={DarkLogo} alt="" />
-            ) : ( */}
             <img
               src={Logo}
               alt=""

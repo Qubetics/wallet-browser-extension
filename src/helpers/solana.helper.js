@@ -303,7 +303,7 @@ export class SolanaHelper {
   ) => {
     try {
       const { account } = store.getState();
-      // console.log("GENERATE ROW TRANSACTION :",password)
+      console.log("GENERATE ROW TRANSACTION :",password)
       const mnemonics = await WalletHelper.getMnemonicsByPassword(account.address,password);
       if (!mnemonics) {
         return false;

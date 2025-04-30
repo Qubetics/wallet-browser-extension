@@ -116,8 +116,6 @@ function AddNewWallet() {
                     navigate("/setPassword", {
                       state: {
                         type: state?.type,
-                        addNew: false,
-                        addNewImport:false,
                         createWalletMnemonics: newMnemonic,
                         createShuffledMnemonics: newMnemonic
                           .split(" ")

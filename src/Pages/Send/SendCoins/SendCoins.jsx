@@ -78,7 +78,7 @@ function SendCoins() {
   const [selectedGasPrice, setSelectedGasPrice] = useState(0);
   const [selectedGasPriceSol, setSelectedGasPriceSol] = useState(0);
   const [sessionPassword, setSessionPassword] = useState(null);
-  const [isModalOpen, setModalOpen] = useState(false);
+  const [isModalOpen, setConfirmModal] = useState(false);
 
   const [nativeCoinPrice, setNativeCoinPrice] = useState(0);
 
@@ -518,6 +518,8 @@ function SendCoins() {
       (chain) => chain.coinFamily === coin.coin.coin_family
     );
 
+    console.log('CHAIN SELECTED :',chain)
+
     // if (!chain.isEVM && chain.currencyName === "ADA" && amount < 1) {
     //   store.dispatch(setLoading(false));
     //   return messageApi.error(
@@ -536,6 +538,7 @@ function SendCoins() {
     // }
 
     if (!amount) {
+      console.log('VALID AMOUNT')
       store.dispatch(setLoading(false));
       return messageApi.error('Please enter a valid amount to proceed.');
     }
@@ -543,8 +546,9 @@ function SendCoins() {
     // console.log("AMTTTTT : ", amount, myBalance);
     const finalAmount = new BigNumber(amount);
     const balance = new BigNumber(myBalance);
-
+    console.log('AMOUNT AND BALANCE :' , finalAmount , balance);
     if (finalAmount.gt(balance)) {
+      console.log('IS AMOUNT GREATER THAN BLAANCE')
       store.dispatch(setLoading(false));
       return messageApi.error(
         'Insufficient balance to proceed with the transaction'
@@ -566,7 +570,10 @@ function SendCoins() {
 
     const myAddress = account.coinFamilyAndAddress[chain.coinFamily];
 
+    console.log('SENDER ADDRESS',myAddress)
+
     if (myAddress.toLowerCase() === address.toLowerCase()) {
+      console.log('OWN ADDRESS')
       store.dispatch(setLoading(false));
       return messageApi.error('You cannot send to your own address.');
     }
@@ -626,6 +633,7 @@ function SendCoins() {
           : process.env.REACT_APP_QUBETIC_RPC
       );
 
+      console.log('NATIVE COIN BALANCE :',nativeCoinResponse)
       const nativeCoinBalance = new BigNumber(nativeCoinResponse);
 
       const finalAmount = new BigNumber(amount);
@@ -1233,7 +1241,7 @@ function SendCoins() {
         </div>
         <div>
           <ButtonComp
-            onClick={() => setModalOpen(!isModalOpen)}
+            onClick={() => setConfirmModal(!isModalOpen)}
             text={'Send'}
             maxWidth={'100%'}
           />
@@ -1325,9 +1333,7 @@ function SendCoins() {
 
       <ModalCustom
         title={'Password'}
-        handleCancel={() => setModalOpen(!isModalOpen)}
         isModalOpen={isModalOpen}
-        handleOk={() => handleSend()}
         customClass="customClassModal"
       >
         <div className="viewphrases">
@@ -1344,7 +1350,7 @@ function SendCoins() {
               if (!res) {
                 return messageApi.error('Invalid Password');
               }
-
+              setConfirmModal(!isModalOpen)
               store.dispatch(setLoading(true));
               await handleSend();
               store.dispatch(setLoading(false));
@@ -1359,7 +1365,7 @@ function SendCoins() {
               if (!res) {
                 return messageApi.error('Invalid Password');
               }
-
+              setConfirmModal(!isModalOpen)
               store.dispatch(setLoading(true));
               await handleSend();
               store.dispatch(setLoading(false));

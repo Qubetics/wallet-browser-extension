@@ -140,6 +140,12 @@ export class WalletHelper {
     }
   };
 
+
+  static generateNewMnemonics = ()=> {
+    const { phrase } = ethers.Wallet.createRandom().mnemonic;
+    return phrase;
+  }
+
   static getPrivateKey = () => {
     try {
       const { account } = store.getState();
@@ -149,7 +155,24 @@ export class WalletHelper {
     }
   };
 
+  static getPrivateKeyEvm = async (password) => {
+    const { mnemonics } = await chrome.storage.local.get('mnemonics');
+    const decryptedMnemonics = SecurityHelper.decrypt(mnemonics, password);
+    try {
+      const mnemonics = JSON.parse(decryptedMnemonics);
+      console.log('mnemonics',mnemonics)
+      const phrase = mnemonics[0]?.phrase 
+      console.log('phrase ',phrase)
+      const result = ethers.Wallet.fromMnemonic(phrase); 
+      console.log('result',result)
+      return result;
+    } catch (error) {
+      return false;
+    }
+  };
+
   static getPrivateKeyWithPassword = async (password) => {
+    console.log('PASSWORD IN KYC BY PASSWORD',password)
     const { mnemonics } = await chrome.storage.local.get('mnemonics');
     const decryptedMnemonics = SecurityHelper.decrypt(mnemonics, password);
     try {
@@ -161,6 +184,7 @@ export class WalletHelper {
       const account = new Account(
         nacl.sign.keyPair.fromSeed(derivedSeed).secretKey
       );
+      console.log('ACCOUNT IN KEY BY PASSWORD :',account)
       return account.secretKey;
     } catch (error) {
       return false;
