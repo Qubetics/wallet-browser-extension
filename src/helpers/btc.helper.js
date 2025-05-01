@@ -47,7 +47,6 @@ export class BTCHelper {
   static async getBTCGasPrice() {
     try {
       const data = await axios.get("https://api.blockchain.info/mempool/fees");
-      console.log(data);
       return data.data.priority || 3;
     } catch (error) {
       return false;
