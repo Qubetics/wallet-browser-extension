@@ -121,21 +121,28 @@ export class WalletHelper {
   };
 
   static getMnemonicsByPassword = async (address, password) => {
+    console.log('password',password, address)
     try {
       const { mnemonics } = await chrome.storage.local.get('mnemonics');
+      console.log('mnemonics',mnemonics)
       if (mnemonics) {
         const decryptedMnemonics = SecurityHelper.decrypt(mnemonics, password);
+        console.log('decryptedMnemonics',decryptedMnemonics)
         const mnemonicsList = JSON.parse(decryptedMnemonics);
+        console.log('mnemonicsList',mnemonicsList)
         const matchedMnemonic = mnemonicsList.find(
           (mnemonic) => mnemonic.address.toLowerCase() === address.toLowerCase()
         );
+        console.log('matchedMnemonic',matchedMnemonic)
         const defaultMnemonics = matchedMnemonic || mnemonicsList[0];
         return defaultMnemonics.phrase;
       } else {
+        console.log('Else case')
         const { phrase } = ethers.Wallet.createRandom().mnemonic;
         return phrase;
       }
     } catch (error) {
+      console.log('error',error)
       return false;
     }
   };

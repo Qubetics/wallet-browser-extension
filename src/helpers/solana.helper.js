@@ -125,19 +125,38 @@ export class SolanaHelper {
     password
   ) => {
     try {
-      const { account } = store.getState();
-      // console.log("GENERATE ROW TRANSACTION :",password)
+      let account = {};
+      const { accounts } = await chrome.storage.session.get('accounts');
+
+      console.log('ACCOUNT SIGN SOLANA TXN : ',accounts)
+
+      accounts.map((item)=> {
+        console.log('item',item)
+        if(item.default){
+          account = item
+        }
+      })
+      console.log('account',account);
+      console.log("GENERATE ROW TRANSACTION :",password)
       const mnemonics = await WalletHelper.getMnemonicsByPassword(account.address,password);
+
+      console.log('MNEMONICS SIGN SOLANA TXN : ',mnemonics)
+
       if (!mnemonics) {
         return false;
       }
       const myKeyPair = await this.generateSolanaAddress1(mnemonics);
 
+      console.log('myKeyPair SIGN SOLANA TXN : ',myKeyPair)
+
       const lastValidBlockHeight = await this.connection.getSlot("finalized");
+
+      console.log('lastValidBlockHeight SIGN SOLANA TXN : ',lastValidBlockHeight)
 
       let blockhash = (await this.connection.getLatestBlockhash("finalized"))
         .blockhash;
-      // console.log("🚀 ~ SolanaHelper ~ blockhash:", blockhash);
+
+      console.log("🚀 ~ SolanaHelper ~ blockhash:", blockhash);
 
       const solValue = new BigNumber(amount);
 
@@ -155,26 +174,27 @@ export class SolanaHelper {
           lamports: lamports,
         })
       );
-      // console.log("🚀 ~ SolanaHelper ~ transaction:", transaction);
+
+      console.log("🚀 ~ SolanaHelper ~ transaction:", transaction);
 
       transaction.recentBlockhash = blockhash;
 
       transaction.sign(myKeyPair);
-      // console.log(transaction);
+      console.log(transaction);
 
       const signature = getSignature(transaction);
-      // console.log("🚀 ~ SolanaHelper ~ signature:", signature);
+      console.log("🚀 ~ SolanaHelper ~ signature:", signature);
       const serializedTransaction = Buffer.from(transaction.serialize());
-      // console.log(
-      //   "🚀 ~ SolanaHelper ~ serializedTransaction:",
-      //   serializedTransaction
-      // );
-      // console.log("🚀 ~ SolanaHelper ~ blockhash:", blockhash);
+      console.log(
+        "🚀 ~ SolanaHelper ~ serializedTransaction:",
+        serializedTransaction
+      );
+      console.log("🚀 ~ SolanaHelper ~ blockhash:", blockhash);
 
-      // console.log({
-      //   blockhash,
-      //   lastValidBlockHeight: lastValidBlockHeight,
-      // });
+      console.log({
+        blockhash,
+        lastValidBlockHeight: lastValidBlockHeight,
+      });
       const transactionResponse =
         await this.transactionSenderAndConfirmationWaiter({
           connection: this.connection,

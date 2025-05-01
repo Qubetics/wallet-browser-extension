@@ -265,7 +265,10 @@ function SendConfirm() {
               currency.name,
               toName,
               `solana/${coin.coin.coin_symbol}`, //chain.slug,
-              chain.chainId
+              chain.chainId,
+              undefined,
+              undefined,
+              sessionPassword
             );
           // console.log("RRRRR solana--- ", response);
 

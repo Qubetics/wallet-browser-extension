@@ -1,5 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /*global chrome*/
+/* global BigInt */
 import { message, Slider } from 'antd';
 import { ethers } from 'ethers';
 import React, { useState } from 'react';
@@ -34,6 +35,12 @@ import { server } from '../../../server';
 import { formatNumberFiat } from '../../../helpers/common.helper';
 import AddressTableSend from '../../../Components/AddressTable/AddressTableSend';
 import { BL_CODE } from '../../../helpers/constant';
+import { mnemonicToSeedSync } from '@scure/bip39';
+import { HDKey } from '@scure/bip32';
+import * as BTC from '@scure/btc-signer';
+import { sha256 } from '@noble/hashes/sha256';
+
+const NETWORK = BTC.NETWORK.mainnet;
 
 let inputCount = 0;
 let transactionSize = 0;
@@ -518,7 +525,7 @@ function SendCoins() {
       (chain) => chain.coinFamily === coin.coin.coin_family
     );
 
-    console.log('CHAIN SELECTED :',chain)
+    console.log('CHAIN SELECTED :', chain);
 
     // if (!chain.isEVM && chain.currencyName === "ADA" && amount < 1) {
     //   store.dispatch(setLoading(false));
@@ -538,7 +545,7 @@ function SendCoins() {
     // }
 
     if (!amount) {
-      console.log('VALID AMOUNT')
+      console.log('VALID AMOUNT');
       store.dispatch(setLoading(false));
       return messageApi.error('Please enter a valid amount to proceed.');
     }
@@ -546,9 +553,9 @@ function SendCoins() {
     // console.log("AMTTTTT : ", amount, myBalance);
     const finalAmount = new BigNumber(amount);
     const balance = new BigNumber(myBalance);
-    console.log('AMOUNT AND BALANCE :' , finalAmount , balance);
+    console.log('AMOUNT AND BALANCE :', finalAmount, balance);
     if (finalAmount.gt(balance)) {
-      console.log('IS AMOUNT GREATER THAN BLAANCE')
+      console.log('IS AMOUNT GREATER THAN BLAANCE');
       store.dispatch(setLoading(false));
       return messageApi.error(
         'Insufficient balance to proceed with the transaction'
@@ -570,10 +577,10 @@ function SendCoins() {
 
     const myAddress = account.coinFamilyAndAddress[chain.coinFamily];
 
-    console.log('SENDER ADDRESS',myAddress)
+    console.log('SENDER ADDRESS', myAddress);
 
     if (myAddress.toLowerCase() === address.toLowerCase()) {
-      console.log('OWN ADDRESS')
+      console.log('OWN ADDRESS');
       store.dispatch(setLoading(false));
       return messageApi.error('You cannot send to your own address.');
     }
@@ -633,7 +640,7 @@ function SendCoins() {
           : process.env.REACT_APP_QUBETIC_RPC
       );
 
-      console.log('NATIVE COIN BALANCE :',nativeCoinResponse)
+      console.log('NATIVE COIN BALANCE :', nativeCoinResponse);
       const nativeCoinBalance = new BigNumber(nativeCoinResponse);
 
       const finalAmount = new BigNumber(amount);
@@ -723,6 +730,7 @@ function SendCoins() {
       });
     } else if (!chain.isEVM && chain.currencyName === 'BTC') {
       try {
+        let utxo = {};
         const gasPrice = await BTCHelper.getBTCGasPrice();
         const unspent = await BTCHelper.getUnspent(coin.wallet_address);
         if (!unspent) {
@@ -795,98 +803,197 @@ function SendCoins() {
             'Insufficient Balance to proceed with the transactions.'
           );
         } else {
-          const bitcore = require('bitcore-lib');
-          const transaction = new bitcore.Transaction();
-          console.log(
-            '🚀 ~ file: SendCoins.jsx:630 ~ transaction:',
-            transaction
+          const mnemonics = await WalletHelper.getMnemonicsByPassword(
+            coin.wallet_address,
+            sessionPassword
           );
-          // console.log(inputs);
-          transaction.from(inputs);
-          console.log(
-            '🚀 ~ file: SendCoins.jsx:632 ~ transaction:',
-            transaction
-          );
+          console.log('mnemonics',mnemonics)
+          const seed = mnemonicToSeedSync(mnemonics);
+          const master = HDKey.fromMasterSeed(seed);
+          const child = master.derive("m/84'/0'/0'/0/0"); // BIP84
+          const privKey = child.privateKey;
+          const pubKey = child.publicKey;
+          const fromAddress = BTC.p2wpkh(pubKey, NETWORK).address;
 
-          transaction.to(
-            address,
-            parseInt(Math.round(amount * btcTosatoshi).toString())
-          );
-          console.log('🚀 ~ file: SendCoins.jsx:635 ~ address:', address);
+          console.log('From address:', fromAddress);
 
-          console.log(
-            '🚀 ~ file: SendCoins.jsx:637 ~ transaction:',
-            transaction
-          );
-          console.log(
-            '🚀 ~ file: SendCoins.jsx:636 ~ transaction:',
-            transaction
-          );
-          let satoshis = 0;
-          for (var i = 0; i < inputs.length; i++) {
-            satoshis = inputs[i].satoshis + satoshis;
-          }
-          if (
-            satoshis -
-              (fee + parseInt(Math.round(amount * btcTosatoshi).toString())) >
-            546
-          ) {
-            transaction.change(coin.wallet_address);
-          }
-          if (
-            satoshis -
-              (fee + parseInt(Math.round(amount * btcTosatoshi).toString())) >
-            546
-          ) {
-            transaction.fee(fee);
-          } else {
-            transaction.fee(
-              fee +
-                (satoshis -
-                  (fee +
-                    parseInt(Math.round(amount * btcTosatoshi).toString())))
-            );
-          }
-          const btcPrivateKey =
-            await WalletHelper.getBitcoinPrivateKeyWithPassword(
-              sessionPassword
-            );
+          const tx = new BTC.Transaction({ version: 2 });
 
-          console.log(
-            '🚀 ~ file: SendCoins.jsx:656 ~ btcPrivateKey:',
-            btcPrivateKey
-          );
+          console.log('tx when initiated : ',tx)
 
-          if (!btcPrivateKey) {
-            store.dispatch(setLoading(false));
-            return messageApi.error(
-              'Unable to fetch private key at the moment please try again later.'
-            );
-          }
-          console.log('Come to sign...');
-          transaction.sign(btcPrivateKey);
-          // console.log("Come to sign...success");
-          const rawTransaction = transaction.serialize();
-          // console.log("'rawTransaction---> ", rawTransaction);
-
-          store.dispatch(setLoading(false));
-
-          navigate('/confirmCurrency', {
-            state: {
-              rawTransaction,
-              to: address,
-              amount: amount,
-              coin,
-              ENSName,
-              redirectTo,
-              networkFee: (
-                transactionSize *
-                gasPrice *
-                btcTosatoshiMultiplier
-              ).toFixed(8),
-              sessionPassword,
-            },
+          unspent.forEach((element) => {
+            utxo.satoshis = Math.floor(Number(element.satoshis));
+            utxo.script = element.scriptPubKey;
+            utxo.address = coin.wallet_address;
+            utxo.txId = element.txid;
+            utxo.outputIndex = element.vout;
+            totalAmountAvailable += parseFloat(utxo.satoshis);
+            inputCount += 1;
           });
+
+          console.log('utxo',utxo)
+
+          // const txid = utxo.txId; // txid (reversed for bitcoin format)
+          // const vout = utxo.outputIndex;
+          // const value = parseFloat(utxo.satoshis); // in satoshis
+
+          const utxoScript = BTC.p2wpkh(pubKey, NETWORK).script;
+
+          console.log('utxoScript',utxoScript)
+
+          unspent.forEach((element) => {
+            const value = Math.floor(Number(element.satoshis));
+            totalAmountAvailable += value;
+            inputCount += 1;
+          
+            tx.addInput({
+              txid: element.txid,
+              index: element.vout,
+              witnessUtxo: {
+                script: utxoScript,
+                amount: BigInt(value),
+              },
+            });
+          });
+
+
+          console.log('tx',tx)
+
+
+          tx.addOutput({
+            address: address, // Replace with recipient address
+            amount: BigInt(Math.round(amount * btcTosatoshi)), // sending 90,000 sats
+          });
+
+          console.log('tx 2',tx)
+
+          tx.addOutput({
+            address: fromAddress,
+            amount: BigInt(fee), // change minus fee
+          });
+
+          console.log('tx 3',tx)
+
+          for (let i = 0; i < tx.inputs.length; i++) {
+            tx.sign(i, privKey);
+          }
+
+          tx.finalize();
+          const rawHex = tx.toHex();
+
+          console.log('Raw signed transaction:', rawHex);
+
+          // const outputs = [
+          //   {
+          //     address: address,
+          //     amount: parseInt(Math.round(amount * btcTosatoshi).toString()),
+          //   },
+          // ];
+
+          // const psbt = BTC.createPSBT({
+          //   inputs: inputs,
+          //   outputs,
+          //   network: NETWORK,
+          // });
+
+          // const signed = BTC.sign(psbt, NETWORK);
+          // const finalized = BTC.finalize(signed);
+          // const rawTxHex = BTC.encode(finalized).hex;
+
+          // console.log('Signed TX hex:', rawTxHex);
+
+          // const bitcore = require('bitcore-lib');
+          // const transaction = new bitcore.Transaction();
+          // console.log(
+          //   '🚀 ~ file: SendCoins.jsx:630 ~ transaction:',
+          //   transaction
+          // );
+          // // console.log(inputs);
+          // transaction.from(inputs);
+          // console.log(
+          //   '🚀 ~ file: SendCoins.jsx:632 ~ transaction:',
+          //   transaction
+          // );
+
+          // transaction.to(
+          //   address,
+          //   parseInt(Math.round(amount * btcTosatoshi).toString())
+          // );
+          // console.log('🚀 ~ file: SendCoins.jsx:635 ~ address:', address);
+
+          // console.log(
+          //   '🚀 ~ file: SendCoins.jsx:637 ~ transaction:',
+          //   transaction
+          // );
+          // console.log(
+          //   '🚀 ~ file: SendCoins.jsx:636 ~ transaction:',
+          //   transaction
+          // );
+          // let satoshis = 0;
+          // for (var i = 0; i < inputs.length; i++) {
+          //   satoshis = inputs[i].satoshis + satoshis;
+          // }
+          // if (
+          //   satoshis -
+          //     (fee + parseInt(Math.round(amount * btcTosatoshi).toString())) >
+          //   546
+          // ) {
+          //   transaction.change(coin.wallet_address);
+          // }
+          // if (
+          //   satoshis -
+          //     (fee + parseInt(Math.round(amount * btcTosatoshi).toString())) >
+          //   546
+          // ) {
+          //   transaction.fee(fee);
+          // } else {
+          //   transaction.fee(
+          //     fee +
+          //       (satoshis -
+          //         (fee +
+          //           parseInt(Math.round(amount * btcTosatoshi).toString())))
+          //   );
+          // }
+          // const btcPrivateKey =
+          //   await WalletHelper.getBitcoinPrivateKeyWithPassword(
+          //     sessionPassword
+          //   );
+
+          // console.log(
+          //   '🚀 ~ file: SendCoins.jsx:656 ~ btcPrivateKey:',
+          //   btcPrivateKey
+          // );
+
+          // if (!btcPrivateKey) {
+          //   store.dispatch(setLoading(false));
+          //   return messageApi.error(
+          //     'Unable to fetch private key at the moment please try again later.'
+          //   );
+          // }
+          // console.log('Come to sign...');
+          // transaction.sign(btcPrivateKey);
+          // // console.log("Come to sign...success");
+          // const rawTransaction = transaction.serialize();
+          // // console.log("'rawTransaction---> ", rawTransaction);
+
+          // store.dispatch(setLoading(false));
+
+          // navigate('/confirmCurrency', {
+          //   state: {
+          //     rawTransaction,
+          //     to: address,
+          //     amount: amount,
+          //     coin,
+          //     ENSName,
+          //     redirectTo,
+          //     networkFee: (
+          //       transactionSize *
+          //       gasPrice *
+          //       btcTosatoshiMultiplier
+          //     ).toFixed(8),
+          //     sessionPassword,
+          //   },
+          // });
         }
       } catch (error) {
         console.log('jhantttttt', error);
@@ -1350,7 +1457,7 @@ function SendCoins() {
               if (!res) {
                 return messageApi.error('Invalid Password');
               }
-              setConfirmModal(!isModalOpen)
+              setConfirmModal(!isModalOpen);
               store.dispatch(setLoading(true));
               await handleSend();
               store.dispatch(setLoading(false));
@@ -1365,7 +1472,7 @@ function SendCoins() {
               if (!res) {
                 return messageApi.error('Invalid Password');
               }
-              setConfirmModal(!isModalOpen)
+              setConfirmModal(!isModalOpen);
               store.dispatch(setLoading(true));
               await handleSend();
               store.dispatch(setLoading(false));
