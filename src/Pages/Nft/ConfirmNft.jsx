@@ -18,6 +18,7 @@ import {
 import { Web3Helper } from '../../helpers/web3.helper';
 import { server } from '../../server';
 import './Nft.scss';
+import { WalletHelper } from '../../helpers/wallet.helper';
 
 function ConfirmNft() {
   const { currency, account } = useSelector((state) => state);
@@ -187,17 +188,17 @@ function ConfirmNft() {
 
   return (
     <>
-      <div className='tokenNft nfDetail'>
+      <div className="tokenNft nfDetail">
         {contextHolder}
-        <div className='card_name'>
+        <div className="card_name">
           <table>
             <tr>
-              <td className='left'>Name</td>
-              <td className='right'>{detail.nft_coin_data.coin_name}</td>
+              <td className="left">Name</td>
+              <td className="right">{detail.nft_coin_data.coin_name}</td>
             </tr>
             <tr>
-              <td className='left'>From</td>
-              <td className='right'>
+              <td className="left">From</td>
+              <td className="right">
                 {fromAddress.substring(0, 7)}.....
                 {fromAddress.substring(
                   fromAddress.length - 7,
@@ -206,8 +207,8 @@ function ConfirmNft() {
               </td>
             </tr>
             <tr>
-              <td className='left'>To</td>
-              <td className='right'>
+              <td className="left">To</td>
+              <td className="right">
                 {toName
                   ? toName
                   : ENSName
@@ -219,8 +220,8 @@ function ConfirmNft() {
               </td>
             </tr>
             <tr>
-              <td className='left'>Network Fee</td>
-              <td className='right'>{`${parseFloat(
+              <td className="left">Network Fee</td>
+              <td className="right">{`${parseFloat(
                 getFlooredFixed(networkFee, 8)
               )} ${parentCoin ? parentCoin.coin_symbol.toUpperCase() : ''}/ ${
                 currency.symbol
@@ -229,11 +230,11 @@ function ConfirmNft() {
               )}`}</td>
             </tr>
           </table>
-          <div className='border1'></div>
+          <div className="border1"></div>
           <table>
             <tr>
-              <td className='left'>Max Total</td>
-              <td className='right'>{`${parseFloat(
+              <td className="left">Max Total</td>
+              <td className="right">{`${parseFloat(
                 getFlooredFixed(networkFee, 8)
               )} ${parentCoin ? parentCoin.coin_symbol.toUpperCase() : ''}/ ${
                 currency.symbol
@@ -257,17 +258,19 @@ function ConfirmNft() {
         handleCancel={handleCancel}
         isModalOpen={isModalOpen}
         handleOk={handleOk}
-        customClass='customClassModal'
+        customClass="customClassModal"
       >
-        <div className='viewphrases'>
+        <div className="viewphrases">
           <InputFieldSimple
-            placeholder='Password'
+            placeholder="Password"
             getData={setPassword}
             value={sessionPassword}
             customFunction={async () => {
-              const { password } = await chrome.storage.session.get('password');
+              const isVerified = await WalletHelper.verifyPassword(
+                sessionPassword
+              );
 
-              if (sessionPassword !== password) {
+              if (!isVerified) {
                 return messageApi.error('Incorrect password provided.');
               }
 

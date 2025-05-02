@@ -170,8 +170,8 @@ function ManageWallet() {
           default: acc.id === selectedAccount.id,
         }));
 
-        console.log('ACCCCCC ', accounts);
-        console.log('ACCCCCCselectedAccount ', selectedAccount);
+        // console.log('ACCCCCC ', accounts);
+        // console.log('ACCCCCCselectedAccount ', selectedAccount);
 
         const { mnemonics } = await chrome.storage.local.get('mnemonics');
         const decryptedMnemonics = SecurityHelper.decrypt(mnemonics, sessionPassword);
@@ -184,7 +184,7 @@ function ManageWallet() {
           }
           return el;
         });
-        console.log('updatesMnemonics::', updatesMnemonics);
+        // console.log('updatesMnemonics::', updatesMnemonics);
         const encryptedMnemonics = SecurityHelper.encrypt(
           updatesMnemonics,
           sessionPassword
@@ -220,7 +220,7 @@ function ManageWallet() {
   };
 
   const handleShowPrivateKey = async (password)=> {
-    console.log('PASSWORD ENTER TO SHOW PRIVATE KEY :',password)
+    // console.log('PASSWORD ENTER TO SHOW PRIVATE KEY :',password)
       const res = await WalletHelper.verifyPassword(password);
       if (!res) {
         return messageApi.error('Invalid Password');

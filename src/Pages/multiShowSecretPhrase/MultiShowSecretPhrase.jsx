@@ -27,7 +27,7 @@ function MultiShowSecretPhrase() {
     setTerms(e.target.checked);
   };
 
-  console.log('password in secret phrase multi : ',password)
+  // console.log('password in secret phrase multi : ',password)
 
   return (
     <>

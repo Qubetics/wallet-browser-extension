@@ -188,6 +188,7 @@ export class BTCHelper {
         type
       );
       const { account } = store.getState();
+      console.log('ACCOUNT : ',account)
       let payload = {
         tx_raw: rawTransaction,
         from: from,
@@ -202,6 +203,8 @@ export class BTCHelper {
           Authorization: account.jwtToken,
         },
       });
+
+      console.log('RESPONSE FROM TXN REQUEST  BTC:',myResponse)
 
       return myResponse.data;
     } catch (error) {

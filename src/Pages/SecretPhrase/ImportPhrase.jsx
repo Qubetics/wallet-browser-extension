@@ -29,7 +29,7 @@ function ImportPhrase() {
   };
 
 
-  console.log('PASSWORD IN INPORT PHRASE :',state.password)
+  // console.log('PASSWORD IN INPORT PHRASE :',state.password)
 
   return (
     <div>

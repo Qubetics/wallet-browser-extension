@@ -126,7 +126,7 @@ export class SolanaHelper {
   ) => {
     try {
       const { account } = store.getState();
-      // console.log("GENERATE ROW TRANSACTION :",password)
+      // console.log("GENERATE ROW TRANSACTION :",password,account)
       const mnemonics = await WalletHelper.getMnemonicsByPassword(account.address,password);
       if (!mnemonics) {
         return false;
@@ -137,14 +137,20 @@ export class SolanaHelper {
 
       let blockhash = (await this.connection.getLatestBlockhash("finalized"))
         .blockhash;
-      // console.log("🚀 ~ SolanaHelper ~ blockhash:", blockhash);
+      console.log("🚀 ~ SolanaHelper ~ blockhash:", blockhash);
 
       const solValue = new BigNumber(amount);
+
+      console.log('solValue',solValue)
+
+      const rentExemptionAmount = await this.connection.getMinimumBalanceForRentExemption(0);
 
       // Convert SOL to lamports (1 SOL = 10^9 lamports)
       const lamports = solValue
         .multipliedBy(LAMPORTS_PER_SOL)
         .integerValue(BigNumber.ROUND_DOWN);
+
+        console.log('lamports',lamports,rentExemptionAmount)
 
       // const lamports = new BigNumber(Math.round(amount * LAMPORTS_PER_SOL));
 
@@ -152,29 +158,29 @@ export class SolanaHelper {
         SystemProgram.transfer({
           fromPubkey: myKeyPair.publicKey,
           toPubkey: new PublicKey(to),
-          lamports: lamports,
+          lamports: rentExemptionAmount,
         })
       );
-      // console.log("🚀 ~ SolanaHelper ~ transaction:", transaction);
+      console.log("🚀 ~ SolanaHelper ~ transaction:", transaction);
 
       transaction.recentBlockhash = blockhash;
 
       transaction.sign(myKeyPair);
-      // console.log(transaction);
+      console.log(transaction);
 
       const signature = getSignature(transaction);
-      // console.log("🚀 ~ SolanaHelper ~ signature:", signature);
+      console.log("🚀 ~ SolanaHelper ~ signature:", signature);
       const serializedTransaction = Buffer.from(transaction.serialize());
-      // console.log(
-      //   "🚀 ~ SolanaHelper ~ serializedTransaction:",
-      //   serializedTransaction
-      // );
-      // console.log("🚀 ~ SolanaHelper ~ blockhash:", blockhash);
+      console.log(
+        "🚀 ~ SolanaHelper ~ serializedTransaction:",
+        serializedTransaction
+      );
+      console.log("🚀 ~ SolanaHelper ~ blockhash:", blockhash);
 
-      // console.log({
-      //   blockhash,
-      //   lastValidBlockHeight: lastValidBlockHeight,
-      // });
+      console.log({
+        blockhash,
+        lastValidBlockHeight: lastValidBlockHeight,
+      });
       const transactionResponse =
         await this.transactionSenderAndConfirmationWaiter({
           connection: this.connection,
@@ -184,6 +190,8 @@ export class SolanaHelper {
             lastValidBlockHeight: lastValidBlockHeight,
           },
         });
+
+        console.log('transactionResponse',transactionResponse)
 
       if (!transactionResponse) {
         console.error("Transaction not confirmed");
@@ -303,7 +311,7 @@ export class SolanaHelper {
   ) => {
     try {
       const { account } = store.getState();
-      console.log("GENERATE ROW TRANSACTION :",password)
+      // console.log("GENERATE ROW TRANSACTION :",password)
       const mnemonics = await WalletHelper.getMnemonicsByPassword(account.address,password);
       if (!mnemonics) {
         return false;
@@ -426,7 +434,7 @@ export class SolanaHelper {
 
       return true;
     } catch (error) {
-      console.log(error, "=====eror");
+      console.log(error, "error sending sol tokens");
       let message = error?.message;
       let arr = message.split(" ");
       let findIndex = arr?.indexOf("signature");

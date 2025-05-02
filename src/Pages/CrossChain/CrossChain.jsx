@@ -1781,6 +1781,7 @@ function CrossChain() {
           }
 
           if (parseFloat(balance) < parseFloat(amount)) {
+            console.log('INSIDE INSUFFICENT BALANCE')
             return messageApi.error(
               "Insufficient balance to proceed with the transaction."
             );
@@ -1871,7 +1872,7 @@ function CrossChain() {
               tab: 1,
             };
             store.dispatch(swapDetailAc(swapDetailed));
-            console.log("swapDetailedswapDetailed ", swapDetailed);
+            // console.log("swapDetailedswapDetailed ", swapDetailed);
 
             navigate("/crosschain-swapDetails", {
               state: swapDetailed,

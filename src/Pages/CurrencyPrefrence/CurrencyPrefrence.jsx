@@ -28,7 +28,7 @@ function CurrencyPrefrence() {
         Authorization: account.jwtToken,
       },
     });
-    console.log("SSSSSSSSSSSSSSSSSS ", response);
+    // console.log("SSSSSSSSSSSSSSSSSS ", response);
     
     const data = response.data.data;
 

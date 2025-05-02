@@ -1,23 +1,25 @@
 /* global chrome*/
-import "./style.scss";
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import ButtonComp from "../../Components/ButtonComp/ButtonComp";
-import { InputField } from "../../Components/InputField/InputFieldSimple";
-import ModalCustom from "../../Components/ModalCustom/ModalCustom";
-import { setCreate } from "../../actions/create";
-import { store } from "../..";
-import { message } from "antd";
-import { spritzHelper } from "../../helpers/spritz.helper";
-import { setLoading } from "../../actions/loading";
-import { SecurityHelper } from "../../helpers/security.helper";
-import { spritzAccounts, spritzKyc, spritzLogin } from "../../actions/spritz";
+import './style.scss';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import ButtonComp from '../../Components/ButtonComp/ButtonComp';
+import { InputField } from '../../Components/InputField/InputFieldSimple';
+import ModalCustom from '../../Components/ModalCustom/ModalCustom';
+import { setCreate } from '../../actions/create';
+import { store } from '../..';
+import { message } from 'antd';
+import { spritzHelper } from '../../helpers/spritz.helper';
+import { setLoading } from '../../actions/loading';
+import { SecurityHelper } from '../../helpers/security.helper';
+import { spritzAccounts, spritzKyc, spritzLogin } from '../../actions/spritz';
 
 function ApiKey() {
   const navigate = useNavigate();
   const [isModalOpen, setOpenmodal] = useState(false);
+  const [isModalOpen1, setOpenmodal1] = useState(false);
   const [key, setKey] = useState(null);
   const [messageApi, contextHolder] = message.useMessage();
+  const [password, setPassword] = useState(null);
 
   const handleOk = () => {
     // setOpenmodal(false);
@@ -29,19 +31,18 @@ function ApiKey() {
 
   const handleVerify = async () => {
     if (!key) {
-      return messageApi.error("Verification code required.");
+      return messageApi.error('Verification code required.');
     }
     store.dispatch(setLoading(true));
     await spritzHelper.setApiKey(key);
     const user = await spritzHelper.getUser();
-    console.log("🚀 ~ file: ApiKey.jsx:36 ~ handleVerify ~ user:", user);
+    console.log('🚀 ~ file: ApiKey.jsx:36 ~ handleVerify ~ user:', user);
 
     if (!user) {
       store.dispatch(setLoading(false));
-      return messageApi.error("Verification code is invalid.");
+      return messageApi.error('Verification code is invalid.');
     }
 
-    const { password } = await chrome.storage.session.get("password");
     const encryptedData = SecurityHelper.encrypt({ ...user, key }, password);
 
     await chrome.storage.local.set({
@@ -69,17 +70,17 @@ function ApiKey() {
       if (verificationData) {
         store.dispatch(spritzKyc(verificationData?.identity));
 
-        if (verificationData?.identity?.status === "ACTIVE") {
+        if (verificationData?.identity?.status === 'ACTIVE') {
           //check for bank accounts
           if (bankAccounts?.length === 0) {
             store.dispatch(setLoading(false));
-            return navigate("/kyc");
+            return navigate('/kyc');
           } else {
             store.dispatch(setLoading(false));
-            return navigate("/withdraw");
+            return navigate('/withdraw');
           }
         } else {
-          navigate("/kyc");
+          navigate('/kyc');
         }
         store.dispatch(setLoading(false));
       } else {
@@ -105,7 +106,7 @@ function ApiKey() {
       </p>
       <div className="cardWhite__linkOuter">
         <InputField
-          placeholder={"Enter verification code"}
+          placeholder={'Enter verification code'}
           label="Verification Code"
           placeholderBaseColor={true}
           coloredBg={true}
@@ -116,7 +117,7 @@ function ApiKey() {
           addonAfter={
             <>
               <span
-                className={"send__pasteText"}
+                className={'send__pasteText'}
                 onClick={async (e) => {
                   const text = await navigator.clipboard.readText();
                   setKey(text);
@@ -129,15 +130,15 @@ function ApiKey() {
         />
       </div>
       <div className="create_acc">
-        <a onClick={() => navigate("/emailAddress")}>Create an account</a>
+        <a onClick={() => navigate('/emailAddress')}>Create an account</a>
       </div>
       <div>
         <ButtonComp
           onClick={async () => {
-            handleVerify();
+            setOpenmodal1(!isModalOpen1);
           }}
-          marginTop={"24px"}
-          text={"Verify"}
+          marginTop={'24px'}
+          text={'Verify'}
         />
       </div>
       <ModalCustom
@@ -150,14 +151,14 @@ function ApiKey() {
         <div className="balanceDetails__modal">
           <p
             className="balanceDetails__modal__title"
-            style={{ textAlign: "center" }}
+            style={{ textAlign: 'center' }}
           >
             Congratulations! Your Account Is Ready!
           </p>
           <ButtonComp
-            text={"Ok"}
-            maxWidth={"100%"}
-            marginTop={"20px"}
+            text={'Ok'}
+            maxWidth={'100%'}
+            marginTop={'20px'}
             onClick={async () => {
               store.dispatch(setCreate(true));
               store.dispatch(setLoading(true));
@@ -167,22 +168,64 @@ function ApiKey() {
               if (verificationData) {
                 store.dispatch(spritzKyc(verificationData.identity));
 
-                if (verificationData.identity.status === "ACTIVE") {
+                if (verificationData.identity.status === 'ACTIVE') {
                   //check for bank accounts
                   if (bankAccounts.length === 0) {
                     store.dispatch(setLoading(false));
-                    return navigate("/kyc");
+                    return navigate('/kyc');
                   } else {
                     store.dispatch(setLoading(false));
-                    return navigate("/withdraw");
+                    return navigate('/withdraw');
                   }
                 } else {
-                  navigate("/kyc");
+                  navigate('/kyc');
                 }
                 store.dispatch(setLoading(false));
               } else {
                 store.dispatch(setLoading(false));
               }
+            }}
+          />
+        </div>
+      </ModalCustom>
+
+      <ModalCustom
+        title={'Password'}
+        isModalOpen={isModalOpen}
+        customClass="customClassModal"
+      >
+        <div className="viewphrases">
+          <InputFieldSimple
+            placeholder="Password"
+            // getData={setPassword}
+            getData={(value) => {
+              const hasEmoji = /[\p{Extended_Pictographic}]/u.test(value);
+              if (value.length <= 100 && !hasEmoji) {
+                setPassword(value);
+              }
+            }}
+            customFunction={async () => {
+              const isVerified = await WalletHelper.verifyPassword(password);
+
+              if (!isVerified) {
+                return messageApi.error('Incorrect password provided.');
+              }
+
+              handleVerify();
+            }}
+          />
+          <div style={{ marginTop: '10px' }}></div>
+          <ButtonComp
+            text={'Proceed'}
+            maxWidth={'100%'}
+            onClick={async () => {
+              const isVerified = await WalletHelper.verifyPassword(password);
+
+              if (!isVerified) {
+                return messageApi.error('Incorrect password provided.');
+              }
+
+              handleVerify();
             }}
           />
         </div>

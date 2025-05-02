@@ -88,12 +88,13 @@ export class UniswapHelper {
     slug,
     symbol,
     isToken,
-    chainId
+    chainId,
+    sessionPassword
   ) {
     try {
       slug = slug=='matic'?'polygon':slug;
       const { account } = store.getState();
-      const WALLET_SECRET = await WalletHelper.getPrivateKey();
+      const WALLET_SECRET = await WalletHelper.getPrivateKeyEvm(sessionPassword);
       console.log(
         "🚀 ~ file: pancake.helper.js:129 ~ PancakeHelper ~ sendForApproval ~ WALLET_SECRET:",
         WALLET_SECRET
@@ -197,12 +198,15 @@ export class UniswapHelper {
     symbol,
     isToken,
     slippage,
-    commision
+    commision,
+    sessionPassword
   ) {
     try {
       slug = slug == 'matic' ? "polygon" : slug
       if (route) {
         const { account } = store.getState();
+
+        console.log('account : ', account);
 
         const { data } = await server.post(
           "/on-chain/swap",
@@ -225,7 +229,9 @@ export class UniswapHelper {
           }
         );
 
-        const WALLET_SECRET = await WalletHelper.getPrivateKey();
+        console.log('RESPONSE FROM API : ',data)
+
+        const WALLET_SECRET = await WalletHelper.getPrivateKeyEvm(sessionPassword);
 
         const gasPrice = await Web3Helper.getGasPrice(
           slug,
@@ -264,7 +270,7 @@ export class UniswapHelper {
         const wallet = new ethers.Wallet(WALLET_SECRET, this.web3Provider);
         const signedTransaction = await wallet.signTransaction(transaction);
 
-        // console.log("signedTransactionsignedTransaction ", signedTransaction);
+        console.log("signedTransactionsignedTransaction ", signedTransaction);
         
         
         const response = await server.post(
@@ -289,7 +295,7 @@ export class UniswapHelper {
             },
           }
         );
-        console.log();
+        console.log('response',response);
         
         return response.data.tx_hash;
       }

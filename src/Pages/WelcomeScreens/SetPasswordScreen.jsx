@@ -112,7 +112,7 @@ function SetPasswordScreen() {
       } else {
         const mnemonics = await WalletHelper.generateNewMnemonics();
         setMnemonics(mnemonics);
-        console.log('mnemonics',mnemonics)
+        // console.log('mnemonics',mnemonics)
         setShuffledMnemonics(
           mnemonics.split(' ').sort(() => Math.random() - 0.5)
         );
@@ -124,6 +124,7 @@ function SetPasswordScreen() {
   };
 
   const handleConfirmSecretPhrase = async () => {
+    console.log('CONFIRM SCRET PRASE :',correct)
     try {
       if (correct) {
         store.dispatch(setLoading(true));
@@ -142,7 +143,7 @@ function SetPasswordScreen() {
         store.dispatch(setLoading(false));
         popError('Please check the phrase order and try again.');
       }
-    } catch (error) {
+    } catch (error) { 
       console.error('Error Confirm Secret Phrase:', error);
       store.dispatch(setLoading(false));
     }

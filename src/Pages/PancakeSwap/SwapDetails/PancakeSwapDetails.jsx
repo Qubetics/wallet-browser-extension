@@ -70,7 +70,7 @@ function PancakeSwapDetails() {
     duration: DURATION,
   });
 
-  console.log({ route, token1, token2, amount, amount2, feeAmount });
+  // console.log({ route, token1, token2, amount, amount2, feeAmount });
 
   const [requireApproval, setRequireApproval] = useState(true);
   const web3Helper = useRef(new Web3Helper(chain.rpcUrl));

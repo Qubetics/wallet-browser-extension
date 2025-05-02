@@ -188,7 +188,7 @@ function SendConfirm() {
             );
           }
         } else {
-          console.log('PASSWORD IN BNB CASE : ', sessionPassword);
+          // console.log('PASSWORD IN BNB CASE : ', sessionPassword);
           const response =
             await Web3Helper.generateRawTransactionForCoinAndBroadcast(
               to,
@@ -265,7 +265,10 @@ function SendConfirm() {
               currency.name,
               toName,
               `solana/${coin.coin.coin_symbol}`, //chain.slug,
-              chain.chainId
+              chain.chainId,
+              undefined,
+              undefined,
+              sessionPassword
             );
           // console.log("RRRRR solana--- ", response);
 

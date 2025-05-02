@@ -518,7 +518,7 @@ function SendCoins() {
       (chain) => chain.coinFamily === coin.coin.coin_family
     );
 
-    console.log('CHAIN SELECTED :',chain)
+    console.log('CHAIN SELECTED :', chain);
 
     // if (!chain.isEVM && chain.currencyName === "ADA" && amount < 1) {
     //   store.dispatch(setLoading(false));
@@ -538,7 +538,7 @@ function SendCoins() {
     // }
 
     if (!amount) {
-      console.log('VALID AMOUNT')
+      console.log('VALID AMOUNT');
       store.dispatch(setLoading(false));
       return messageApi.error('Please enter a valid amount to proceed.');
     }
@@ -546,9 +546,9 @@ function SendCoins() {
     // console.log("AMTTTTT : ", amount, myBalance);
     const finalAmount = new BigNumber(amount);
     const balance = new BigNumber(myBalance);
-    console.log('AMOUNT AND BALANCE :' , finalAmount , balance);
+    console.log('AMOUNT AND BALANCE :', finalAmount, balance);
     if (finalAmount.gt(balance)) {
-      console.log('IS AMOUNT GREATER THAN BLAANCE')
+      console.log('IS AMOUNT GREATER THAN BLAANCE');
       store.dispatch(setLoading(false));
       return messageApi.error(
         'Insufficient balance to proceed with the transaction'
@@ -570,10 +570,10 @@ function SendCoins() {
 
     const myAddress = account.coinFamilyAndAddress[chain.coinFamily];
 
-    console.log('SENDER ADDRESS',myAddress)
+    console.log('SENDER ADDRESS', myAddress);
 
     if (myAddress.toLowerCase() === address.toLowerCase()) {
-      console.log('OWN ADDRESS')
+      console.log('OWN ADDRESS');
       store.dispatch(setLoading(false));
       return messageApi.error('You cannot send to your own address.');
     }
@@ -633,7 +633,7 @@ function SendCoins() {
           : process.env.REACT_APP_QUBETIC_RPC
       );
 
-      console.log('NATIVE COIN BALANCE :',nativeCoinResponse)
+      console.log('NATIVE COIN BALANCE :', nativeCoinResponse);
       const nativeCoinBalance = new BigNumber(nativeCoinResponse);
 
       const finalAmount = new BigNumber(amount);
@@ -723,183 +723,107 @@ function SendCoins() {
       });
     } else if (!chain.isEVM && chain.currencyName === 'BTC') {
       try {
+        // 1. Fetch gas price and unspent transactions
         const gasPrice = await BTCHelper.getBTCGasPrice();
         const unspent = await BTCHelper.getUnspent(coin.wallet_address);
+      
         if (!unspent) {
           store.dispatch(setLoading(false));
           return messageApi.error('Unable to fetch unspent at the moment.');
         }
+      
         if (unspent.length === 0) {
           store.dispatch(setLoading(false));
           return messageApi.error(
-            'You have a pending transaction in your account or you do not have enough balance to proceed with the transaction.'
+            'You have a pending transaction or insufficient balance.'
           );
         }
-        const inputs = [];
+      
+        // 2. Prepare inputs and calculate available satoshis
         let totalAmountAvailable = 0;
-        unspent.forEach((element) => {
-          let utxo = {};
-          utxo.satoshis = Math.floor(Number(element.satoshis));
-          utxo.script = element.scriptPubKey;
-          utxo.address = coin.wallet_address;
-          utxo.txId = element.txid;
-          utxo.outputIndex = element.vout;
-          totalAmountAvailable += parseFloat(utxo.satoshis);
-          inputCount += 1;
-          inputs.push(utxo);
+        const inputs = unspent.map((utxo) => {
+          const satoshis = Math.floor(Number(utxo.satoshis));
+          totalAmountAvailable += satoshis;
+          return {
+            satoshis,
+            script: utxo.scriptPubKey,
+            address: coin.wallet_address,
+            txId: utxo.txid,
+            outputIndex: utxo.vout,
+          };
         });
-
-        // console.log("--------inputs-------> ", inputs);
-
-        transactionSize = inputCount * 146 + outputCount * 34 + 10 - inputCount;
-        let fee = transactionSize * gasPrice;
-        const totalFee = (
-          transactionSize *
-          gasPrice *
-          btcTosatoshiMultiplier
-        ).toFixed(8);
-        console.log(
-          '🚀 ~ file: SendCoins.jsx:591 ~ onClick={~totalFee:',
-          +totalFee,
-          amount
-        );
-
+      
+        const inputCount = inputs.length;
+        const transactionSize = inputCount * 146 + outputCount * 34 + 10 - inputCount;
+        const fee = transactionSize * gasPrice;
+        const totalFee = (fee * btcTosatoshiMultiplier).toFixed(8);
         const totalAmount = parseFloat(totalFee) + parseFloat(amount);
-        console.log(
-          '🚀 ~ file: SendCoins.jsx:594 ~ onClick={~totalAmount:',
-          totalAmount
-        );
-
-        // console.log("MyBALAnCEEEEEEEEE ", myBalance);
-
+      
+        // 3. Validate balance
         if (totalAmount > myBalance) {
           store.dispatch(setLoading(false));
-          return messageApi.error(
-            'Not enough balance to proceed with the transaction.'
-          );
+          return messageApi.error('Not enough balance to proceed.');
         }
-
-        // console.log("BTC TRANSACTION CASE : ",
-        //   totalAmountAvailable,
-        //   Math.round(amount * btcTosatoshi),
-        //   btcTosatoshi,
-        //   fee,
-        //   amount
-        // );
-        if (
-          totalAmountAvailable - Math.round(amount * btcTosatoshi) - fee <
-          0
-        ) {
+      
+        const sendAmount = Math.round(amount * btcTosatoshi);
+        if (totalAmountAvailable - sendAmount - fee < 0) {
           store.dispatch(setLoading(false));
-          return messageApi.error(
-            'Insufficient Balance to proceed with the transactions.'
-          );
+          return messageApi.error('Insufficient UTXO balance.');
+        }
+      
+        // 4. Create and configure transaction
+        const bitcore = require('bitcore-lib');
+        const transaction = new bitcore.Transaction()
+          .from(inputs)
+          .to(address, sendAmount);
+      
+        const change = totalAmountAvailable - sendAmount - fee;
+        if (change > 546) {
+          transaction.change(coin.wallet_address);
+          transaction.fee(fee);
         } else {
-          const bitcore = require('bitcore-lib');
-          const transaction = new bitcore.Transaction();
-          console.log(
-            '🚀 ~ file: SendCoins.jsx:630 ~ transaction:',
-            transaction
-          );
-          // console.log(inputs);
-          transaction.from(inputs);
-          console.log(
-            '🚀 ~ file: SendCoins.jsx:632 ~ transaction:',
-            transaction
-          );
-
-          transaction.to(
-            address,
-            parseInt(Math.round(amount * btcTosatoshi).toString())
-          );
-          console.log('🚀 ~ file: SendCoins.jsx:635 ~ address:', address);
-
-          console.log(
-            '🚀 ~ file: SendCoins.jsx:637 ~ transaction:',
-            transaction
-          );
-          console.log(
-            '🚀 ~ file: SendCoins.jsx:636 ~ transaction:',
-            transaction
-          );
-          let satoshis = 0;
-          for (var i = 0; i < inputs.length; i++) {
-            satoshis = inputs[i].satoshis + satoshis;
-          }
-          if (
-            satoshis -
-              (fee + parseInt(Math.round(amount * btcTosatoshi).toString())) >
-            546
-          ) {
-            transaction.change(coin.wallet_address);
-          }
-          if (
-            satoshis -
-              (fee + parseInt(Math.round(amount * btcTosatoshi).toString())) >
-            546
-          ) {
-            transaction.fee(fee);
-          } else {
-            transaction.fee(
-              fee +
-                (satoshis -
-                  (fee +
-                    parseInt(Math.round(amount * btcTosatoshi).toString())))
-            );
-          }
-          const btcPrivateKey =
-            await WalletHelper.getBitcoinPrivateKeyWithPassword(
-              sessionPassword
-            );
-
-          console.log(
-            '🚀 ~ file: SendCoins.jsx:656 ~ btcPrivateKey:',
-            btcPrivateKey
-          );
-
-          if (!btcPrivateKey) {
-            store.dispatch(setLoading(false));
-            return messageApi.error(
-              'Unable to fetch private key at the moment please try again later.'
-            );
-          }
-          console.log('Come to sign...');
-          transaction.sign(btcPrivateKey);
-          // console.log("Come to sign...success");
-          const rawTransaction = transaction.serialize();
-          // console.log("'rawTransaction---> ", rawTransaction);
-
-          store.dispatch(setLoading(false));
-
-          navigate('/confirmCurrency', {
-            state: {
-              rawTransaction,
-              to: address,
-              amount: amount,
-              coin,
-              ENSName,
-              redirectTo,
-              networkFee: (
-                transactionSize *
-                gasPrice *
-                btcTosatoshiMultiplier
-              ).toFixed(8),
-              sessionPassword,
-            },
-          });
+          // Include dust change in the fee
+          transaction.fee(fee + change);
         }
-      } catch (error) {
-        console.log('jhantttttt', error);
+      
+        // 5. Get private key
+        const btcPrivateKey = await WalletHelper.getBitcoinPrivateKeyWithPassword(sessionPassword);
+        if (!btcPrivateKey) {
+          store.dispatch(setLoading(false));
+          return messageApi.error('Unable to fetch private key. Please try again later.');
+        }
+      
+        // 6. Sign and serialize transaction
+        transaction.sign(btcPrivateKey);
+        const rawTransaction = transaction.serialize();
+        console.log('Raw Transaciton : ',rawTransaction);
+      
         store.dispatch(setLoading(false));
+      
+        // 7. Navigate to confirmation screen
+        navigate('/confirmCurrency', {
+          state: {
+            rawTransaction,
+            to: address,
+            amount,
+            coin,
+            ENSName,
+            redirectTo,
+            networkFee: totalFee,
+            sessionPassword,
+          },
+        });
+      } catch (error) {
+        console.error('BTC Transaction Error:', error);
+        store.dispatch(setLoading(false));
+      
         if (error.message.includes('Dust amount detected in one output')) {
-          // Handle the specific error
-          return messageApi.error(
-            'Transaction amount is below the dust threshold. Please enter a higher amount.'
-          );
-        } else {
-          return messageApi.error(error.message);
+          return messageApi.error('Amount is below the dust threshold. Please enter a higher value.');
         }
+      
+        return messageApi.error(error.message || 'An unexpected error occurred.');
       }
+      
     } else if (!chain.isEVM && chain.currencyName === 'ADA') {
       try {
         if (coin.tokenAddress) {
@@ -1241,7 +1165,10 @@ function SendCoins() {
         </div>
         <div>
           <ButtonComp
-            onClick={() => setConfirmModal(!isModalOpen)}
+            onClick={() =>{
+              setSessionPassword(null)
+              setConfirmModal(!isModalOpen)
+            }}
             text={'Send'}
             maxWidth={'100%'}
           />
@@ -1333,6 +1260,7 @@ function SendCoins() {
 
       <ModalCustom
         title={'Password'}
+        handleCancel={()=> setConfirmModal(!isModalOpen)}
         isModalOpen={isModalOpen}
         customClass="customClassModal"
       >
@@ -1350,7 +1278,7 @@ function SendCoins() {
               if (!res) {
                 return messageApi.error('Invalid Password');
               }
-              setConfirmModal(!isModalOpen)
+              setConfirmModal(!isModalOpen);
               store.dispatch(setLoading(true));
               await handleSend();
               store.dispatch(setLoading(false));
@@ -1365,7 +1293,7 @@ function SendCoins() {
               if (!res) {
                 return messageApi.error('Invalid Password');
               }
-              setConfirmModal(!isModalOpen)
+              setConfirmModal(!isModalOpen);
               store.dispatch(setLoading(true));
               await handleSend();
               store.dispatch(setLoading(false));

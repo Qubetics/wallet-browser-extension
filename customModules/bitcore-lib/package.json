@@ -1,0 +1,94 @@
+{
+  "_args": [
+    [
+      "bitcore-lib@git+ssh://git@github.com/bplunkert/bitcore-lib.git#53c52295dbf3b05ae99875c1d71a13f70452144f",
+      "/data/qubetics-wallet"
+    ]
+  ],
+  "_from": "bitcore-lib@github:bplunkert/bitcore-lib#elliptic_bn_js_hotfix",
+  "_id": "bitcore-lib@git+ssh://git@github.com/bplunkert/bitcore-lib.git#53c52295dbf3b05ae99875c1d71a13f70452144f",
+  "_inBundle": false,
+  "_integrity": "sha512-Ug2LnddUuTFb+J41lY2oePFAGVIuUv+DQCV5ZEONxzFHfHsnsswr7Zx6AcVHtYsi4ncNPArFPCpgbijROjjOQQ==",
+  "_location": "/bitcore-lib",
+  "_phantomChildren": {
+    "bn.js": "5.2.1",
+    "brorand": "1.1.0",
+    "hash.js": "1.1.7",
+    "hmac-drbg": "1.0.1",
+    "minimalistic-assert": "1.0.1",
+    "minimalistic-crypto-utils": "1.0.1"
+  },
+  "_requested": {
+    "type": "git",
+    "raw": "bitcore-lib@git+ssh://git@github.com/bplunkert/bitcore-lib.git#53c52295dbf3b05ae99875c1d71a13f70452144f",
+    "name": "bitcore-lib",
+    "escapedName": "bitcore-lib",
+    "rawSpec": "git+ssh://git@github.com/bplunkert/bitcore-lib.git#53c52295dbf3b05ae99875c1d71a13f70452144f",
+    "saveSpec": "git+ssh://git@github.com/bplunkert/bitcore-lib.git#53c52295dbf3b05ae99875c1d71a13f70452144f",
+    "fetchSpec": "ssh://git@github.com/bplunkert/bitcore-lib.git",
+    "gitCommittish": "53c52295dbf3b05ae99875c1d71a13f70452144f"
+  },
+  "_requiredBy": [
+    "/"
+  ],
+  "_resolved": "git+ssh://git@github.com/bplunkert/bitcore-lib.git#53c52295dbf3b05ae99875c1d71a13f70452144f",
+  "_spec": "git+ssh://git@github.com/bplunkert/bitcore-lib.git#53c52295dbf3b05ae99875c1d71a13f70452144f",
+  "_where": "/data/qubetics-wallet",
+  "author": {
+    "name": "BitPay",
+    "email": "dev@bitpay.com"
+  },
+  "browser": {
+    "request": "browser-request"
+  },
+  "dependencies": {
+    "bech32": "=2.0.0",
+    "bip-schnorr": "=0.6.4",
+    "bn.js": "^5.1.3",
+    "bs58": "^4.0.1",
+    "buffer-compare": "=1.1.1",
+    "elliptic": "github:coltongit/elliptic#curve.n_fix",
+    "inherits": "=2.0.1",
+    "lodash": "^4.17.20"
+  },
+  "description": "A pure and powerful JavaScript Bitcoin library.",
+  "devDependencies": {
+    "bitcore-build": "^8.25.40",
+    "brfs": "^2.0.1",
+    "chai": "^4.2.0",
+    "gulp": "^4.0.0",
+    "sinon": "^7.1.1"
+  },
+  "gitHead": "012cc0216a9bc6b195035855bd17149bad41acd1",
+  "keywords": [
+    "bitcoin",
+    "transaction",
+    "address",
+    "p2p",
+    "ecies",
+    "cryptocurrency",
+    "blockchain",
+    "payment",
+    "bip21",
+    "bip32",
+    "bip37",
+    "bip69",
+    "bip70",
+    "multisig"
+  ],
+  "license": "MIT",
+  "main": "index.js",
+  "name": "bitcore-lib",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bitpay/bitcore/tree/master/packages/bitcore-lib"
+  },
+  "scripts": {
+    "build": "gulp",
+    "coverage": "gulp coverage",
+    "pub": "npm run build && npm publish",
+    "test": "gulp test",
+    "test:ci": "npm run test"
+  },
+  "version": "8.25.40"
+}

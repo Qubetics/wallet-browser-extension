@@ -245,8 +245,8 @@ function SwapDetails() {
         parseFloat(amount) * token1?.coin?.fiat_price_data?.value +
         parseFloat(networkPriceFiat);
       // console.log('ppppppppppppppppp', token1, " amount : ", amount ,  " networkPrice : ", networkPrice, " networkPriceFiat ", networkPriceFiat);
-      // console.log("SEND DETAIL : ", bal, totalAmt);
-      // console.log("COME CHECK COIN");
+      console.log("SEND DETAIL : ", bal, totalAmt);
+      console.log("COME CHECK COIN");
       if (
         parseFloat(token1?.balance) <
           parseFloat(amount) + parseFloat(networkPrice) &&
@@ -288,7 +288,8 @@ function SwapDetails() {
           token1.chain.slug,
           token1.isToken ? token1.tokenAddress : token1.symbol.toLowerCase(),
           token1.isToken,
-          parseInt(token1.chain.chainId)
+          parseInt(token1.chain.chainId),
+          sessionPassword
         );
 
         if (!data) {
@@ -334,8 +335,11 @@ function SwapDetails() {
           token1.symbol.toLowerCase(),
           token1.isToken,
           slippage,
-          commision
+          commision,
+          sessionPassword
         );
+
+        console.log('SWAP TRANSACTION :',data);
 
         if (!data || data?.message) {
           setSwapModal(false);

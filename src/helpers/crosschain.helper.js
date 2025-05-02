@@ -85,7 +85,8 @@ export class CrossChainHelper {
     fiatValue,
     parentCoin,
     rpc,
-    symbol
+    symbol,
+    sessionPassword
   ) => {
     try {
       console.log({
@@ -103,6 +104,8 @@ export class CrossChainHelper {
       });
 
       const { account } = store.getState();
+
+      console.log('ACCOUNT FOUND CROSS CHAIN SEND ORDER :',account)
 
       const response = await server.post(
         "/swftc/accountExchange",
@@ -124,7 +127,7 @@ export class CrossChainHelper {
         }
       );
 
-      // console.log("resssssssssssssssssssss ", response);
+      console.log("RESPOSNE FROM API TO SWAP CROSS-CHAIN: ", response);
       
       const orderData = response.data.data.data;
 
@@ -298,12 +301,12 @@ export class CrossChainHelper {
               );
             }
 
-            const btcPrivateKey = await WalletHelper.getBitcoinPrivateKey();
+            const btcPrivateKey = await WalletHelper.getBitcoinPrivateKeyWithPassword(sessionPassword);
 
-            // console.log(
-            //   "🚀 ~ file: SendCoins.jsx:656 ~ btcPrivateKey:",
-            //   btcPrivateKey
-            // );
+            console.log(
+              "🚀 ~ file: SendCoins.jsx:656 ~ btcPrivateKey:",
+              btcPrivateKey
+            );
             if (!btcPrivateKey) {
               // store.dispatch(setLoading(false));
               return console.error(
@@ -317,6 +320,7 @@ export class CrossChainHelper {
               btcTosatoshiMultiplier
             ).toFixed(8);
             rawTransaction = transaction.serialize(); // Assign raw transaction
+            console.log('RAW TRANSACTION:',rawTransaction)
             // store.dispatch(setLoading(false));
           }
         } catch (error) {
@@ -341,6 +345,7 @@ export class CrossChainHelper {
           orderData.orderId,
           "cross_chain"
         );
+        console.log('HASH CREATED IN BTC CROSS-CHAIN SWAP :',hash)
       } else if (fromCoin?.coinFamily === 5 && fromCoin.tokenAddress) {
         const solanaHelper = new SolanaHelper(chain.rpcUrl);
         hash = await solanaHelper.generateRawTransactionForTokenAndBroadcast(
@@ -359,7 +364,8 @@ export class CrossChainHelper {
           "",
           orderData.orderId,
           "cross_chain",
-          gasPriceType
+          gasPriceType,
+          sessionPassword
         );
       } else if (fromCoin?.coinFamily === 5) {
         const solanaHelper = new SolanaHelper(chain.rpcUrl);
@@ -375,7 +381,8 @@ export class CrossChainHelper {
           `solana/${chain.slug}`,
           chain.chainId,
           orderData.orderId,
-          "cross_chain"
+          "cross_chain",
+          sessionPassword
         );
       } else if (fromCoin?.coinFamily != 5 && fromCoin.tokenAddress) {
         console.log("IN TOKEN CROSS SWAP EVM");
@@ -396,7 +403,8 @@ export class CrossChainHelper {
           "cross_chain",
           coinFamily,
           gasPriceType,
-          orderData.orderId
+          orderData.orderId,
+          sessionPassword
         );
       } else {
         hash = await Web3Helper.generateRawTransactionForCoinAndBroadcast(
@@ -414,7 +422,8 @@ export class CrossChainHelper {
           rpc,
           "cross_chain",
           "",
-          orderData.orderId
+          orderData.orderId,
+          sessionPassword
         );
       }
 

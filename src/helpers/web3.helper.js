@@ -669,7 +669,8 @@ export class Web3Helper {
     type,
     coinFamily,
     gasPriceType,
-    orderId
+    orderId,
+    password
   ) => {
     console.log(
       'tokenAddress:::::',
@@ -681,14 +682,16 @@ export class Web3Helper {
       'coin_family ',
       coinFamily,
       'ORDERID',
-      orderId
+      orderId,
+      "password",
+      password
     );
     try {
       const { account } = store.getState();
       const web3 = new Web3();
       const contract = new web3.eth.Contract(ABI);
 
-      const privateKey = await WalletHelper.getPrivateKey();
+      const privateKey = await WalletHelper.getPrivateKeyEvm(password);
       if (!privateKey) {
         return false;
       }

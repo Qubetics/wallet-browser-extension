@@ -37,7 +37,7 @@ function getFlooredFixed(v, d) {
 export const ExternalConnection = () => {
   const { account, currency } = useSelector((state) => state);
   const [method, setMethod] = useState(null);
-  const [chainID, setChainID] = useState(null)
+  const [chainID, setChainID] = useState(null);
   const [data, setData] = useState(null);
   const [feeInEth, setFeeInEth] = useState(0);
   const [messageApi, contextHolder] = message.useMessage();
@@ -55,8 +55,8 @@ export const ExternalConnection = () => {
       JSON.parse(mnemonics).find((obj) => obj.address === defaultAccount)
         ?.phrase) ||
     '';
-    // console.log("defaultAddressPhrase6756756:::",defaultAddressPhrase);
-    
+  // console.log("defaultAddressPhrase6756756:::",defaultAddressPhrase);
+
   let price = null;
 
   const handleOk = () => {
@@ -67,32 +67,32 @@ export const ExternalConnection = () => {
     setOpenmodal(false);
   };
 
-
   const dappApprovalHash = (pvt_key, approvalParam) => {
     return new Promise(async (resolve, reject) => {
       let wallet = new Wallet(pvt_key);
-      wallet._signTypedData(
-        approvalParam.domain,
-        approvalParam.types,
-        approvalParam.message).then(async (resww) => { 
-          resolve(resww)
-
-        }).catch(err => { 
-          reject(err)
+      wallet
+        ._signTypedData(
+          approvalParam.domain,
+          approvalParam.types,
+          approvalParam.message
+        )
+        .then(async (resww) => {
+          resolve(resww);
+        })
+        .catch((err) => {
+          reject(err);
         });
-    })
+    });
   };
 
-
   const init = async () => {
-    console.log("EXTERNALLLLLLLLLLLLLL ");
-    
+    console.log('EXTERNALLLLLLLLLLLLLL ');
+
     const { chains } = await chrome.storage.local.get('chains');
     let { accounts } = await chrome.storage.session.get('accounts');
 
-    const { password } = await chrome.storage.session.get('password');
     const { mnemonics } = await chrome.storage.local.get('mnemonics');
-    const decryptMnemonics = SecurityHelper.decrypt(mnemonics, password);
+    const decryptMnemonics = SecurityHelper.decrypt(mnemonics, sessionPassword);
     const defaultAddress = accounts?.find((item) => item.default)?.address;
     if (defaultAddress) {
       setDefaultAccounts(defaultAddress);
@@ -108,16 +108,16 @@ export const ExternalConnection = () => {
         try {
           const tab = tabs[0];
           const url = new URL(tab.url);
-          const queryParams = new URLSearchParams(url.search); 
-          const method = queryParams.get('method'); 
+          const queryParams = new URLSearchParams(url.search);
+          const method = queryParams.get('method');
 
           // console.log("METHODDDDDDDDDDDDDDDDDD External_conn ", method);
-          
+
           const data = queryParams.get('data')
             ? JSON.parse(decodeURIComponent(queryParams.get('data')))
-            : null; 
+            : null;
           setData(data);
-          setChainID(Web3.utils.toDecimal(data.chainId))
+          setChainID(Web3.utils.toDecimal(data.chainId));
           // console.log('EXTERNAL CONN DATA::', data,"account::",account);
 
           if (data.network === 'qubetics') {
@@ -130,8 +130,13 @@ export const ExternalConnection = () => {
                 data.nodeUrl
               );
               // console.log("valoperAddress:::",valoperAddress,"addressaddress:::",address,"defaultAddressPhrase::",defaultAddressPhrase);
-              
-              setData({ ...data, valoperAddress, address,evmAddress:account.address });
+
+              setData({
+                ...data,
+                valoperAddress,
+                address,
+                evmAddress: account.address,
+              });
               setMethod(method);
               // console.log("DATA DAT:::",data,valoperAddress,address);
             } else {
@@ -140,12 +145,19 @@ export const ExternalConnection = () => {
             }
 
             return;
-          } 
+          }
           if (method === 'requestAccounts' && account) {
             setMethod('requestAccounts');
             store.dispatch(setLoading(false));
           } else if (method === 'signTransaction' && account) {
-            const symbol = (myDefaultChain.slug == 'matic' || myDefaultChain.slug == 'polygon') ? "pol" : myDefaultChain.slug == "ethereum" ? "eth" : myDefaultChain.slug == "binancesmartchain" ? "bnb" : ""
+            const symbol =
+              myDefaultChain.slug == 'matic' || myDefaultChain.slug == 'polygon'
+                ? 'pol'
+                : myDefaultChain.slug == 'ethereum'
+                ? 'eth'
+                : myDefaultChain.slug == 'binancesmartchain'
+                ? 'bnb'
+                : '';
             const gasPriceRes = await Web3Helper.getGasPrice(
               myDefaultChain.slug,
               data.from,
@@ -158,9 +170,12 @@ export const ExternalConnection = () => {
             // chain id==> 1->Eth, 137->Pol, 56->Bnb
             let rpc =
               myDefaultChain?.chainId == 1
-                ? process.env.REACT_APP_ETH_RPC :
-                myDefaultChain?.chainId == 9009 ? process.env.REACT_APP_QUBETIC_RPC
-                  : myDefaultChain?.chainId == 137 ? process.env.REACT_APP_MATIC_RPC : process.env.REACT_APP_BNB_RPC;
+                ? process.env.REACT_APP_ETH_RPC
+                : myDefaultChain?.chainId == 9009
+                ? process.env.REACT_APP_QUBETIC_RPC
+                : myDefaultChain?.chainId == 137
+                ? process.env.REACT_APP_MATIC_RPC
+                : process.env.REACT_APP_BNB_RPC;
             const provider = new Web3.providers.HttpProvider(rpc);
             const web3 = new Web3(provider);
             let gasEstimate = '';
@@ -200,17 +215,16 @@ export const ExternalConnection = () => {
             // console.log("DATA SETTING ", data);
             setMethod('signTransaction');
             store.dispatch(setLoading(false));
-          } else if (method === "signTypedMessage" && account) {
-            console.log("Rightplace::::::::: ", data?.raw);
+          } else if (method === 'signTypedMessage' && account) {
+            console.log('Rightplace::::::::: ', data?.raw);
 
             let approvalParam = JSON.parse(data?.raw);
-            console.log("approvalParamapprovalParam", approvalParam);
-            let typeArr = Object.keys(approvalParam.types)
-            let newTypes = {}
-            typeArr.map(el => {
-              if (el != "EIP712Domain") {
-                newTypes[el] = approvalParam.types[el]
-
+            console.log('approvalParamapprovalParam', approvalParam);
+            let typeArr = Object.keys(approvalParam.types);
+            let newTypes = {};
+            typeArr.map((el) => {
+              if (el != 'EIP712Domain') {
+                newTypes[el] = approvalParam.types[el];
               }
             });
             let newParams = {
@@ -220,8 +234,8 @@ export const ExternalConnection = () => {
             };
             setData(data);
             // console.log("DATA SETTING ", data);
-            setMethod("signTypedMessage");
-            console.log("---------newParams:::::", newParams);
+            setMethod('signTypedMessage');
+            console.log('---------newParams:::::', newParams);
             setParams(newParams);
             store.dispatch(setLoading(false));
           } else if (method === 'signRawTransaction' && account) {
@@ -235,20 +249,20 @@ export const ExternalConnection = () => {
             store.dispatch(setLoading(false));
           } else if (method === 'switchEthereumChain' && account) {
             const { chains } = await chrome.storage.local.get('chains');
-            console.log("CHAINNNNNNNNNNNNN ", chains);
+            console.log('CHAINNNNNNNNNNNNN ', chains);
 
             const switchChain = chains.find(
               (el) => el.chainId == Web3.utils.toDecimal(data.chainId)
             );
 
             setFromChain(myDefaultChain);
-            console.log("switchChainswitchChainswitchChain ", switchChain);
+            console.log('switchChainswitchChainswitchChain ', switchChain);
             setToChain(switchChain);
             // await chrome.storage.local.set({
             //   chains: switchChain,
             // });
             setMethod('switchEthereumChain');
-            console.log("DATA SETTING ", data);
+            console.log('DATA SETTING ', data);
             setData(data);
           }
         } catch (error) {
@@ -260,14 +274,14 @@ export const ExternalConnection = () => {
   };
   const handleResponse = async (result, error) => {
     // await chrome.storage.session.set({ isApproved: true });
-    const { isApproved } = await chrome.storage.local.get(
-      'isApproved'
-    );
+    const { isApproved } = await chrome.storage.local.get('isApproved');
     console.log(
       '🚀 ~ file: ExternalConnections.jsx:187 ~ handleResponse ~ result 11',
-      result,"isApproved::",isApproved
+      result,
+      'isApproved::',
+      isApproved
     );
-    chrome.runtime.sendMessage({ method, result },(response) => {
+    chrome.runtime.sendMessage({ method, result }, (response) => {
       chrome.windows.getCurrent(async function (window) {
         await chrome.storage.local.set({ isApproved: true });
         chrome.windows.remove(window.id);
@@ -277,7 +291,7 @@ export const ExternalConnection = () => {
 
   const handleTransaction = async () => {
     try {
-      store.dispatch(setLoading(true)); 
+      store.dispatch(setLoading(true));
       if (data.network === 'solana') {
         console.log(
           '🚀 ~ file: ExternalConnections.jsx:105 ~ handleTransaction ~ data',
@@ -441,25 +455,34 @@ export const ExternalConnection = () => {
           }
         }
       } else if (method === 'signTypedMessage') {
-        console.log("XXXXX :: ", data);
+        console.log('XXXXX :: ', data);
 
         const privateKey = await WalletHelper.getPrivateKey();
         if (!privateKey) {
           return false;
         }
-        dappApprovalHash(privateKey, params).then((res) => {
-          handleResponse(res);
-        }).catch((error) => {
-          console.log("ERRRRRRRRRRR ", error);
-          messageApi.error("Something went wrong")
-          return;
-        })
+        dappApprovalHash(privateKey, params)
+          .then((res) => {
+            handleResponse(res);
+          })
+          .catch((error) => {
+            console.log('ERRRRRRRRRRR ', error);
+            messageApi.error('Something went wrong');
+            return;
+          });
       } else {
         const gasLimit = Web3.utils.toDecimal(data.gas);
         // console.log("gasLimit TRX ", gasLimit);
         const { chains } = await chrome.storage.local.get('chains');
         const myDefaultChain = chains.find((el) => el.default);
-        const symbol = (myDefaultChain.slug == 'polygon' || myDefaultChain.slug == 'matic') ? "pol" : myDefaultChain.slug == "ethereum" ? "eth" : myDefaultChain.slug == "binancesmartchain" ? "bnb" : ""
+        const symbol =
+          myDefaultChain.slug == 'polygon' || myDefaultChain.slug == 'matic'
+            ? 'pol'
+            : myDefaultChain.slug == 'ethereum'
+            ? 'eth'
+            : myDefaultChain.slug == 'binancesmartchain'
+            ? 'bnb'
+            : '';
         const hash =
           await Web3Helper.generateRawTransactionForTokenAndBroadcastExternalCopy(
             data.to,
@@ -510,14 +533,13 @@ export const ExternalConnection = () => {
         handleResponse(true);
       }
     } catch (error) {
-      console.log("Error BB ", error);
+      console.log('Error BB ', error);
     }
-
   };
   // console.log('method:::', method);
   useEffect(() => {
     init();
-  }, [account]);
+  }, [account,sessionPassword]);
 
   return (
     <>
@@ -525,7 +547,7 @@ export const ExternalConnection = () => {
       <ModalCustom
         title={'Request Accounts'}
         isModalOpen={method === 'requestAccounts'}
-        customClass='customClassModal'
+        customClass="customClassModal"
         handleCancel={() => {
           setMethod(null);
         }}
@@ -546,7 +568,7 @@ export const ExternalConnection = () => {
                   >
                     <img
                       src={logo}
-                      alt=''
+                      alt=""
                       style={{
                         height: '70px',
                         width: '70px',
@@ -590,7 +612,7 @@ export const ExternalConnection = () => {
                     }}
                   >
                     <ButtonComp
-                      maxWidth='100%'
+                      maxWidth="100%"
                       onClick={async () => {
                         handleResponse([
                           data?.network === 'solana'
@@ -598,15 +620,15 @@ export const ExternalConnection = () => {
                             : account.address,
                         ]);
                       }}
-                      text='Accept'
+                      text="Accept"
                     />
-                    <div className='cancelBtn'>
+                    <div className="cancelBtn">
                       <ButtonComp
-                        maxWidth='100%'
+                        maxWidth="100%"
                         onClick={async () => {
                           handleResponse([]);
                         }}
-                        text='Reject'
+                        text="Reject"
                       />
                     </div>
                   </div>
@@ -620,7 +642,7 @@ export const ExternalConnection = () => {
       <ModalCustom
         title={'Sign Transaction'}
         isModalOpen={method === 'signTransaction'}
-        customClass='customClassModal'
+        customClass="customClassModal"
         handleCancel={() => {
           setMethod(null);
         }}
@@ -641,7 +663,7 @@ export const ExternalConnection = () => {
                   >
                     <img
                       src={logo}
-                      alt=''
+                      alt=""
                       style={{
                         height: '70px',
                         width: '70px',
@@ -679,7 +701,10 @@ export const ExternalConnection = () => {
                     <div className={'confirmCurrency__keyValues__key'}>To</div>
                     <div className={'confirmCurrency__keyValues__value'}>
                       {data?.to?.substring(0, 7)}....
-                      {data?.to?.substring(data?.to?.length - 7, data?.to?.length)}
+                      {data?.to?.substring(
+                        data?.to?.length - 7,
+                        data?.to?.length
+                      )}
                     </div>
                   </div>
 
@@ -700,17 +725,17 @@ export const ExternalConnection = () => {
                     <div className={'confirmCurrency__keyValues__value'}>
                       {data.value
                         ? addCommasToNumber(
-                          getFlooredFixed(
-                            new BigNumber(data.value)
-                              .dividedBy(new BigNumber(10).pow(18))
-                              .plus(new BigNumber(feeInEth))
-                              .toString(),
-                            5
+                            getFlooredFixed(
+                              new BigNumber(data.value)
+                                .dividedBy(new BigNumber(10).pow(18))
+                                .plus(new BigNumber(feeInEth))
+                                .toString(),
+                              5
+                            )
                           )
-                        )
                         : addCommasToNumber(getFlooredFixed(feeInEth, 5)) +
-                        ' ' +
-                        chain.currencySymbol}{' '}
+                          ' ' +
+                          chain.currencySymbol}{' '}
                     </div>
                   </div>
 
@@ -740,15 +765,15 @@ export const ExternalConnection = () => {
                       onClick={async () => {
                         setOpenmodal(true);
                       }}
-                      text='Accept'
+                      text="Accept"
                     />
-                    <div className='cancelBtn'>
+                    <div className="cancelBtn">
                       <ButtonComp
-                        maxWidth='100%'
+                        maxWidth="100%"
                         onClick={async () => {
                           handleResponse(null);
                         }}
-                        text='Reject'
+                        text="Reject"
                       />
                     </div>
                   </div>
@@ -759,12 +784,10 @@ export const ExternalConnection = () => {
         ) : null}
       </ModalCustom>
 
-
-
       <ModalCustom
         title={'Sign Transaction'}
         isModalOpen={method === 'signTypedMessage'}
-        customClass='customClassModal'
+        customClass="customClassModal"
         handleCancel={() => {
           setMethod(null);
         }}
@@ -785,7 +808,7 @@ export const ExternalConnection = () => {
                   >
                     <img
                       src={logo}
-                      alt=''
+                      alt=""
                       style={{
                         height: '70px',
                         width: '70px',
@@ -811,22 +834,19 @@ export const ExternalConnection = () => {
                       From
                     </div>
                     <div className={'confirmCurrency__keyValues__value'}>
-                      {method === 'signTypedMessage' ?
-                        data?.address?.substring(0, 7) + '....' +
-                        data?.address?.substring(
-                          data?.address?.length - 7,
-                          data?.address?.length
-                        )
-                        : data?.from?.substring(0, 7) + '....' +
-                        data?.from?.substring(
-                          data?.from?.length - 7,
-                          data?.from?.length
-                        )}
-
-
-
-
-
+                      {method === 'signTypedMessage'
+                        ? data?.address?.substring(0, 7) +
+                          '....' +
+                          data?.address?.substring(
+                            data?.address?.length - 7,
+                            data?.address?.length
+                          )
+                        : data?.from?.substring(0, 7) +
+                          '....' +
+                          data?.from?.substring(
+                            data?.from?.length - 7,
+                            data?.from?.length
+                          )}
                     </div>
                   </div>
 
@@ -834,7 +854,10 @@ export const ExternalConnection = () => {
                     <div className={'confirmCurrency__keyValues__key'}>To</div>
                     <div className={'confirmCurrency__keyValues__value'}>
                       {data?.to?.substring(0, 7)}....
-                      {data?.to?.substring(data?.to?.length - 7, data?.to?.length)}
+                      {data?.to?.substring(
+                        data?.to?.length - 7,
+                        data?.to?.length
+                      )}
                     </div>
                   </div>
 
@@ -855,17 +878,17 @@ export const ExternalConnection = () => {
                     <div className={'confirmCurrency__keyValues__value'}>
                       {data.value
                         ? addCommasToNumber(
-                          getFlooredFixed(
-                            new BigNumber(data.value)
-                              .dividedBy(new BigNumber(10).pow(18))
-                              .plus(new BigNumber(feeInEth))
-                              .toString(),
-                            5
+                            getFlooredFixed(
+                              new BigNumber(data.value)
+                                .dividedBy(new BigNumber(10).pow(18))
+                                .plus(new BigNumber(feeInEth))
+                                .toString(),
+                              5
+                            )
                           )
-                        )
                         : addCommasToNumber(getFlooredFixed(feeInEth, 5)) +
-                        ' ' +
-                        chain.currencySymbol}{' '}
+                          ' ' +
+                          chain.currencySymbol}{' '}
                     </div>
                   </div>
 
@@ -895,15 +918,15 @@ export const ExternalConnection = () => {
                       onClick={async () => {
                         setOpenmodal(true);
                       }}
-                      text='Accept'
+                      text="Accept"
                     />
-                    <div className='cancelBtn'>
+                    <div className="cancelBtn">
                       <ButtonComp
-                        maxWidth='100%'
+                        maxWidth="100%"
                         onClick={async () => {
                           handleResponse(null);
                         }}
-                        text='Reject'
+                        text="Reject"
                       />
                     </div>
                   </div>
@@ -914,12 +937,10 @@ export const ExternalConnection = () => {
         ) : null}
       </ModalCustom>
 
-
-
       <ModalCustom
         title={'Sign Transaction'}
         isModalOpen={method === 'signRawTransaction'}
-        customClass='customClassModal'
+        customClass="customClassModal"
         handleCancel={() => {
           setMethod(null);
         }}
@@ -940,7 +961,7 @@ export const ExternalConnection = () => {
                   >
                     <img
                       src={logo}
-                      alt=''
+                      alt=""
                       style={{
                         height: '70px',
                         width: '70px',
@@ -1006,14 +1027,14 @@ export const ExternalConnection = () => {
                     <div className={'confirmCurrency__keyValues__value'}>
                       {data.value
                         ? addCommasToNumber(
-                          getFlooredFixed(
-                            new BigNumber(data.value)
-                              .dividedBy(new BigNumber(10).pow(18))
-                              .plus(new BigNumber(feeInEth))
-                              .toString(),
-                            6
+                            getFlooredFixed(
+                              new BigNumber(data.value)
+                                .dividedBy(new BigNumber(10).pow(18))
+                                .plus(new BigNumber(feeInEth))
+                                .toString(),
+                              6
+                            )
                           )
-                        )
                         : 0}{' '}
                     </div>
                   </div>
@@ -1043,15 +1064,15 @@ export const ExternalConnection = () => {
                       onClick={async () => {
                         setOpenmodal(true);
                       }}
-                      text='Accept'
+                      text="Accept"
                     />
-                    <div className='cancelBtn'>
+                    <div className="cancelBtn">
                       <ButtonComp
-                        maxWidth='100%'
+                        maxWidth="100%"
                         onClick={async () => {
                           handleResponse(null);
                         }}
-                        text='Reject'
+                        text="Reject"
                       />
                     </div>
                   </div>
@@ -1065,7 +1086,7 @@ export const ExternalConnection = () => {
       <ModalCustom
         title={'Switch Chains'}
         isModalOpen={method === 'switchEthereumChain'}
-        customClass='customClassModal'
+        customClass="customClassModal"
         handleCancel={() => {
           setMethod(null);
         }}
@@ -1086,7 +1107,7 @@ export const ExternalConnection = () => {
                   >
                     <img
                       src={logo}
-                      alt=''
+                      alt=""
                       style={{
                         height: '70px',
                         width: '70px',
@@ -1111,7 +1132,12 @@ export const ExternalConnection = () => {
                   </div>
                   <div className={'swapDetails__iconsTop'}>
                     <img src={fromChain?.image} width={30} height={30} />
-                    <img className='arrowDashedLine' src={ArrowDashedLine} width="90px" height={12} />
+                    <img
+                      className="arrowDashedLine"
+                      src={ArrowDashedLine}
+                      width="90px"
+                      height={12}
+                    />
                     <img src={toChain?.image} width={30} height={30} />
                   </div>
                   <div className={'swapDetails__border'}></div>
@@ -1126,19 +1152,19 @@ export const ExternalConnection = () => {
                     }}
                   >
                     <ButtonComp
-                      maxWidth='100%'
+                      maxWidth="100%"
                       onClick={async () => {
                         handleChainSwitch();
                       }}
-                      text='Accept'
+                      text="Accept"
                     />
-                    <div className='cancelBtn'>
+                    <div className="cancelBtn">
                       <ButtonComp
-                        maxWidth='100%'
+                        maxWidth="100%"
                         onClick={async () => {
                           handleResponse(false);
                         }}
-                        text='Reject'
+                        text="Reject"
                       />
                     </div>
                   </div>
@@ -1151,10 +1177,8 @@ export const ExternalConnection = () => {
 
       <ModalCustom
         title={'Enter password'}
-        handleCancel={handleCancel}
         isModalOpen={isModalOpen}
-        handleOk={handleOk}
-        customClass='customClassModal'
+        customClass="customClassModal"
       >
         <div className={'swapDetails__address'}>
           <p className={'swapDetails__address__key'}>
@@ -1169,15 +1193,15 @@ export const ExternalConnection = () => {
             }}
           >
             <InputFieldSimple
-              placeholder='Password'
+              placeholder="Password"
               getData={setPassword}
               value={sessionPassword}
               customFunction={async () => {
-                const { password } = await chrome.storage.session.get(
-                  'password'
+                const isVerified = await WalletHelper.verifyPassword(
+                  sessionPassword
                 );
 
-                if (sessionPassword !== password) {
+                if (!isVerified) {
                   return messageApi.error('Incorrect password provided.');
                 }
 
@@ -1189,9 +1213,11 @@ export const ExternalConnection = () => {
             text={'Proceed'}
             maxWidth={'100%'}
             onClick={async () => {
-              const { password } = await chrome.storage.session.get('password');
+              const isVerified = await WalletHelper.verifyPassword(
+                sessionPassword
+              );
 
-              if (sessionPassword !== password) {
+              if (!isVerified) {
                 return messageApi.error('Incorrect password provided.');
               }
 
@@ -1208,7 +1234,7 @@ export const ExternalConnection = () => {
       <ModalCustom
         title={'Request Accounts'}
         isModalOpen={account && method === 'nativeConnect'}
-        customClass='customClassModal'
+        customClass="customClassModal"
         handleCancel={async () => {
           setMethod(null);
           handleResponse({
@@ -1234,7 +1260,7 @@ export const ExternalConnection = () => {
                   >
                     <img
                       src={logo}
-                      alt=''
+                      alt=""
                       style={{
                         height: '70px',
                         width: '70px',
@@ -1278,19 +1304,18 @@ export const ExternalConnection = () => {
                     }}
                   >
                     <ButtonComp
-                      maxWidth='100%'
+                      maxWidth="100%"
                       onClick={async () => {
                         handleResponse({
                           type: 'success',
                           data: data,
                         });
-                        
                       }}
-                      text='Accept'
+                      text="Accept"
                     />
-                    <div className='cancelBtn'>
+                    <div className="cancelBtn">
                       <ButtonComp
-                        maxWidth='100%'
+                        maxWidth="100%"
                         onClick={async () => {
                           handleResponse({
                             type: 'error',
@@ -1301,7 +1326,7 @@ export const ExternalConnection = () => {
                             'password',
                           ]);
                         }}
-                        text='Reject'
+                        text="Reject"
                       />
                     </div>
                   </div>
@@ -1316,7 +1341,7 @@ export const ExternalConnection = () => {
       <ModalCustom
         title={'Create Validator'}
         isModalOpen={account && method === 'createValidator'}
-        customClass='customClassModal'
+        customClass="customClassModal"
         handleCancel={() => {
           setMethod(null);
           handleResponse({
@@ -1341,7 +1366,7 @@ export const ExternalConnection = () => {
                   >
                     <img
                       src={logo}
-                      alt=''
+                      alt=""
                       style={{
                         height: '70px',
                         width: '70px',
@@ -1400,22 +1425,22 @@ export const ExternalConnection = () => {
                     }}
                   >
                     <ButtonComp
-                      maxWidth='100%'
+                      maxWidth="100%"
                       onClick={async () => {
                         setOpenmodal(true);
                       }}
-                      text='Accept'
+                      text="Accept"
                     />
-                    <div className='cancelBtn'>
+                    <div className="cancelBtn">
                       <ButtonComp
-                        maxWidth='100%'
+                        maxWidth="100%"
                         onClick={async () => {
                           handleResponse({
                             type: 'error',
                             data: { message: 'Rejected by user' },
                           });
                         }}
-                        text='Reject'
+                        text="Reject"
                       />
                     </div>
                   </div>
@@ -1430,7 +1455,7 @@ export const ExternalConnection = () => {
       <ModalCustom
         title={'Edit Validator'}
         isModalOpen={account && method === 'editValidator'}
-        customClass='customClassModal'
+        customClass="customClassModal"
         handleCancel={() => {
           setMethod(null);
           handleResponse({
@@ -1455,7 +1480,7 @@ export const ExternalConnection = () => {
                   >
                     <img
                       src={logo}
-                      alt=''
+                      alt=""
                       style={{
                         height: '70px',
                         width: '70px',
@@ -1514,22 +1539,22 @@ export const ExternalConnection = () => {
                     }}
                   >
                     <ButtonComp
-                      maxWidth='100%'
+                      maxWidth="100%"
                       onClick={async () => {
                         setOpenmodal(true);
                       }}
-                      text='Accept'
+                      text="Accept"
                     />
-                    <div className='cancelBtn'>
+                    <div className="cancelBtn">
                       <ButtonComp
-                        maxWidth='100%'
+                        maxWidth="100%"
                         onClick={async () => {
                           handleResponse({
                             type: 'error',
                             data: { message: 'Rejected by user' },
                           });
                         }}
-                        text='Reject'
+                        text="Reject"
                       />
                     </div>
                   </div>
@@ -1544,7 +1569,7 @@ export const ExternalConnection = () => {
       <ModalCustom
         title={'Bond More Funds'}
         isModalOpen={account && method === 'bondMoreFunds'}
-        customClass='customClassModal'
+        customClass="customClassModal"
         handleCancel={() => {
           setMethod(null);
           handleResponse({
@@ -1569,7 +1594,7 @@ export const ExternalConnection = () => {
                   >
                     <img
                       src={logo}
-                      alt=''
+                      alt=""
                       style={{
                         height: '70px',
                         width: '70px',
@@ -1628,22 +1653,22 @@ export const ExternalConnection = () => {
                     }}
                   >
                     <ButtonComp
-                      maxWidth='100%'
+                      maxWidth="100%"
                       onClick={async () => {
                         setOpenmodal(true);
                       }}
-                      text='Accept'
+                      text="Accept"
                     />
-                    <div className='cancelBtn'>
+                    <div className="cancelBtn">
                       <ButtonComp
-                        maxWidth='100%'
+                        maxWidth="100%"
                         onClick={async () => {
                           handleResponse({
                             type: 'error',
                             data: { message: 'Rejected by user' },
                           });
                         }}
-                        text='Reject'
+                        text="Reject"
                       />
                     </div>
                   </div>
@@ -1658,7 +1683,7 @@ export const ExternalConnection = () => {
       <ModalCustom
         title={'Bond More Funds'}
         isModalOpen={account && method === 'delegatorBondMoreFunds'}
-        customClass='customClassModal'
+        customClass="customClassModal"
         handleCancel={() => {
           setMethod(null);
           handleResponse({
@@ -1683,7 +1708,7 @@ export const ExternalConnection = () => {
                   >
                     <img
                       src={logo}
-                      alt=''
+                      alt=""
                       style={{
                         height: '70px',
                         width: '70px',
@@ -1742,22 +1767,22 @@ export const ExternalConnection = () => {
                     }}
                   >
                     <ButtonComp
-                      maxWidth='100%'
+                      maxWidth="100%"
                       onClick={async () => {
                         setOpenmodal(true);
                       }}
-                      text='Accept'
+                      text="Accept"
                     />
-                    <div className='cancelBtn'>
+                    <div className="cancelBtn">
                       <ButtonComp
-                        maxWidth='100%'
+                        maxWidth="100%"
                         onClick={async () => {
                           handleResponse({
                             type: 'error',
                             data: { message: 'Rejected by user' },
                           });
                         }}
-                        text='Reject'
+                        text="Reject"
                       />
                     </div>
                   </div>
@@ -1772,7 +1797,7 @@ export const ExternalConnection = () => {
       <ModalCustom
         title={'Redelegate'}
         isModalOpen={account && method === 'redelegate'}
-        customClass='customClassModal'
+        customClass="customClassModal"
         handleCancel={() => {
           setMethod(null);
           handleResponse({
@@ -1797,7 +1822,7 @@ export const ExternalConnection = () => {
                   >
                     <img
                       src={logo}
-                      alt=''
+                      alt=""
                       style={{
                         height: '70px',
                         width: '70px',
@@ -1855,22 +1880,22 @@ export const ExternalConnection = () => {
                     }}
                   >
                     <ButtonComp
-                      maxWidth='100%'
+                      maxWidth="100%"
                       onClick={async () => {
                         setOpenmodal(true);
                       }}
-                      text='Accept'
+                      text="Accept"
                     />
-                    <div className='cancelBtn'>
+                    <div className="cancelBtn">
                       <ButtonComp
-                        maxWidth='100%'
+                        maxWidth="100%"
                         onClick={async () => {
                           handleResponse({
                             type: 'error',
                             data: { message: 'Rejected by user' },
                           });
                         }}
-                        text='Reject'
+                        text="Reject"
                       />
                     </div>
                   </div>
@@ -1885,7 +1910,7 @@ export const ExternalConnection = () => {
       <ModalCustom
         title={'Un Bond Funds'}
         isModalOpen={account && method === 'unBondFunds'}
-        customClass='customClassModal'
+        customClass="customClassModal"
         handleCancel={() => {
           setMethod(null);
           handleResponse({
@@ -1910,7 +1935,7 @@ export const ExternalConnection = () => {
                   >
                     <img
                       src={logo}
-                      alt=''
+                      alt=""
                       style={{
                         height: '70px',
                         width: '70px',
@@ -1969,22 +1994,22 @@ export const ExternalConnection = () => {
                     }}
                   >
                     <ButtonComp
-                      maxWidth='100%'
+                      maxWidth="100%"
                       onClick={async () => {
                         setOpenmodal(true);
                       }}
-                      text='Accept'
+                      text="Accept"
                     />
-                    <div className='cancelBtn'>
+                    <div className="cancelBtn">
                       <ButtonComp
-                        maxWidth='100%'
+                        maxWidth="100%"
                         onClick={async () => {
                           handleResponse({
                             type: 'error',
                             data: { message: 'Rejected by user' },
                           });
                         }}
-                        text='Reject'
+                        text="Reject"
                       />
                     </div>
                   </div>
@@ -2000,7 +2025,7 @@ export const ExternalConnection = () => {
       <ModalCustom
         title={'Stop Validator'}
         isModalOpen={account && method === 'stopValidator'}
-        customClass='customClassModal'
+        customClass="customClassModal"
         handleCancel={() => {
           setMethod(null);
           handleResponse({
@@ -2025,7 +2050,7 @@ export const ExternalConnection = () => {
                   >
                     <img
                       src={logo}
-                      alt=''
+                      alt=""
                       style={{
                         height: '70px',
                         width: '70px',
@@ -2083,22 +2108,22 @@ export const ExternalConnection = () => {
                     }}
                   >
                     <ButtonComp
-                      maxWidth='100%'
+                      maxWidth="100%"
                       onClick={async () => {
                         setOpenmodal(true);
                       }}
-                      text='Accept'
+                      text="Accept"
                     />
-                    <div className='cancelBtn'>
+                    <div className="cancelBtn">
                       <ButtonComp
-                        maxWidth='100%'
+                        maxWidth="100%"
                         onClick={async () => {
                           handleResponse({
                             type: 'error',
                             data: { message: 'Rejected by user' },
                           });
                         }}
-                        text='Reject'
+                        text="Reject"
                       />
                     </div>
                   </div>
@@ -2113,7 +2138,7 @@ export const ExternalConnection = () => {
       <ModalCustom
         title={'Un Jail Validator'}
         isModalOpen={account && method === 'unJailValidator'}
-        customClass='customClassModal'
+        customClass="customClassModal"
         handleCancel={() => {
           setMethod(null);
           handleResponse({
@@ -2138,7 +2163,7 @@ export const ExternalConnection = () => {
                   >
                     <img
                       src={logo}
-                      alt=''
+                      alt=""
                       style={{
                         height: '70px',
                         width: '70px',
@@ -2187,22 +2212,22 @@ export const ExternalConnection = () => {
                     }}
                   >
                     <ButtonComp
-                      maxWidth='100%'
+                      maxWidth="100%"
                       onClick={async () => {
                         setOpenmodal(true);
                       }}
-                      text='Accept'
+                      text="Accept"
                     />
-                    <div className='cancelBtn'>
+                    <div className="cancelBtn">
                       <ButtonComp
-                        maxWidth='100%'
+                        maxWidth="100%"
                         onClick={async () => {
                           handleResponse({
                             type: 'error',
                             data: { message: 'Rejected by user' },
                           });
                         }}
-                        text='Reject'
+                        text="Reject"
                       />
                     </div>
                   </div>
@@ -2217,7 +2242,7 @@ export const ExternalConnection = () => {
       <ModalCustom
         title={'Stop Deactivating'}
         isModalOpen={account && method === 'stopDeactivating'}
-        customClass='customClassModal'
+        customClass="customClassModal"
         handleCancel={() => {
           setMethod(null);
           handleResponse({
@@ -2242,7 +2267,7 @@ export const ExternalConnection = () => {
                   >
                     <img
                       src={logo}
-                      alt=''
+                      alt=""
                       style={{
                         height: '70px',
                         width: '70px',
@@ -2292,22 +2317,22 @@ export const ExternalConnection = () => {
                     }}
                   >
                     <ButtonComp
-                      maxWidth='100%'
+                      maxWidth="100%"
                       onClick={async () => {
                         setOpenmodal(true);
                       }}
-                      text='Accept'
+                      text="Accept"
                     />
-                    <div className='cancelBtn'>
+                    <div className="cancelBtn">
                       <ButtonComp
-                        maxWidth='100%'
+                        maxWidth="100%"
                         onClick={async () => {
                           handleResponse({
                             type: 'error',
                             data: { message: 'Rejected by user' },
                           });
                         }}
-                        text='Reject'
+                        text="Reject"
                       />
                     </div>
                   </div>

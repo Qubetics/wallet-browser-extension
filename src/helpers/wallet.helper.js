@@ -78,7 +78,7 @@ export class WalletHelper {
       await this.generateAndSetWalletToRefreshToken();
       return true;
     } catch (error) {
-      console.log(error);
+      console.log('Error unlocking wallet :',error);
       return false;
     }
   };
@@ -160,11 +160,11 @@ export class WalletHelper {
     const decryptedMnemonics = SecurityHelper.decrypt(mnemonics, password);
     try {
       const mnemonics = JSON.parse(decryptedMnemonics);
-      console.log('mnemonics',mnemonics)
+      // console.log('mnemonics',mnemonics)
       const phrase = mnemonics[0]?.phrase 
-      console.log('phrase ',phrase)
+      // console.log('phrase ',phrase)
       const result = ethers.Wallet.fromMnemonic(phrase); 
-      console.log('result',result)
+      // console.log('result',result)
       return result;
     } catch (error) {
       return false;
@@ -172,7 +172,7 @@ export class WalletHelper {
   };
 
   static getPrivateKeyWithPassword = async (password) => {
-    console.log('PASSWORD IN KYC BY PASSWORD',password)
+    // console.log('PASSWORD IN KYC BY PASSWORD',password)
     const { mnemonics } = await chrome.storage.local.get('mnemonics');
     const decryptedMnemonics = SecurityHelper.decrypt(mnemonics, password);
     try {
@@ -184,7 +184,7 @@ export class WalletHelper {
       const account = new Account(
         nacl.sign.keyPair.fromSeed(derivedSeed).secretKey
       );
-      console.log('ACCOUNT IN KEY BY PASSWORD :',account)
+      // console.log('ACCOUNT IN KEY BY PASSWORD :',account)
       return account.secretKey;
     } catch (error) {
       return false;
@@ -475,7 +475,7 @@ export class WalletHelper {
       store.dispatch(setAuth());
       return true;
     } catch (error) {
-      console.log(error);
+      console.log('Error while generating watch only wallet :',error);
       return false;
     }
   };
@@ -636,7 +636,7 @@ export class WalletHelper {
       store.dispatch(setAuth());
       return true;
     } catch (error) {
-      console.log(error);
+      console.log('Error while generating watch only wallet :',error);
       return false;
     }
   };
@@ -892,7 +892,7 @@ export class WalletHelper {
         }
       );
 
-      console.log('WALLET CREATED : ', createWallet);
+      // console.log('WALLET CREATED : ', createWallet);
       const id = uuidv4();
 
       const finalAccounts = [
@@ -939,7 +939,7 @@ export class WalletHelper {
         password
       );
 
-      console.log('finalAccountsfinalAccounts ', finalAccounts);
+      // console.log('finalAccountsfinalAccounts ', finalAccounts);
 
       // const encryptedAccounts = SecurityHelper.encrypt(finalAccounts, password);
 
@@ -1067,14 +1067,8 @@ export class WalletHelper {
     try {
       const { mnemonics } = await chrome.storage.local.get('mnemonics');
       const decryptedMnemonics = SecurityHelper.decrypt(mnemonics, oldPassword);
-      const { privateKey } = await chrome.storage.local.get('privateKey');
-      const decryptedKey = SecurityHelper.decrypt(privateKey, oldPassword);
 
       if (!decryptedMnemonics) {
-        return false;
-      }
-
-      if (!decryptedKey) {
         return false;
       }
 
@@ -1083,15 +1077,8 @@ export class WalletHelper {
         newPassword
       );
 
-      const encryptedPrivateKey = SecurityHelper.encrypt(
-        JSON.parse(decryptedKey),
-        newPassword
-      );
-
       await chrome.storage.local.set({
         mnemonics: encryptedMnemonics,
-        privateKey:encryptedPrivateKey
-
       });
       return true;
     } catch (error) {
@@ -1351,7 +1338,7 @@ export class WalletHelper {
     console.log('DELETE WALLET :', id, evmAddress);
     const { accounts } = await chrome.storage.local.get('accounts');
 
-    console.log('decryptedAccounts-----------> ', accounts);
+    // console.log('decryptedAccounts-----------> ', accounts);
 
     const newAccounts = accounts.filter((el) => el.id !== id);
 

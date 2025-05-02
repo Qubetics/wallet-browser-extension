@@ -117,7 +117,8 @@ function CrossChainDetails() {
       token1Price,
       parentCoin,
       rpc,
-      coinSymbol
+      coinSymbol,
+      sessionPassword
     );
 
     if (!data) {

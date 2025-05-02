@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./Welcome.scss";
 function ConfirmSecretPhrase({
   children,
@@ -23,13 +23,19 @@ function ConfirmSecretPhrase({
     setBlankArray(data);
   };
 
+ useEffect(()=> {
   if (blankArray.length === 12) {
+    // console.log('blankArray.join(" ") === mnemonics',blankArray.join(" "), mnemonics)
     if (blankArray.join(" ") === mnemonics) {
       checkIfCorrect(true);
     } else {
       checkIfCorrect(false);
     }
   }
+  else{
+    checkIfCorrect(false);
+  }
+ },[blankArray])
   return (
     <div className="setPassword__secretPharse">
       <div className="setPassword__secretPharse__confirmFieldSBg">

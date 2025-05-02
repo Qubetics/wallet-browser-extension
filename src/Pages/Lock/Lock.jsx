@@ -11,6 +11,7 @@ import { message } from 'antd';
 import { store } from '../..';
 import { setAuth } from '../../actions/auth';
 import { useNavigate } from 'react-router-dom';
+import { WalletHelper } from '../../helpers/wallet.helper';
 function Lock() {
   const { theme } = useSelector((state) => state);
 
@@ -43,8 +44,8 @@ function Lock() {
           text={'Lock'}
           maxWidth={'100%'}
           onClick={async () => {
-            const { password } = await chrome.storage.session.get('password');
-            if (password === sessionPassword) {
+            const isVerified = await WalletHelper.verifyPassword(sessionPassword);
+            if (isVerified) {
               await chrome.storage.session.remove(['accounts', 'password']);
               store.dispatch(setAuth(false));
               navigate('/verify', {

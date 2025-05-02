@@ -338,9 +338,8 @@ class Background {
         );
         if (req.method === 'requestAccounts') {
           try {
-            const { password } = await chrome.storage.session.get('password');
-            if (password) {
-              const { accounts } = await chrome.storage.session.get('accounts');
+            const { accounts } = await chrome.storage.session.get('accounts');
+            if (accounts) {
               const defaultAccount = accounts.find((el) => el.default === true);
               const account =
                 req.network === 'solana'
