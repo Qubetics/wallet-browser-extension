@@ -1,79 +1,60 @@
-const CryptoJS = require("crypto-js");
+import crypto from 'crypto-browserify';
+const CryptoJS = require('crypto-js');
+const Buffer = require('safe-buffer').Buffer;
+
 
 export class SecurityHelper {
-  // Configuration constants
+  static KEY_SIZE = 32; // 256-bit key
+  static IV_SIZE = 12; // 96-bit IV for GCM
+  static TAG_SIZE = 16; // 128-bit Auth Tag
   static PBKDF2_ITERATIONS = 100000;
-  static KEY_SIZE = 256 / 32; // 256-bit key
-  static SALT_SIZE = 128 / 8; // 128-bit salt
-  static IV_SIZE = 128 / 8; // 128-bit IV
 
   /**
-   * Encrypts data using AES-256-CBC with PBKDF2 key derivation
+   * Encrypts data using AES-256-GCM with PBKDF2 key derivation
    * @param {any} payload - Data to encrypt
    * @param {string} password - Encryption password
-   * @returns {string} Encrypted data in format: salt:iv:ciphertext
+   * @returns {string} Base64-encoded string of: salt + iv + ciphertext + authTag
    */
   static encrypt(payload, password) {
-    // Generate random salt
-    const salt = CryptoJS.lib.WordArray.random(this.SALT_SIZE);
+    const salt = Buffer.from(
+      CryptoJS.lib.WordArray.random(16).toString(CryptoJS.enc.Hex),
+      'hex'
+    );
+    const iv = crypto.randomBytes(this.IV_SIZE);
+    const key = crypto.pbkdf2Sync(password, salt, this.PBKDF2_ITERATIONS, this.KEY_SIZE, 'sha256');
 
-    // Generate random IV
-    const iv = CryptoJS.lib.WordArray.random(this.IV_SIZE);
-    
-    // Derive key using PBKDF2
-    const key = CryptoJS.PBKDF2(password, salt, {
-      keySize: this.KEY_SIZE,
-      iterations: this.PBKDF2_ITERATIONS,
-      hasher: CryptoJS.algo.SHA256
-    });
-    
-    // Encrypt the data
-    const encrypted = CryptoJS.AES.encrypt(JSON.stringify(payload), key, { 
-      iv: iv,
-      padding: CryptoJS.pad.Pkcs7,
-      mode: CryptoJS.mode.CBC
-    });
-    
-    // Combine salt, IV and ciphertext
-    return salt.toString() + iv.toString() + encrypted.toString();
+    const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
+    const data = Buffer.from(JSON.stringify(payload));
+    const encrypted = Buffer.concat([cipher.update(data), cipher.final()]);
+    const authTag = cipher.getAuthTag();
+
+    const result = Buffer.concat([salt, iv, encrypted, authTag]);
+    return result.toString('base64');
   }
 
   /**
-   * Decrypts data encrypted with the above method
-   * @param {string} payload - Encrypted data in format salt:iv:ciphertext
+   * Decrypts data encrypted with AES-256-GCM
+   * @param {string} payload - Base64-encoded encrypted data
    * @param {string} password - Decryption password
-   * @returns {any|boolean} Decrypted data or false if decryption fails
+   * @returns {any|boolean} Decrypted JSON string or false on failure
    */
   static decrypt(payload, password) {
     try {
-      // Validate payload length (salt + iv = 64 hex chars)
-      if (payload.length < 64) throw new Error('Invalid payload length');
+      const rawData = Buffer.from(payload, 'base64');
 
-      // Extract components from payload
-      const salt = CryptoJS.enc.Hex.parse(payload.substring(0, 32));
-      const iv = CryptoJS.enc.Hex.parse(payload.substring(32, 64));
-      const ciphertext = payload.substring(64);
-      
-      // Derive key using same parameters
-      const key = CryptoJS.PBKDF2(password, salt, {
-        keySize: this.KEY_SIZE,
-        iterations: this.PBKDF2_ITERATIONS,
-        hasher: CryptoJS.algo.SHA256
-      });
-      
-      // Decrypt the data
-      const decrypted = CryptoJS.AES.decrypt(ciphertext, key, {
-        iv: iv,
-        padding: CryptoJS.pad.Pkcs7,
-        mode: CryptoJS.mode.CBC
-      });
-      
-      // Convert to UTF-8 and parse JSON
-      const decryptedStr = decrypted.toString(CryptoJS.enc.Utf8);
-      if (!decryptedStr) throw new Error("Decryption failed - empty result");
-      
-      return decryptedStr;
-    } catch (error) {
+      const salt = rawData.slice(0, 16);
+      const iv = rawData.slice(16, 28);
+      const authTag = rawData.slice(rawData.length - this.TAG_SIZE);
+      const ciphertext = rawData.slice(28, rawData.length - this.TAG_SIZE);
+
+      const key = crypto.pbkdf2Sync(password, salt, this.PBKDF2_ITERATIONS, this.KEY_SIZE, 'sha256');
+
+      const decipher = crypto.createDecipheriv('aes-256-gcm', key, iv);
+      decipher.setAuthTag(authTag);
+
+      const decrypted = Buffer.concat([decipher.update(ciphertext), decipher.final()]);
+      return decrypted.toString();
+    } catch (err) {
       return false;
     }
   }

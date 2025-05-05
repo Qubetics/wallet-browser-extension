@@ -135,7 +135,7 @@ function EmailAddress() {
     }
 
     const password  = sessionPassword ; 
-    const encryptedData = SecurityHelper.encrypt({ ...user, key }, password);
+    const encryptedData = await SecurityHelper.encrypt({ ...user, key }, password);
 
     await chrome.storage.local.set({
       spritzData: encryptedData,

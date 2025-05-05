@@ -178,7 +178,9 @@ function SendConfirm() {
               coin.coin.token_type,
               '',
               coin.coin.coin_family,
-              gasPriceType
+              gasPriceType,
+              undefined,
+              sessionPassword
             );
 
           if (!response) {
@@ -244,6 +246,9 @@ function SendConfirm() {
               coin?.coin?.decimals,
               coin.coin.token_type,
               coin.balance,
+              undefined,
+              undefined,
+              undefined,
               sessionPassword
             );
           if (!response) {

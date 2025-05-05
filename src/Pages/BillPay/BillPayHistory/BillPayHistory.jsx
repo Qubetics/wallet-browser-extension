@@ -18,9 +18,7 @@ import BillPayHistryList from '../../../Components/BillPayHistryList/BillPayHist
 function BillPayHistorySpritz() {
   const [payments, setPayments] = useState([]);
   const { billList } = useSelector((state) => state);
-  console.log('Bill LIST IN BILPAY HISTORY::', billList);
   const { state } = useLocation();
-  console.log('STATE IN BILPAY HISTORY:::', state);
   const init = async () => {
     if (billList.length === 0) {
       store.dispatch(setLoading(false));

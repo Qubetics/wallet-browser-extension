@@ -30,11 +30,13 @@ import TruncatedAddress from './TruncatedAddress';
 import { getUserAddress } from '../../helpers/getAddress';
 import fetchValoperAddress from '../../helpers/fetchValoperAddress';
 import { Wallet } from 'ethers';
+import { useLocation } from 'react-router-dom';
 
 function getFlooredFixed(v, d) {
   return (Math.floor(v * Math.pow(10, d)) / Math.pow(10, d)).toFixed(d);
 }
 export const ExternalConnection = () => {
+  const { state } = useLocation();
   const { account, currency } = useSelector((state) => state);
   const [method, setMethod] = useState(null);
   const [chainID, setChainID] = useState(null);
@@ -92,7 +94,7 @@ export const ExternalConnection = () => {
     let { accounts } = await chrome.storage.session.get('accounts');
 
     const { mnemonics } = await chrome.storage.local.get('mnemonics');
-    const decryptMnemonics = SecurityHelper.decrypt(mnemonics, sessionPassword);
+    const decryptMnemonics = await SecurityHelper.decrypt(mnemonics, sessionPassword);
     const defaultAddress = accounts?.find((item) => item.default)?.address;
     if (defaultAddress) {
       setDefaultAccounts(defaultAddress);
@@ -538,8 +540,8 @@ export const ExternalConnection = () => {
   };
   // console.log('method:::', method);
   useEffect(() => {
-    init();
-  }, [account,sessionPassword]);
+    init(state?.password);
+  }, [account,state]);
 
   return (
     <>

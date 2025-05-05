@@ -262,12 +262,12 @@ export class SolanaHelper {
   };
 
   async createdAssociatedAccounts(toAddress, tokenAddress, myKeyPair) {
-    // console.log(
-    //   "🚀 ~ SolanaHelper ~ createdAssociatedAccounts ~ toAddress, tokenAddress, myKeyPair:",
-    //   toAddress,
-    //   tokenAddress,
-    //   myKeyPair
-    // );
+    console.log(
+      "🚀 ~ SolanaHelper ~ createdAssociatedAccounts ~ toAddress, tokenAddress, myKeyPair:",
+      toAddress,
+      tokenAddress,
+      myKeyPair
+    );
     const tokenMint = new PublicKey(tokenAddress);
     const myToken = new splToken.Token(
       this.connection,
@@ -276,12 +276,18 @@ export class SolanaHelper {
       myKeyPair
     );
 
+
+
     const fromTokenAccount = await myToken.getOrCreateAssociatedAccountInfo(
       myKeyPair.publicKey
     );
+
+    console.log('fromTokenAccount',fromTokenAccount)
     const toTokenAccount = await myToken.getOrCreateAssociatedAccountInfo(
       new PublicKey(toAddress)
     );
+
+    console.log('toTokenAccount',toTokenAccount)
 
     return {
       fromTokenAccount,
@@ -311,15 +317,15 @@ export class SolanaHelper {
   ) => {
     try {
       const { account } = store.getState();
-      // console.log("GENERATE ROW TRANSACTION :",password)
+      console.log("GENERATE ROW TRANSACTION :",password)
       const mnemonics = await WalletHelper.getMnemonicsByPassword(account.address,password);
       if (!mnemonics) {
         return false;
       }
       const myKeyPair = await this.generateSolanaAddress1(mnemonics);
-      // console.log("🚀 ~ SolanaHelper ~ myKeyPair:", myKeyPair);
+      console.log("🚀 ~ SolanaHelper ~ myKeyPair:", myKeyPair);
       const tokenBalance = balance;
-      // console.log('AMOUNT::', amount, 'TOKEN BALANCE::', tokenBalance);
+      console.log('AMOUNT::', amount, 'TOKEN BALANCE::', tokenBalance);
       if (amount > tokenBalance) {
         return false;
       }

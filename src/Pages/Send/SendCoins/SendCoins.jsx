@@ -899,6 +899,12 @@ function SendCoins() {
     }
   };
 
+  // useEffect(()=>{
+  //    if(isModalOpen){
+  //    setSessionPassword('')
+  //    }
+  // },[isModalOpen])
+
   return (
     <div className={`scrollableCont ${style.send}`}>
       {contextHolder}
@@ -1166,7 +1172,7 @@ function SendCoins() {
         <div>
           <ButtonComp
             onClick={() =>{
-              setSessionPassword(null)
+              setSessionPassword('')
               setConfirmModal(!isModalOpen)
             }}
             text={'Send'}
@@ -1267,6 +1273,7 @@ function SendCoins() {
         <div className="viewphrases">
           <InputFieldSimple
             placeholder="Password"
+            value={sessionPassword}
             getData={(value) => {
               const hasEmoji = /[\p{Extended_Pictographic}]/u.test(value);
               if (value.length <= 100 && !hasEmoji) {

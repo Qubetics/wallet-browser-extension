@@ -21,7 +21,6 @@ import { DURATION } from "../../config/message.config";
 import Search from "../../Assets/SearchIcon.svg";
 function CreditBillPay() {
   const { state } = useLocation();
-  console.log(state, "state");
   const { theme, account, currency, bankAccount } = useSelector(
     (state) => state
   );

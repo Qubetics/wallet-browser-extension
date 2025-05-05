@@ -68,7 +68,7 @@ export default function TokenDrawer({
     }
 
     const { password } = await chrome.storage.session.get('password');
-    const encryptedData = SecurityHelper.encrypt({ ...user, key }, password);
+    const encryptedData = await SecurityHelper.encrypt({ ...user, key }, password);
 
     await chrome.storage.local.set({
       spritzData: encryptedData,

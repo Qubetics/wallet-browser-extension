@@ -29,11 +29,7 @@ function Setting() {
   const ZENDESK_KEY = "REDACTED";
   const [open, setOpen] = useState(false);
   const [openHelp, setOpenHelp] = useState(false);
-
   const { state } = useLocation();
-
-  console.log("state", state)
-
   const { chain, account } = useSelector((state) => state);
   const navigate = useNavigate();
   const [password, setPassword] = useState(null);
