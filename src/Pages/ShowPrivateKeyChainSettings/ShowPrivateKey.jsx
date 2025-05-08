@@ -20,8 +20,7 @@ function ShowPrivateKey() {
   } = useLocation();
 
   const init = async () => {
-    const key = await WalletHelper.getPrivateKeyWithPassword(password);
-    const privateKey = bs58.encode(key);
+    const { privateKey } = await WalletHelper.getPrivateKeyWithPassword(password);
     setAddress(privateKey || '');
   };
 

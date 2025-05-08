@@ -190,7 +190,7 @@ function SendConfirm() {
             );
           }
         } else {
-          // console.log('PASSWORD IN BNB CASE : ', sessionPassword);
+          console.log('IS EVM COIN CASE ')
           const response =
             await Web3Helper.generateRawTransactionForCoinAndBroadcast(
               to,

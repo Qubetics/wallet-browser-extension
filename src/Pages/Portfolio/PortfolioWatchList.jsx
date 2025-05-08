@@ -1,57 +1,35 @@
-import React, { useEffect, useState } from "react";
-import MenuRestofHeaders from "../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders";
-import CoinsTable from "../../Components/CoinsTable/CoinsTable";
-import "./Receive.scss";
-import { useSelector } from "react-redux";
-import { InputField } from "../../Components/InputField/InputFieldSimple";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import Search from "../../Assets/SearchIcon.svg";
-import BigNumber from "bignumber.js";
+import React, { useEffect, useState } from 'react';
+import CoinsTable from '../../Components/CoinsTable/CoinsTable';
+import './Receive.scss';
+import { useSelector } from 'react-redux';
+import { InputField } from '../../Components/InputField/InputFieldSimple';
+import { useLocation, useNavigate } from 'react-router-dom';
+import Search from '../../Assets/SearchIcon.svg';
+import BigNumber from 'bignumber.js';
 import {
   addCommasToNumber,
   exponential_to_decimal,
   formatSmallNumber,
   getFlooredFixed,
-} from "../../helpers/conversion.helper";
-import { server } from "../../server";
-import { store } from "../..";
-import { setTokens } from "../../actions/tokens";
-import { QRCode } from "react-qrcode-logo";
-import { message } from "antd";
-import { DURATION } from "../../config/message.config";
-import CopyIconBlue from "../../Assets/CopyIconBlue.svg";
-import ModalCustom from "../../Components/ModalCustom/ModalCustom";
-import { setLoading } from "../../actions/loading";
-import ButtonComp from "../../Components/ButtonComp/ButtonComp";
-import GroupBtc from "../../Assets/Group.svg";
-import DeleteIcon from "../../Assets/DeleteIcon.svg";
-import { token_type } from "../../helpers/constant";
-import NoRecord from "../../Assets/no-record.svg";
+} from '../../helpers/conversion.helper';
+import { server } from '../../server';
+import { store } from '../..';
+import { message } from 'antd';
+import { DURATION } from '../../config/message.config';
+import { setLoading } from '../../actions/loading';
+import ButtonComp from '../../Components/ButtonComp/ButtonComp';
+import { token_type } from '../../helpers/constant';
+import NoRecord from '../../Assets/no-record.svg';
 
 function PortfolioWatchList() {
   const { account, currency, balanceIn } = useSelector((state) => state);
-
   const navigate = useNavigate();
   const [keyword, setKeyword] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [messageApi, contextHolder] = message.useMessage({
     duration: DURATION,
   });
-  const [selectedCoin, setSelectedCoin] = useState(null);
   const [list, setList] = useState([]);
   const [tokens, setTokens] = useState([]);
-  const [add, setAdd] = useState(false);
-  const showModal = (coin) => {
-    setIsModalOpen(true);
-    setSelectedCoin(coin);
-  };
-
-  const handleOk = () => {
-    setIsModalOpen(false);
-  };
-  const handleCancel = () => {
-    setIsModalOpen(false);
-  };
 
   const { state } = useLocation();
 
@@ -99,7 +77,7 @@ function PortfolioWatchList() {
 
   return (
     <div className={`scrollableCont send watchList`}>
-      <div style={{ marginBottom: "24px" }}>
+      <div style={{ marginBottom: '24px' }}>
         {contextHolder}
         {/* <MenuRestofHeaders
           backTo={'/wallet'}
@@ -111,7 +89,7 @@ function PortfolioWatchList() {
         {state?.nft ? null : (
           <div className="search">
             <InputField
-              placeholder={"Search"}
+              placeholder={'Search'}
               value={keyword}
               checkForSymbols={true}
               getData={(value) => {
@@ -125,7 +103,7 @@ function PortfolioWatchList() {
                   <img
                     src={Search}
                     style={{
-                      width: "17px",
+                      width: '17px',
                     }}
                     alt=""
                   />
@@ -182,7 +160,7 @@ function PortfolioWatchList() {
                       ? formatSmallNumber(
                           exponential_to_decimal(myPrice.toNumber())
                         )
-                      : "0.00",
+                      : '0.00',
                     coinStatus: getFlooredFixed(
                       price
                         ? parseFloat(
@@ -201,18 +179,18 @@ function PortfolioWatchList() {
                     currCryptoBalSymbol: token.coin_symbol.toUpperCase(),
                     currDollerBal: balanceIn
                       ? addCommasToNumber(getFlooredFixed(formattedResult, 2))
-                      : "****",
-                    routeTo: "no-where",
+                      : '****',
+                    routeTo: 'no-where',
                     // type: token.coin_family === 1 ? "BEP20" : "ERC20",
                     type:
-                      token.is_token !== 0 ? token_type(token.coin_family) : "",
+                      token.is_token !== 0 ? token_type(token.coin_family) : '',
                     status: true,
                     coin: token,
                     currPriceValue: priceData,
                     watch: async () => {
                       try {
                         await server.post(
-                          "wallet/updateWatchlist",
+                          'wallet/updateWatchlist',
                           {
                             data: [
                               {
@@ -231,7 +209,7 @@ function PortfolioWatchList() {
                         init();
                       } catch (error) {
                         messageApi.error(
-                          "Unable to favourite the selected coin"
+                          'Unable to favourite the selected coin'
                         );
                       }
                     },
@@ -245,8 +223,8 @@ function PortfolioWatchList() {
               <p
                 className="noAddress"
                 style={{
-                  fontWeight: "bold",
-                  fontSize: "17px",
+                  fontWeight: 'bold',
+                  fontSize: '17px',
                 }}
               >
                 No record found
@@ -255,13 +233,13 @@ function PortfolioWatchList() {
           )}
         </div>
       </div>
-      <div style={{ marginTop: "15px" }}>
+      <div style={{ marginTop: '15px' }}>
         <ButtonComp
           onClick={() =>
-            navigate("/add-watch-list", { state: { isFromPortfolio: true } })
+            navigate('/add-watch-list', { state: { isFromPortfolio: true } })
           }
-          text={"Add Tokens"}
-          maxWidth={"100%"}
+          text={'Add Tokens'}
+          maxWidth={'100%'}
         />
       </div>
     </div>

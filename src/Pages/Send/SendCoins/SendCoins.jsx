@@ -538,7 +538,7 @@ function SendCoins() {
     // }
 
     if (!amount) {
-      console.log('VALID AMOUNT');
+      console.log('INVALID AMOUNT');
       store.dispatch(setLoading(false));
       return messageApi.error('Please enter a valid amount to proceed.');
     }

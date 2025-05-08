@@ -94,11 +94,11 @@ export class UniswapHelper {
     try {
       slug = slug=='matic'?'polygon':slug;
       const { account } = store.getState();
-      const WALLET_SECRET = await WalletHelper.getPrivateKeyEvm(sessionPassword);
-      console.log(
-        "🚀 ~ file: pancake.helper.js:129 ~ PancakeHelper ~ sendForApproval ~ WALLET_SECRET:",
-        WALLET_SECRET
-      );
+      const { privateKey } = await WalletHelper.getPrivateKeyEvm(sessionPassword);
+      // console.log(
+      //   "🚀 ~ file: pancake.helper.js:129 ~ PancakeHelper ~ sendForApproval ~ privateKey:",
+      //   privateKey
+      // );
       const contract = new ethers.Contract(
         tokenAddress, // The address of the ERC20 token contract
         ABI, // Replace with the actual ABI of the ERC20 token contract
@@ -153,7 +153,7 @@ export class UniswapHelper {
       console.log(approveTx);
 
       // Sign the transaction with the wallet's private key
-      const wallet = new ethers.Wallet(WALLET_SECRET, this.web3Provider);
+      const wallet = new ethers.Wallet(privateKey, this.web3Provider);
       console.log(
         "🚀 ~ file: pancake.helper.js:149 ~ PancakeHelper ~ sendForApproval ~ wallet:",
         wallet
@@ -231,8 +231,8 @@ export class UniswapHelper {
 
         console.log('RESPONSE FROM API : ',data)
 
-        const WALLET_SECRET = await WalletHelper.getPrivateKeyEvm(sessionPassword);
-
+        const { privateKey } = await WalletHelper.getPrivateKeyEvm(sessionPassword);
+        // console.log('privateKey',privateKey)
         const gasPrice = await Web3Helper.getGasPrice(
           slug,
           walletAddress,
@@ -250,7 +250,7 @@ export class UniswapHelper {
           walletAddress
         );
 
-        // console.log("NONCE-----> ", nonce);
+        console.log("NONCE-----> ", nonce);
         
         const increasedGasLimitDecimal = (
           Number(data.data.tx.gas) * 1.5
@@ -267,7 +267,8 @@ export class UniswapHelper {
           chainId: parseInt(token1.chain.chainId),
         };
 
-        const wallet = new ethers.Wallet(WALLET_SECRET, this.web3Provider);
+        const wallet = new ethers.Wallet(privateKey, this.web3Provider);
+        console.log('wallet',wallet);
         const signedTransaction = await wallet.signTransaction(transaction);
 
         console.log("signedTransactionsignedTransaction ", signedTransaction);
@@ -300,7 +301,7 @@ export class UniswapHelper {
         return response.data.tx_hash;
       }
     } catch (error) {
-      console.log("SEND ERROR : ", error?.response?.data?.message);
+      console.log("SEND ERROR : ", error);
       return error?.response?.data?.message?error?.response?.data:false;
     }
   }
@@ -335,7 +336,7 @@ export class UniswapHelper {
       );
 
       const { account } = store.getState();
-      const WALLET_SECRET = await WalletHelper.getPrivateKey();
+      const { privateKey } = await WalletHelper.getPrivateKey();
       const increasedGasLimitDecimal = gasLimit * 2;
 
       const web3 = new Web3();
@@ -354,7 +355,7 @@ export class UniswapHelper {
           : contract.methods.deposit().encodeABI(),
       };
 
-      const wallet = new ethers.Wallet(WALLET_SECRET, this.web3Provider);
+      const wallet = new ethers.Wallet(privateKey, this.web3Provider);
       const signedTransaction = await wallet.signTransaction(transaction);
 
       const response = await server.post(

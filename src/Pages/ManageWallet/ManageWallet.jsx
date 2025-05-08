@@ -943,6 +943,7 @@ function ManageWallet() {
 
       <ModalCustom
           title={"Password"}
+          handleCancel={()=> setModalOpen(!isModalOpen)}
           isModalOpen={isModalOpen}
           customClass="customClassModal"
         >

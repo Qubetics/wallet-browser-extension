@@ -471,7 +471,7 @@ export class SolanaHelper {
     }
   };
 
-  signRawTransaction = async (raw, instructions) => {
+  signRawTransaction = async (raw, instructions, sessionPassword) => {
     console.log(
       "🚀 ~ SolanaHelper ~ signRawTransaction= ~ transaction:",
       instructions
@@ -481,25 +481,27 @@ export class SolanaHelper {
     try {
       const { account } = store.getState();
 
-      const mnemonics = await WalletHelper.getMnemonics(account.address);
+      const mnemonics = await WalletHelper.getMnemonicsByPassword(account.address,sessionPassword);
       console.log(
         "🚀 ~ SolanaHelper ~ signRawTransaction= ~ mnemonics:",
-        mnemonics
+        // mnemonics,
+        sessionPassword,
+        account.address
       );
       if (!mnemonics) {
         return false;
       }
       const myKeyPair = await this.generateSolanaAddress1(mnemonics);
-      console.log(
-        "🚀 ~ SolanaHelper ~ signRawTransaction= ~ myKeyPair:",
-        myKeyPair
-      );
+      // console.log(
+      //   "🚀 ~ SolanaHelper ~ signRawTransaction= ~ myKeyPair:",
+      //   myKeyPair
+      // );
 
       let solanaWallet = new SolanaWallet(myKeyPair.secretKey);
-      console.log(
-        "🚀 ~ SolanaHelper ~ signRawTransaction= ~ solanaWallet:",
-        solanaWallet
-      );
+      // console.log(
+      //   "🚀 ~ SolanaHelper ~ signRawTransaction= ~ solanaWallet:",
+      //   solanaWallet
+      // );
       const { signature } = await solanaWallet.signTransaction(
         account.coinFamilyAndAddress[4],
         { ...instructions, partialSignatures: [] }
@@ -513,7 +515,7 @@ export class SolanaHelper {
       // return result;
       return signature;
     } catch (error) {
-      console.log("-----------error", error);
+      console.log("Error signing transaction:", error);
       let message = error?.message;
       let arr = message.split(" ");
       let findIndex = arr?.indexOf("Signature");

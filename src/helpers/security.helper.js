@@ -22,7 +22,6 @@ export class SecurityHelper {
     );
     const iv = crypto.randomBytes(this.IV_SIZE);
     const key = crypto.pbkdf2Sync(password, salt, this.PBKDF2_ITERATIONS, this.KEY_SIZE, 'sha256');
-
     const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
     const data = Buffer.from(JSON.stringify(payload));
     const encrypted = Buffer.concat([cipher.update(data), cipher.final()]);
@@ -48,7 +47,6 @@ export class SecurityHelper {
       const ciphertext = rawData.slice(28, rawData.length - this.TAG_SIZE);
 
       const key = crypto.pbkdf2Sync(password, salt, this.PBKDF2_ITERATIONS, this.KEY_SIZE, 'sha256');
-
       const decipher = crypto.createDecipheriv('aes-256-gcm', key, iv);
       decipher.setAuthTag(authTag);
 

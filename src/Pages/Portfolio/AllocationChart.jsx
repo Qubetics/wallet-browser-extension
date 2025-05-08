@@ -1,11 +1,9 @@
-import React, { useState, useEffect } from "react";
-import Chart from "react-apexcharts";
-import { useSelector } from "react-redux";
-import { store } from "../..";
-import { setLoading } from "../../actions/loading";
-import { server } from "../../server";
-import BTC from "../../Assets/Coins/BTC.png";
-import CryptoS from "../../Assets/CryptoS.svg";
+import React, { useState, useEffect } from 'react';
+import Chart from 'react-apexcharts';
+import { useSelector } from 'react-redux';
+import { store } from '../..';
+import { setLoading } from '../../actions/loading';
+import { server } from '../../server';
 
 const stringToColour = function (name) {
   let hash = 0;
@@ -17,9 +15,9 @@ const stringToColour = function (name) {
   const g = ((hash >> 5) & 0x3f) + 96;
   const b = ((hash >> 10) & 0x7f) + 160;
 
-  return `#${("00" + r.toString(16)).slice(-2)}${("00" + g.toString(16)).slice(
+  return `#${('00' + r.toString(16)).slice(-2)}${('00' + g.toString(16)).slice(
     -2
-  )}${("00" + b.toString(16)).slice(-2)}`;
+  )}${('00' + b.toString(16)).slice(-2)}`;
 };
 
 const AllocationChart = () => {
@@ -32,25 +30,25 @@ const AllocationChart = () => {
 
   const [chartOptions, setChartOptions] = useState({
     chart: {
-      type: "donut",
+      type: 'donut',
     },
     stroke: {
       show: true,
-      curve: "straight",
-      lineCap: "butt",
-      colors: ["#000"],
+      curve: 'straight',
+      lineCap: 'butt',
+      colors: ['#000'],
       width: 1,
     },
     labels: [],
     plotOptions: {
       pie: {
         donut: {
-          size: "55%",
+          size: '55%',
           labels: {
             total: {
-              label: "Total",
+              label: 'Total',
               formatter: () =>
-                `${currency?.symbol || ""} ${portfolioBalance.toFixed(2)}`,
+                `${currency?.symbol || ''} ${portfolioBalance.toFixed(2)}`,
             },
           },
         },
@@ -60,9 +58,9 @@ const AllocationChart = () => {
       enabled: false,
     },
     legend: {
-      position: "right",
+      position: 'right',
       labels: {
-        colors: "#fff",
+        colors: '#fff',
         // useSeriesColors: true, // Use series colors for legend items
       },
       formatter: function (seriesName, opts) {
@@ -86,7 +84,7 @@ const AllocationChart = () => {
           page: 1,
           limit: 100,
           coin_family: account?.coinFamilies,
-          search: "",
+          search: '',
           addressListKeys: account?.addressLists,
           fiat_type: currency?.name,
         },
@@ -125,12 +123,12 @@ const AllocationChart = () => {
       //       totalBalance) *
       //     100,
       // }));
-      console.log("PORTFOLIO DATA", portfolioData);
+      console.log('PORTFOLIO DATA', portfolioData);
       const percentages = portfolioData
         .filter((obj) => parseFloat(obj?.balance) > 0 && obj?.balance !== null)
         .map((obj) => ({
-          name: obj?.coin?.coin_name || "Unknown",
-          symbol: obj?.coin?.coin_symbol || "Unknown",
+          name: obj?.coin?.coin_name || 'Unknown',
+          symbol: obj?.coin?.coin_symbol || 'Unknown',
           percentage:
             ((parseFloat(obj?.balance) *
               parseFloat(obj?.coin?.fiat_price_data?.value || 0)) /
@@ -138,10 +136,12 @@ const AllocationChart = () => {
             100,
         }));
 
-      console.log("PERCENTAGE CONSOLE", percentages);
+      console.log('PERCENTAGE CONSOLE', percentages);
 
       const names = percentages.map((item) => item.name);
+      console.log('names', names);
       const series = percentages.map((item) => parseFloat(item.percentage));
+      console.log('series', series);
       // const namesWithPercentages = percentages.map(
       //   (item) => `${item.name}   ${item.percentage.toFixed(2)}%`
       // );
@@ -163,22 +163,39 @@ const AllocationChart = () => {
         stringToColour(_?.name)
       );
 
-      setChartOptions((prev) => ({
-        ...prev,
-        labels: names,
-        colors: chartColors,
-        legend: {
-          ...prev.legend,
-          formatter: function (seriesName, opts) {
-            const index = opts.w.globals.seriesNames.indexOf(seriesName);
-            return namesWithPercentages[index]; // Use namesWithPercentages for the legend
+      setChartOptions((prev) => {
+        console.log('prev', prev);
+        return {
+          ...prev,
+          labels: names,
+          colors: chartColors,
+          legend: {
+            ...prev.legend,
+            formatter: function (seriesName, opts) {
+              console.log(
+                'Series Index:',
+                opts.seriesIndex,
+                'Series Name:',
+                seriesName,
+                'Mapped Name:',
+                namesWithPercentages[opts.seriesIndex]
+              );
+              console.log('seriesName', seriesName);
+              const index = opts.seriesIndex;
+              console.log('index', index);
+              console.log(
+                'namesWithPercentages[index]',
+                namesWithPercentages[index]
+              );
+              return namesWithPercentages[index]; // Use namesWithPercentages for the legend
+            },
           },
-        },
-      }));
+        };
+      });
 
       store.dispatch(setLoading(false));
     } catch (error) {
-      console.error("Portfolio fetch error:", error);
+      console.error('Portfolio fetch error:', error);
       store.dispatch(setLoading(false));
     }
   };
@@ -191,8 +208,8 @@ const AllocationChart = () => {
     if (!chartSeries.length || chartSeries.every((val) => val === 0)) {
       setChartOptions((prev) => ({
         ...prev,
-        colors: ["#1413132e"],
-        labels: ["No Data"],
+        colors: ['#1413132e'],
+        labels: ['No Data'],
       }));
       setChartSeries([100]);
     }
@@ -202,8 +219,8 @@ const AllocationChart = () => {
     <div
       className="allocation-chart"
       style={{
-        color: "#fff",
-        margin: "0 auto",
+        color: '#fff',
+        margin: '0 auto',
       }}
     >
       <div className="chartBalance">
@@ -214,7 +231,7 @@ const AllocationChart = () => {
           {currency?.symbol} {portfolioBalance.toFixed(2)}
         </h1>
       </div>
-      <div style={{ position: "relative", overflow: "hidden" }}>
+      <div style={{ position: 'relative', overflow: 'hidden' }}>
         {portfolioBalance > 0 && (
           <Chart
             options={chartOptions}
@@ -237,7 +254,7 @@ const AllocationChart = () => {
                 <div className="coinsTable1__left__icon">
                   {itm?.coin?.coin_image ? (
                     <img
-                      style={{ height: 35, width: 35, borderRadius:50 }}
+                      style={{ height: 35, width: 35, borderRadius: 50 }}
                       src={itm?.coin?.coin_image}
                       alt=""
                     />
@@ -245,17 +262,17 @@ const AllocationChart = () => {
                     <div
                       className="randb extra borderDarkLight"
                       style={{
-                        height: "30px",
-                        width: "30px",
-                        background: "rgb(202, 201, 201)",
-                        borderRadius: "50%",
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        border: "1px solid",
+                        height: '30px',
+                        width: '30px',
+                        background: 'rgb(202, 201, 201)',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        border: '1px solid',
                       }}
                     >
-                      {itm?.coin?.coin_symbol.split("")[0].toUpperCase()}
+                      {itm?.coin?.coin_symbol.split('')[0].toUpperCase()}
                     </div>
                   )}
                 </div>
@@ -267,8 +284,8 @@ const AllocationChart = () => {
                   </div>
 
                   <div>
-                    <span style={{ color: "#98969B" }}>Percentage</span>
-                    <span style={{ color: "#7DB0FF", marginLeft: "5px" }}>
+                    <span style={{ color: '#98969B' }}>Percentage</span>
+                    <span style={{ color: '#7DB0FF', marginLeft: '5px' }}>
                       {portfolioBalance &&
                         (
                           ((parseFloat(itm?.balance) *
@@ -284,7 +301,7 @@ const AllocationChart = () => {
                 </div>
               </div>
               <div className="coinsTable1__right">
-                <span style={{ color: "#FFFFFF" }}>
+                <span style={{ color: '#FFFFFF' }}>
                   {currency?.symbol}
                   {(
                     parseFloat(itm?.balance) *
@@ -293,7 +310,7 @@ const AllocationChart = () => {
                 </span>
 
                 <span>
-                  <span style={{ color: "#98969B", marginLeft: "5px" }}>
+                  <span style={{ color: '#98969B', marginLeft: '5px' }}>
                     Amount
                   </span>
                 </span>

@@ -21,7 +21,6 @@ import createValidator from '../../helpers/createValidator';
 import bondMoreFunds from '../../helpers/bondMoreFunds';
 import unBondFunds from '../../helpers/unBondFunds';
 import unJailValidator from '../../helpers/unjailValidator';
-import stopDeactivating from '../../helpers/stopDeactivating';
 import { SecurityHelper } from '../../helpers/security.helper';
 import editValidator from '../../helpers/editValidator';
 import delagteAndBondMore from '../../helpers/delegatorBondMoreFunds';
@@ -88,7 +87,7 @@ export const ExternalConnection = () => {
   };
 
   const init = async () => {
-    console.log('EXTERNALLLLLLLLLLLLLL ');
+    // console.log('EXTERNALLLLLLLLLLLLLL ');
 
     const { chains } = await chrome.storage.local.get('chains');
     let { accounts } = await chrome.storage.session.get('accounts');
@@ -120,7 +119,7 @@ export const ExternalConnection = () => {
             : null;
           setData(data);
           setChainID(Web3.utils.toDecimal(data.chainId));
-          // console.log('EXTERNAL CONN DATA::', data,"account::",account);
+          console.log('EXTERNAL CONN DATA::', data,"account::",account);
 
           if (data.network === 'qubetics') {
             if (method === 'nativeConnect' && defaultAddressPhrase) {
@@ -218,10 +217,10 @@ export const ExternalConnection = () => {
             setMethod('signTransaction');
             store.dispatch(setLoading(false));
           } else if (method === 'signTypedMessage' && account) {
-            console.log('Rightplace::::::::: ', data?.raw);
+            // console.log('Rightplace::::::::: ', data?.raw);
 
             let approvalParam = JSON.parse(data?.raw);
-            console.log('approvalParamapprovalParam', approvalParam);
+            // console.log('approvalParamapprovalParam', approvalParam);
             let typeArr = Object.keys(approvalParam.types);
             let newTypes = {};
             typeArr.map((el) => {
@@ -237,7 +236,7 @@ export const ExternalConnection = () => {
             setData(data);
             // console.log("DATA SETTING ", data);
             setMethod('signTypedMessage');
-            console.log('---------newParams:::::', newParams);
+            // console.log('---------newParams:::::', newParams);
             setParams(newParams);
             store.dispatch(setLoading(false));
           } else if (method === 'signRawTransaction' && account) {
@@ -251,38 +250,38 @@ export const ExternalConnection = () => {
             store.dispatch(setLoading(false));
           } else if (method === 'switchEthereumChain' && account) {
             const { chains } = await chrome.storage.local.get('chains');
-            console.log('CHAINNNNNNNNNNNNN ', chains);
+            // console.log('CHAINNNNNNNNNNNNN ', chains);
 
             const switchChain = chains.find(
               (el) => el.chainId == Web3.utils.toDecimal(data.chainId)
             );
 
             setFromChain(myDefaultChain);
-            console.log('switchChainswitchChainswitchChain ', switchChain);
+            // console.log('switchChainswitchChainswitchChain ', switchChain);
             setToChain(switchChain);
             // await chrome.storage.local.set({
             //   chains: switchChain,
             // });
             setMethod('switchEthereumChain');
-            console.log('DATA SETTING ', data);
+            // console.log('DATA SETTING ', data);
             setData(data);
           }
         } catch (error) {
-          console.log('Error In GAS Estimate ', error);
           console.log(error);
         }
       }
     );
   };
   const handleResponse = async (result, error) => {
+    console.log('HANDLE RESPOSNE')
     // await chrome.storage.session.set({ isApproved: true });
     const { isApproved } = await chrome.storage.local.get('isApproved');
-    console.log(
-      '🚀 ~ file: ExternalConnections.jsx:187 ~ handleResponse ~ result 11',
-      result,
-      'isApproved::',
-      isApproved
-    );
+    // console.log(
+    //   '🚀 ~ file: ExternalConnections.jsx:187 ~ handleResponse ~ result 11',
+    //   result,
+    //   'isApproved::',
+    //   isApproved
+    // );
     chrome.runtime.sendMessage({ method, result }, (response) => {
       chrome.windows.getCurrent(async function (window) {
         await chrome.storage.local.set({ isApproved: true });
@@ -292,20 +291,22 @@ export const ExternalConnection = () => {
   };
 
   const handleTransaction = async () => {
+    console.log('HANDLE TRANSACTION')
     try {
       store.dispatch(setLoading(true));
       if (data.network === 'solana') {
-        console.log(
-          '🚀 ~ file: ExternalConnections.jsx:105 ~ handleTransaction ~ data',
-          data
-        );
+        // console.log(
+        //   '🚀 ~ file: ExternalConnections.jsx:105 ~ handleTransaction ~ data',
+        //   data
+        // );
         const solanaHelper = new SolanaHelper(process.env.REACT_APP_SOL_RPC);
-        console.log(typeof data.object.data);
+        // console.log(typeof data.object.data);
         const signature = await solanaHelper.signRawTransaction(
           data.object.raw,
           typeof data.object.data === 'string'
             ? JSON.parse(data.object.data)
-            : data.object.data
+            : data.object.data,
+            sessionPassword
         );
         store.dispatch(setLoading(false));
         if (signature) {
@@ -354,7 +355,7 @@ export const ExternalConnection = () => {
               code: response.code,
             };
 
-            console.log('result:::editValidator', response);
+            // console.log('result:::editValidator', response);
             handleResponse({ type: 'success', data: extractDataFromResp });
             store.dispatch(setLoading(false));
             return;
@@ -385,7 +386,7 @@ export const ExternalConnection = () => {
             data.nodeUrl
           );
           if (response) {
-            console.log('RESPO:::', response);
+            // console.log('RESPO:::', response);
             handleResponse({ type: 'success', data: response });
             store.dispatch(setLoading(false));
             return;
@@ -400,7 +401,7 @@ export const ExternalConnection = () => {
             data.stakeAmount,
             data.nodeUrl
           );
-          console.log('RESPO: redelegate::', response);
+          // console.log('RESPO: redelegate::', response);
           if (response) {
             const extractDataFromResp = {
               transactionHash: response.transactionHash,
@@ -412,7 +413,7 @@ export const ExternalConnection = () => {
             return;
           }
         } else if (data.method === 'unBondFunds') {
-          console.log('I am unBondFunds called::', data);
+          // console.log('I am unBondFunds called::', data);
           const response = await unBondFunds(
             // data.mnemonics,
             defaultAddressPhrase,
@@ -423,13 +424,13 @@ export const ExternalConnection = () => {
             // data.maxClicked,
             // data.totalAmount
           );
-          console.log('RETURN RESP unBondFunds::', response);
+          // console.log('RETURN RESP unBondFunds::', response);
           if (response) {
             handleResponse({ type: 'success', data: response });
             store.dispatch(setLoading(false));
           }
         } else if (data.method === 'stopValidator') {
-          console.log('I am stopValidator called::', data);
+          // console.log('I am stopValidator called::', data);
           const response = await unBondFunds(
             // data.mnemonics,
             defaultAddressPhrase,
@@ -438,7 +439,7 @@ export const ExternalConnection = () => {
             data.unBoundAmt,
             data.nodeUrl
           );
-          console.log('RETURN RESP stopValidator::', response);
+          // console.log('RETURN RESP stopValidator::', response);
           if (response) {
             handleResponse({ type: 'success', data: response });
             store.dispatch(setLoading(false));
@@ -450,16 +451,16 @@ export const ExternalConnection = () => {
             data.valoperAddress,
             data.nodeUrl
           );
-          console.log('RETURN RESP unJailValidator::', response);
+          // console.log('RETURN RESP unJailValidator::', response);
           if (response) {
             handleResponse({ type: 'success', data: response });
             store.dispatch(setLoading(false));
           }
         }
       } else if (method === 'signTypedMessage') {
-        console.log('XXXXX :: ', data);
+        // console.log('XXXXX :: ', data);
 
-        const privateKey = await WalletHelper.getPrivateKey();
+        const {privateKey} = await WalletHelper.getPrivateKeyEvm(sessionPassword);
         if (!privateKey) {
           return false;
         }
@@ -474,7 +475,7 @@ export const ExternalConnection = () => {
           });
       } else {
         const gasLimit = Web3.utils.toDecimal(data.gas);
-        // console.log("gasLimit TRX ", gasLimit);
+        console.log("gasLimit TRX ", gasLimit);
         const { chains } = await chrome.storage.local.get('chains');
         const myDefaultChain = chains.find((el) => el.default);
         const symbol =
@@ -504,7 +505,8 @@ export const ExternalConnection = () => {
             gasLimitNew || gasLimit,
             chain.coinFamily,
             data.value,
-            symbol
+            symbol,
+            sessionPassword
           );
 
         console.log(
@@ -513,6 +515,7 @@ export const ExternalConnection = () => {
         );
 
         if (hash.error) {
+          console.log('error', hash.error)
           store.dispatch(setLoading(false));
           return message.error(hash.error);
         }
@@ -520,7 +523,7 @@ export const ExternalConnection = () => {
         handleResponse(hash);
       }
     } catch (error) {
-      console.log(error);
+      console.log('error while doing transaction ',error);
     }
   };
 
@@ -773,6 +776,7 @@ export const ExternalConnection = () => {
                       <ButtonComp
                         maxWidth="100%"
                         onClick={async () => {
+                          console.log('REJECTED 1')
                           handleResponse(null);
                         }}
                         text="Reject"
@@ -904,7 +908,6 @@ export const ExternalConnection = () => {
                   </div>
 
                   <div className={'swapDetails__border'}></div>
-
                   <div
                     style={{
                       display: 'flex',
@@ -1180,6 +1183,7 @@ export const ExternalConnection = () => {
       <ModalCustom
         title={'Enter password'}
         isModalOpen={isModalOpen}
+        handleCancel={()=> setOpenmodal(!isModalOpen)}
         customClass="customClassModal"
       >
         <div className={'swapDetails__address'}>

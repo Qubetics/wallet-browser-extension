@@ -239,10 +239,10 @@ class Background {
   constructor() {
     this.storeDefaultNetworks();
     function sendMessageToContentScript(message) {
-      console.log('i am called!!');
+      // console.log('i am called!!');
       chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
         if (tabs.length > 0) {
-          console.log('Tabs::', tabs);
+          // console.log('Tabs::', tabs);
           // message.id = tabs[0].id;
           chrome.tabs.sendMessage(tabs[0].id, message);
         } else {
@@ -447,7 +447,7 @@ class Background {
                 const { isApproved } = await chrome.storage.local.get(
                   'isApproved'
                 );
-                console.log('isApproved:::', isApproved);
+                // console.log('isApproved:::', isApproved);
                 if (!isApproved)
                   sendMessageToContentScript({
                     method: 'user_rejected',
@@ -656,7 +656,7 @@ class Background {
               const { isApproved } = await chrome.storage.local.get(
                 'isApproved'
               );
-              console.log('isApproved:::', isApproved);
+              // console.log('isApproved:::', isApproved);
               if (!isApproved)
                 sendMessageToContentScript({
                   method: 'user_rejected',
@@ -1044,7 +1044,7 @@ class Background {
 
   handleAllEthereumEvents = async () => {
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-      console.log('MESSG::', message, 'SENDER::', sender);
+      // console.log('MESSG::', message, 'SENDER::', sender);
 
       if (message.method === 'switchAccount') {
         // Process the request and prepare the data to send to content script

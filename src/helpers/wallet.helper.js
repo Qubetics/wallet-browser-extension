@@ -156,15 +156,17 @@ export class WalletHelper {
   };
 
   static getPrivateKeyEvm = async (password) => {
+    let phrase = ''
     const { mnemonics } = await chrome.storage.local.get('mnemonics');
     const decryptedMnemonics = await SecurityHelper.decrypt(mnemonics, password);
     try {
       const mnemonics = JSON.parse(decryptedMnemonics);
-      // console.log('mnemonics',mnemonics)
-      const phrase = mnemonics[0]?.phrase 
-      // console.log('phrase ',phrase)
+      mnemonics.map((item)=> {
+        if(item.default){
+          phrase = item.phrase
+        }
+      })
       const result = ethers.Wallet.fromMnemonic(phrase); 
-      // console.log('result',result)
       return result;
     } catch (error) {
       return false;
@@ -172,20 +174,18 @@ export class WalletHelper {
   };
 
   static getPrivateKeyWithPassword = async (password) => {
-    // console.log('PASSWORD IN KYC BY PASSWORD',password)
+    let phrase = '';
     const { mnemonics } = await chrome.storage.local.get('mnemonics');
     const decryptedMnemonics = await SecurityHelper.decrypt(mnemonics, password);
     try {
       const parsedMnemonis = JSON.parse(decryptedMnemonics);
-      const phrase = parsedMnemonis[0]?.phrase 
-      const seed = await bip39.mnemonicToSeed(phrase);
-      const path = `m/44'/501'/0'`;
-      const derivedSeed = derivePath(path, seed).key;
-      const account = new Account(
-        nacl.sign.keyPair.fromSeed(derivedSeed).secretKey
-      );
-      // console.log('ACCOUNT IN KEY BY PASSWORD :',account)
-      return account.secretKey;
+      parsedMnemonis.map((item)=> {
+        if(item.default){
+          phrase = item.phrase
+        }
+      })
+      const result = ethers.Wallet.fromMnemonic(phrase); 
+      return result;
     } catch (error) {
       return false;
     }
