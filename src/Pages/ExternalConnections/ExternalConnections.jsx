@@ -119,7 +119,7 @@ export const ExternalConnection = () => {
             : null;
           setData(data);
           setChainID(Web3.utils.toDecimal(data.chainId));
-          console.log('EXTERNAL CONN DATA::', data,"account::",account);
+          // console.log('EXTERNAL CONN DATA::', data,"account::",account);
 
           if (data.network === 'qubetics') {
             if (method === 'nativeConnect' && defaultAddressPhrase) {
@@ -267,7 +267,7 @@ export const ExternalConnection = () => {
             setData(data);
           }
         } catch (error) {
-          console.log(error);
+          // console.log(error);
         }
       }
     );

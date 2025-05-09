@@ -1240,16 +1240,17 @@ function Swap() {
           commision.percentage
         );
 
+        console.log('swap route',route);
+
         if (!route) {
           setLoading(false);
           return messageApi.error(
             'This pair is not available for swap at the moment. Please try again later.'
           );
         }
-
         setRoute(route);
         setAmount2(
-          new Bignumber(route.toAmount).dividedBy(Math.pow(10, token2.decimals))
+          new Bignumber(route.toAmount).dividedBy(Math.pow(10, token2.decimals)).toFixed()
         );
 
         setLoading(false);

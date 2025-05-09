@@ -633,8 +633,8 @@ function SendCoins() {
           : process.env.REACT_APP_QUBETIC_RPC
       );
 
-      console.log('NATIVE COIN BALANCE :', nativeCoinResponse);
       const nativeCoinBalance = new BigNumber(nativeCoinResponse);
+      console.log('nativeCoinBalance',nativeCoinBalance)
 
       const finalAmount = new BigNumber(amount);
       console.log('🚀 ~ finalAmount:', finalAmount.toString());

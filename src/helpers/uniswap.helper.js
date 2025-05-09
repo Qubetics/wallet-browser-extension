@@ -1,25 +1,13 @@
-import { AlphaRouter, SwapType } from "@uniswap/smart-order-router";
-import {
-  CurrencyAmount,
-  Ether,
-  Percent,
-  Token,
-  TradeType,
-} from "@uniswap/sdk-core";
+import { AlphaRouter } from "@uniswap/smart-order-router";
 import { ethers } from "ethers";
 import { BigNumber } from "bignumber.js";
 import {
   UNISWAP_NATIVE_WRAPPED_TOKEN_ADDRESSES,
-  UNI_MAINNET_ROUTER,
-  UNI_ROUTER_ABI,
-  UNI_TESTNET_ROUTER,
-  WETH_ABI,
 } from "../config/uniswap.config";
 import { ABI, WRAP_ABI } from "../config/abi";
 import { WalletHelper } from "./wallet.helper";
 import { Web3Helper } from "./web3.helper";
 import Web3 from "web3";
-import JSBI from "jsbi";
 import { server } from "../server";
 import { store } from "..";
 
@@ -30,14 +18,14 @@ export class UniswapHelper {
   chainId = null;
 
   constructor(rpcUrl) {
-    console.log(
-      "🚀 ~ file: uniswap.helper.js:33 ~ UniswapHelper ~ constructor ~ rpcUrl:",
-      rpcUrl
-    );
-    this.web3Provider = new ethers.providers.JsonRpcProvider(rpcUrl);
+    // console.log(
+    //   "🚀 ~ file: uniswap.helper.js:33 ~ UniswapHelper ~ constructor ~ rpcUrl:",
+    //   rpcUrl
+    // );
+    this.ethProvider = new ethers.providers.JsonRpcProvider(rpcUrl);
     this.router = new AlphaRouter({
       chainId: parseInt(1),
-      provider: this.web3Provider,
+      provider: this.ethProvider,
     });
     this.WETH = UNISWAP_NATIVE_WRAPPED_TOKEN_ADDRESSES[parseInt(1)].address;
     this.chainId = 1;
@@ -45,11 +33,11 @@ export class UniswapHelper {
 
   getTransactionStatusThroughHash = async (hash) => {
     try {
-      const data = await this.web3Provider.getTransactionReceipt(hash);
-      console.log(
-        "🚀 ~ file: pancake.helper.js:37 ~ PancakeHelper ~ getTransactionStatusThroughHash= ~ data:",
-        data
-      );
+      const data = await this.ethProvider.getTransactionReceipt(hash);
+      // console.log(
+      //   "🚀 ~ file: pancake.helper.js:37 ~ PancakeHelper ~ getTransactionStatusThroughHash= ~ data:",
+      //   data
+      // );
       return data.status;
     } catch (error) {
       return false;
@@ -95,14 +83,10 @@ export class UniswapHelper {
       slug = slug=='matic'?'polygon':slug;
       const { account } = store.getState();
       const { privateKey } = await WalletHelper.getPrivateKeyEvm(sessionPassword);
-      // console.log(
-      //   "🚀 ~ file: pancake.helper.js:129 ~ PancakeHelper ~ sendForApproval ~ privateKey:",
-      //   privateKey
-      // );
       const contract = new ethers.Contract(
         tokenAddress, // The address of the ERC20 token contract
         ABI, // Replace with the actual ABI of the ERC20 token contract
-        this.web3Provider // The provider you're using (e.g., Infura, Alchemy, etc.)
+        this.ethProvider // The provider you're using (e.g., Infura, Alchemy, etc.)
       );
 
       // Unlimited allowance value (2^256 - 1)
@@ -144,7 +128,10 @@ export class UniswapHelper {
       );
 
       approveTx.gasLimit = gasLimitRequired._hex;
-      approveTx.gasPrice = Web3.utils.toHex(gasPrice.fast * Math.pow(10, 9));
+      approveTx.gasPrice = ethers.utils.parseUnits(
+        Math.max(gasPrice.fast, 1).toString(),
+        "gwei"
+      );
       approveTx.from = walletAddress;
       approveTx.value = "0x0";
       approveTx.chainId = chainId;
@@ -153,7 +140,7 @@ export class UniswapHelper {
       console.log(approveTx);
 
       // Sign the transaction with the wallet's private key
-      const wallet = new ethers.Wallet(privateKey, this.web3Provider);
+      const wallet = new ethers.Wallet(privateKey, this.ethProvider);
       console.log(
         "🚀 ~ file: pancake.helper.js:149 ~ PancakeHelper ~ sendForApproval ~ wallet:",
         wallet
@@ -173,7 +160,10 @@ export class UniswapHelper {
           to: spenderAddress,
           amount: 0,
           gas_estimate: gasLimitRequired.toNumber(),
-          gas_price: gasPrice?.fast * Math.pow(10, 9),
+          gas_price: ethers.utils.parseUnits(
+            Math.max(gasPrice?.fast || 1, 1).toString(),
+            "gwei"
+          ).toString(),
           tx_type: "approve",
         },
         {
@@ -206,7 +196,7 @@ export class UniswapHelper {
       if (route) {
         const { account } = store.getState();
 
-        console.log('account : ', account);
+        console.log(' SWAP account : ', account);
 
         const { data } = await server.post(
           "/on-chain/swap",
@@ -229,10 +219,9 @@ export class UniswapHelper {
           }
         );
 
-        console.log('RESPONSE FROM API : ',data)
+        console.log('SWAP RESPONSE FROM API : ',data)
 
         const { privateKey } = await WalletHelper.getPrivateKeyEvm(sessionPassword);
-        // console.log('privateKey',privateKey)
         const gasPrice = await Web3Helper.getGasPrice(
           slug,
           walletAddress,
@@ -242,6 +231,7 @@ export class UniswapHelper {
           symbol
         );
 
+        console.log('SWAP GAS PRICE :',gasPrice)
         const nonce = await Web3Helper.getNonce(
           slug,
           isToken,
@@ -250,7 +240,7 @@ export class UniswapHelper {
           walletAddress
         );
 
-        console.log("NONCE-----> ", nonce);
+        console.log("SWAP NONCE :", nonce);
         
         const increasedGasLimitDecimal = (
           Number(data.data.tx.gas) * 1.5
@@ -261,13 +251,13 @@ export class UniswapHelper {
           to: "0x1111111254eeb25477b68fb85ed929f73a960582",
           value: Web3.utils.toHex(data.data.tx.value),
           from: walletAddress,
-          gasPrice: Web3.utils.toHex(gasPrice.fast * Math.pow(10, 9)),
+          gasPrice: Web3.utils.toHex(Math.max(gasPrice.fast * Math.pow(10, 9),1e9)),
           gasLimit: Web3.utils.toHex(increasedGasLimitDecimal),
           nonce: nonce,
           chainId: parseInt(token1.chain.chainId),
         };
 
-        const wallet = new ethers.Wallet(privateKey, this.web3Provider);
+        const wallet = new ethers.Wallet(privateKey, this.ethProvider);
         console.log('wallet',wallet);
         const signedTransaction = await wallet.signTransaction(transaction);
 
@@ -283,7 +273,7 @@ export class UniswapHelper {
             to: "0x1111111254eeb25477b68fb85ed929f73a960582",
             amount: amount,
             gas_estimate: +increasedGasLimitDecimal,
-            gas_price: gasPrice?.fast* Math.pow(10, 9),
+            gas_price: Math.max(gasPrice?.fast* Math.pow(10, 9),1e9),
             //estimate:gasPrice?.estimate
             // fast: gasPrice?.fast,
             // propose: gasPrice?.propose,
@@ -296,12 +286,12 @@ export class UniswapHelper {
             },
           }
         );
-        console.log('response',response);
+        console.log('SWAP SEND response',response);
         
         return response.data.tx_hash;
       }
     } catch (error) {
-      console.log("SEND ERROR : ", error);
+      console.log("SWAP ERROR : ", error);
       return error?.response?.data?.message?error?.response?.data:false;
     }
   }
@@ -355,7 +345,7 @@ export class UniswapHelper {
           : contract.methods.deposit().encodeABI(),
       };
 
-      const wallet = new ethers.Wallet(privateKey, this.web3Provider);
+      const wallet = new ethers.Wallet(privateKey, this.ethProvider);
       const signedTransaction = await wallet.signTransaction(transaction);
 
       const response = await server.post(

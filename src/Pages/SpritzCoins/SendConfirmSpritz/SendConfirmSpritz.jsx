@@ -1,34 +1,34 @@
 /*global chrome*/
 
-import { message } from "antd";
-import moment from "moment";
-import React from "react";
-import { useEffect } from "react";
-import { useState } from "react";
-import { useSelector } from "react-redux";
-import { useLocation, useNavigate } from "react-router-dom";
-import { store } from "../../..";
-import { setLoading } from "../../../actions/loading";
-import MenuRestofHeaders from "../../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders";
-import ButtonComp from "../../../Components/ButtonComp/ButtonComp";
-import InputFieldSimple from "../../../Components/InputField/InputFieldSimple";
-import ModalCustom from "../../../Components/ModalCustom/ModalCustom";
-import { DURATION } from "../../../config/message.config";
-import { AdaHelper } from "../../../helpers/ada.helper";
-import { BTCHelper } from "../../../helpers/btc.helper";
-import { SolanaHelper } from "../../../helpers/solana.helper";
-import { Web3Helper } from "../../../helpers/web3.helper";
-import "./SendConfirm.scss";
-import warning from "../../../Assets/PNG/warning.png";
-import DarkLogo from "../../../Assets/DarkLogo.svg";
-import Logo from "../../../Assets/logo.png";
+import { message } from 'antd';
+import moment from 'moment';
+import React from 'react';
+import { useEffect } from 'react';
+import { useState } from 'react';
+import { useSelector } from 'react-redux';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { store } from '../../..';
+import { setLoading } from '../../../actions/loading';
+import MenuRestofHeaders from '../../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders';
+import ButtonComp from '../../../Components/ButtonComp/ButtonComp';
+import InputFieldSimple from '../../../Components/InputField/InputFieldSimple';
+import ModalCustom from '../../../Components/ModalCustom/ModalCustom';
+import { DURATION } from '../../../config/message.config';
+import { AdaHelper } from '../../../helpers/ada.helper';
+import { BTCHelper } from '../../../helpers/btc.helper';
+import { SolanaHelper } from '../../../helpers/solana.helper';
+import { Web3Helper } from '../../../helpers/web3.helper';
+import './SendConfirm.scss';
+import warning from '../../../Assets/PNG/warning.png';
+import DarkLogo from '../../../Assets/DarkLogo.svg';
+import Logo from '../../../Assets/logo.png';
 import {
   addCommasToNumber,
   getFlooredFixed,
-} from "../../../helpers/conversion.helper";
-import { server } from "../../../server";
-import { ClipLoader } from "react-spinners";
-import { WalletHelper } from "../../../helpers/wallet.helper";
+} from '../../../helpers/conversion.helper';
+import { server } from '../../../server';
+import { ClipLoader } from 'react-spinners';
+import { WalletHelper } from '../../../helpers/wallet.helper';
 
 function SendConfirmSpritz() {
   const {
@@ -138,10 +138,10 @@ function SendConfirmSpritz() {
     }
 
     const parentCoin = await server.post(
-      "/wallet/coin/coins_market_data",
+      '/wallet/coin/coins_market_data',
       {
         coin_family: coin.coin_data.coin_family,
-        fiat_currency: "USD",
+        fiat_currency: 'USD',
       },
       {
         headers: {
@@ -175,7 +175,7 @@ function SendConfirmSpritz() {
       if (approvedAmount === false) {
         setLoading(false);
         return messageApi.error(
-          "Unable to fetch approval amount. Please try again later."
+          'Unable to fetch approval amount. Please try again later.'
         );
       }
 
@@ -200,27 +200,27 @@ function SendConfirmSpritz() {
 
   const data = [
     {
-      text: "From",
+      text: 'From',
       textVal: `${coin.address.substring(0, 7)}.....${coin.address.substring(
         to.length - 7,
         to.length
       )}`,
     },
     {
-      text: "To",
+      text: 'To',
       textVal: `${to.substring(0, 7)}.....${to.substring(
         to.length - 7,
         to.length
       )}`,
     },
     {
-      text: "Network Fee",
+      text: 'Network Fee',
       textVal: `${parseFloat(getFlooredFixed(networkFee, 8))} ${
-        parentCoin ? parentCoin.coin_symbol.toUpperCase() : ""
+        parentCoin ? parentCoin.coin_symbol.toUpperCase() : ''
       }/ $${addCommasToNumber(parseFloat(getFlooredFixed(fiatGasFee, 4)))}`,
     },
     {
-      text: "Total value",
+      text: 'Total value',
       textVal: fromBillPay
         ? `${addCommasToNumber(getFlooredFixed(amount, 5))}
         ${coin?.coin_data?.coin_symbol?.toUpperCase()} / $${
@@ -232,21 +232,21 @@ function SendConfirmSpritz() {
           }`,
     },
     {
-      text: "Provider Fee",
+      text: 'Provider Fee',
       textVal: `$${addCommasToNumber(
         getFlooredFixed(paymentRequest.feeAmount, 2)
       )}`,
     },
     {
-      text: "Date",
-      textVal: moment(new Date()).format("MM/DD/YY"),
+      text: 'Date',
+      textVal: moment(new Date()).format('MM/DD/YY'),
     },
   ];
 
   const handleTransaction = async () => {
     const web3helper = new Web3Helper();
 
-    const { chains } = await chrome.storage.local.get("chains");
+    const { chains } = await chrome.storage.local.get('chains');
     const chain = chains.find(
       (chain) => chain.coinFamily === coin.coin_data.coin_family
     );
@@ -267,11 +267,12 @@ function SendConfirmSpritz() {
           : coin.coin_data.coin_family == 7
           ? process.env.REACT_APP_AVAX_RPC
           : process.env.REACT_APP_MATIC_RPC,
-        parseInt(chain.chainId)
+        parseInt(chain.chainId),
+        sessionPassword
       );
       if (!data) {
         setLogoutOpenmodal(false);
-        return messageApi.error("Insufficient balance in wallet for gas fee.");
+        return messageApi.error('Insufficient balance in wallet for gas fee.');
       }
       setLogoutOpenmodal(false);
       setRequireApproval(false);
@@ -298,14 +299,22 @@ function SendConfirmSpritz() {
             null,
             paymentRequest.data,
             paymentRequest,
-            coin.coin_data.token_address ? true : false
+            coin.coin_data.token_address ? true : false,
+            sessionPassword,
+            coin.coin_data.coin_family == 1
+              ? process.env.REACT_APP_ETH_RPC
+              : coin.coin_data.coin_family == 3
+              ? process.env.REACT_APP_BNB_RPC
+              : coin.coin_data.coin_family == 7
+              ? process.env.REACT_APP_AVAX_RPC
+              : process.env.REACT_APP_MATIC_RPC
           );
 
         if (!response) {
           store.dispatch(setLoading(false));
-          return messageApi.error("Something went wrong.");
+          return messageApi.error('Something went wrong.');
         }
-      } else if (!chain.isEVM && chain.currencyName === "BTC") {
+      } else if (!chain.isEVM && chain.currencyName === 'BTC') {
         const response =
           await BTCHelper.generateRawTransactionForCoinAndBroadcast(
             to,
@@ -323,7 +332,7 @@ function SendConfirmSpritz() {
 
         if (!response) {
           store.dispatch(setLoading(false));
-          return messageApi.error("Something went wrong.");
+          return messageApi.error('Something went wrong.');
         }
       }
 
@@ -336,7 +345,7 @@ function SendConfirmSpritz() {
     <div className={`scrollableCont`}>
       {contextHolder}
       <MenuRestofHeaders
-        backTo={billPay ? "/creditBillPay" : "/enter-price-spritz"}
+        backTo={billPay ? '/creditBillPay' : '/enter-price-spritz'}
         title="Confirm" //{`Send ${coin.coin_data.coin_symbol.toUpperCase()}`}
         coin={coin}
         amount={fiatAmountToSend}
@@ -350,7 +359,7 @@ function SendConfirmSpritz() {
           <div
             className="confirmCurrency__card"
             style={{
-              display: "flex",
+              display: 'flex',
             }}
           >
             <div
@@ -359,7 +368,7 @@ function SendConfirmSpritz() {
               }}
             >
               <h3 className="confirmCurrency__card__textTop">
-                {addCommasToNumber(getFlooredFixed(amount, 5))}{" "}
+                {addCommasToNumber(getFlooredFixed(amount, 5))}{' '}
                 {coin.coin_data.coin_symbol.toUpperCase()}
               </h3>
               <p className="confirmCurrency__card__textBtm">
@@ -368,10 +377,10 @@ function SendConfirmSpritz() {
             </div>
             <div
               style={{
-                display: "flex",
+                display: 'flex',
                 flex: 1,
-                justifyContent: "center",
-                alignItems: "center",
+                justifyContent: 'center',
+                alignItems: 'center',
               }}
             >
               {coin.coin_data.coin_image ? (
@@ -379,7 +388,7 @@ function SendConfirmSpritz() {
                   src={`${process.env.REACT_APP_IMAGE_BASE_URL}${coin.coin_data.coin_image}`}
                   alt=""
                   style={{
-                    width: "50px",
+                    width: '50px',
                   }}
                 />
               ) : null}
@@ -404,18 +413,18 @@ function SendConfirmSpritz() {
             disabled={!approvalConfirmed && approvalHash}
             text={
               requireApproval
-                ? "Approve"
+                ? 'Approve'
                 : approvalConfirmed
-                ? "Send"
-                : "Approval Pending"
+                ? 'Send'
+                : 'Approval Pending'
             }
-            maxWidth={"100%"}
+            maxWidth={'100%'}
           />
         </div>
       </div>
 
       <ModalCustom
-        title={"Approval Request"}
+        title={'Approval Request'}
         isModalOpen={isLogoutModalOpen}
         customClass="customClassModal"
       >
@@ -424,13 +433,13 @@ function SendConfirmSpritz() {
             <ClipLoader size={65} color="#00adee" />
             <div
               style={{
-                marginTop: "20px",
-                textAlign: "center",
+                marginTop: '20px',
+                textAlign: 'center',
               }}
             >
               <p
                 style={{
-                  textAlign: "center",
+                  textAlign: 'center',
                 }}
               >
                 Approval request has been processed successfully. Waiting for
@@ -442,7 +451,7 @@ function SendConfirmSpritz() {
       </ModalCustom>
 
       <ModalCustom
-        title={"Enter password"}
+        title={'Enter password'}
         handleCancel={handleCancel}
         isModalOpen={isModalOpen}
         handleOk={handleOk}
@@ -467,7 +476,7 @@ function SendConfirmSpritz() {
                   return messageApi.error('Incorrect password provided.');
                 }
               } else {
-                return messageApi.error("Please enter password.");
+                return messageApi.error('Please enter password.');
               }
 
               setOpenmodal(false);
@@ -484,8 +493,8 @@ function SendConfirmSpritz() {
             </div>
           </div>
           <ButtonComp
-            text={"Proceed"}
-            maxWidth={"100%"}
+            text={'Proceed'}
+            maxWidth={'100%'}
             onClick={async () => {
               const isCorrectPassword = await WalletHelper.verifyPassword(
                 sessionPassword
@@ -500,7 +509,7 @@ function SendConfirmSpritz() {
                   return messageApi.error('Incorrect password provided.');
                 }
               } else {
-                return messageApi.error("Please enter password.");
+                return messageApi.error('Please enter password.');
               }
 
               setOpenmodal(false);
@@ -520,27 +529,27 @@ function SendConfirmSpritz() {
         customClass="customClassModal"
         closable={false}
       >
-        <div className={"confirmationsModal"}>
-          <div className={"iInner"}>
-            {theme == "darkTheme" ? (
+        <div className={'confirmationsModal'}>
+          <div className={'iInner'}>
+            {theme == 'darkTheme' ? (
               <img src={DarkLogo} alt="" />
             ) : (
               <img src={Logo} alt="" />
             )}
             <div>
               <p>
-                Withdraw request of{" "}
-                {addCommasToNumber(getFlooredFixed(amount, 5))}{" "}
+                Withdraw request of{' '}
+                {addCommasToNumber(getFlooredFixed(amount, 5))}{' '}
                 {coin.coin_data.coin_symbol.toUpperCase()} has been processed
                 successfully.
               </p>
             </div>
           </div>
           <ButtonComp
-            text={"OK"}
-            maxWidth={"100%"}
+            text={'OK'}
+            maxWidth={'100%'}
             onClick={() => {
-              return navigate("/withdraw", {
+              return navigate('/withdraw', {
                 state: {
                   coin: coin,
                   account: bankAccount,
