@@ -49,9 +49,6 @@ const Sell = ({ coins = [], fiats = [], loading }) => {
   const findMinMax = async () => {
     try {
       store.dispatch(setLoading(true));
-      // console.log("SSSSSSSSSSSSSSSSS ", selectedFiat);
-      // console.log("CCCCCCCCCCCCCCCCC ", selectedCoin);
-      store.dispatch(setLoading(true));
       const fiatItem = selectedFiat?.currency_code?.toUpperCase();
       const cryptoItem = selectedCoin?.coin?.coin_symbol?.toUpperCase()
       let url = `https://api.mercuryo.io/v1.6/public/currency-limits?from=${fiatItem}&to=${cryptoItem}&widget_id=${process.env.REACT_APP_MERCURYO_WIDGET_ID}&type=sell`
@@ -60,7 +57,6 @@ const Sell = ({ coins = [], fiats = [], loading }) => {
       setFiatMinMax(data[`${fiatItem}`]);
       setCryptoMinMax(data[`${cryptoItem}`]);
       store.dispatch(setLoading(false));
-      // console.log("DATA--------------> ", data[`${fiatItem}`], " ----------- ", data[`${cryptoItem}`], data);
     } catch (error) {
       messageApi.error(error?.message || "Something went wrong.")
       store.dispatch(setLoading(false));
@@ -70,10 +66,8 @@ const Sell = ({ coins = [], fiats = [], loading }) => {
   }
   useEffect(() => {
     const timer = setTimeout(() => {
-      // if (selectedCoin && selectedFiat && amount) {
       if (selectedCoin && selectedFiat) {
         findMinMax();
-        // handleFieldChange(amount);
       }
     }, 1000);
 
@@ -102,21 +96,16 @@ const Sell = ({ coins = [], fiats = [], loading }) => {
       const cryptoItem = selectedCoin?.coin?.coin_symbol?.toUpperCase()
       let url = `https://api.mercuryo.io/v1.6/public/convert?from=${cryptoItem}&to=${fiatItem}&type=sell&amount=${amount}&widget_id=${process.env.REACT_APP_MERCURYO_WIDGET_ID}`
       const response = await fetch(url);
-      // console.log("urlurlurlurl ", response);
       const res = await response?.json()
-      // console.log("XXXXXXXXXXXXXXXXXXXXXXXXXXX ", res);
       if (!response.ok) {
         store.dispatch(setLoading(false));
-        // if (res?.message.includes('Amount off limits.')) {
           messageApi.info("Please enter amount between min max range");
           return;
-        // }
       } 
 
       setConversionDetail(res?.data);
       store.dispatch(setLoading(false));
     } catch (error) {
-      // console.log("------------xxx------------>", error);
       setConversionDetail(null);
       messageApi.error(error?.message || "Something went wrong.")
       store.dispatch(setLoading(false));

@@ -89,8 +89,6 @@ function SendCoins() {
     safe: 0,
   });
 
-  console.log('----------> ', coin?.coin?.coin_family);
-
   const fetchNativePrice = async () => {
     const parentCoin = await server.post(
       '/wallet/nativeCoinFiatPrice',
@@ -170,8 +168,6 @@ function SendCoins() {
               'You have a pending transaction in your account or you do not have enough balance to proceed with the transaction.'
             );
           }
-          console.log('UNSPENT:::: ', unspent, gasPrice);
-          console.log('inputCount : ', inputCount);
 
           const inputs = [];
           let totalAmountAvailable = 0;
@@ -189,19 +185,16 @@ function SendCoins() {
           transactionSize =
             inputCount * 146 + outputCount * 34 + 10 - inputCount;
           let fee = transactionSize * gasPrice;
-          // console.log("btc feee::::::", fee);
 
           const totalFee = (
             transactionSize *
             gasPrice *
             btcTosatoshiMultiplier
           ).toFixed(8);
-          // console.log("btc Totalfeee::::::", totalFee);
 
           setSelectedGasPriceSol(totalFee);
         } catch (error) {
           store.dispatch(setLoading(false));
-          // console.log("btc errrr:::::::", error);
         }
       }
       if (!chain.isEVM && chain.currencyName === 'SOL') {
@@ -247,23 +240,6 @@ function SendCoins() {
   };
 
   const calculatePercentageWise = async (percentage) => {
-    // if (coin?.coin?.coin_family == 3 || coin?.coin?.coin_family == 5) {
-    // if (coin?.coin?.token_address !== null) {
-    //   return setAmount(myBalance?.toString());
-    // } else {
-    //   const maxAfterGas = new BigNumber(myBalance).minus(selectedGasPriceSol);
-    //   console.log(maxAfterGas.toString());
-    //   if (maxAfterGas.isNegative()) {
-    //     return messageApi.error("Insufficient balance to cover gas fee.");
-    //   } else {
-    //     setAmount(maxAfterGas?.toString());
-    //   }
-
-    //   console.log("Not Max For SOL BTC");
-
-    //   return;
-    // }
-    // }
     if (coin.coin.token_address) {
       let rpc;
       let amountToSend = 0;
@@ -328,11 +304,7 @@ function SendCoins() {
         const balance = new BigNumber(coin.balance).times(
           '1000000000000000000'
         );
-        console.log(balance.toString());
         const amountToSend = new BigNumber(balance);
-        console.log(amountToSend.toString());
-        // console.log(amountToSend.toString());
-
         // Get the current gas price
         const gasPrice = await Web3Helper.getGasPrice(
           chain.slug == 'matic' ? 'polygon' : chain.slug,
@@ -358,13 +330,11 @@ function SendCoins() {
         // Apply the buffer factor to the gas cost
         const bufferedGasCost = gasCost.times(2.5);
 
-        console.log(bufferedGasCost.toString());
-
         // Subtract the buffered gas cost from the maximum BNB
         const maxBNBAfterGas = new BigNumber(amountToSend).minus(
           bufferedGasCost
         );
-        console.log(maxBNBAfterGas.toString());
+
         if (maxBNBAfterGas.isNegative()) {
           store.dispatch(setLoading(false));
           return messageApi.error('Insufficient balance to cover gas fee.');
@@ -388,7 +358,6 @@ function SendCoins() {
         balance = balance - 0.0015; // Added fee with some buffer values i.e 0.001495 + gas price = 0.0015
         // balance = balance - 0.0015;
         const amountToSend = parseFloat(balance) * (percentage / 100);
-        // console.log("amountToSend::::::::::", amountToSend);
         if (parseFloat(amountToSend) - parseFloat(gasPrice) * 3 < 0) {
           store.dispatch(setLoading(false));
           return messageApi.error(
@@ -405,25 +374,13 @@ function SendCoins() {
       } else if (!chain.isEVM && chain.currencyName === 'BTC') {
         try {
           store.dispatch(setLoading(true));
-          // console.log("coinnnnnnnnnnnnnnnnnnnnn ", coin);
 
           let gasPrice = await BTCHelper.getBTCGasPrice();
           let unspent = await BTCHelper.getUnspent(coin.wallet_address);
-          // console.log("coin.balance;;;; ", coin.balance);
-          // console.log("CCCCCCCCCCCC ", gasPrice, unspent);
 
           let balance = coin.balance;
           balance = (balance * 99) / 100;
-          // console.log(
-          //   "🚀 ~ file: SendCoins.jsx:193 ~ calculatePercentageWise ~ balance:",
-          //   balance
-          // );
-
           const amountToSend = parseFloat(balance) * (percentage / 100);
-          // console.log(
-          //   "🚀 ~ file: SendCoins.jsx:195 ~ calculatePercentageWise ~ amountToSend:",
-          //   amountToSend
-          // );
 
           if (!unspent) {
             store.dispatch(setLoading(false));
@@ -459,10 +416,6 @@ function SendCoins() {
             gasPrice *
             btcTosatoshiMultiplier
           ).toFixed(8);
-          console.log(
-            '🚀 ~ file: SendCoins.jsx:232 ~ calculatePercentageWise ~ totalFee:',
-            totalFee
-          );
 
           if (amountToSend - totalFee * 2.5 < 0) {
             store.dispatch(setLoading(false));
@@ -487,7 +440,6 @@ function SendCoins() {
   };
 
   const handleChange = (val) => {
-    // console.log('gasPrice?. ', myGasPrice);
     switch (val) {
       case 0: {
         setSelectedGasPrice(myGasPrice?.safe);
@@ -510,6 +462,7 @@ function SendCoins() {
   };
 
   const handleSend = async () => {
+
     store.dispatch(setLoading(true));
 
     const { chains } = await chrome.storage.local.get('chains');
@@ -518,37 +471,14 @@ function SendCoins() {
       (chain) => chain.coinFamily === coin.coin.coin_family
     );
 
-    console.log('CHAIN SELECTED :', chain);
-
-    // if (!chain.isEVM && chain.currencyName === "ADA" && amount < 1) {
-    //   store.dispatch(setLoading(false));
-    //   return messageApi.error(
-    //     "The minimum value must be greater than 1 or equal to 1."
-    //   );
-    // }
-
-    // if (!chain.isEVM && chain.currencyName === "ADA") {
-    //   const check = await AdaHelper.checkCardanoAddressType(address);
-    //   store.dispatch(setLoading(false));
-    //   if (check !== "Shelley-era address") {
-    //     return messageApi.error(
-    //       "Invalid address: Only Shelley-era addresses (starting with 'addr1') are supported."
-    //     );
-    //   }
-    // }
-
     if (!amount) {
-      console.log('INVALID AMOUNT');
       store.dispatch(setLoading(false));
       return messageApi.error('Please enter a valid amount to proceed.');
     }
 
-    // console.log("AMTTTTT : ", amount, myBalance);
     const finalAmount = new BigNumber(amount);
     const balance = new BigNumber(myBalance);
-    console.log('AMOUNT AND BALANCE :', finalAmount, balance);
     if (finalAmount.gt(balance)) {
-      console.log('IS AMOUNT GREATER THAN BLAANCE');
       store.dispatch(setLoading(false));
       return messageApi.error(
         'Insufficient balance to proceed with the transaction'
@@ -570,10 +500,7 @@ function SendCoins() {
 
     const myAddress = account.coinFamilyAndAddress[chain.coinFamily];
 
-    console.log('SENDER ADDRESS', myAddress);
-
     if (myAddress.toLowerCase() === address.toLowerCase()) {
-      console.log('OWN ADDRESS');
       store.dispatch(setLoading(false));
       return messageApi.error('You cannot send to your own address.');
     }
@@ -634,11 +561,7 @@ function SendCoins() {
       );
 
       const nativeCoinBalance = new BigNumber(nativeCoinResponse);
-      console.log('nativeCoinBalance',nativeCoinBalance)
-
       const finalAmount = new BigNumber(amount);
-      console.log('🚀 ~ finalAmount:', finalAmount.toString());
-
       let gasEstimate = new BigNumber(myGasPrice.estimate);
       const gasPrice = new BigNumber(selectedGasPrice).times(1000000000);
       const gasInEth = gasPrice.times(gasEstimate).div(Math.pow(10, 18));
@@ -652,8 +575,6 @@ function SendCoins() {
         }
 
         const tokenBalance = new BigNumber(myBalance);
-        console.log('🚀 ~ tokenBalance:', tokenBalance.toString());
-
         if (tokenBalance.isLessThan(finalAmount)) {
           store.dispatch(setLoading(false));
           return messageApi.error(
@@ -702,15 +623,6 @@ function SendCoins() {
         return messageApi.error('Please provide a valid amount to proceed.');
       }
       store.dispatch(setLoading(false));
-
-      // console.log("ITMMMMMMMMMMMMMMM ", {
-      //   to: address,
-      //   amount: amount,
-      //   coin,
-      //   networkFee: gasPrice,
-      //   redirectTo
-      // });
-
       navigate('/confirmCurrency', {
         state: {
           to: address,
@@ -721,12 +633,12 @@ function SendCoins() {
           sessionPassword,
         },
       });
-    } else if (!chain.isEVM && chain.currencyName === 'BTC') {
+    }
+     else if (!chain.isEVM && chain.currencyName === 'BTC') {
       try {
-        // 1. Fetch gas price and unspent transactions
         const gasPrice = await BTCHelper.getBTCGasPrice();
         const unspent = await BTCHelper.getUnspent(coin.wallet_address);
-      
+
         if (!unspent) {
           store.dispatch(setLoading(false));
           return messageApi.error('Unable to fetch unspent at the moment.');
@@ -758,8 +670,7 @@ function SendCoins() {
         const fee = transactionSize * gasPrice;
         const totalFee = (fee * btcTosatoshiMultiplier).toFixed(8);
         const totalAmount = parseFloat(totalFee) + parseFloat(amount);
-      
-        // 3. Validate balance
+
         if (totalAmount > myBalance) {
           store.dispatch(setLoading(false));
           return messageApi.error('Not enough balance to proceed.');
@@ -771,36 +682,30 @@ function SendCoins() {
           return messageApi.error('Insufficient UTXO balance.');
         }
       
-        // 4. Create and configure transaction
         const bitcore = require('bitcore-lib');
+
         const transaction = new bitcore.Transaction()
           .from(inputs)
           .to(address, sendAmount);
-      
+
         const change = totalAmountAvailable - sendAmount - fee;
         if (change > 546) {
           transaction.change(coin.wallet_address);
           transaction.fee(fee);
         } else {
-          // Include dust change in the fee
           transaction.fee(fee + change);
         }
       
-        // 5. Get private key
         const btcPrivateKey = await WalletHelper.getBitcoinPrivateKeyWithPassword(sessionPassword);
         if (!btcPrivateKey) {
           store.dispatch(setLoading(false));
           return messageApi.error('Unable to fetch private key. Please try again later.');
         }
       
-        // 6. Sign and serialize transaction
         transaction.sign(btcPrivateKey);
         const rawTransaction = transaction.serialize();
-        console.log('Raw Transaciton : ',rawTransaction);
-      
         store.dispatch(setLoading(false));
       
-        // 7. Navigate to confirmation screen
         navigate('/confirmCurrency', {
           state: {
             rawTransaction,
@@ -894,16 +799,10 @@ function SendCoins() {
           });
         }
       } catch (error) {
-        console.log('Error :--> ', error);
+        console.log('~ sendcoin.jsx ~ handleSend ~ 848 error ~:', error);
       }
     }
   };
-
-  // useEffect(()=>{
-  //    if(isModalOpen){
-  //    setSessionPassword('')
-  //    }
-  // },[isModalOpen])
 
   return (
     <div className={`scrollableCont ${style.send}`}>
@@ -1083,7 +982,6 @@ function SendCoins() {
                   readonly={true}
                   placeholderBaseColor={true}
                 />
-                {/* {console.log("MMMMMMMMMMMMMM ", myGasPrice)} */}
               </>
             ) : (
               <>

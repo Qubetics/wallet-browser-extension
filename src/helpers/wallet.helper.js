@@ -1116,7 +1116,6 @@ export class WalletHelper {
   };
 
   static updateBalanceInShow = async (status, id) => {
-    console.log('updateBalanceInShow :', status, id);
 
     try {
       const { accounts } = await chrome.storage.local.get('accounts');
@@ -1335,10 +1334,7 @@ export class WalletHelper {
   };
 
   static deleteWallet = async (id, evmAddress) => {
-    console.log('DELETE WALLET :', id, evmAddress);
     const { accounts } = await chrome.storage.local.get('accounts');
-
-    // console.log('decryptedAccounts-----------> ', accounts);
 
     const newAccounts = accounts.filter((el) => el.id !== id);
 

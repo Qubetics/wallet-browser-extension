@@ -196,8 +196,6 @@ export class UniswapHelper {
       if (route) {
         const { account } = store.getState();
 
-        console.log(' SWAP account : ', account);
-
         const { data } = await server.post(
           "/on-chain/swap",
           {
@@ -219,8 +217,6 @@ export class UniswapHelper {
           }
         );
 
-        console.log('SWAP RESPONSE FROM API : ',data)
-
         const { privateKey } = await WalletHelper.getPrivateKeyEvm(sessionPassword);
         const gasPrice = await Web3Helper.getGasPrice(
           slug,
@@ -231,7 +227,6 @@ export class UniswapHelper {
           symbol
         );
 
-        console.log('SWAP GAS PRICE :',gasPrice)
         const nonce = await Web3Helper.getNonce(
           slug,
           isToken,
@@ -239,8 +234,6 @@ export class UniswapHelper {
           symbol,
           walletAddress
         );
-
-        console.log("SWAP NONCE :", nonce);
         
         const increasedGasLimitDecimal = (
           Number(data.data.tx.gas) * 1.5
@@ -258,12 +251,8 @@ export class UniswapHelper {
         };
 
         const wallet = new ethers.Wallet(privateKey, this.ethProvider);
-        console.log('wallet',wallet);
         const signedTransaction = await wallet.signTransaction(transaction);
 
-        console.log("signedTransactionsignedTransaction ", signedTransaction);
-        
-        
         const response = await server.post(
           `${slug}/${isToken ? token1.tokenAddress : symbol}/send`,
           {
@@ -274,10 +263,6 @@ export class UniswapHelper {
             amount: amount,
             gas_estimate: +increasedGasLimitDecimal,
             gas_price: Math.max(gasPrice?.fast* Math.pow(10, 9),1e9),
-            //estimate:gasPrice?.estimate
-            // fast: gasPrice?.fast,
-            // propose: gasPrice?.propose,
-            // safe: gasPrice?.safe,
             tx_type: "swap",
           },
           {
@@ -286,7 +271,6 @@ export class UniswapHelper {
             },
           }
         );
-        console.log('SWAP SEND response',response);
         
         return response.data.tx_hash;
       }
@@ -369,14 +353,14 @@ export class UniswapHelper {
             },
             {
               address_book_name: "",
-              amount: parseFloat(adminDetails.amount), // Set to 0 for an approve transaction
-              coin_id: adminDetails.coinId, // Set to the appropriate coin ID
+              amount: parseFloat(adminDetails.amount), 
+              coin_id: adminDetails.coinId,
               fiat_price: 0,
-              fiat_type: "USD", // Set to the appropriate fiat type
+              fiat_type: "USD",
               from_address: walletAddress,
               gas_estimate: parseFloat(increasedGasLimitDecimal),
               gas_price: gasPrice.price,
-              to_address: adminDetails.address, // The ERC20 token contract address (to_address should be the token address for an approval transaction)
+              to_address: adminDetails.address,
               trnx_raw: adminDetails.raw_trnx,
               trnx_type: "admin_fees",
               coin_symbol: "eth",
@@ -393,7 +377,7 @@ export class UniswapHelper {
 
       return response.data.tx_hash;
     } catch (error) {
-      console.log(error);
+      console.log('Send Wrap Transaction :',error);
       return false;
     }
   }

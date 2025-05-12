@@ -295,8 +295,6 @@ class Background {
     chrome.runtime.onMessage.addListener(
       async (message, sender, sendResponse) => {
         if (message.type === 'SWITCH_CHAIN') {
-          console.log("PAYYYYYYYYYYYY ", message);
-          
           if (message.payload.chainId) {
             const { chains } = await chrome.storage.local.get('chains');
 

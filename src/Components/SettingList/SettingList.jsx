@@ -46,14 +46,9 @@ function SettingList(props) {
       const isCorrectPassword = await WalletHelper.verifyPassword(
         password
       );
-      console.log(
-        'isCorrectPassword on Button Click',
-        isCorrectPassword
-      );
       if (!isCorrectPassword) {
         return messageApi.error('Incorrect password provided.');
       }
-
       store.dispatch(setLoading(true));
       await WalletHelper.logout();
       store.dispatch(setLoading(false));
@@ -339,10 +334,6 @@ function SettingList(props) {
             customFunction={async () => {
               const isCorrectPassword = await WalletHelper.verifyPassword(
                 password
-              );
-              console.log(
-                'isCorrectPassword on Button Click',
-                isCorrectPassword
               );
               if (!isCorrectPassword) {
                 return messageApi.error('Incorrect password provided.');

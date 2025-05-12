@@ -124,7 +124,6 @@ function SetPasswordScreen() {
   };
 
   const handleConfirmSecretPhrase = async () => {
-    console.log('CONFIRM SCRET PRASE :',correct)
     try {
       if (correct) {
         store.dispatch(setLoading(true));

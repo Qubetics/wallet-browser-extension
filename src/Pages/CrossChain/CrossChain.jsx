@@ -374,8 +374,6 @@ function CrossChain() {
             break;
         }
 
-        console.log("------------------> ", token);
-
         return {
           id: token?.coin_data?.coin_id,
           symbol: token?.coinCode,

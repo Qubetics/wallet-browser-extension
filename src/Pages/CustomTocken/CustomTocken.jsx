@@ -148,18 +148,6 @@ function CustomTocken() {
       )
     );
 
-    console.log(
-      chains.filter(
-        (el) => el.supportTokens && account.coinFamilyAndAddress[el.coinFamily]
-      )
-    );
-
-    console.log(
-      chains.filter(
-        (el) => el.supportTokens && account.coinFamilyAndAddress[el.coinFamily]
-      )[0]
-    );
-
     setSelectedChain(
       state?.swap
         ? chains.find((chain) => chain.coinFamily == state.swap)
@@ -192,8 +180,6 @@ function CustomTocken() {
         }
       );
 
-      // console.log("TOKENNNNNNNNNNNNNNN ", tokenData);
-
       setTokenInfo({
         name: tokenData.data.data.name,
         symbol: tokenData.data.data.symbol,
@@ -202,7 +188,7 @@ function CustomTocken() {
 
       store.dispatch(setLoading(false));
     } catch (error) {
-      console.log("Error >>>>> ", error);
+      console.log("~ CustomTocken.jsx ~ 191 :", error);
 
       store.dispatch(setLoading(false));
       return messageApi.error(
@@ -391,8 +377,6 @@ function CustomTocken() {
                 }
 
                 store.dispatch(setLoading(true));
-                // console.log('selectedChainselectedChainselectedChain ',selectedChain);
-
                 const resp = await server.post(
                   "/wallet/addtoken",
                   {
@@ -681,11 +665,9 @@ function CustomTocken() {
                 }
                 return navigate("/wallet");
               } catch (error) {
-                console.log(error);
+                console.log('~ customTocken.jsx ~ error ~ 668 : ',error)
                 store.dispatch(setLoading(false));
-
                 const errorMessage = error?.response?.data?.message;
-
                 if (typeof errorMessage === "string") {
                   return messageApi.error(errorMessage);
                 } else {
@@ -767,7 +749,6 @@ function CustomTocken() {
               }}
               alt=""
               onClick={() => {
-                console.log(selectURL(selectedChain.coinFamily));
                 navigator.clipboard.writeText(
                   selectURL(selectedChain.coinFamily)
                 );
@@ -840,7 +821,7 @@ function CustomTocken() {
                 messageApi.success("Token added successfully.");
                 return navigate("/wallet");
               } catch (error) {
-                console.log(error);
+                console.log('~ customtoken.jsx ~ 825 ~ error :');
                 store.dispatch(setLoading(false));
 
                 const errorMessage = error?.response?.data?.message;

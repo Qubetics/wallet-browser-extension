@@ -1,18 +1,12 @@
 /*global chrome*/
 import { message } from "antd";
-import moment from "moment";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
 import { DURATION } from "../../config/message.config";
-import { capitalize } from "../../helpers/conversion.helper";
 import "./HistryList.scss";
-// import TickIcon from "../../Assets/TickIcon.svg"
 import recieveIcon from "../../Assets/ReceiveIcon.svg"
-import swapIcon1 from "../../Assets/SwapIcon.svg"
 import swapIcon from "../../Assets/SwapIconWhite.svg"
 import dAppIcon from "../../Assets/datatransfer.svg";
-
 
 function HistoryListOuter(props) {
   const { chain, account, currency } = useSelector((state) => state);
@@ -35,14 +29,9 @@ function HistoryListOuter(props) {
     type,
   } = props;
 
-  const navigate = useNavigate();
-
   const [messageApi, contextHolder] = message.useMessage({
     duration: DURATION,
   });
-
-  console.log("typetypetypetypetype", type);
-  
 
   const updateExp = (e) => {
     e.preventDefault(); 

@@ -961,15 +961,9 @@ function ManageWallet() {
                 const isCorrectPassword = await WalletHelper.verifyPassword(
                   sessionPassword
                 );
-                console.log(
-                  'isCorrectPassword on Button Click',
-                  isCorrectPassword
-                );
                 if (!isCorrectPassword) {
                   return messageApi.error('Incorrect password provided.');
                 }
-
-
                 setModalOpen(false)
                 setDefaultAccount(accountSelected);
                 navigate('/wallet');
@@ -982,10 +976,6 @@ function ManageWallet() {
               onClick={async () => {
                 const isCorrectPassword = await WalletHelper.verifyPassword(
                   sessionPassword
-                );
-                console.log(
-                  'isCorrectPassword on Button Click',
-                  isCorrectPassword
                 );
                 if (!isCorrectPassword) {
                   return messageApi.error('Incorrect password provided.');

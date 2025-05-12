@@ -395,14 +395,9 @@ function PancakeSwapDetails() {
               const isCorrectPassword = await WalletHelper.verifyPassword(
                 sessionPassword
               );
-              console.log(
-                'isCorrectPassword on Button Click',
-                isCorrectPassword
-              );
               if (!isCorrectPassword) {
                 return messageApi.error('Incorrect password provided.');
               }
-
               handleSwap();
             }}
           />

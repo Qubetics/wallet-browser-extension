@@ -114,16 +114,6 @@ const AllocationChart = () => {
         return;
       }
 
-      // const percentages = portfolioData.map((obj) => ({
-      //   name: obj?.coin?.coin_name || "Unknown",
-      //   symbol: obj?.coin?.coin_symbol || "Unknown",
-      //   percentage:
-      //     ((parseFloat(obj?.balance) *
-      //       parseFloat(obj?.coin?.fiat_price_data?.value || 0)) /
-      //       totalBalance) *
-      //     100,
-      // }));
-      console.log('PORTFOLIO DATA', portfolioData);
       const percentages = portfolioData
         .filter((obj) => parseFloat(obj?.balance) > 0 && obj?.balance !== null)
         .map((obj) => ({
@@ -136,16 +126,8 @@ const AllocationChart = () => {
             100,
         }));
 
-      console.log('PERCENTAGE CONSOLE', percentages);
-
       const names = percentages.map((item) => item.name);
-      console.log('names', names);
       const series = percentages.map((item) => parseFloat(item.percentage));
-      console.log('series', series);
-      // const namesWithPercentages = percentages.map(
-      //   (item) => `${item.name}   ${item.percentage.toFixed(2)}%`
-      // );
-
       const namesWithPercentages = percentages.map(
         (item) =>
           `${
@@ -164,7 +146,6 @@ const AllocationChart = () => {
       );
 
       setChartOptions((prev) => {
-        console.log('prev', prev);
         return {
           ...prev,
           labels: names,
@@ -172,21 +153,7 @@ const AllocationChart = () => {
           legend: {
             ...prev.legend,
             formatter: function (seriesName, opts) {
-              console.log(
-                'Series Index:',
-                opts.seriesIndex,
-                'Series Name:',
-                seriesName,
-                'Mapped Name:',
-                namesWithPercentages[opts.seriesIndex]
-              );
-              console.log('seriesName', seriesName);
               const index = opts.seriesIndex;
-              console.log('index', index);
-              console.log(
-                'namesWithPercentages[index]',
-                namesWithPercentages[index]
-              );
               return namesWithPercentages[index]; // Use namesWithPercentages for the legend
             },
           },

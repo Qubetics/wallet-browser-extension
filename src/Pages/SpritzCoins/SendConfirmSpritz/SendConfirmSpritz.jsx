@@ -499,11 +499,6 @@ function SendConfirmSpritz() {
               const isCorrectPassword = await WalletHelper.verifyPassword(
                 sessionPassword
               );
-              console.log(
-                'isCorrectPassword on Button Click in send confirm',
-                isCorrectPassword
-              );
-
               if (sessionPassword != null) {
                 if (!isCorrectPassword) {
                   return messageApi.error('Incorrect password provided.');
@@ -511,10 +506,8 @@ function SendConfirmSpritz() {
               } else {
                 return messageApi.error('Please enter password.');
               }
-
               setOpenmodal(false);
               setPassword(null);
-
               handleTransaction();
             }}
           />
