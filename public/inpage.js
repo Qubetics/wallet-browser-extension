@@ -16,7 +16,7 @@ const inject = async () => {
         (function() {
           var config = {
             ethereum: {
-              chainId: window.localStorage.getItem("qubetics_chain_id") ? window.localStorage.getItem("qubetics_chain_id") : 1,
+              chainId: '0x38',
               rpcUrl: window.localStorage.getItem("qubetics_rpc_url") ? window.localStorage.getItem("qubetics_rpc_url") : "https://mainnet.infura.io/v3/REDACTED",
             },
             solana: {

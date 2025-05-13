@@ -90,6 +90,7 @@ export const ExternalConnection = () => {
     // console.log('EXTERNALLLLLLLLLLLLLL ');
 
     const { chains } = await chrome.storage.local.get('chains');
+    console.log('DEFAULT CHAIN 1:',chains)
     let { accounts } = await chrome.storage.session.get('accounts');
 
     const { mnemonics } = await chrome.storage.local.get('mnemonics');
@@ -101,6 +102,9 @@ export const ExternalConnection = () => {
     // console.log("Dec:::Mn::",decryptMnemonics,'accounts::',accounts?.find((item)=>item.default)?.address,"defaultAddress::",defaultAddress);
     setMnemonics(decryptMnemonics);
     setChain(chains.find((el) => el.default));
+
+
+    console.log('DEFAULT CHAIN 2:',chains)
 
     const myDefaultChain = chains.find((el) => el?.default);
     chrome.tabs.query(
