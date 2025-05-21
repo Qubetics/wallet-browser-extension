@@ -352,6 +352,7 @@ export class Web3Helper {
       const { privateKey } = await WalletHelper.getPrivateKeyEvm(
         sessionPassword
       );
+
       if (!privateKey) {
         console.log('INVALID PRIVATE KEY :');
         return false;
@@ -604,16 +605,17 @@ export class Web3Helper {
         payload['order_id'] = orderId;
       }
       slug = slug == 'matic' ? 'polygon' : slug;
-      const response = await server.post(
-        `${slug}/${tokenAddress}/send`,
-        payload,
-        {
-          headers: {
-            Authorization: account.jwtToken,
-          },
-        }
-      );
-      return response.data.tx_hash;
+      // const response = await server.post(
+      //   `${slug}/${tokenAddress}/send`,
+      //   payload,
+      //   {
+      //     headers: {
+      //       Authorization: account.jwtToken,
+      //     },
+      //   }
+      // );
+      // return response.data.tx_hash;
+      return true ;
     } catch (error) {
       console.log(
         'ethers helper error generateRawTransaction For TokenAndBroadcast ',

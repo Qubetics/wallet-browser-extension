@@ -1,34 +1,28 @@
 /*global chrome*/
 import React, { useEffect, useState } from "react";
 import { Checkbox, Drawer, message, Select } from "antd";
-import MenuRestofHeaders from "../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders";
+import MenuRestofHeaders from "../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders.jsx";
 import style from "./style.module.scss";
-import { InputField } from "../../Components/InputField/InputFieldSimple";
+import { InputField } from "../../Components/InputField/InputFieldSimple.jsx";
 import { InputFieldOnly } from "../../Components/InputField/InputFieldSimple.jsx";
-import ButtonComp from "../../Components/ButtonComp/ButtonComp";
+import ButtonComp from "../../Components/ButtonComp/ButtonComp.jsx";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { ethers } from "ethers";
-import { Web3Helper } from "../../helpers/web3.helper";
-import { WalletHelper } from "../../helpers/wallet.helper";
-import { store } from "../..";
-import { setLoading } from "../../actions/loading";
-import { SolanaHelper } from "../../helpers/solana.helper";
-import { AdaHelper } from "../../helpers/ada.helper";
+import { store } from "../../index.js";
+import { setLoading } from "../../actions/loading.js";
 import ModalCloseIcon from "../../Assets/ModalCloseIcon.svg";
 import Copy from "../../Assets/CopyIconBlue.svg";
 import navigateiCON from "../../Assets/topnavigate.svg";
 import darkclose from "../../Assets/darkclose.svg";
-import { DURATION } from "../../config/message.config";
-import { server } from "../../server";
-import ModalCustom from "../../Components/ModalCustom/ModalCustom";
+import { DURATION } from "../../config/message.config.js";
+import { server } from "../../server.js";
+import ModalCustom from "../../Components/ModalCustom/ModalCustom.jsx";
 import warning from "../../Assets/PNG/warning.png";
-import bscscan from "../../Assets/logo-symbol.png";
-import { modifyString } from "../../helpers/common.helper";
 import info from "../../Assets/Info.svg";
 var WAValidator = require("multicoin-address-validator");
 
-function CustomTocken() {
+function CustomToken() {
   const [disabled, setDisabled] = useState(false);
   const { chain, account } = useSelector((state) => state);
   const [tokenAddress, setTokenAddress] = useState(null);
@@ -131,6 +125,13 @@ function CustomTocken() {
           setTokenAddress(null);
           const selectedChain = chains.find((el) => el.coinFamily == value);
           setSelectedChain(selectedChain);
+          setTokenAddress(null);
+          setTokenInfo({
+            name: null,
+            symbol: null,
+            decimals: null,
+            image: null,
+          })
         }}
         style={{
           width: "100",
@@ -188,11 +189,11 @@ function CustomTocken() {
 
       store.dispatch(setLoading(false));
     } catch (error) {
-      console.log("~ CustomTocken.jsx ~ 191 :", error);
+      console.log("~ CustomToken.jsx ~ 191 :", error);
 
       store.dispatch(setLoading(false));
       return messageApi.error(
-        "Invalid token address provided. Please check the address and try again."
+        "Please enter a valid address."
       );
     }
   };
@@ -203,7 +204,7 @@ function CustomTocken() {
       <MenuRestofHeaders
         backTo={state ? (state.swap ? '/swap' : '/wallet') : '/wallet'}
         title={'Add Custom Token'}
-        manage={state ? (state.swap ? '/swap' : '/wallet') : '/manage'}
+        // manage={state ? (state.swap ? '/swap' : '/wallet') : '/manage'}
       />
       <div className={`flexedContent`}>
         <div className="warrningMsg">
@@ -391,7 +392,7 @@ function CustomTocken() {
                     wallet_name: account.name,
                     token_type: selectedChain.tokenType,
                     isSwapList: selectedChain?.swap,
-                    coin_gicko_id: "",
+                    // coin_gicko_id: "",
                   },
                   {
                     headers: {
@@ -665,7 +666,7 @@ function CustomTocken() {
                 }
                 return navigate("/wallet");
               } catch (error) {
-                console.log('~ customTocken.jsx ~ error ~ 668 : ',error)
+                console.log('~ CustomToken.jsx ~ error ~ 668 : ',error)
                 store.dispatch(setLoading(false));
                 const errorMessage = error?.response?.data?.message;
                 if (typeof errorMessage === "string") {
@@ -840,4 +841,4 @@ function CustomTocken() {
   );
 }
 
-export default CustomTocken;
+export default CustomToken;

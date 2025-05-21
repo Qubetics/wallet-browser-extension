@@ -19,7 +19,7 @@ import Manage from "./Pages/Manage/Manage";
 import Swap from "./Pages/Swap/Swap";
 import SwapDetails from "./Pages/Swap/SwapDetails/SwapDetails";
 import CurrencyDetails from "./Pages/Wallet/CurrencyDetails/CurrencyDetails";
-import CustomTocken from "./Pages/CustomTocken/CustomTocken";
+import CustomToken from "./Pages/CustomTocken/CustomTocken";
 import WatchWallet from "./Pages/WelcomeScreens/WatchWallet";
 import WatchAddress from "./Pages/WelcomeScreens/WatchAddress";
 import SecretPhrasePaste from "./Pages/WelcomeScreens/SecretPhrasePaste";
@@ -412,7 +412,7 @@ function App() {
             element={<CrossChainDetails />}
           />
           <Route index path="/currencyDetails" element={<CurrencyDetails />} />
-          <Route index path="/add-token" element={<CustomTocken />} />
+          <Route index path="/add-token" element={<CustomToken />} />
           <Route index path="/add-contact" element={<AddContact />} />
           <Route index path="/price-alerts" element={<PriceAlerts />} />
           <Route index path="/add-pa" element={<AddPriceAlert />} />

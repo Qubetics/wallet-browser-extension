@@ -3,22 +3,18 @@
 import React, { useState } from "react";
 import { message } from "antd";
 import "./AddressNetworkCard.scss";
-import bin from "../../Assets/delete.png";
-import EDIT from "../../Assets/edit.png";
 import { store } from "../..";
 import { setLoading } from "../../actions/loading";
 import { useSelector } from "react-redux";
 import ModalCustom from "../ModalCustom/ModalCustom";
-import { Link, useNavigate } from "react-router-dom";
 import { server } from "../../server";
 import { useEffect } from "react";
 import { EditAddress } from "./EditAddress.jsx";
-import EditIcon from "../../Assets/edit.svg";
 import DeleteIcon from "../../Assets/delete.png";
 import DownArrowSuffix from "../../Assets/DownArrowSuffix.svg";
-import JohWick from "../../Assets/JohWick.svg";
 import { EditAddressMain } from "./EditAddressMain.jsx";
 import ButtonComp from "../ButtonComp/ButtonComp.jsx";
+import { capitalizeWords } from "../../helpers/common.helper.js";
 
 const crypto = {
   1: "BNB",
@@ -236,11 +232,11 @@ function AddressNetworkCard(props) {
             <div className="leftSec">
               <h6> {heading.charAt(0).toUpperCase()}</h6>
               <div>
-                <h3>{heading} </h3>
-                <span className="address">
+                <h3>{capitalizeWords(heading)} </h3>
+                {/* <span className="address">
                   {address.substring(0, 7)}.....
                   {address.substring(address.length - 7, address.length)}
-                </span>
+                </span> */}
               </div>
             </div>
             <div className="rytSec">
@@ -252,6 +248,7 @@ function AddressNetworkCard(props) {
                 src={DeleteIcon}
                 alt="DeleteIcon"
                 width={"15px"}
+                style={{cursor:"pointer"}}
               />
               {/* <span>
                 <img
@@ -291,7 +288,7 @@ function AddressNetworkCard(props) {
                       src={elem?.coin_data?.coin_image}
                     />
                     <div className="addressInner">
-                      <h3>{crypto[elem?.coin_family]?.toUpperCase()}</h3>
+                      <h3>{capitalizeWords(crypto[elem?.coin_family])}</h3>
                       <span className="address">
                         {elem?.wallet_address.substring(0, 7)}.....
                         {elem?.wallet_address.substring(
@@ -322,6 +319,7 @@ function AddressNetworkCard(props) {
                       src={DeleteIcon}
                       alt="DeleteIcon"
                       width={"15px"}
+                      style={{cursor:"pointer"}}
                     />
                   </div>
                 </div>

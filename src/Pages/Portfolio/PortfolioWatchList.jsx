@@ -194,7 +194,7 @@ function PortfolioWatchList() {
                           {
                             data: [
                               {
-                                address: account.address,
+                                address: token.coin_id === 3 ? token?.wallets[0]?.wallet_address : account.address,
                                 coin_id: token.coin_id,
                                 status: token.watchlist_data ? 0 : 1,
                               },

@@ -346,6 +346,7 @@ function SendCoins() {
             .dividedBy(coin.coin.decimals)
             .toString()
         );
+        console.log('amt',amt);
         setAmount(amt);
         store.dispatch(setLoading(false));
       } else if (!chain.isEVM && chain.currencyName === 'SOL') {
@@ -462,7 +463,6 @@ function SendCoins() {
   };
 
   const handleSend = async () => {
-
     store.dispatch(setLoading(true));
 
     const { chains } = await chrome.storage.local.get('chains');
@@ -600,6 +600,7 @@ function SendCoins() {
           : gasPriceType == 2
           ? myGasPrice?.propose
           : myGasPrice?.fast;
+      console.log('amount ~ 602 ~ SendCoins.jsx',amount);
       navigate('/confirmCurrency', {
         state: {
           to: address,
@@ -633,8 +634,7 @@ function SendCoins() {
           sessionPassword,
         },
       });
-    }
-     else if (!chain.isEVM && chain.currencyName === 'BTC') {
+    } else if (!chain.isEVM && chain.currencyName === 'BTC') {
       try {
         const gasPrice = await BTCHelper.getBTCGasPrice();
         const unspent = await BTCHelper.getUnspent(coin.wallet_address);
@@ -643,14 +643,14 @@ function SendCoins() {
           store.dispatch(setLoading(false));
           return messageApi.error('Unable to fetch unspent at the moment.');
         }
-      
+
         if (unspent.length === 0) {
           store.dispatch(setLoading(false));
           return messageApi.error(
             'You have a pending transaction or insufficient balance.'
           );
         }
-      
+
         // 2. Prepare inputs and calculate available satoshis
         let totalAmountAvailable = 0;
         const inputs = unspent.map((utxo) => {
@@ -664,9 +664,10 @@ function SendCoins() {
             outputIndex: utxo.vout,
           };
         });
-      
+
         const inputCount = inputs.length;
-        const transactionSize = inputCount * 146 + outputCount * 34 + 10 - inputCount;
+        const transactionSize =
+          inputCount * 146 + outputCount * 34 + 10 - inputCount;
         const fee = transactionSize * gasPrice;
         const totalFee = (fee * btcTosatoshiMultiplier).toFixed(8);
         const totalAmount = parseFloat(totalFee) + parseFloat(amount);
@@ -675,13 +676,13 @@ function SendCoins() {
           store.dispatch(setLoading(false));
           return messageApi.error('Not enough balance to proceed.');
         }
-      
+
         const sendAmount = Math.round(amount * btcTosatoshi);
         if (totalAmountAvailable - sendAmount - fee < 0) {
           store.dispatch(setLoading(false));
           return messageApi.error('Insufficient UTXO balance.');
         }
-      
+
         const bitcore = require('bitcore-lib');
 
         const transaction = new bitcore.Transaction()
@@ -695,17 +696,20 @@ function SendCoins() {
         } else {
           transaction.fee(fee + change);
         }
-      
-        const btcPrivateKey = await WalletHelper.getBitcoinPrivateKeyWithPassword(sessionPassword);
+
+        const btcPrivateKey =
+          await WalletHelper.getBitcoinPrivateKeyWithPassword(sessionPassword);
         if (!btcPrivateKey) {
           store.dispatch(setLoading(false));
-          return messageApi.error('Unable to fetch private key. Please try again later.');
+          return messageApi.error(
+            'Unable to fetch private key. Please try again later.'
+          );
         }
-      
+
         transaction.sign(btcPrivateKey);
         const rawTransaction = transaction.serialize();
         store.dispatch(setLoading(false));
-      
+
         navigate('/confirmCurrency', {
           state: {
             rawTransaction,
@@ -721,14 +725,17 @@ function SendCoins() {
       } catch (error) {
         console.error('BTC Transaction Error:', error);
         store.dispatch(setLoading(false));
-      
+
         if (error.message.includes('Dust amount detected in one output')) {
-          return messageApi.error('Amount is below the dust threshold. Please enter a higher value.');
+          return messageApi.error(
+            'Amount is below the dust threshold. Please enter a higher value.'
+          );
         }
-      
-        return messageApi.error(error.message || 'An unexpected error occurred.');
+
+        return messageApi.error(
+          error.message || 'An unexpected error occurred.'
+        );
       }
-      
     } else if (!chain.isEVM && chain.currencyName === 'ADA') {
       try {
         if (coin.tokenAddress) {
@@ -1006,59 +1013,109 @@ function SendCoins() {
                 >
                   <div style={{ display: 'flex', flexDirection: 'column' }}>
                     <p style={{ color: 'white' }}>
-                      {parseFloat(
-                        (myGasPrice?.estimate * myGasPrice?.safe) / 10 ** 9
-                      )?.toFixed(5)}{' '}
-                      {crypto[coin?.coin?.coin_family]?.toUpperCase()}
-                    </p>
-                    <p style={{ color: 'white' }}>
-                      {' '}
-                      {(
-                        parseFloat(nativeCoinPrice) *
+                      {isNaN(
                         parseFloat(
                           (myGasPrice?.estimate * myGasPrice?.safe) / 10 ** 9
                         )
-                      )?.toFixed(5)}{' '}
+                      )
+                        ? '0.00'
+                        : parseFloat(
+                            (myGasPrice?.estimate * myGasPrice?.safe) / 10 ** 9
+                          )?.toFixed(5)}{' '}
+                      {crypto[coin?.coin?.coin_family]?.toUpperCase()}
+                    </p>
+                    <p style={{ color: 'white' }}>
+                      {' '}
+                      {isNaN(
+                        (
+                          parseFloat(nativeCoinPrice) *
+                          parseFloat(
+                            (myGasPrice?.estimate * myGasPrice?.safe) / 10 ** 9
+                          )
+                        )
+                      )
+                        ? '0.00'
+                        : (
+                            parseFloat(nativeCoinPrice) *
+                            parseFloat(
+                              (myGasPrice?.estimate * myGasPrice?.safe) /
+                                10 ** 9
+                            )
+                          )?.toFixed(5)}{' '}
                       {currency?.name?.toUpperCase()}
                     </p>
                   </div>
 
                   <div style={{ display: 'flex', flexDirection: 'column' }}>
                     <p style={{ color: 'white' }}>
-                      {parseFloat(
-                        (myGasPrice?.estimate * myGasPrice?.propose) / 10 ** 9
-                      )?.toFixed(5)}{' '}
-                      {crypto[coin?.coin?.coin_family]?.toUpperCase()}
-                    </p>
-
-                    <p style={{ color: 'white' }}>
-                      {' '}
-                      {(
-                        parseFloat(nativeCoinPrice) *
+                      {isNaN(
                         parseFloat(
                           (myGasPrice?.estimate * myGasPrice?.propose) / 10 ** 9
                         )
-                      )?.toFixed(5)}{' '}
+                      )
+                        ? '0.00'
+                        : parseFloat(
+                            (myGasPrice?.estimate * myGasPrice?.propose) /
+                              10 ** 9
+                          )?.toFixed(5)}{' '}
+                      {crypto[coin?.coin?.coin_family]?.toUpperCase()}
+                    </p>
+
+                    <p style={{ color: 'white' }}>
+                      {' '}
+                      {isNaN(
+                        (
+                          parseFloat(nativeCoinPrice) *
+                          parseFloat(
+                            (myGasPrice?.estimate * myGasPrice?.propose) /
+                              10 ** 9
+                          )
+                        )
+                      )
+                        ? '0.00'
+                        : (
+                            parseFloat(nativeCoinPrice) *
+                            parseFloat(
+                              (myGasPrice?.estimate * myGasPrice?.propose) /
+                                10 ** 9
+                            )
+                          )?.toFixed(5)}{' '}
                       {currency?.name?.toUpperCase()}
                     </p>
                   </div>
 
                   <div style={{ display: 'flex', flexDirection: 'column' }}>
                     <p style={{ color: 'white' }}>
-                      {parseFloat(
-                        (myGasPrice?.estimate * myGasPrice?.fast) / 10 ** 9
-                      )?.toFixed(5)}{' '}
+                      {isNaN(
+                        parseFloat(
+                          (myGasPrice?.estimate * myGasPrice?.fast) / 10 ** 9
+                        )
+                      )
+                        ? '0.00'
+                        : parseFloat(
+                            (myGasPrice?.estimate * myGasPrice?.fast) / 10 ** 9
+                          )?.toFixed(5)}{' '}
                       {crypto[coin?.coin?.coin_family]?.toUpperCase()}
                     </p>
 
                     <p style={{ color: 'white' }}>
                       {' '}
-                      {(
-                        parseFloat(nativeCoinPrice) *
-                        parseFloat(
-                          (myGasPrice?.estimate * myGasPrice?.fast) / 10 ** 9
+                      {isNaN(
+                        (
+                          parseFloat(nativeCoinPrice) *
+                          parseFloat(
+                            (myGasPrice?.estimate * myGasPrice?.fast) / 10 ** 9
+                          )
                         )
-                      )?.toFixed(5)}{' '}
+                      )
+                        ? '0.00'
+                        : (
+                            parseFloat(nativeCoinPrice) *
+                            parseFloat(
+                              (myGasPrice?.estimate * myGasPrice?.fast) /
+                                10 ** 9
+                            )
+                          )?.toFixed(5)}{' '}
                       {currency?.name?.toUpperCase()}
                     </p>
                   </div>
@@ -1069,9 +1126,20 @@ function SendCoins() {
         </div>
         <div>
           <ButtonComp
-            onClick={() =>{
-              setSessionPassword('')
-              setConfirmModal(!isModalOpen)
+            onClick={() => {
+              if (!address) {
+                return messageApi.error(
+                  'Please enter a valid address.'
+                );
+              }
+              if (!amount) {
+                return messageApi.error(
+                  'Please enter valid amount.'
+                );
+              } else {
+                setSessionPassword('');
+                setConfirmModal(!isModalOpen);
+              }
             }}
             text={'Send'}
             maxWidth={'100%'}
@@ -1164,7 +1232,7 @@ function SendCoins() {
 
       <ModalCustom
         title={'Password'}
-        handleCancel={()=> setConfirmModal(!isModalOpen)}
+        handleCancel={() => setConfirmModal(!isModalOpen)}
         isModalOpen={isModalOpen}
         customClass="customClassModal"
       >
@@ -1179,9 +1247,14 @@ function SendCoins() {
               }
             }}
             customFunction={async () => {
+              if (!sessionPassword) {
+                return messageApi.error('Please enter password.');
+              }
               const res = await WalletHelper.verifyPassword(sessionPassword);
               if (!res) {
-                return messageApi.error('Invalid Password');
+                return messageApi.error(
+                  'Please enter valid password to proceed.'
+                );
               }
               setConfirmModal(!isModalOpen);
               store.dispatch(setLoading(true));
@@ -1194,9 +1267,14 @@ function SendCoins() {
             text={'Proceed'}
             maxWidth={'100%'}
             onClick={async () => {
+              if (!sessionPassword) {
+                return messageApi.error('Please enter password.');
+              }
               const res = await WalletHelper.verifyPassword(sessionPassword);
               if (!res) {
-                return messageApi.error('Invalid Password');
+                return messageApi.error(
+                  'Please enter valid password to proceed.'
+                );
               }
               setConfirmModal(!isModalOpen);
               store.dispatch(setLoading(true));

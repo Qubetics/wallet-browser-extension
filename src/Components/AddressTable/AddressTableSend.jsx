@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import Person from "../../Assets/person-button-svgrepo-com.svg";
 import "./AddressTable.scss";
+import { capitalizeWords } from "../../helpers/common.helper";
 
 function AddressTableSend({ dataArray, setAddress, setContact }) {
   const [viewAddress, setViewAddress] = useState(false);
@@ -28,7 +29,7 @@ function AddressTableSend({ dataArray, setAddress, setContact }) {
                 <div className="leftSec">
                   <h6> {ele?.name?.charAt(0).toUpperCase()}</h6>
                   <div>
-                    <h3>{ele?.name?.toUpperCase()} </h3>
+                    <h3>{capitalizeWords(ele?.name)} </h3>
                     {/* <span className="address">
                                             {ele?.address.substring(0, 7)}.....
                                             {ele?.address.substring(

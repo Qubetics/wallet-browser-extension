@@ -4,7 +4,7 @@ import { message } from "antd";
 import React, { useState } from "react";
 import { useEffect } from "react";
 import { useSelector } from "react-redux";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { store } from "../..";
 import { setLoading } from "../../actions/loading";
 import ButtonComp from "../../Components/ButtonComp/ButtonComp";
@@ -36,7 +36,7 @@ function VerifyPassword() {
 
   const handleLogin = async () => {
     if (!password) {
-      return messageApi.error("Please enter a valid password to proceed.");
+      return messageApi.error("Please enter password to proceed.");
     }
     store.dispatch(setLoading(true));
     const response = await WalletHelper.unlockWallet(password);
@@ -44,9 +44,6 @@ function VerifyPassword() {
       store.dispatch(setLoading(false));
       return messageApi.error("Invalid password. Please try again.");
     }
-    // await chrome.storage.session.set({
-    //   password,
-    // });
     store.dispatch(setLoading(false));
     navigate("/wallet",{ state : { password }});
   };

@@ -22,6 +22,8 @@ import { token_type } from '../../helpers/constant';
 
 function AddWatchList() {
   const { account, currency, balanceIn } = useSelector((state) => state);
+
+  console.log('ACCOUNT IN ADD WATCH LIST :',account)
   const location = useLocation();
   const isFromPortfolio = location.state?.isFromPortfolio ?? false;
   const [keyword, setKeyword] = useState(null);
@@ -134,6 +136,7 @@ function AddWatchList() {
         {(state?.nft ? list : tokens).length > 0 ? (
           <CoinsTable
             dataArray={tokens.map((token) => {
+              console.log('token',token);
               const price = token.fiat_price_data || null;
 
               const myPrice = new BigNumber(price ? price.value : 0);
@@ -179,7 +182,7 @@ function AddWatchList() {
                       {
                         data: [
                           {
-                            address: account.address,
+                            address: token.coin_id === 3 ? token?.wallets[0]?.wallet_address : account.address,
                             coin_id: token.coin_id,
                             status: token.watchlist_data ? 0 : 1,
                           },

@@ -3,13 +3,10 @@ import React, { useState } from "react";
 import MenuRestofHeaders from "../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders.jsx";
 import {
   InputField,
-  InputFieldOnly,
 } from "../../Components/InputField/InputFieldSimple";
 import style from "./style.module.scss";
 import ButtonComp from "../../Components/ButtonComp/ButtonComp.jsx";
-import { Checkbox, Input, message } from "antd";
-import closeXicon from "../../Assets/closeXicon.svg";
-import CopyIconBlue from "../../Assets/CopyIconBlue.svg";
+import { Checkbox, message } from "antd";
 import { store } from "../../index.js";
 import { setLoading } from "../../actions/loading.js";
 import { WalletHelper } from "../../helpers/wallet.helper.js";
@@ -32,7 +29,8 @@ function ImportPhrase() {
   // console.log('PASSWORD IN INPORT PHRASE :',state.password)
 
   return (
-    <div>
+    <div 
+    >
       {contextHolder}
       <div className={`scrollableCont`}>
         <MenuRestofHeaders

@@ -132,7 +132,7 @@ function AddresBook() {
         {list.length > 0 ? (
           list.map((el, index) => (
             <AddressNetworkCard
-              heading={el?.name?.toUpperCase()}
+              heading={el?.name}
               address={el?.address}
               wallet_address={el?.address}
               // currency={`${el?.coin_data?.coin_symbol.toUpperCase()} (${el.coin_data.coin_name

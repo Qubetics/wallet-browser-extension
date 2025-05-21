@@ -282,7 +282,7 @@ function SendConfirm() {
               'Insufficient funds to perform transaction.'
             );
           } else {
-            messageApi.success(response?.message);
+            // messageApi.success(response?.message);
             store.dispatch(setLoading(false));
           }
         }

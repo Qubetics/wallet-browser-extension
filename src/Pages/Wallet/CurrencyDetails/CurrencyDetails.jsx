@@ -222,7 +222,7 @@ function CurrencyDetails() {
               {
                 data: [
                   {
-                    address: account.address,
+                    address: coin.coin.coin_id === 3 ? coin.wallet_address : account.address,
                     coin_id: coin.coin.coin_id,
                     status: coin?.coin?.watchlist_data?.status == '1'
                       ? 0

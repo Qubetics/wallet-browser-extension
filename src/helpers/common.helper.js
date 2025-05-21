@@ -170,3 +170,20 @@ export function toPrecisionMultiply(num) {
   const respectedRes = result.multipliedBy(1).toFixed();
   return respectedRes;
 }
+
+export function capitalizeWords(input) {
+  console.log('input',input)
+  if (typeof input !== 'string') return '';
+
+  console.log('input 2',input)
+
+  // Trim and check if there's at least one word (non-space character)
+  const trimmed = input.trim();
+  if (!trimmed) return '';
+
+  // Capitalize each word
+  return trimmed
+    .split(/\s+/)
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}

@@ -206,7 +206,7 @@ function CoinsTable({ dataArray, showCoinPrice, name }) {
                   </span> */}
                   {name == "portfolio" && (
                     <img
-                      style={{ marginLeft: 15 }}
+                      style={{ marginLeft: 15, cursor:'pointer' }}
                       onClick={() => showDeleteModal(ele)}
                       src={bin}
                     />

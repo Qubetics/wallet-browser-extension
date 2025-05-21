@@ -1,5 +1,4 @@
 /*global chrome*/
-
 import React, { useEffect, useState } from 'react';
 import MenuRestofHeaders from '../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders';
 import './NewAddress.scss';
@@ -9,6 +8,9 @@ import { DURATION } from '../../config/message.config';
 import CopyIcon from '../../Assets/CopyIconBlue.svg';
 import { WalletHelper } from '../../helpers/wallet.helper';
 import bs58 from 'bs58';
+import { setLoading } from "../../actions/loading"
+import { useDispatch, useSelector } from 'react-redux';
+import { Loader } from '../../Components/Loader/Loader';
 
 function ShowPrivateKey() {
   const [address, setAddress] = useState(null);
@@ -18,6 +20,8 @@ function ShowPrivateKey() {
   const {
     state: { account, password },
   } = useLocation();
+  const dispatch = useDispatch();
+  const { loading  } = useSelector((state)=> state?.loading);
 
   const init = async () => {
     const { privateKey } = await WalletHelper.getPrivateKeyWithPassword(password);
@@ -48,6 +52,7 @@ function ShowPrivateKey() {
 
   const get_privateKey = async () => {
     if (account?.coinFamilyAndAddress) {
+      dispatch(setLoading(true))
       const evmAddress = account.coinFamilyAndAddress['1'];
       // const btcAddress = account.coinFamilyAndAddress["3"];
       // const solAddress = account.coinFamilyAndAddress["5"];
@@ -61,7 +66,9 @@ function ShowPrivateKey() {
         await WalletHelper.getSolanaPrivateKeyWithAddress(evmAddress, password);
       const privateKey = bs58.encode(solPrivateKeyData);
       setSolKey(privateKey);
+      dispatch(setLoading(false))
     } else {
+      dispatch(setLoading(false))
       console.error('coinFamilyAndAddress data is missing');
     }
   };
@@ -69,6 +76,8 @@ function ShowPrivateKey() {
   useEffect(() => {
     get_privateKey();
   }, []);
+
+  if(loading) return <Loader text={"Hello"} />
 
   return (
     <div>

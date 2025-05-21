@@ -34,9 +34,11 @@ function SecretPhrase({ children, mnemonics, termsCheck, isShare, setIsShare, is
         <div
           onClick={copyToClipboard}
           className="setPassword__secretPharse__copyField"
+          style={{paddingLeft:"3px"}}
         >
           {contextHolder}
           <span>Copy</span>
+          <div style={{width:'8px'}}></div>
           <img src={CopyIcon} width={16} height={18} />
         </div>
         </div>

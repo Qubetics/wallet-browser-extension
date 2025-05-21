@@ -2,17 +2,20 @@ import React from 'react';
 import './Welcome.scss';
 import Lottie from 'react-lottie-player';
 import TickAnimation from '../../Assets/JsonFiles/TickAnimation.json';
+import CongratulationsImport from '../../Assets/JsonFiles/Congratulations_import.json';
+
 import ButtonComp from '../../Components/ButtonComp/ButtonComp';
 import { useNavigate } from 'react-router-dom';
-function CongratulationsScreen() {
+function CongratulationsScreen({ type }) {
   const navigate = useNavigate();
   return (
     <div className="setPassword__secretPharse walletReady">
       <Lottie
         loop={false}
-        animationData={TickAnimation}
+        animationData={
+          type === 'import' ? CongratulationsImport : TickAnimation
+        }
         play
-        style={{ height: 308 }}
       />
       <ButtonComp
         text={'Continue'}

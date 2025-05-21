@@ -1,10 +1,10 @@
-import { Input } from "antd";
-import React from "react";
-import EyeOpenIcon from "../../Assets/EyeOpenIcon.svg";
-import EyeCloseIcon from "../../Assets/EyeCloseIcon.svg";
-import "./InputFieldSimple.scss";
-import Scanner from "../../Assets/scanner.svg";
-import { Link } from "react-router-dom";
+import { Input } from 'antd';
+import React from 'react';
+import EyeOpenIcon from '../../Assets/EyeOpenIcon.svg';
+import EyeCloseIcon from '../../Assets/EyeCloseIcon.svg';
+import './InputFieldSimple.scss';
+import Scanner from '../../Assets/scanner.svg';
+import { Link } from 'react-router-dom';
 
 function InputFieldSimple({
   placeholder,
@@ -15,7 +15,7 @@ function InputFieldSimple({
 }) {
   return (
     <>
-      <label className={"password-label"}>{label}</label>
+      <label className={'password-label'}>{label}</label>
       <Input.Password
         onChange={(e) => {
           getData(e.target.value);
@@ -26,13 +26,23 @@ function InputFieldSimple({
         }}
         value={value}
         className="inputSimple"
-        onKeyDown={(e) => e.key === "Enter" && customFunction()}
+        onKeyDown={(e) => e.key === 'Enter' && customFunction()}
         placeholder={placeholder}
         iconRender={(visible) =>
           visible ? (
-            <img src={EyeOpenIcon} width={19} height={12} />
+            <img
+              style={{ cursor: 'pointer' }}
+              src={EyeOpenIcon}
+              width={19}
+              height={12}
+            />
           ) : (
-            <img src={EyeCloseIcon} width={19} height={16} />
+            <img
+              style={{ cursor: 'pointer' }}
+              src={EyeCloseIcon}
+              width={19}
+              height={16}
+            />
           )
         }
       />
@@ -62,13 +72,13 @@ export const InputField = ({
   maxLength,
 }) => {
   return (
-    <div className={`${"boxStyle"} inputField ${mb0 ? "mb0" : ""}`}>
-      <label className={`${"boxStyle__label"}`}>{label}</label>
+    <div className={`${'boxStyle'} inputField ${mb0 ? 'mb0' : ''}`}>
+      <label className={`${'boxStyle__label'}`}>{label}</label>
       <Input
-        className={`${"inputField__input"} ${
-          inputSelect ? "inputField__inputSelect" : ""
-        }  ${placeholderBaseColor ? "placeholderBaseColor" : ""} ${
-          coloredBg ? "inputField__coloredBg" : ""
+        className={`${'inputField__input'} ${
+          inputSelect ? 'inputField__inputSelect' : ''
+        }  ${placeholderBaseColor ? 'placeholderBaseColor' : ''} ${
+          coloredBg ? 'inputField__coloredBg' : ''
         }`}
         addonAfter={addonAfter}
         addonBefore={addonBefore}
@@ -76,9 +86,9 @@ export const InputField = ({
         title=""
         maxLength={maxLength}
         onKeyDown={(e) => {
-          if (type === "number") {
+          if (type === 'number') {
             // console.log(e.key);
-            if (e.key === "e" || e.key === "+" || e.key === "-") {
+            if (e.key === 'e' || e.key === '+' || e.key === '-') {
               e.preventDefault();
             }
           }
@@ -89,8 +99,8 @@ export const InputField = ({
           }
           getData(e.target.value);
         }}
-        type={type || "text"}
-        onWheel={(e) => (type === "number" ? e.target.blur() : console.log(""))}
+        type={type || 'text'}
+        onWheel={(e) => (type === 'number' ? e.target.blur() : console.log(''))}
         defaultValue={defaultValue}
         placeholder={placeholder}
         readOnly={readonly ? readonly : false}
@@ -139,9 +149,9 @@ export const InputFieldOnly = ({
 
           getData(e.target.value);
         }}
-        className={`${"inputSimple"} ${
-          placeholderBaseColor ? "placeholderBaseColor" : ""
-        } ${coloredBg ? "inputField__coloredBg" : ""}`}
+        className={`${'inputSimple'} ${
+          placeholderBaseColor ? 'placeholderBaseColor' : ''
+        } ${coloredBg ? 'inputField__coloredBg' : ''}`}
         placeholder={placeholder}
         style={{ minHeight: minHeight, width }}
         readOnly={readonly ? readonly : false}

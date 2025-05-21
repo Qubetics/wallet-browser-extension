@@ -1753,6 +1753,17 @@ function CrossChain() {
       </div>
       <ButtonComp
         onClick={async () => {
+
+          console.log(
+            token1,
+              token2 ,
+              amount ,
+              amount2 ,
+              amount  ,
+              amount2  ,
+              loading
+          );
+
           console.log(
             !token1 ||
               !token2 ||
