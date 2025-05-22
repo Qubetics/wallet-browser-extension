@@ -20,6 +20,7 @@ import { setTokens } from "../../actions/tokens";
 import useCurrentHeight from "../../CustomHooks/useCurrentHeight";
 import CoinsTableDraggable from "../../Components/CoinsTable/CoinsTableDraggable";
 import ButtonComp from "../../Components/ButtonComp/ButtonComp";
+import { setAccount } from "../../actions/accounts";
 function Wallet() {
   const { account, currency, tokens, balanceIn, theme } = useSelector(
     (state) => state
@@ -36,8 +37,6 @@ function Wallet() {
   }, [isSidePanelOpen]);
 
   const {state} = useLocation();
-
-  // console.log("LOCATION STATE IN WALLET DAHBOARD :",state)
 
   const [currentPage, setCurrentPage] = useState(1);
   const [isFetchingData, setIsFetchingData] = useState(false);
@@ -76,7 +75,7 @@ function Wallet() {
 
   useEffect(() => {
     init();
-  }, [currentPage, refresh, account]);
+  }, [currentPage, refresh,account]);
 
   const parentRef = useRef(null);
 

@@ -185,7 +185,7 @@ function SetPasswordScreen() {
         store.dispatch(setLoading(true));
 
         await WalletHelper.generateAndSetWallet(getMnemonicsData.trim(), name, 'IMPORT', password);
-        messageApi.success('Wallet imported successfully.');
+        // messageApi.success('Wallet imported successfully.');
         setActiveTab('congrats');
       } else {
         popError('Invalid mnemonics. Please try again.');

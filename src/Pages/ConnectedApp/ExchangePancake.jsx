@@ -9,6 +9,11 @@ import ButtonComp from '../../Components/ButtonComp/ButtonComp';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import moment from 'moment';
+
+function startsWithSlash(str) {
+  return str.startsWith('/');
+}
+
 const ExchangePancake = () => {
   const { state } = useLocation();
 
@@ -28,7 +33,11 @@ const ExchangePancake = () => {
         <div className='exchangePancake'>
           <div className='topConatct'>
             <img
-              src={`${state.connection.url}/favicon.ico`}
+              src={`${state.connection.url}${
+                startsWithSlash(state.connection?.image)
+                  ? `${state.connection.image}`
+                  : `/${state.connection.image}`
+              }`}
               style={{ height: '40px', width: '40px', objectFit: 'contain' }}
               onError={addDefaultSrc}
             />

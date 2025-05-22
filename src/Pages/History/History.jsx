@@ -19,6 +19,7 @@ import HistoryListOuter from "../../Components/HistryList/HistryListOuter";
 
 function History() {
   const { account, currency, filter } = useSelector((state) => state);
+  console.log("🚀 ~ History ~ state:", state)
 
   const [history, setHistory] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);

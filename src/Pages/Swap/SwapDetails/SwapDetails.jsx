@@ -172,14 +172,15 @@ function SwapDetails() {
             'Unable to fetch approval amount. Please try again later.'
           );
         }
-
-        const approvedAmountBig = new BigNumber(approvedAmount);
-        // console.log("approvedAmountBig>>>", approvedAmountBig.toFixed(10));
+        console.log("approvedAmount>>>", approvedAmount);
+        const approvedAmountBig = new BigNumber(approvedAmount._hex);
+        console.log("approvedAmountBig>>>", approvedAmountBig);
         const amountBig = new BigNumber(amount);
-        // console.log(amountBig.toFixed(10));
+        console.log(amountBig);
 
         if (approvedAmountBig.isGreaterThan(amountBig)) {
-          // console.log("Inside Here");
+          
+          console.log("Inside Here");
           setRequireApproval(false);
           setApprovalConfirmed(true);
           setLoading(false);

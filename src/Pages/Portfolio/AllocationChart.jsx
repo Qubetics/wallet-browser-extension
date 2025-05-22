@@ -25,7 +25,7 @@ const AllocationChart = () => {
   const [portfolioBalance, setPortfolioBalance] = useState(0);
   const [labels, setLabels] = useState([]);
   const [chartSeries, setChartSeries] = useState([]);
-  const { account, currency } = useSelector((state) => state);
+  const { account, currency,balanceIn } = useSelector((state) => state);
   const [namesWithPercentages, setNamesWithPercentages] = useState([]);
 
   const [chartOptions, setChartOptions] = useState({
@@ -195,7 +195,7 @@ const AllocationChart = () => {
           <span>Total Balance:</span>
         </h3>
         <h1>
-          {currency?.symbol} {portfolioBalance.toFixed(2)}
+          {balanceIn ? currency?.symbol : ''} {balanceIn ? portfolioBalance.toFixed(2) : '****'}
         </h1>
       </div>
       <div style={{ position: 'relative', overflow: 'hidden' }}>

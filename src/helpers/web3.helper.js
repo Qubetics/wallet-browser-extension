@@ -144,6 +144,7 @@ export class Web3Helper {
       const provider = new ethers.providers.JsonRpcProvider(rpc);
       const contract = new ethers.Contract(tokenAddress, ABI, provider);
       const approvedAmount = await contract.allowance(owner, spender);
+      console.log('approvedAmount',approvedAmount);
       return approvedAmount;
     } catch (error) {
       return false;

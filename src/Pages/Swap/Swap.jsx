@@ -208,9 +208,14 @@ function Swap() {
           setInfoData([]);
         }
         store.dispatch(overAllLoader(false));
-        const finalAmountToSend = new BigNumber(amountToSend).multipliedBy(
+        console.log('AMOUNT TO SWAP :',amountToSend)
+        const amountCalculatedbyPercentage = new BigNumber(amountToSend).multipliedBy(
           new BigNumber(percentage).dividedBy(100)
-        );
+        )
+
+       const finalAmountToSend = new BigNumber(amountCalculatedbyPercentage)
+
+        console.log('FINAL AMOUNT  :',percentage,finalAmountToSend);
         setAount(
           finalAmountToSend.toString() == 0
             ? finalAmountToSend.toString()
@@ -225,10 +230,53 @@ function Swap() {
         );
       }
     } catch (error) {
+      console.log('error',error)
       store.dispatch(overAllLoader(false));
       return messageApi.error('Something went wrong.');
     }
   };
+  
+  // const calculateAccordingly = async (percentage) => {
+  //   try {
+  //     store.dispatch(overAllLoader(true));
+  //     if (token1.tokenAddress) {
+  //       const amountToSend = await Web3Helper.getTokenBalance(
+  //         token1.tokenAddress,
+  //         token1.address,
+  //         token1.rpc
+  //       );
+  //       if (amountToSend == 0) {
+  //         setAmount2(0);
+  //         setInfoData([]);
+  //         store.dispatch(overAllLoader(false));
+  //         return;
+  //       }
+  
+  //       const swapValue = new BigNumber(amountToSend)
+  //         .multipliedBy(new BigNumber(percentage).dividedBy(100))
+  //         .integerValue(); // ← ensures whole number
+  
+  //       console.log('AMOUNT TO SWAP :', amountToSend);
+  //       console.log('FINAL AMOUNT :', percentage, swapValue.toString());
+  
+  //       setAount(swapValue.toString());
+  //       setBalance(toFixed(amountToSend.toString()));
+  
+  //       await handleInputChange(
+  //         swapValue.toString(),
+  //         token1,
+  //         token2,
+  //         true
+  //       );
+  //     }
+  //   } catch (error) {
+  //     console.error('calculateAccordingly error:', error);
+  //     messageApi.error('Something went wrong.');
+  //   } finally {
+  //     store.dispatch(overAllLoader(false));
+  //   }
+  // };
+  
   const init = async () => {
     const { chains } = await chrome.storage.local.get('chains');
     try {
@@ -1225,6 +1273,7 @@ function Swap() {
   };
 
   const handleInputChange = async (amount, token1, token2, second) => {
+    console.log('amount, token1, token2, second',amount, token1, token2, second)
     try {
       if (amount > 0 && token1.coinFamily == token2.coinFamily) {
         setLoading(true);
@@ -1235,8 +1284,8 @@ function Swap() {
           token1.tokenAddress || '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
           token2.tokenAddress || '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
           new BigNumber(amount)
-            .multipliedBy(Math.pow(10, token1.decimals))
-            .toString(),
+          .multipliedBy(new BigNumber(10).pow(token1.decimals))
+          .decimalPlaces(0, BigNumber.ROUND_DOWN),
           commision.percentage
         );
 

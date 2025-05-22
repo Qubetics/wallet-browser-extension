@@ -158,7 +158,7 @@ export class SolanaHelper {
         SystemProgram.transfer({
           fromPubkey: myKeyPair.publicKey,
           toPubkey: new PublicKey(to),
-          lamports: rentExemptionAmount,
+          lamports: lamports,
         })
       );
       console.log("🚀 ~ SolanaHelper ~ transaction:", transaction);

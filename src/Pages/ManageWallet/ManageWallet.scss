@@ -75,9 +75,10 @@
 }
 
 .mwheight {
-  height: calc(100vh - 415px) !important;
+  // height: calc(100vh - 315px) !important;
   overflow-y: scroll;
-
+  max-height: 550px;
+  height: 100%;
   @media (max-height:600px) {
     height: calc(100vh - 193px) !important;
   }

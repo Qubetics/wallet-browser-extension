@@ -165,7 +165,7 @@ function ManageCustom(props) {
               }}
             >
               {/* {name} */}
-              {curr?.symbol}  {coin?.fiat_price_data?.value?.toFixed(2)} <span style={{ color: coin?.fiat_price_data?.price_change_24h< 0 ?"#D33535":"green" }}>{coin?.fiat_price_data?.price_change_24h?.toFixed(2)}%</span>
+              {curr?.symbol}  {coin?.fiat_price_data == null ? '0.00' : coin?.fiat_price_data?.value?.toFixed(2)} <span style={{ color: coin?.fiat_price_data?.price_change_24h< 0 ?"#D33535":"green" }}>{coin?.fiat_price_data?.price_change_24h?.toFixed(2)}%</span>
             </span>
           </div>
         </div>

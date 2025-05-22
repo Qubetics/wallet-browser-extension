@@ -23,7 +23,7 @@ import { token_type } from '../../helpers/constant';
 function AddWatchList() {
   const { account, currency, balanceIn } = useSelector((state) => state);
 
-  console.log('ACCOUNT IN ADD WATCH LIST :',account)
+  console.log('ACCOUNT IN ADD WATCH LIST :', account);
   const location = useLocation();
   const isFromPortfolio = location.state?.isFromPortfolio ?? false;
   const [keyword, setKeyword] = useState(null);
@@ -94,7 +94,7 @@ function AddWatchList() {
 
   return (
     <div className={`scrollableCont send`}>
-      <div className='searchBarFixed'>
+      <div className="searchBarFixed">
         {contextHolder}
         <MenuRestofHeaders
           backTo={isFromPortfolio ? '/portfolio' : '/watch-list-tokens'}
@@ -104,14 +104,16 @@ function AddWatchList() {
         />
 
         {state?.nft ? null : (
-          <div className='search'>
+          <div className="search">
             <InputField
               placeholder={'Search'}
               value={keyword}
               checkForSymbols={true}
               getData={(value) => {
                 const hasEmoji = /[\p{Extended_Pictographic}]/u.test(value);
-                if (hasEmoji) { return false }
+                if (hasEmoji) {
+                  return false;
+                }
                 setKeyword(value);
               }}
               addonBefore={
@@ -121,7 +123,7 @@ function AddWatchList() {
                     style={{
                       width: '17px',
                     }}
-                    alt=''
+                    alt=""
                   />
                 </span>
               }
@@ -136,7 +138,6 @@ function AddWatchList() {
         {(state?.nft ? list : tokens).length > 0 ? (
           <CoinsTable
             dataArray={tokens.map((token) => {
-              console.log('token',token);
               const price = token.fiat_price_data || null;
 
               const myPrice = new BigNumber(price ? price.value : 0);
@@ -151,28 +152,28 @@ function AddWatchList() {
                 coinSubName: token.coin_name,
                 coinPrice: myPrice.toNumber()
                   ? formatSmallNumber(
-                    exponential_to_decimal(myPrice.toNumber())
-                  )
+                      exponential_to_decimal(myPrice.toNumber())
+                    )
                   : '0.00',
                 coinStatus: getFlooredFixed(
                   price
                     ? parseFloat(
-                      price.price_change_percentage_24h || 0
-                    ).toLocaleString()
+                        price.price_change_percentage_24h || 0
+                      ).toLocaleString()
                     : 0,
                   2
                 ),
                 currCryptoBal: balanceIn
                   ? `${addCommasToNumber(
-                    parseFloat(getFlooredFixed(token.balance, 6))
-                  )}`
+                      parseFloat(getFlooredFixed(token.balance, 6))
+                    )}`
                   : `****`,
                 currCryptoBalSymbol: token.coin_symbol.toUpperCase(),
                 currDollerBal: balanceIn
                   ? addCommasToNumber(getFlooredFixed(formattedResult, 2))
                   : '****',
                 routeTo: 'no-where',
-                type: token.is_token !== 0 ? token_type(token.coin_family) : "",
+                type: token.is_token !== 0 ? token_type(token.coin_family) : '',
                 status: true,
                 coin: token,
                 watch: async () => {
@@ -182,7 +183,10 @@ function AddWatchList() {
                       {
                         data: [
                           {
-                            address: token.coin_id === 3 ? token?.wallets[0]?.wallet_address : account.address,
+                            address:
+                              token.coin_id === 3 || token.coin_id === 5
+                                ? token?.wallets[0]?.wallet_address
+                                : account.address,
                             coin_id: token.coin_id,
                             status: token.watchlist_data ? 0 : 1,
                           },
@@ -205,7 +209,7 @@ function AddWatchList() {
           />
         ) : (
           <p
-            className='noAddress'
+            className="noAddress"
             style={{
               marginTop: '50%',
               fontWeight: 'bold',

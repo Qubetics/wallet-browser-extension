@@ -45,6 +45,8 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
   const fetchAccounts = async () => {
     const { accounts } = await chrome.storage.session.get("accounts");
 
+    console.log('ACCOUNT DEFAULT :',accounts);
+
     const items = accounts.flatMap((account, index) => {
       const accountItem = {
         label: (
@@ -52,10 +54,10 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
             to="/"
             onClick={async (e) => {
               e.preventDefault();
-              await WalletHelper.setWalletPreference(account.id);
+              await WalletHelper.setWalletPreference(account?.id);
             }}
           >
-            {account.name}
+            {account?.name}
           </Link>
         ),
         key: `${index}`,
@@ -69,6 +71,7 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
       return [accountItem];
     });
 
+    console.log('ACCOUNT SET IN WALLET :',items);
     setAccounts(items);
   };
 
@@ -114,6 +117,8 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
         total += fiatValue;
       }
     });
+
+    console.log('total',total)
     setTotal(total);
   };
 
@@ -220,12 +225,13 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
 
     const isSidePanelOpen = await chrome.storage.local.get("openSidePanel");
     setIsSidePanelOpen(isSidePanelOpen.openSidePanel);
+
+    console.log('myItems',myItems);
     setChainItems(myItems);
   };
 
   useEffect(() => {
     fetchAccounts();
-    calculateTotal();
     init();
     if (coin) {
       try {
@@ -235,6 +241,7 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
 
         // Perform the multiplication
         const result = myPrice.times(balance);
+        console.log('result 245 ~ balance details :',result)
 
         // Get the result as a string with the desired precision
         const formattedResult = getFlooredFixed(result.toString(), 2);
@@ -245,7 +252,11 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
         console.log(error, "error");
       }
     }
-  }, [tokens]);
+  }, []);
+
+  useEffect(()=>{
+    calculateTotal();
+  },[tokens])
 
   const [messageApi, contextHolder] = message.useMessage({
     duration: DURATION,
@@ -303,7 +314,7 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
             >
               {/* <img src={aName} alt="icon" /> */}
               <div className="balanceName">
-                <h5>{account.name.charAt(0).toUpperCase()}</h5>
+                <h5>{account?.name.charAt(0).toUpperCase()}</h5>
               </div>
               <div>
                 <Link
@@ -311,12 +322,12 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
                   //  onClick={(e) => e.preventDefault()}
                 >
                   <p style={{ display: "flex" }}>
-                    {account.name.charAt(0).toUpperCase() +
-                      account.name.length <
+                    {account?.name.charAt(0).toUpperCase() +
+                      account?.name.length <
                     10 ? (
-                      <p> {account.name} </p>
+                      <p> {account?.name} </p>
                     ) : (
-                      <p> {account.name.slice(0, 6)}...</p>
+                      <p> {account?.name.slice(0, 6)}...</p>
                     )}
 
                     {}
@@ -414,7 +425,7 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
                   await chrome.storage.local.set({
                     balanceIn: false,
                   });
-                  await WalletHelper.updateBalanceInShow(false, account.id);
+                  await WalletHelper.updateBalanceInShow(false, account?.id);
                   store.dispatch(setBalancesIn(false));
                 }}
                 style={{
@@ -432,7 +443,7 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
                   await chrome.storage.local.set({
                     balanceIn: true,
                   });
-                  await WalletHelper.updateBalanceInShow(true, account.id);
+                  await WalletHelper.updateBalanceInShow(true, account?.id);
                   store.dispatch(setBalancesIn(true));
                 }}
                 style={{

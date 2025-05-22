@@ -2,11 +2,6 @@ import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import "./CoinsTable.scss";
-import Mercuryo from "../../Assets/Coins/Mercuryo.png";
-import Transak from "../../Assets/Coins/Transak.png";
-import Simplex from "../../Assets/Simplex.png";
-import Alchemy from "../../Assets/Coins/Alchemy.png";
-import EDIT from "../../Assets/edit.png";
 import Edit from "../../Assets/edit.svg";
 import bin from "../../Assets/DeleteIcon.svg";
 import { store } from "../..";
@@ -15,7 +10,6 @@ import { WalletHelper } from "../../helpers/wallet.helper";
 import ModalCustom from "../ModalCustom/ModalCustom";
 import { capitalize } from "../../helpers/conversion.helper";
 import DummyEle from "./DummyEle";
-import { Draggable } from "react-drag-reorder";
 import blackStar from "../../Assets/blackStar.svg";
 import blueStar from "../../Assets/blueStar.svg";
 import { token_type } from "../../helpers/constant";
@@ -141,8 +135,8 @@ function CoinsTable({ dataArray, showCoinPrice, name }) {
                 <Tooltip title={`${ele?.coinSubName}`}>
                   {ele?.coinSubName?.length > 10 &&
                     ele?.coin?.coin?.token_address
-                    ? `${ele.coinSubName.substring(0, 15)}...`
-                    : `${ele.coinSubName.substring(0, 15)}...`}
+                    ? `${ele.coinSubName.substring(0, 15)}... ${ele.type ? '('+ele.type+')' : ''})`
+                    : `${ele.coinSubName.substring(0, 15)} ${ele.type ? '('+ele.type+')' : ''}`}
                     </Tooltip>
                 </span>
                 <span

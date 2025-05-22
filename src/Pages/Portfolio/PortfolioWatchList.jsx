@@ -194,7 +194,7 @@ function PortfolioWatchList() {
                           {
                             data: [
                               {
-                                address: token.coin_id === 3 ? token?.wallets[0]?.wallet_address : account.address,
+                                address: token.coin_id === 3 || token.coin_id === 5 ? token?.wallets[0]?.wallet_address : account.address,
                                 coin_id: token.coin_id,
                                 status: token.watchlist_data ? 0 : 1,
                               },
@@ -238,7 +238,7 @@ function PortfolioWatchList() {
           onClick={() =>
             navigate('/add-watch-list', { state: { isFromPortfolio: true } })
           }
-          text={'Add Tokens'}
+          text={'Add Assets'}
           maxWidth={'100%'}
         />
       </div>

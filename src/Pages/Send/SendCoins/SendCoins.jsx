@@ -601,12 +601,13 @@ function SendCoins() {
           ? myGasPrice?.propose
           : myGasPrice?.fast;
       console.log('amount ~ 602 ~ SendCoins.jsx',amount);
+      console.log('GAS PRICE IN SEND CONFIRM :',Math.max(prc,1) , prc);
       navigate('/confirmCurrency', {
         state: {
           to: address,
           amount: amount,
           coin,
-          networkFee: ((myGasPrice?.estimate * prc) / 10 ** 9)?.toFixed(5),
+          networkFee: ((myGasPrice?.estimate * Math.max(prc,1)) / 10 ** 9)?.toFixed(5),
           ENSName,
           contact: findContact?.name,
           redirectTo,

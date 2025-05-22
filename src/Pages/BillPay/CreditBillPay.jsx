@@ -147,7 +147,7 @@ function CreditBillPay() {
     }
   }, []);
 
-  console.log("token::", token);
+  // console.log("token::", token);
 
   const doPayment = async () => {
     console.log("amount::", amount);

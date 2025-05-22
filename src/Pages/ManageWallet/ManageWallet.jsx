@@ -109,97 +109,44 @@ function ManageWallet() {
       });
     setTotalAmt(total);
   };
+
   useEffect(() => {
     init();
   }, []);
-  // console.log("Data:11:",data);
+
   const onClose = () => {
     setDrawer(false);
   };
-
   const navigate = useNavigate();
-
   const { state } = useLocation();
-
-  // const setDefaultAccount = async (selectedAccount) => {
-  //   try {
-  //     store.dispatch(setLoading(true));
-  //     const { accounts } = await chrome.storage.session.get('accounts');
-
-  //     if (accounts) {
-  //       accounts.map((acc) => ({
-  //         ...acc,
-  //         default: acc.id === selectedAccount.id,
-  //       }));
-
-  //       const updatedAccount = accounts.map((el) => {
-  //         if (el.address === selectedAccount?.address) {
-  //           el.default = true;
-  //         } else {
-  //           el.default = false;
-  //         }
-  //         return el;
-  //       });
-
-  //       chrome.storage.local.set({
-  //         mnemonics: updatedAccount,
-  //         registered: true,
-  //       });
-
-  //       await WalletHelper.setWalletPreference(selectedAccount.id);
-
-  //       await init();
-  //       messageApi.success('Default account updated successfully!');
-  //     }
-  //   } catch (error) {
-  //     messageApi.error('Failed to update the default account.');
-  //   } finally {
-  //     store.dispatch(setLoading(false));
-  //   }
-  // };
 
   const setDefaultAccount = async (selectedAccount) => {
     try {
       store.dispatch(setLoading(true));
-      const { accounts } = await chrome.storage.session.get('accounts');
-      if (accounts) {
-        accounts.map((acc) => ({
-          ...acc,
-          default: acc.id === selectedAccount.id,
-        }));
-
-        // console.log('ACCCCCC ', accounts);
-        // console.log('ACCCCCCselectedAccount ', selectedAccount);
-
-        const { mnemonics } = await chrome.storage.local.get('mnemonics');
-        const decryptedMnemonics = await SecurityHelper.decrypt(
-          mnemonics,
-          sessionPassword
-        );
-
-        const updatesMnemonics = JSON.parse(decryptedMnemonics).map((el) => {
-          if (el.address === selectedAccount?.address) {
-            el.default = true;
-          } else {
-            el.default = false;
-          }
-          return el;
-        });
-        console.log('updatesMnemonics::', updatesMnemonics);
-        const encryptedMnemonics = await SecurityHelper.encrypt(
-          updatesMnemonics,
-          sessionPassword
-        );
-        chrome.storage.local.set({
-          mnemonics: encryptedMnemonics,
-          registered: true,
-        });
-
-        await WalletHelper.setWalletPreference(selectedAccount.id);
-
-        await init();
-        messageApi.success('Default account updated successfully!');
-      }
+      const { mnemonics } = await chrome.storage.local.get('mnemonics');
+      const decryptedMnemonics = await SecurityHelper.decrypt(
+        mnemonics,
+        sessionPassword
+      );
+      const updatesMnemonics = JSON.parse(decryptedMnemonics).map((el) => {
+        if (el.address === selectedAccount?.address) {
+          el.default = true;
+        } else {
+          el.default = false;
+        }
+        return el;
+      });
+      const encryptedMnemonics = await SecurityHelper.encrypt(
+        updatesMnemonics,
+        sessionPassword
+      );
+      chrome.storage.local.set({
+        mnemonics: encryptedMnemonics,
+        registered: true,
+      });
+      await WalletHelper.setWalletPreference(selectedAccount.id);
+      await init();
+      messageApi.success('Default account updated successfully!');
     } catch (error) {
       messageApi.error('Failed to update the default account.');
     } finally {
@@ -339,7 +286,7 @@ function ManageWallet() {
                   <li key={idx} className="currency_click">
                     <div
                       style={{ display: 'flex', alignItems: 'center' }}
-                      onClick={async (e) => {
+                      onClick={(e) => {
                         setSessionPassword(null);
                         e.preventDefault();
                         if (!data?.default) {

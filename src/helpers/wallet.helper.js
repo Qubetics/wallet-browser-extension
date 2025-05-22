@@ -1005,12 +1005,16 @@ export class WalletHelper {
   };
 
   static generateAndSetWalletToRefreshToken = async () => {
+    console.log('generateAndSetWalletToRefreshToken')
     try {
       let { accounts } = await chrome.storage.session.get('accounts');
+      console.log('GENERATE WALLET ON REFRESH TOKEN :',accounts)
       const { chains } = await chrome.storage.local.get('chains');
       const { currency } = await chrome.storage.local.get('currency');
       const { deviceId } = await chrome.storage.local.get('deviceId');
       const defaultAccount = accounts.find((el) => el.default);
+
+      console.log('GENERATE WALLET ON REFRESH :',defaultAccount)
 
       const response = await server.post(
         `/auth/authorisation`,
@@ -1042,7 +1046,7 @@ export class WalletHelper {
       });
 
       await chrome.storage.session.set({ accounts: updateAccounts });
-
+      store.dispatch(setAccount({}));
       store.dispatch(setAccount(updateAccounts.find((el) => el.default)));
 
       store.dispatch(setChain(chains.find((el) => el.default)));
@@ -1242,54 +1246,9 @@ export class WalletHelper {
     store.dispatch(setChain(updatedChains.find((el) => el.default)));
   };
 
-  // static setWalletPreference = async (walletId) => {
-  //   try {
-  //     const { accounts } = await chrome.storage.local.get('accounts');
-
-  //     const decryptedAccounts = accounts;
-
-  //     const updatesAccounts = decryptedAccounts.map((el) => {
-  //       if (el.id === walletId) {
-  //         el.default = true;
-  //       } else {
-  //         el.default = false;
-  //       }
-  //       return el;
-  //     });
-
-  //     await chrome.storage.local.set({
-  //       accounts: updatesAccounts,
-  //     });
-
-  //     store.dispatch(
-  //       setBalancesIn(
-  //         updatesAccounts.find((el) => el.default).balanceIn !== null ||
-  //           updatesAccounts.find((el) => el.default).balanceIn !== undefined
-  //           ? updatesAccounts.find((el) => el.default).balanceIn === false
-  //             ? false
-  //             : true
-  //           : true
-  //       )
-  //     );
-  //     store.dispatch(setNfts([]));
-  //     store.dispatch(setTokens([]));
-  //     await chrome.storage.session.set({ accounts: updatesAccounts });
-  //     store.dispatch(setAccount(updatesAccounts.find((el) => el.default)));
-  //     await this.generateAndSetWalletToRefreshToken();
-  //     return true;
-  //   } catch (error) {
-  //     console.log(error);
-  //     return false;
-  //   }
-  // };
-
   static setWalletPreference = async (walletId) => {
     try {
-      console.log(walletId, 'walletId>>>>>>>>>>');
       const { accounts } = await chrome.storage.local.get('accounts');
-
-      // const decryptedAccounts = await SecurityHelper.decrypt(accounts, password);
-
       const updatesAccounts = accounts.map((el) => {
         if (el.id === walletId) {
           el.default = true;
@@ -1298,11 +1257,7 @@ export class WalletHelper {
         }
         return el;
       });
-      // const encryptedAccounts = await SecurityHelper.encrypt(
-      //   updatesAccounts,
-      //   password
-      // );
-
+      
       await chrome.storage.local.set({
         accounts: updatesAccounts,
       });
@@ -1320,11 +1275,11 @@ export class WalletHelper {
       store.dispatch(setNfts([]));
       store.dispatch(setTokens([]));
       await chrome.storage.session.set({ accounts: updatesAccounts });
-      store.dispatch(setAccount(updatesAccounts.find((el) => el.default)));
+      // store.dispatch(setAccount(updatesAccounts.find((el) => el.default)));
       await this.generateAndSetWalletToRefreshToken();
       return true;
     } catch (error) {
-      console.log(error);
+      console.log('error',error);
       return false;
     }
   };
