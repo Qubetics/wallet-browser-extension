@@ -135,8 +135,8 @@ function CoinsTable({ dataArray, showCoinPrice, name }) {
                 <Tooltip title={`${ele?.coinSubName}`}>
                   {ele?.coinSubName?.length > 10 &&
                     ele?.coin?.coin?.token_address
-                    ? `${ele.coinSubName.substring(0, 15)}... ${ele.type ? '('+ele.type+')' : ''})`
-                    : `${ele.coinSubName.substring(0, 15)} ${ele.type ? '('+ele.type+')' : ''}`}
+                    ? `${ele.coinSubName.substring(0, 15)}`
+                    : `${ele.coinSubName.substring(0, 15)}`}
                     </Tooltip>
                 </span>
                 <span
@@ -149,7 +149,7 @@ function CoinsTable({ dataArray, showCoinPrice, name }) {
                   {/* {ele?.coin?.coin_family == 9 ? "PLS" : ele.type} */}
                   {ele?.coin?.coin?.token_address
                     ? `(${token_type(ele?.coin?.coin?.coin_family)})`
-                    : ""}
+                    : `${ele.type ? '('+ele.type+')' : ''}`}
                 </span>
                 <div className={`${"coinsTable1__grayText12"} textBold`}></div>
               </div>

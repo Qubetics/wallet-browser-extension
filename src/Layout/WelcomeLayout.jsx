@@ -14,7 +14,7 @@ function WelcomeLayout() {
     "/terms-policy": {
       heading: "Legal",
       subHeading:
-        "Please review the Qubetics Extension Terms of Service and Privacy Policy.",
+        "Please review the Qubetics Extension Privacy Policy.",
     },
     "/createNewWallet": {
       heading: "Wallet Name",

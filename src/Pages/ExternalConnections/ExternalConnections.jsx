@@ -87,24 +87,16 @@ export const ExternalConnection = () => {
   };
 
   const init = async () => {
-    // console.log('EXTERNALLLLLLLLLLLLLL ');
-
     const { chains } = await chrome.storage.local.get('chains');
-    console.log('DEFAULT CHAIN 1:',chains)
     let { accounts } = await chrome.storage.session.get('accounts');
-
     const { mnemonics } = await chrome.storage.local.get('mnemonics');
     const decryptMnemonics = await SecurityHelper.decrypt(mnemonics, sessionPassword);
     const defaultAddress = accounts?.find((item) => item.default)?.address;
     if (defaultAddress) {
       setDefaultAccounts(defaultAddress);
     }
-    // console.log("Dec:::Mn::",decryptMnemonics,'accounts::',accounts?.find((item)=>item.default)?.address,"defaultAddress::",defaultAddress);
     setMnemonics(decryptMnemonics);
     setChain(chains.find((el) => el.default));
-
-
-    console.log('DEFAULT CHAIN 2:',chains)
 
     const myDefaultChain = chains.find((el) => el?.default);
     chrome.tabs.query(
@@ -116,14 +108,11 @@ export const ExternalConnection = () => {
           const queryParams = new URLSearchParams(url.search);
           const method = queryParams.get('method');
 
-          // console.log("METHODDDDDDDDDDDDDDDDDD External_conn ", method);
-
           const data = queryParams.get('data')
             ? JSON.parse(decodeURIComponent(queryParams.get('data')))
             : null;
           setData(data);
           setChainID(Web3.utils.toDecimal(data.chainId));
-          // console.log('EXTERNAL CONN DATA::', data,"account::",account);
 
           if (data.network === 'qubetics') {
             if (method === 'nativeConnect' && defaultAddressPhrase) {
@@ -134,7 +123,6 @@ export const ExternalConnection = () => {
                 defaultAddressPhrase,
                 data.nodeUrl
               );
-              // console.log("valoperAddress:::",valoperAddress,"addressaddress:::",address,"defaultAddressPhrase::",defaultAddressPhrase);
 
               setData({
                 ...data,
@@ -143,7 +131,6 @@ export const ExternalConnection = () => {
                 evmAddress: account.address,
               });
               setMethod(method);
-              // console.log("DATA DAT:::",data,valoperAddress,address);
             } else {
               setMethod(method);
               setData(data);
@@ -741,7 +728,7 @@ export const ExternalConnection = () => {
                                 .toString(),
                               5
                             )
-                          )
+                          ) + ' ' + chain.currencySymbol
                         : addCommasToNumber(getFlooredFixed(feeInEth, 5)) +
                           ' ' +
                           chain.currencySymbol}{' '}

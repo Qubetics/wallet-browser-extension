@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import { store } from '../..';
 import { setLoading } from '../../actions/loading';
 import { server } from '../../server';
+import { token_type } from '../../helpers/constant';
 
 const stringToColour = function (name) {
   let hash = 0;
@@ -96,7 +97,12 @@ const AllocationChart = () => {
       );
 
       const portfolioData = data?.data || [];
-      setPortfolio(portfolioData);
+
+      const filteredPortfolio = portfolioData.filter(item => item.balance > 0);
+
+
+
+      setPortfolio(filteredPortfolio);
 
       const totalBalance = portfolioData.reduce(
         (acc, obj) =>
@@ -246,7 +252,10 @@ const AllocationChart = () => {
                 <div className="coinsTable1__left__textSec">
                   <div className="coinsTable1__textTop">
                     <span className="coinNname">
+                    {console.log('coin type',itm?.coin?.is_token,token_type(itm?.coin?.coin_family))}
                       {itm?.coin?.coin_symbol?.toUpperCase()}
+                      {' '}
+                      {token_type(itm?.coin?.coin_family) ? `(${token_type(itm?.coin?.coin_family)})` : ''}
                     </span>
                   </div>
 
@@ -269,11 +278,11 @@ const AllocationChart = () => {
               </div>
               <div className="coinsTable1__right">
                 <span style={{ color: '#FFFFFF' }}>
-                  {currency?.symbol}
-                  {(
+                  {balanceIn ? currency?.symbol : ''}
+                  {balanceIn ? (
                     parseFloat(itm?.balance) *
                     parseFloat(itm?.coin?.fiat_price_data?.value || 0)
-                  ).toFixed(2)}
+                  ).toFixed(2) : '****'}
                 </span>
 
                 <span>

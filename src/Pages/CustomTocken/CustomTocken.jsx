@@ -384,7 +384,7 @@ function CustomToken() {
                     name: tokenInfo.name,
                     symbol: tokenInfo.symbol,
                     coin_gicko_alias: tokenInfo.symbol,
-                    decimals: tokenInfo.decimals,
+                    decimals: tokenInfo.decimals.toString(),
                     token_address: tokenAddress,
                     coin_family: selectedChain.coinFamily,
                     wallet_address:

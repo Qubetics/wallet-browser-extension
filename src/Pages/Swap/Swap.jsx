@@ -4,10 +4,7 @@ import './Swap.scss';
 import ModalCloseIcon from '../../Assets/ModalCloseIcon.svg';
 import darkclose from '../../Assets/darkclose.svg';
 import { Drawer, message, Select } from 'antd';
-import {
-  InfoCircleOutlined,
-  SettingOutlined,
-} from '@ant-design/icons';
+import { InfoCircleOutlined, SettingOutlined } from '@ant-design/icons';
 // import DarkLogo from "../../Assets/skymarvelLogo.png";
 // import Logo from "../../Assets/skymarvelLogo.png";
 import React from 'react';
@@ -33,9 +30,7 @@ import { DURATION } from '../../config/message.config';
 import BigNumber from 'bignumber.js';
 import warning from '../../Assets/PNG/danger.png';
 import infoBg from '../../Assets/bgRedinfo.png';
-import {
-  toFixed,
-} from '../../helpers/conversion.helper';
+import { toFixed } from '../../helpers/conversion.helper';
 import { server } from '../../server';
 import { PancakeHelper } from '../../helpers/pancake.helper';
 import ModalCustom from '../../Components/ModalCustom/ModalCustom';
@@ -133,20 +128,10 @@ function Swap() {
 
   useEffect(() => {
     if (swapDetail) {
+      console.log('swapDetail?.amount', swapDetail?.amount);
       setSel(swapDetail?.tab);
       if (swapDetail?.tab == 0) {
-        // setToken1(swapDetail?.token1);
-        // setToken2(swapDetail?.token2);
-        setAount(+swapDetail?.amount);
-        // setAmount2(+swapDetail?.amount2);
-        // setFeeAmount(+swapDetail?.feeAmount);
-        // setTimeout(() => {
-        //   initialInput(
-        //     +swapDetail?.amount,
-        //     swapDetail?.token1,
-        //     swapDetail?.token2
-        //   );
-        // }, 2000);
+        setAount(swapDetail?.amount.toString());
       }
     }
     init();
@@ -198,86 +183,55 @@ function Swap() {
     try {
       store.dispatch(overAllLoader(true));
       if (token1.tokenAddress) {
+        const token1Balance = token1?.balance;
         const amountToSend = await Web3Helper.getTokenBalance(
           token1.tokenAddress,
           token1.address,
           token1.rpc
+        );
+        console.log('amountToSend', amountToSend);
+        // const amountToSend = token1Balance;
+        console.log(
+          '🚀 ~ calculateAccordingly ~ getTokenBalance:',
+          amountToSend
         );
         if (amountToSend == 0) {
           setAmount2(0);
           setInfoData([]);
         }
         store.dispatch(overAllLoader(false));
-        console.log('AMOUNT TO SWAP :',amountToSend)
-        const amountCalculatedbyPercentage = new BigNumber(amountToSend).multipliedBy(
-          new BigNumber(percentage).dividedBy(100)
-        )
+        console.log('AMOUNT TO SWAP :', amountToSend);
 
-       const finalAmountToSend = new BigNumber(amountCalculatedbyPercentage)
+        const amountBN = new BigNumber(amountToSend);
+        const percentageBN = new BigNumber(percentage).dividedBy(100);
 
-        console.log('FINAL AMOUNT  :',percentage,finalAmountToSend);
+        const amountCalculatedByPercentage =
+          amountBN.multipliedBy(percentageBN);
+        const finalAmountToSend = amountCalculatedByPercentage.toString();
+
+        console.log('FINAL AMOUNT  :', percentage, finalAmountToSend);
         setAount(
           finalAmountToSend.toString() == 0
-            ? finalAmountToSend.toString()
-            : finalAmountToSend.toFixed(18).toString()
+            ? finalAmountToSend
+            : finalAmountToSend
         );
-        setBalance(toFixed(amountToSend.toString()));
-        await handleInputChange(
-          finalAmountToSend.toFixed(18).toString(),
-          token1,
-          token2,
-          true
+        setBalance(amountToSend);
+        console.log(
+          '🚀 ~ calculateAccordingly ~ parseFloat(amount.toFixed(18)).toString():',
+          finalAmountToSend
         );
+
+        await handleInputChange(finalAmountToSend, token1, token2, true);
       }
     } catch (error) {
-      console.log('error',error)
+      console.log('error', error);
       store.dispatch(overAllLoader(false));
       return messageApi.error('Something went wrong.');
     }
   };
-  
-  // const calculateAccordingly = async (percentage) => {
-  //   try {
-  //     store.dispatch(overAllLoader(true));
-  //     if (token1.tokenAddress) {
-  //       const amountToSend = await Web3Helper.getTokenBalance(
-  //         token1.tokenAddress,
-  //         token1.address,
-  //         token1.rpc
-  //       );
-  //       if (amountToSend == 0) {
-  //         setAmount2(0);
-  //         setInfoData([]);
-  //         store.dispatch(overAllLoader(false));
-  //         return;
-  //       }
-  
-  //       const swapValue = new BigNumber(amountToSend)
-  //         .multipliedBy(new BigNumber(percentage).dividedBy(100))
-  //         .integerValue(); // ← ensures whole number
-  
-  //       console.log('AMOUNT TO SWAP :', amountToSend);
-  //       console.log('FINAL AMOUNT :', percentage, swapValue.toString());
-  
-  //       setAount(swapValue.toString());
-  //       setBalance(toFixed(amountToSend.toString()));
-  
-  //       await handleInputChange(
-  //         swapValue.toString(),
-  //         token1,
-  //         token2,
-  //         true
-  //       );
-  //     }
-  //   } catch (error) {
-  //     console.error('calculateAccordingly error:', error);
-  //     messageApi.error('Something went wrong.');
-  //   } finally {
-  //     store.dispatch(overAllLoader(false));
-  //   }
-  // };
-  
+
   const init = async () => {
+    let amountToSend = 0;
     const { chains } = await chrome.storage.local.get('chains');
     try {
       const comissionData = await server.get('/on-chain/commision_data', {
@@ -353,8 +307,6 @@ function Swap() {
           (token) => !token.tokenAddress && token.iHave && token.coinFamily == 3
         );
 
-        // console.log("TOKENNNNNNNNN1", myToken1, " XXXX ", tokens);
-
         if (!myToken1) {
           myToken1 = tokens.find((token) => !token.tokenAddress);
         }
@@ -369,7 +321,14 @@ function Swap() {
             token.coin.coin_family === myToken1.coin.coin_family
         );
 
-        // console.log("🚀 ~ file: Swap.jsx:235 ~ init ~ myToken2:", myToken2);
+        console.log('TOKENNNNNNNNN1', myToken1, ' XXXX ', tokens);
+
+        amountToSend = await Web3Helper.getTokenBalance(
+          myToken1.tokenAddress,
+          myToken1.address,
+          myToken1.rpc
+        );
+
 
         if (!myToken2) {
           myToken2 = tokens.find(
@@ -467,7 +426,13 @@ function Swap() {
           }
         }
 
-        const balance = myToken1.balance || 0;
+        console.log('UPDATING BALANCE ON COMPONENT MOUNT :', amountToSend);
+
+        const balance = amountToSend
+          ? amountToSend
+          : myToken1.balance
+          ? myToken1.balance
+          : 0;
         const tokenBalance = myToken2.balance || 0;
 
         await chrome.storage.local.set({
@@ -491,6 +456,12 @@ function Swap() {
         }
         ///////////////////////////////////////////////////////////////////////////////////
         let token1 = uniToken1 || null;
+
+        amountToSend = await Web3Helper.getTokenBalance(
+          token1.tokenAddress,
+          token1.address,
+          token1.rpc
+        );
 
         const token1Response = await server.post(
           `/wallet/swap_coinlist`,
@@ -712,16 +683,16 @@ function Swap() {
           }
         }
 
-        setBalance(token1?.balance || 0);
-
+        console.log('amountToSend', amountToSend);
+        setBalance(
+          amountToSend ? amountToSend : token1?.balance ? token1?.balance : 0
+        );
         setAvailableTokens(tokens);
         setToken1(token1);
         setToken2(uniToken2);
-
         setSelectedCoinFamily(token1?.coinFamily);
         setLoading(false);
       }
-
       setLoading(false);
     } catch (error) {
       console.log(error);
@@ -837,7 +808,7 @@ function Swap() {
       store.dispatch(overAllLoader(false));
     } catch (error) {
       store.dispatch(overAllLoader(false));
-      console.log('get Inactive Token:',error);
+      console.log('get Inactive Token:', error);
       messageApi.error('Something went wrong.');
       navigate(-1);
     }
@@ -876,10 +847,10 @@ function Swap() {
       token1.coinFamily == 1
         ? el.network === 'bnb'
         : token1.coinFamily == 2
-        ? el.network === "eth"
+        ? el.network === 'eth'
         : token1.coinFamily == 4
-        ? el.network === "pol"
-        : el.network === ""
+        ? el.network === 'pol'
+        : el.network === ''
     );
 
     let finalFee = 0;
@@ -1237,10 +1208,6 @@ function Swap() {
   };
 
   const handleToken2Change = async (updatedToken2, isWrap) => {
-    // console.log(
-    //   "🚀 ~ file: Swap.jsx:777 ~ handleToken2Change ~ updatedToken2:",
-    //   updatedToken2
-    // );
     await chrome.storage.local.set({
       [`uniToken2_${account.id}`]: updatedToken2,
     });
@@ -1266,14 +1233,21 @@ function Swap() {
         setInfoData([]);
         updateRef.current = false;
         if (!isWrap) {
-          handleInputChange(amount, token1, updatedToken2);
+          handleInputChange(swapDetail?.amount, token1, updatedToken2);
         }
       }
     }
   };
 
   const handleInputChange = async (amount, token1, token2, second) => {
-    console.log('amount, token1, token2, second',amount, token1, token2, second)
+    console.log(
+      '🚀 ~ handleInputChange ~ amount, token1, token2, second:',
+      typeof amount,
+      amount.toString(),
+      token1,
+      token2,
+      second
+    );
     try {
       if (amount > 0 && token1.coinFamily == token2.coinFamily) {
         setLoading(true);
@@ -1284,12 +1258,11 @@ function Swap() {
           token1.tokenAddress || '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
           token2.tokenAddress || '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
           new BigNumber(amount)
-          .multipliedBy(new BigNumber(10).pow(token1.decimals))
-          .decimalPlaces(0, BigNumber.ROUND_DOWN),
+            .multipliedBy(new BigNumber(10).pow(token1.decimals))
+            .decimalPlaces(0, BigNumber.ROUND_DOWN),
           commision.percentage
         );
-
-        console.log('swap route',route);
+        console.log('🚀 ~ handleInputChange ~ route:', route);
 
         if (!route) {
           setLoading(false);
@@ -1299,11 +1272,19 @@ function Swap() {
         }
         setRoute(route);
         setAmount2(
-          new Bignumber(route.toAmount).dividedBy(Math.pow(10, token2.decimals)).toFixed()
+          new Bignumber(route.toAmount)
+            .dividedBy(Math.pow(10, token2.decimals))
+            .toFixed()
+        );
+
+        console.log(
+          '🚀 ~ handleInputChange ~ new Bignumber(route.toAmount).dividedBy(Math.pow(10, token2.decimals)).toFixed():',
+          new Bignumber(route.toAmount)
+            .dividedBy(Math.pow(10, token2.decimals))
+            .toFixed()
         );
 
         setLoading(false);
-
         setLoading(false);
       }
       updateRef.current = true;
@@ -1385,7 +1366,7 @@ function Swap() {
               )} ${token1.symbol}`,
             },
             {
-              text: "Trading Fees",
+              text: 'Trading Fees',
               textVal: `${tradingFee} ${BL_CODE[token1?.coinFamily]}`,
             },
             {
@@ -1478,9 +1459,9 @@ function Swap() {
               )} ${token1.symbol}`,
             },
             {
-              text: "Trading Fees",
+              text: 'Trading Fees',
               textVal: `${tradingFee} ${
-                token1.coinFamily == 1 ? "ETH" : "BNB"
+                token1.coinFamily == 1 ? 'ETH' : 'BNB'
               }`,
             },
             {
@@ -1547,13 +1528,13 @@ function Swap() {
               )} ${token1.symbol}`,
             },
             {
-              text: "Trading Fees",
+              text: 'Trading Fees',
               textVal: `${tradingFee} ${
                 token1.coinFamily == 1
-                  ? "ETH"
+                  ? 'ETH'
                   : token1.coinFamily == 9
-                  ? "PLS"
-                  : "BNB"
+                  ? 'PLS'
+                  : 'BNB'
               }`,
             },
             {
@@ -1670,26 +1651,11 @@ function Swap() {
     }, 2000);
   }
 
-  // if (!token1 || !token2 || availableTokens.length === 0) {
-  //   return (
-  //     <div className={`scrollableCont`}>
-  //       {contextHolder}
-  //       <MenuRestofHeaders backTo={"/wallet"} title={"Swap"} />
-  //       <div className={`flexedContent`}>
-  //         <Loader
-  //           className="noAddress"
-  //           text={"Please wait while we load your tokens for swapping."}
-  //         />
-  //       </div>
-  //     </div>
-  //   );
-  // }
-
   const selectAfter = (
     <div className={'addonAfter'}>
       {token1?.isToken ? (
         <span
-          className='send__pasteText'
+          className="send__pasteText"
           style={{
             position: 'relative',
             top: '-1px',
@@ -1727,7 +1693,7 @@ function Swap() {
           {
             value: token1?.id,
             label: (
-              <span className='flexedItemSelect'>
+              <span className="flexedItemSelect">
                 {!token1?.image ? (
                   <div
                     style={{
@@ -1753,7 +1719,7 @@ function Swap() {
                       position: 'relative',
                       borderRadius: '15px',
                     }}
-                    alt=''
+                    alt=""
                     src={token1?.image}
                   />
                 )}
@@ -1815,7 +1781,7 @@ function Swap() {
             return {
               value: token?.id,
               label: (
-                <span className='flexedItemSelect'>
+                <span className="flexedItemSelect">
                   <img
                     style={{
                       height: '20px',
@@ -1824,7 +1790,7 @@ function Swap() {
                       marginLeft: '20px',
                       marginRight: '20px',
                     }}
-                    alt=''
+                    alt=""
                     src={token?.image}
                   />
                   {token?.symbol}
@@ -1957,6 +1923,10 @@ function Swap() {
   //   </div>
   // );
 
+  useEffect(() => {
+    console.log('🚀 ~ balance:', balance);
+  }, [balance]);
+
   return (
     <div className={`scrollableCont`}>
       {contextHolder}
@@ -1964,7 +1934,7 @@ function Swap() {
       <div className={`flexedContent`}>
         <Tabs selectedIndex={sel}>
           <TabList
-            className='swapTabList '
+            className="swapTabList "
             style={{
               border: 'none',
               borderRadius: '14px',
@@ -1974,7 +1944,7 @@ function Swap() {
             }}
           >
             <Tab
-              className='swapTab'
+              className="swapTab"
               onClick={() => {
                 if (swapDetail) {
                   store.dispatch(swapDetailAc(null));
@@ -1985,7 +1955,7 @@ function Swap() {
               On-Chain
             </Tab>
             <Tab
-              className='swapTab'
+              className="swapTab"
               disabled={chain.testnet}
               onClick={() => {
                 if (chain.testnet) {
@@ -2005,53 +1975,45 @@ function Swap() {
 
           <TabPanel>
             {onChainSwapM?.is_maintenance ? (
-              <Maintanance text='On chain swap is in under maintenance' />
+              <Maintanance text="On chain swap is in under maintenance" />
             ) : (
               <div
-                className={`${"fixedContent height-571"} ${
-                  height <= 600 ? "fixedContentOuterExt" : ""
+                className={`${'fixedContent height-571'} ${
+                  height <= 600 ? 'fixedContentOuterExt' : ''
                 }`}
               >
-                <div style={{ width: '100%' }} className='swap '>
-                  <div className='swap_onChain'>
-                    <div className='swap_onChain_balance'>
+                <div style={{ width: '100%' }} className="swap ">
+                  <div className="swap_onChain">
+                    <div className="swap_onChain_balance">
                       <div>
                         <input
-                          type='number'
-                          className='myInput'
-                          placeholder='0.000'
+                          type="number"
+                          className="myInput"
+                          placeholder="0.000"
                           onChange={({ target: { value: amount } }) => {
                             if (percent != null) {
                               setPercent(null);
                             }
 
                             const afterDecimal = amount.split('.')[1];
-
-                            // Get the maximum allowed characters before the decimal point (15 characters)
                             const maxCharactersBeforeDecimal = 15;
-
                             if (afterDecimal) {
-                              // Get the maximum allowed decimals for the cryptocurrency (e.g., Bitcoin has 8 decimals)
                               const maxDecimals = token1.decimals;
-                              // Check if the entered decimal part is longer than the maximum allowed
                               if (
                                 afterDecimal.toString().length > maxDecimals
                               ) {
-                                return; // Return if decimal part is too long
+                                return;
                               }
-
-                              // Check if the characters before the decimal exceed the maximum allowed
                               const beforeDecimal = amount.split('.')[0];
                               if (
                                 beforeDecimal.toString().length >
                                 maxCharactersBeforeDecimal
                               ) {
-                                return; // Return if characters before decimal exceed the maximum allowed
+                                return;
                               }
                             } else {
-                              // If there's no decimal, check the whole input length
                               if (amount.length > maxCharactersBeforeDecimal) {
-                                return; // Return if the whole input exceeds the maximum allowed
+                                return;
                               }
                             }
                             setAount(amount);
@@ -2087,7 +2049,7 @@ function Swap() {
                             {
                               value: token1?.id,
                               label: (
-                                <span className='flexedItemSelect'>
+                                <span className="flexedItemSelect">
                                   {!token1?.image ? (
                                     <div
                                       style={{
@@ -2112,7 +2074,7 @@ function Swap() {
                                         position: 'relative',
                                         borderRadius: '15px',
                                       }}
-                                      alt=''
+                                      alt=""
                                       src={token1?.image}
                                     />
                                   )}
@@ -2135,7 +2097,7 @@ function Swap() {
                               return {
                                 value: token?.id,
                                 label: (
-                                  <span className='flexedItemSelect'>
+                                  <span className="flexedItemSelect">
                                     <img
                                       style={{
                                         height: '20px',
@@ -2152,10 +2114,9 @@ function Swap() {
                               };
                             })}
                         />
-                        <div className='swap_onChain_pay'>
-                          {/* <p>You Pay</p> */}
-                          <p style={{ textAlign: "right" }}>
-                            Balance{" "}
+                        <div className="swap_onChain_pay">
+                          <p style={{ textAlign: 'right' }}>
+                            Balance{' '}
                             <span>
                               {addCommasToNumber(
                                 parseFloat(getFlooredFixed(balance || 0, 6))
@@ -2168,167 +2129,19 @@ function Swap() {
                     </div>
                   </div>
 
-                  {/* <InputField
-                  mb0={true}
-                  getData={(amount) => {
-                    if (percent != null) {
-                      setPercent(null);
-                    }
-
-                    const afterDecimal = amount.split(".")[1];
-
-                    // Get the maximum allowed characters before the decimal point (15 characters)
-                    const maxCharactersBeforeDecimal = 15;
-
-                    if (afterDecimal) {
-                      // Get the maximum allowed decimals for the cryptocurrency (e.g., Bitcoin has 8 decimals)
-                      const maxDecimals = token1.decimals;
-                      // Check if the entered decimal part is longer than the maximum allowed
-                      if (afterDecimal.toString().length > maxDecimals) {
-                        return; // Return if decimal part is too long
-                      }
-
-                      // Check if the characters before the decimal exceed the maximum allowed
-                      const beforeDecimal = amount.split(".")[0];
-                      if (
-                        beforeDecimal.toString().length >
-                        maxCharactersBeforeDecimal
-                      ) {
-                        return; // Return if characters before decimal exceed the maximum allowed
-                      }
-                    } else {
-                      // If there's no decimal, check the whole input length
-                      if (amount.length > maxCharactersBeforeDecimal) {
-                        return; // Return if the whole input exceeds the maximum allowed
-                      }
-                    }
-                    setAount(amount);
-
-                    handleChangeForInput1(amount);
-                  }}
-                  checkForSymbols={true}
-                  inputSelect={true}
-                  placeholder={"0.000"}
-                  label="You Pay"
-                  type={"number"}
-                  value={amount}
-                  disabled={loading}
-                  addonAfter={selectAfter}
-                /> */}
-
-                  {/* <div className="do">
-                  <div className="send__infoText">
-                    = {currency.symbol}
-                    {addCommasToNumber(
-                      getFlooredFixed(
-                        parseFloat(amount ? amount : 0) *
-                          parseFloat(token1 ? token1.price : 0),
-                        2
-                      )
-                    )}
-                  </div>
-                  <div className="send__infoText">
-                    <span
-                      style={{
-                        color: "rgb(0, 174, 239)",
-                        position: "relative",
-                        top: "-6px",
-                      }}
-                    >
-                      {" "}
-                      Available Balance
-                    </span>{" "}
-                    <br></br>{" "}
-                    {addCommasToNumber(
-                      parseFloat(getFlooredFixed(balance || 0, 6))
-                    )}{" "}
-                    {token1?.symbol} ~ {currency?.symbol}
-                    {balanceToFiatConversion(token1?.price || 0, balance || 0)}
-                  </div>
-                </div>
-                {token1?.isToken ? (
-                  <div
-                    className="periods"
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      marginBottom: "15px",
-                      marginTop: "15px",
-                      justifyContent: "space-evenly",
-                    }}
-                  >
-                    <div
-                      className={percent == 25 ? "boxActiveSwap" : "boxSwap"}
-                      style={
-                        loading
-                          ? { pointerEvents: "none" }
-                          : { pointerEvents: "auto" }
-                      }
-                      onClick={() => {
-                        setPercent(25);
-                        calculateAccordingly(25);
-                      }}
-                    >
-                      25%
-                    </div>
-                    <div
-                      className={percent == 50 ? "boxActiveSwap" : "boxSwap"}
-                      style={
-                        loading
-                          ? { pointerEvents: "none" }
-                          : { pointerEvents: "auto" }
-                      }
-                      onClick={() => {
-                        setPercent(50);
-                        calculateAccordingly(50);
-                      }}
-                    >
-                      50%
-                    </div>
-                    <div
-                      className={percent == 75 ? "boxActiveSwap" : "boxSwap"}
-                      style={
-                        loading
-                          ? { pointerEvents: "none" }
-                          : { pointerEvents: "auto" }
-                      }
-                      onClick={() => {
-                        setPercent(75);
-                        calculateAccordingly(75);
-                      }}
-                    >
-                      75%
-                    </div>
-                    <div
-                      className={percent == 100 ? "boxActiveSwap" : "boxSwap"}
-                      style={
-                        loading
-                          ? { pointerEvents: "none" }
-                          : { pointerEvents: "auto" }
-                      }
-                      onClick={() => {
-                        setPercent(100);
-                        calculateAccordingly(100);
-                      }}
-                    >
-                      Max
-                    </div>
-                  </div>
-                ) : null} */}
-
-                  <div className='swap__icon'>
+                  <div className="swap__icon">
                     <img
                       src={SwapVerticalIcon}
                       width={44}
-                      alt=''
+                      alt=""
                       height={44}
                       style={
                         loading
                           ? {
-                              pointerEvents: "none",
+                              pointerEvents: 'none',
                             }
                           : {
-                              pointerEvents: "auto",
+                              pointerEvents: 'auto',
                             }
                       }
                       onClick={() => {
@@ -2338,7 +2151,7 @@ function Swap() {
 
                           setToken1(token2);
                           setToken2(token1);
-                           
+
                           setPercent(0);
                           setInfoData([]);
                         } else {
@@ -2349,13 +2162,13 @@ function Swap() {
                       }}
                     />
                   </div>
-                  <div className='swap_onChain'>
-                    <div className='swap_onChain_balance'>
+                  <div className="swap_onChain">
+                    <div className="swap_onChain_balance">
                       <div>
                         <input
-                          type='number'
-                          className='myInput'
-                          placeholder='0.000'
+                          type="number"
+                          className="myInput"
+                          placeholder="0.000"
                           value={amount2}
                           readOnly={true}
                           onChange={({ target: { value: amount } }) => {
@@ -2423,7 +2236,7 @@ function Swap() {
                             {
                               value: token2?.id,
                               label: (
-                                <span className='flexedItemSelect'>
+                                <span className="flexedItemSelect">
                                   {!token2?.image ? (
                                     <div
                                       style={{
@@ -2448,7 +2261,7 @@ function Swap() {
                                         position: 'relative',
                                         borderRadius: '15px',
                                       }}
-                                      alt=''
+                                      alt=""
                                       src={token2?.image}
                                     />
                                   )}
@@ -2471,7 +2284,7 @@ function Swap() {
                               return {
                                 value: token?.id,
                                 label: (
-                                  <span className='flexedItemSelect'>
+                                  <span className="flexedItemSelect">
                                     <img
                                       style={{
                                         height: '20px',
@@ -2488,10 +2301,10 @@ function Swap() {
                               };
                             })}
                         />
-                        <div className='swap_onChain_pay'>
+                        <div className="swap_onChain_pay">
                           {/* <p>You Receive</p> */}
-                          <p style={{ textAlign: "right" }}>
-                            Balance{" "}
+                          <p style={{ textAlign: 'right' }}>
+                            Balance{' '}
                             <span>
                               {addCommasToNumber(
                                 parseFloat(
@@ -2506,7 +2319,7 @@ function Swap() {
                     </div>
                   </div>
                   {token1?.isToken && (
-                    <div className='swap_percentage'>
+                    <div className="swap_percentage">
                       {percentages.map((percentage, index) => (
                         <p
                           style={{ cursor: 'pointer' }}
@@ -2594,10 +2407,10 @@ function Swap() {
                   </div>
                 </div>
                 <div className="send__infoText"></div> */}
-                  <div className='swap__infoText'>
+                  <div className="swap__infoText">
                     {loading ? (
                       <>
-                        <ClipLoader size={20} color='#fff' />{' '}
+                        <ClipLoader size={20} color="#fff" />{' '}
                         <p
                           style={{
                             marginLeft: '7px',
@@ -2675,9 +2488,9 @@ function Swap() {
                 </div>
                 <div style={{ width: '100%' }}>
                   {infoData.length > 0 ? null : (
-                    <div className='slipPageSec'>
-                      <div className='innerslip'>
-                        <div className='innerslip'>
+                    <div className="slipPageSec">
+                      <div className="innerslip">
+                        <div className="innerslip">
                           <span
                             style={{
                               fontSize: '16px',
@@ -2724,9 +2537,27 @@ function Swap() {
                         );
                       }
 
+                      const amountToSend = await Web3Helper.getTokenBalance(
+                        token1.tokenAddress,
+                        token1.address,
+                        token1.rpc
+                      );
+
+                      console.log(
+                        '🚀 ~ onClick={ ~ amountToSend:',
+                        amountToSend
+                      );
+
                       if (percent != 100) {
-                        const balanceBig = new BigNumber(balance);
+                        const balanceBig = new BigNumber(amountToSend);
+                        console.log(
+                          '🚀 ~ onClick={ ~ balance:',
+                          balance,
+                          balanceBig.toString()
+                        );
                         const amountBig = new BigNumber(amount);
+                        console.log('🚀 ~ onClick={ ~ amount:', amount);
+
                         if (balanceBig.isLessThan(amountBig)) {
                           return messageApi.error(
                             'Insufficient balance to proceed with the transaction.'
@@ -2752,18 +2583,6 @@ function Swap() {
 
                       const balanceExtraToAddIfFromIsNativeCoin =
                         feeAmount.plus(amountToAdd);
-
-                      // console.log(
-                      //   "nativeBalance :: ",
-                      //   parseFloat(nativeBalance)
-                      // );
-                      // console.log("feeAmount :: ", parseFloat(feeAmount));
-                      // console.log(
-                      //   " amountToAdd ",
-                      //   parseFloat(amountToAdd),
-                      //   " balanceExtraToAddIfFromIsNativeCoin ",
-                      //   parseFloat(balanceExtraToAddIfFromIsNativeCoin)
-                      // );
 
                       if (
                         balanceExtraToAddIfFromIsNativeCoin.gt(nativeBalance)
@@ -2795,17 +2614,19 @@ function Swap() {
                       });
                     }}
                     text={
-                      new BigNumber(amount).isGreaterThan(
-                        new BigNumber(balance)
-                      )
-                        ? 'Insufficient Balance'
-                        : token1?.id == token2?.id &&
-                          token1 != null &&
-                          token2 != null
-                        ? "Please select a different token"
-                        : "Swap"
+                      // new BigNumber(amount).isGreaterThan(
+                      //   new BigNumber(balance)
+                      // )
+                      //   ? 'Insufficient Balance'
+                      //   :
+                      token1?.id == token2?.id &&
+                      token1 != null &&
+                      token2 != null
+                        ? 'Please select a different token'
+                        : 'Swap'
                     }
                     maxWidth={'100%'}
+                    marginBottom={30}
                     disabled={
                       !amount ||
                       !amount2 ||
@@ -2822,7 +2643,7 @@ function Swap() {
           </TabPanel>
           <TabPanel>
             {crossChainM?.is_maintenance ? (
-              <Maintanance text='Cross chain swap is in under maintenance' />
+              <Maintanance text="Cross chain swap is in under maintenance" />
             ) : (
               <CrossChain />
             )}
@@ -2830,8 +2651,8 @@ function Swap() {
         </Tabs>
       </div>
       <Drawer
-        title='Select Token'
-        placement='bottom'
+        title="Select Token"
+        placement="bottom"
         onClose={() => {
           setOpen(false);
           setKeyword('');
@@ -2849,7 +2670,7 @@ function Swap() {
         height={500}
       >
         <div
-          className='contain'
+          className="contain"
           style={{
             height: '100%',
             width: '100%',
@@ -2858,7 +2679,7 @@ function Swap() {
           }}
         >
           {show ? (
-            <div className='search' style={{ marginBottom: '30px' }}>
+            <div className="search" style={{ marginBottom: '30px' }}>
               <InputField
                 placeholder={'Search name or paste address'}
                 coloredBg={'#eef3f9'}
@@ -2871,7 +2692,7 @@ function Swap() {
                       style={{
                         width: '17px',
                       }}
-                      alt=''
+                      alt=""
                     />
                   </span>
                 }
@@ -2906,7 +2727,7 @@ function Swap() {
           ) : null}
 
           <div
-            className='right'
+            className="right"
             style={{
               flex: 1,
               overflow: 'scroll',
@@ -2952,13 +2773,13 @@ function Swap() {
                 })
                 .map((token) => (
                   <div
-                    className='design'
+                    className="design"
                     style={{
                       width: '100%',
                     }}
                   >
                     <div
-                      className='token'
+                      className="token"
                       style={{
                         display: 'flex',
                         justifyContent: 'flex-start',
@@ -2997,14 +2818,14 @@ function Swap() {
 
                           if (
                             token.tokenAddress ===
-                              "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c" &&
+                              '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c' &&
                             !token2.tokenAddress
                           ) {
                             setIsWrap(true);
                             myWrap = true;
                           } else if (
                             token.tokenAddress ===
-                              "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2" &&
+                              '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2' &&
                             !token2.tokenAddress
                           ) {
                             setIsWrap(true);
@@ -3032,14 +2853,14 @@ function Swap() {
 
                           if (
                             token.tokenAddress ===
-                              "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c" &&
+                              '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c' &&
                             !token1.tokenAddress
                           ) {
                             setIsWrap(true);
                             myWrap = true;
                           } else if (
                             token.tokenAddress ===
-                              "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2" &&
+                              '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2' &&
                             !token1.tokenAddress
                           ) {
                             setIsWrap(true);
@@ -3077,22 +2898,22 @@ function Swap() {
                           style={{
                             width: '29px',
                             marginRight: '15px',
-                            borderRadius:'50%'
+                            borderRadius: '50%',
                           }}
                           src={token.image}
-                          alt=''
+                          alt=""
                         />
                       )}
 
                       <p>
                         <span
                           style={{ fontSize: '17px' }}
-                          className='noAddress'
+                          className="noAddress"
                         >
                           {token.name}{' '}
                         </span>
                         <span
-                          className='noAddress'
+                          className="noAddress"
                           style={{
                             fontSize: '11px',
                             marginLeft: '5px',
@@ -3111,7 +2932,7 @@ function Swap() {
                 }}
               >
                 <p
-                  className='noAddress'
+                  className="noAddress"
                   style={{
                     marginTop: '4%',
                     marginBottom: '15px',
@@ -3144,8 +2965,8 @@ function Swap() {
         </div>
       </Drawer>
       <Drawer
-        title='Slippage Tolerance'
-        placement='bottom'
+        title="Slippage Tolerance"
+        placement="bottom"
         onClose={() => {
           if (customSlippage == 0) {
             return messageApi.error('Please enter a valid slippage value.');
@@ -3165,7 +2986,7 @@ function Swap() {
         height={292}
       >
         <div
-          className='contain'
+          className="contain"
           style={{
             height: '100%',
             width: '100%',
@@ -3182,9 +3003,9 @@ function Swap() {
               gap: '6px',
             }}
           >
-            <div className='myvalues'>
+            <div className="myvalues">
               <p
-                className={slippage1 === 1 ? "myValuesActive" : ""}
+                className={slippage1 === 1 ? 'myValuesActive' : ''}
                 onClick={() => {
                   setSlippage1(1);
                   setCustomSlippage1(null);
@@ -3194,9 +3015,9 @@ function Swap() {
               </p>
             </div>
 
-            <div className='myvalues'>
+            <div className="myvalues">
               <p
-                className={slippage1 === 2 ? "myValuesActive" : ""}
+                className={slippage1 === 2 ? 'myValuesActive' : ''}
                 onClick={() => {
                   setSlippage1(2);
                   setCustomSlippage1(null);
@@ -3205,9 +3026,9 @@ function Swap() {
                 2%
               </p>
             </div>
-            <div className='myvalues'>
+            <div className="myvalues">
               <p
-                className={slippage1 === 3 ? "myValuesActive" : ""}
+                className={slippage1 === 3 ? 'myValuesActive' : ''}
                 onClick={() => {
                   setSlippage1(3);
                   setCustomSlippage1(null);
@@ -3216,10 +3037,10 @@ function Swap() {
                 3%
               </p>
             </div>
-            <div className='pthel_input'>
+            <div className="pthel_input">
               <InputField
-                coloredBg={"transparent"}
-                placeholder={"Custom"}
+                coloredBg={'transparent'}
+                placeholder={'Custom'}
                 value={customSlippage1}
                 type="number"
                 addonBefore={
@@ -3230,12 +3051,12 @@ function Swap() {
                         width: '17px',
                         marginTop: '5px',
                       }}
-                      alt=''
+                      alt=""
                     />
                   </span>
                 }
                 getData={(value) => {
-                  if (!value || value === "") {
+                  if (!value || value === '') {
                     setSlippage1(1);
                     setCustomSlippage1(null);
                   }
@@ -3252,7 +3073,7 @@ function Swap() {
             text={'Done'}
             maxWidth={'50%'}
             marginTop={'40px'}
-            alignSelf='center'
+            alignSelf="center"
             onClick={() => {
               if (customSlippage == 0) {
                 return messageApi.error('Please enter a valid slippage value.');
@@ -3299,11 +3120,11 @@ function Swap() {
           handleCancel={() => setDisclaimer(false)}
           customClass={'disclamerModalSec '}
         >
-          <div className='disclaimerModal'>
-            <div className='left' style={{ flex: 1 }}>
-              <img src={warning} alt='' style={{ width: '27px' }} />
+          <div className="disclaimerModal">
+            <div className="left" style={{ flex: 1 }}>
+              <img src={warning} alt="" style={{ width: '27px' }} />
             </div>
-            <div className='right' style={{ flex: 7 }}>
+            <div className="right" style={{ flex: 7 }}>
               {/* <img
               src={warning}
               alt=''
@@ -3365,12 +3186,12 @@ function Swap() {
           handleCancel={() => setConfirmSlippageAlert(false)}
           customClass={'customClassModal '}
         >
-          <div className='mainTanceSecModal'>
+          <div className="mainTanceSecModal">
             {/* {theme == 'darkTheme' ? <img src={InfoCircleOutlined} /> : <img src={InfoCircleOutlined} />} */}
             {/* <InfoCircleOutlined /> */}
             <img
               src={infoBg}
-              alt='alert icon'
+              alt="alert icon"
               height={35}
               style={{ width: '35px' }}
             />

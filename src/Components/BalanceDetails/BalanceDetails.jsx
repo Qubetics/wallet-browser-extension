@@ -225,8 +225,6 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
 
     const isSidePanelOpen = await chrome.storage.local.get("openSidePanel");
     setIsSidePanelOpen(isSidePanelOpen.openSidePanel);
-
-    console.log('myItems',myItems);
     setChainItems(myItems);
   };
 
@@ -256,7 +254,7 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
 
   useEffect(()=>{
     calculateTotal();
-  },[tokens])
+  },[tokens,account])
 
   const [messageApi, contextHolder] = message.useMessage({
     duration: DURATION,

@@ -44,7 +44,7 @@ function ShowPrivateKey() {
     4: 'POL',
     5: 'SOL',
     6: 'TRX',
-    7: 'TICS',
+    // 7: 'TICS',
   };
 
   const [solKey, setSolKey] = useState(null);
@@ -139,7 +139,7 @@ function ShowPrivateKey() {
                     </div>
                   </div>
                 );
-              })}
+              }).slice(0,5)}
           </div>
         </div>
       </div>

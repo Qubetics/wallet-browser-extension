@@ -48,7 +48,9 @@ function SwapDetails() {
     },
   } = useLocation();
 
-  // console.log({
+  // console.log(
+  //       'SWAP DETAIL DATA FROM SWAP MODULE :',
+  //   {
   //   route,
   //   token1,
   //   token2,
@@ -57,6 +59,8 @@ function SwapDetails() {
   //   feeAmount,
   //   slippage,
   //   isWrap,
+  //   adminSwapFee,
+  //   commision
   // });
   const navigate = useNavigate();
   const [messageApi, contextHolder] = message.useMessage({
@@ -238,7 +242,12 @@ function SwapDetails() {
   const handleSwap = async () => {
     try {
       let amtTosend = amount;
-      const bal = token1?.balance * token1?.coin?.fiat_price_data?.value;
+      const bal = await Web3Helper.getTokenBalance(
+        token1.tokenAddress,
+        token1.address,
+        token1.rpc
+      );
+      // const bal = token1?.balance * token1?.coin?.fiat_price_data?.value;
       const totalAmt =
         parseFloat(amount) * token1?.coin?.fiat_price_data?.value +
         parseFloat(networkPriceFiat);
@@ -250,8 +259,7 @@ function SwapDetails() {
         amtTosend = parseFloat(amount) - parseFloat(networkPrice * 1.5);
       }
 
-      const totalAmtToken =
-        parseFloat(amount) * token1?.coin?.fiat_price_data?.value;
+      const totalAmtToken = amount
       if (bal < totalAmtToken && token1?.coin?.token_address) {
         return messageApi.error(
           'Insufficient balance to proceed with the transaction.'
@@ -487,6 +495,7 @@ function SwapDetails() {
                 : 'Approval Pending'
             }
             maxWidth={'100%'}
+            marginBottom={30}
           />
         </div>
       </div>

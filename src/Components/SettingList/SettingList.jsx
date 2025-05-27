@@ -2,7 +2,6 @@
 // import Link from 'antd/es/typography/Link';
 import { Link, useNavigate } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
-import ticketcheck1 from '../../Assets/ArrowRightIcon.svg';
 import DarkArrowRightIcon from '../../Assets/DarkArrowRightIcon.svg';
 import './SettingList.scss';
 import { WalletHelper } from '../../helpers/wallet.helper';
@@ -11,7 +10,6 @@ import { DURATION } from '../../config/message.config';
 import { useSelector } from 'react-redux';
 import { store } from '../..';
 import { setTheme } from '../../actions/theme';
-import ArrowRyt from '../../Assets/ArrowRightIcon.svg';
 import { setAuth } from '../../actions/auth';
 import ModalCustom from '../ModalCustom/ModalCustom';
 import InputFieldSimple from '../InputField/InputFieldSimple';
@@ -180,6 +178,11 @@ function SettingList(props) {
           // }}
           onClick={async (e) => {
             e.preventDefault();
+
+            if (to === 'https://privacy-policy.qubetics.work/') {
+              window.open('https://privacy-policy.qubetics.work/', '_blank')
+              return ;
+            }
 
             if (to === '/logout') {
               return setDrawerOpen(true);

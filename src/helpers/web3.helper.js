@@ -281,10 +281,12 @@ export class Web3Helper {
   static getTokenBalance = async (tokenAddress, owner, rpc) => {
     try {
       const provider = new Web3.providers.HttpProvider(rpc);
+      console.log("🚀 ~ Web3Helper ~ getTokenBalance= ~ provider:", provider)
       const web3 = new Web3(provider);
 
       const contract = new web3.eth.Contract(ABI, tokenAddress);
       const balance = await contract.methods.balanceOf(owner).call();
+      console.log("🚀 ~ Web3Helper ~ getTokenBalance= ~ balance:", balance)
       const decimals = await contract.methods.decimals().call();
 
       const originalNumber = balance;
@@ -292,6 +294,7 @@ export class Web3Helper {
       const inputAmount = bigNumber
         .dividedBy(new BigNumber(10).pow(decimals))
         .toString();
+        console.log("🚀 ~ Web3Helper ~ getTokenBalance= ~ inputAmount:", inputAmount)
 
       return inputAmount;
     } catch (error) {
@@ -606,17 +609,16 @@ export class Web3Helper {
         payload['order_id'] = orderId;
       }
       slug = slug == 'matic' ? 'polygon' : slug;
-      // const response = await server.post(
-      //   `${slug}/${tokenAddress}/send`,
-      //   payload,
-      //   {
-      //     headers: {
-      //       Authorization: account.jwtToken,
-      //     },
-      //   }
-      // );
-      // return response.data.tx_hash;
-      return true ;
+      const response = await server.post(
+        `${slug}/${tokenAddress}/send`,
+        payload,
+        {
+          headers: {
+            Authorization: account.jwtToken,
+          },
+        }
+      );
+      return response.data.tx_hash;
     } catch (error) {
       console.log(
         'ethers helper error generateRawTransaction For TokenAndBroadcast ',

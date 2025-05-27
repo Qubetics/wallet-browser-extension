@@ -26,7 +26,7 @@ function Legal() {
   // console.log("terms:::::", terms);
   const verifyLegalPolicy = async () => {
     if (!terms) {
-      return messageApi.error('Please accept terms and conditions.');
+      return messageApi.error('Please accept the privacy policy');
     } else {
       if (state?.type === 'watch-list') {
         return navigate('/watch-list');
@@ -50,7 +50,7 @@ function Legal() {
         <div className='legalContent'>
           <div className='legalSec'>
             <p>
-              Please review the Qubetics Wallet Terms of Service and Privacy Policy
+              Please review the Qubetics Wallet Privacy Policy
             </p>
 
             <div className='legalInner'>
@@ -76,7 +76,7 @@ function Legal() {
                   })
                 }
               >
-                Terms of Service{' '}
+                Privacy Policy{' '}
                 <img
                   src={
                     theme === 'darkTheme' ? DarkArrowRightIcon : ticketcheck1
@@ -96,7 +96,7 @@ function Legal() {
                 onChange={(e) => onChange(e)}
                 style={{ paddingLeft: '10px' }}
               >
-                I've read and accept the Terms of Service and Privacy Policy
+                I've read and accept the Privacy Policy
               </Checkbox>
             </div>
             <ButtonComp

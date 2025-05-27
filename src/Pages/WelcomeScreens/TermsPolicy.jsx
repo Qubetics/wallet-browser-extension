@@ -20,12 +20,12 @@ function TermsPolicy() {
       title: "Privacy Policy",
       rightImage: rightImg,
     },
-    {
-      id: 2,
-      image: TermsOfService,
-      title: "Terms of Service",
-      rightImage: rightImg,
-    },
+    // {
+    //   id: 2,
+    //   image: TermsOfService,
+    //   title: "Terms of Service",
+    //   rightImage: rightImg,
+    // },
   ];
 
   const [messageApi, contextHolder] = message.useMessage();
@@ -37,8 +37,8 @@ function TermsPolicy() {
         {contextHolder}
         {layoutHeader}
         <div className="termsPolicy_contect">
-          {termsData.map((item) => (
-            <div className="termsPolicy_contect_card" key={item.id}>
+          {termsData?.map((item) => (
+            <div className="termsPolicy_contect_card" key={item.id} onClick={()=> window.open('https://privacy-policy.qubetics.work/','_blank')}>
               <div className="termsPolicy_contect_card_left">
                 <img src={item.image} alt={`${item.title} Icon`} />
                 <h4>{item.title}</h4>
@@ -54,8 +54,7 @@ function TermsPolicy() {
         <div className={"checkboxOuter"} style={{ marginBottom: "20px" }}>
           <Checkbox onChange={(e) => setAccr(e.target.checked)}>
             <p>
-              I accepted the <Link>Terms of Service</Link> &
-              <Link> Privacy Policy</Link>
+              I accepted the <Link> Privacy Policy</Link>
             </p>
           </Checkbox>
         </div>
@@ -67,7 +66,7 @@ function TermsPolicy() {
                 state: { type: state?.type },
               });
             }else{
-              messageApi.error('Please accept terms and conditions.')
+              messageApi.error('Please accept the privacy policy.')
             }
           }}
           text={"Continue"}

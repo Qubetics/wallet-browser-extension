@@ -27,6 +27,10 @@ function Wallet() {
   );
   const [isSidePanelOpen, setIsSidePanelOpen] = useState(false);
 
+  const { state } = useLocation();
+
+ 
+
   const getSidePanelStatus = async () => {
     const isSidePanelOpen = await chrome.storage.local.get("openSidePanel");
     setIsSidePanelOpen(isSidePanelOpen.openSidePanel);
@@ -35,8 +39,6 @@ function Wallet() {
   useEffect(() => {
     getSidePanelStatus();
   }, [isSidePanelOpen]);
-
-  const {state} = useLocation();
 
   const [currentPage, setCurrentPage] = useState(1);
   const [isFetchingData, setIsFetchingData] = useState(false);
@@ -48,13 +50,14 @@ function Wallet() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const height = useCurrentHeight();
   const [loading, setLoading] = useState(false);
-  const init = async (refresh) => {
+
+  const init = async (_account ) => {
     setLoading(true);
     const walletsList = await server.post(
       `/wallet/portfolio`,
       {
-        addressListKeys: account.addressLists,
-        coin_family: account.coinFamilies,
+        addressListKeys: _account ?  _account?.addressLists : account?.addressLists,
+        coin_family: _account ? _account?.coinFamilies : account?.coinFamilies,
         fiat_type: currency.name,
         limit: 2000,
         page: currentPage,
@@ -62,20 +65,21 @@ function Wallet() {
       },
       {
         headers: {
-          Authorization: account.jwtToken,
+          Authorization: _account ? _account?.jwtToken : account?.jwtToken,
         },
       }
     );
 
-    setTotal(walletsList.data.meta.total);
-    store.dispatch(setTokens(walletsList.data.data));
+    setTotal(walletsList?.data?.meta?.total);
+    store.dispatch(setTokens(walletsList?.data?.data));
     setIsFetchingData(false);
     setLoading(false);
   };
 
   useEffect(() => {
-    init();
-  }, [currentPage, refresh,account]);
+    console.log('state',state,state?.updatedAccount);
+    init(state?.updatedAccount);
+  }, [currentPage, refresh , state?.updatedAccount,account]);
 
   const parentRef = useRef(null);
 

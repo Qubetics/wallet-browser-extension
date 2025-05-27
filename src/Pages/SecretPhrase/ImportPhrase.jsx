@@ -77,7 +77,7 @@ function ImportPhrase() {
               onClick={async (e) => { 
                 if (!terms) {
                   return messageApi.error(
-                    "Please accept terms and conditions."
+                    "Please accept the privacy policy."
                   );
                 }
 

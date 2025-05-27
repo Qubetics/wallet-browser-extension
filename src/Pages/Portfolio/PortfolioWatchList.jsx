@@ -157,10 +157,10 @@ function PortfolioWatchList() {
                     coinName: token.coin_symbol.toUpperCase(),
                     coinSubName: token.coin_name,
                     coinPrice: myPrice.toNumber()
-                      ? formatSmallNumber(
+                      ? `$${formatSmallNumber(
                           exponential_to_decimal(myPrice.toNumber())
-                        )
-                      : '0.00',
+                        )}`
+                      : '$0.00',
                     coinStatus: getFlooredFixed(
                       price
                         ? parseFloat(

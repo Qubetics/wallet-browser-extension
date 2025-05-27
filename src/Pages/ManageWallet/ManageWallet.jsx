@@ -182,6 +182,25 @@ function ManageWallet() {
     });
   };
 
+  const changeWallet = async () => {
+    if (!sessionPassword) {
+      return messageApi.error('Please enter password.');
+    }
+    const isCorrectPassword = await WalletHelper.verifyPassword(
+      sessionPassword
+    );
+    if (!isCorrectPassword) {
+      return messageApi.error('Incorrect password provided.');
+    }
+    setModalOpen(false);
+    setDefaultAccount(accountSelected);
+    navigate('/wallet' , {
+      state : {
+       updatedAccount : accountSelected 
+      }
+    });
+  };
+
   return (
     <>
       {contextHolder}
@@ -983,39 +1002,13 @@ function ManageWallet() {
                 setSessionPassword(value);
               }
             }}
-            customFunction={async () => {
-              if (!sessionPassword) {
-                return messageApi.error('Please enter password.');
-              }
-              const isCorrectPassword = await WalletHelper.verifyPassword(
-                sessionPassword
-              );
-              if (!isCorrectPassword) {
-                return messageApi.error('Incorrect password provided.');
-              }
-              setModalOpen(false);
-              setDefaultAccount(accountSelected);
-              navigate('/wallet');
-            }}
+            customFunction={changeWallet}
           />
           <div style={{ marginTop: '10px' }}></div>
           <ButtonComp
             text={'Proceed'}
             maxWidth={'100%'}
-            onClick={async () => {
-              if (!sessionPassword) {
-                return messageApi.error('Please enter password.');
-              }
-              const isCorrectPassword = await WalletHelper.verifyPassword(
-                sessionPassword
-              );
-              if (!isCorrectPassword) {
-                return messageApi.error('Incorrect password provided.');
-              }
-              setModalOpen(false);
-              setDefaultAccount(accountSelected);
-              navigate('/wallet');
-            }}
+            onClick={changeWallet}
           />
         </div>
       </ModalCustom>
