@@ -635,82 +635,260 @@ function SendCoins() {
           sessionPassword,
         },
       });
-    } else if (!chain.isEVM && chain.currencyName === 'BTC') {
+    }
+    //  else if (!chain.isEVM && chain.currencyName === 'BTC') {
+    //   try {
+    //     const gasPrice = await BTCHelper.getBTCGasPrice();
+    //     const unspent = await BTCHelper.getUnspent(coin.wallet_address);
+
+    //     if (!unspent) {
+    //       store.dispatch(setLoading(false));
+    //       return messageApi.error('Unable to fetch unspent at the moment.');
+    //     }
+
+    //     if (unspent.length === 0) {
+    //       store.dispatch(setLoading(false));
+    //       return messageApi.error(
+    //         'You have a pending transaction or insufficient balance.'
+    //       );
+    //     }
+
+    //     // 2. Prepare inputs and calculate available satoshis
+    //     let totalAmountAvailable = 0;
+    //     const inputs = unspent.map((utxo) => {
+    //       const satoshis = Math.floor(Number(utxo.satoshis));
+    //       totalAmountAvailable += satoshis;
+    //       return {
+    //         satoshis,
+    //         script: utxo.scriptPubKey,
+    //         address: coin.wallet_address,
+    //         txId: utxo.txid,
+    //         outputIndex: utxo.vout,
+    //       };
+    //     });
+
+    //     const inputCount = inputs.length;
+    //     const transactionSize =
+    //       inputCount * 146 + outputCount * 34 + 10 - inputCount;
+    //     const fee = transactionSize * gasPrice;
+    //     const totalFee = (fee * btcTosatoshiMultiplier).toFixed(8);
+    //     const totalAmount = parseFloat(totalFee) + parseFloat(amount);
+
+    //     if (totalAmount > myBalance) {
+    //       store.dispatch(setLoading(false));
+    //       return messageApi.error('Not enough balance to proceed.');
+    //     }
+
+    //     const sendAmount = Math.round(amount * btcTosatoshi);
+    //     if (totalAmountAvailable - sendAmount - fee < 0) {
+    //       store.dispatch(setLoading(false));
+    //       return messageApi.error('Insufficient UTXO balance.');
+    //     }
+
+    //     const bitcore = require('bitcore-lib');
+
+    //     const transaction = new bitcore.Transaction()
+    //       .from(inputs)
+    //       .to(address, sendAmount);
+
+    //     const change = totalAmountAvailable - sendAmount - fee;
+    //     if (change > 546) {
+    //       transaction.change(coin.wallet_address);
+    //       transaction.fee(fee);
+    //     } else {
+    //       transaction.fee(fee + change);
+    //     }
+
+    //     const btcPrivateKey =
+    //       await WalletHelper.getBitcoinPrivateKeyWithPassword(sessionPassword);
+    //     if (!btcPrivateKey) {
+    //       store.dispatch(setLoading(false));
+    //       return messageApi.error(
+    //         'Unable to fetch private key. Please try again later.'
+    //       );
+    //     }
+
+    //     transaction.sign(btcPrivateKey);
+    //     const rawTransaction = transaction.serialize();
+    //     store.dispatch(setLoading(false));
+
+    //     navigate('/confirmCurrency', {
+    //       state: {
+    //         rawTransaction,
+    //         to: address,
+    //         amount,
+    //         coin,
+    //         ENSName,
+    //         redirectTo,
+    //         networkFee: totalFee,
+    //         sessionPassword,
+    //       },
+    
+    //     });
+    //   } catch (error) {
+    //     console.error('BTC Transaction Error:', error);
+    //     store.dispatch(setLoading(false));
+
+    //     if (error.message.includes('Dust amount detected in one output')) {
+    //       return messageApi.error(
+    //         'Amount is below the dust threshold. Please enter a higher value.'
+    //       );
+    //     }
+
+    //     return messageApi.error(
+    //       error.message || 'An unexpected error occurred.'
+    //     );
+    //   }
+    // }
+
+    else if (!chain.isEVM && chain.currencyName === 'BTC') {
       try {
-        const gasPrice = await BTCHelper.getBTCGasPrice();
+        const bitcoin = require('bitcoinjs-lib');
+        
+        const gasPrice = await BTCHelper.getBTCGasPrice(); 
         const unspent = await BTCHelper.getUnspent(coin.wallet_address);
-
-        if (!unspent) {
+        console.log("🚀 ~ handleSend ~ unspent:", unspent)
+        console.log(coin,"coin");
+        
+        if (!unspent || unspent.length === 0) {
           store.dispatch(setLoading(false));
-          return messageApi.error('Unable to fetch unspent at the moment.');
+          return messageApi.error('No UTXOs available or insufficient balance.');
         }
-
-        if (unspent.length === 0) {
-          store.dispatch(setLoading(false));
-          return messageApi.error(
-            'You have a pending transaction or insufficient balance.'
-          );
-        }
-
-        // 2. Prepare inputs and calculate available satoshis
+      
         let totalAmountAvailable = 0;
-        const inputs = unspent.map((utxo) => {
+        
+        // Process UTXOs
+        const utxos = unspent.map((utxo) => {
+          console.log(utxo,"utxoutxoutxo");
+          
           const satoshis = Math.floor(Number(utxo.satoshis));
           totalAmountAvailable += satoshis;
+          
           return {
-            satoshis,
-            script: utxo.scriptPubKey,
-            address: coin.wallet_address,
-            txId: utxo.txid,
-            outputIndex: utxo.vout,
+            txid: utxo.txid,
+            vout: utxo.vout,
+            value: satoshis,
           };
         });
-
-        const inputCount = inputs.length;
-        const transactionSize =
-          inputCount * 146 + outputCount * 34 + 10 - inputCount;
-        const fee = transactionSize * gasPrice;
-        const totalFee = (fee * btcTosatoshiMultiplier).toFixed(8);
-        const totalAmount = parseFloat(totalFee) + parseFloat(amount);
-
-        if (totalAmount > myBalance) {
-          store.dispatch(setLoading(false));
-          return messageApi.error('Not enough balance to proceed.');
-        }
-
+      
+        const inputCount = utxos.length;
+        const outputCount = 2;
+        const transactionSize = inputCount * 146 + outputCount * 34 + 10;
+        const fee = Math.ceil(transactionSize * gasPrice);
         const sendAmount = Math.round(amount * btcTosatoshi);
-        if (totalAmountAvailable - sendAmount - fee < 0) {
+        const totalFee = (fee * btcTosatoshiMultiplier).toFixed(8);
+        const totalAmount = sendAmount + fee;
+
+        
+      
+        if (totalAmountAvailable < totalAmount) {
           store.dispatch(setLoading(false));
           return messageApi.error('Insufficient UTXO balance.');
         }
-
-        const bitcore = require('bitcore-lib');
-
-        const transaction = new bitcore.Transaction()
-          .from(inputs)
-          .to(address, sendAmount);
-
-        const change = totalAmountAvailable - sendAmount - fee;
-        if (change > 546) {
-          transaction.change(coin.wallet_address);
-          transaction.fee(fee);
-        } else {
-          transaction.fee(fee + change);
-        }
-
-        const btcPrivateKey =
-          await WalletHelper.getBitcoinPrivateKeyWithPassword(sessionPassword);
-        if (!btcPrivateKey) {
+      
+        // Get private key
+        const btcPrivateKeyStr = await WalletHelper.getBitcoinPrivateKeyWithPassword(sessionPassword);
+        if (!btcPrivateKeyStr) {
           store.dispatch(setLoading(false));
-          return messageApi.error(
-            'Unable to fetch private key. Please try again later.'
-          );
+          return messageApi.error('Unable to fetch private key.');
         }
-
-        transaction.sign(btcPrivateKey);
-        const rawTransaction = transaction.serialize();
+      
+        // Convert WIF to key pair
+        const keyPair = bitcoin.ECPair.fromWIF(btcPrivateKeyStr);
+        
+        // Determine address type and create appropriate payment
+        let payment;
+        if (coin.wallet_address.startsWith('bc1q')) {
+          // P2WPKH (Bech32)
+          payment = bitcoin.payments.p2wpkh({ pubkey: keyPair.publicKey });
+          console.log("Using P2WPKH (SegWit) address:", payment.address);
+        } else if (coin.wallet_address.startsWith('3')) {
+          // P2SH-P2WPKH (SegWit wrapped in P2SH)
+          const p2wpkh = bitcoin.payments.p2wpkh({ pubkey: keyPair.publicKey });
+          payment = bitcoin.payments.p2sh({ redeem: p2wpkh });
+          console.log("Using P2SH-P2WPKH address:", payment.address);
+        } else {
+          // P2PKH (Legacy)
+          payment = bitcoin.payments.p2pkh({ pubkey: keyPair.publicKey });
+          console.log("Using P2PKH (Legacy) address:", payment.address);
+        }
+      
+        // Verify address match
+        if (payment.address !== coin.wallet_address) {
+          console.error("Address mismatch:", payment.address, "vs", coin.wallet_address);
+          store.dispatch(setLoading(false));
+          return messageApi.error('Private key does not match wallet address.');
+        }
+      
+        // Create transaction
+        const psbt = new bitcoin.Psbt();
+        
+        // Add inputs
+        for (const utxo of utxos) {
+          const inputData = {
+            hash: utxo.txid,
+            index: utxo.vout,
+            // For SegWit inputs, we need to specify the value
+            ...(coin.wallet_address.startsWith('bc1q') && { witnessUtxo: {
+              script: payment.output,
+              value: utxo.value,
+            }}),
+            // For P2SH-P2WPKH
+            ...(coin.wallet_address.startsWith('3') && { 
+              witnessUtxo: {
+                script: payment.output,
+                value: utxo.value,
+              },
+              redeemScript: payment.redeem.output
+            }),
+            // For legacy inputs, you'd need the full previous transaction
+            // This is more complex and requires fetching the full tx
+          };
+          
+          psbt.addInput(inputData);
+        }
+      
+        // Add outputs
+        const change = totalAmountAvailable - sendAmount - fee;
+        
+        // Add recipient output
+        psbt.addOutput({
+          address: address,
+          value: sendAmount,
+        });
+      
+        // Add change output if above dust threshold
+        if (change > 546) {
+          psbt.addOutput({
+            address: coin.wallet_address,
+            value: change,
+          });
+        }
+      
+        // Sign all inputs
+        for (let i = 0; i < utxos.length; i++) {
+          psbt.signInput(i, keyPair);
+        }
+      
+        // Validate signatures
+        psbt.validateSignaturesOfAllInputs();
+        
+        // Finalize and extract transaction
+        psbt.finalizeAllInputs();
+        const rawTransaction = psbt.extractTransaction().toHex();
+        
+        console.log("Transaction created successfully");
         store.dispatch(setLoading(false));
-
+        console.log({rawTransaction,
+          to: address,
+          amount,
+          coin,
+          ENSName,
+          redirectTo,
+          networkFee: totalFee,
+          sessionPassword,});
+        
+      
         navigate('/confirmCurrency', {
           state: {
             rawTransaction,
@@ -723,21 +901,20 @@ function SendCoins() {
             sessionPassword,
           },
         });
-      } catch (error) {
+      
+      }  catch (error) {
         console.error('BTC Transaction Error:', error);
         store.dispatch(setLoading(false));
-
-        if (error.message.includes('Dust amount detected in one output')) {
-          return messageApi.error(
-            'Amount is below the dust threshold. Please enter a higher value.'
-          );
-        }
-
         return messageApi.error(
-          error.message || 'An unexpected error occurred.'
+          error.message.includes('Dust amount') ?
+            'Amount is below dust threshold.' :
+            error.message || 'Transaction failed.'
         );
       }
-    } else if (!chain.isEVM && chain.currencyName === 'ADA') {
+    }
+    
+    
+     else if (!chain.isEVM && chain.currencyName === 'ADA') {
       try {
         if (coin.tokenAddress) {
           store.dispatch(setLoading(true));

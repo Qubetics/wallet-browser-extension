@@ -138,196 +138,126 @@ export class CrossChainHelper {
       let gasPriceType = 3;
 
       if (fromCoin?.coinFamily === 3) {
-        let inputCount = 0;
-        let transactionSize = 0;
-        let outputCount = 2;
         let btcTosatoshi = 100000000;
         let btcTosatoshiMultiplier = 0.00000001;
-        let rawTransaction; // Declare outside to make it accessible
+        let rawTransaction; 
         let networkFee;
         let tx_fee = parseFloat(getFlooredFixed(+networkFee, 8));
 
+        
         try {
+          const bitcoin = require('bitcoinjs-lib');
           const gasPrice = await BTCHelper.getBTCGasPrice();
           const unspent = await BTCHelper.getUnspent(walletAddress);
-          if (!unspent) {
-            // store.dispatch(setLoading(false));
-            // return messageApi.error("Unable to fetch unspent at the moment.");
-            return console.error("Unable to fetch unspent at the moment.");
+        
+          if (!unspent || unspent.length === 0) {
+            return console.error("No UTXOs available or balance too low.");
           }
-          if (unspent.length === 0) {
-            // store.dispatch(setLoading(false));
-            // return messageApi.error(
-            //   "You have a pending transaction in your account or you do not have enough balance to proceed with the transaction."
-            // );
-            return console.error(
-              "You have a pending transaction in your account or you do not have enough balance to proceed with the transaction."
-            );
-          }
-          const inputs = [];
+        
+          const utxos = [];
           let totalAmountAvailable = 0;
-          unspent.forEach((element) => {
-            let utxo = {};
-            utxo.satoshis = Math.floor(Number(element.satoshis));
-            utxo.script = element.scriptPubKey;
-            utxo.address = walletAddress;
-            utxo.txId = element.txid;
-            utxo.outputIndex = element.vout;
-            totalAmountAvailable += parseFloat(utxo.satoshis);
-            inputCount += 1;
-            inputs.push(utxo);
-          });
-
-          console.log("--------inputs-------> ", inputs);
-
-          transactionSize =
-            inputCount * 146 + outputCount * 34 + 10 - inputCount;
-          let fee = transactionSize * gasPrice;
-          const totalFee = (
-            transactionSize *
-            gasPrice *
-            btcTosatoshiMultiplier
-          ).toFixed(8);
-          console.log(
-            "🚀 ~ file: SwapBtc crosschain helper.jsx:591 ~ onClick={ ~ totalFee:",
-            +totalFee,
-            depositAmount
-          );
-
-          const totalAmount = +totalFee + depositAmount;
-          console.log(
-            "🚀 ~ file: SendCoins.jsx:594 ~ onClick={ ~ totalAmount:",
-            totalAmount
-          );
-
-          if (totalAmount > fromCoin?.balance) {
-            // store.dispatch(setLoading(false));
-            // return messageApi.error(
-            //   "Not enough balance to proceed with the transaction."
-            // );
-            return console.error(
-              "Not enough balance to proceed with the transaction."
-            );
+        
+          for (const element of unspent) {
+            const satoshis = Math.floor(Number(element.satoshis));
+            totalAmountAvailable += satoshis;
+            utxos.push({
+              txid: element.txid,
+              vout: element.vout,
+              value: satoshis,
+            });
           }
-
-          // console.log(
-          //   totalAmountAvailable,
-          //   Math.round(amount * btcTosatoshi),
-          //   btcTosatoshi,
-          //   fee,
-          //   amount
-          // );
-          if (
-            totalAmountAvailable -
-              Math.round(depositAmount * btcTosatoshi) -
-              fee <
-            0
-          ) {
-            // store.dispatch(setLoading(false));
-            // return messageApi.error(
-            //   "Insufficient Balance to proceed with the transactions."
-            // );
-            return console.error(
-              "Insufficient Balance to proceed with the transactions."
-            );
+        
+          const inputCount = utxos.length;
+          const outputCount = 2;
+          const transactionSize = inputCount * 146 + outputCount * 34 + 10;
+          const fee = Math.ceil(transactionSize * gasPrice);
+          const sendAmount = Math.round(depositAmount * btcTosatoshi);
+          const totalFee = (fee * btcTosatoshiMultiplier).toFixed(8);
+          const totalAmount = sendAmount + fee;
+        
+          // if (totalAmount > fromCoin?.balance || (totalAmountAvailable - totalAmount) < 0) {
+          //   return console.error("Insufficient balance to proceed.");
+          // }
+        
+          const btcPrivateKeyStr = await WalletHelper.getBitcoinPrivateKeyWithPassword(sessionPassword);
+          if (!btcPrivateKeyStr) {
+            return console.error("Unable to fetch private key.");
+          }
+        
+          const keyPair = bitcoin.ECPair.fromWIF(btcPrivateKeyStr);
+          let payment;
+        
+          if (walletAddress.startsWith('bc1q')) {
+            payment = bitcoin.payments.p2wpkh({ pubkey: keyPair.publicKey });
+          } else if (walletAddress.startsWith('3')) {
+            const p2wpkh = bitcoin.payments.p2wpkh({ pubkey: keyPair.publicKey });
+            payment = bitcoin.payments.p2sh({ redeem: p2wpkh });
           } else {
-            const bitcore = require("bitcore-lib");
-            const transaction = new bitcore.Transaction();
-            console.log(
-              "🚀 ~ file: SendCoins.jsx:630 ~ transaction:",
-              transaction
-            );
-            // console.log(inputs);
-            transaction.from(inputs);
-            console.log(
-              "🚀 ~ file: SendCoins.jsx:632 ~ transaction:",
-              transaction
-            );
-
-            console.log("orderDataorderDataorderData ", orderData);
-            console.log("depositAmount :::: ", depositAmount);
-            console.log("btcTosatoshi::::: ", btcTosatoshi);
-            
-            
-            transaction.to(
-              orderData?.platformAddr,
-              parseInt(Math.round(depositAmount * btcTosatoshi).toString())
-            );
-            // console.log(
-            //   "🚀 ~ file: SendCoins.jsx:635 ~ address:",
-            //   address
-            // );
-
-            console.log(
-              "🚀 ~ file: SendCoins.jsx:637 ~ transaction:",
-              transaction
-            );
-            // console.log(
-            //   "🚀 ~ file: SendCoins.jsx:636 ~ transaction:",
-            //   transaction
-            // );
-            let satoshis = 0;
-            for (var i = 0; i < inputs.length; i++) {
-              satoshis = inputs[i]?.satoshis + satoshis;
-            }
-            if (
-              satoshis -
-                (fee +
-                  parseInt(
-                    Math.round(depositAmount * btcTosatoshi).toString()
-                  )) >
-              546
-            ) {
-              transaction.change(walletAddress);
-            }
-            
-            if (
-              satoshis -
-                (fee +
-                  parseInt(
-                    Math.round(depositAmount * btcTosatoshi).toString()
-                  )) >
-              546
-            ) {
-              transaction.fee(fee);
-            } else {
-              transaction.fee(
-                fee +
-                  (satoshis -
-                    (fee +
-                      parseInt(
-                        Math.round(depositAmount * btcTosatoshi).toString()
-                      )))
-              );
-            }
-
-            const btcPrivateKey = await WalletHelper.getBitcoinPrivateKeyWithPassword(sessionPassword);
-
-            console.log(
-              "🚀 ~ file: SendCoins.jsx:656 ~ btcPrivateKey:",
-              btcPrivateKey
-            );
-            if (!btcPrivateKey) {
-              // store.dispatch(setLoading(false));
-              return console.error(
-                "Unable to fetch private key at the moment please try again later."
-              );
-            }
-            transaction.sign(btcPrivateKey);
-            networkFee = (
-              transactionSize *
-              gasPrice *
-              btcTosatoshiMultiplier
-            ).toFixed(8);
-            rawTransaction = transaction.serialize(); // Assign raw transaction
-            console.log('RAW TRANSACTION:',rawTransaction)
-            // store.dispatch(setLoading(false));
+            payment = bitcoin.payments.p2pkh({ pubkey: keyPair.publicKey });
           }
+        
+          if (payment.address !== walletAddress) {
+            return console.error("Private key does not match wallet address.");
+          }
+        
+          const psbt = new bitcoin.Psbt();
+        
+          for (const utxo of utxos) {
+            const input = {
+              hash: utxo.txid,
+              index: utxo.vout,
+              ...(walletAddress.startsWith('bc1q') && {
+                witnessUtxo: {
+                  script: payment.output,
+                  value: utxo.value,
+                }
+              }),
+              ...(walletAddress.startsWith('3') && {
+                witnessUtxo: {
+                  script: payment.output,
+                  value: utxo.value,
+                },
+                redeemScript: payment.redeem.output
+              }),
+            };
+            psbt.addInput(input);
+          }
+        
+          const change = totalAmountAvailable - sendAmount - fee;
+        
+          psbt.addOutput({
+            address: orderData?.platformAddr,
+            value: sendAmount,
+          });
+        
+          if (change > 546) {
+            psbt.addOutput({
+              address: walletAddress,
+              value: change,
+            });
+          }
+        
+          for (let i = 0; i < utxos.length; i++) {
+            psbt.signInput(i, keyPair);
+          }
+        
+          psbt.validateSignaturesOfAllInputs();
+          psbt.finalizeAllInputs();
+        
+           rawTransaction = psbt.extractTransaction().toHex();
+          const networkFee = totalFee;
+        
+          console.log("RAW TRANSACTION:", rawTransaction);
+        
         } catch (error) {
-          console.log("ERROR CROSS_CHAIN HELPER BTC", error);
-          // store.dispatch(setLoading(false));
-          return console.error(error.message);
+          console.error('BTC Transaction Error:', error);
+          return console.error(
+            error.message.includes('Dust amount') ?
+              'Amount is below dust threshold.' :
+              error.message || 'Transaction failed.'
+          );
         }
+        
 
         hash = await BTCHelper.generateRawTransactionForCoinAndBroadcast(
           orderData.platformAddr,
