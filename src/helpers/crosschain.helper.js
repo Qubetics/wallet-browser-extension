@@ -89,7 +89,9 @@ export class CrossChainHelper {
     sessionPassword
   ) => {
     try {
-      console.log({
+      console.log('sendOrder');
+      console.log(
+        {
         depositCoinCode: fromCoin.symbol,
         receiveCoinCode: toCoin.symbol,
         depositCoinAmt: getFlooredFixed(depositAmount, 8),
@@ -104,9 +106,11 @@ export class CrossChainHelper {
       });
 
       const { account } = store.getState();
+      const btcPrivateKeyStr = await WalletHelper.getBitcoinPrivateKeyWithPassword(sessionPassword);
+      console.log("🚀 ~ CrossChainHelper ~ btcPrivateKeyStr:", btcPrivateKeyStr)
 
-      console.log('ACCOUNT FOUND CROSS CHAIN SEND ORDER :',account)
-
+      console.log("🚀 ~ CrossChainHelper ~ account:", account)
+      
       const response = await server.post(
         "/swftc/accountExchange",
         {
@@ -126,18 +130,15 @@ export class CrossChainHelper {
           },
         }
       );
+      console.log("🚀 ~ CrossChainHelper ~ response:", response)
 
-      console.log("RESPOSNE FROM API TO SWAP CROSS-CHAIN: ", response);
-      
       const orderData = response.data.data.data;
-
       let hash = "";
-
       let coinFamily = fromCoin?.coinFamily;
-      console.log("COINFAMILKY", coinFamily);
       let gasPriceType = 3;
 
       if (fromCoin?.coinFamily === 3) {
+        console.log("🚀 ~ CrossChainHelper ~ fromCoin?.coinFamily:", fromCoin?.coinFamily)
         let btcTosatoshi = 100000000;
         let btcTosatoshiMultiplier = 0.00000001;
         let rawTransaction; 
@@ -175,11 +176,9 @@ export class CrossChainHelper {
           const totalFee = (fee * btcTosatoshiMultiplier).toFixed(8);
           const totalAmount = sendAmount + fee;
         
-          // if (totalAmount > fromCoin?.balance || (totalAmountAvailable - totalAmount) < 0) {
-          //   return console.error("Insufficient balance to proceed.");
-          // }
-        
-          const btcPrivateKeyStr = await WalletHelper.getBitcoinPrivateKeyWithPassword(sessionPassword);
+          // const btcPrivateKeyStr = await WalletHelper.getBitcoinPrivateKeyWithPassword(sessionPassword);
+          // console.log("🚀 ~ CrossChainHelper ~ btcPrivateKeyStr:", btcPrivateKeyStr)
+          
           if (!btcPrivateKeyStr) {
             return console.error("Unable to fetch private key.");
           }
@@ -260,7 +259,7 @@ export class CrossChainHelper {
         
 
         hash = await BTCHelper.generateRawTransactionForCoinAndBroadcast(
-          orderData.platformAddr,
+          orderData?.platformAddr,
           walletAddress,
           depositAmount,
           fromCoin.id,
@@ -279,7 +278,7 @@ export class CrossChainHelper {
       } else if (fromCoin?.coinFamily === 5 && fromCoin.tokenAddress) {
         const solanaHelper = new SolanaHelper(chain.rpcUrl);
         hash = await solanaHelper.generateRawTransactionForTokenAndBroadcast(
-          orderData.platformAddr,
+          orderData?.platformAddr,
           walletAddress,
           depositAmount,
           fromCoin.id,
@@ -300,7 +299,7 @@ export class CrossChainHelper {
       } else if (fromCoin?.coinFamily === 5) {
         const solanaHelper = new SolanaHelper(chain.rpcUrl);
         hash = await solanaHelper.generateRawTransactionForCoinAndBroadcast(
-          orderData.platformAddr,
+          orderData?.platformAddr,
           walletAddress,
           depositAmount,
           fromCoin.id,
@@ -310,14 +309,14 @@ export class CrossChainHelper {
           null,
           `solana/${chain.slug}`,
           chain.chainId,
-          orderData.orderId,
+          orderData?.orderId,
           "cross_chain",
           sessionPassword
         );
       } else if (fromCoin?.coinFamily != 5 && fromCoin.tokenAddress) {
         console.log("IN TOKEN CROSS SWAP EVM");
         hash = await Web3Helper.generateRawTransactionForTokenAndBroadcast(
-          orderData.platformAddr,
+          orderData?.platformAddr,
           walletAddress,
           depositAmount,
           fromCoin.id,
@@ -333,12 +332,12 @@ export class CrossChainHelper {
           "cross_chain",
           coinFamily,
           gasPriceType,
-          orderData.orderId,
+          orderData?.orderId,
           sessionPassword
         );
       } else {
         hash = await Web3Helper.generateRawTransactionForCoinAndBroadcast(
-          orderData.platformAddr,
+          orderData?.platformAddr,
           walletAddress,
           depositAmount,
           fromCoin.id,

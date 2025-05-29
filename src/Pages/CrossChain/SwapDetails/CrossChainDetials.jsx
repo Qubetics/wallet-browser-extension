@@ -104,6 +104,8 @@ function CrossChainDetails() {
   }, []);
 
   const handleSwap = async () => {
+    console.log("🚀 ~ handleSwap ~ handleSwap:")
+    
     setSwapModal(true);
 
     const data = await crossChainHelper.current.sendOrder(
@@ -120,6 +122,7 @@ function CrossChainDetails() {
       coinSymbol,
       sessionPassword
     );
+    console.log("🚀 ~ handleSwap ~ data:", data)
 
     if (!data) {
       setSwapModal(false);

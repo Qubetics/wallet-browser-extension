@@ -168,7 +168,6 @@ export class WalletHelper {
       mnemonics,
       password
     );
-    console.log('decryptedMnemonics',decryptedMnemonics)
     try {
       const mnemonics = JSON.parse(decryptedMnemonics);
       mnemonics.map((item) => {
@@ -176,9 +175,7 @@ export class WalletHelper {
           phrase = item.phrase;
         }
       });
-      console.log('phrase',phrase)
       const result = ethers.Wallet.fromMnemonic(phrase);
-      console.log('result',result)
       return result;
     } catch (error) {
       return false;
@@ -289,21 +286,6 @@ export class WalletHelper {
       return false;
     }
   };
-
-  // static getAdaPrivateKey = async () => {
-  //   try {
-  //     const { password } = await chrome.storage.session.get("passwords");
-  //     const { mnemonics } = await chrome.storage.local.get("mnemonics");
-  //     const decryptedMnemonics = await SecurityHelper.decrypt(mnemonics, password);
-  //     const defaultMnemonics = JSON.parse(decryptedMnemonics).find(
-  //       (el) => el.default
-  //     );
-  //     const response = AdaHelper.generateWalletAddress(defaultMnemonics.phrase);
-  //     return response;
-  //   } catch (error) {
-  //     return false;
-  //   }
-  // };
 
   static getChains = async () => {
     const { chains } = await chrome.storage.local.get('chains');

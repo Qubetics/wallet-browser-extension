@@ -1,38 +1,38 @@
 /*global chrome*/
 
-import "./CrossChain.scss";
+import './CrossChain.scss';
 
-import { Drawer, message, Select } from "antd";
-import React from "react";
-import { InputField } from "../../Components/InputField/InputFieldSimple";
-import DownArrowSuffix from "../../Assets/DownArrowSuffix.svg";
-import SwapVerticalIcon from "../../Assets/SwapVerticalIcon.svg";
-import ButtonComp from "../../Components/ButtonComp/ButtonComp";
-import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
-import { useState } from "react";
-import { Web3Helper } from "../../helpers/web3.helper";
-import darkclose from "../../Assets/darkclose.svg";
-import { useSelector } from "react-redux";
-import { store } from "../..";
-import { setLoading } from "../../actions/loading";
-import { ClipLoader } from "react-spinners";
-import { useRef } from "react";
-import { CrossChainHelper } from "../../helpers/crosschain.helper";
-import ModalCloseIcon from "../../Assets/ModalCloseIcon.svg";
-import Search from "../../Assets/SearchIcon.svg";
-import { SolanaHelper } from "../../helpers/solana.helper";
-import { BTCHelper } from "../../helpers/btc.helper";
-import { DURATION } from "../../config/message.config";
-import BigNumber from "bignumber.js";
+import { Drawer, message, Select } from 'antd';
+import React from 'react';
+import { InputField } from '../../Components/InputField/InputFieldSimple';
+import DownArrowSuffix from '../../Assets/DownArrowSuffix.svg';
+import SwapVerticalIcon from '../../Assets/SwapVerticalIcon.svg';
+import ButtonComp from '../../Components/ButtonComp/ButtonComp';
+import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useState } from 'react';
+import { Web3Helper } from '../../helpers/web3.helper';
+import darkclose from '../../Assets/darkclose.svg';
+import { useSelector } from 'react-redux';
+import { store } from '../..';
+import { setLoading } from '../../actions/loading';
+import { ClipLoader } from 'react-spinners';
+import { useRef } from 'react';
+import { CrossChainHelper } from '../../helpers/crosschain.helper';
+import ModalCloseIcon from '../../Assets/ModalCloseIcon.svg';
+import Search from '../../Assets/SearchIcon.svg';
+import { SolanaHelper } from '../../helpers/solana.helper';
+import { BTCHelper } from '../../helpers/btc.helper';
+import { DURATION } from '../../config/message.config';
+import BigNumber from 'bignumber.js';
 import {
   newBalanceToFiatConversion,
   toFixed,
-} from "../../helpers/conversion.helper";
-import { server } from "../../server";
-import { swapDetailAc } from "../../actions/swap";
-import { setLoading as overAllLoader } from "../../actions/loading";
-import useCurrentHeight from "../../CustomHooks/useCurrentHeight";
+} from '../../helpers/conversion.helper';
+import { server } from '../../server';
+import { swapDetailAc } from '../../actions/swap';
+import { setLoading as overAllLoader } from '../../actions/loading';
+import useCurrentHeight from '../../CustomHooks/useCurrentHeight';
 
 function getFlooredFixed(v, d) {
   return (Math.floor(v * Math.pow(10, d)) / Math.pow(10, d)).toFixed(d);
@@ -44,16 +44,16 @@ let btcTosatoshi = 100000000;
 let btcTosatoshiMultiplier = 0.00000001;
 
 function addCommasToNumber(number) {
-  var parts = number.toString().split(".");
+  var parts = number.toString().split('.');
   var integerPart = parts[0];
-  var decimalPart = parts[1] || ""; // Handle cases where there is no decimal part
+  var decimalPart = parts[1] || ''; // Handle cases where there is no decimal part
 
   // Add commas to the integer part
-  integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 
   // Combine the integer and decimal parts
-  if (decimalPart !== "") {
-    return integerPart + "." + decimalPart;
+  if (decimalPart !== '') {
+    return integerPart + '.' + decimalPart;
   } else {
     return integerPart;
   }
@@ -104,7 +104,7 @@ function CrossChain() {
   const percentages = [25, 50, 75, 100];
 
   useEffect(() => {
-    console.log("SWAPDETAILS", swapDetail);
+    console.log('SWAPDETAILS', swapDetail);
     if (swapDetail) {
       if (swapDetail?.tab == 1) {
         setToken1(swapDetail?.token1);
@@ -135,7 +135,7 @@ function CrossChain() {
           );
 
           if (route?.status && route?.message) {
-            if (route?.status != "" || route?.message != "") {
+            if (route?.status != '' || route?.message != '') {
               setInnerLoading(false);
               return messageApi.error(route?.message);
             }
@@ -157,7 +157,7 @@ function CrossChain() {
           setInnerLoading(false);
           setInfoData([
             {
-              text: "Estimate Rate",
+              text: 'Estimate Rate',
               textVal: `1 ${tokenOne.symbol} = ${
                 route
                   ? getFlooredFixed(
@@ -168,13 +168,13 @@ function CrossChain() {
               } ${tokenTwo.symbol}`,
             },
             {
-              text: "Service Fee",
+              text: 'Service Fee',
               textVal: `${new BigNumber(route.exchangeData.depositCoinFeeRate)
                 .multipliedBy(100)
                 .toString()}%`,
             },
             {
-              text: "Relayer Service Fee",
+              text: 'Relayer Service Fee',
               textVal: `${parseFloat(
                 getFlooredFixed(
                   parseFloat(
@@ -196,13 +196,13 @@ function CrossChain() {
             //   )} ${token2.symbol}`,
             // },
             {
-              text: "You will receive",
+              text: 'You will receive',
               textVal: `${toFixed(
                 getFlooredFixed(parseFloat(route.outAmount), 6)
               )} ${tokenTwo.symbol}`,
             },
             {
-              text: "Estimated time of receiving",
+              text: 'Estimated time of receiving',
               textVal: `1~20 Minutes`,
             },
           ]);
@@ -211,26 +211,26 @@ function CrossChain() {
 
       updateRef.current = true;
     } catch (error) {
-      console.log("ERR ", error);
+      console.log('ERR ', error);
       setInnerLoading(false);
-      return messageApi.error("Pair not available for swap.");
+      return messageApi.error('Pair not available for swap.');
     }
   };
 
   const calculateAccordingly = async (percentage) => {
     if (selectedChain.isEVM) {
       account.address = account.evmAddress;
-    } else if (!selectedChain.isEVM && selectedChain.currencyName === "SOL") {
+    } else if (!selectedChain.isEVM && selectedChain.currencyName === 'SOL') {
       account.address = account.solanaAddress;
-    } else if (!selectedChain.isEVM && selectedChain.currencyName === "BTC") {
+    } else if (!selectedChain.isEVM && selectedChain.currencyName === 'BTC') {
       account.address = account.bitcoinAddress;
-    } else if (!selectedChain.isEVM && selectedChain.currencyName === "ADA") {
+    } else if (!selectedChain.isEVM && selectedChain.currencyName === 'ADA') {
       account.address = account.adaAddress;
     } else {
       account.address = account.evmAddress;
     }
 
-    console.log(selectedChain, "selectedChain");
+    console.log(selectedChain, 'selectedChain');
 
     if (token1?.tokenAddress) {
       if (
@@ -238,14 +238,14 @@ function CrossChain() {
         token1.coinFamily == 5 ||
         token1.coinFamily == 2
       ) {
-        console.log("TTTTTTTTTTTT ", token1);
+        console.log('TTTTTTTTTTTT ', token1);
         const finalAmountToSend = new BigNumber(token1.balance).multipliedBy(
           new BigNumber(percentage).dividedBy(100)
         );
         setAount(
           finalAmountToSend == 0
             ? finalAmountToSend.toString()
-            : finalAmountToSend.toFixed(18).replace(/\.?0+$/, "")
+            : finalAmountToSend.toFixed(18).replace(/\.?0+$/, '')
         );
         updateRef.current = true;
         handleChangeForInput1(
@@ -254,13 +254,13 @@ function CrossChain() {
             : finalAmountToSend.toFixed(18).toString()
         );
       } else {
-        console.log("FFFFFFFFFFFFFF ", token1);
+        console.log('FFFFFFFFFFFFFF ', token1);
         const amountToSend = await Web3Helper.getTokenBalance(
           token1.tokenAddress,
           token1.address,
           token1.rpc
         );
-        console.log("AMTTTTTTTTTTTT ", amountToSend);
+        console.log('AMTTTTTTTTTTTT ', amountToSend);
         if (amountToSend == 0) {
           setAmount2(0);
           setInfoData([]);
@@ -273,7 +273,7 @@ function CrossChain() {
         setAount(
           finalAmountToSend == 0
             ? finalAmountToSend.toString()
-            : finalAmountToSend.toFixed(18).replace(/\.?0+$/, "")
+            : finalAmountToSend.toFixed(18).replace(/\.?0+$/, '')
         );
         setBalance(toFixed(amountToSend.toString()));
         updateRef.current = true;
@@ -305,7 +305,7 @@ function CrossChain() {
   const init = async () => {
     try {
       const { data } = await server.post(
-        "/swftc/queryCoinList",
+        '/swftc/queryCoinList',
         {
           addresses: Object.values(account.coinFamilyAndAddress).filter(
             (address) => address
@@ -322,7 +322,7 @@ function CrossChain() {
         }
       );
       const inActiveTokens = await server.post(
-        "/swftc/queryCoinList",
+        '/swftc/queryCoinList',
         {
           // addresses: Object.keys(account.coinFamilyAndAddress)
           //   .map((key) => {
@@ -348,27 +348,27 @@ function CrossChain() {
       );
 
       setTotal(inActiveTokens?.data?.meta?.total || 0);
-      const { chains } = await chrome.storage.local.get("chains");
+      const { chains } = await chrome.storage.local.get('chains');
 
       let tokens = data?.data?.map((token) => {
-        let coinFamilyName = "ETH";
-        let tokenType = "ERC20";
+        let coinFamilyName = 'ETH';
+        let tokenType = 'ERC20';
         switch (token?.coin_family) {
           case 1:
-            coinFamilyName = "BNB";
-            tokenType = "BEP20";
+            coinFamilyName = 'BNB';
+            tokenType = 'BEP20';
             break;
           case 2:
-            coinFamilyName = "ETH";
-            tokenType = "ERC20";
+            coinFamilyName = 'ETH';
+            tokenType = 'ERC20';
             break;
           case 4:
-            coinFamilyName = "POL";
-            tokenType = "ERC20";
+            coinFamilyName = 'POL';
+            tokenType = 'ERC20';
             break;
           case 5:
-            coinFamilyName = "SOL";
-            tokenType = "SPL";
+            coinFamilyName = 'SOL';
+            tokenType = 'SPL';
             break;
           default:
             break;
@@ -415,30 +415,30 @@ function CrossChain() {
               ? process.env.REACT_APP_SOL_RPC
               : token?.coin_data?.coin_family == 7
               ? process.env.REACT_APP_QUBETIC_RPC
-              : "",
+              : '',
         };
       });
 
       const tokens2 = inActiveTokens?.data?.data.map((token) => {
-        let coinFamilyName = "ETH";
-        let tokenType = "ERC20";
+        let coinFamilyName = 'ETH';
+        let tokenType = 'ERC20';
 
         switch (token.coin_family) {
           case 1:
-            coinFamilyName = "BNB";
-            tokenType = "BEP20";
+            coinFamilyName = 'BNB';
+            tokenType = 'BEP20';
             break;
           case 2:
-            coinFamilyName = "ETH";
-            tokenType = "ERC20";
+            coinFamilyName = 'ETH';
+            tokenType = 'ERC20';
             break;
           case 4:
-            coinFamilyName = "POL";
-            tokenType = "ERC20";
+            coinFamilyName = 'POL';
+            tokenType = 'ERC20';
             break;
           case 5:
-            coinFamilyName = "SOL";
-            tokenType = "SPL";
+            coinFamilyName = 'SOL';
+            tokenType = 'SPL';
             break;
           default:
             break;
@@ -489,7 +489,7 @@ function CrossChain() {
               ? process.env.REACT_APP_SOL_RPC
               : token?.coin_data?.coin_family == 7
               ? process.env.REACT_APP_QUBETIC_RPC
-              : "",
+              : '',
         };
       });
 
@@ -503,15 +503,15 @@ function CrossChain() {
 
       tokens = [...tokens, ...tokens2];
       let modifiedList = await uniqueList(allToken, tokens);
-      console.log("ALLL UNIQUE TOKEN ", modifiedList);
+      console.log('ALLL UNIQUE TOKEN ', modifiedList);
 
       setAllTokens(modifiedList);
       setFilteredTokens(modifiedList);
 
-      let { crossToken1 } = await chrome.storage.local.get("crossToken1");
-      let { crossToken2 } = await chrome.storage.local.get("crossToken2");
-      console.log("crossToken1crossToken1 ", crossToken1);
-      console.log("crossToken2crossToken2 ", crossToken2);
+      let { crossToken1 } = await chrome.storage.local.get('crossToken1');
+      let { crossToken2 } = await chrome.storage.local.get('crossToken2');
+      console.log('crossToken1crossToken1 ', crossToken1);
+      console.log('crossToken2crossToken2 ', crossToken2);
 
       if (!crossToken1 && !crossToken2) {
         let myToken1 = modifiedList.find(
@@ -547,7 +547,7 @@ function CrossChain() {
         );
         // console.log("ROUTES:::::::592", route);
         if (route?.status && route?.message) {
-          if (route?.status != "" || route?.message != "") {
+          if (route?.status != '' || route?.message != '') {
             setInnerLoading(false);
             return messageApi.error(route?.message);
           }
@@ -579,7 +579,7 @@ function CrossChain() {
           );
           // console.log("ROUTES:::::::623", route);
           if (route?.status && route?.message) {
-            if (route?.status != "" || route?.message != "") {
+            if (route?.status != '' || route?.message != '') {
               setInnerLoading(false);
               return messageApi.error(route?.message);
               // navigate(-1);
@@ -591,10 +591,10 @@ function CrossChain() {
         setInnerLoading(false);
       }
     } catch (error) {
-      console.log("error CrossChain:::", error);
+      console.log('error CrossChain:::', error);
       setInnerLoading(false);
       messageApi.error(
-        "Unable to perform swap currently. Please try again later."
+        'Unable to perform swap currently. Please try again later.'
       );
       // navigate(-1);
     }
@@ -621,7 +621,7 @@ function CrossChain() {
       }, 2000);
     }
 
-    if (amount == "" || amount == null) {
+    if (amount == '' || amount == null) {
       setInfoData([]);
       setAmount2(null);
     }
@@ -657,7 +657,7 @@ function CrossChain() {
     );
     // console.log("ROUTES:::::::700", route);
     if (route?.status && route?.message) {
-      if (route?.status != "" || route?.message != "") {
+      if (route?.status != '' || route?.message != '') {
         return messageApi.error(route?.message);
       }
     }
@@ -686,7 +686,7 @@ function CrossChain() {
       );
       // console.log("ROUTES:::::::730", route);
       if (route?.status && route?.message) {
-        if (route?.status != "" || route?.message != "") {
+        if (route?.status != '' || route?.message != '') {
           return messageApi.error(route?.message);
         }
       }
@@ -715,7 +715,7 @@ function CrossChain() {
           );
           // console.log("ROUTES:::::::758", route);
           if (route?.status && route?.message) {
-            if (route?.status != "" || route?.message != "") {
+            if (route?.status != '' || route?.message != '') {
               setInnerLoading(false);
               return messageApi.error(route?.message);
             }
@@ -737,7 +737,7 @@ function CrossChain() {
           setInnerLoading(false);
           setInfoData([
             {
-              text: "Estimate Rate",
+              text: 'Estimate Rate',
               textVal: `1 ${token1.symbol} = ${
                 route
                   ? getFlooredFixed(
@@ -748,13 +748,13 @@ function CrossChain() {
               } ${token2.symbol}`,
             },
             {
-              text: "Service Fee",
+              text: 'Service Fee',
               textVal: `${new BigNumber(route.exchangeData.depositCoinFeeRate)
                 .multipliedBy(100)
                 .toString()}%`,
             },
             {
-              text: "Relayer Service Fee",
+              text: 'Relayer Service Fee',
               textVal: `${parseFloat(
                 getFlooredFixed(
                   parseFloat(
@@ -776,13 +776,13 @@ function CrossChain() {
             //   )} ${token2.symbol}`,
             // },
             {
-              text: "You will receive",
+              text: 'You will receive',
               textVal: `${toFixed(
                 getFlooredFixed(parseFloat(route.outAmount), 6)
               )} ${token2.symbol}`,
             },
             {
-              text: "Estimated time of receiving",
+              text: 'Estimated time of receiving',
               textVal: `1~20 Minutes`,
             },
           ]);
@@ -792,7 +792,7 @@ function CrossChain() {
       updateRef.current = true;
     } catch (error) {
       setInnerLoading(false);
-      return messageApi.error("Pair not available for swap.");
+      return messageApi.error('Pair not available for swap.');
     }
   };
 
@@ -838,15 +838,15 @@ function CrossChain() {
   // }
 
   const selectAfter = (
-    <div className={"addonAfter"}>
+    <div className={'addonAfter'}>
       {token1?.isToken ? (
         <span
           className="send__pasteText"
           style={{
-            position: "relative",
-            top: "-1px",
-            left: "-5px",
-            borderLeft: "0px",
+            position: 'relative',
+            top: '-1px',
+            left: '-5px',
+            borderLeft: '0px',
           }}
           onClick={() => {
             calculateAccordingly(100);
@@ -867,11 +867,11 @@ function CrossChain() {
                 {token1?.image ? (
                   <img
                     style={{
-                      height: "20px",
-                      width: "20px",
-                      objectFit: "contain",
-                      position: "relative",
-                      borderRadius: "15px",
+                      height: '20px',
+                      width: '20px',
+                      objectFit: 'contain',
+                      position: 'relative',
+                      borderRadius: '15px',
                     }}
                     src={token1?.image}
                   />
@@ -879,16 +879,16 @@ function CrossChain() {
                   <div
                     className="randb extra"
                     style={{
-                      height: "35px",
-                      width: "35px",
-                      background: "rgb(202, 201, 201)",
-                      borderRadius: "50%",
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
+                      height: '35px',
+                      width: '35px',
+                      background: 'rgb(202, 201, 201)',
+                      borderRadius: '50%',
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
                     }}
                   >
-                    {token1?.symbol?.split("")[0]}
+                    {token1?.symbol?.split('')[0]}
                   </div>
                 )}
                 {token1?.symbol}
@@ -904,10 +904,10 @@ function CrossChain() {
                 {token1?.image ? (
                   <img
                     style={{
-                      height: "20px",
-                      width: "20px",
-                      objectFit: "contain",
-                      borderRadius: "15px",
+                      height: '20px',
+                      width: '20px',
+                      objectFit: 'contain',
+                      borderRadius: '15px',
                     }}
                     src={token1?.image}
                   />
@@ -915,16 +915,16 @@ function CrossChain() {
                   <div
                     className="randb extra"
                     style={{
-                      height: "35px",
-                      width: "35px",
-                      background: "rgb(202, 201, 201)",
-                      borderRadius: "50%",
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
+                      height: '35px',
+                      width: '35px',
+                      background: 'rgb(202, 201, 201)',
+                      borderRadius: '50%',
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
                     }}
                   >
-                    {token1?.symbol?.split("")[0]}
+                    {token1?.symbol?.split('')[0]}
                   </div>
                 )}
                 {token1?.symbol}
@@ -943,7 +943,7 @@ function CrossChain() {
     </div>
   );
   const selectAfterTo = (
-    <div className={"addonAfter"}>
+    <div className={'addonAfter'}>
       <Select
         open={false}
         style={{
@@ -957,11 +957,11 @@ function CrossChain() {
                 {token2?.image ? (
                   <img
                     style={{
-                      height: "20px",
-                      width: "20px",
-                      objectFit: "contain",
-                      position: "relative",
-                      borderRadius: "15px",
+                      height: '20px',
+                      width: '20px',
+                      objectFit: 'contain',
+                      position: 'relative',
+                      borderRadius: '15px',
                     }}
                     src={token2?.image}
                   />
@@ -969,16 +969,16 @@ function CrossChain() {
                   <div
                     className="randb extra"
                     style={{
-                      height: "35px",
-                      width: "35px",
-                      background: "rgb(202, 201, 201)",
-                      borderRadius: "50%",
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
+                      height: '35px',
+                      width: '35px',
+                      background: 'rgb(202, 201, 201)',
+                      borderRadius: '50%',
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
                     }}
                   >
-                    {token2?.symbol.split("")[0]}
+                    {token2?.symbol.split('')[0]}
                   </div>
                 )}
                 {token2?.symbol}
@@ -994,10 +994,10 @@ function CrossChain() {
                 {token2?.image ? (
                   <img
                     style={{
-                      height: "20px",
-                      width: "20px",
-                      objectFit: "contain",
-                      borderRadius: "15px",
+                      height: '20px',
+                      width: '20px',
+                      objectFit: 'contain',
+                      borderRadius: '15px',
                     }}
                     src={token2?.image}
                   />
@@ -1005,16 +1005,16 @@ function CrossChain() {
                   <div
                     className="randb extra"
                     style={{
-                      height: "35px",
-                      width: "35px",
-                      background: "rgb(202, 201, 201)",
-                      borderRadius: "50%",
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
+                      height: '35px',
+                      width: '35px',
+                      background: 'rgb(202, 201, 201)',
+                      borderRadius: '50%',
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
                     }}
                   >
-                    {token2?.symbol?.split("")[0]}
+                    {token2?.symbol?.split('')[0]}
                   </div>
                 )}
 
@@ -1378,49 +1378,49 @@ function CrossChain() {
     //   </div>
 
     <div
-      className={`${"fixedContent height-571"} ${
-        height <= 600 ? "fixedContentOuterExt" : ""
+      className={`${'fixedContent height-571'} ${
+        height <= 600 ? 'fixedContentOuterExt' : ''
       }`}
     >
-      <div style={{ width: "100%", marginBottom: "20px" }}>
+      <div style={{ width: '100%', marginBottom: '20px' }}>
         <div
           className="send__infoText"
           style={{
-            marginBottom: "10px",
-            marginTop: "0",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "flex-end",
-            gap: "10px",
+            marginBottom: '10px',
+            marginTop: '0',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'flex-end',
+            gap: '10px',
           }}
         >
           <span
             style={{
-              color: "#f5da76",
+              color: '#f5da76',
             }}
           >
-            {" "}
+            {' '}
             Min-Max
-          </span>{" "}
+          </span>{' '}
           <div
             style={{
-              display: "flex",
-              justifyContent: "flex-end",
-              gap: "10px",
+              display: 'flex',
+              justifyContent: 'flex-end',
+              gap: '10px',
             }}
           >
             {addCommasToNumber(
               parseFloat(route ? route.exchangeData.depositMin : 0)
-            )}{" "}
-            -{" "}
+            )}{' '}
+            -{' '}
             {addCommasToNumber(
               parseFloat(route ? route.exchangeData.depositMax : 0)
-            )}{" "}
+            )}{' '}
           </div>
           {token1?.symbol?.toUpperCase()}
         </div>
         {contextHolder}
-        <div style={{ width: "100%" }} className="swap ">
+        <div style={{ width: '100%' }} className="swap ">
           <div className="swap_onChain ">
             <div className="swap_onChain_balance">
               <div>
@@ -1433,7 +1433,7 @@ function CrossChain() {
                       setPercent(null);
                     }
 
-                    const afterDecimal = amount.split(".")[1];
+                    const afterDecimal = amount.split('.')[1];
 
                     // Get the maximum allowed characters before the decimal point (15 characters)
                     const maxCharactersBeforeDecimal = 15;
@@ -1447,7 +1447,7 @@ function CrossChain() {
                       }
 
                       // Check if the characters before the decimal exceed the maximum allowed
-                      const beforeDecimal = amount.split(".")[0];
+                      const beforeDecimal = amount.split('.')[0];
                       if (
                         beforeDecimal.toString().length >
                         maxCharactersBeforeDecimal
@@ -1466,7 +1466,7 @@ function CrossChain() {
                   }}
                   value={amount}
                 />
-                <p style={{ marginBottom: "8px" }}>
+                <p style={{ marginBottom: '8px' }}>
                   {currency.symbol}
                   {addCommasToNumber(
                     getFlooredFixed(
@@ -1477,7 +1477,7 @@ function CrossChain() {
                   )}
                 </p>
               </div>
-              <div style={{textAlign:"right"}}>
+              <div style={{ textAlign: 'right' }}>
                 <Select
                   suffixIcon={<img src={DownArrowSuffix} />}
                   style={{
@@ -1498,26 +1498,26 @@ function CrossChain() {
                           {!token1?.image ? (
                             <div
                               style={{
-                                alignItems: "center",
-                                backgroundColor: "rgba(98,126,234,.2)",
-                                borderRadius: "49%",
-                                display: "flex",
-                                height: "29px",
-                                justifyContent: "center",
-                                width: "29px",
-                                marginRight: "15px",
+                                alignItems: 'center',
+                                backgroundColor: 'rgba(98,126,234,.2)',
+                                borderRadius: '49%',
+                                display: 'flex',
+                                height: '29px',
+                                justifyContent: 'center',
+                                width: '29px',
+                                marginRight: '15px',
                               }}
                             >
-                              {token1?.name.split("")[0]}
+                              {token1?.name.split('')[0]}
                             </div>
                           ) : (
                             <img
                               style={{
-                                height: "30px",
-                                width: "30px",
-                                objectFit: "contain",
-                                position: "relative",
-                                borderRadius: "15px",
+                                height: '30px',
+                                width: '30px',
+                                objectFit: 'contain',
+                                position: 'relative',
+                                borderRadius: '15px',
                               }}
                               alt=""
                               src={token1?.image}
@@ -1543,11 +1543,11 @@ function CrossChain() {
                           <span className="flexedItemSelect">
                             <img
                               style={{
-                                height: "20px",
-                                width: "20px",
-                                objectFit: "contain",
-                                marginLeft: "20px",
-                                marginRight: "20px",
+                                height: '20px',
+                                width: '20px',
+                                objectFit: 'contain',
+                                marginLeft: '20px',
+                                marginRight: '20px',
                               }}
                               src={token?.image}
                             />
@@ -1559,13 +1559,13 @@ function CrossChain() {
                 />
                 <div className="swap_onChain_pay">
                   {/* <p>You Pay</p> */}
-                  <p style={{ textAlign: "right" }}>
-                    Balance{" "}
+                  <p style={{ textAlign: 'right' }}>
+                    Balance{' '}
                     <span>
                       {addCommasToNumber(
                         parseFloat(getFlooredFixed(balance || 0, 6))
-                      )}{" "}
-                      {token1?.symbol}{" "}
+                      )}{' '}
+                      {token1?.symbol}{' '}
                     </span>
                   </p>
                 </div>
@@ -1580,7 +1580,7 @@ function CrossChain() {
               alt=""
               height={44}
               style={
-                loading ? { pointerEvents: "none" } : { pointerEvents: "auto" }
+                loading ? { pointerEvents: 'none' } : { pointerEvents: 'auto' }
               }
               onClick={() => {
                 if (token2?.iHave) {
@@ -1608,7 +1608,7 @@ function CrossChain() {
                   placeholder="0.000"
                   value={amount2}
                 />
-                <p style={{ marginBottom: "8px" }}>
+                <p style={{ marginBottom: '8px' }}>
                   {currency.symbol}
                   {addCommasToNumber(
                     getFlooredFixed(
@@ -1619,7 +1619,7 @@ function CrossChain() {
                   )}
                 </p>
               </div>
-              <div style={{ textAlign: "right" }}>
+              <div style={{ textAlign: 'right' }}>
                 <Select
                   suffixIcon={<img src={DownArrowSuffix} />}
                   style={{
@@ -1640,26 +1640,26 @@ function CrossChain() {
                           {!token2?.image ? (
                             <div
                               style={{
-                                alignItems: "center",
-                                backgroundColor: "rgba(98,126,234,.2)",
-                                borderRadius: "49%",
-                                display: "flex",
-                                height: "29px",
-                                justifyContent: "center",
-                                width: "29px",
-                                marginRight: "15px",
+                                alignItems: 'center',
+                                backgroundColor: 'rgba(98,126,234,.2)',
+                                borderRadius: '49%',
+                                display: 'flex',
+                                height: '29px',
+                                justifyContent: 'center',
+                                width: '29px',
+                                marginRight: '15px',
                               }}
                             >
-                              {token2?.name.split("")[0]}
+                              {token2?.name.split('')[0]}
                             </div>
                           ) : (
                             <img
                               style={{
-                                height: "30px",
-                                width: "30px",
-                                objectFit: "contain",
-                                position: "relative",
-                                borderRadius: "15px",
+                                height: '30px',
+                                width: '30px',
+                                objectFit: 'contain',
+                                position: 'relative',
+                                borderRadius: '15px',
                               }}
                               alt=""
                               src={token2?.image}
@@ -1685,11 +1685,11 @@ function CrossChain() {
                           <span className="flexedItemSelect">
                             <img
                               style={{
-                                height: "20px",
-                                width: "20px",
-                                objectFit: "contain",
-                                marginLeft: "20px",
-                                marginRight: "20px",
+                                height: '20px',
+                                width: '20px',
+                                objectFit: 'contain',
+                                marginLeft: '20px',
+                                marginRight: '20px',
                               }}
                               src={token?.image}
                             />
@@ -1704,13 +1704,13 @@ function CrossChain() {
                   className="swap_onChain_pay"
                 >
                   {/* <p>You Receive</p> */}
-                  <p style={{ textAlign: "right" }}>
-                    Balance{" "}
+                  <p style={{ textAlign: 'right' }}>
+                    Balance{' '}
                     <span>
                       {addCommasToNumber(
                         parseFloat(getFlooredFixed(token2?.balance || 0, 6))
-                      )}{" "}
-                      {token2?.symbol}{" "}
+                      )}{' '}
+                      {token2?.symbol}{' '}
                     </span>
                   </p>
                 </div>
@@ -1722,9 +1722,9 @@ function CrossChain() {
             <div className="swap_percentage">
               {percentages.map((percentage, index) => (
                 <p
-                  style={{ cursor: "pointer" }}
+                  style={{ cursor: 'pointer' }}
                   key={index}
-                  className={activeIndex === index ? "active" : ""}
+                  className={activeIndex === index ? 'active' : ''}
                   onClick={() => {
                     setActiveIndex(index);
                     setPercent(percentage);
@@ -1739,10 +1739,10 @@ function CrossChain() {
 
           {loading ? (
             <div className="swap__infoText">
-              <ClipLoader size={20} color="#00adee" />{" "}
+              <ClipLoader size={20} color="#00adee" />{' '}
               <p
                 style={{
-                  marginLeft: "7px",
+                  marginLeft: '7px',
                 }}
               >
                 Fetching the best price. Please wait...
@@ -1753,46 +1753,40 @@ function CrossChain() {
       </div>
       <ButtonComp
         onClick={async () => {
-
-          console.log(
+          console.log('cross-chain onClick button swap : ', {
             token1,
-              token2 ,
-              amount ,
-              amount2 ,
-              amount  ,
-              amount2  ,
-              loading
-          );
+            token2,
+            amount,
+            amount2,
+            amount,
+            amount2,
+            loading,
+          });
 
-          console.log(
-            !token1 ||
-              !token2 ||
-              !amount ||
-              !amount2 ||
-              amount <= 0 ||
-              amount2 <= 0 ||
-              loading
-          );
           if (isNaN(parseFloat(amount)) || isNaN(parseFloat(amount2))) {
-            return messageApi.error("Please enter a valid amount to proceed.");
+            console.log('Invalid swap in or out amount')
+            return messageApi.error('Please enter a valid amount to proceed.');
           }
 
           if (parseFloat(amount) < parseFloat(route.exchangeData.depositMin)) {
+            console.log('Amount is less than the min amount required')
             return messageApi.error(
               `The minimum deposit amount to swap is ${route.exchangeData.depositMin} ${token1.symbol}`
             );
           }
 
           if (parseFloat(amount) > parseFloat(route.exchangeData.depositMax)) {
+            console.log("🚀 ~ onClick={ ~ route.exchangeData.depositMax:", route.exchangeData.depositMax)
+            console.log('Out amount is greater than the max amount deposit')
             return messageApi.error(
               `The maximum deposit amount to swap is ${route.exchangeData.depositMax} ${token1.symbol}`
             );
           }
 
           if (parseFloat(balance) < parseFloat(amount)) {
-            console.log('INSIDE INSUFFICENT BALANCE')
+            console.log('INSIDE INSUFFICENT BALANCE');
             return messageApi.error(
-              "Insufficient balance to proceed with the transaction."
+              'Insufficient balance to proceed with the transaction.'
             );
           }
 
@@ -1810,7 +1804,7 @@ function CrossChain() {
               store.dispatch(setLoading(false));
 
               return messageApi.error(
-                "Unable to fetch gas price at the moment."
+                'Unable to fetch gas price at the moment.'
               );
             }
 
@@ -1820,7 +1814,7 @@ function CrossChain() {
             store.dispatch(setLoading(false));
 
             const parentCoin = await server.post(
-              "/wallet/nativeCoinFiatPrice",
+              '/wallet/nativeCoinFiatPrice',
               {
                 coin_family: token1.coinFamily,
                 fiat_currency: currency.name,
@@ -1850,11 +1844,12 @@ function CrossChain() {
               coinSymbol: token1.coinSymbol,
             };
             store.dispatch(swapDetailAc(swapDetailed));
-            navigate("/crosschain-swapDetails", {
+            navigate('/crosschain-swapDetails', {
               state: swapDetailed,
             });
-          } else if (token1.chain.currencyName == "SOL") {
-            console.log("XXXXXXXXXXXXXXXx ");
+          } 
+          else if (token1.chain.currencyName == 'SOL') {
+            console.log('Cross Chain swap for Solana');
 
             const solanaHelper = new SolanaHelper(token1?.chain?.rpcUrl);
             const gasPrice = solanaHelper.getGasPrice();
@@ -1862,7 +1857,7 @@ function CrossChain() {
             store.dispatch(setLoading(false));
 
             console.log(
-              "newBalanceToFiatConversion(token1?.price, amount) ",
+              'newBalanceToFiatConversion(token1?.price, amount) ',
               amount,
               newBalanceToFiatConversion(token1?.price, amount)
             );
@@ -1883,10 +1878,12 @@ function CrossChain() {
             store.dispatch(swapDetailAc(swapDetailed));
             // console.log("swapDetailedswapDetailed ", swapDetailed);
 
-            navigate("/crosschain-swapDetails", {
+            navigate('/crosschain-swapDetails', {
               state: swapDetailed,
             });
-          } else if (token1.chain.currencyName === "BTC") {
+          } 
+          else if (token1.chain.currencyName === 'BTC') {
+            console.log('BTC COIN TRANSACTION')
             try {
               const gasPrice = await BTCHelper.getBTCGasPrice();
               let swapDetailed = {
@@ -1903,9 +1900,8 @@ function CrossChain() {
                 tab: 1,
               };
               store.dispatch(swapDetailAc(swapDetailed));
-
               store.dispatch(setLoading(false));
-              navigate("/crosschain-swapDetails", {
+              navigate('/crosschain-swapDetails', {
                 state: swapDetailed,
               });
             } catch (error) {
@@ -1914,8 +1910,8 @@ function CrossChain() {
             }
           }
         }}
-        text={"Swap"}
-        maxWidth={"100%"}
+        text={'Swap'}
+        maxWidth={'100%'}
         disabled={
           !token1 ||
           !token2 ||
@@ -1938,7 +1934,7 @@ function CrossChain() {
         open={open}
         // eslint-disable-next-line jsx-a11y/alt-text
         closeIcon={
-          theme == "darkTheme" ? (
+          theme == 'darkTheme' ? (
             <img src={darkclose} />
           ) : (
             <img src={ModalCloseIcon} />
@@ -1949,17 +1945,17 @@ function CrossChain() {
         <div
           className="contain"
           style={{
-            height: "100%",
-            width: "100%",
-            display: "flex",
-            flexDirection: "column",
+            height: '100%',
+            width: '100%',
+            display: 'flex',
+            flexDirection: 'column',
           }}
         >
           {show ? (
-            <div className="search" style={{ marginBottom: "30px" }}>
+            <div className="search" style={{ marginBottom: '30px' }}>
               <InputField
-                placeholder={"Search name or paste address"}
-                coloredBg={"#eef3f9"}
+                placeholder={'Search name or paste address'}
+                coloredBg={'#eef3f9'}
                 value={keyword}
                 checkForSymbols={true}
                 getData={(value) => {
@@ -1989,7 +1985,7 @@ function CrossChain() {
                     <img
                       src={Search}
                       style={{
-                        width: "17px",
+                        width: '17px',
                       }}
                       alt=""
                     />
@@ -2004,7 +2000,7 @@ function CrossChain() {
             className="right"
             style={{
               flex: 1,
-              overflow: "scroll",
+              overflow: 'scroll',
             }}
             onScroll={handleScroll}
           >
@@ -2031,30 +2027,30 @@ function CrossChain() {
                   <div
                     className="design"
                     style={{
-                      width: "100%",
+                      width: '100%',
                     }}
                   >
                     <div
                       className="token"
                       style={{
-                        display: "flex",
-                        justifyContent: "flex-start",
-                        alignItems: "center",
-                        marginBottom: "20px",
-                        padding: "8px",
-                        borderRadius: "30px",
-                        marginLeft: "7px",
-                        fontSize: "11px",
-                        cursor: "pointer",
-                        width: "100%;",
+                        display: 'flex',
+                        justifyContent: 'flex-start',
+                        alignItems: 'center',
+                        marginBottom: '20px',
+                        padding: '8px',
+                        borderRadius: '30px',
+                        marginLeft: '7px',
+                        fontSize: '11px',
+                        cursor: 'pointer',
+                        width: '100%;',
                         backgroundColor:
                           token1?.id == token?.id || token2?.id == token?.id
-                            ? "transparent"
-                            : "transparent",
+                            ? 'transparent'
+                            : 'transparent',
                         color:
                           token1?.id == token?.id || token2?.id == token?.id
-                            ? "#000"
-                            : "#000",
+                            ? '#000'
+                            : '#000',
                       }}
                       onClick={() => {
                         // console.log("token===========", token);
@@ -2066,7 +2062,7 @@ function CrossChain() {
                             setKeyword(null);
                             setFilteredTokens(allToken);
                             return messageApi.error(
-                              "You cannot select the same tokens on both sides. Please select a different token."
+                              'You cannot select the same tokens on both sides. Please select a different token.'
                             );
                           }
 
@@ -2077,7 +2073,7 @@ function CrossChain() {
                             setKeyword(null);
                             setFilteredTokens(allToken);
                             return messageApi.error(
-                              "You cannot select the same tokens on both sides. Please select a different token."
+                              'You cannot select the same tokens on both sides. Please select a different token.'
                             );
                           }
 
@@ -2092,24 +2088,24 @@ function CrossChain() {
                       {!token.image ? (
                         <div
                           style={{
-                            alignItems: "center",
-                            backgroundColor: "rgba(98,126,234,.2)",
-                            borderRadius: "49%",
-                            display: "flex",
-                            height: "29px",
-                            justifyContent: "center",
-                            width: "29px",
-                            marginRight: "15px",
+                            alignItems: 'center',
+                            backgroundColor: 'rgba(98,126,234,.2)',
+                            borderRadius: '49%',
+                            display: 'flex',
+                            height: '29px',
+                            justifyContent: 'center',
+                            width: '29px',
+                            marginRight: '15px',
                           }}
                         >
-                          {" "}
-                          {token.name.split("")[0]}
+                          {' '}
+                          {token.name.split('')[0]}
                         </div>
                       ) : (
                         <img
                           style={{
-                            width: "29px",
-                            marginRight: "15px",
+                            width: '29px',
+                            marginRight: '15px',
                           }}
                           src={token.image}
                           alt=""
@@ -2118,16 +2114,16 @@ function CrossChain() {
 
                       <p>
                         <span
-                          style={{ fontSize: "17px" }}
+                          style={{ fontSize: '17px' }}
                           className="noAddress"
                         >
-                          {token.name}{" "}
+                          {token.name}{' '}
                         </span>
                         <span
                           className="noAddress"
                           style={{
-                            fontSize: "11px",
-                            marginLeft: "5px",
+                            fontSize: '11px',
+                            marginLeft: '5px',
                           }}
                         >
                           {token.type ? ` /${token.type}` : null}
@@ -2139,16 +2135,16 @@ function CrossChain() {
             ) : (
               <div
                 style={{
-                  textAlign: "center",
+                  textAlign: 'center',
                 }}
               >
                 <p
                   className="noAddress"
                   style={{
-                    marginTop: "4%",
-                    marginBottom: "15px",
-                    fontWeight: "bold",
-                    fontSize: "15px",
+                    marginTop: '4%',
+                    marginBottom: '15px',
+                    fontWeight: 'bold',
+                    fontSize: '15px',
                   }}
                 >
                   No assets found

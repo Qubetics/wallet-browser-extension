@@ -381,15 +381,21 @@ export class Web3Helper {
           : gasPriceRes.fast;
 
       const gasInEth = (gsFee * Math.pow(10, 9) * gaslimit) / Math.pow(10, 18);
+      console.log("🚀 ~ Web3Helper ~ gasInEth:", gasInEth)
       const gasPrice =
         symbol == 'eth'
           ? Math.max(1.5 * gsFee * Math.pow(10, 9), 1e9)
           : Math.max(gsFee * Math.pow(10, 9), 1e9);
 
       const totalAmount = +gasInEth + +amount;
-      const balance = await this.getCoinBalance(from, rpc);
+      console.log("🚀 ~ Web3Helper ~ totalAmount:", totalAmount)
 
+      const balance = await this.getCoinBalance(from, rpc);
+      console.log("🚀 ~ Web3Helper ~ balance:", balance)
+
+      
       if (totalAmount > balance) {
+        
         return false;
       }
 
