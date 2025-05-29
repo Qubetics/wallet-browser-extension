@@ -70,7 +70,7 @@ function MultiShowSecretPhrase() {
                   </div>
 
                   <div
-                    className={"checkboxOuter"}
+                    className={"checkboxOuter checkboxMain"}
                     style={{ marginBottom: "10px" }}
                   >
                     <Checkbox onChange={onChange}>

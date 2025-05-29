@@ -64,7 +64,7 @@ function ImportPhrase() {
                 </div>
               }
             />
-            <div className={"checkboxOuter"}>
+            <div className={"checkboxOuter checkboxMain"}>
               <Checkbox onChange={onChange} style={{}}>
                 <p style={{ marginLeft: "10px", textAlign: "left" }}>
                 I understand that the risk of losing my funds by
@@ -75,14 +75,14 @@ function ImportPhrase() {
             <ButtonComp
               text={"Proceed"}
               onClick={async (e) => { 
+                if (!mnemonics) {
+                  return messageApi.error("Please enter Secret Phrase.");
+                }
+
                 if (!terms) {
                   return messageApi.error(
                     "Please accept the privacy policy."
                   );
-                }
-
-                if (!mnemonics) {
-                  return messageApi.error("Mnemonics are required.");
                 }
 
                 store.dispatch(setLoading(true));

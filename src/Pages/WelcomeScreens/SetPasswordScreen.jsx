@@ -169,8 +169,8 @@ function SetPasswordScreen() {
 
   const handleImportSecretPhrase = async () => {
     try {
+      if (!getMnemonicsData) return popError('Please enter Secret Phrase.');
       if (!terms) return popError('Please accept the terms and conditions.');
-      if (!getMnemonicsData) return popError('Please enter mnemonics.');
 
       const isValid = WalletHelper.checkMnemonics(getMnemonicsData.trim());
       const { accounts } = await chrome.storage.session.get('accounts');
@@ -244,7 +244,7 @@ function SetPasswordScreen() {
             placeholder="Enter Password"
             getData={handlePasswordChange}
             value={password}
-            label="Password"
+            label="New Password"
           />
           <div className="setPassword__validations">
             {validations.map((item, i) => (
@@ -255,7 +255,7 @@ function SetPasswordScreen() {
             ))}
           </div>
           <InputFieldSimple
-            placeholder="Confirm Password"
+            placeholder="Enter Confirm Password"
             getData={(e) => e?.length <= 25 && setConfirmPassword(e)}
             value={confirmPassword}
             label="Confirm Password"
@@ -310,7 +310,7 @@ function SetPasswordScreen() {
             blankArray={blankArray}
           >
             <div className="setPassword__footerbuttons">
-              <ButtonComp onClick={handleConfirmSecretPhrase} text="Proceed" maxWidth="100%" />
+              <ButtonComp onClick={handleConfirmSecretPhrase} text="Continue" maxWidth="100%" />
             </div>
           </ConfirmSecretPhrase>
         ) : (

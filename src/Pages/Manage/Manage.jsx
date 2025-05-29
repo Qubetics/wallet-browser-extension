@@ -103,7 +103,7 @@ function Manage() {
         <div className="searchBarFixed">
           <MenuRestofHeaders
             backTo={"/wallet"}
-            title={"Add Tokens"}
+            title={"Manage Assets"}
           // manageTo={
           //   true
           // !(

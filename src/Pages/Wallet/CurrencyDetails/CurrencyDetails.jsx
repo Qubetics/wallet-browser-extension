@@ -384,8 +384,8 @@ function CurrencyDetails() {
 
           <div className="currDetails__dataSec">
             <div className="currDetails__dataSec__header">
-              <p>Transaction History</p>
-              <Link
+              <p>Transactions</p>
+              {/* <Link
                 to=""
                 onClick={(e) => {
                   e.preventDefault();
@@ -401,7 +401,7 @@ function CurrencyDetails() {
                 ) : (
                   <img src={DarkFilterIcon} />
                 )}
-              </Link>
+              </Link> */}
             </div>
             <div className="currDetails__dataSec__table">
               {history.length > 0 ? (
@@ -457,6 +457,7 @@ function CurrencyDetails() {
                       date={moment(data.created_at).format(
                         "DD, MMM YYYY | hh:mm A"
                       )}
+                      coinNameNotShow={true}
                     />
                   );
                 })

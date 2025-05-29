@@ -9,7 +9,8 @@
   .statusCurrency {
     display: flex;
     justify-content: space-between;
-    border-bottom: 1px solid #dce2f5;
+    // border-bottom: 1px solid #dce2f5;
+    border-bottom: 1px solid rgba(220, 226, 245, 0.3); 
     padding-bottom: 20px;
   }
   .Status {

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 
 const DummyEle = ({ ele }) => {
-  const textRef = useRef(null);
+  const textRef = useRef(null);  
 
   useEffect(() => {
     const maxWidth = 153; // Maximum width of the box
@@ -38,7 +38,7 @@ const DummyEle = ({ ele }) => {
         justifyContent: ele.currCryptoBal === "ABOVE" || ele.currCryptoBal === "BELOW" ? "start" : "end",
       }}
     >
-      <span className="overflowEllipsisAmout">{ele.currCryptoBal}</span>
+      <span className="overflowEllipsisAmout">{ele.currCryptoBal} {ele.coinName}</span>
 
     </div>
   );

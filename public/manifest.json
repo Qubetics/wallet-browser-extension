@@ -1,5 +1,5 @@
 {
-  "name": "Qubetics",
+  "name": "Qubetics Wallet",
   "description": "Connect yourself to the Ethereum Dapp to realize the power of blockchain.",
   "version": "1.0",
   "manifest_version": 3,
@@ -19,7 +19,7 @@
 
   "action": {
     "default_popup": "index.html",
-    "default_title": "Qubetics"
+    "default_title": "Qubetics Wallet"
   },
   "content_scripts": [
     {

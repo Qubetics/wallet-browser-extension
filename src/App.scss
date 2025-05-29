@@ -244,6 +244,8 @@ body::-webkit-scrollbar {
     border: 0 !important;
     background-color: transparent !important;
     padding-right: 0;
+    padding-left: 0;
+    line-height: 0;
   }
 }
 
@@ -940,4 +942,16 @@ input[type="number"] {
 }
 .ant-drawer-body {
   padding: 0 !important;
+}
+.checkboxMain{
+  .ant-checkbox-wrapper{
+    display: flex !important;
+    align-items: center !important;
+    .ant-checkbox{
+       top: 0 !important;
+    }
+  }
+}
+.gap0{
+  gap: 0 !important;
 }

@@ -162,7 +162,7 @@ function ManageWallet() {
   const handleResponse = (result, error) => {
     chrome.runtime.sendMessage(
       { method: 'switchAccount', result },
-      (response) => {}
+      (response) => { }
     );
   };
 
@@ -194,9 +194,9 @@ function ManageWallet() {
     }
     setModalOpen(false);
     setDefaultAccount(accountSelected);
-    navigate('/wallet' , {
-      state : {
-       updatedAccount : accountSelected 
+    navigate('/wallet', {
+      state: {
+        updatedAccount: accountSelected
       }
     });
   };
@@ -230,8 +230,25 @@ function ManageWallet() {
                     justifyContent: 'space-between',
                   }}
                 >
-                  {currency?.symbol}
-                  {balanceIn ? totalAmt?.toFixed(2) : '****'}
+                  <>
+                  {/* {currency?.symbol} */}
+                  {/* {balanceIn ? totalAmt?.toFixed(2) : '****'} */}
+                  {balanceIn ? (
+                    (() => {
+                      const formatted = totalAmt?.toFixed(2); // e.g., "8888087.76"
+                      const [intPart, decPart] = formatted.split(".");
+                      return (
+                        <span>
+                          {currency?.symbol} {intPart}
+                          <span style={{ fontSize: "0.6em" }}>.{decPart}</span>
+                        </span>
+                      );
+                    })()
+                  ) : (
+                    "****"
+                  )}
+                  </>
+
                   {/* <span onClick={() => setShow(!show)}> */}
                   {/* {show ? <img style={{ height: '20px' }}
                     src={OpenDark}

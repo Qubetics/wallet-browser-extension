@@ -161,7 +161,7 @@ function CoinsTable({ dataArray, showCoinPrice, name }) {
                 <div
                   dangerouslySetInnerHTML={{ __html: ele.coinPrice }}
                 ></div>{" "}
-                &nbsp;|
+                {/* &nbsp;| */}
                 <div
                   className={`${"coinsTable1__grayText12"} ${ele.coinStatus <= 0 ? "negitiveText" : "positiveText"
                     }`}

@@ -31,7 +31,7 @@ function CreateNewWallet() {
           {layoutHeader}
           <div style={{ marginTop: "16px" }}>
             <InputFieldOnly
-              placeholder={"Enter here"}
+              placeholder={"Enter Wallet Name here"}
               value={name}
               label={"Enter Wallet Name"}
               checkForSymbols={true}

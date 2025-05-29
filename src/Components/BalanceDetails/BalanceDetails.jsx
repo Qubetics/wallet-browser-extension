@@ -38,14 +38,14 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
     }
   );
 
-  const {state} =  useLocation();
+  const { state } = useLocation();
 
   const [accounts, setAccounts] = useState([]);
 
   const fetchAccounts = async () => {
     const { accounts } = await chrome.storage.session.get("accounts");
 
-    console.log('ACCOUNT DEFAULT :',accounts);
+    console.log('ACCOUNT DEFAULT :', accounts);
 
     const items = accounts.flatMap((account, index) => {
       const accountItem = {
@@ -71,7 +71,7 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
       return [accountItem];
     });
 
-    console.log('ACCOUNT SET IN WALLET :',items);
+    console.log('ACCOUNT SET IN WALLET :', items);
     setAccounts(items);
   };
 
@@ -118,7 +118,7 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
       }
     });
 
-    console.log('total',total)
+    console.log('total', total)
     setTotal(total);
   };
 
@@ -239,7 +239,7 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
 
         // Perform the multiplication
         const result = myPrice.times(balance);
-        console.log('result 245 ~ balance details :',result)
+        console.log('result 245 ~ balance details :', result)
 
         // Get the result as a string with the desired precision
         const formattedResult = getFlooredFixed(result.toString(), 2);
@@ -252,9 +252,9 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
     }
   }, []);
 
-  useEffect(()=>{
+  useEffect(() => {
     calculateTotal();
-  },[tokens,account])
+  }, [tokens, account])
 
   const [messageApi, contextHolder] = message.useMessage({
     duration: DURATION,
@@ -294,9 +294,8 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
   const height = useCurrentHeight();
   return (
     <div
-      className={`${"balanceDetails"} ${mt0 ? mt0 : ""}    ${
-        height <= 600 ? "balanceDetailsOuterExt" : ""
-      }`}
+      className={`${"balanceDetails"} ${mt0 ? mt0 : ""}    ${height <= 600 ? "balanceDetailsOuterExt" : ""
+        }`}
       style={{ position: "relative" }}
     >
       {contextHolder}
@@ -317,18 +316,23 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
               <div>
                 <Link
                   to={"/my-wallets"}
-                  //  onClick={(e) => e.preventDefault()}
+                //  onClick={(e) => e.preventDefault()}
                 >
                   <p style={{ display: "flex" }}>
-                    {account?.name.charAt(0).toUpperCase() +
+                    {/* {account?.name.charAt(0).toUpperCase() +
                       account?.name.length <
-                    10 ? (
+                      10 ? (
                       <p> {account?.name} </p>
                     ) : (
                       <p> {account?.name.slice(0, 6)}...</p>
+                    )} */}
+                    {account?.name.length < 10 ? (
+                      <p>{account?.name.charAt(0).toUpperCase() + account?.name.slice(1)}</p>
+                    ) : (
+                      <p>{account?.name.charAt(0).toUpperCase() + account?.name.slice(1, 6)}...</p>
                     )}
 
-                    {}
+                    { }
                     <img
                       style={{ marginLeft: "10px" }}
                       src={downeIcon}
@@ -403,7 +407,7 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
               textOverflow: "ellipsis",
             }}
           >
-            {coin
+            {/* {coin
               ? `${addCommasToNumber(
                   getFlooredFixed(coin.balance, 5)
                 )} ${coin.coin.coin_symbol.toUpperCase()}`
@@ -411,7 +415,25 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
               ? `${currency.symbol}${addCommasToNumber(
                   getFlooredFixed(total, 2)
                 )}`
-              : "****"}
+              : "****"} */}
+            {coin ? (
+              `${addCommasToNumber(getFlooredFixed(coin.balance, 5))} ${coin.coin.coin_symbol.toUpperCase()}`
+            ) : balanceIn ? (
+              (() => {
+                const formatted = getFlooredFixed(total, 2); // e.g., "23.56"
+                const [intPart, decPart] = formatted.split(".");
+                return (
+                  <span>
+                    {currency.symbol}
+                    <span>{addCommasToNumber(intPart)}</span>
+                    <span style={{ fontSize: "25px" }}>.{decPart}</span>
+                  </span>
+                );
+              })()
+            ) : (
+              "****"
+            )}
+
           </h3>
 
           {path !== "currencyDetails" ? (
@@ -431,6 +453,7 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
                   marginLeft: "9px",
                   position: "relative",
                   top: "-7px",
+                  cursor: "pointer"
                 }}
               />
             ) : (
@@ -449,6 +472,7 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
                   marginLeft: "9px",
                   position: "relative",
                   top: "-7px",
+                  cursor: "pointer"
                 }}
               />
             )
@@ -473,9 +497,8 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
         ) : null}
       </div>
       <div
-        className={`${"balanceDetails__itemsOuter"} ${
-          className ? className : ""
-        }`}
+        className={`${"balanceDetails__itemsOuter"} ${className ? className : ""
+          }`}
         style={
           coin
             ? { justifyContent: "center" }
@@ -498,7 +521,7 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
             className={
               path === "currencyDetails"
                 ? "balanceDetails__items__whiteText"
-                : "balanceDetails__items"
+                : "balanceDetails__items gap0"
             }
           >
             <div className={"balanceDetails__items__img"}>
@@ -541,7 +564,7 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
             className={
               path === "currencyDetails"
                 ? "balanceDetails__items__whiteText"
-                : "balanceDetails__items"
+                : "balanceDetails__items gap0"
             }
           >
             <div className={"balanceDetails__items__img"}>
@@ -568,7 +591,7 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
           className={
             path === "currencyDetails"
               ? "balanceDetails__items__whiteText"
-              : "balanceDetails__items"
+              : "balanceDetails__items gap0"
           }
         >
           <div className={"balanceDetails__items__img"}>
@@ -672,7 +695,7 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
           className={
             path === "currencyDetails"
               ? "balanceDetails__items__whiteText"
-              : "balanceDetails__items"
+              : "balanceDetails__items gap0"
           }
         >
           <div className={"balanceDetails__items__img"}>
@@ -703,7 +726,7 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
             className={
               path === "currencyDetails"
                 ? "balanceDetails__items__whiteText"
-                : "balanceDetails__items"
+                : "balanceDetails__items gap0"
             }
           >
             <div className={"balanceDetails__items__img"}>

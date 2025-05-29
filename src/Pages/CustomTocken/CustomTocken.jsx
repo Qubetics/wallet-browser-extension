@@ -226,12 +226,12 @@ function CustomToken() {
             placeholder={
               selectedChain.coinFamily == 5
                 ? "Enter Policy Id"
-                : "Enter Contract Address"
+                : "Contract Address"
             }
             label={
               selectedChain.coinFamily == 5
                 ? "Enter Policy Id"
-                : "Enter Contract Address"
+                : "Contract Address"
             }
             value={tokenAddress}
             checkForSymbols={true}
@@ -306,7 +306,7 @@ function CustomToken() {
             }
           />
           <InputFieldOnly
-            label="Enter Token Name"
+            label="Token Name"
             value={tokenInfo.name}
             placeholder="Token Name"
             readonly={true}
@@ -316,7 +316,7 @@ function CustomToken() {
             checkForSymbols={true}
           />
 
-          <div className={style.token__symbol_dec}>
+          <div className={style.token__symbol_dec}style={{display:"flex",gap:"20px"}}>
             <InputFieldOnly
               label="Symbol"
               placeholder="Symbol"

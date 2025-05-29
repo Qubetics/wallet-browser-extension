@@ -21,6 +21,7 @@ function CoinsTableDraggable({ dataArray, refresh }) {
   const [selected, setSelected] = useState(null);
   const [data, setData] = useState(dataArray);
 
+
   useEffect(() => {
     setData(dataArray);
   }, [dataArray, data, setData]);
@@ -118,11 +119,13 @@ function CoinsTableDraggable({ dataArray, refresh }) {
                     fontSize: "14px",
                     color: "#FFFFFF",
                     marginLeft: "3px",
+                    fontWeight: "normal",
                   }}
                 >
                   {ele?.coin?.coin?.token_address
-                    ? token_type(ele?.coin?.coin?.coin_family)
+                    ? `(${token_type(ele?.coin?.coin?.coin_family)})`
                     : ""}
+
                 </span>
               </div>
 
@@ -180,10 +183,10 @@ function CoinsTableDraggable({ dataArray, refresh }) {
                     {ele.routeTo === "no-where"
                       ? ""
                       : balanceIn
-                      ? ele.routeTo === "enter-price-spritz"
-                        ? "$"
-                        : currency.symbol
-                      : ""}
+                        ? ele.routeTo === "enter-price-spritz"
+                          ? "$"
+                          : currency.symbol
+                        : ""}
                     {ele.currDollerBal}
                   </>
                 )}

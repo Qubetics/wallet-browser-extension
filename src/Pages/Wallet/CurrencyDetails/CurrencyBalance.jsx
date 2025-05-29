@@ -424,7 +424,7 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin }) {
               className={`${"balanceDetails__title"} ${textLeft ? textLeft : ""
                 }`}
             >
-              {currency.symbol}
+              ≈ {currency.symbol}
               {addCommasToNumber(fiatValue)}
             </h5>
           ) : null}
@@ -465,7 +465,7 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin }) {
                 ) : (
                   <img src={SendIcon} height={50} width={50} />
                 )} */}
-                <img src={NewSend} />
+                <img src={NewSend} height={50} width={50}/>
               </div>
               <span>Send</span>
             </Link>
@@ -502,7 +502,7 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin }) {
               }
             >
               <div className={"balanceDetails__items__img"}>
-                <img src={NewSend} />
+                <img src={NewSend}  height={50} width={50}/>
               </div>
               <span>Send</span>
             </Link>
@@ -530,7 +530,7 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin }) {
               ) : (
                 <img src={RecieveIcon} height={50} width={50} />
               )} */}
-              <img src={RecieveNew} />
+              <img src={RecieveNew}  height={50} width={50}/>
             </div>
             <span>Receive</span>
           </Link>
@@ -630,7 +630,7 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin }) {
             }
           >
             <div className={"balanceDetails__items__img"}>
-              <img src={TradeNew} />
+              <img src={TradeNew}  height={50} width={50}/>
             </div>
             <span>Trade</span>
           </Link>}

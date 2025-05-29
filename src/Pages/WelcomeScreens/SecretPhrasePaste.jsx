@@ -2201,7 +2201,7 @@ function SecretPhrasePaste({ children, termsCheck, getMnemonics, type }) {
         ) : null} */}
 
         {contextHolder}
-        <div className={"checkboxOuter"}>
+        <div className={"checkboxOuter checkboxMain"}>
           <Checkbox onChange={onChange}>
             <p style={{ marginLeft: "10px", textAlign:"left" }}>
             I understand that the risk of losing my funds by

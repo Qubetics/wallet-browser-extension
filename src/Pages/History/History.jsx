@@ -169,7 +169,7 @@ function History() {
                 def={currency.symbol}
                 allData={data}
                 coin={data?.coin_data}
-                date={moment(data.created_at).format("DD, MMM YYYY | hh:mm A")}
+                date={moment(data.created_at).format("DD MMM, YYYY | hh:mm A")}
               />
             );
           })

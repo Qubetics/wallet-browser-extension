@@ -8,7 +8,6 @@ import { DURATION } from "../../config/message.config";
 import { capitalize } from "../../helpers/conversion.helper";
 import "./HistryList.scss"; 
 import recieveIcon from "../../Assets/ReceiveIcon.svg"
-import swapIcon1 from "../../Assets/SwapIcon.svg"
 import swapIcon from "../../Assets/SwapIconWhite.svg"
 import dAppIcon from "../../Assets/datatransfer.svg";
 
@@ -32,6 +31,7 @@ function HistryList(props) {
     allData,
     coin,
     spritz,
+    coinNameNotShow
   } = props;
 
   const navigate = useNavigate();
@@ -132,12 +132,12 @@ function HistryList(props) {
 
           <div className="histryList_Status__Send">
             <p className="withSend">
-              {sendRecieve === "WITHDRAW"
-                ? "Send"
-                : sendRecieve === "DEPOSIT"
-                  ? "Receive"
-                  : capitalize(sendRecieve)}
-              <span>/{coinname}</span>
+              {sendRecieve === "Sent"
+                ? "Withdraw"
+                : sendRecieve === "Received"
+                ? "Deposit"
+                : capitalize(sendRecieve)}
+              {!coinNameNotShow && <span>/{coinname}</span>}
             </p>
             <div className="histryStatus">
               <p className="withStatus">
