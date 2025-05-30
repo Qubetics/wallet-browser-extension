@@ -162,7 +162,7 @@ function ManageWallet() {
   const handleResponse = (result, error) => {
     chrome.runtime.sendMessage(
       { method: 'switchAccount', result },
-      (response) => { }
+      (response) => {}
     );
   };
 
@@ -196,11 +196,12 @@ function ManageWallet() {
     setDefaultAccount(accountSelected);
     navigate('/wallet', {
       state: {
-        updatedAccount: accountSelected
-      }
+        updatedAccount: accountSelected,
+      },
     });
   };
 
+  console.log('delete modal', deleteModal);
   return (
     <>
       {contextHolder}
@@ -231,22 +232,22 @@ function ManageWallet() {
                   }}
                 >
                   <>
-                  {/* {currency?.symbol} */}
-                  {/* {balanceIn ? totalAmt?.toFixed(2) : '****'} */}
-                  {balanceIn ? (
-                    (() => {
-                      const formatted = totalAmt?.toFixed(2); // e.g., "8888087.76"
-                      const [intPart, decPart] = formatted.split(".");
-                      return (
-                        <span>
-                          {currency?.symbol} {intPart}
-                          <span style={{ fontSize: "0.6em" }}>.{decPart}</span>
-                        </span>
-                      );
-                    })()
-                  ) : (
-                    "****"
-                  )}
+                    {/* {currency?.symbol} */}
+                    {/* {balanceIn ? totalAmt?.toFixed(2) : '****'} */}
+                    {balanceIn
+                      ? (() => {
+                          const formatted = totalAmt?.toFixed(2); // e.g., "8888087.76"
+                          const [intPart, decPart] = formatted.split('.');
+                          return (
+                            <span>
+                              {currency?.symbol} {intPart}
+                              <span style={{ fontSize: '0.6em' }}>
+                                .{decPart}
+                              </span>
+                            </span>
+                          );
+                        })()
+                      : '****'}
                   </>
 
                   {/* <span onClick={() => setShow(!show)}> */}
@@ -790,30 +791,30 @@ function ManageWallet() {
               if (!isCorrectPassword) {
                 return messageApi.error('Incorrect password provided.');
               } else {
-                setDeleteModal(false);
                 try {
                   store.dispatch(setLoading(true));
                   const result = await WalletHelper.deleteWallet(
                     selectedAccount.id,
                     account.address
                   );
+                  console.log("🚀 ~ customFunction={ ~ result:", result)
 
                   await WalletHelper.removeMnemonic(
                     selectedAccount.address,
                     sessionPassword
                   );
-
                   setDrawer(false);
                   init();
-                  setDeleteModal(false);
                 } catch (e) {
                   console.error('Error deleting wallet:', e);
                 } finally {
+                  console.log('AFTER ALL ');
                   setSessionPassword(null);
+                  setIsDeletePassModal(false);
+                  setDeleteModal(false);
                   store.dispatch(setLoading(false));
                 }
               }
-              setIsDeletePassModal(false);
             }}
           />
           <div style={{ marginTop: '10px' }}></div>
@@ -830,12 +831,8 @@ function ManageWallet() {
               if (!isCorrectPassword) {
                 return messageApi.error('Incorrect password provided.');
               } else {
-                setDeleteModal(false);
                 try {
                   store.dispatch(setLoading(true));
-
-                  console.log('selectedAccount.id', selectedAccount, account);
-
                   const result = await WalletHelper.deleteWallet(
                     selectedAccount.id,
                     account.address
@@ -847,15 +844,16 @@ function ManageWallet() {
                   );
                   setDrawer(false);
                   init();
-                  setDeleteModal(false);
                 } catch (e) {
                   console.error('Error deleting wallet:', e);
                 } finally {
+                  console.log('AFTER ALL ');
                   setSessionPassword(null);
+                  setIsDeletePassModal(false);
+                  setDeleteModal(false);
                   store.dispatch(setLoading(false));
                 }
               }
-              setIsDeletePassModal(false);
             }}
           />
         </div>

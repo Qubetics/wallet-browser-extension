@@ -1,43 +1,44 @@
 /* eslint-disable jsx-a11y/alt-text */
 /*global chrome*/
 
-import React from "react";
-import MenuRestofHeaders from "../../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders";
-import "./CrossChainDetials.scss";
-import ArrowDashedLine from "../../../Assets/arr.svg";
-import ButtonComp from "../../../Components/ButtonComp/ButtonComp";
-import { useLocation, useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
-import { useEffect } from "react";
-import { useRef } from "react";
-import { Web3Helper } from "../../../helpers/web3.helper";
-import { message } from "antd";
-import { useState } from "react";
-import ModalCustom from "../../../Components/ModalCustom/ModalCustom";
-import { ClipLoader } from "react-spinners";
-import { Loader } from "../../../Components/Loader/Loader";
-import { CrossChainHelper } from "../../../helpers/crosschain.helper";
-import { DURATION } from "../../../config/message.config";
-import InputFieldSimple from "../../../Components/InputField/InputFieldSimple";
-import DarkLogo from "../../../Assets/DarkLogo.svg";
-import Logo from "../../../Assets/logo.png";
-import { WalletHelper } from "../../../helpers/wallet.helper";
+import React from 'react';
+import MenuRestofHeaders from '../../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders';
+import './CrossChainDetials.scss';
+import ArrowDashedLine from '../../../Assets/arr.svg';
+import ButtonComp from '../../../Components/ButtonComp/ButtonComp';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { useEffect } from 'react';
+import { useRef } from 'react';
+import { Web3Helper } from '../../../helpers/web3.helper';
+import { message } from 'antd';
+import { useState } from 'react';
+import ModalCustom from '../../../Components/ModalCustom/ModalCustom';
+import { ClipLoader } from 'react-spinners';
+import { Loader } from '../../../Components/Loader/Loader';
+import { CrossChainHelper } from '../../../helpers/crosschain.helper';
+import { DURATION } from '../../../config/message.config';
+import InputFieldSimple from '../../../Components/InputField/InputFieldSimple';
+import DarkLogo from '../../../Assets/DarkLogo.svg';
+import Logo from '../../../Assets/logo.png';
+import { WalletHelper } from '../../../helpers/wallet.helper';
+import { SecurityHelper } from '../../../helpers/security.helper';
 
 function getFlooredFixed(v, d) {
   return (Math.floor(v * Math.pow(10, d)) / Math.pow(10, d)).toFixed(d);
 }
 
 function addCommasToNumber(number) {
-  var parts = number.toString().split(".");
+  var parts = number.toString().split('.');
   var integerPart = parts[0];
-  var decimalPart = parts[1] || ""; // Handle cases where there is no decimal part
+  var decimalPart = parts[1] || ''; // Handle cases where there is no decimal part
 
   // Add commas to the integer part
-  integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 
   // Combine the integer and decimal parts
-  if (decimalPart !== "") {
-    return integerPart + "." + decimalPart;
+  if (decimalPart !== '') {
+    return integerPart + '.' + decimalPart;
   } else {
     return integerPart;
   }
@@ -104,9 +105,12 @@ function CrossChainDetails() {
   }, []);
 
   const handleSwap = async () => {
-    console.log("🚀 ~ handleSwap ~ handleSwap:")
-    
+    console.log('🚀 ~ handleSwap ~ handleSwap:');
+
     setSwapModal(true);
+
+    // let { mnemonics } = await chrome.storage.local.get('mnemonics');
+    // mnemonics = await SecurityHelper.decrypt(mnemonics, sessionPassword);
 
     const data = await crossChainHelper.current.sendOrder(
       token1,
@@ -122,12 +126,12 @@ function CrossChainDetails() {
       coinSymbol,
       sessionPassword
     );
-    console.log("🚀 ~ handleSwap ~ data:", data)
+    console.log('🚀 ~ handleSwap ~ data:', data);
 
     if (!data) {
       setSwapModal(false);
       return messageApi.error(
-        "Unable to process your transaction at the moment. Please try again later."
+        'Unable to process your transaction at the moment. Please try again later.'
       );
     }
     setSwapModal(false);
@@ -138,7 +142,7 @@ function CrossChainDetails() {
     <div className={`scrollableCont`}>
       {loading ? <Loader /> : null}
       {contextHolder}
-      <MenuRestofHeaders backTo={"/swap"} title={"Swap"} />
+      <MenuRestofHeaders backTo={'/swap'} title={'Swap'} />
       <div className={`flexedContent`}>
         <div className="swapDetails">
           <div className="swapDetails__iconsTop swapDetails__iconsTop-specific">
@@ -149,21 +153,26 @@ function CrossChainDetails() {
                 <div
                   className="randb"
                   style={{
-                    height: "35px",
-                    width: "35px",
-                    background: "#fff",
-                    borderRadius: "50%",
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
+                    height: '35px',
+                    width: '35px',
+                    background: '#fff',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
                   }}
                 >
-                  {token1.symbol.split("")[0]}
+                  {token1.symbol.split('')[0]}
                 </div>
               )}
               <p style={{ margin: 0 }}>From</p>
             </div>
-            <img src={ArrowDashedLine} width={144} height={12} style={{ marginTop: 10 }} />
+            <img
+              src={ArrowDashedLine}
+              width={144}
+              height={12}
+              style={{ marginTop: 10 }}
+            />
             <div>
               {token2.image ? (
                 <img src={token2.image} width={30} height={30} />
@@ -171,16 +180,16 @@ function CrossChainDetails() {
                 <div
                   className="randb"
                   style={{
-                    height: "35px",
-                    width: "35px",
-                    background: "#fff",
-                    borderRadius: "50%",
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
+                    height: '35px',
+                    width: '35px',
+                    background: '#fff',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
                   }}
                 >
-                  {token2.symbol.split("")[0]}
+                  {token2.symbol.split('')[0]}
                 </div>
               )}
               <p style={{ margin: 0 }}>To</p>
@@ -190,41 +199,44 @@ function CrossChainDetails() {
             <p className="swapDetails__valueText__text swapDetails__valueText-specific-text">
               {/* <p style={{ margin: 0 }}>From</p> */}
               {/* <br /> */}
-              {addCommasToNumber(getFlooredFixed(parseFloat(amount), 6))}{" "}
+              {addCommasToNumber(getFlooredFixed(parseFloat(amount), 6))}{' '}
               {token1.symbol}
             </p>
             <p className="swapDetails__valueText__text swapDetails__valueText-specific-text">
               {/* <p style={{ margin: 0 }}>To</p> */}
-              {addCommasToNumber(getFlooredFixed(parseFloat(amount2), 4))}{" "}
+              {addCommasToNumber(getFlooredFixed(parseFloat(amount2), 4))}{' '}
               {token2.symbol}
             </p>
           </div>
           {/* <div className="swapDetails__border"></div> */}
-          <div className="swapDetails__address" style={{ marginTop: "16px" }}>
+          <div className="swapDetails__address" style={{ marginTop: '16px' }}>
             <p className="swapDetails__address__key">From</p>
             <p className="swapDetails__address__val">
               <sapn>{`${token1.address.substring(0, 8)}.....
           ${token1.address.substring(
-                token1.address.length - 8,
-                token1.address.length
-              )}`}</sapn>
+            token1.address.length - 8,
+            token1.address.length
+          )}`}</sapn>
             </p>
           </div>
           <div className="swapDetails__address">
             <p className="swapDetails__address__key">To</p>
             <p className="swapDetails__address__val">
               <sapn>
-                {" "}
+                {' '}
                 {`${token2.address.substring(0, 8)}.....
           ${token2.address.substring(
-                  token2.address.length - 8,
-                  token2.address.length
-                )}`}
+            token2.address.length - 8,
+            token2.address.length
+          )}`}
               </sapn>
             </p>
           </div>
           {/* <div className="swapDetails__border"></div> */}
-          <div className="swapDetails__keyValuesText" style={{ marginTop: "0" }}>
+          <div
+            className="swapDetails__keyValuesText"
+            style={{ marginTop: '0' }}
+          >
             <div className="swapDetails__keyValuesText__inner">
               <p className="swapDetails__keyValuesText__key">Type</p>
               <p className="swapDetails__keyValuesText__val">Cross-Chain</p>
@@ -232,8 +244,8 @@ function CrossChainDetails() {
             <div className="swapDetails__keyValuesText__inner">
               <p className="swapDetails__keyValuesText__key">Network Fee</p>
               <p className="swapDetails__keyValuesText__val">
-                {addCommasToNumber(getFlooredFixed(networkFee, 10))}{" "}
-                {tokenChain.currencySymbol} / ({currency.symbol}{" "}
+                {addCommasToNumber(getFlooredFixed(networkFee, 10))}{' '}
+                {tokenChain.currencySymbol} / ({currency.symbol}{' '}
                 {addCommasToNumber(
                   getFlooredFixed(parentCoin?.value * networkFee, 2)
                 )}
@@ -249,14 +261,14 @@ function CrossChainDetails() {
           </div>
           <ButtonComp
             onClick={() => setOpenmodal(true)}
-            text={"Swap"}
-            maxWidth={"100%"}
+            text={'Swap'}
+            maxWidth={'100%'}
           />
         </div>
       </div>
 
       <ModalCustom
-        title={"Swap Transaction"}
+        title={'Swap Transaction'}
         isModalOpen={swapModal}
         customClass="customClassModal"
       >
@@ -264,22 +276,22 @@ function CrossChainDetails() {
           <div
             className=""
             style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
             }}
           >
             <ClipLoader size={65} color="#00adee" />
             <div
               style={{
-                marginTop: "20px",
-                textAlign: "center",
+                marginTop: '20px',
+                textAlign: 'center',
               }}
             >
               <p
                 className="noAddress"
                 style={{
-                  textAlign: "center",
+                  textAlign: 'center',
                 }}
               >
                 Swap request sent. Waiting for blockchain confirmation.
@@ -290,7 +302,7 @@ function CrossChainDetails() {
       </ModalCustom>
 
       <ModalCustom
-        title={"Enter password"}
+        title={'Enter password'}
         handleCancel={handleCancel}
         isModalOpen={isModalOpen}
         handleOk={handleOk}
@@ -299,8 +311,8 @@ function CrossChainDetails() {
         <div className="viewphrases">
           <div
             style={{
-              marginBottom: "36px",
-              width: "100%",
+              marginBottom: '36px',
+              width: '100%',
             }}
           >
             <InputFieldSimple
@@ -321,8 +333,8 @@ function CrossChainDetails() {
           </div>
 
           <ButtonComp
-            text={"Proceed"}
-            maxWidth={"100%"}
+            text={'Proceed'}
+            maxWidth={'100%'}
             onClick={async () => {
               const isCorrectPassword = await WalletHelper.verifyPassword(
                 sessionPassword
@@ -344,30 +356,30 @@ function CrossChainDetails() {
         handleOk={handleOk1}
         customClass="customClassModal"
       >
-        <div className={"confirmationsModal"}>
-          <div className={"iInner"}>
-            {theme == "darkTheme" ? (
+        <div className={'confirmationsModal'}>
+          <div className={'iInner'}>
+            {theme == 'darkTheme' ? (
               <img src={DarkLogo} />
             ) : (
               <img
                 src={Logo}
                 style={{
-                  height: "100px",
+                  height: '100px',
                 }}
               />
             )}
             <div>
               <p>
-                Swap request of {addCommasToNumber(getFlooredFixed(amount, 5))}{" "}
+                Swap request of {addCommasToNumber(getFlooredFixed(amount, 5))}{' '}
                 {token1.symbol.toUpperCase()} has been processed successfully.
               </p>
             </div>
           </div>
           <ButtonComp
-            text={"OK"}
-            maxWidth={"100%"}
+            text={'OK'}
+            maxWidth={'100%'}
             onClick={() => {
-              return navigate("/wallet");
+              return navigate('/wallet');
             }}
           />
         </div>

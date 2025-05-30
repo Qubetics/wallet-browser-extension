@@ -828,11 +828,15 @@ export class WalletHelper {
           mnemonics = [mnemonics];
         }
       }
+
       const finalMnemonics = [
-        ...mnemonics,
+        ...mnemonics.map((mnemonics) => ({
+          ...mnemonics,
+          default: false,
+        })),
         {
           phrase: newMnemonics,
-          default: accounts?.length === 0 ? true : false,
+          default: true,
           address: address,
         },
       ];
@@ -897,7 +901,7 @@ export class WalletHelper {
       const finalAccounts = [
         ...accounts.map((account) => ({
           ...account,
-          default: false, // Set all existing accounts' default to false
+          default: false,
         })),
         {
           id,
@@ -1243,27 +1247,27 @@ export class WalletHelper {
   };
 
   static removeMnemonic = async (address, password) => {
-    console.log('REMOVE MNEMONICS:',password,address);
+    // console.log('REMOVE MNEMONICS:',password,address);
     const { mnemonics } = await chrome.storage.local.get('mnemonics');
 
-    console.log('FOUND MNEMONICS:', mnemonics);
+    // console.log('FOUND MNEMONICS:', mnemonics);
 
     if (mnemonics) {
 
       const decryptedMnemonics = SecurityHelper.decrypt(mnemonics, password);
 
       const mnemonicsList = JSON.parse(decryptedMnemonics);
-      console.log('FOUND mnemonicsList:', mnemonicsList);
+      // console.log('FOUND mnemonicsList:', mnemonicsList);
       const unmatchedMnemonic = mnemonicsList.filter(
         (mnemonic) => mnemonic.address.toLowerCase() !== address.toLowerCase()
       );
-      console.log('unmatchedMnemonic', unmatchedMnemonic);
+      // console.log('unmatchedMnemonic', unmatchedMnemonic);
       const encryptedAgain = SecurityHelper.encrypt(
         unmatchedMnemonic,
         password
       );
 
-      console.log('encryptedAgain', encryptedAgain);
+      // console.log('encryptedAgain', encryptedAgain);
 
       await chrome.storage.local.set({
         mnemonics: encryptedAgain,
@@ -1277,14 +1281,14 @@ export class WalletHelper {
 
   static deleteWallet = async (id, evmAddress) => {
     try {
-      console.log('DELETE WALLET:', id);
+      // console.log('DELETE WALLET:', id);
       const { accounts } = await chrome.storage.session.get('accounts');
 
-      console.log('accounts', accounts);
+      // console.log('accounts', accounts);
 
       const newAccounts = accounts.filter((el) => el.id !== id);
 
-      console.log('UPDATED ACCOUNTS:', newAccounts);
+      // console.log('UPDATED ACCOUNTS:', newAccounts);
 
       chrome.storage.local.set({
         accounts: newAccounts,

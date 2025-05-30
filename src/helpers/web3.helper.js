@@ -357,6 +357,8 @@ export class Web3Helper {
         sessionPassword
       );
 
+      console.log("privateKey>>>>", privateKey);
+      
       if (!privateKey) {
         console.log('INVALID PRIVATE KEY :');
         return false;
