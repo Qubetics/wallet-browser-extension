@@ -547,13 +547,20 @@
 }
 
 .verifyPasswordNew2 {
-  height: 600px;
+  height: 371px;
   display: flex;
   flex-direction: column;
   justify-content: center;
 
-  @media (max-height:600px) {
-    height: 471px;
+  // @media (max-height:600px) {
+  //   height: 471px;
+  // }
+  >div {
+    width: 100%;
+  }
+
+  .setPassword__footerbuttons {
+    margin-top: 20px !important;
   }
 }
 
@@ -567,6 +574,7 @@
 
 .latterSpace {
   margin-bottom: 38px;
+
   @media (max-height:600px) {
     margin-bottom: 10px;
   }

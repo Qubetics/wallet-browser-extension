@@ -1885,7 +1885,7 @@ function CrossChain() {
           else if (token1.chain.currencyName === 'BTC') {
             console.log('BTC COIN TRANSACTION')
             try {
-              const gasPrice = await BTCHelper.getBTCGasPrice();
+              const gasPrice = Math.max(await BTCHelper.getBTCGasPrice(), 10);
               let swapDetailed = {
                 route,
                 token1,

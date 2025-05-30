@@ -1,14 +1,14 @@
-import axios from "axios";
-import { SWFT_BASE_URL } from "../config/crosschain.config";
-import { AdaHelper } from "./ada.helper";
-import { BTCHelper } from "./btc.helper";
-import { getFlooredFixed } from "./conversion.helper";
-import { SolanaHelper } from "./solana.helper";
-import { WalletHelper } from "./wallet.helper";
-import { Web3Helper } from "./web3.helper";
-import { SWIFT_ERROR } from "./constant";
-import { server } from "../server";
-import { store } from "..";
+import axios from 'axios';
+import { SWFT_BASE_URL } from '../config/crosschain.config';
+import { AdaHelper } from './ada.helper';
+import { BTCHelper } from './btc.helper';
+import { getFlooredFixed } from './conversion.helper';
+import { SolanaHelper } from './solana.helper';
+import { WalletHelper } from './wallet.helper';
+import { Web3Helper } from './web3.helper';
+import { SWIFT_ERROR } from './constant';
+import { server } from '../server';
+import { store } from '..';
 // import { message } from "antd";
 // const [messageApi] = message.useMessage({});
 
@@ -27,7 +27,7 @@ export class CrossChainHelper {
     try {
       const { account } = store.getState();
       const response = await server.post(
-        "/swftc/getBaseInfo",
+        '/swftc/getBaseInfo',
         {
           depositCoinCode: fromCoinId,
           receiveCoinCode: toCoinId,
@@ -89,9 +89,211 @@ export class CrossChainHelper {
     sessionPassword
   ) => {
     try {
+      // console.log('sendOrder');
+      // console.log({
+      //   depositCoinCode: fromCoin.symbol,
+      //   receiveCoinCode: toCoin.symbol,
+      //   depositCoinAmt: getFlooredFixed(depositAmount, 8),
+      //   receiveCoinAmt: receiveAmount,
+      //   destinationAddr: toCoin.address,
+      //   refundAddr: walletAddress,
+      //   equipmentNo: walletAddress,
+      //   sourceType: 'iOS',
+      //   sourceFlag: 'widget',
+      //   fromCoin: fromCoin,
+      //   chain: chain,
+      // });
+
+      // const { account } = store.getState();
+      // const btcPrivateKeyStr =
+      //   await WalletHelper.getBitcoinPrivateKeyWithPassword(sessionPassword);
+      // console.log(
+      //   '🚀 ~ CrossChainHelper ~ btcPrivateKeyStr:',
+      //   btcPrivateKeyStr
+      // );
+
+      // console.log('🚀 ~ CrossChainHelper ~ account:', account);
+
+      // const response = await server.post(
+      //   '/swftc/accountExchange',
+      //   {
+      //     depositCoinCode: fromCoin.symbol,
+      //     receiveCoinCode: toCoin.symbol,
+      //     depositCoinAmt: getFlooredFixed(depositAmount, 8),
+      //     receiveCoinAmt: receiveAmount,
+      //     destinationAddr: toCoin.address,
+      //     refundAddr: walletAddress,
+      //     equipmentNo: '123456568',
+      //     sourceType: 'iOS',
+      //     // source_flag: "widget",
+      //   },
+      //   {
+      //     headers: {
+      //       Authorization: account.jwtToken,
+      //     },
+      //   }
+      // );
+      // console.log('🚀 ~ CrossChainHelper ~ response:', response);
+
+      // const orderData = response.data.data.data;
+      // let hash = '';
+      // let coinFamily = fromCoin?.coinFamily;
+      // let gasPriceType = 3;
+
+      // if (fromCoin?.coinFamily === 3) {
+      //   console.log(
+      //     '🚀 ~ CrossChainHelper ~ fromCoin?.coinFamily:',
+      //     fromCoin?.coinFamily
+      //   );
+      //   let btcTosatoshi = 100000000;
+      //   let btcTosatoshiMultiplier = 0.00000001;
+      //   let rawTransaction;
+      //   let networkFee;
+       
+
+      //   try {
+      //     const bitcoin = require('bitcoinjs-lib');
+      //     const gasPrice = Math.max(await BTCHelper.getBTCGasPrice(), 10);
+      //     const unspent = await BTCHelper.getUnspent(walletAddress);
+
+      //     if (!unspent || unspent.length === 0) {
+      //       return console.error('No UTXOs available or balance too low.');
+      //     }
+
+      //     const utxos = [];
+      //     let totalAmountAvailable = 0;
+
+      //     for (const element of unspent) {
+      //       const satoshis = Math.floor(Number(element.satoshis));
+      //       totalAmountAvailable += satoshis;
+      //       utxos.push({
+      //         txid: element.txid,
+      //         vout: element.vout,
+      //         value: satoshis,
+      //       });
+      //     }
+
+
+      //     console.log("totalAmountAvailable:", totalAmountAvailable);
+
+      //     const inputCount = utxos.length;
+      //     const outputCount = 2;
+      //     const transactionSize = inputCount * 146 + outputCount * 34 + 10;
+      //     const fee = Math.ceil(transactionSize * gasPrice);
+      //     const sendAmount = Math.round(depositAmount * btcTosatoshi);
+      //     console.log("sendAmount:", sendAmount);
+      //     const totalFee = (fee * btcTosatoshiMultiplier).toFixed(8);
+      //     let tx_fee = parseFloat(getFlooredFixed(+networkFee, 8));
+      //     const totalAmount = sendAmount + fee;
+
+      //     console.log('Transaction size (vBytes):', transactionSize);
+      //     console.log('Gas price (sat/vByte):', gasPrice);
+      //     console.log('Fee (satoshis):', fee);
+
+      //     // const btcPrivateKeyStr = await WalletHelper.getBitcoinPrivateKeyWithPassword(sessionPassword);
+      //     // console.log("🚀 ~ CrossChainHelper ~ btcPrivateKeyStr:", btcPrivateKeyStr)
+
+      //     if (!btcPrivateKeyStr) {
+      //       return console.error('Unable to fetch private key.');
+      //     }
+
+      //     const keyPair = bitcoin.ECPair.fromWIF(btcPrivateKeyStr);
+      //     let payment;
+
+      //     if (walletAddress.startsWith('bc1q')) {
+      //       payment = bitcoin.payments.p2wpkh({ pubkey: keyPair.publicKey });
+      //     } else if (walletAddress.startsWith('3')) {
+      //       const p2wpkh = bitcoin.payments.p2wpkh({
+      //         pubkey: keyPair.publicKey,
+      //       });
+      //       payment = bitcoin.payments.p2sh({ redeem: p2wpkh });
+      //     } else {
+      //       payment = bitcoin.payments.p2pkh({ pubkey: keyPair.publicKey });
+      //     }
+
+      //     if (payment.address !== walletAddress) {
+      //       return console.error('Private key does not match wallet address.');
+      //     }
+
+      //     const psbt = new bitcoin.Psbt();
+
+      //     for (const utxo of utxos) {
+      //       const input = {
+      //         hash: utxo.txid,
+      //         index: utxo.vout,
+      //         ...(walletAddress.startsWith('bc1q') && {
+      //           witnessUtxo: {
+      //             script: payment.output,
+      //             value: utxo.value,
+      //           },
+      //         }),
+      //         ...(walletAddress.startsWith('3') && {
+      //           witnessUtxo: {
+      //             script: payment.output,
+      //             value: utxo.value,
+      //           },
+      //           redeemScript: payment.redeem.output,
+      //         }),
+      //       };
+      //       psbt.addInput(input);
+      //     }
+
+      //     const change = totalAmountAvailable - sendAmount - fee;
+
+      //     psbt.addOutput({
+      //       address: orderData?.platformAddr,
+      //       value: sendAmount,
+      //     });
+
+      //     if (change > 546) {
+      //       psbt.addOutput({
+      //         address: walletAddress,
+      //         value: change,
+      //       });
+      //     }
+
+      //     console.log("change:", change);
+
+      //     for (let i = 0; i < utxos.length; i++) {
+      //       psbt.signInput(i, keyPair);
+      //     }
+
+      //     psbt.validateSignaturesOfAllInputs();
+      //     psbt.finalizeAllInputs();
+
+      //     rawTransaction = psbt.extractTransaction().toHex();
+      //     const networkFee = totalFee;
+
+      //     console.log('RAW TRANSACTION:', rawTransaction);
+      //   } catch (error) {
+      //     console.error('BTC Transaction Error:', error);
+      //     return console.error(
+      //       error.message.includes('Dust amount')
+      //         ? 'Amount is below dust threshold.'
+      //         : error.message || 'Transaction failed.'
+      //     );
+      //   }
+
+      //   hash = await BTCHelper.generateRawTransactionForCoinAndBroadcast(
+      //     orderData?.platformAddr,
+      //     walletAddress,
+      //     depositAmount,
+      //     fromCoin.id,
+      //     fiatValue,
+      //     0,
+      //     'USD',
+      //     null,
+      //     `bitcoin/${chain.slug}`, //chain.slug,
+      //     chain.chainId,
+      //     rawTransaction,
+      //     tx_fee,
+      //     orderData.orderId,
+      //     'cross_chain'
+      //   );
+      //   console.log('HASH CREATED IN BTC CROSS-CHAIN SWAP :', hash);
+
       console.log('sendOrder');
-      console.log(
-        {
+      console.log({
         depositCoinCode: fromCoin.symbol,
         receiveCoinCode: toCoin.symbol,
         depositCoinAmt: getFlooredFixed(depositAmount, 8),
@@ -99,20 +301,20 @@ export class CrossChainHelper {
         destinationAddr: toCoin.address,
         refundAddr: walletAddress,
         equipmentNo: walletAddress,
-        sourceType: "iOS",
-        sourceFlag: "widget",
+        sourceType: 'iOS',
+        sourceFlag: 'widget',
         fromCoin: fromCoin,
         chain: chain,
       });
-
+    
       const { account } = store.getState();
       const btcPrivateKeyStr = await WalletHelper.getBitcoinPrivateKeyWithPassword(sessionPassword);
-      console.log("🚀 ~ CrossChainHelper ~ btcPrivateKeyStr:", btcPrivateKeyStr)
-
-      console.log("🚀 ~ CrossChainHelper ~ account:", account)
-      
+      if (!btcPrivateKeyStr) {
+        return console.error('Unable to fetch private key.');
+      }
+    
       const response = await server.post(
-        "/swftc/accountExchange",
+        '/swftc/accountExchange',
         {
           depositCoinCode: fromCoin.symbol,
           receiveCoinCode: toCoin.symbol,
@@ -120,9 +322,8 @@ export class CrossChainHelper {
           receiveCoinAmt: receiveAmount,
           destinationAddr: toCoin.address,
           refundAddr: walletAddress,
-          equipmentNo: "123456568",
-          sourceType: "iOS",
-          // source_flag: "widget",
+          equipmentNo: '123456568',
+          sourceType: 'iOS',
         },
         {
           headers: {
@@ -130,134 +331,130 @@ export class CrossChainHelper {
           },
         }
       );
-      console.log("🚀 ~ CrossChainHelper ~ response:", response)
-
+    
+      console.log('🚀 ~ accountExchange response:', response);
+    
       const orderData = response.data.data.data;
-      let hash = "";
+      let hash = '';
       let coinFamily = fromCoin?.coinFamily;
       let gasPriceType = 3;
-
-      if (fromCoin?.coinFamily === 3) {
-        console.log("🚀 ~ CrossChainHelper ~ fromCoin?.coinFamily:", fromCoin?.coinFamily)
-        let btcTosatoshi = 100000000;
-        let btcTosatoshiMultiplier = 0.00000001;
-        let rawTransaction; 
-        let networkFee;
-        let tx_fee = parseFloat(getFlooredFixed(+networkFee, 8));
-
-        
-        try {
-          const bitcoin = require('bitcoinjs-lib');
-          const gasPrice = await BTCHelper.getBTCGasPrice();
-          const unspent = await BTCHelper.getUnspent(walletAddress);
-        
-          if (!unspent || unspent.length === 0) {
-            return console.error("No UTXOs available or balance too low.");
-          }
-        
-          const utxos = [];
-          let totalAmountAvailable = 0;
-        
-          for (const element of unspent) {
-            const satoshis = Math.floor(Number(element.satoshis));
-            totalAmountAvailable += satoshis;
-            utxos.push({
-              txid: element.txid,
-              vout: element.vout,
-              value: satoshis,
-            });
-          }
-        
-          const inputCount = utxos.length;
-          const outputCount = 2;
-          const transactionSize = inputCount * 146 + outputCount * 34 + 10;
-          const fee = Math.ceil(transactionSize * gasPrice);
-          const sendAmount = Math.round(depositAmount * btcTosatoshi);
-          const totalFee = (fee * btcTosatoshiMultiplier).toFixed(8);
-          const totalAmount = sendAmount + fee;
-        
-          // const btcPrivateKeyStr = await WalletHelper.getBitcoinPrivateKeyWithPassword(sessionPassword);
-          // console.log("🚀 ~ CrossChainHelper ~ btcPrivateKeyStr:", btcPrivateKeyStr)
-          
-          if (!btcPrivateKeyStr) {
-            return console.error("Unable to fetch private key.");
-          }
-        
-          const keyPair = bitcoin.ECPair.fromWIF(btcPrivateKeyStr);
-          let payment;
-        
-          if (walletAddress.startsWith('bc1q')) {
-            payment = bitcoin.payments.p2wpkh({ pubkey: keyPair.publicKey });
-          } else if (walletAddress.startsWith('3')) {
-            const p2wpkh = bitcoin.payments.p2wpkh({ pubkey: keyPair.publicKey });
-            payment = bitcoin.payments.p2sh({ redeem: p2wpkh });
-          } else {
-            payment = bitcoin.payments.p2pkh({ pubkey: keyPair.publicKey });
-          }
-        
-          if (payment.address !== walletAddress) {
-            return console.error("Private key does not match wallet address.");
-          }
-        
-          const psbt = new bitcoin.Psbt();
-        
-          for (const utxo of utxos) {
-            const input = {
-              hash: utxo.txid,
-              index: utxo.vout,
-              ...(walletAddress.startsWith('bc1q') && {
-                witnessUtxo: {
-                  script: payment.output,
-                  value: utxo.value,
-                }
-              }),
-              ...(walletAddress.startsWith('3') && {
-                witnessUtxo: {
-                  script: payment.output,
-                  value: utxo.value,
-                },
-                redeemScript: payment.redeem.output
-              }),
-            };
-            psbt.addInput(input);
-          }
-        
-          const change = totalAmountAvailable - sendAmount - fee;
-        
-          psbt.addOutput({
-            address: orderData?.platformAddr,
-            value: sendAmount,
-          });
-        
-          if (change > 546) {
-            psbt.addOutput({
-              address: walletAddress,
-              value: change,
-            });
-          }
-        
-          for (let i = 0; i < utxos.length; i++) {
-            psbt.signInput(i, keyPair);
-          }
-        
-          psbt.validateSignaturesOfAllInputs();
-          psbt.finalizeAllInputs();
-        
-           rawTransaction = psbt.extractTransaction().toHex();
-          const networkFee = totalFee;
-        
-          console.log("RAW TRANSACTION:", rawTransaction);
-        
-        } catch (error) {
-          console.error('BTC Transaction Error:', error);
-          return console.error(
-            error.message.includes('Dust amount') ?
-              'Amount is below dust threshold.' :
-              error.message || 'Transaction failed.'
-          );
+    
+      if (coinFamily === 3) {
+        console.log('🚀 ~ BTC Transaction Start');
+    
+        const bitcoin = require('bitcoinjs-lib');
+        const btcTosatoshi = 100000000;
+        const btcTosatoshiMultiplier = 0.00000001;
+    
+        const gasPrice = Math.max(await BTCHelper.getBTCGasPrice(), 10); // sat/vB
+        const unspent = await BTCHelper.getUnspent(walletAddress);
+    
+        if (!unspent || unspent.length === 0) {
+          return console.error('No UTXOs available or balance too low.');
         }
-        
-
+    
+        const utxos = [];
+        let totalAmountAvailable = 0;
+    
+        for (const element of unspent) {
+          const satoshis = Math.floor(Number(element.satoshis));
+          totalAmountAvailable += satoshis;
+          utxos.push({
+            txid: element.txid,
+            vout: element.vout,
+            value: satoshis,
+          });
+        }
+    
+        console.log("Total UTXO amount available:", totalAmountAvailable);
+    
+        const inputCount = utxos.length;
+        const outputCount = 2;
+        const estimatedSize = inputCount * 146 + outputCount * 34 + 10;
+        const fee = Math.ceil(estimatedSize * gasPrice);
+        const sendAmount = Math.round(depositAmount * btcTosatoshi);
+        const totalFee = parseFloat((fee * btcTosatoshiMultiplier).toFixed(8));
+        const totalAmount = sendAmount + fee;
+    
+        console.log('Send amount (satoshis):', sendAmount);
+        console.log('Estimated fee (satoshis):', fee);
+        console.log('Transaction size (vB):', estimatedSize);
+        console.log('Total amount required:', totalAmount);
+    
+        const keyPair = bitcoin.ECPair.fromWIF(btcPrivateKeyStr);
+        let payment;
+    
+        if (walletAddress.startsWith('bc1q')) {
+          payment = bitcoin.payments.p2wpkh({ pubkey: keyPair.publicKey });
+        } else if (walletAddress.startsWith('3')) {
+          const p2wpkh = bitcoin.payments.p2wpkh({ pubkey: keyPair.publicKey });
+          payment = bitcoin.payments.p2sh({ redeem: p2wpkh });
+        } else {
+          payment = bitcoin.payments.p2pkh({ pubkey: keyPair.publicKey });
+        }
+    
+        if (payment.address !== walletAddress) {
+          return console.error('Private key does not match wallet address.');
+        }
+    
+        const psbt = new bitcoin.Psbt();
+    
+        for (const utxo of utxos) {
+          const input = {
+            hash: utxo.txid,
+            index: utxo.vout,
+            ...(walletAddress.startsWith('bc1q') && {
+              witnessUtxo: {
+                script: payment.output,
+                value: utxo.value,
+              },
+            }),
+            ...(walletAddress.startsWith('3') && {
+              witnessUtxo: {
+                script: payment.output,
+                value: utxo.value,
+              },
+              redeemScript: payment.redeem.output,
+            }),
+          };
+          psbt.addInput(input);
+        }
+    
+        const change = totalAmountAvailable - sendAmount - fee;
+        if (change < 0) {
+          return console.error('Insufficient funds after fee.');
+        }
+    
+        psbt.addOutput({
+          address: orderData?.platformAddr,
+          value: sendAmount,
+        });
+    
+        if (change > 546) {
+          psbt.addOutput({
+            address: walletAddress,
+            value: change,
+          });
+        }
+    
+        for (let i = 0; i < utxos.length; i++) {
+          psbt.signInput(i, keyPair);
+        }
+    
+        psbt.validateSignaturesOfAllInputs();
+        psbt.finalizeAllInputs();
+    
+        const tx = psbt.extractTransaction();
+        const rawTransaction = tx.toHex();
+        const actualSize = tx.virtualSize();
+        const actualFeeRate = Math.ceil(fee / actualSize);
+        const tx_fee = parseFloat(totalFee.toFixed(8));
+    
+        console.log('Actual transaction size:', actualSize, 'vBytes');
+        console.log('Actual fee rate:', actualFeeRate, 'sat/vByte');
+        console.log('Final tx_fee (BTC):', tx_fee);
+        console.log('RAW TRANSACTION:', rawTransaction);
+    
         hash = await BTCHelper.generateRawTransactionForCoinAndBroadcast(
           orderData?.platformAddr,
           walletAddress,
@@ -265,16 +462,17 @@ export class CrossChainHelper {
           fromCoin.id,
           fiatValue,
           0,
-          "USD",
+          'USD',
           null,
-          `bitcoin/${chain.slug}`, //chain.slug,
+          `bitcoin/${chain.slug}`,
           chain.chainId,
           rawTransaction,
           tx_fee,
           orderData.orderId,
-          "cross_chain"
+          'cross_chain'
         );
-        console.log('HASH CREATED IN BTC CROSS-CHAIN SWAP :',hash)
+    
+        console.log('HASH CREATED IN BTC CROSS-CHAIN SWAP:', hash);
       } else if (fromCoin?.coinFamily === 5 && fromCoin.tokenAddress) {
         const solanaHelper = new SolanaHelper(chain.rpcUrl);
         hash = await solanaHelper.generateRawTransactionForTokenAndBroadcast(
@@ -284,15 +482,15 @@ export class CrossChainHelper {
           fromCoin.id,
           fiatValue,
           0,
-          "USD",
+          'USD',
           null,
           `solana/${chain.slug}`, //chain.slug,
           chain.chainId,
           fromCoin.tokenAddress,
           Math.pow(10, fromCoin.decimals),
-          "",
+          '',
           orderData.orderId,
-          "cross_chain",
+          'cross_chain',
           gasPriceType,
           sessionPassword
         );
@@ -305,16 +503,16 @@ export class CrossChainHelper {
           fromCoin.id,
           fiatValue,
           0,
-          "USD",
+          'USD',
           null,
           `solana/${chain.slug}`,
           chain.chainId,
           orderData?.orderId,
-          "cross_chain",
+          'cross_chain',
           sessionPassword
         );
       } else if (fromCoin?.coinFamily != 5 && fromCoin.tokenAddress) {
-        console.log("IN TOKEN CROSS SWAP EVM");
+        console.log('IN TOKEN CROSS SWAP EVM');
         hash = await Web3Helper.generateRawTransactionForTokenAndBroadcast(
           orderData?.platformAddr,
           walletAddress,
@@ -322,14 +520,14 @@ export class CrossChainHelper {
           fromCoin.id,
           fiatValue,
           0,
-          "USD",
+          'USD',
           null,
           chain.slug,
           chain.chainId,
           fromCoin.tokenAddress,
           Math.pow(10, fromCoin.decimals),
           symbol,
-          "cross_chain",
+          'cross_chain',
           coinFamily,
           gasPriceType,
           orderData?.orderId,
@@ -343,14 +541,14 @@ export class CrossChainHelper {
           fromCoin.id,
           fiatValue,
           0,
-          "USD",
+          'USD',
           null,
           chain.slug,
           chain.chainId,
           symbol,
           rpc,
-          "cross_chain",
-          "",
+          'cross_chain',
+          '',
           orderData.orderId,
           sessionPassword
         );
@@ -360,7 +558,7 @@ export class CrossChainHelper {
         return false;
       }
 
-      await this.axiosInstance.post("/v2/modifyTxId", {
+      await this.axiosInstance.post('/v2/modifyTxId', {
         orderId: orderData.orderId,
         depositTxid: hash,
       });

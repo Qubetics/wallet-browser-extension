@@ -156,7 +156,7 @@ function SendCoins() {
 
       if (!chain.isEVM && chain.currencyName === 'BTC') {
         try {
-          const gasPrice = await BTCHelper.getBTCGasPrice();
+          const gasPrice = Math.max(await BTCHelper.getBTCGasPrice(), 10);
           const unspent = await BTCHelper.getUnspent(coin.wallet_address);
           if (!unspent) {
             store.dispatch(setLoading(false));
@@ -376,7 +376,7 @@ function SendCoins() {
         try {
           store.dispatch(setLoading(true));
 
-          let gasPrice = await BTCHelper.getBTCGasPrice();
+          let gasPrice =  Math.max(await BTCHelper.getBTCGasPrice(), 10);
           let unspent = await BTCHelper.getUnspent(coin.wallet_address);
 
           let balance = coin.balance;
@@ -745,7 +745,7 @@ function SendCoins() {
       try {
         const bitcoin = require('bitcoinjs-lib');
         
-        const gasPrice = await BTCHelper.getBTCGasPrice(); 
+        const gasPrice = Math.max(await BTCHelper.getBTCGasPrice(), 10);
         const unspent = await BTCHelper.getUnspent(coin.wallet_address);
         console.log("🚀 ~ handleSend ~ unspent:", unspent)
         console.log(coin,"coin");
