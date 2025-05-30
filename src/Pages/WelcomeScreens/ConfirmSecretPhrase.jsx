@@ -68,7 +68,7 @@ function ConfirmSecretPhrase({
       >
         <span>Clear</span>
       </div>
-      <div className="setPassword__secretPhrase__latters">
+      <div className="setPassword__secretPhrase__latters latterSpace">
         <div
           className={`${'setPassword__secretPharse__confirmFieldSBgInner'} ${'setPassword__secretPharse__confirmFieldSBgInner'}`}
         >

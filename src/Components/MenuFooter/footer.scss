@@ -1,5 +1,6 @@
 @import "../../styles/__vars.scss";
 @import "../../styles/__mixins.scss";
+
 .menuItems {
   padding: 16px 25px;
   position: sticky;
@@ -10,6 +11,9 @@
   gap: 20px;
   background-color: #121117;
   border: 1px solid #1d1b1e;
+  border-bottom-right-radius: 10px;
+  border-bottom-left-radius: 10px;
+
   &__items {
     display: flex;
     flex-direction: column;
@@ -22,15 +26,18 @@
     color: $gray;
     text-decoration: none;
     transition: 0.3s all;
+
     &__active,
     &:hover {
-      > div {
+      >div {
         filter: none;
       }
+
       span {
         color: $baseText-00AEEF;
       }
     }
+
     &__img {
       filter: grayscale(1);
     }

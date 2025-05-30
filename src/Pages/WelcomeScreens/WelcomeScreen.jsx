@@ -59,7 +59,7 @@ function WelcomeScreen() {
         {/* <img src={MainLogo} alt="logo" /> */}
       </div>
 
-      <div className="cardWhite__linkOuter">
+      <div className="cardWhite__linkOuter bottomBtn">
         <Link
           className="cardWhite__linkOuter__lytblue"
           to={"/terms-policy"}
