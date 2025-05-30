@@ -103,7 +103,7 @@ function Send() {
           />
         </div>
       </div>
-      <div className={`flexedContent`}>
+      <div className={`flexedContent  sendSec`}>
         {tokens.filter((el) => el.balance > 0).length > 0 ? (
           <CoinsTable
             dataArray={tokens

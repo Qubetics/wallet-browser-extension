@@ -35,17 +35,19 @@ import { token_type } from "../../../helpers/constant";
 function CurrencyDetails() {
   const { currency, account } = useSelector((state) => state);
 
-
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const getLocation = useLocation();
 
-  const path = getLocation.pathname.replace('/', '');
+  const path = getLocation.pathname.replace("/", "");
 
   const navigate = useNavigate();
 
   const { state } = useLocation();
-  const { state: { coin }, ...rest } = useLocation();
+  const {
+    state: { coin },
+    ...rest
+  } = useLocation();
 
   // const { state } = useLocation();
 
@@ -56,42 +58,22 @@ function CurrencyDetails() {
   }, []);
 
   const showModal = () => {
-
     setIsModalOpen(true);
-
   };
 
   const handleOk = () => {
-
     setIsModalOpen(false);
-
   };
 
   const handleCancel = () => {
-
     setIsModalOpen(false);
-
   };
 
-
-
-
-
-
-
   const [isStared, setIsStared] = useState(
-
-    coin.coin.watchlist_data && coin.coin.watchlist_data.status === '1'
-
+    coin.coin.watchlist_data && coin.coin.watchlist_data.status === "1"
       ? true
-
       : false
-
   );
-
-
-
-
 
   const [messageApi, contextHolder] = message.useMessage({
     duration: DURATION,
@@ -145,7 +127,7 @@ function CurrencyDetails() {
         },
       }
     );
-    
+
     setHistory(transactionList?.data?.data);
   };
 
@@ -174,7 +156,7 @@ function CurrencyDetails() {
                   justifyContent: "center",
                   alignItems: "center",
                   border: "1px solid",
-                  color: "black"
+                  color: "black",
                 }}
               >
                 {coin?.coin?.coin_name &&
@@ -201,32 +183,43 @@ function CurrencyDetails() {
             let pay = {
               coin_id: coin?.coin?.coin_id,
               cmc_id: coin?.coin?.cmc_id,
-              coin_family: coin?.coin?.coin_family
-            }
+              coin_family: coin?.coin?.coin_family,
+            };
             chrome.tabs.create({
               // url: `https://trading-view.qubetics.work/?key=${coin?.coin?.graph_pair?.toUpperCase()}&item=${JSON.stringify(coin?.coin)}&account=${JSON.stringify(account)}`,
-              url: `https://trading-view.qubetics.work/?key=${encodeURIComponent(coin?.coin?.graph_pair?.toUpperCase())}&item=${encodeURIComponent(JSON.stringify(pay))}&account=${encodeURIComponent(JSON.stringify(account))}&wallet_address=${encodeURIComponent(coin?.wallet_address)}&token=${encodeURIComponent(account?.jwtToken)}&currency=${currency?.name}`,
+              url: `https://trading-view.qubetics.work/?key=${encodeURIComponent(
+                coin?.coin?.graph_pair?.toUpperCase()
+              )}&item=${encodeURIComponent(
+                JSON.stringify(pay)
+              )}&account=${encodeURIComponent(
+                JSON.stringify(account)
+              )}&wallet_address=${encodeURIComponent(
+                coin?.wallet_address
+              )}&token=${encodeURIComponent(account?.jwtToken)}&currency=${
+                currency?.name
+              }`,
             });
           } else {
-            return messageApi.error("Graph is not available for this asset.")
+            return messageApi.error("Graph is not available for this asset.");
           }
         }}
         // stared={() => {
         //   navigate("/watch-list-tokens");
         // }}
-        pairExist = {coin?.coin?.graph_pair}
+        pairExist={coin?.coin?.graph_pair}
         stared={async () => {
           try {
             await server.post(
-              'wallet/updateWatchlist',
+              "wallet/updateWatchlist",
               {
                 data: [
                   {
-                    address: coin.coin.coin_id === 3 ? coin.wallet_address : account.address,
+                    address:
+                      coin.coin.coin_id === 3
+                        ? coin.wallet_address
+                        : account.address,
                     coin_id: coin.coin.coin_id,
-                    status: coin?.coin?.watchlist_data?.status == '1'
-                      ? 0
-                      : 1,
+                    status: coin?.coin?.watchlist_data?.status == "1" ? 0 : 1,
                   },
                 ],
               },
@@ -236,10 +229,14 @@ function CurrencyDetails() {
                 },
               }
             );
-            messageApi.success(`${!isStared ? 'Added in' : "Removed from "} watchlist successfully`);
-            setIsStared(!isStared)
+            messageApi.success(
+              `${
+                !isStared ? "Added in" : "Removed from "
+              } watchlist successfully`
+            );
+            setIsStared(!isStared);
           } catch (error) {
-            messageApi.error('Unable to favourite the selected coin');
+            messageApi.error("Unable to favourite the selected coin");
           }
         }}
         isStared={isStared}
@@ -256,8 +253,9 @@ function CurrencyDetails() {
                   color: "#fff",
                 }}
               >
-
-                {coin?.coin?.token_address !== null ? token_type(coin?.coin?.coin_family) : 'Coin'}
+                {coin?.coin?.token_address !== null
+                  ? token_type(coin?.coin?.coin_family)
+                  : "Coin"}
                 {/* {coin.coin.coin_family === 1 ? "BEP20" : currDetails currencyCardcoin.coin.coin_family === 2 ? "ERC20" : coin.coin.coin_family === 4 ? "ERC20" : coin.coin.coin_family === 5 ? "SPL" : coin.coin.coin_family === 6 ? "TRC20" : ""} */}
               </p>
               <p
@@ -269,11 +267,11 @@ function CurrencyDetails() {
                 {currency.symbol}
                 {price
                   ? addCommasToNumber(
-                    getFlooredFixed(
-                      Number(price?.value),
-                      parseFloat(price?.value) < 1 ? 4 : 2
+                      getFlooredFixed(
+                        Number(price?.value),
+                        parseFloat(price?.value) < 1 ? 4 : 2
+                      )
                     )
-                  )
                   : "0.00"}{" "}
                 <span
                   style={{
@@ -300,10 +298,21 @@ function CurrencyDetails() {
                 </span>
               </p>
             </div>
-            <div style={{ textAlign: "center", margin: "12px auto", display: 'flex', justifyContent: 'center' }}>
-              {coin?.coin?.coin_image ?
-                <img style={{ height: 50, width: 50,borderRadius:'50%' }} src={coin?.coin?.coin_image} alt="usdt" />
-                :
+            <div
+              style={{
+                textAlign: "center",
+                margin: "12px auto",
+                display: "flex",
+                justifyContent: "center",
+              }}
+            >
+              {coin?.coin?.coin_image ? (
+                <img
+                  style={{ height: 50, width: 50, borderRadius: "50%" }}
+                  src={coin?.coin?.coin_image}
+                  alt="usdt"
+                />
+              ) : (
                 <div
                   className="randb extra borderDarkLight"
                   style={{
@@ -319,7 +328,7 @@ function CurrencyDetails() {
                 >
                   {coin?.coin?.coin_name?.split("")[0]}
                 </div>
-              }
+              )}
             </div>
             <CurrencyBalanceDetails
               mt0="currDetails__card__mt0"
@@ -342,7 +351,7 @@ function CurrencyDetails() {
           </div>
 
           {coin && (
-            <div className="editWallet__linkOuter">
+            <div className="editWallet__linkOuter shareIconaad">
               <InputField
                 value={account.coinFamilyAndAddress[coin.coin.coin_family]}
                 readonly={true}
@@ -352,7 +361,7 @@ function CurrencyDetails() {
                     style={{
                       display: "flex",
                       alignItems: "center",
-                      gap: "5px",
+                      gap: "10px",
                     }}
                   >
                     <img
@@ -370,12 +379,15 @@ function CurrencyDetails() {
                         messageApi.success("Address copied to clipboard");
                       }}
                     />
-                    {/* <img
+                    <img
                       src={ShareIcon}
+                      width={14}
+                      alt=""
+                      height={16}
                       style={{
                         cursor: "pointer",
                       }}
-                    /> */}
+                    />
                   </span>
                 }
               />
@@ -414,12 +426,14 @@ function CurrencyDetails() {
                     data.type === "dapp"
                       ? "Smart Contract"
                       : data.type === "deposit"
-                        ? "Received"
-                        : data.type === "withdraw"
-                          ? "Sent"
-                          : data.type.toLowerCase() === "swap"
-                            ? "Swap"
-                            : data.type.toLowerCase() === "cross_chain" ? "Cross Chain" : "Approve";
+                      ? "Received"
+                      : data.type === "withdraw"
+                      ? "Sent"
+                      : data.type.toLowerCase() === "swap"
+                      ? "Swap"
+                      : data.type.toLowerCase() === "cross_chain"
+                      ? "Cross Chain"
+                      : "Approve";
 
                   return (
                     <HistryList
@@ -444,9 +458,9 @@ function CurrencyDetails() {
                           ? name
                           : `${data?.to_adrs?.substring(0, 5)}.....
                       ${data?.to_adrs?.substring(
-                            data?.to_adrs?.length - 5,
-                            data?.to_adrs?.length
-                          )}`
+                        data?.to_adrs?.length - 5,
+                        data?.to_adrs?.length
+                      )}`
                       }
                       TickIcon={
                         transactionType === "Deposit" ? Deposit : Sendhistry
