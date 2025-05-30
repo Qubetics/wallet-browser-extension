@@ -1,8 +1,8 @@
 @import "../../styles/__vars.scss";
 @import "../../styles/__mixins.scss";
 .detailIcon {
-  height: 30px !important;
-  width: 30px !important;
+  height: 34px !important;
+  width: 34px !important;
   object-fit: contain;
   border-radius: 50%;
   &.currencyIcon {
@@ -16,7 +16,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 0px;
-  padding: 18px 11px 16px 11px;
+  padding: 13px;
   // padding-right: 20px;
   background-color: #18171f;
   margin-bottom: 6px;
@@ -59,7 +59,7 @@
     font-size: 16px;
     color: #ffffff;
     font-weight: bold;
-    margin-bottom: 3px;
+    margin-bottom: 0px;
     align-items: center;
     word-break: break-word;
     display: flex;

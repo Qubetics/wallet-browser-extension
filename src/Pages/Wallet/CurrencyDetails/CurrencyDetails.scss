@@ -73,7 +73,7 @@
         align-items: center;
         background-color: transparent;
         border-bottom: 1px solid #dce2f526;
-        padding: 16px 0 !important;
+        padding: 13px 0 !important;
         border-radius: 0 !important;
         margin-bottom: 0 !important;
         .Status {
@@ -150,5 +150,10 @@
         color: #fff !important;
       }
     }
+  }
+}
+.shareIconaad{
+  .ant-input-group-addon{
+    padding: 0 10px 0 15px ;
   }
 }

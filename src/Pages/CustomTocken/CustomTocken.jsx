@@ -131,7 +131,7 @@ function CustomToken() {
             symbol: null,
             decimals: null,
             image: null,
-          })
+          });
         }}
         style={{
           width: "100",
@@ -192,9 +192,7 @@ function CustomToken() {
       console.log("~ CustomToken.jsx ~ 191 :", error);
 
       store.dispatch(setLoading(false));
-      return messageApi.error(
-        "Please enter a valid address."
-      );
+      return messageApi.error("Please enter a valid address.");
     }
   };
 
@@ -202,8 +200,8 @@ function CustomToken() {
     <div className={`scrollableCont`}>
       {contextHolder}
       <MenuRestofHeaders
-        backTo={state ? (state.swap ? '/swap' : '/wallet') : '/wallet'}
-        title={'Add Custom Token'}
+        backTo={state ? (state.swap ? "/swap" : "/wallet") : "/wallet"}
+        title={"Add Custom Token"}
         // manage={state ? (state.swap ? '/swap' : '/wallet') : '/manage'}
       />
       <div className={`flexedContent`}>
@@ -316,7 +314,10 @@ function CustomToken() {
             checkForSymbols={true}
           />
 
-          <div className={style.token__symbol_dec}style={{display:"flex",gap:"20px"}}>
+          <div
+            className={style.token__symbol_dec}
+            style={{ display: "flex", gap: "20px" }}
+          >
             <InputFieldOnly
               label="Symbol"
               placeholder="Symbol"
@@ -400,16 +401,15 @@ function CustomToken() {
                     },
                   }
                 );
-                setDisabled(true)
+                setDisabled(true);
                 store.dispatch(setLoading(false));
 
                 messageApi.success(resp?.data?.message);
-                 
+
                 setTimeout(() => {
-                  navigate('/wallet');
+                  navigate("/wallet");
                 }, 3000);
               } catch (error) {
-                 
                 store.dispatch(setLoading(false));
 
                 const errorMessage = error?.response?.data?.message;
@@ -422,8 +422,14 @@ function CustomToken() {
               }
             }}
           >
-            {' '}
-            <ButtonComp disabled={disabled} text={'Add Token'} maxWidth={'100%'} />
+            {" "}
+            <div className="bottomBtn">
+              <ButtonComp
+                disabled={disabled}
+                text={"Add Token"}
+                maxWidth={"100%"}
+              />
+            </div>
           </Link>
         </div>
       </div>
@@ -666,7 +672,7 @@ function CustomToken() {
                 }
                 return navigate("/wallet");
               } catch (error) {
-                console.log('~ CustomToken.jsx ~ error ~ 668 : ',error)
+                console.log("~ CustomToken.jsx ~ error ~ 668 : ", error);
                 store.dispatch(setLoading(false));
                 const errorMessage = error?.response?.data?.message;
                 if (typeof errorMessage === "string") {
@@ -822,7 +828,7 @@ function CustomToken() {
                 messageApi.success("Token added successfully.");
                 return navigate("/wallet");
               } catch (error) {
-                console.log('~ customtoken.jsx ~ 825 ~ error :');
+                console.log("~ customtoken.jsx ~ 825 ~ error :");
                 store.dispatch(setLoading(false));
 
                 const errorMessage = error?.response?.data?.message;

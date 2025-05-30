@@ -150,8 +150,8 @@ function FilterHistory() {
                               <div
                                 className="randb  borderDarkLight"
                                 style={{
-                                  height: "35px",
-                                  width: "35px",
+                                  height: "26px",
+                                  width: "26px",
                                   border: "1.5px solid",
                                   borderRadius: "50%",
                                   display: "flex",
@@ -305,7 +305,7 @@ function FilterHistory() {
                 onChange={(value) => {
                   // console.log("CCCCCCCCCCC ", value.format("YYYY-MM-DD"), " ----- ", value);
                   // console.log("daysssss ", dayjs(value).format("YYYY-MM-DD"));
-                  
+
                   setFilterValue({
                     ...filterValue,
                     fromDate: value ? dayjs(value).format("YYYY-MM-DD") : null,
@@ -348,7 +348,7 @@ function FilterHistory() {
             </div>
           </div>
         </div>
-        <div className={"filterHistory__selctHis bottomBtn"}>
+        <div className={" bottomBtn"}>
           <ButtonComp
             text={"Apply"}
             maxWidth={"352px"}

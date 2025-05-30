@@ -26,20 +26,15 @@
     color: $gray;
     text-decoration: none;
     transition: 0.3s all;
+  }
+}
 
-    &__active,
-    &:hover {
-      >div {
-        filter: none;
+.itemsActive {
+  .img {
+    svg {
+      path {
+        fill: #fff;
       }
-
-      span {
-        color: $baseText-00AEEF;
-      }
-    }
-
-    &__img {
-      filter: grayscale(1);
     }
   }
 }

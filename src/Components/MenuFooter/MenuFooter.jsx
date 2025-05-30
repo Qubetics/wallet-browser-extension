@@ -1,11 +1,18 @@
 import React from "react";
 import "./footer.scss";
-import WalletIcon from "../../Assets/walletIcon.svg";
-import AlertIcon from "../../Assets/Alerts.svg";
-import SettignIcon from "../../Assets/SettignIcon.svg";
+// import WalletIcon from "../../Assets/walletIcon.svg";
+// import AlertIcon from "../../Assets/Alerts.svg";
+// import SettignIcon from "../../Assets/SettignIcon.svg";
 import { Link, useLocation } from "react-router-dom";
-import Browser from "../../Assets/broswer.svg";
-import portfolioIcon from "../../Assets/portfolioIcon.svg";
+// import Browser from "../../Assets/broswer.svg";
+// import portfolioIcon from "../../Assets/portfolioIcon.svg";
+import {
+  AlertsIcon,
+  BrowserIcon,
+  PortfolioIcon,
+  SettignIcon,
+  WalletIcon,
+} from "../../Assets/SvgImg.jsx";
 
 function MenuFooter() {
   const getLocation = useLocation();
@@ -24,50 +31,53 @@ function MenuFooter() {
           }
           // onClick={() => setactiveLink("wallet")}
           className={`${"menuItems__items"} ${
-            path === "wallet" ? "menuItems__items__active" : ""
+            path === "wallet" ? "itemsActive" : ""
           }`}
         >
-          <div className="menuItems__items__img">
-            <img src={WalletIcon} />
+          <div className="img">
+            {/* <img src={WalletIcon} /> */}
+            <WalletIcon />
           </div>
-          {/* <span className='menuItems__items__title'>Wallets</span> */}
+          {/* <span className='title'>Wallets</span> */}
         </Link>
         <Link
           to="/swap"
           // onClick={() => setactiveLink("defi")}
-          className={`${"menuItems__items"} ${
-            path === "swap" ? "menuItems__items__active" : ""
-          }`}
+          className={`${"menuItems__items"} ${path === "swap" ? "itemsActive" : ""}`}
         >
-          <div className="menuItems__items__img">
-            <img src={AlertIcon} />
+          <div className="img">
+            {/* <img src={AlertIcon} /> */}
+
+            <AlertsIcon />
           </div>
-          {/* <span className='menuItems__items__title'>Swap</span> */}
+          {/* <span className='title'>Swap</span> */}
         </Link>
         <Link
           to="/portfolio"
           // onClick={() => setactiveLink("setting")}
           className={`${"menuItems__items"} ${
-            path === "portfolio" ? "menuItems__items__active" : ""
+            path === "portfolio" ? "itemsActive" : ""
           }`}
         >
-          <div className="menuItems__items__img">
-            <img src={portfolioIcon} />
+          <div className="img">
+            {/* <img src={portfolioIcon} /> */}
+            <PortfolioIcon />
           </div>
-          {/* <span className='menuItems__items__title'>Portfolio</span> */}
+          {/* <span className='title'>Portfolio</span> */}
         </Link>
         <Link
           to="/conectswapedApp"
           // onClick={() => setactiveLink("defi")}
           className={`${"menuItems__items"} ${
-            path === "conectswapedApp" ? "menuItems__items__active" : ""
+            path === "conectswapedApp" ? "itemsActive" : ""
           }`}
         >
-          <div className="menuItems__items__img">
-            <img src={Browser} />
+          <div className="img">
+            {/* <img src={Browser} /> */}
+            <BrowserIcon />
           </div>
           {/* <span
-            className='menuItems__items__title'
+            className='title'
             style={{
               position: 'relative',
               top: '4px',
@@ -81,13 +91,14 @@ function MenuFooter() {
           to="/setting"
           // onClick={() => setactiveLink("setting")}
           className={`${"menuItems__items"} ${
-            path === "setting" ? "menuItems__items__active" : ""
+            path === "setting" ? "itemsActive" : ""
           }`}
         >
-          <div className="menuItems__items__img">
-            <img src={SettignIcon} />
+          <div className="img">
+            {/* <img src={SettignIcon} /> */}
+            <SettignIcon />
           </div>
-          {/* <span className='menuItems__items__title'>Settings</span> */}
+          {/* <span className='title'>Settings</span> */}
         </Link>
       </div>
     </>
