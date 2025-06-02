@@ -105,13 +105,7 @@ function CrossChainDetails() {
   }, []);
 
   const handleSwap = async () => {
-    console.log('🚀 ~ handleSwap ~ handleSwap:');
-
     setSwapModal(true);
-
-    // let { mnemonics } = await chrome.storage.local.get('mnemonics');
-    // mnemonics = await SecurityHelper.decrypt(mnemonics, sessionPassword);
-
     const data = await crossChainHelper.current.sendOrder(
       token1,
       token2,
@@ -126,7 +120,6 @@ function CrossChainDetails() {
       coinSymbol,
       sessionPassword
     );
-    console.log('🚀 ~ handleSwap ~ data:', data);
 
     if (!data) {
       setSwapModal(false);

@@ -24,7 +24,9 @@ function ShowPrivateKey() {
   const { loading  } = useSelector((state)=> state?.loading);
 
   const init = async () => {
-    const { privateKey } = await WalletHelper.getPrivateKeyWithPassword(password);
+
+    console.log('account, password',account, password)
+    const { privateKey } = await WalletHelper.getPrivateKeyWithPassword(account,password);
     setAddress(privateKey || '');
   };
 

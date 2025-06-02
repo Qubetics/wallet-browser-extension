@@ -187,7 +187,7 @@ function App() {
     const { password } = await chrome?.storage?.session.get("password");
 
     if (password) {
-      await WalletHelper.generateAndSetWalletToRefreshToken();
+      await WalletHelper.generateAndSetWalletToRefreshToken(password);
     }
 
     const { accounts } = await chrome?.storage?.session.get("accounts");

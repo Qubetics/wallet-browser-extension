@@ -133,7 +133,7 @@ function PortfolioWatchList() {
             </div>
           </div>
         </div> */}
-        <div>
+        <>
           {(state?.nft ? list : tokens.filter((token) => token.watchlist_data))
             .length > 0 ? (
             <CoinsTable
@@ -231,7 +231,7 @@ function PortfolioWatchList() {
               </p>
             </div>
           )}
-        </div>
+        </>
       </div>
       <div style={{ marginTop: '15px' }}>
         <ButtonComp

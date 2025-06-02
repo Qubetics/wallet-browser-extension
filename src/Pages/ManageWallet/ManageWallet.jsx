@@ -136,6 +136,7 @@ function ManageWallet() {
         }
         return el;
       });
+      console.log("🚀 ~ updatesMnemonics ~ updatesMnemonics:", updatesMnemonics)
       const encryptedMnemonics = await SecurityHelper.encrypt(
         updatesMnemonics,
         sessionPassword
@@ -167,7 +168,7 @@ function ManageWallet() {
   };
 
   const handleShowPrivateKey = async (password) => {
-    // console.log('PASSWORD ENTER TO SHOW PRIVATE KEY :',password)
+    console.log('PASSWORD ENTER TO SHOW PRIVATE KEY :',password)
     const res = await WalletHelper.verifyPassword(password);
     if (!res) {
       return messageApi.error('Invalid Password');

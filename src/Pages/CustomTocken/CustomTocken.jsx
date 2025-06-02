@@ -204,7 +204,7 @@ function CustomToken() {
         title={"Add Custom Token"}
         // manage={state ? (state.swap ? '/swap' : '/wallet') : '/manage'}
       />
-      <div className={`flexedContent`}>
+      <div className={`flexedContent tokenHeight`}>
         <div className="warrningMsg">
           <img src={info} alt="" />
           <p>

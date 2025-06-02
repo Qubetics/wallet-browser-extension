@@ -433,6 +433,10 @@ body::-webkit-scrollbar {
   font-size: 12px;
   font-weight: bold;
   color: $white !important;
+
+  @media (max-height:600px) {
+    margin-top: 5px !important;
+  }
 }
 
 .ant-select-dropdown {

@@ -352,8 +352,8 @@ export class Web3Helper {
 
     try {
       const { account } = store.getState();
-
-      const { privateKey } = await WalletHelper.getPrivateKeyEvm(
+      const { privateKey } = await WalletHelper.getPrivateKeyWithPassword(
+        account,
         sessionPassword
       );
 
@@ -397,7 +397,6 @@ export class Web3Helper {
 
       
       if (totalAmount > balance) {
-        
         return false;
       }
 
@@ -450,7 +449,7 @@ export class Web3Helper {
       return response.data.tx_hash;
     } catch (error) {
       console.log('error occure----> ', error);
-      return false;
+      return error;
     }
   };
 
