@@ -1,36 +1,36 @@
 /*global chrome*/
 
-import React, { useEffect, useState } from "react";
-import MenuRestofHeaders from "../../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders";
-import "./CurrencyDetails.scss";
-import BalanceDetails from "../../../Components/BalanceDetails/BalanceDetails";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { message } from "antd";
-import { useSelector } from "react-redux";
-import { DURATION } from "../../../config/message.config";
+import React, { useEffect, useState } from 'react';
+import MenuRestofHeaders from '../../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders';
+import './CurrencyDetails.scss';
+import BalanceDetails from '../../../Components/BalanceDetails/BalanceDetails';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { message } from 'antd';
+import { useSelector } from 'react-redux';
+import { DURATION } from '../../../config/message.config';
 import {
   addCommasToNumber,
   balanceToFiatConversion,
   getFlooredFixed,
-} from "../../../helpers/conversion.helper";
-import { server } from "../../../server";
-import HistryList from "../../../Components//HistryList/HistryList";
-import Sendhistry from "../../../Assets/sendhistry.svg";
-import Deposit from "../../../Assets/deposit.svg";
-import FilterIcon from "../../../Assets/Filtericon.svg";
-import { store } from "../../..";
-import { setFilter } from "../../../actions/filter";
-import DarkFilterIcon from "../../../Assets/DarkFilterIcon.svg";
-import * as moment from "moment";
+} from '../../../helpers/conversion.helper';
+import { server } from '../../../server';
+import HistryList from '../../../Components//HistryList/HistryList';
+import Sendhistry from '../../../Assets/sendhistry.svg';
+import Deposit from '../../../Assets/deposit.svg';
+import FilterIcon from '../../../Assets/Filtericon.svg';
+import { store } from '../../..';
+import { setFilter } from '../../../actions/filter';
+import DarkFilterIcon from '../../../Assets/DarkFilterIcon.svg';
+import * as moment from 'moment';
 import {
   InputField,
   InputFieldOnly,
-} from "../../../Components/InputField/InputFieldSimple";
-import CopyIcon from "../../../Assets/CopyIconBlue.svg";
-import ShareIcon from "../../../Assets/ShareIcon.png";
-import usdt from "../../../Assets/Coins/usdt.svg";
-import CurrencyBalanceDetails from "./CurrencyBalance";
-import { token_type } from "../../../helpers/constant";
+} from '../../../Components/InputField/InputFieldSimple';
+import CopyIcon from '../../../Assets/CopyIconBlue.svg';
+import ShareIcon from '../../../Assets/ShareIcon.png';
+import usdt from '../../../Assets/Coins/usdt.svg';
+import CurrencyBalanceDetails from './CurrencyBalance';
+import { token_type } from '../../../helpers/constant';
 
 function CurrencyDetails() {
   const { currency, account } = useSelector((state) => state);
@@ -39,7 +39,7 @@ function CurrencyDetails() {
 
   const getLocation = useLocation();
 
-  const path = getLocation.pathname.replace("/", "");
+  const path = getLocation.pathname.replace('/', '');
 
   const navigate = useNavigate();
 
@@ -70,7 +70,7 @@ function CurrencyDetails() {
   };
 
   const [isStared, setIsStared] = useState(
-    coin.coin.watchlist_data && coin.coin.watchlist_data.status === "1"
+    coin.coin.watchlist_data && coin.coin.watchlist_data.status === '1'
       ? true
       : false
   );
@@ -86,11 +86,11 @@ function CurrencyDetails() {
     if (!state.status) {
       store.dispatch(
         setFilter({
-          coinId: "all",
-          status: "all",
+          coinId: 'all',
+          status: 'all',
           fromDate: null,
           toDate: null,
-          type: "all",
+          type: 'all',
         })
       );
     }
@@ -105,18 +105,18 @@ function CurrencyDetails() {
         page: 1,
         limit: 250,
         status: state
-          ? state.status === "all"
+          ? state.status === 'all'
             ? undefined
             : state.status
           : undefined,
         date_from: state
           ? state.fromDate
-            ? moment(state.fromDate).format("YYYY-MM-DD") //moment(state.fromDate).startOf("day")
+            ? moment(state.fromDate).format('YYYY-MM-DD') //moment(state.fromDate).startOf("day")
             : undefined
           : undefined,
         date_to: state
           ? state.toDate
-            ? moment(state.toDate).format("YYYY-MM-DD") //moment(state.toDate).endOf("day")
+            ? moment(state.toDate).format('YYYY-MM-DD') //moment(state.toDate).endOf("day")
             : undefined
           : undefined,
         trnx_type: state ? (state.type ? state.type : undefined) : undefined,
@@ -139,41 +139,41 @@ function CurrencyDetails() {
     <div className={`scrollableCont`}>
       {contextHolder}
       <MenuRestofHeaders
-        backTo={"/wallet"}
+        backTo={'/wallet'}
         title={
-          <span style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             {coin.coin.coin_image ? (
               <img src={coin?.coin?.coin_image} className="detailIcon" alt="" />
             ) : (
               <div
                 className="randb extra borderDarkLight"
                 style={{
-                  height: "35px",
-                  width: "35px",
-                  background: "rgb(202, 201, 201)",
-                  borderRadius: "50%",
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  border: "1px solid",
-                  color: "black",
+                  height: '35px',
+                  width: '35px',
+                  background: 'rgb(202, 201, 201)',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  border: '1px solid',
+                  color: 'black',
                 }}
               >
                 {coin?.coin?.coin_name &&
-                  coin?.coin?.coin_name?.split("")[0]?.toUpperCase()}
+                  coin?.coin?.coin_name?.split('')[0]?.toUpperCase()}
               </div>
             )}
             <p
               style={{
-                maxWidth: "200px",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
+                maxWidth: '200px',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
               }}
             >
-              {" "}
+              {' '}
               {coin.coin.coin_symbol &&
-                (coin?.coin?.coin_symbol?.toUpperCase() === "BNB"
-                  ? "BNB Smart Chain"
+                (coin?.coin?.coin_symbol?.toUpperCase() === 'BNB'
+                  ? 'BNB Smart Chain'
                   : coin?.coin?.coin_symbol?.toUpperCase())}
             </p>
           </span>
@@ -200,7 +200,7 @@ function CurrencyDetails() {
               }`,
             });
           } else {
-            return messageApi.error("Graph is not available for this asset.");
+            return messageApi.error('Graph is not available for this asset.');
           }
         }}
         // stared={() => {
@@ -208,18 +208,20 @@ function CurrencyDetails() {
         // }}
         pairExist={coin?.coin?.graph_pair}
         stared={async () => {
+          console.log('coin?.coin', coin, account);
           try {
             await server.post(
-              "wallet/updateWatchlist",
+              'wallet/updateWatchlist',
               {
                 data: [
                   {
                     address:
-                      coin.coin.coin_id === 3
+                      coin?.coin?.coin_family === 3 ||
+                      coin?.coin?.coin_family === 5
                         ? coin.wallet_address
                         : account.address,
                     coin_id: coin.coin.coin_id,
-                    status: coin?.coin?.watchlist_data?.status == "1" ? 0 : 1,
+                    status: coin?.coin?.watchlist_data?.status == '1' ? 0 : 1,
                   },
                 ],
               },
@@ -231,12 +233,12 @@ function CurrencyDetails() {
             );
             messageApi.success(
               `${
-                !isStared ? "Added in" : "Removed from "
+                !isStared ? 'Added in' : 'Removed from '
               } watchlist successfully`
             );
             setIsStared(!isStared);
           } catch (error) {
-            messageApi.error("Unable to favourite the selected coin");
+            messageApi.error('Unable to favourite the selected coin');
           }
         }}
         isStared={isStared}
@@ -250,18 +252,18 @@ function CurrencyDetails() {
               <p
                 className="currDetails__card__text"
                 style={{
-                  color: "#fff",
+                  color: '#fff',
                 }}
               >
                 {coin?.coin?.token_address !== null
                   ? token_type(coin?.coin?.coin_family)
-                  : "Coin"}
+                  : 'Coin'}
                 {/* {coin.coin.coin_family === 1 ? "BEP20" : currDetails currencyCardcoin.coin.coin_family === 2 ? "ERC20" : coin.coin.coin_family === 4 ? "ERC20" : coin.coin.coin_family === 5 ? "SPL" : coin.coin.coin_family === 6 ? "TRC20" : ""} */}
               </p>
               <p
                 className="currDetails__card__text"
                 style={{
-                  color: "#fff",
+                  color: '#fff',
                 }}
               >
                 {currency.symbol}
@@ -272,20 +274,20 @@ function CurrencyDetails() {
                         parseFloat(price?.value) < 1 ? 4 : 2
                       )
                     )
-                  : "0.00"}{" "}
+                  : '0.00'}{' '}
                 <span
                   style={{
                     color:
                       parseFloat(price?.price_change_percentage_24h) <= 0
-                        ? "red"
-                        : "lightgreen",
+                        ? 'red'
+                        : 'lightgreen',
                   }}
                 >
                   {parseFloat(
                     price?.price_change_percentage_24h || 0
                   ).toLocaleString() <= 0
-                    ? ""
-                    : "+"}
+                    ? ''
+                    : '+'}
                   {getFlooredFixed(
                     price
                       ? price?.price_change_percentage_24h
@@ -300,15 +302,15 @@ function CurrencyDetails() {
             </div>
             <div
               style={{
-                textAlign: "center",
-                margin: "12px auto",
-                display: "flex",
-                justifyContent: "center",
+                textAlign: 'center',
+                margin: '12px auto',
+                display: 'flex',
+                justifyContent: 'center',
               }}
             >
               {coin?.coin?.coin_image ? (
                 <img
-                  style={{ height: 50, width: 50, borderRadius: "50%" }}
+                  style={{ height: 50, width: 50, borderRadius: '50%' }}
                   src={coin?.coin?.coin_image}
                   alt="usdt"
                 />
@@ -316,17 +318,17 @@ function CurrencyDetails() {
                 <div
                   className="randb extra borderDarkLight"
                   style={{
-                    height: "30px",
-                    width: "30px",
-                    background: "rgb(202, 201, 201)",
-                    borderRadius: "50%",
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    border: "1px solid",
+                    height: '30px',
+                    width: '30px',
+                    background: 'rgb(202, 201, 201)',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    border: '1px solid',
                   }}
                 >
-                  {coin?.coin?.coin_name?.split("")[0]}
+                  {coin?.coin?.coin_name?.split('')[0]}
                 </div>
               )}
             </div>
@@ -359,9 +361,9 @@ function CurrencyDetails() {
                 addonAfter={
                   <span
                     style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "10px",
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '10px',
                     }}
                   >
                     <img
@@ -370,13 +372,13 @@ function CurrencyDetails() {
                       alt=""
                       height={16}
                       style={{
-                        cursor: "pointer",
+                        cursor: 'pointer',
                       }}
                       onClick={() => {
                         navigator.clipboard.writeText(
                           account.coinFamilyAndAddress[coin.coin.coin_family]
                         );
-                        messageApi.success("Address copied to clipboard");
+                        messageApi.success('Address copied to clipboard');
                       }}
                     />
                     <img
@@ -385,7 +387,7 @@ function CurrencyDetails() {
                       alt=""
                       height={16}
                       style={{
-                        cursor: "pointer",
+                        cursor: 'pointer',
                       }}
                     />
                   </span>
@@ -423,17 +425,17 @@ function CurrencyDetails() {
                   const price = data?.coin_data?.fiat_price_data;
 
                   let transactionType =
-                    data.type === "dapp"
-                      ? "Smart Contract"
-                      : data.type === "deposit"
-                      ? "Received"
-                      : data.type === "withdraw"
-                      ? "Sent"
-                      : data.type.toLowerCase() === "swap"
-                      ? "Swap"
-                      : data.type.toLowerCase() === "cross_chain"
-                      ? "Cross Chain"
-                      : "Approve";
+                    data.type === 'dapp'
+                      ? 'Smart Contract'
+                      : data.type === 'deposit'
+                      ? 'Received'
+                      : data.type === 'withdraw'
+                      ? 'Sent'
+                      : data.type.toLowerCase() === 'swap'
+                      ? 'Swap'
+                      : data.type.toLowerCase() === 'cross_chain'
+                      ? 'Cross Chain'
+                      : 'Approve';
 
                   return (
                     <HistryList
@@ -463,13 +465,13 @@ function CurrencyDetails() {
                       )}`
                       }
                       TickIcon={
-                        transactionType === "Deposit" ? Deposit : Sendhistry
+                        transactionType === 'Deposit' ? Deposit : Sendhistry
                       }
                       def={currency.symbol}
                       allData={data}
                       coin={coin}
                       date={moment(data.created_at).format(
-                        "DD, MMM YYYY | hh:mm A"
+                        'DD, MMM YYYY | hh:mm A'
                       )}
                       coinNameNotShow={true}
                     />
@@ -479,9 +481,9 @@ function CurrencyDetails() {
                 <p
                   className="noAddress"
                   style={{
-                    marginTop: "24%",
-                    fontWeight: "bold",
-                    fontSize: "15px",
+                    marginTop: '24%',
+                    fontWeight: 'bold',
+                    fontSize: '15px',
                   }}
                 >
                   No Transactions Found...

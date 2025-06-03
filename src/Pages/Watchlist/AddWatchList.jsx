@@ -175,6 +175,7 @@ function AddWatchList() {
                 status: true,
                 coin: token,
                 watch: async () => {
+                  console.log('coin?.coin', token, account);
                   try {
                     await server.post(
                       'wallet/updateWatchlist',
@@ -182,7 +183,7 @@ function AddWatchList() {
                         data: [
                           {
                             address:
-                              token.coin_id === 3 || token.coin_id === 5
+                              token.coin_family === 3 || token.coin_family === 5
                                 ? token?.wallets[0]?.wallet_address
                                 : account.address,
                             coin_id: token.coin_id,

@@ -1,18 +1,10 @@
-import React, { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import React, { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { store } from "../..";
-import { setNFTbackData } from "../../actions/setNFTBackData";
 import ButtonComp from "../../Components/ButtonComp/ButtonComp";
 import "./Nft.scss";
-import Copy from "../../Assets/CopyIconBlue.svg";
-import { message } from "antd";
 import { useSelector } from "react-redux";
-import SuperInfluencers1 from "../../Assets/SuperInfluencers1.png";
-import SuperInfluencers2 from "../../Assets/SuperInfluencers2.png";
-import SuperInfluencers3 from "../../Assets/SuperInfluencers3.png";
-import SuperInfluencers4 from "../../Assets/SuperInfluencers4.png";
 import MenuRestofHeaders from "../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders";
-import EthIcon from "../../Assets/EthIcon.svg";
 import { server } from "../../server";
 import { setImage } from "../../actions/image";
 import { setNfts } from "../../actions/nfts";
@@ -166,9 +158,11 @@ function NftDetail() {
       <div className={`scrollableCont`}>
         <div className={`flexedContent padding-Top`}>
           <div className="nftDetailList">
-            <div className="nftDetail" style={{ color: "#fff" }}>
+            <div className="nftDetail" style={{ color: "#fff"}}>
               {nfts.length === 0
-                ? <div className="emptyNft">NFT's will appear here</div>
+                ? <div className="emptyNft"
+                style={{ color: "#fff",textAlign:"center",display:"flex",justifyContent:"center",alignItems:"center",height:"455px",width:"100%" }}
+                >NFT's will appear here</div>
                 : nfts.map((nft) => (
                   <div
                     className="nftSuper"

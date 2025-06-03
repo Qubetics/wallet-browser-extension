@@ -1574,29 +1574,33 @@ function CrossChain() {
           </div>
 
           <div className="swap__icon">
-            <img
-              src={SwapVerticalIcon}
-              width={44}
-              alt=""
-              height={44}
-              style={
-                loading ? { pointerEvents: 'none' } : { pointerEvents: 'auto' }
-              }
-              onClick={() => {
-                if (token2?.iHave) {
-                  setToken1(token2);
-                  setToken2(token1);
-                  setAmount2(null);
-                  setAount(null);
-                  setPercent(0);
-                  setInfoData([]);
-                } else {
-                  return messageApi.error(
-                    `Please enable ${token2?.name} in your wallet.`
-                  );
+            {availableTokens?.length !== 0 && (
+              <img
+                src={SwapVerticalIcon}
+                width={44}
+                alt=""
+                height={44}
+                style={
+                  loading
+                    ? { pointerEvents: 'none' }
+                    : { pointerEvents: 'auto' }
                 }
-              }}
-            />
+                onClick={() => {
+                  if (token2?.iHave) {
+                    setToken1(token2);
+                    setToken2(token1);
+                    setAmount2(null);
+                    setAount(null);
+                    setPercent(0);
+                    setInfoData([]);
+                  } else {
+                    return messageApi.error(
+                      `Please enable ${token2?.name} in your wallet.`
+                    );
+                  }
+                }}
+              />
+            )}
           </div>
           <div className="swap_onChain">
             <div className="swap_onChain_balance">
@@ -1764,20 +1768,23 @@ function CrossChain() {
           });
 
           if (isNaN(parseFloat(amount)) || isNaN(parseFloat(amount2))) {
-            console.log('Invalid swap in or out amount')
+            console.log('Invalid swap in or out amount');
             return messageApi.error('Please enter a valid amount to proceed.');
           }
 
           if (parseFloat(amount) < parseFloat(route.exchangeData.depositMin)) {
-            console.log('Amount is less than the min amount required')
+            console.log('Amount is less than the min amount required');
             return messageApi.error(
               `The minimum deposit amount to swap is ${route.exchangeData.depositMin} ${token1.symbol}`
             );
           }
 
           if (parseFloat(amount) > parseFloat(route.exchangeData.depositMax)) {
-            console.log("🚀 ~ onClick={ ~ route.exchangeData.depositMax:", route.exchangeData.depositMax)
-            console.log('Out amount is greater than the max amount deposit')
+            console.log(
+              '🚀 ~ onClick={ ~ route.exchangeData.depositMax:',
+              route.exchangeData.depositMax
+            );
+            console.log('Out amount is greater than the max amount deposit');
             return messageApi.error(
               `The maximum deposit amount to swap is ${route.exchangeData.depositMax} ${token1.symbol}`
             );
@@ -1811,6 +1818,17 @@ function CrossChain() {
             const gasInEth =
               (gasPrice.fast * Math.pow(10, 9) * gasPrice.estimate) /
               Math.pow(10, 18);
+
+            if (
+              parseFloat(balance) <
+              parseFloat(Number(amount) + Number(gasInEth))
+            ) {
+              console.log('INSIDE INSUFFICENT BALANCE');
+              return messageApi.error(
+                'Insufficient balance to proceed with the transaction.'
+              );
+            }
+
             store.dispatch(setLoading(false));
 
             const parentCoin = await server.post(
@@ -1847,8 +1865,7 @@ function CrossChain() {
             navigate('/crosschain-swapDetails', {
               state: swapDetailed,
             });
-          } 
-          else if (token1.chain.currencyName == 'SOL') {
+          } else if (token1.chain.currencyName == 'SOL') {
             console.log('Cross Chain swap for Solana');
 
             const solanaHelper = new SolanaHelper(token1?.chain?.rpcUrl);
@@ -1881,9 +1898,8 @@ function CrossChain() {
             navigate('/crosschain-swapDetails', {
               state: swapDetailed,
             });
-          } 
-          else if (token1.chain.currencyName === 'BTC') {
-            console.log('BTC COIN TRANSACTION')
+          } else if (token1.chain.currencyName === 'BTC') {
+            console.log('BTC COIN TRANSACTION');
             try {
               const gasPrice = Math.max(await BTCHelper.getBTCGasPrice(), 10);
               let swapDetailed = {

@@ -139,7 +139,7 @@ function Send() {
                       parseFloat(getFlooredFixed(token.balance, 6))
                     )}`
                     : `****`,
-                  currCryptoBalSymbol: token.coin.coin_symbol.toUpperCase(),
+                  currCryptoBalSymbol: balanceIn ? token.coin.coin_symbol.toUpperCase() : '****',
                   currDollerBal: balanceIn
                     ? addCommasToNumber(getFlooredFixed(formattedResult, 2))
                     : '****',

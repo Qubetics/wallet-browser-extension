@@ -54,7 +54,7 @@ function TermsPolicy() {
         <div className={"checkboxOuter"} style={{ marginBottom: "20px" }}>
           <Checkbox onChange={(e) => setAccr(e.target.checked)}>
             <p>
-              I accepted the <Link> Privacy Policy</Link>
+              I accepted the <Link to={''} onClick={()=> window.open('https://privacy-policy.qubetics.work/','_blank')}> Privacy Policy</Link>
             </p>
           </Checkbox>
         </div>

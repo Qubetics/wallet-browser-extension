@@ -143,6 +143,7 @@ function Swap() {
       setInfoData([]);
     }
   }, [amount]);
+
   function showFiatConversion(amount, token1Price, amount2, token2Price) {
     const fromAmount =
       parseFloat(amount ? amount : 0) * parseFloat(token1Price);
@@ -328,7 +329,6 @@ function Swap() {
           myToken1.address,
           myToken1.rpc
         );
-
 
         if (!myToken2) {
           myToken2 = tokens.find(
@@ -2130,37 +2130,39 @@ function Swap() {
                   </div>
 
                   <div className="swap__icon">
-                    <img
-                      src={SwapVerticalIcon}
-                      width={44}
-                      alt=""
-                      height={44}
-                      style={
-                        loading
-                          ? {
-                              pointerEvents: 'none',
-                            }
-                          : {
-                              pointerEvents: 'auto',
-                            }
-                      }
-                      onClick={() => {
-                        if (token2?.iHave) {
-                          setAmount2(0);
-                          setAount(0);
-
-                          setToken1(token2);
-                          setToken2(token1);
-
-                          setPercent(0);
-                          setInfoData([]);
-                        } else {
-                          return messageApi.error(
-                            `Please enable ${token2?.name} in your wallet.`
-                          );
+                    {token2?.name && (
+                      <img
+                        src={SwapVerticalIcon}
+                        width={44}
+                        alt=""
+                        height={44}
+                        style={
+                          loading
+                            ? {
+                                pointerEvents: 'none',
+                              }
+                            : {
+                                pointerEvents: 'auto',
+                              }
                         }
-                      }}
-                    />
+                        onClick={() => {
+                          if (token2?.iHave) {
+                            setAmount2(0);
+                            setAount(0);
+
+                            setToken1(token2);
+                            setToken2(token1);
+
+                            setPercent(0);
+                            setInfoData([]);
+                          } else {
+                            return messageApi.error(
+                              `Please enable ${token2?.name} in your wallet.`
+                            );
+                          }
+                        }}
+                      />
+                    )}
                   </div>
                   <div className="swap_onChain">
                     <div className="swap_onChain_balance">
