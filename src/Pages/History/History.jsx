@@ -29,9 +29,6 @@ function History() {
 
   const { pathname, state } = useLocation();
 
-  console.log("🚀 ~ History ~ state:", state)
-
-
   const init = async () => {
     if (!state) {
       store.dispatch(

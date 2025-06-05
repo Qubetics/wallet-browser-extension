@@ -180,14 +180,12 @@ export class WalletHelper {
     try {
       const mnemonics = JSON.parse(decryptedMnemonics);
       mnemonics?.map((item) => {
-        console.log('item', item);
         if (item.default) {
           phrase = item.phrase;
         }
       });
       const result = ethers.Wallet.fromMnemonic(phrase);
       console.log('🚀 ~ WalletHelper ~ getPrivateKeyEvm= ~ result:', result);
-
       return result;
     } catch (error) {
       return false;
@@ -195,7 +193,6 @@ export class WalletHelper {
   };
 
   static getPrivateKeyWithPassword = async (account,password) => {
-    console.log('PADDOER ', account,password)
     let phrase = '';
     const { mnemonics } = await chrome.storage.local.get('mnemonics');
     const decryptedMnemonics = await SecurityHelper.decrypt(
@@ -204,16 +201,12 @@ export class WalletHelper {
     );
     try {
       const parsedMnemonis = JSON.parse(decryptedMnemonics);
-      console.log("🚀 ~ WalletHelper ~ getPrivateKeyWithPassword= ~ parsedMnemonis:", parsedMnemonis)
       parsedMnemonis.map((item) => {
-        console.log("🚀 ~ WalletHelper ~ parsedMnemonis.map ~ item:", item)
-        
         if (item?.address === account?.address) {
           phrase = item.phrase;
         }
       });
       const result = ethers.Wallet.fromMnemonic(phrase);
-      console.log("🚀 ~ WalletHelper ~ getPrivateKeyWithPassword= ~ result:", result)
       return result;
     } catch (error) {
       return false;
@@ -857,10 +850,6 @@ export class WalletHelper {
           address: address,
         },
       ];
-      console.log(
-        '🚀 ~ WalletHelper ~ staticgenerateAndSetWal ~ finalMnemonics:',
-        finalMnemonics
-      );
 
       const { deviceId } = await chrome.storage.local.get('deviceId');
 
@@ -917,10 +906,6 @@ export class WalletHelper {
           },
         }
       );
-      console.log(
-        '🚀 ~ WalletHelper ~ staticgenerateAndSetWal ~ createWallet:',
-        createWallet
-      );
 
       const id = uuidv4();
       const finalAccounts = [
@@ -961,10 +946,6 @@ export class WalletHelper {
           totalBalanceShow: true,
         },
       ];
-      console.log(
-        '🚀 ~ WalletHelper ~ staticgenerateAndSetWal ~ finalAccounts:',
-        finalAccounts
-      );
 
       const encryptedMnemonics = await SecurityHelper.encrypt(
         finalMnemonics,
@@ -1009,10 +990,6 @@ export class WalletHelper {
       const { currency } = await chrome.storage.local.get('currency');
       const { deviceId } = await chrome.storage.local.get('deviceId');
       const defaultAccount = accounts.find((el) => el.default);
-      console.log(
-        '🚀 ~ WalletHelper ~ staticgenerateAndSetWalletToRefreshToken ~ defaultAccount:',
-        defaultAccount
-      );
 
       const response = await server.post(
         `/auth/authorisation`,
@@ -1025,10 +1002,6 @@ export class WalletHelper {
             Authorization: defaultAccount.jwtToken,
           },
         }
-      );
-      console.log(
-        '🚀 ~ WalletHelper ~ staticgenerateAndSetWalletToRefreshToken ~ response:',
-        response
       );
 
       const updateAccounts = accounts.map((el) => {
@@ -1067,10 +1040,6 @@ export class WalletHelper {
         let { mnemonics } = await chrome.storage.local.get('mnemonics');
         mnemonics = await SecurityHelper.decrypt(mnemonics, password);
         mnemonics = JSON.parse(mnemonics);
-        console.log(
-          '🚀 ~ WalletHelper ~ staticgenerateAndSetWalletToRefreshToken ~ mnemonics:',
-          mnemonics
-        );
       }
       return true;
     } catch (error) {

@@ -17,7 +17,7 @@ import { BTCHelper } from '../../../helpers/btc.helper';
 import { SolanaHelper } from '../../../helpers/solana.helper';
 import { Web3Helper } from '../../../helpers/web3.helper';
 import './SendConfirm.scss';
-import Logo from '../../../Assets/logo.png';
+import Logo from '../../../Assets/QubeticsLogo.png';
 import {
   addCommasToNumber,
   getFlooredFixed,
@@ -274,7 +274,6 @@ function SendConfirm() {
               undefined,
               sessionPassword
             );
-          // console.log("RRRRR solana--- ", response);
 
           if (!response) {
             store.dispatch(setLoading(false));

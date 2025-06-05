@@ -132,7 +132,7 @@ export class CrossChainHelper {
     
       console.log('🚀 ~ accountExchange response:', response);
     
-      const orderData = response.data.data.data;
+      const orderData = response?.data?.data?.data;
       let hash = '';
       let coinFamily = fromCoin?.coinFamily;
       let gasPriceType = 3;
@@ -266,7 +266,7 @@ export class CrossChainHelper {
           chain.chainId,
           rawTransaction,
           tx_fee,
-          orderData.orderId,
+          orderData?.orderId,
           'cross_chain'
         );
     
@@ -287,7 +287,7 @@ export class CrossChainHelper {
           fromCoin.tokenAddress,
           Math.pow(10, fromCoin.decimals),
           '',
-          orderData.orderId,
+          orderData?.orderId,
           'cross_chain',
           gasPriceType,
           sessionPassword
@@ -347,7 +347,7 @@ export class CrossChainHelper {
           rpc,
           'cross_chain',
           '',
-          orderData.orderId,
+          orderData?.orderId,
           sessionPassword
         );
       }
@@ -357,7 +357,7 @@ export class CrossChainHelper {
       }
 
       await this.axiosInstance.post('/v2/modifyTxId', {
-        orderId: orderData.orderId,
+        orderId: orderData?.orderId,
         depositTxid: hash,
       });
 

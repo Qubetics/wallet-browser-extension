@@ -19,10 +19,9 @@ import { Loader } from '../../../Components/Loader/Loader';
 import { CrossChainHelper } from '../../../helpers/crosschain.helper';
 import { DURATION } from '../../../config/message.config';
 import InputFieldSimple from '../../../Components/InputField/InputFieldSimple';
-import DarkLogo from '../../../Assets/DarkLogo.svg';
 import Logo from '../../../Assets/logo.png';
 import { WalletHelper } from '../../../helpers/wallet.helper';
-import { SecurityHelper } from '../../../helpers/security.helper';
+import QubeticsLogo from "../../../Assets/QubeticsLogo.png";
 
 function getFlooredFixed(v, d) {
   return (Math.floor(v * Math.pow(10, d)) / Math.pow(10, d)).toFixed(d);
@@ -352,10 +351,10 @@ function CrossChainDetails() {
         <div className={'confirmationsModal'}>
           <div className={'iInner'}>
             {theme == 'darkTheme' ? (
-              <img src={DarkLogo} />
+              <img src={QubeticsLogo} />
             ) : (
               <img
-                src={Logo}
+                src={QubeticsLogo}
                 style={{
                   height: '100px',
                 }}

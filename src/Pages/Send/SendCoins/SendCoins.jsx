@@ -156,7 +156,7 @@ function SendCoins() {
 
       if (!chain.isEVM && chain.currencyName === 'BTC') {
         try {
-          const gasPrice = Math.max(await BTCHelper.getBTCGasPrice(), 10);
+          const gasPrice = await BTCHelper.getBTCGasPrice()
           const unspent = await BTCHelper.getUnspent(coin.wallet_address);
           if (!unspent) {
             store.dispatch(setLoading(false));
@@ -164,6 +164,7 @@ function SendCoins() {
           }
           if (unspent.length === 0) {
             store.dispatch(setLoading(false));
+           
             return messageApi.error(
               'You have a pending transaction in your account or you do not have enough balance to proceed with the transaction.'
             );
@@ -184,15 +185,14 @@ function SendCoins() {
           });
           transactionSize =
             inputCount * 146 + outputCount * 34 + 10 - inputCount;
-          let fee = transactionSize * gasPrice;
 
-          const totalFee = (
+            const totalFee = (
             transactionSize *
             gasPrice *
             btcTosatoshiMultiplier
           ).toFixed(8);
 
-          setSelectedGasPriceSol(totalFee);
+          setSelectedGasPriceSol(Number(totalFee * 1.5).toFixed(8));
         } catch (error) {
           store.dispatch(setLoading(false));
         }
@@ -266,6 +266,7 @@ function SendCoins() {
         default:
           rpc = process.env.REACT_APP_TRON_RPC;
       }
+
       store.dispatch(setLoading(true));
       amountToSend = await Web3Helper.getTokenBalance(
         coin.coin.token_address,
@@ -277,6 +278,7 @@ function SendCoins() {
         store.dispatch(setLoading(false));
         amountToSend = coin.balance;
       }
+      
       setBalance(amountToSend);
       store.dispatch(setLoading(false));
 
@@ -346,7 +348,6 @@ function SendCoins() {
             .dividedBy(coin.coin.decimals)
             .toString()
         );
-        console.log('amt',amt);
         setAmount(amt);
         store.dispatch(setLoading(false));
       } else if (!chain.isEVM && chain.currencyName === 'SOL') {
@@ -375,10 +376,8 @@ function SendCoins() {
       } else if (!chain.isEVM && chain.currencyName === 'BTC') {
         try {
           store.dispatch(setLoading(true));
-
-          let gasPrice =  Math.max(await BTCHelper.getBTCGasPrice(), 10);
+          let gasPrice =  await BTCHelper.getBTCGasPrice();
           let unspent = await BTCHelper.getUnspent(coin.wallet_address);
-
           let balance = coin.balance;
           balance = (balance * 99) / 100;
           const amountToSend = parseFloat(balance) * (percentage / 100);
@@ -390,6 +389,7 @@ function SendCoins() {
 
           if (unspent.length === 0) {
             store.dispatch(setLoading(false));
+            
             return messageApi.error(
               'You have a pending transaction in your account or you do not have enough balance to proceed with the transaction.'
             );
@@ -417,20 +417,15 @@ function SendCoins() {
             gasPrice *
             btcTosatoshiMultiplier
           ).toFixed(8);
-
-          if (amountToSend - totalFee * 2.5 < 0) {
+          if (amountToSend - Number(totalFee * 1.5).toFixed(8) < 0) {
             store.dispatch(setLoading(false));
-
             return messageApi.error(
               'You do not have enough balance to proceed with the transaction.'
             );
           }
-
-          let amt = formatNumberFiat(
-            (amountToSend - totalFee * 2.5).toString()
-          );
+          let amt = (Number(amountToSend) - Number(totalFee * 1.5)).toFixed(8);
           setAmount(amt);
-          setSelectedGasPriceSol(totalFee);
+          setSelectedGasPriceSol(Number(totalFee * 1.5).toFixed(8));
           store.dispatch(setLoading(false));
         } catch (error) {
           store.dispatch(setLoading(false));
@@ -600,8 +595,6 @@ function SendCoins() {
           : gasPriceType == 2
           ? myGasPrice?.propose
           : myGasPrice?.fast;
-      console.log('amount ~ 602 ~ SendCoins.jsx',amount);
-      console.log('GAS PRICE IN SEND CONFIRM :',Math.max(prc,1) , prc);
       navigate('/confirmCurrency', {
         state: {
           to: address,
@@ -636,119 +629,13 @@ function SendCoins() {
         },
       });
     }
-    //  else if (!chain.isEVM && chain.currencyName === 'BTC') {
-    //   try {
-    //     const gasPrice = await BTCHelper.getBTCGasPrice();
-    //     const unspent = await BTCHelper.getUnspent(coin.wallet_address);
-
-    //     if (!unspent) {
-    //       store.dispatch(setLoading(false));
-    //       return messageApi.error('Unable to fetch unspent at the moment.');
-    //     }
-
-    //     if (unspent.length === 0) {
-    //       store.dispatch(setLoading(false));
-    //       return messageApi.error(
-    //         'You have a pending transaction or insufficient balance.'
-    //       );
-    //     }
-
-    //     // 2. Prepare inputs and calculate available satoshis
-    //     let totalAmountAvailable = 0;
-    //     const inputs = unspent.map((utxo) => {
-    //       const satoshis = Math.floor(Number(utxo.satoshis));
-    //       totalAmountAvailable += satoshis;
-    //       return {
-    //         satoshis,
-    //         script: utxo.scriptPubKey,
-    //         address: coin.wallet_address,
-    //         txId: utxo.txid,
-    //         outputIndex: utxo.vout,
-    //       };
-    //     });
-
-    //     const inputCount = inputs.length;
-    //     const transactionSize =
-    //       inputCount * 146 + outputCount * 34 + 10 - inputCount;
-    //     const fee = transactionSize * gasPrice;
-    //     const totalFee = (fee * btcTosatoshiMultiplier).toFixed(8);
-    //     const totalAmount = parseFloat(totalFee) + parseFloat(amount);
-
-    //     if (totalAmount > myBalance) {
-    //       store.dispatch(setLoading(false));
-    //       return messageApi.error('Not enough balance to proceed.');
-    //     }
-
-    //     const sendAmount = Math.round(amount * btcTosatoshi);
-    //     if (totalAmountAvailable - sendAmount - fee < 0) {
-    //       store.dispatch(setLoading(false));
-    //       return messageApi.error('Insufficient UTXO balance.');
-    //     }
-
-    //     const bitcore = require('bitcore-lib');
-
-    //     const transaction = new bitcore.Transaction()
-    //       .from(inputs)
-    //       .to(address, sendAmount);
-
-    //     const change = totalAmountAvailable - sendAmount - fee;
-    //     if (change > 546) {
-    //       transaction.change(coin.wallet_address);
-    //       transaction.fee(fee);
-    //     } else {
-    //       transaction.fee(fee + change);
-    //     }
-
-    //     const btcPrivateKey =
-    //       await WalletHelper.getBitcoinPrivateKeyWithPassword(sessionPassword);
-    //     if (!btcPrivateKey) {
-    //       store.dispatch(setLoading(false));
-    //       return messageApi.error(
-    //         'Unable to fetch private key. Please try again later.'
-    //       );
-    //     }
-
-    //     transaction.sign(btcPrivateKey);
-    //     const rawTransaction = transaction.serialize();
-    //     store.dispatch(setLoading(false));
-
-    //     navigate('/confirmCurrency', {
-    //       state: {
-    //         rawTransaction,
-    //         to: address,
-    //         amount,
-    //         coin,
-    //         ENSName,
-    //         redirectTo,
-    //         networkFee: totalFee,
-    //         sessionPassword,
-    //       },
-    
-    //     });
-    //   } catch (error) {
-    //     console.error('BTC Transaction Error:', error);
-    //     store.dispatch(setLoading(false));
-
-    //     if (error.message.includes('Dust amount detected in one output')) {
-    //       return messageApi.error(
-    //         'Amount is below the dust threshold. Please enter a higher value.'
-    //       );
-    //     }
-
-    //     return messageApi.error(
-    //       error.message || 'An unexpected error occurred.'
-    //     );
-    //   }
-    // }
 
     else if (!chain.isEVM && chain.currencyName === 'BTC') {
       try {
         const bitcoin = require('bitcoinjs-lib');
         
-        const gasPrice = Math.max(await BTCHelper.getBTCGasPrice(), 10);
+        const gasPrice = await BTCHelper.getBTCGasPrice();
         const unspent = await BTCHelper.getUnspent(coin.wallet_address);
-        console.log("🚀 ~ handleSend ~ unspent:", unspent)
-        console.log(coin,"coin");
         
         if (!unspent || unspent.length === 0) {
           store.dispatch(setLoading(false));
@@ -759,7 +646,6 @@ function SendCoins() {
         
         // Process UTXOs
         const utxos = unspent.map((utxo) => {
-          console.log(utxo,"utxoutxoutxo");
           
           const satoshis = Math.floor(Number(utxo.satoshis));
           totalAmountAvailable += satoshis;
@@ -777,10 +663,8 @@ function SendCoins() {
         const fee = Math.ceil(transactionSize * gasPrice);
         const sendAmount = Math.round(amount * btcTosatoshi);
         const totalFee = (fee * btcTosatoshiMultiplier).toFixed(8);
-        const totalAmount = sendAmount + fee;
+        const totalAmount = sendAmount + (fee * 1.5);
 
-        
-      
         if (totalAmountAvailable < totalAmount) {
           store.dispatch(setLoading(false));
           return messageApi.error('Insufficient UTXO balance.');
@@ -801,16 +685,13 @@ function SendCoins() {
         if (coin.wallet_address.startsWith('bc1q')) {
           // P2WPKH (Bech32)
           payment = bitcoin.payments.p2wpkh({ pubkey: keyPair.publicKey });
-          console.log("Using P2WPKH (SegWit) address:", payment.address);
         } else if (coin.wallet_address.startsWith('3')) {
           // P2SH-P2WPKH (SegWit wrapped in P2SH)
           const p2wpkh = bitcoin.payments.p2wpkh({ pubkey: keyPair.publicKey });
           payment = bitcoin.payments.p2sh({ redeem: p2wpkh });
-          console.log("Using P2SH-P2WPKH address:", payment.address);
         } else {
           // P2PKH (Legacy)
           payment = bitcoin.payments.p2pkh({ pubkey: keyPair.publicKey });
-          console.log("Using P2PKH (Legacy) address:", payment.address);
         }
       
         // Verify address match
@@ -877,17 +758,7 @@ function SendCoins() {
         psbt.finalizeAllInputs();
         const rawTransaction = psbt.extractTransaction().toHex();
         
-        console.log("Transaction created successfully");
         store.dispatch(setLoading(false));
-        console.log({rawTransaction,
-          to: address,
-          amount,
-          coin,
-          ENSName,
-          redirectTo,
-          networkFee: totalFee,
-          sessionPassword,});
-        
       
         navigate('/confirmCurrency', {
           state: {
