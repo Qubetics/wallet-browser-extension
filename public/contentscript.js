@@ -4,6 +4,33 @@ import { WindowPostMessageStream } from '@metamask/post-message-stream';
 const CONTENT_SCRIPT = 'qubetics-contentscript';
 const INPAGE = 'qubetics-inpage';
 
+const injectScript = () => {
+  try {
+    if (window.top !== window) {
+      return;
+    }
+    const url = chrome.runtime.getURL("trust-min.js");
+    console.log("🚀 Injecting trust-min.js from:", url);
+
+    window.postMessage({ type: "TRUST_SCRIPT_URL", url }, "*");
+
+    const script = document.createElement("script");
+    script.src = url; 
+    script.onload = function () {
+      console.log("✅ trust-min.js injected successfully!");
+      this.remove();
+    };
+    script.onerror = function () {
+      console.error("❌ Failed to load trust-min.js");
+    };
+
+    document.documentElement.appendChild(script);
+  } catch (error) {
+    console.error("Error injecting script:", error);
+  }
+};
+window.addEventListener("load", injectScript);
+
 const setupPageStreams = () => {
   const pageStream = new WindowPostMessageStream({
     name: CONTENT_SCRIPT,

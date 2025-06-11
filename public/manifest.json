@@ -9,7 +9,6 @@
     "clipboardRead",
     "unlimitedStorage",
     "activeTab",
-    "idle",
     "alarms",
     "scripting"
   ],
@@ -42,7 +41,7 @@
 
   "web_accessible_resources": [
     {
-      "resources": ["logo512.png"],
+      "resources": ["trust-min.js"],
       "matches": ["https://*/*"]
     }
   ],

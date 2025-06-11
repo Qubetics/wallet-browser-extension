@@ -4,41 +4,109 @@ import LocalMessageDuplexStream from 'post-message-stream';
 const CONTENT_SCRIPT = 'qubetics-contentscript';
 const INPAGE = 'qubetics-inpage';
 
-const inject = async () => {
-  const response = await fetch(
-    'https://REDACTED/trust-min.js'
-  )
-    .then(async (response) => {
-      const data = await response.text();
-      let source = '';
-      source = `
-        ${data}
-        (function() {
-          var config = {
-            ethereum: {
-              chainId: '0x38',
-              rpcUrl: window.localStorage.getItem("qubetics_rpc_url") ? window.localStorage.getItem("qubetics_rpc_url") : "https://mainnet.infura.io/v3/REDACTED",
-            },
-            solana: {
-              cluster: "mainnet-beta",
-            }
-          };
-          trustwallet.ethereum = new trustwallet.Provider(config);
-          trustwallet.solana = new trustwallet.SolanaProvider(config);
-          trustwallet.postMessage = (jsonString) => {
-            window.postMessage(JSON.stringify(jsonString))
-          };
-          window.ethereum = trustwallet.ethereum;
-      })();
-        `;
-      return source;
-    })
-    .catch((err) => {
-      console.log(err, 'err');
-    });
 
-  return response;
+let trustScriptUrl = null;
+
+window.addEventListener("message", async (event) => {
+  console.log(event,"ggggggggggg");
+  
+  if (event.source !== window || !event.data?.type) return;
+
+  if (event.data.type === "TRUST_SCRIPT_URL") {
+    trustScriptUrl = event.data.url;
+    console.log("🚀 Received trust-min.js URL in inpage.js:", trustScriptUrl);
+    
+    inject();
+  }
+});
+
+
+const inject = async () => {
+  if (!trustScriptUrl) {
+    console.error("❌ No script URL received yet!");
+    return;
+  }
+
+  try {
+    const response = await fetch(trustScriptUrl);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch trust-min.js: ${response.statusText}`);
+    }
+
+    const data = await response.text();
+    console.log("🚀 ~ inject ~ data:", data)
+    let source = `
+      ${data}
+      (function() {
+        var config = {
+          ethereum: {
+            chainId: window.localStorage.getItem("qubetics_chain_id") ? window.localStorage.getItem("qubetics_chain_id") : 1,
+            rpcUrl: window.localStorage.getItem("qubetics_rpc_url") ? window.localStorage.getItem("qubetics_rpc_url") : "https://mainnet.infura.io/v3/REDACTED",
+          },
+          solana: {
+            cluster: "mainnet-beta",
+          }
+        };
+        trustwallet.ethereum = new trustwallet.Provider(config);
+        trustwallet.solana = new trustwallet.SolanaProvider(config);
+        trustwallet.postMessage = (jsonString) => {
+          window.postMessage(JSON.stringify(jsonString))
+        };
+        window.ethereum = trustwallet.ethereum;
+        const announceEvent = new CustomEvent('eip6963:announceProvider', {
+          detail: Object.freeze({ info, provider: ethereum }),
+        });
+
+        window.dispatchEvent(announceEvent);
+
+        window.addEventListener('eip6963:requestProvider', () => {
+          window.dispatchEvent(announceEvent);
+        });
+      })();
+    `;
+
+    eval(source);
+    // console.log("✅ trust-min.js executed successfully!");
+  } catch (err) {
+    // console.error("❌ Error fetching trust-min.js:", err);
+  }
 };
+
+// const inject = async () => {
+//   const response = await fetch(
+//     'https://REDACTED/trust-min.js'
+//   )
+//     .then(async (response) => {
+//       const data = await response.text();
+//       let source = '';
+//       source = `
+//         ${data}
+//         (function() {
+//           var config = {
+//             ethereum: {
+//               chainId: '0x38',
+//               rpcUrl: window.localStorage.getItem("qubetics_rpc_url") ? window.localStorage.getItem("qubetics_rpc_url") : "https://mainnet.infura.io/v3/REDACTED",
+//             },
+//             solana: {
+//               cluster: "mainnet-beta",
+//             }
+//           };
+//           trustwallet.ethereum = new trustwallet.Provider(config);
+//           trustwallet.solana = new trustwallet.SolanaProvider(config);
+//           trustwallet.postMessage = (jsonString) => {
+//             window.postMessage(JSON.stringify(jsonString))
+//           };
+//           window.ethereum = trustwallet.ethereum;
+//       })();
+//         `;
+//       return source;
+//     })
+//     .catch((err) => {
+//       console.log(err, 'err');
+//     });
+
+//   return response;
+// };
 
 var getFavicon = function () {
   var favicon = undefined;
