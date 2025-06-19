@@ -338,6 +338,7 @@ class Background {
           try {
             const { accounts } = await chrome.storage.session.get('accounts');
             if (accounts) {
+              console.log('ACCOUNTS',accounts);
               const defaultAccount = accounts.find((el) => el.default === true);
               const account =
                 req.network === 'solana'
@@ -369,6 +370,7 @@ class Background {
                 });
               }
             } else {
+              console.log('No Account');
               const response = await new Promise(async (resolve, reject) => {
                 const requestData = encodeURIComponent(JSON.stringify(req));
                 chrome.windows.create({
@@ -388,7 +390,9 @@ class Background {
                 );
               });
 
-              if (response) {
+              console.log('RESPONSE ON CONNECT DAPP:',response)
+
+              if (response && response.length > 0 ) {
                 res.result = response;
                 res.method = req.method;
                 res.network = req.network;

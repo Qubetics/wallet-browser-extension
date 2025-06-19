@@ -38,13 +38,6 @@
     "48": "logo.png",
     "128": "logo.png"
   },
-
-  "web_accessible_resources": [
-    {
-      "resources": ["trust-min.js"],
-      "matches": ["https://*/*"]
-    }
-  ],
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'self';"
   }
