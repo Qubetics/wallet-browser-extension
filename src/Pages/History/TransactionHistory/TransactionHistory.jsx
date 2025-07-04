@@ -103,10 +103,10 @@ function TransactionHistory() {
       coinFamily = 'TRON';
       explorer = `https://cardanoscan.io/transaction/${transactionHash}`;
       break;
-    // case 7:
-    //   coinFamily = 'TICS';
-    //   explorer = `https://dev-explorer.qubetics.work/tx/${transactionHash}`;
-    //   break;
+    case 7:
+      coinFamily = 'TICS';
+      explorer = `https://ticsscan.com/tx/${transactionHash}`;
+      break;
     case 8:
       coinFamily = 'CRO';
       explorer = `https://cronoscan.com/tx/${transactionHash}`;

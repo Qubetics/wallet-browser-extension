@@ -6,7 +6,7 @@ export const BL_CODE = {
   4: "POL",
   5: "SOL",
   6: "TRX",
-  // 7: "TICS"
+  7: "TICS"
 }
 
 export const supportedNetworks = [{ coin_family: 1, network: "BINANCESMARTCHAIN" }, { coin_family: 2, network: "ETHEREUM" }, { coin_family: 3, network: "BITCOIN" }, { coin_family: 4, network: "POLYGON" }, { coin_family: 5, network: "SOLANA" }, { coin_family: 6, network: "TRON" }];

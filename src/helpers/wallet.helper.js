@@ -892,11 +892,11 @@ export class WalletHelper {
             //   address: tronAddress,
             //   coin_family: 6,
             // },
-            // {
-            //   symbol: 'tics',
-            //   address: address,
-            //   coin_family: 7,
-            // },
+            {
+              symbol: 'tics',
+              address: address,
+              coin_family: 7,
+            },
           ],
         },
         {

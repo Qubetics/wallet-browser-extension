@@ -1032,9 +1032,16 @@ function SendCoins() {
                 <InputFieldOnly
                   placeholder={'Transaction Fee'}
                   label=""
-                  value={parseFloat(
-                    (myGasPrice?.estimate * myGasPrice?.fast) / 10 ** 9
-                  )?.toFixed(coin?.coin?.coin_family == 7 ? 15 : 5)}
+                  value={
+                    myGasPrice?.estimate &&
+                    myGasPrice?.fast &&
+                    !isNaN(myGasPrice.estimate) &&
+                    !isNaN(myGasPrice.fast)
+                      ? parseFloat(
+                          (myGasPrice.estimate * myGasPrice.fast) / 10 ** 9
+                        ).toFixed(coin?.coin?.coin_family === 7 ? 15 : 5)
+                      : '0.00'
+                  }
                   readonly={true}
                   placeholderBaseColor={true}
                 />

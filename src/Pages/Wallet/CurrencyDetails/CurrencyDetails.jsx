@@ -179,6 +179,7 @@ function CurrencyDetails() {
           </span>
         }
         chartIcon={() => {
+          console.log('COIN DATA :',coin?.coin);
           if (coin?.coin?.graph_pair) {
             let pay = {
               coin_id: coin?.coin?.coin_id,

@@ -12,20 +12,13 @@ function HistoryListOuter(props) {
   const { chain, account, currency } = useSelector((state) => state);
 
   const {
-    sendRecieve,
-    coinname,
     address,
     valueCurrency,
-    dollercurrency,
     addressTo,
     TickIcon,
     status,
     date,
-    hash,
-    def,
     allData,
-    coin,
-    spritz,
     type,
   } = props;
 
@@ -64,10 +57,10 @@ function HistoryListOuter(props) {
         coinFamily = 'ADA';
         explorer = `https://cardanoscan.io/transaction/${transactionHash}`;
         break;
-      // case 7:
-      //   coinFamily = 'TICS';
-      //   explorer = `https://dev-explorer.qubetics.work/tx/${transactionHash}`;
-      //   break;
+      case 7:
+        coinFamily = 'TICS';
+        explorer = `https://ticsscan.com/tx/${transactionHash}`;
+        break;
       case 8:
         coinFamily = 'CRO';
         explorer = `https://cronoscan.com/tx/${transactionHash}`;

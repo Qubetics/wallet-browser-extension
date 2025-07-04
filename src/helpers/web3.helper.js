@@ -442,10 +442,11 @@ export class Web3Helper {
 
       const response = await server.post(`${slug}/${symbol}/send`, payload, {
         headers: {
+         
           Authorization: account.jwtToken,
         },
       });
-
+      console.log("🚀 ~ Web3Helper ~ response:", response)
       return response.data.tx_hash;
     } catch (error) {
       console.log('error occure----> ', error);
