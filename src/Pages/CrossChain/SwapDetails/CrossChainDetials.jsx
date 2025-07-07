@@ -120,6 +120,9 @@ function CrossChainDetails() {
       sessionPassword
     );
 
+
+    console.log('data in cross chain detail screen:',data)
+
     if (!data) {
       setSwapModal(false);
       return messageApi.error(

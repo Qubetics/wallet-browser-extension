@@ -12,7 +12,7 @@ export let server = null;
       if (!request.headers['Authorization']) {
         request.headers['authorization'] = '';
       }
-      request.headers['app-version'] = '1';
+      request.headers['app-version'] = '1.1';
 
       return request;
     },

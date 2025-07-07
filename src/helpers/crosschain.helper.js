@@ -350,6 +350,9 @@ export class CrossChainHelper {
           orderData?.orderId,
           sessionPassword
         );
+
+
+        console.log('hash returned from the web3.helper file:',hash)
       }
 
       if (!hash) {

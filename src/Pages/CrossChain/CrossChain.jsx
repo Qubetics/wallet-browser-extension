@@ -1,7 +1,6 @@
 /*global chrome*/
 
 import './CrossChain.scss';
-
 import { Drawer, message, Select } from 'antd';
 import React from 'react';
 import { InputField } from '../../Components/InputField/InputFieldSimple';
@@ -37,21 +36,14 @@ import useCurrentHeight from '../../CustomHooks/useCurrentHeight';
 function getFlooredFixed(v, d) {
   return (Math.floor(v * Math.pow(10, d)) / Math.pow(10, d)).toFixed(d);
 }
-let inputCount = 0;
-let transactionSize = 0;
-let outputCount = 2;
-let btcTosatoshi = 100000000;
-let btcTosatoshiMultiplier = 0.00000001;
 
 function addCommasToNumber(number) {
   var parts = number.toString().split('.');
   var integerPart = parts[0];
-  var decimalPart = parts[1] || ''; // Handle cases where there is no decimal part
+  var decimalPart = parts[1] || '';
 
-  // Add commas to the integer part
   integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 
-  // Combine the integer and decimal parts
   if (decimalPart !== '') {
     return integerPart + '.' + decimalPart;
   } else {
@@ -67,13 +59,10 @@ function CrossChain() {
   const { chain, account, currency } = useSelector((state) => state);
   let timeOutId = useRef();
   const crossChainHelper = useRef(new CrossChainHelper());
-  const [chains, setChains] = useState([]);
   const [availableTokens, setAvailableTokens] = useState([]);
   const [loading, setInnerLoading] = useState(false);
   const [token1, setToken1] = useState(null);
   const [token2, setToken2] = useState(null);
-  // console.log("TOKEN ! ! 1 INitially", token1);
-  // console.log("TOKEN ! ! 2 INitially", token2);
   const [balance, setBalance] = useState(0);
   const [balance2, setBalance2] = useState(0);
   const navigate = useNavigate();
@@ -81,8 +70,8 @@ function CrossChain() {
     duration: DURATION,
     maxCount: 1,
   });
-  const [amount2, setAmount2] = useState(null);
-  const [amount, setAount] = useState(null);
+  const [amount2, setAmount2] = useState('');
+  const [amount, setAmount] = useState('');
   const [route, setRoute] = useState(null);
   const [refresh, setRefresh] = useState(false);
   const [filteredTokens, setFilteredTokens] = useState([]);
@@ -90,12 +79,9 @@ function CrossChain() {
   const [selected, setSelected] = useState(null);
   const [infoData, setInfoData] = useState([]);
   const height = useCurrentHeight();
-
   const [allToken, setAllTokens] = useState([]);
-
   const [keyword, setKeyword] = useState(null);
   const [show, setShow] = useState(true);
-
   const updateRef = useRef(true);
 
   const [percent, setPercent] = useState(null);
@@ -109,7 +95,7 @@ function CrossChain() {
       if (swapDetail?.tab == 1) {
         setToken1(swapDetail?.token1);
         setToken2(swapDetail?.token2);
-        setAount(+swapDetail?.amount);
+        setAmount(+swapDetail?.amount);
         setAmount2(+swapDetail?.amount2);
         setTimeout(() => {
           initialSwapDetail(
@@ -141,19 +127,8 @@ function CrossChain() {
             }
           }
 
-          // if (!route) {
-          //   setInnerLoading(false);
-          //   return messageApi.error('Pair not available for swap.');
-          // }
-
           setRoute(route);
-
-          setAmount2(
-            // parseFloat(getFlooredFixed(parseFloat(route.outAmount), 6))
-            // Number(route.outAmount).toFixed(18)
-            // toFixed(route.outAmount.toString())
-            toFixed(getFlooredFixed(parseFloat(route.outAmount), 6))
-          );
+          setAmount2(toFixed(getFlooredFixed(parseFloat(route.outAmount), 6)));
           setInnerLoading(false);
           setInfoData([
             {
@@ -189,12 +164,6 @@ function CrossChain() {
                 )
               )} ${tokenTwo.symbol}`,
             },
-            // {
-            //   text: 'You will receive',
-            //   textVal: `${parseFloat(
-            //     getFlooredFixed(parseFloat(route ? route.outAmount : 0), 6)
-            //   )} ${token2.symbol}`,
-            // },
             {
               text: 'You will receive',
               textVal: `${toFixed(
@@ -242,7 +211,7 @@ function CrossChain() {
         const finalAmountToSend = new BigNumber(token1.balance).multipliedBy(
           new BigNumber(percentage).dividedBy(100)
         );
-        setAount(
+        setAmount(
           finalAmountToSend == 0
             ? finalAmountToSend.toString()
             : finalAmountToSend.toFixed(18).replace(/\.?0+$/, '')
@@ -269,8 +238,8 @@ function CrossChain() {
         const finalAmountToSend = new BigNumber(amountToSend).multipliedBy(
           new BigNumber(percentage).dividedBy(100)
         );
-        // setAount(toFixed(finalAmountToSend.toString()));
-        setAount(
+        // setAmount(toFixed(finalAmountToSend.toString()));
+        setAmount(
           finalAmountToSend == 0
             ? finalAmountToSend.toString()
             : finalAmountToSend.toFixed(18).replace(/\.?0+$/, '')
@@ -324,14 +293,6 @@ function CrossChain() {
       const inActiveTokens = await server.post(
         '/swftc/queryCoinList',
         {
-          // addresses: Object.keys(account.coinFamilyAndAddress)
-          //   .map((key) => {
-          //     return {
-          //       coin_family: key,
-          //       address: account.coinFamilyAndAddress[key],
-          //     };
-          //   })
-          //   .filter((el) => el.address),
           addresses: Object.values(account.coinFamilyAndAddress).filter(
             (address) => address
           ),
@@ -637,14 +598,14 @@ function CrossChain() {
     if (updatedToken1.tokenAddress) {
       if (updatedToken1.id != token1.id) {
         setAmount2(null);
-        setAount(null);
+        setAmount(null);
         setPercent(null);
         updateRef.current = false;
       }
     } else {
       if (updatedToken1.id != token1.id) {
         setAmount2(null);
-        setAount(null);
+        setAmount(null);
         setPercent(null);
         updateRef.current = false;
       }
@@ -674,7 +635,7 @@ function CrossChain() {
     if (updatedToken2.tokenAddress) {
       if (updatedToken2.id != token2.id) {
         setAmount2(null);
-        setAount(null);
+        setAmount(null);
         setPercent(null);
         updateRef.current = false;
       }
@@ -694,7 +655,7 @@ function CrossChain() {
     } else {
       if (updatedToken2.id != token2.id) {
         setAmount2(null);
-        setAount(null);
+        setAmount(null);
         setPercent(null);
         updateRef.current = false;
       }
@@ -805,7 +766,7 @@ function CrossChain() {
     // Set a new timeout to execute the action after 2000 milliseconds
     debounceTimeout.current = setTimeout(() => {
       handleInputChange(newAmount);
-      setAount(newAmount);
+      setAmount(newAmount);
     }, 3000);
   }
 
@@ -1031,352 +992,10 @@ function CrossChain() {
     </div>
   );
 
+
+  console.log('AMOUNT: >>>>>>>>>>>>>>>>', amount , amount2);
+
   return (
-    // <div className='swap'>
-    //
-    //   {/* <div
-    //     className='send__infoText'
-    //     style={{
-    //       marginBottom: '0px',
-    //       position: 'relative',
-    //       top: '19px',
-    //       left: '-11px',
-    //     }}
-    //   >
-    //     <span
-    //       style={{
-    //         color: 'rgb(0, 174, 239)',
-    //         position: 'relative',
-    //         top: '-6px',
-    //       }}
-    //     >
-    //       {' '}
-    //       Min-Max
-    //     </span>{' '}
-    //     <br></br>{' '}
-    //     <div
-    //       style={{ width: '100%', display: 'flex', justifyContent: 'flex-end' }}
-    //     >
-    //       {addCommasToNumber(
-    //         parseFloat(route ? route.exchangeData.depositMin : 0)
-    //       )}{' '}
-    //       -{' '}
-    //       {addCommasToNumber(
-    //         parseFloat(route ? route.exchangeData.depositMax : 0)
-    //       )}{' '}
-    //     </div>
-    //     {token1?.symbol?.toUpperCase()}
-    //   </div> */}
-    //   {/* <InputField
-    //     mb0={true}
-    //     // getData={(amount) => {
-
-    //     //   handleChangeForInput1(amount);
-    //     //   setAount(amount);
-    //     // }}
-    //     getData={(amount) => {
-    //       if (percent != null) {
-    //         setPercent(null);
-    //       }
-    //       // const afterDecimal = amount.split('.')[1];
-
-    //       // // Get the maximum allowed characters before the decimal point (15 characters)
-    //       // const maxCharactersBeforeDecimal = 15;
-
-    //       // if (afterDecimal) {
-    //       //   // Get the maximum allowed decimals for the cryptocurrency (e.g., Bitcoin has 8 decimals)
-    //       //   const maxDecimals = token1.decimals;
-    //       //   // Check if the entered decimal part is longer than the maximum allowed
-    //       //   if (afterDecimal.toString().length > maxDecimals) {
-    //       //     return; // Return if decimal part is too long
-    //       //   }
-
-    //       //   // Check if the characters before the decimal exceed the maximum allowed
-    //       //   const beforeDecimal = amount.split('.')[0];
-    //       //   if (beforeDecimal.toString().length > maxCharactersBeforeDecimal) {
-    //       //     return; // Return if characters before decimal exceed the maximum allowed
-    //       //   }
-    //       // } else {
-    //       //   // If there's no decimal, check the whole input length
-    //       //   if (amount.length > maxCharactersBeforeDecimal) {
-    //       //     return; // Return if the whole input exceeds the maximum allowed
-    //       //   }
-    //       // }
-    //       handleChangeForInput1(amount);
-    //       setAount(amount);
-    //     }}
-    //     inputSelect={true}
-    //     placeholder={'0.000'}
-    //     label='You Pay'
-    //     type={'number'}
-    //     value={amount}
-    //     addonAfter={selectAfter}
-    //     checkForSymbols={true}
-    //     disabled={loading}
-    //   /> */}
-    //   {/* <div className='do'>
-    //     <div
-    //       className='send__infoText swapYouPay'
-    //       style={{
-    //         wordBreak: 'break-all',
-    //         textWrap: 'wrap',
-    //       }}
-    //     >
-    //       = {currency.symbol}
-    //       {addCommasToNumber(
-    //         exponential_to_decimal(
-    //           parseFloat(amount ? amount : 0) * parseFloat(token1?.price || 0),
-    //           2
-    //         )
-    //         // getFlooredFixed(
-    //         //   parseFloat(amount ? amount : 0) * parseFloat(token1?.price || 0),
-    //         //   2
-    //         // )
-    //       )}
-    //     </div>
-    //     <div className='send__infoText   '>
-    //       <span
-    //         style={{
-    //           color: 'rgb(0, 174, 239)',
-    //           // position: 'relative',
-    //           // top: '-6px',
-    //         }}
-    //       >
-    //         {' '}
-    //         Available Balance
-    //       </span>{' '}
-    //       <br></br>{' '}
-    //       {addCommasToNumber(parseFloat(getFlooredFixed(balance || 0, 6)))}{' '}
-    //       {token1?.symbol} ~ {currency.symbol}
-    //       {balanceToFiatConversion(token1?.price || 0, balance || 0)}
-    //     </div>
-    //   </div> */}
-
-    //   {/* {token1?.isToken ? (
-    //     <div
-    //       className='periods'
-    //       style={{
-    //         display: 'flex',
-    //         alignItems: 'center',
-    //         marginBottom: '15px',
-    //         marginTop: '15px',
-    //         justifyContent: 'space-evenly',
-    //       }}
-    //     >
-    //       <div
-    //         className={percent == 25 ? 'boxActiveSwap' : 'boxSwap'}
-    //         onClick={() => {
-    //           setPercent(25);
-    //           calculateAccordingly(25);
-    //         }}
-    //       >
-    //         25%
-    //       </div>
-    //       <div
-    //         className={percent == 50 ? 'boxActiveSwap' : 'boxSwap'}
-    //         onClick={() => {
-    //           setPercent(50);
-    //           calculateAccordingly(50);
-    //         }}
-    //       >
-    //         50%
-    //       </div>
-    //       <div
-    //         className={percent == 75 ? 'boxActiveSwap' : 'boxSwap'}
-    //         onClick={() => {
-    //           setPercent(75);
-    //           calculateAccordingly(75);
-    //         }}
-    //       >
-    //         75%
-    //       </div>
-    //       <div
-    //         className={percent == 100 ? 'boxActiveSwap' : 'boxSwap'}
-    //         onClick={() => {
-    //           setPercent(100);
-    //           calculateAccordingly(100);
-    //         }}
-    //       >
-    //         Max
-    //       </div>
-    //     </div>
-    //   ) : null} */}
-
-    //   <div className='swap__icon'>
-    //     <img
-    //       src={SwapVerticalIcon}
-    //       width={44}
-    //       alt=''
-    //       height={44}
-    //       onClick={() => {
-    //         if (token2?.iHave) {
-    //           setToken1(token2);
-    //           setToken2(token1);
-    //           setAmount2(null);
-    //           setAount(null);
-    //         } else {
-    //           return messageApi.error(
-    //             `Please enable ${token2.name} in your wallet.`
-    //           );
-    //         }
-    //       }}
-    //     />
-    //   </div>
-    //   <InputField
-    //     mb0={true}
-    //     inputSelect={true}
-    //     placeholder={'0.000'}
-    //     label='You Receive'
-    //     readonly={true}
-    //     value={amount2}
-    //     getData={(amount) => {
-    //       setAmount2(amount);
-    //       // setAmount2(amount.toFixed(18));
-    //     }}
-    //     type={'number'}
-    //     checkForSymbols={true}
-    //     addonAfter={selectAfterTo}
-    //   />
-    //   <div className='doSingle'>
-    //     <div
-    //       className='send__infoText'
-    //       style={{
-    //         position: 'relative',
-    //         left: '20px',
-    //         wordBreak: 'break-all',
-    //         textWrap: 'wrap',
-    //       }}
-    //     >
-    //       = {currency.symbol}
-    //       {addCommasToNumber(
-    //         exponential_to_decimal(
-    //           parseFloat(amount2 ? amount2 : 0) *
-    //             parseFloat(token2?.price || 0),
-    //           2
-    //         )
-    //         // getFlooredFixed(
-    //         //   parseFloat(amount2 ? amount2 : 0) *
-    //         //     parseFloat(token2?.price || 0),
-    //         //   2
-    //         // )
-    //       )}
-    //     </div>
-    //   </div>
-    //   {loading ? (
-    //     <div className='swap__infoText'>
-    //       <ClipLoader size={20} color='#00adee' />{' '}
-    //       <p
-    //         style={{
-    //           marginLeft: '7px',
-    //         }}
-    //       >
-    //         Fetching the best price. Please wait...
-    //       </p>
-    //     </div>
-    //   ) : null}
-
-    //   <div>
-    //     <ButtonComp
-    //       onClick={async () => {
-    //         if (isNaN(parseFloat(amount)) || isNaN(parseFloat(amount2))) {
-    //           return messageApi.error(
-    //             'Please enter a valid amount to proceed.'
-    //           );
-    //         }
-
-    //         if (
-    //           parseFloat(amount) < parseFloat(route.exchangeData.depositMin)
-    //         ) {
-    //           return messageApi.error(
-    //             `The minimum deposit amount to swap is ${route.exchangeData.depositMin} ${token1.symbol}`
-    //           );
-    //         }
-
-    //         if (
-    //           parseFloat(amount) > parseFloat(route.exchangeData.depositMax)
-    //         ) {
-    //           return messageApi.error(
-    //             `The maximum deposit amount to swap is ${route.exchangeData.depositMax} ${token1.symbol}`
-    //           );
-    //         }
-
-    //         if (parseFloat(balance) < parseFloat(amount)) {
-    //           return messageApi.error(
-    //             'Insufficient balance to proceed with the transaction.'
-    //           );
-    //         }
-
-    //         const gasPrice = await Web3Helper.getGasPrice(
-    //           token1.chain.slug,
-    //           token1.address,
-    //           token1.address,
-    //           token1.isToken,
-    //           token1.tokenAddress,
-    //           token1.coinSymbol
-    //         );
-
-    //         if (!gasPrice) {
-    //           store.dispatch(setLoading(false));
-
-    //           return messageApi.error(
-    //             'Unable to fetch gas price at the moment.'
-    //           );
-    //         }
-
-    //         const gasInEth =
-    //           (gasPrice.fast * Math.pow(10, 9) * gasPrice.estimate) /
-    //           Math.pow(10, 18);
-    //         store.dispatch(setLoading(false));
-
-    //         const parentCoin = await server.post(
-    //           '/wallet/nativeCoinFiatPrice',
-    //           {
-    //             coin_family: token1.coinFamily,
-    //             fiat_currency: currency.name,
-    //           },
-    //           {
-    //             headers: {
-    //               Authorization: account.jwtToken,
-    //             },
-    //           }
-    //         );
-
-    //         let swapDetailed = {
-    //           route,
-    //           token1,
-    //           token2,
-    //           amount,
-    //           amount2,
-    //           tokenChain: token1.chain,
-    //           networkFee: gasInEth,
-    //           walletAddress: token1.address,
-    //           token1Price: newBalanceToFiatConversion(token1.price, amount),
-    //           parentCoin: {
-    //             value: parentCoin.data.data.fiatCoinPrice.value,
-    //           },
-    //           tab: 1,
-    //           rpc: token1.rpc,
-    //           coinSymbol: token1.coinSymbol
-    //         };
-    //         store.dispatch(swapDetailAc(swapDetailed));
-    //         navigate('/crosschain-swapDetails', {
-    //           state: swapDetailed,
-    //         });
-    //       }}
-    //       text={'Swap'}
-    //       maxWidth={'100%'}
-    //       disabled={
-    //         !token1 ||
-    //         !token2 ||
-    //         !amount ||
-    //         !amount2 ||
-    //         amount <= 0 ||
-    //         amount2 <= 0 ||
-    //         loading
-    //       }
-    //     />
-    //   </div>
-
     <div
       className={`${'fixedContent height-571'} ${
         height <= 600 ? 'fixedContentOuterExt' : ''
@@ -1460,10 +1079,11 @@ function CrossChain() {
                         return; // Return if the whole input exceeds the maximum allowed
                       }
                     }
-                    setAount(amount);
+                    setAmount(amount);
 
                     handleChangeForInput1(amount);
                   }}
+
                   value={amount}
                 />
                 <p style={{ marginBottom: '8px' }}>
@@ -1558,7 +1178,6 @@ function CrossChain() {
                     })}
                 />
                 <div className="swap_onChain_pay">
-                  {/* <p>You Pay</p> */}
                   <p style={{ textAlign: 'right' }}>
                     Balance{' '}
                     <span>
@@ -1589,8 +1208,8 @@ function CrossChain() {
                   if (token2?.iHave) {
                     setToken1(token2);
                     setToken2(token1);
-                    setAmount2(null);
-                    setAount(null);
+                    setAmount2('');
+                    setAmount('');
                     setPercent(0);
                     setInfoData([]);
                   } else {
@@ -1790,14 +1409,23 @@ function CrossChain() {
             );
           }
 
-          if (parseFloat(balance) < parseFloat(amount)) {
-            console.log('INSIDE INSUFFICENT BALANCE');
-            return messageApi.error(
-              'Insufficient balance to proceed with the transaction.'
-            );
-          }
+
+          console.log('balance of tics:',balance , 'amount to swap tics:', amount)
+
+          // if (parseFloat(balance) < parseFloat(amount)) {
+          //   console.log('INSIDE INSUFFICENT BALANCE');
+          //   return messageApi.error(
+          //     'Insufficient balance to proceed with the transaction.'
+          //   );
+          // }
+
+
 
           if (token1.chain.isEVM) {
+
+          console.log('is evm chain : ', token1.chain)
+
+
             const gasPrice = await Web3Helper.getGasPrice(
               token1.chain.slug,
               token1.address,
@@ -1819,15 +1447,15 @@ function CrossChain() {
               (gasPrice.fast * Math.pow(10, 9) * gasPrice.estimate) /
               Math.pow(10, 18);
 
-            if (
-              parseFloat(balance) <
-              parseFloat(Number(amount) + Number(gasInEth))
-            ) {
-              console.log('INSIDE INSUFFICENT BALANCE');
-              return messageApi.error(
-                'Insufficient balance to proceed with the transaction.'
-              );
-            }
+            // if (
+            //   parseFloat(balance) <
+            //   parseFloat(Number(amount) + Number(gasInEth))
+            // ) {
+            //   console.log('INSIDE INSUFFICENT BALANCE');
+            //   return messageApi.error(
+            //     'Insufficient balance to proceed with the transaction.'
+            //   );
+            // }
 
             store.dispatch(setLoading(false));
 
@@ -1893,8 +1521,6 @@ function CrossChain() {
               tab: 1,
             };
             store.dispatch(swapDetailAc(swapDetailed));
-            // console.log("swapDetailedswapDetailed ", swapDetailed);
-
             navigate('/crosschain-swapDetails', {
               state: swapDetailed,
             });

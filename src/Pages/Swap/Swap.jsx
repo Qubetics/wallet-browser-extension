@@ -5,14 +5,11 @@ import ModalCloseIcon from '../../Assets/ModalCloseIcon.svg';
 import darkclose from '../../Assets/darkclose.svg';
 import { Drawer, message, Select } from 'antd';
 import { InfoCircleOutlined, SettingOutlined } from '@ant-design/icons';
-// import DarkLogo from "../../Assets/skymarvelLogo.png";
-// import Logo from "../../Assets/skymarvelLogo.png";
 import React from 'react';
 import MenuRestofHeaders from '../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders';
 import { InputField } from '../../Components/InputField/InputFieldSimple';
 import DownArrowSuffix from '../../Assets/DownArrowSuffix.svg';
 import Search from '../../Assets/SearchIcon.svg';
-// import Search from "../../Assets/SearchIcon.svg";
 import SwapVerticalIcon from '../../Assets/SwapVerticalIcon.svg';
 import ButtonComp from '../../Components/ButtonComp/ButtonComp';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -40,7 +37,6 @@ import { UNISWAP_NATIVE_WRAPPED_TOKEN_ADDRESSES } from '../../config/uniswap.con
 import { PANCAKE_NATIVE_WRAPPED_TOKEN_ADDRESSES } from '../../config/pancake.config';
 import Bignumber from 'bignumber.js';
 import { generateString } from '../../helpers/common.helper';
-// import useCheckMaintanace from "../../CustomHooks/checkMaintanance";
 import Maintanance from '../../Components/Maintanance/Maintanance';
 import { swapDetailAc } from '../../actions/swap';
 import useCurrentHeight from '../../CustomHooks/useCurrentHeight';
@@ -53,12 +49,10 @@ let randomString = generateString(15).trim();
 function addCommasToNumber(number) {
   var parts = number.toString().split('.');
   var integerPart = parts[0];
-  var decimalPart = parts[1] || ''; // Handle cases where there is no decimal part
+  var decimalPart = parts[1] || '';
 
-  // Add commas to the integer part
   integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 
-  // Combine the integer and decimal parts
   if (decimalPart !== '') {
     return integerPart + '.' + decimalPart;
   } else {
@@ -118,9 +112,6 @@ function Swap() {
   const updateRef = useRef(true);
   const { theme } = useSelector((state) => state);
   const [percent, setPercent] = useState(null);
-
-  // let g = { type: "on_chain_swap", is_maintenance: 1 };
-  // let b = { type: "cross_chain_swap", is_maintenance: 0 };
   const [onChainSwapM, setOnChainSwapM] = useState({});
   const [crossChainM, setCrossChainM] = useState({});
   const [activeIndex, setActiveIndex] = useState(null);
@@ -1801,131 +1792,6 @@ function Swap() {
       />
     </div>
   );
-  // const selectAfterTo = (
-  //   <div className={"addonAfter"}>
-  //     <Select
-  //       suffixIcon={<img src={DownArrowSuffix} />}
-  //       style={{
-  //         width: 100,
-  //       }}
-  //       disabled={!token1 || !token2 || loading}
-  //       onClick={() => {
-  //         if (!token1 || !token2 || loading) return;
-  //         setSelected(2);
-  //         setOpen(true);
-  //       }}
-  //       open={false}
-  //       value={[
-  //         {
-  //           value: token2?.id,
-  //           label: (
-  //             <span className="flexedItemSelect">
-  //               {!token2?.image ? (
-  //                 <div
-  //                   style={{
-  //                     alignItems: "center",
-  //                     backgroundColor: "rgba(98,126,234,.2)",
-  //                     borderRadius: "49%",
-  //                     display: "flex",
-  //                     height: "29px",
-  //                     justifyContent: "center",
-  //                     width: "29px",
-  //                     marginRight: "15px",
-  //                   }}
-  //                 >
-  //                   {" "}
-  //                   {token2?.name.split("")[0]}
-  //                 </div>
-  //               ) : (
-  //                 <img
-  //                   style={{
-  //                     height: "30px",
-  //                     width: "30px",
-  //                     objectFit: "contain",
-  //                     position: "relative",
-  //                     borderRadius: "15px",
-  //                   }}
-  //                   alt=""
-  //                   src={token2?.image}
-  //                 />
-  //               )}
-  //               {token2?.symbol}
-  //             </span>
-  //           ),
-  //         },
-  //       ]}
-  //       // defaultValue={[
-  //       //   {
-  //       //     value: token2?.id,
-  //       //     label: (
-  //       //       <span className="flexedItemSelect">
-  //       //         {!token2?.image ? (
-  //       //           <div
-  //       //             style={{
-  //       //               alignItems: "center",
-  //       //               backgroundColor: "rgba(98,126,234,.2)",
-  //       //               borderRadius: "49%",
-  //       //               display: "flex",
-  //       //               height: "29px",
-  //       //               justifyContent: "center",
-  //       //               width: "29px",
-  //       //               marginRight: "15px",
-  //       //             }}
-  //       //           >
-  //       //             {" "}
-  //       //             {token2?.name.split("")[0]}
-  //       //           </div>
-  //       //         ) : (
-  //       //           <img
-  //       //             style={{
-  //       //               height: "30px",
-  //       //               width: "30px",
-  //       //               objectFit: "contain",
-  //       //               position: "relative",
-  //       //               borderRadius: "15px",
-  //       //             }}
-  //       //             alt=""
-  //       //             src={token2?.image}
-  //       //           />
-  //       //         )}
-  //       //         {token2?.symbol}
-  //       //       </span>
-  //       //     ),
-  //       //   },
-  //       // ]}
-  //       onSelect={(value) => {
-  //         setToken2(availableTokens.find((el) => el.id == value));
-  //         handleToken2Change(availableTokens.find((el) => el.id == value));
-  //       }}
-  //       options={availableTokens
-  //         .filter((token) => token.id !== token1?.id)
-  //         .map((token) => {
-  //           return {
-  //             value: token?.id,
-  //             label: (
-  //               <span className="flexedItemSelect">
-  //                 <img
-  //                   style={{
-  //                     height: "20px",
-  //                     width: "20px",
-  //                     objectFit: "contain",
-  //                     marginLeft: "20px",
-  //                     marginRight: "20px",
-  //                   }}
-  //                   src={token?.image}
-  //                 />
-  //                 {token?.symbol}
-  //               </span>
-  //             ),
-  //           };
-  //         })}
-  //     />
-  //   </div>
-  // );
-
-  useEffect(() => {
-    console.log('🚀 ~ balance:', balance);
-  }, [balance]);
 
   return (
     <div className={`scrollableCont`}>

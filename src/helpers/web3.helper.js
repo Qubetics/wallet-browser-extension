@@ -396,9 +396,9 @@ export class Web3Helper {
       console.log("🚀 ~ Web3Helper ~ balance:", balance)
 
       
-      if (totalAmount > balance) {
-        return false;
-      }
+      // if (totalAmount > balance) {
+      //   return false;
+      // }
 
       const ethersProvider = new ethers.providers.JsonRpcProvider(rpc);
       const wallet = new ethers.Wallet(privateKey, ethersProvider);
