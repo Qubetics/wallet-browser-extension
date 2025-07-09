@@ -1,26 +1,26 @@
 /*global chrome*/
 /* eslint-disable jsx-a11y/alt-text */
-import React, { useEffect, useRef, useState } from "react";
-import "./Wallet.scss";
-import FilterIcon from "../../Assets/twoLine.svg";
-import LightManage from "../../Assets/light-manage.svg";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
-import nftIcon from "../../Assets/nftIcon.svg";
-import { store } from "../..";
-import BigNumber from "bignumber.js";
-import { server } from "../../server";
+import React, { useEffect, useRef, useState } from 'react';
+import './Wallet.scss';
+import FilterIcon from '../../Assets/twoLine.svg';
+import LightManage from '../../Assets/light-manage.svg';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import nftIcon from '../../Assets/nftIcon.svg';
+import { store } from '../..';
+import BigNumber from 'bignumber.js';
+import { server } from '../../server';
 import {
   addCommasToNumber,
   exponential_to_decimal,
   formatSmallNumber,
   getFlooredFixed,
-} from "../../helpers/conversion.helper";
-import { setTokens } from "../../actions/tokens";
-import useCurrentHeight from "../../CustomHooks/useCurrentHeight";
-import CoinsTableDraggable from "../../Components/CoinsTable/CoinsTableDraggable";
-import ButtonComp from "../../Components/ButtonComp/ButtonComp";
-import { setAccount } from "../../actions/accounts";
+} from '../../helpers/conversion.helper';
+import { setTokens } from '../../actions/tokens';
+import useCurrentHeight from '../../CustomHooks/useCurrentHeight';
+import CoinsTableDraggable from '../../Components/CoinsTable/CoinsTableDraggable';
+import ButtonComp from '../../Components/ButtonComp/ButtonComp';
+import { setAccount } from '../../actions/accounts';
 function Wallet() {
   const { account, currency, tokens, balanceIn, theme } = useSelector(
     (state) => state
@@ -29,10 +29,8 @@ function Wallet() {
 
   const { state } = useLocation();
 
- 
-
   const getSidePanelStatus = async () => {
-    const isSidePanelOpen = await chrome.storage.local.get("openSidePanel");
+    const isSidePanelOpen = await chrome.storage.local.get('openSidePanel');
     setIsSidePanelOpen(isSidePanelOpen.openSidePanel);
   };
 
@@ -43,25 +41,25 @@ function Wallet() {
   const [currentPage, setCurrentPage] = useState(1);
   const [isFetchingData, setIsFetchingData] = useState(false);
   const [total, setTotal] = useState(0);
-  const [sel, setSel] = useState(
-    state ? (state?.showNftTrue ? 1 : 0) : 0
-  );
+  const [sel, setSel] = useState(state ? (state?.showNftTrue ? 1 : 0) : 0);
   const [refresh, setRefresh] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const height = useCurrentHeight();
   const [loading, setLoading] = useState(false);
 
-  const init = async (_account ) => {
+  const init = async (_account) => {
     setLoading(true);
     const walletsList = await server.post(
       `/wallet/portfolio`,
       {
-        addressListKeys: _account ?  _account?.addressLists : account?.addressLists,
+        addressListKeys: _account
+          ? _account?.addressLists
+          : account?.addressLists,
         coin_family: _account ? _account?.coinFamilies : account?.coinFamilies,
         fiat_type: currency.name,
         limit: 2000,
         page: currentPage,
-        search: "",
+        search: '',
       },
       {
         headers: {
@@ -77,9 +75,9 @@ function Wallet() {
   };
 
   useEffect(() => {
-    console.log('state',state,state?.updatedAccount);
+    console.log('state', state, state?.updatedAccount);
     init(state?.updatedAccount);
-  }, [currentPage, refresh , state?.updatedAccount,account]);
+  }, [currentPage, refresh, state?.updatedAccount, account]);
 
   const parentRef = useRef(null);
 
@@ -106,9 +104,9 @@ function Wallet() {
         <h3 className="wallet__heading__text">Crypto's</h3>
         <div
           style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "11px",
+            display: 'flex',
+            alignItems: 'center',
+            gap: '11px',
           }}
         >
           <div className="wallet__heading__filter">
@@ -131,29 +129,30 @@ function Wallet() {
               />
             </Link> */}
             <div
-              onClick={() => navigate("/nftDetail", { state: { detail: {} } })}
+              onClick={() => navigate('/nftDetail', { state: { detail: {} } })}
             >
               <img src={nftIcon} />
             </div>
           </div>
           <div className="wallet__heading__filter">
             <Link to="/manage">
-              <img src={theme === "darkTheme" ? LightManage : FilterIcon} />
+              <img src={theme === 'darkTheme' ? LightManage : FilterIcon} />
             </Link>
           </div>
         </div>
       </div>
       <div
-        className={`${"wallet__tableOuter"} ${height <= 600 ? "wallet__tabelOuterExt" : ""
-          }`}
+        className={`${'wallet__tableOuter'} ${
+          height <= 600 ? 'wallet__tabelOuterExt' : ''
+        }`}
         ref={parentRef}
         onScroll={handleScroll}
       >
         {tokens.length === 0 ? (
           <p className="noAddress">
             {loading
-              ? ""
-              : "No token available. Please add new tokens or enable them from the manage section."}
+              ? ''
+              : 'No token available. Please add new tokens or enable them from the manage section.'}
           </p>
         ) : (
           <CoinsTableDraggable
@@ -175,29 +174,44 @@ function Wallet() {
                   coinSubName: token.coin.coin_name,
                   coinPrice: myPrice.toNumber()
                     ? formatSmallNumber(
-                      exponential_to_decimal(myPrice.toNumber())
-                    )
-                    : "0.00",
+                        exponential_to_decimal(myPrice.toNumber())
+                      )
+                    : '0.00',
                   coinStatus: getFlooredFixed(
                     price
                       ? parseFloat(
-                        price.price_change_percentage_24h || 0
-                      ).toLocaleString()
+                          price.price_change_percentage_24h || 0
+                        ).toLocaleString()
                       : 0,
                     2
                   ),
                   currCryptoBal: balanceIn
                     ? `${addCommasToNumber(
-                      parseFloat(getFlooredFixed(token.balance, 6))
-                    )}`
+                        parseFloat(getFlooredFixed(token.balance, 6))
+                      )}`
                     : `****`,
-                  currCryptoBalSymbol: balanceIn ?  token.coin.coin_symbol.toUpperCase() : '****',
+                  currCryptoBalSymbol: balanceIn
+                    ? token.coin.coin_symbol.toUpperCase()
+                    : '****',
                   currDollerBal: balanceIn
                     ? addCommasToNumber(getFlooredFixed(formattedResult, 2))
-                    : "****",
-                  routeTo: "currencyDetails",
-                  // type: token.coin.coin_family === 1 ? "BEP20" : "ERC20",
-                  type: token.coin.is_token ? (token.coin.coin_family === 1 ? "BEP20" : token.coin.coin_family === 2 ? "ERC20" : token.coin.coin_family === 4 ? "ERC20" : token.coin.coin_family === 5 ? "SPL" : token.coin.coin_family === 6 ? "TRC20" : ""):'',
+                    : '****',
+                  routeTo: 'currencyDetails',
+                  type: token.coin.is_token
+                    ? token.coin.coin_family === 1
+                      ? 'BEP20'
+                      : token.coin.coin_family === 2
+                      ? 'ERC20'
+                      : token.coin.coin_family === 4
+                      ? 'ERC20'
+                      : token.coin.coin_family === 5
+                      ? 'SPL'
+                      : token.coin.coin_family === 6
+                      ? 'TRC20'
+                      : token.coin.coin_family === 7
+                      ? 'TICS20'
+                      : ''
+                    : '',
                   status: true,
                   coin: token,
                 };
@@ -206,8 +220,9 @@ function Wallet() {
           />
         )}
       </div>
-      <div className={`${"walletBtn"} ${height <= 600 ? "walletBtnOuterExt" : ""
-          }`}>
+      <div
+        className={`${'walletBtn'} ${height <= 600 ? 'walletBtnOuterExt' : ''}`}
+      >
         <ButtonComp
           maxWidth="190px"
           onClick={() => {

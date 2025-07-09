@@ -9,19 +9,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 // import ModalCustom from "../ModalCustom/ModalCustom";
 import ModalCustom from "../../../Components/ModalCustom/ModalCustom";
 import CopyIconBlue from "../../../Assets/CopyIconBlue.svg";
-import JustLogo from "../../../Assets/JustLogo.svg";
-import InfoIcon from "../../../Assets/InfoIcon.svg";
-import PlusBordredIcon from "../../../Assets/PlusBordredIcon.svg";
-import SendIconWhite from "../../../Assets/SendIconWhite.svg";
-import RecieveIconWhite from "../../../Assets/RecieveIconWhite.svg";
-import BuyIconWhite from "../../../Assets/other-buy.png";
-import SwapIconWhite from "../../../Assets/SwapIconWhite.svg";
-import DarkSendIcon from "../../../Assets/DarkSendIcon.svg";
-import DarkRecieveIcon from "../../../Assets/DarkRecieveIcon.svg";
-import Darkotherbuy from "../../../Assets/Newbuy.png";
-import DarkSwapIcon from "../../../Assets/DarkSwapIcon.svg";
-import Buy from "../../../Assets/buy-sell.png";
-import { Dropdown, message } from "antd";
+import { message } from "antd";
 import { WalletHelper } from "../../../helpers/wallet.helper";
 import { useSelector } from "react-redux";
 import { QRCode } from "react-qrcode-logo";
@@ -35,7 +23,6 @@ import { setLoading } from "../../../actions/loading";
 // import CoinsTable from "../../../CoinsTable/CoinsTable";
 import BigNumber from "bignumber.js";
 // import Logo from "../../../Assets/logo.png";
-import HistoryIcon from "../../../Assets/HistoryIcon.svg";
 
 import {
   addCommasToNumber,
@@ -51,9 +38,8 @@ import { setBalancesIn } from "../../../actions/balance-off-out";
 // import { SolanaHelper } from "../../helpers/solana.helper";
 // import DownIcon from "../../../Assets/DownIcon.svg";
 import { store } from "../../..";
-import { log } from "loglevel";
 
-function CurrencyBalanceDetails({ className, textLeft, mt0, coin }) {
+function CurrencyBalanceDetails({ className, textLeft, mt0, coin,crossChainDetail }) {
   const { account, currency, chain, tokens, theme, balanceIn } = useSelector(
     (state) => {
       return state;
@@ -523,102 +509,21 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin }) {
             }
           >
             <div className={"balanceDetails__items__img"}>
-              {/* {path === "currencyDetails" ? (
-                <img src={RecieveIconWhite} height={50} width={50} />
-              ) : theme === "darkTheme" ? (
-                <img src={DarkRecieveIcon} />
-              ) : (
-                <img src={RecieveIcon} height={50} width={50} />
-              )} */}
               <img src={RecieveNew}  height={50} width={50}/>
             </div>
             <span>Receive</span>
           </Link>
 
-          {/* <div>
-            <img src={Darkotherbuy} alt='Buy/Sell' />
-            <span>Buy/Sell</span>
-          </div> */}
-
-          {/* <Link
-            to="/buy-sell"
+          {coin?.coin?.for_swap === 1 || crossChainDetail !== null ? <Link
             onClick={(e) => {
               e.preventDefault();
-              if (buySellM?.is_maintenance) {
-                return messageApi.error("Buy/Sell is under maintenance.");
-              }
-              if (path === "currencyDetails") {
-                if (coin.coin.on_off_ramp_coin) {
-                  return setSelectedCoin(coin.coin.on_off_ramp_coin);
-                } else {
-                  return messageApi.error("Coin not supported.");
-                }
-              } else {
-                return navigate("/buy-sell");
-              }
-            }}
-            className={
-              path === "currencyDetails"
-                ? "balanceDetails__items__whiteText"
-                : "balanceDetails__items"
-            }
-          >
-            <div className={"balanceDetails__items__img"}> */}
-          {/* {path === "currencyDetails" ? (
-                  <img
-                    // src={BuyIconWhite}
-                    height={50}
-                    width={50}
-                    style={{ filter: "brightness(0) invert(1)" }}
-                    alt=""
-                  />
-                ) : theme === "darkTheme" ? (
-                  <img src={Darkotherbuy} />
-                ) : (
-                  <img src={Buy} height={50} width={50} />
-                )} */}
-          {/* <img src={Darkotherbuy} />
-            </div>
-            <span>{account.isWatchOnly ? "Buy" : "Buy/Sell"} </span>
-          </Link> */}
-          {/* <Link
-            // to="/buy-sell"
-            to="#"
-            onClick={(e) => {
-              e.preventDefault();
-              if (buySellM?.is_maintenance) {
-                return messageApi.error("Buy/Sell is under maintenance.");
-              }
-              if (path === "currencyDetails") {
-                // if (coin.coin.on_off_ramp_coin) {
-                return setSelectedCoin(coin.coin.on_off_ramp_coin);
-                // } else {
-                //   return messageApi.error("Coin not supported.");
-                // }
-              } else {
-                // return navigate("/buy-sell");
-              }
-            }}
-            className={
-              path === "currencyDetails"
-                ? "balanceDetails__items__whiteText"
-                : "balanceDetails__items"
-            }
-          >
-            <div className={"balanceDetails__items__img"}>
-              <img src={Darkotherbuy} alt="" />
-            </div>
-            <span>{"Buy"} </span>
-          </Link> */}
-          {coin?.coin?.for_swap && <Link
-            onClick={(e) => {
-              e.preventDefault();
-              // path === "currencyDetails" ? showModal() : navigate("/swap");
               navigate("/swap", {
                 state: {
-                  fromOrTo: 1,//coin?.coin?.token_address ?? coin?.coin?.wallet_address,
+                  fromOrTo: 1,
                   coinFamily: coin?.coin?.coin_family,
-                  coinId: coin?.coin?.coin_id
+                  coinId: coin?.coin?.coin_id,
+                  isCrossChain:crossChainDetail !== null ? true : false,
+                  isOnChain:coin?.coin?.for_swap === 1 ? true : false
                 }
               })  
             }}
@@ -633,34 +538,7 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin }) {
               <img src={TradeNew}  height={50} width={50}/>
             </div>
             <span>Trade</span>
-          </Link>}
-          {/* {path !== "currencyDetails" && (
-            <Link
-              onClick={(e) => {
-                e.preventDefault();
-                path === "currencyDetails"
-                  ? showModal()
-                  : navigate("/watch-list-tokens");
-              }}
-              to="#"
-              className={
-                path === "currencyDetails"
-                  ? "balanceDetails__items__whiteText"
-                  : "balanceDetails__items"
-              }
-            >
-              <div className={"balanceDetails__items__img"}>
-                {path === "currencyDetails" ? (
-                  <img src={RecieveIconWhite} height={50} width={50} />
-                ) : theme === "darkTheme" ? (
-                  <img src={DarkRecieveIcon} />
-                ) : (
-                  <img src={RecieveIcon} height={50} width={50} />
-                )}
-              </div>
-              <span>Watch List</span>
-            </Link>
-          )} */}
+          </Link>: null}
         </div>
         {coin ? (
           <ModalCustom

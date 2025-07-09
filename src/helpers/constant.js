@@ -13,7 +13,7 @@ export const supportedNetworks = [{ coin_family: 1, network: "BINANCESMARTCHAIN"
 
 
 export const token_type = (coin_family) => {
-  return coin_family === 1 ? "BEP20" : coin_family === 2 ? "ERC20" : coin_family === 4 ? "POL ERC20" : coin_family === 5 ? "SPL" : coin_family === 6 ? "TRC20" : ""
+  return coin_family === 1 ? "BEP20" : coin_family === 2 ? "ERC20" : coin_family === 4 ? "POL ERC20" : coin_family === 5 ? "SPL" : coin_family === 6 ? "TRC20" : coin_family === 7 ? "TICS20" : ""
 }
 
 export const rpc_chain = (coin_family) => {

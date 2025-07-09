@@ -281,12 +281,10 @@ export class Web3Helper {
   static getTokenBalance = async (tokenAddress, owner, rpc) => {
     try {
       const provider = new Web3.providers.HttpProvider(rpc);
-      console.log("🚀 ~ Web3Helper ~ getTokenBalance= ~ provider:", provider)
       const web3 = new Web3(provider);
 
       const contract = new web3.eth.Contract(ABI, tokenAddress);
       const balance = await contract.methods.balanceOf(owner).call();
-      console.log("🚀 ~ Web3Helper ~ getTokenBalance= ~ balance:", balance)
       const decimals = await contract.methods.decimals().call();
 
       const originalNumber = balance;
@@ -450,7 +448,7 @@ export class Web3Helper {
       return response.data.tx_hash;
     } catch (error) {
       console.log('error occure----> ', error);
-      return error;
+      return false;
     }
   };
 
@@ -510,7 +508,7 @@ export class Web3Helper {
     coinFamily,
     gasPriceType,
     orderId,
-    password
+    sessionPassword
   ) => {
     console.log('RAW TXN FOR TOKEN:', {
       to,
@@ -537,7 +535,7 @@ export class Web3Helper {
         rpc_chain(coinFamily)
       );
       const contract = new ethers.Contract(tokenAddress, ABI, provider);
-      const { privateKey } = await WalletHelper.getPrivateKeyEvm(password);
+      const { privateKey } = await WalletHelper.getPrivateKeyEvm(sessionPassword);
 
       if (!privateKey) {
         console.log('INVALID PRIVATE KEY');

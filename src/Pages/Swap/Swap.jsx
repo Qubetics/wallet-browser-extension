@@ -134,6 +134,12 @@ function Swap() {
         setAount(swapDetail?.amount.toString());
       }
     }
+    if (state?.isCrossChain && !state?.isOnChain) {
+      setSel(1);
+    }
+    if (state?.isOnChain && state?.isCrossChain) {
+      setSel(0);
+    }
     init();
   }, []);
 
@@ -203,18 +209,22 @@ function Swap() {
         store.dispatch(overAllLoader(false));
         console.log('AMOUNT TO SWAP :', amountToSend);
 
-        const amountBN = new BigNumber(amountToSend);
-        const percentageBN = new BigNumber(percentage).dividedBy(100);
+        // const amountBN = new BigNumber(amountToSend);
+        // const percentageBN = new BigNumber(percentage).dividedBy(100);
 
-        const amountCalculatedByPercentage =
-          amountBN.multipliedBy(percentageBN);
-        const finalAmountToSend = amountCalculatedByPercentage.toString();
+        // const amountCalculatedByPercentage =
+        //   amountBN.multipliedBy(percentageBN);
+        // const finalAmountToSend = amountCalculatedByPercentage.toString();
+
+        const finalAmountToSend = new BigNumber(token1.balance).multipliedBy(
+          new BigNumber(percentage).dividedBy(100)
+        );
 
         console.log('FINAL AMOUNT  :', percentage, finalAmountToSend);
         setAount(
-          finalAmountToSend.toString() == 0
-            ? finalAmountToSend
-            : finalAmountToSend
+          finalAmountToSend == 0
+            ? finalAmountToSend.toString()
+            : finalAmountToSend.toFixed(6).replace(/\.?0+$/, '')
         );
         setBalance(amountToSend);
         console.log(
@@ -222,7 +232,14 @@ function Swap() {
           finalAmountToSend
         );
 
-        await handleInputChange(finalAmountToSend, token1, token2, true);
+        await handleInputChange(
+          finalAmountToSend == 0
+            ? finalAmountToSend.toString()
+            : finalAmountToSend.toFixed(6).replace(/\.?0+$/, ''),
+          token1,
+          token2,
+          true
+        );
       }
     } catch (error) {
       console.log('error', error);
@@ -242,10 +259,6 @@ function Swap() {
       });
 
       setCommision(comissionData.data.data);
-
-      // console.log("ccaaaaaaa ", account);
-      // console.log("currencycurrency ", currency);
-      // console.log("STATTTTTTTTTT ", state);
 
       const { data } = await server.post(
         `/wallet/swap_coinlist`,
@@ -354,8 +367,6 @@ function Swap() {
             }
           );
 
-          //Configur ethe response like above
-
           const newTokens = data.data.map((token) => {
             return {
               id: token.coin_id,
@@ -387,9 +398,8 @@ function Swap() {
           //assign the object to my state token
           const myStateToken = newTokens[0];
 
-          // console.log('newTokensnewTokensnewTokens ', newTokens);
-
-          if (!myStateToken) {
+          if (!myStateToken && !state?.isCrossChain) {
+            console.log('TOKEN IN SWAP MODULE 1', newTokens);
             messageApi.error('Token not available for swap.');
           }
 
@@ -649,7 +659,8 @@ function Swap() {
           //assign the object to my state token
           const myStateToken = newTokens[0];
 
-          if (!myStateToken) {
+          if (!myStateToken && !state?.isCrossChain) {
+            console.log('TOKEN IN SWAP MODULE 2', newTokens);
             messageApi.error('Token not available for swap.');
           }
 
@@ -1630,10 +1641,7 @@ function Swap() {
   const debounceTimeout = useRef(null);
 
   function handleChangeForInput1(newAmount) {
-    // Clear the previous timeout
     clearTimeout(debounceTimeout.current);
-
-    // Set a new timeout to execute the action after 2000 milliseconds
     debounceTimeout.current = setTimeout(() => {
       handleInputChange(newAmount, token1, token2);
     }, 2000);
@@ -1642,10 +1650,7 @@ function Swap() {
   const debounceTimeout2 = useRef(null);
 
   function handleChangeForInput2(newAmount) {
-    // Clear the previous timeout
     clearTimeout(debounceTimeout2.current);
-
-    // Set a new timeout to execute the action after 2000 milliseconds
     debounceTimeout2.current = setTimeout(() => {
       handleInputChangeForToToken(newAmount, token2);
     }, 2000);
@@ -1729,45 +1734,6 @@ function Swap() {
             ),
           },
         ]}
-        // defaultValue={[
-        //   {
-        //     value: token1?.id,
-        //     label: (
-        //       <span className="flexedItemSelect">
-        //         {!token1?.image ? (
-        //           <div
-        //             style={{
-        //               alignItems: "center",
-        //               backgroundColor: "rgba(98,126,234,.2)",
-        //               borderRadius: "49%",
-        //               display: "flex",
-        //               height: "29px",
-        //               justifyContent: "center",
-        //               width: "29px",
-        //               marginRight: "15px",
-        //             }}
-        //           >
-        //             {" "}
-        //             {token1?.name.split("")[0]}
-        //           </div>
-        //         ) : (
-        //           <img
-        //             style={{
-        //               height: "30px",
-        //               width: "30px",
-        //               objectFit: "contain",
-        //               position: "relative",
-        //               borderRadius: "15px",
-        //             }}
-        //             alt=""
-        //             src={token1?.image}
-        //           />
-        //         )}
-        //         {token1?.symbol}
-        //       </span>
-        //     ),
-        //   },
-        // ]}
         style={{
           width: 100,
         }}
@@ -1801,131 +1767,6 @@ function Swap() {
       />
     </div>
   );
-  // const selectAfterTo = (
-  //   <div className={"addonAfter"}>
-  //     <Select
-  //       suffixIcon={<img src={DownArrowSuffix} />}
-  //       style={{
-  //         width: 100,
-  //       }}
-  //       disabled={!token1 || !token2 || loading}
-  //       onClick={() => {
-  //         if (!token1 || !token2 || loading) return;
-  //         setSelected(2);
-  //         setOpen(true);
-  //       }}
-  //       open={false}
-  //       value={[
-  //         {
-  //           value: token2?.id,
-  //           label: (
-  //             <span className="flexedItemSelect">
-  //               {!token2?.image ? (
-  //                 <div
-  //                   style={{
-  //                     alignItems: "center",
-  //                     backgroundColor: "rgba(98,126,234,.2)",
-  //                     borderRadius: "49%",
-  //                     display: "flex",
-  //                     height: "29px",
-  //                     justifyContent: "center",
-  //                     width: "29px",
-  //                     marginRight: "15px",
-  //                   }}
-  //                 >
-  //                   {" "}
-  //                   {token2?.name.split("")[0]}
-  //                 </div>
-  //               ) : (
-  //                 <img
-  //                   style={{
-  //                     height: "30px",
-  //                     width: "30px",
-  //                     objectFit: "contain",
-  //                     position: "relative",
-  //                     borderRadius: "15px",
-  //                   }}
-  //                   alt=""
-  //                   src={token2?.image}
-  //                 />
-  //               )}
-  //               {token2?.symbol}
-  //             </span>
-  //           ),
-  //         },
-  //       ]}
-  //       // defaultValue={[
-  //       //   {
-  //       //     value: token2?.id,
-  //       //     label: (
-  //       //       <span className="flexedItemSelect">
-  //       //         {!token2?.image ? (
-  //       //           <div
-  //       //             style={{
-  //       //               alignItems: "center",
-  //       //               backgroundColor: "rgba(98,126,234,.2)",
-  //       //               borderRadius: "49%",
-  //       //               display: "flex",
-  //       //               height: "29px",
-  //       //               justifyContent: "center",
-  //       //               width: "29px",
-  //       //               marginRight: "15px",
-  //       //             }}
-  //       //           >
-  //       //             {" "}
-  //       //             {token2?.name.split("")[0]}
-  //       //           </div>
-  //       //         ) : (
-  //       //           <img
-  //       //             style={{
-  //       //               height: "30px",
-  //       //               width: "30px",
-  //       //               objectFit: "contain",
-  //       //               position: "relative",
-  //       //               borderRadius: "15px",
-  //       //             }}
-  //       //             alt=""
-  //       //             src={token2?.image}
-  //       //           />
-  //       //         )}
-  //       //         {token2?.symbol}
-  //       //       </span>
-  //       //     ),
-  //       //   },
-  //       // ]}
-  //       onSelect={(value) => {
-  //         setToken2(availableTokens.find((el) => el.id == value));
-  //         handleToken2Change(availableTokens.find((el) => el.id == value));
-  //       }}
-  //       options={availableTokens
-  //         .filter((token) => token.id !== token1?.id)
-  //         .map((token) => {
-  //           return {
-  //             value: token?.id,
-  //             label: (
-  //               <span className="flexedItemSelect">
-  //                 <img
-  //                   style={{
-  //                     height: "20px",
-  //                     width: "20px",
-  //                     objectFit: "contain",
-  //                     marginLeft: "20px",
-  //                     marginRight: "20px",
-  //                   }}
-  //                   src={token?.image}
-  //                 />
-  //                 {token?.symbol}
-  //               </span>
-  //             ),
-  //           };
-  //         })}
-  //     />
-  //   </div>
-  // );
-
-  useEffect(() => {
-    console.log('🚀 ~ balance:', balance);
-  }, [balance]);
 
   return (
     <div className={`scrollableCont`}>
@@ -1950,6 +1791,7 @@ function Swap() {
                   store.dispatch(swapDetailAc(null));
                 }
                 setSel(0);
+                setAount(null)
               }}
             >
               On-Chain
@@ -1990,34 +1832,49 @@ function Swap() {
                           type="number"
                           className="myInput"
                           placeholder="0.000"
-                          onChange={({ target: { value: amount } }) => {
+                          onWheel={(e) => e.currentTarget.blur()}
+                          inputMode="decimal"
+                          onKeyDown={(e) => {
+                            const allowedKeys = [
+                              'Backspace',
+                              'Tab',
+                              'ArrowLeft',
+                              'ArrowRight',
+                              'Delete',
+                              'Home',
+                              'End',
+                            ];
+
+                            // Allow control/navigation keys
+                            if (allowedKeys.includes(e.key)) return;
+
+                            if (!/^[0-9.]$/.test(e.key)) {
+                              e.preventDefault(); // Block everything else (letters, +, -, e, etc.)
+                            }
+                          }}
+                          onChange={({ target: { value: _amount } }) => {
+                            console.log('_amount', _amount);
+
+                            // const numberRegex = /^\d*\.?\d*$/;
+                            // if (!numberRegex.test(_amount)) return;
+
                             if (percent != null) {
                               setPercent(null);
                             }
 
-                            const afterDecimal = amount.split('.')[1];
+                            const [beforeDecimal = '', afterDecimal = ''] =
+                              _amount.split('.');
                             const maxCharactersBeforeDecimal = 15;
-                            if (afterDecimal) {
-                              const maxDecimals = token1.decimals;
-                              if (
-                                afterDecimal.toString().length > maxDecimals
-                              ) {
-                                return;
-                              }
-                              const beforeDecimal = amount.split('.')[0];
-                              if (
-                                beforeDecimal.toString().length >
-                                maxCharactersBeforeDecimal
-                              ) {
-                                return;
-                              }
-                            } else {
-                              if (amount.length > maxCharactersBeforeDecimal) {
-                                return;
-                              }
-                            }
-                            setAount(amount);
-                            handleChangeForInput1(amount);
+                            const maxDecimals = token1.decimals;
+
+                            if (
+                              beforeDecimal.length > maxCharactersBeforeDecimal
+                            )
+                              return;
+                            if (afterDecimal.length > maxDecimals) return;
+
+                            setAount(_amount); // ✅ typo fixed from `setAount`
+                            handleChangeForInput1(_amount);
                           }}
                           value={amount}
                         />
@@ -2146,7 +2003,7 @@ function Swap() {
                               }
                         }
                         onClick={() => {
-                          console.log('token2',token2,token1)
+                          console.log('token2', token2, token1);
                           if (token2?.iHave) {
                             setAmount2(0);
                             setAount(0);
@@ -2648,7 +2505,7 @@ function Swap() {
             {crossChainM?.is_maintenance ? (
               <Maintanance text="Cross chain swap is in under maintenance" />
             ) : (
-              <CrossChain />
+              <CrossChain state={state} />
             )}
           </TabPanel>
         </Tabs>

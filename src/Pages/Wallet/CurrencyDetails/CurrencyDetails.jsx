@@ -34,28 +34,19 @@ import { token_type } from '../../../helpers/constant';
 
 function CurrencyDetails() {
   const { currency, account } = useSelector((state) => state);
-
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [crossChainDetail,setCrossChainDetail]=useState(null);
+  const [price, setPrice] = useState(0);
+  const [isGraphExist,setIsGraphExist]=useState(false);
 
   const getLocation = useLocation();
-
   const path = getLocation.pathname.replace('/', '');
-
   const navigate = useNavigate();
-
   const { state } = useLocation();
   const {
     state: { coin },
     ...rest
   } = useLocation();
-
-  // const { state } = useLocation();
-
-  const [price, setPrice] = useState(0);
-
-  useEffect(() => {
-    setPrice(coin.coin.fiat_price_data || 0);
-  }, []);
 
   const showModal = () => {
     setIsModalOpen(true);
@@ -95,11 +86,29 @@ function CurrencyDetails() {
       );
     }
 
+
+    const coinDetail = await server.post('/wallet/coinWalletDetail' , {
+
+      coin_id: coin.coin.coin_id,
+      cmc_id:  coin.coin.cmc_id,
+      fiat_currency:'USD',
+      wallet_address:coin.wallet_address
+    },
+    {
+      headers: {
+        Authorization: account.jwtToken,
+      },
+    }
+  )
+
+    console.log('coinDetail',coinDetail);
+    setCrossChainDetail(coinDetail?.data?.data?.coin?.cross_chain_data);
+    setIsGraphExist(coinDetail?.data?.graph?.length > 0 ? true : false);
+
     const transactionList = await server.post(
       `/wallet/transaction/list`,
       {
         coin_id: coin.coin.coin_id,
-        // coin_type: coin.coin.coin_symbol,
         coin_family: [coin.coin.coin_family],
         addrsListKeys: [coin.wallet_address],
         page: 1,
@@ -127,11 +136,11 @@ function CurrencyDetails() {
         },
       }
     );
-
     setHistory(transactionList?.data?.data);
   };
 
   useEffect(() => {
+    setPrice(coin.coin.fiat_price_data || 0);
     init();
   }, []);
 
@@ -179,8 +188,7 @@ function CurrencyDetails() {
           </span>
         }
         chartIcon={() => {
-          console.log('COIN DATA :',coin?.coin);
-          if (coin?.coin?.graph_pair) {
+          if (coin?.coin?.graph_pair || isGraphExist || coin?.coin?.graph_source) {
             let pay = {
               coin_id: coin?.coin?.coin_id,
               cmc_id: coin?.coin?.cmc_id,
@@ -200,14 +208,15 @@ function CurrencyDetails() {
                 currency?.name
               }`,
             });
-          } else {
-            return messageApi.error('Graph is not available for this asset.');
           }
+          //  else {
+          //   return messageApi.error('Graph is not available for this asset.');
+          // }
         }}
         // stared={() => {
         //   navigate("/watch-list-tokens");
         // }}
-        pairExist={coin?.coin?.graph_pair}
+        pairExist={coin?.coin?.graph_pair || isGraphExist || coin?.coin?.graph_source}
         stared={async () => {
           console.log('coin?.coin', coin, account);
           try {
@@ -341,6 +350,7 @@ function CurrencyDetails() {
                 parseFloat(getFlooredFixed(coin?.balance, 4))
               )} ${coin?.coin?.coin_symbol}`}
               coin={coin}
+              crossChainDetail={crossChainDetail}
             />
             {/* <BalanceDetails
               mt0="currDetails__card__mt0"
