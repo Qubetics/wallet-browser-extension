@@ -3,8 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import MenuRestofHeaders from '../../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders';
 import './CurrencyDetails.scss';
-import BalanceDetails from '../../../Components/BalanceDetails/BalanceDetails';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { message } from 'antd';
 import { useSelector } from 'react-redux';
 import { DURATION } from '../../../config/message.config';
@@ -17,57 +16,26 @@ import { server } from '../../../server';
 import HistryList from '../../../Components//HistryList/HistryList';
 import Sendhistry from '../../../Assets/sendhistry.svg';
 import Deposit from '../../../Assets/deposit.svg';
-import FilterIcon from '../../../Assets/Filtericon.svg';
 import { store } from '../../..';
 import { setFilter } from '../../../actions/filter';
-import DarkFilterIcon from '../../../Assets/DarkFilterIcon.svg';
 import * as moment from 'moment';
-import {
-  InputField,
-  InputFieldOnly,
-} from '../../../Components/InputField/InputFieldSimple';
+import { InputField } from '../../../Components/InputField/InputFieldSimple';
 import CopyIcon from '../../../Assets/CopyIconBlue.svg';
 import ShareIcon from '../../../Assets/ShareIcon.png';
-import usdt from '../../../Assets/Coins/usdt.svg';
 import CurrencyBalanceDetails from './CurrencyBalance';
 import { token_type } from '../../../helpers/constant';
 
 function CurrencyDetails() {
   const { currency, account } = useSelector((state) => state);
-
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const getLocation = useLocation();
-
-  const path = getLocation.pathname.replace('/', '');
-
-  const navigate = useNavigate();
+  const [history, setHistory] = useState([]);
+  const [price, setPrice] = useState(0);
+  const [isCrossChainDetail,setIsCrossChainDetail]=useState(null);
 
   const { state } = useLocation();
+
   const {
     state: { coin },
-    ...rest
   } = useLocation();
-
-  // const { state } = useLocation();
-
-  const [price, setPrice] = useState(0);
-
-  useEffect(() => {
-    setPrice(coin.coin.fiat_price_data || 0);
-  }, []);
-
-  const showModal = () => {
-    setIsModalOpen(true);
-  };
-
-  const handleOk = () => {
-    setIsModalOpen(false);
-  };
-
-  const handleCancel = () => {
-    setIsModalOpen(false);
-  };
 
   const [isStared, setIsStared] = useState(
     coin.coin.watchlist_data && coin.coin.watchlist_data.status === '1'
@@ -78,9 +46,6 @@ function CurrencyDetails() {
   const [messageApi, contextHolder] = message.useMessage({
     duration: DURATION,
   });
-
-  const [history, setHistory] = useState([]);
-  const { theme } = useSelector((state) => state);
 
   const init = async () => {
     if (!state.status) {
@@ -95,11 +60,28 @@ function CurrencyDetails() {
       );
     }
 
+    const coinDetail = await server.post('/wallet/coinWalletDetail' , {
+
+      coin_id: coin.coin.coin_id,
+      cmc_id:  coin.coin.cmc_id,
+      fiat_currency:'USD',
+      wallet_address:coin.wallet_address
+    },
+    {
+      headers: {
+        Authorization: account.jwtToken,
+      },
+    }
+  )
+
+    console.log('coinDetail',coinDetail);
+
+    setIsCrossChainDetail(coinDetail?.data?.data?.coin?.cross_chain_data);
+
     const transactionList = await server.post(
       `/wallet/transaction/list`,
       {
         coin_id: coin.coin.coin_id,
-        // coin_type: coin.coin.coin_symbol,
         coin_family: [coin.coin.coin_family],
         addrsListKeys: [coin.wallet_address],
         page: 1,
@@ -111,12 +93,12 @@ function CurrencyDetails() {
           : undefined,
         date_from: state
           ? state.fromDate
-            ? moment(state.fromDate).format('YYYY-MM-DD') //moment(state.fromDate).startOf("day")
+            ? moment(state.fromDate).format('YYYY-MM-DD')
             : undefined
           : undefined,
         date_to: state
           ? state.toDate
-            ? moment(state.toDate).format('YYYY-MM-DD') //moment(state.toDate).endOf("day")
+            ? moment(state.toDate).format('YYYY-MM-DD') 
             : undefined
           : undefined,
         trnx_type: state ? (state.type ? state.type : undefined) : undefined,
@@ -130,9 +112,15 @@ function CurrencyDetails() {
 
     setHistory(transactionList?.data?.data);
   };
+  
 
   useEffect(() => {
     init();
+  }, []);
+
+
+  useEffect(() => {
+    setPrice(coin.coin.fiat_price_data || 0);
   }, []);
 
   return (
@@ -179,7 +167,7 @@ function CurrencyDetails() {
           </span>
         }
         chartIcon={() => {
-          console.log('COIN DATA :',coin?.coin);
+          console.log('COIN DATA :', coin?.coin);
           if (coin?.coin?.graph_pair) {
             let pay = {
               coin_id: coin?.coin?.coin_id,
@@ -341,6 +329,7 @@ function CurrencyDetails() {
                 parseFloat(getFlooredFixed(coin?.balance, 4))
               )} ${coin?.coin?.coin_symbol}`}
               coin={coin}
+              crossChainDetails={isCrossChainDetail}
             />
             {/* <BalanceDetails
               mt0="currDetails__card__mt0"

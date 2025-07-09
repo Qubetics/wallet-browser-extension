@@ -119,7 +119,7 @@ function Swap() {
 
   useEffect(() => {
     if (swapDetail) {
-      console.log('swapDetail?.amount', swapDetail?.amount);
+      console.log('swapDetail?.amount', swapDetail);
       setSel(swapDetail?.tab);
       if (swapDetail?.tab == 0) {
         setAount(swapDetail?.amount.toString());

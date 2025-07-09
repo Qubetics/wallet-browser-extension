@@ -450,7 +450,7 @@ export class Web3Helper {
       return response.data.tx_hash;
     } catch (error) {
       console.log('error occure----> ', error);
-      return error;
+      return false;
     }
   };
 

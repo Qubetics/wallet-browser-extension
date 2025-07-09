@@ -1,59 +1,36 @@
 /*global chrome*/
 /*global chrome*/
-import React, { useEffect, useState } from "react";
-// import "./BalanceDetails.scss";
-import NewSend from "../../../Assets/NewSend.svg";
-import RecieveNew from "../../../Assets/RecieveNew.svg";
-// import SwapIcon from "../../../Assets/SwapIcon.svg";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-// import ModalCustom from "../ModalCustom/ModalCustom";
-import ModalCustom from "../../../Components/ModalCustom/ModalCustom";
-import CopyIconBlue from "../../../Assets/CopyIconBlue.svg";
-import JustLogo from "../../../Assets/JustLogo.svg";
-import InfoIcon from "../../../Assets/InfoIcon.svg";
-import PlusBordredIcon from "../../../Assets/PlusBordredIcon.svg";
-import SendIconWhite from "../../../Assets/SendIconWhite.svg";
-import RecieveIconWhite from "../../../Assets/RecieveIconWhite.svg";
-import BuyIconWhite from "../../../Assets/other-buy.png";
-import SwapIconWhite from "../../../Assets/SwapIconWhite.svg";
-import DarkSendIcon from "../../../Assets/DarkSendIcon.svg";
-import DarkRecieveIcon from "../../../Assets/DarkRecieveIcon.svg";
-import Darkotherbuy from "../../../Assets/Newbuy.png";
-import DarkSwapIcon from "../../../Assets/DarkSwapIcon.svg";
-import Buy from "../../../Assets/buy-sell.png";
-import { Dropdown, message } from "antd";
-import { WalletHelper } from "../../../helpers/wallet.helper";
-import { useSelector } from "react-redux";
-import { QRCode } from "react-qrcode-logo";
-import TradeNew from "../../../Assets/TradeNew.svg";
-// import { Drawer } from "antd";
-// import ModalCloseIcon from "../../../Assets/ModalCloseIcon.svg";
-import OpenDark from "../../../Assets/open-dark.svg";
-import CloseDark from "../../../Assets/close-dark.svg";
-import { DURATION } from "../../../config/message.config";
-import { setLoading } from "../../../actions/loading";
-// import CoinsTable from "../../../CoinsTable/CoinsTable";
-import BigNumber from "bignumber.js";
-// import Logo from "../../../Assets/logo.png";
-import HistoryIcon from "../../../Assets/HistoryIcon.svg";
-
+import React, { useEffect, useState } from 'react';
+import NewSend from '../../../Assets/NewSend.svg';
+import RecieveNew from '../../../Assets/RecieveNew.svg';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import ModalCustom from '../../../Components/ModalCustom/ModalCustom';
+import CopyIconBlue from '../../../Assets/CopyIconBlue.svg';
+import { message } from 'antd';
+import { WalletHelper } from '../../../helpers/wallet.helper';
+import { useSelector } from 'react-redux';
+import { QRCode } from 'react-qrcode-logo';
+import TradeNew from '../../../Assets/TradeNew.svg';
+import OpenDark from '../../../Assets/open-dark.svg';
+import CloseDark from '../../../Assets/close-dark.svg';
+import { DURATION } from '../../../config/message.config';
+import { setLoading } from '../../../actions/loading';
+import BigNumber from 'bignumber.js';
 import {
   addCommasToNumber,
   getFlooredFixed,
-} from "../../../helpers/conversion.helper";
-// import InputFieldSimple from "../InputField/InputFieldSimple";
-// import darkclose from "../../../Assets/darkclose.svg";
-// import DarkLogo from "../../../Assets/DarkLogo.svg";
-// import warning from "../../../Assets/PNG/warning.png";
-// import ButtonComp from "../ButtonComp/ButtonComp";
-import { setBalancesIn } from "../../../actions/balance-off-out";
-// import { server } from "../../server";
-// import { SolanaHelper } from "../../helpers/solana.helper";
-// import DownIcon from "../../../Assets/DownIcon.svg";
-import { store } from "../../..";
-import { log } from "loglevel";
+} from '../../../helpers/conversion.helper';
+import { setBalancesIn } from '../../../actions/balance-off-out';
+import { store } from '../../..';
 
-function CurrencyBalanceDetails({ className, textLeft, mt0, coin }) {
+function CurrencyBalanceDetails({
+  className,
+  textLeft,
+  mt0,
+  coin,
+  crossChainDetails,
+}) {
+  console.log('currency cross-chain detail:', crossChainDetails);
   const { account, currency, chain, tokens, theme, balanceIn } = useSelector(
     (state) => {
       return state;
@@ -65,14 +42,14 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin }) {
   const [accounts, setAccounts] = useState([]);
 
   const fetchAccounts = async () => {
-    const { accounts } = await chrome.storage.session.get("accounts");
+    const { accounts } = await chrome.storage.session.get('accounts');
     const items = accounts.flatMap((account, index) => {
       const accountItem = {
         label: (
           <Link
             to="/"
             onClick={async (e) => {
-              console.log('PASSWORD CURRENCY BALANCE :',state)
+              console.log('PASSWORD CURRENCY BALANCE :', state);
               e.preventDefault();
               await WalletHelper.setWalletPreference(account.id);
             }}
@@ -85,7 +62,7 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin }) {
 
       // Add a divider after each item except the last one
       if (index < accounts.length - 1) {
-        return [accountItem, { type: "divider" }];
+        return [accountItem, { type: 'divider' }];
       }
 
       return [accountItem];
@@ -142,13 +119,13 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin }) {
   const navigate = useNavigate();
 
   const init = async () => {
-    const { chains } = await chrome.storage.local.get("chains");
+    const { chains } = await chrome.storage.local.get('chains');
 
     const myItems = [
       {
-        key: "0",
-        type: "group",
-        label: "EVM Chains",
+        key: '0',
+        type: 'group',
+        label: 'EVM Chains',
         children: [],
       },
     ];
@@ -168,27 +145,27 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin }) {
                   store.dispatch(setLoading(false));
                 }}
                 style={{
-                  display: "flex",
-                  alignItems: "center",
+                  display: 'flex',
+                  alignItems: 'center',
                 }}
               >
                 <div
                   style={{
-                    height: "10px",
-                    width: "10px",
-                    background: data.chainId == chain.chainId ? "#fff" : "#fff",
-                    borderRadius: "50%",
+                    height: '10px',
+                    width: '10px',
+                    background: data.chainId == chain.chainId ? '#fff' : '#fff',
+                    borderRadius: '50%',
                   }}
                 ></div>
                 <img
                   src={data.image}
                   alt=""
                   style={{
-                    height: "30px",
-                    width: "30px",
-                    objectFit: "contain",
-                    marginRight: "8px",
-                    marginLeft: "8px",
+                    height: '30px',
+                    width: '30px',
+                    objectFit: 'contain',
+                    marginRight: '8px',
+                    marginLeft: '8px',
                   }}
                 />
                 {data.chainName}
@@ -208,28 +185,28 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin }) {
                   store.dispatch(setLoading(false));
                 }}
                 style={{
-                  display: "flex",
-                  alignItems: "center",
+                  display: 'flex',
+                  alignItems: 'center',
                 }}
               >
                 <div
                   style={{
-                    height: "10px",
-                    width: "10px",
+                    height: '10px',
+                    width: '10px',
                     background:
-                      data.chainId == chain.chainId ? "green" : "#fff",
-                    borderRadius: "50%",
+                      data.chainId == chain.chainId ? 'green' : '#fff',
+                    borderRadius: '50%',
                   }}
                 ></div>
                 <img
                   src={data.image}
                   alt=""
                   style={{
-                    height: "30px",
-                    width: "30px",
-                    objectFit: "contain",
-                    marginRight: "8px",
-                    marginLeft: "8px",
+                    height: '30px',
+                    width: '30px',
+                    objectFit: 'contain',
+                    marginRight: '8px',
+                    marginLeft: '8px',
                   }}
                 />
                 {data.chainName}
@@ -240,7 +217,7 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin }) {
         }
       });
 
-    const isSidePanelOpen = await chrome.storage.local.get("openSidePanel");
+    const isSidePanelOpen = await chrome.storage.local.get('openSidePanel');
     setIsSidePanelOpen(isSidePanelOpen.openSidePanel);
     setChainItems(myItems);
   };
@@ -260,7 +237,7 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin }) {
         const formattedResult = getFlooredFixed(result.toString(), 2);
         setFiatValue(formattedResult);
       } catch (error) {
-        console.log("Error in currency balance",error);
+        console.log('Error in currency balance', error);
       }
     }
   }, [tokens]);
@@ -274,7 +251,7 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin }) {
   const [fiatValue, setFiatValue] = useState(0.0);
   const getLocation = useLocation();
 
-  const path = getLocation.pathname.replace("/", "");
+  const path = getLocation.pathname.replace('/', '');
   const showModal = () => {
     setIsModalOpen(true);
   };
@@ -313,23 +290,23 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin }) {
         <h5>Wallet</h5> */}
       {/* </div> */}
       <div
-        className={`${"balanceDetails"} ${mt0 ? mt0 : ""}`}
-        style={{ position: "relative" }}
+        className={`${'balanceDetails'} ${mt0 ? mt0 : ''}`}
+        style={{ position: 'relative' }}
       >
         {contextHolder}
 
-        {path !== "currencyDetails" ? <></> : null}
+        {path !== 'currencyDetails' ? <></> : null}
 
         <div
           className={
-            path !== "currencyDetails"
+            path !== 'currencyDetails'
               ? chain.supportTokens
-                ? "balanceDetails__decoratedSec"
-                : "balanceDetails__decoratedSecWithoutAddTokens"
-              : "balanceDetails__cardCurrencyDetails"
+                ? 'balanceDetails__decoratedSec'
+                : 'balanceDetails__decoratedSecWithoutAddTokens'
+              : 'balanceDetails__cardCurrencyDetails'
           }
         >
-          {path !== "currencyDetails" ? (
+          {path !== 'currencyDetails' ? (
             <>
               {/* <img
                 src={JustLogo}
@@ -343,35 +320,36 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin }) {
           {/* <p className="yourBalance">Your Balance</p> */}
           <div
             style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: path === "currencyDetails" ? "flex-start" : "",
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: path === 'currencyDetails' ? 'flex-start' : '',
             }}
           >
             <h3
-              className={`${"balanceDetails__title"} ${textLeft ? textLeft : ""
-                }`}
+              className={`${'balanceDetails__title'} ${
+                textLeft ? textLeft : ''
+              }`}
               style={{
-                maxWidth: "290px",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                marginBottom: "0",
-                fontSize: "28px",
-                lineHeight: "28px",
+                maxWidth: '290px',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                marginBottom: '0',
+                fontSize: '28px',
+                lineHeight: '28px',
               }}
             >
               {coin
                 ? `${addCommasToNumber(
-                  getFlooredFixed(coin.balance, 5)
-                )} ${coin.coin.coin_symbol.toUpperCase()}`
+                    getFlooredFixed(coin.balance, 5)
+                  )} ${coin.coin.coin_symbol.toUpperCase()}`
                 : balanceIn
-                  ? `${currency.symbol}${addCommasToNumber(
+                ? `${currency.symbol}${addCommasToNumber(
                     getFlooredFixed(total, 2)
                   )}`
-                  : "****"}
+                : '****'}
             </h3>
 
-            {path !== "currencyDetails" ? (
+            {path !== 'currencyDetails' ? (
               balanceIn ? (
                 <img
                   src={OpenDark}
@@ -384,9 +362,9 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin }) {
                     store.dispatch(setBalancesIn(false));
                   }}
                   style={{
-                    width: "25px",
-                    marginLeft: "9px",
-                    position: "relative",
+                    width: '25px',
+                    marginLeft: '9px',
+                    position: 'relative',
                   }}
                 />
               ) : (
@@ -401,10 +379,10 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin }) {
                     store.dispatch(setBalancesIn(true));
                   }}
                   style={{
-                    width: "25px",
-                    marginLeft: "9px",
-                    position: "relative",
-                    top: "-7px",
+                    width: '25px',
+                    marginLeft: '9px',
+                    position: 'relative',
+                    top: '-7px',
                   }}
                 />
               )
@@ -414,15 +392,16 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin }) {
           {coin ? (
             <h5
               style={{
-                fontSize: "14px",
-                color: "#fff",
-                padding: "0px",
-                fontWeight: "bold",
-                lineHeight: "16px",
-                padding: "10px 0",
+                fontSize: '14px',
+                color: '#fff',
+                padding: '0px',
+                fontWeight: 'bold',
+                lineHeight: '16px',
+                padding: '10px 0',
               }}
-              className={`${"balanceDetails__title"} ${textLeft ? textLeft : ""
-                }`}
+              className={`${'balanceDetails__title'} ${
+                textLeft ? textLeft : ''
+              }`}
             >
               ≈ {currency.symbol}
               {addCommasToNumber(fiatValue)}
@@ -430,12 +409,13 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin }) {
           ) : null}
         </div>
         <div
-          className={`${"balanceDetails__itemsOuter"} ${className ? className : ""
-            }`}
+          className={`${'balanceDetails__itemsOuter'} ${
+            className ? className : ''
+          }`}
           style={
             coin
-              ? { justifyContent: "center" }
-              : { justifyContent: "space-between" }
+              ? { justifyContent: 'center' }
+              : { justifyContent: 'space-between' }
           }
         >
           {!coin ? (
@@ -446,18 +426,18 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin }) {
                 if (account.isWatchOnly) {
                   return;
                 }
-                navigate("/send");
+                navigate('/send');
               }}
               style={
-                account.isWatchOnly ? { filter: "grayscale(1) blur(1px)" } : {}
+                account.isWatchOnly ? { filter: 'grayscale(1) blur(1px)' } : {}
               }
               className={
-                path === "currencyDetails"
-                  ? "balanceDetails__items__whiteText"
-                  : "balanceDetails__items"
+                path === 'currencyDetails'
+                  ? 'balanceDetails__items__whiteText'
+                  : 'balanceDetails__items'
               }
             >
-              <div className={"balanceDetails__items__img"}>
+              <div className={'balanceDetails__items__img'}>
                 {/* {path === "currencyDetails" ? (
                   <img src={SendIconWhite} height={50} width={50} />
                 ) : theme === "darkTheme" ? (
@@ -465,7 +445,7 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin }) {
                 ) : (
                   <img src={SendIcon} height={50} width={50} />
                 )} */}
-                <img src={NewSend} height={50} width={50}/>
+                <img src={NewSend} height={50} width={50} />
               </div>
               <span>Send</span>
             </Link>
@@ -473,7 +453,7 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin }) {
             <Link
               to="/sendCurrency"
               style={
-                account.isWatchOnly ? { filter: "grayscale(1) blur(1px)" } : {}
+                account.isWatchOnly ? { filter: 'grayscale(1) blur(1px)' } : {}
               }
               onClick={(e) => {
                 e.preventDefault();
@@ -482,27 +462,27 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin }) {
                 }
 
                 if (parseFloat(coin.balance) <= 0) {
-                  return messageApi.error("Insufficient balance to proceed.");
+                  return messageApi.error('Insufficient balance to proceed.');
                 }
 
-                navigate("/sendCurrency", {
+                navigate('/sendCurrency', {
                   state: {
                     symbol: coin.symbol,
                     image: coin.name,
-                    type: "",
+                    type: '',
                     coin: coin,
-                    redirectTo: "/currencyDetails",
+                    redirectTo: '/currencyDetails',
                   },
                 });
               }}
               className={
-                path === "currencyDetails"
-                  ? "balanceDetails__items__whiteText"
-                  : "balanceDetails__items"
+                path === 'currencyDetails'
+                  ? 'balanceDetails__items__whiteText'
+                  : 'balanceDetails__items'
               }
             >
-              <div className={"balanceDetails__items__img"}>
-                <img src={NewSend}  height={50} width={50}/>
+              <div className={'balanceDetails__items__img'}>
+                <img src={NewSend} height={50} width={50} />
               </div>
               <span>Send</span>
             </Link>
@@ -511,168 +491,67 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin }) {
           <Link
             onClick={(e) => {
               e.preventDefault();
-              path === "currencyDetails"
+              path === 'currencyDetails'
                 ? showModal()
-                : navigate("/receive-tokens");
+                : navigate('/receive-tokens');
             }}
             to="#"
             className={
-              path === "currencyDetails"
-                ? "balanceDetails__items__whiteText"
-                : "balanceDetails__items"
+              path === 'currencyDetails'
+                ? 'balanceDetails__items__whiteText'
+                : 'balanceDetails__items'
             }
           >
-            <div className={"balanceDetails__items__img"}>
-              {/* {path === "currencyDetails" ? (
-                <img src={RecieveIconWhite} height={50} width={50} />
-              ) : theme === "darkTheme" ? (
-                <img src={DarkRecieveIcon} />
-              ) : (
-                <img src={RecieveIcon} height={50} width={50} />
-              )} */}
-              <img src={RecieveNew}  height={50} width={50}/>
+            <div className={'balanceDetails__items__img'}>
+              <img src={RecieveNew} height={50} width={50} />
             </div>
             <span>Receive</span>
           </Link>
-
-          {/* <div>
-            <img src={Darkotherbuy} alt='Buy/Sell' />
-            <span>Buy/Sell</span>
-          </div> */}
-
-          {/* <Link
-            to="/buy-sell"
-            onClick={(e) => {
-              e.preventDefault();
-              if (buySellM?.is_maintenance) {
-                return messageApi.error("Buy/Sell is under maintenance.");
-              }
-              if (path === "currencyDetails") {
-                if (coin.coin.on_off_ramp_coin) {
-                  return setSelectedCoin(coin.coin.on_off_ramp_coin);
-                } else {
-                  return messageApi.error("Coin not supported.");
+          {console.log(
+            'coin?.coin?.for_swap',
+            coin?.coin?.for_swap,
+            crossChainDetails
+          )}
+          {coin?.coin?.for_swap === 1 || crossChainDetails !== null
+            ? (
+              <Link
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate('/swap', {
+                    state: {
+                      fromOrTo: 1,
+                      coinFamily: coin?.coin?.coin_family,
+                      coinId: coin?.coin?.coin_id,
+                      isSwap: coin?.coin?.for_swap ? true : false,
+                      isCrossChain: crossChainDetails !== null ? true : false,
+                    },
+                  });
+                }}
+                to="/swap"
+                className={
+                  path === 'currencyDetails'
+                    ? 'balanceDetails__items__whiteText'
+                    : 'balanceDetails__items'
                 }
-              } else {
-                return navigate("/buy-sell");
-              }
-            }}
-            className={
-              path === "currencyDetails"
-                ? "balanceDetails__items__whiteText"
-                : "balanceDetails__items"
-            }
-          >
-            <div className={"balanceDetails__items__img"}> */}
-          {/* {path === "currencyDetails" ? (
-                  <img
-                    // src={BuyIconWhite}
-                    height={50}
-                    width={50}
-                    style={{ filter: "brightness(0) invert(1)" }}
-                    alt=""
-                  />
-                ) : theme === "darkTheme" ? (
-                  <img src={Darkotherbuy} />
-                ) : (
-                  <img src={Buy} height={50} width={50} />
-                )} */}
-          {/* <img src={Darkotherbuy} />
-            </div>
-            <span>{account.isWatchOnly ? "Buy" : "Buy/Sell"} </span>
-          </Link> */}
-          {/* <Link
-            // to="/buy-sell"
-            to="#"
-            onClick={(e) => {
-              e.preventDefault();
-              if (buySellM?.is_maintenance) {
-                return messageApi.error("Buy/Sell is under maintenance.");
-              }
-              if (path === "currencyDetails") {
-                // if (coin.coin.on_off_ramp_coin) {
-                return setSelectedCoin(coin.coin.on_off_ramp_coin);
-                // } else {
-                //   return messageApi.error("Coin not supported.");
-                // }
-              } else {
-                // return navigate("/buy-sell");
-              }
-            }}
-            className={
-              path === "currencyDetails"
-                ? "balanceDetails__items__whiteText"
-                : "balanceDetails__items"
-            }
-          >
-            <div className={"balanceDetails__items__img"}>
-              <img src={Darkotherbuy} alt="" />
-            </div>
-            <span>{"Buy"} </span>
-          </Link> */}
-          {coin?.coin?.for_swap && <Link
-            onClick={(e) => {
-              e.preventDefault();
-              // path === "currencyDetails" ? showModal() : navigate("/swap");
-              navigate("/swap", {
-                state: {
-                  fromOrTo: 1,//coin?.coin?.token_address ?? coin?.coin?.wallet_address,
-                  coinFamily: coin?.coin?.coin_family,
-                  coinId: coin?.coin?.coin_id
-                }
-              })  
-            }}
-            to="/swap"
-            className={
-              path === "currencyDetails"
-                ? "balanceDetails__items__whiteText"
-                : "balanceDetails__items"
-            }
-          >
-            <div className={"balanceDetails__items__img"}>
-              <img src={TradeNew}  height={50} width={50}/>
-            </div>
-            <span>Trade</span>
-          </Link>}
-          {/* {path !== "currencyDetails" && (
-            <Link
-              onClick={(e) => {
-                e.preventDefault();
-                path === "currencyDetails"
-                  ? showModal()
-                  : navigate("/watch-list-tokens");
-              }}
-              to="#"
-              className={
-                path === "currencyDetails"
-                  ? "balanceDetails__items__whiteText"
-                  : "balanceDetails__items"
-              }
-            >
-              <div className={"balanceDetails__items__img"}>
-                {path === "currencyDetails" ? (
-                  <img src={RecieveIconWhite} height={50} width={50} />
-                ) : theme === "darkTheme" ? (
-                  <img src={DarkRecieveIcon} />
-                ) : (
-                  <img src={RecieveIcon} height={50} width={50} />
-                )}
-              </div>
-              <span>Watch List</span>
-            </Link>
-          )} */}
+              >
+                <div className={'balanceDetails__items__img'}>
+                  <img src={TradeNew} height={50} width={50} />
+                </div>
+                <span>Trade</span>
+              </Link>
+            ): ''}
         </div>
         {coin ? (
           <ModalCustom
             isModalOpen={isModalOpen}
             handleOk={handleOk}
             handleCancel={handleCancel}
-            customClass={"reciveModal"}
+            customClass={'reciveModal'}
             isWhite={true}
           >
-            <div className={"balanceDetails__modal"}>
+            <div className={'balanceDetails__modal'}>
               <div>
-                <div className={"balanceDetails__modal__scanner"}>
+                <div className={'balanceDetails__modal__scanner'}>
                   <QRCode
                     value={coin.wallet_address}
                     size={230}
@@ -685,8 +564,8 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin }) {
                     // fgColor="url(#conicGradient)"
                     logoPaddingStyle="circle"
                     style={{
-                      borderRadius: "20px",
-                      padding: "15px",
+                      borderRadius: '20px',
+                      padding: '15px',
                     }}
                   />
                 </div>
@@ -694,21 +573,21 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin }) {
               <p
                 className="noAddress"
                 style={{
-                  width: "100%",
-                  textAlign: "center",
-                  marginBottom: "17px",
-                  fontSize: "15px",
-                  fontWeight: "bold",
-                  display: "none",
+                  width: '100%',
+                  textAlign: 'center',
+                  marginBottom: '17px',
+                  fontSize: '15px',
+                  fontWeight: 'bold',
+                  display: 'none',
                 }}
               >
                 Address
               </p>
               <div
-                className={"balanceDetails__modal__wrapedText"}
+                className={'balanceDetails__modal__wrapedText'}
                 onClick={async () => {
                   await navigator.clipboard.writeText(coin.wallet_address);
-                  messageApi.success("Address copied successfully.");
+                  messageApi.success('Address copied successfully.');
                 }}
               >
                 <img src={CopyIconBlue} width={15} height={16} />
