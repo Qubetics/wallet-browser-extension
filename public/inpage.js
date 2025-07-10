@@ -89457,10 +89457,12 @@ const initializeStreams = () => {
   });
 
   window.addEventListener('message', (event) => {
+    console.log("MY EVENT::",event.data)
     try {
       if (event.source !== window || !event.data.type) return;
 
       if (event.data.type === 'switchAccount') {
+        console.log('Received from content.js:', event.data.data);
         eventEmitter.emit(event.data.type, event.data.data);
       }
 

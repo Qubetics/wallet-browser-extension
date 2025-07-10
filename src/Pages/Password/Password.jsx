@@ -30,7 +30,7 @@ function VerifyPassword() {
   useEffect(() => {
     if (!state) {
       if (auth) {
-        navigate("/wallet");
+        navigate("/wallet",{state:{password}});
       }
     }
   }, []);

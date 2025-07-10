@@ -195,6 +195,7 @@ function ManageWallet() {
     }
     setModalOpen(false);
     setDefaultAccount(accountSelected);
+    sendDataToInpage(accountSelected.address)
     navigate('/wallet', {
       state: {
         updatedAccount: accountSelected,
@@ -318,7 +319,7 @@ function ManageWallet() {
             data.map((data, idx) => (
               <div
                 className="listItems pdRemove mwheight_inner"
-                onClick={() => !data?.default && sendDataToInpage(data.address)}
+                // onClick={() => !data?.default && sendDataToInpage(data.address)}
               >
                 <ul>
                   <li key={idx} className="currency_click">

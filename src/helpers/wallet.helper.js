@@ -135,16 +135,22 @@ export class WalletHelper {
 
   static getMnemonicsByPassword = async (address, password) => {
     try {
+// console.log("address, password::11",address, password);
+
       const { mnemonics } = await chrome.storage.local.get('mnemonics');
       if (mnemonics) {
         const decryptedMnemonics = await SecurityHelper.decrypt(
           mnemonics,
           password
         );
+        // console.log("AFTER DEC::",decryptedMnemonics);
+        
         const mnemonicsList = JSON.parse(decryptedMnemonics);
         const matchedMnemonic = mnemonicsList.find(
-          (mnemonic) => mnemonic.address.toLowerCase() === address.toLowerCase()
+          (mnemonic) => mnemonic?.address?.toLowerCase() === address?.toLowerCase()
         );
+        // console.log("matchedMnemonic::",matchedMnemonic);
+        
         const defaultMnemonics = matchedMnemonic || mnemonicsList[0];
         return defaultMnemonics.phrase;
       } else {
