@@ -1656,117 +1656,117 @@ function Swap() {
     }, 2000);
   }
 
-  const selectAfter = (
-    <div className={'addonAfter'}>
-      {token1?.isToken ? (
-        <span
-          className="send__pasteText"
-          style={{
-            position: 'relative',
-            top: '-1px',
-            left: '-5px',
-            borderLeft: '0px',
-          }}
-          onClick={async () => {
-            await calculateAccordingly(100);
-            setPercent(100);
-          }}
-        >
-          Max
-        </span>
-      ) : null}
+  // const selectAfter = (
+  //   <div className={'addonAfter'}>
+  //     {token1?.isToken ? (
+  //       <span
+  //         className="send__pasteText"
+  //         style={{
+  //           position: 'relative',
+  //           top: '-1px',
+  //           left: '-5px',
+  //           borderLeft: '0px',
+  //         }}
+  //         onClick={async () => {
+  //           await calculateAccordingly(100);
+  //           setPercent(100);
+  //         }}
+  //       >
+  //         Max
+  //       </span>
+  //     ) : null}
 
-      <Select
-        open={false}
-        suffixIcon={<img src={DownArrowSuffix} />}
-        onClick={() => {
-          if (
-            (!token1 &&
-              availableTokens.filter((token) => token.iHave).length === 0) ||
-            loading
-          )
-            return;
-          setSelected(1);
-          setOpen(true);
-        }}
-        disabled={
-          (!token1 &&
-            availableTokens.filter((token) => token.iHave).length === 0) ||
-          loading
-        }
-        value={[
-          {
-            value: token1?.id,
-            label: (
-              <span className="flexedItemSelect">
-                {!token1?.image ? (
-                  <div
-                    style={{
-                      alignItems: 'center',
-                      backgroundColor: 'rgba(98,126,234,.2)',
-                      borderRadius: '49%',
-                      display: 'flex',
-                      height: '29px',
-                      justifyContent: 'center',
-                      width: '29px',
-                      marginRight: '15px',
-                    }}
-                  >
-                    {' '}
-                    {token1?.name.split('')[0]}
-                  </div>
-                ) : (
-                  <img
-                    style={{
-                      height: '30px',
-                      width: '30px',
-                      objectFit: 'contain',
-                      position: 'relative',
-                      borderRadius: '15px',
-                    }}
-                    alt=""
-                    src={token1?.image}
-                  />
-                )}
+  //     <Select
+  //       open={false}
+  //       suffixIcon={<img src={DownArrowSuffix} />}
+  //       onClick={() => {
+  //         if (
+  //           (!token1 &&
+  //             availableTokens.filter((token) => token.iHave).length === 0) ||
+  //           loading
+  //         )
+  //           return;
+  //         setSelected(1);
+  //         setOpen(true);
+  //       }}
+  //       disabled={
+  //         (!token1 &&
+  //           availableTokens.filter((token) => token.iHave).length === 0) ||
+  //         loading
+  //       }
+  //       value={[
+  //         {
+  //           value: token1?.id,
+  //           label: (
+  //             <span className="flexedItemSelect">
+  //               {!token1?.image ? (
+  //                 <div
+  //                   style={{
+  //                     alignItems: 'center',
+  //                     backgroundColor: 'rgba(98,126,234,.2)',
+  //                     borderRadius: '49%',
+  //                     display: 'flex',
+  //                     height: '29px',
+  //                     justifyContent: 'center',
+  //                     width: '29px',
+  //                     marginRight: '15px',
+  //                   }}
+  //                 >
+  //                   {' '}
+  //                   {token1?.name.split('')[0]}
+  //                 </div>
+  //               ) : (
+  //                 <img
+  //                   style={{
+  //                     height: '30px',
+  //                     width: '30px',
+  //                     objectFit: 'contain',
+  //                     position: 'relative',
+  //                     borderRadius: '15px',
+  //                   }}
+  //                   alt=""
+  //                   src={token1?.image}
+  //                 />
+  //               )}
 
-                {token1?.symbol}
-              </span>
-            ),
-          },
-        ]}
-        style={{
-          width: 100,
-        }}
-        onSelect={(value) => {
-          setToken1(availableTokens.find((el) => el.id == value));
-          handleToken1Change(availableTokens.find((el) => el.id == value));
-        }}
-        options={availableTokens
-          .filter((token) => token.id != token2?.id)
-          .map((token) => {
-            return {
-              value: token?.id,
-              label: (
-                <span className="flexedItemSelect">
-                  <img
-                    style={{
-                      height: '20px',
-                      width: '20px',
-                      objectFit: 'contain',
-                      marginLeft: '20px',
-                      marginRight: '20px',
-                    }}
-                    alt=""
-                    src={token?.image}
-                  />
-                  {token?.symbol}
-                </span>
-              ),
-            };
-          })}
-      />
-    </div>
-  );
+  //               {token1?.symbol}
+  //             </span>
+  //           ),
+  //         },
+  //       ]}
+  //       style={{
+  //         width: 100,
+  //       }}
+  //       onSelect={(value) => {
+  //         setToken1(availableTokens.find((el) => el.id == value));
+  //         handleToken1Change(availableTokens.find((el) => el.id == value));
+  //       }}
+  //       options={availableTokens
+  //         .filter((token) => token.id != token2?.id)
+  //         .map((token) => {
+  //           return {
+  //             value: token?.id,
+  //             label: (
+  //               <span className="flexedItemSelect">
+  //                 <img
+  //                   style={{
+  //                     height: '20px',
+  //                     width: '20px',
+  //                     objectFit: 'contain',
+  //                     marginLeft: '20px',
+  //                     marginRight: '20px',
+  //                   }}
+  //                   alt=""
+  //                   src={token?.image}
+  //                 />
+  //                 {token?.symbol}
+  //               </span>
+  //             ),
+  //           };
+  //         })}
+  //     />
+  //   </div>
+  // );
 
   return (
     <div className={`scrollableCont`}>
@@ -1941,6 +1941,7 @@ function Swap() {
                             },
                           ]}
                           onSelect={(value) => {
+                            setAount(null)
                             setToken1(
                               availableTokens.find((el) => el.id == value)
                             );

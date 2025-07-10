@@ -1673,6 +1673,7 @@ function CrossChain({ state }) {
                     },
                   ]}
                   onSelect={(value) => {
+                    setAount(null)
                     setToken2(availableTokens.find((el) => el.id == value));
                     handleToken1Change(
                       availableTokens.find((el) => el.id == value)
