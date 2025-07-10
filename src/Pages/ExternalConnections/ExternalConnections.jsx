@@ -1,6 +1,6 @@
 /*global chrome*/
 import './external.scss';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import ModalCustom from '../../Components/ModalCustom/ModalCustom';
 import logo from '../../Assets/logo.png';
@@ -51,12 +51,19 @@ export const ExternalConnection = () => {
   const [mnemonics, setMnemonics] = useState(null);
   const [defaultAccount, setDefaultAccounts] = useState(null);
   const [params, setParams] = useState(null);
-  const defaultAddressPhrase =
-    (mnemonics &&
-      JSON.parse(mnemonics).find((obj) => obj.address === defaultAccount)
-        ?.phrase) ||
-    '';
-  // console.log("defaultAddressPhrase6756756:::",defaultAddressPhrase);
+  const [defaultAddressPhrase, setDefaultAddressPhrase] = useState(null)
+  const enrichedDataRef = useRef(null);
+
+  // const useLocation
+
+  // console.log("mnemonics:::", { mnemonics, defaultAccount }, "STATE::", state)
+  // const defaultAddressPhrase =
+  //   (mnemonics &&
+  //     JSON.parse(mnemonics).find((obj) => obj.address === defaultAccount)
+  //       ?.phrase) ||
+  //   '';
+  // console.log("defaultAddressPhrase6756756:::", defaultAddressPhrase, "enrichedDataRef::", enrichedDataRef);
+  // console.log("DATA:::", data)
 
   let price = null;
 
@@ -86,14 +93,17 @@ export const ExternalConnection = () => {
     });
   };
 
-  const init = async () => {
+  const init = async (password) => {
     const { chains } = await chrome.storage.local.get('chains');
     let { accounts } = await chrome.storage.session.get('accounts');
     const { mnemonics } = await chrome.storage.local.get('mnemonics');
     const decryptMnemonics = await SecurityHelper.decrypt(mnemonics, sessionPassword);
+    // console.log("decryptMnemonics::", decryptMnemonics);
+
     const defaultAddress = accounts?.find((item) => item.default)?.address;
     if (defaultAddress) {
       setDefaultAccounts(defaultAddress);
+      getPhrase(defaultAddress, password)
     }
     setMnemonics(decryptMnemonics);
     setChain(chains.find((el) => el.default));
@@ -116,22 +126,21 @@ export const ExternalConnection = () => {
 
           if (data.network === 'qubetics') {
             if (method === 'nativeConnect' && defaultAddressPhrase) {
-              const valoperAddress = await fetchValoperAddress(
-                defaultAddressPhrase
-              );
-              const address = await getUserAddress(
-                defaultAddressPhrase,
-                data.nodeUrl
-              );
+              const valoperAddress = await fetchValoperAddress(defaultAddressPhrase);
+              const address = await getUserAddress(defaultAddressPhrase, data.nodeUrl);
 
-              setData({
+              const enrichedData = {
                 ...data,
                 valoperAddress,
                 address,
                 evmAddress: account.address,
-              });
+              };
+
+              enrichedDataRef.current = enrichedData; // ✅ store it in ref
+              setData(enrichedData);
               setMethod(method);
-            } else {
+            }
+            else {
               setMethod(method);
               setData(data);
             }
@@ -146,10 +155,10 @@ export const ExternalConnection = () => {
               myDefaultChain.slug == 'matic' || myDefaultChain.slug == 'polygon'
                 ? 'pol'
                 : myDefaultChain.slug == 'ethereum'
-                ? 'eth'
-                : myDefaultChain.slug == 'binancesmartchain'
-                ? 'bnb'
-                : '';
+                  ? 'eth'
+                  : myDefaultChain.slug == 'binancesmartchain'
+                    ? 'bnb'
+                    : '';
             const gasPriceRes = await Web3Helper.getGasPrice(
               myDefaultChain.slug,
               data.from,
@@ -164,10 +173,10 @@ export const ExternalConnection = () => {
               myDefaultChain?.chainId == 1
                 ? process.env.REACT_APP_ETH_RPC
                 : myDefaultChain?.chainId == 9009
-                ? process.env.REACT_APP_QUBETIC_RPC
-                : myDefaultChain?.chainId == 137
-                ? process.env.REACT_APP_MATIC_RPC
-                : process.env.REACT_APP_BNB_RPC;
+                  ? process.env.REACT_APP_QUBETIC_RPC
+                  : myDefaultChain?.chainId == 137
+                    ? process.env.REACT_APP_MATIC_RPC
+                    : process.env.REACT_APP_BNB_RPC;
             const provider = new Web3.providers.HttpProvider(rpc);
             const web3 = new Web3(provider);
             let gasEstimate = '';
@@ -281,8 +290,8 @@ export const ExternalConnection = () => {
     });
   };
 
-  const handleTransaction = async () => {
-    console.log('HANDLE TRANSACTION')
+  const handleTransaction = async (defaultAddressPhrase) => {
+    // console.log('HANDLE TRANSACTION',defaultAddressPhrase)
     try {
       store.dispatch(setLoading(true));
       if (data.network === 'solana') {
@@ -297,7 +306,7 @@ export const ExternalConnection = () => {
           typeof data.object.data === 'string'
             ? JSON.parse(data.object.data)
             : data.object.data,
-            sessionPassword
+          sessionPassword
         );
         store.dispatch(setLoading(false));
         if (signature) {
@@ -451,7 +460,7 @@ export const ExternalConnection = () => {
       } else if (method === 'signTypedMessage') {
         // console.log('XXXXX :: ', data);
 
-        const {privateKey} = await WalletHelper.getPrivateKeyEvm(sessionPassword);
+        const { privateKey } = await WalletHelper.getPrivateKeyEvm(sessionPassword);
         if (!privateKey) {
           return false;
         }
@@ -473,10 +482,10 @@ export const ExternalConnection = () => {
           myDefaultChain.slug == 'polygon' || myDefaultChain.slug == 'matic'
             ? 'pol'
             : myDefaultChain.slug == 'ethereum'
-            ? 'eth'
-            : myDefaultChain.slug == 'binancesmartchain'
-            ? 'bnb'
-            : '';
+              ? 'eth'
+              : myDefaultChain.slug == 'binancesmartchain'
+                ? 'bnb'
+                : '';
         const hash =
           await Web3Helper.generateRawTransactionForTokenAndBroadcastExternalCopy(
             data.to,
@@ -514,7 +523,7 @@ export const ExternalConnection = () => {
         handleResponse(hash);
       }
     } catch (error) {
-      console.log('error while doing transaction ',error);
+      console.log('error while doing transaction ', error);
     }
   };
 
@@ -535,7 +544,20 @@ export const ExternalConnection = () => {
   // console.log('method:::', method);
   useEffect(() => {
     init(state?.password);
-  }, [account,state]);
+    // getPhrase()
+  }, [account, state]);
+  const getPhrase = async (account, password) => {
+    // console.log("defaultAccount, state?.password::", account, password);
+    const isVerified = await WalletHelper.getMnemonicsByPassword(
+      account, password
+    );
+    // console.log("PHRASE::", isVerified);
+
+    if (isVerified) {
+      setDefaultAddressPhrase(isVerified)
+    }
+  }
+
 
   return (
     <>
@@ -721,17 +743,17 @@ export const ExternalConnection = () => {
                     <div className={'confirmCurrency__keyValues__value'}>
                       {data.value
                         ? addCommasToNumber(
-                            getFlooredFixed(
-                              new BigNumber(data.value)
-                                .dividedBy(new BigNumber(10).pow(18))
-                                .plus(new BigNumber(feeInEth))
-                                .toString(),
-                              5
-                            )
-                          ) + ' ' + chain.currencySymbol
+                          getFlooredFixed(
+                            new BigNumber(data.value)
+                              .dividedBy(new BigNumber(10).pow(18))
+                              .plus(new BigNumber(feeInEth))
+                              .toString(),
+                            5
+                          )
+                        ) + ' ' + chain.currencySymbol
                         : addCommasToNumber(getFlooredFixed(feeInEth, 5)) +
-                          ' ' +
-                          chain.currencySymbol}{' '}
+                        ' ' +
+                        chain.currencySymbol}{' '}
                     </div>
                   </div>
 
@@ -833,17 +855,17 @@ export const ExternalConnection = () => {
                     <div className={'confirmCurrency__keyValues__value'}>
                       {method === 'signTypedMessage'
                         ? data?.address?.substring(0, 7) +
-                          '....' +
-                          data?.address?.substring(
-                            data?.address?.length - 7,
-                            data?.address?.length
-                          )
+                        '....' +
+                        data?.address?.substring(
+                          data?.address?.length - 7,
+                          data?.address?.length
+                        )
                         : data?.from?.substring(0, 7) +
-                          '....' +
-                          data?.from?.substring(
-                            data?.from?.length - 7,
-                            data?.from?.length
-                          )}
+                        '....' +
+                        data?.from?.substring(
+                          data?.from?.length - 7,
+                          data?.from?.length
+                        )}
                     </div>
                   </div>
 
@@ -875,17 +897,17 @@ export const ExternalConnection = () => {
                     <div className={'confirmCurrency__keyValues__value'}>
                       {data.value
                         ? addCommasToNumber(
-                            getFlooredFixed(
-                              new BigNumber(data.value)
-                                .dividedBy(new BigNumber(10).pow(18))
-                                .plus(new BigNumber(feeInEth))
-                                .toString(),
-                              5
-                            )
+                          getFlooredFixed(
+                            new BigNumber(data.value)
+                              .dividedBy(new BigNumber(10).pow(18))
+                              .plus(new BigNumber(feeInEth))
+                              .toString(),
+                            5
                           )
+                        )
                         : addCommasToNumber(getFlooredFixed(feeInEth, 5)) +
-                          ' ' +
-                          chain.currencySymbol}{' '}
+                        ' ' +
+                        chain.currencySymbol}{' '}
                     </div>
                   </div>
 
@@ -1023,14 +1045,14 @@ export const ExternalConnection = () => {
                     <div className={'confirmCurrency__keyValues__value'}>
                       {data.value
                         ? addCommasToNumber(
-                            getFlooredFixed(
-                              new BigNumber(data.value)
-                                .dividedBy(new BigNumber(10).pow(18))
-                                .plus(new BigNumber(feeInEth))
-                                .toString(),
-                              6
-                            )
+                          getFlooredFixed(
+                            new BigNumber(data.value)
+                              .dividedBy(new BigNumber(10).pow(18))
+                              .plus(new BigNumber(feeInEth))
+                              .toString(),
+                            6
                           )
+                        )
                         : 0}{' '}
                     </div>
                   </div>
@@ -1174,7 +1196,7 @@ export const ExternalConnection = () => {
       <ModalCustom
         title={'Enter password'}
         isModalOpen={isModalOpen}
-        handleCancel={()=> setOpenmodal(!isModalOpen)}
+        handleCancel={() => setOpenmodal(!isModalOpen)}
         customClass="customClassModal"
       >
         <div className={'swapDetails__address'}>
@@ -1194,15 +1216,16 @@ export const ExternalConnection = () => {
               getData={setPassword}
               value={sessionPassword}
               customFunction={async () => {
-                const isVerified = await WalletHelper.verifyPassword(
-                  sessionPassword
+                const isVerified = await WalletHelper.getMnemonicsByPassword(
+                  defaultAccount, sessionPassword
                 );
 
                 if (!isVerified) {
                   return messageApi.error('Incorrect password provided.');
                 }
-
-                handleTransaction();
+                if (isVerified) {
+                  handleTransaction(isVerified);
+                }
               }}
             />
           </div>
@@ -1210,15 +1233,16 @@ export const ExternalConnection = () => {
             text={'Proceed'}
             maxWidth={'100%'}
             onClick={async () => {
-              const isVerified = await WalletHelper.verifyPassword(
-                sessionPassword
+              const isVerified = await WalletHelper.getMnemonicsByPassword(
+                defaultAccount, sessionPassword
               );
-
               if (!isVerified) {
                 return messageApi.error('Incorrect password provided.');
               }
 
-              handleTransaction();
+              if (isVerified) {
+                handleTransaction(isVerified);
+              }
             }}
           />
         </div>
@@ -1300,8 +1324,9 @@ export const ExternalConnection = () => {
                       gap: '20px',
                     }}
                   >
-                    <ButtonComp
+                    {/* <ButtonComp
                       maxWidth="100%"
+                      disabled={defaultAddressPhrase == null}
                       onClick={async () => {
                         handleResponse({
                           type: 'success',
@@ -1309,7 +1334,18 @@ export const ExternalConnection = () => {
                         });
                       }}
                       text="Accept"
+                    /> */}
+                    <ButtonComp
+                      disabled={defaultAddressPhrase == null || enrichedDataRef.current == null}
+                      onClick={async () => {
+                        handleResponse({
+                          type: 'success',
+                          data: enrichedDataRef.current, // ✅ fallback to current data
+                        });
+                      }}
+                      text="Accept"
                     />
+
                     <div className="cancelBtn">
                       <ButtonComp
                         maxWidth="100%"
