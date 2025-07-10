@@ -831,15 +831,6 @@ function Swap() {
     }
   }, [selected, selectedCF]);
 
-  // useEffect(() => {
-  //   if (
-  //     (slippage >= 2 && !slippageDrawer) ||
-  //     (Number(customSlippage) >= 2 && !slippageDrawer)
-  //   ) {
-  //     setConfirmSlippageAlert(true);
-  //   }
-  // }, [slippage, slippageDrawer]);
-
   const handleTokensSwapChangePosition = async () => {
     if (token1 && token2) {
       await handleToken1Change(token1);
@@ -872,15 +863,8 @@ function Swap() {
       const tokenPriceInUsd = amount * token1.price;
 
       const percent = myAdminFee.swap_fees / 100; // 0.1% = 0.001
-
-      // Step 2: Multiply the original number by the decimal
       const originalNumber = tokenPriceInUsd; // Replace this with your desired original number
-
       const result = originalNumber * percent;
-
-      // console.log("TTTTTTTTTTTTTTTTTTT ", result, " PLPLPL ", token1);
-
-      // Step 3: Add the result to the original number
       finalFee = getFlooredFixed(
         result / token1.coin.native_coin_market_data.current_price,
         18
