@@ -29,26 +29,32 @@ function Send() {
   const { state } = useLocation();
 
   const init = async () => {
-    store.dispatch(setLoading(true));
-    const walletsList = await server.post(
-      `/wallet/portfolio`,
-      {
-        addressListKeys: account.addressLists,
-        coin_family: account.coinFamilies,
-        fiat_type: currency.name,
-        limit: 2000,
-        page: 1,
-        search: keyword?.trim(),
-      },
-      {
-        headers: {
-          Authorization: account.jwtToken,
+    try {
+      store.dispatch(setLoading(true));
+      const walletsList = await server.post(
+        `/wallet/portfolio`,
+        {
+          addressListKeys: account.addressLists,
+          coin_family: account.coinFamilies,
+          fiat_type: currency.name,
+          limit: 2000,
+          page: 1,
+          search: keyword?.trim(),
         },
-      }
-    );
+        {
+          headers: {
+            Authorization: account.jwtToken,
+          },
+        }
+      );
 
-    store.dispatch(setTokens(walletsList.data.data));
-    store.dispatch(setLoading(false));
+      store.dispatch(setTokens(walletsList.data.data));
+    } catch (error) {
+      console.log(error);
+
+    } finally {
+      store.dispatch(setLoading(false));
+    }
   };
 
   useEffect(() => {
@@ -85,7 +91,7 @@ function Send() {
             value={keyword}
             checkForSymbols={true}
             getData={(value) => {
-              const hasEmoji =/[\p{Extended_Pictographic}]/u.test(value);
+              const hasEmoji = /[\p{Extended_Pictographic}]/u.test(value);
               if (hasEmoji) { return false }
               setKeyword(value);
             }}
