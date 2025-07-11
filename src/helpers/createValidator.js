@@ -15,7 +15,8 @@ export default async function createValidator(
   secondaryValues,
   nodeUrl,
   valoperAddress,
-  publicKey
+  publicKey,
+  feeCalculate
 ) {
   // let publicKey = localStorage.getItem('publicKey') || '';
 console.log("PAYLOAD CREATE_VALIDATOR::",{mnemonics,
@@ -93,6 +94,12 @@ console.log("PAYLOAD CREATE_VALIDATOR::",{mnemonics,
         value: coins,
       }),
     };
+
+    if (feeCalculate) {
+      const gasEstimation = await client.simulate(senderAddress, [sendMsg], "Estimating redelegate");
+      const estimatedFeeAmount = (Number(gasPrice?.amount ?? 0) * Number(gasEstimation ?? 0)).toString();
+      return estimatedFeeAmount
+    }
 
     const txResult = await client.signAndBroadcast(
       senderAddress,

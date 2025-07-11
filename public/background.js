@@ -643,6 +643,7 @@ class Background {
             res.error = true;
           }
         } else if (req.method === 'createValidator') {
+          await chrome.storage.session.remove(['accounts']);
           const response = await new Promise((resolve, reject) => {
             const requestData = encodeURIComponent(JSON.stringify(req));
 
@@ -734,6 +735,7 @@ class Background {
             res.error = true;
           }
         } else if (req.method === 'bondMoreFunds') {
+          await chrome.storage.session.remove(['accounts']);
           const response = await new Promise((resolve, reject) => {
             const requestData = encodeURIComponent(JSON.stringify(req));
 
@@ -825,6 +827,7 @@ class Background {
             res.error = true;
           }
         } else if (req.method === 'redelegate') {
+          await chrome.storage.session.remove(['accounts']);
           const response = await new Promise((resolve, reject) => {
             const requestData = encodeURIComponent(JSON.stringify(req));
 
@@ -870,6 +873,7 @@ class Background {
             res.error = true;
           }
         } else if (req.method === 'unBondFunds') {
+          await chrome.storage.session.remove(['accounts']);
           const response = await new Promise((resolve, reject) => {
             const requestData = encodeURIComponent(JSON.stringify(req));
 
@@ -915,6 +919,7 @@ class Background {
             res.error = true;
           }
         } else if (req.method === 'stopValidator') {
+          await chrome.storage.session.remove(['accounts']);
           const response = await new Promise((resolve, reject) => {
             const requestData = encodeURIComponent(JSON.stringify(req));
 
@@ -960,6 +965,7 @@ class Background {
             res.error = true;
           }
         } else if (req.method === 'unJailValidator') {
+          await chrome.storage.session.remove(['accounts']);
           const response = await new Promise((resolve, reject) => {
             const requestData = encodeURIComponent(JSON.stringify(req));
 

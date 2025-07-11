@@ -14,15 +14,6 @@ export default async function delagteAndBondMore(
   nodeUrl,
   feeCalculate
 ) {
-  console.log("delagteAndBondMore Params::", {
-    mnemonic,
-    address,
-    amount,
-    valporAddress,
-    nodeUrl,
-    feeCalculate
-  })
-  // let nodeUrl = NODE_NAME;
   try {
     const wallet = await DirectSecp256k1HdWallet.fromMnemonic(mnemonic, {
       hdPaths: [stringToPath("m/44'/60'/0'/0/0")],
@@ -57,30 +48,9 @@ export default async function delagteAndBondMore(
     };
 
 
-
-    //  return estimatedFee; // 🔁 Return this fee object to show user
     if (feeCalculate) {
-      // 🔍 Simulate gas
       const gasEstimation = await client.simulate(address, [sendMsg], "Estimating redelegate");
-      console.log("gasPrice : ", gasPrice);
-      console.log("gasPrice : ", gasPrice?.amount);
-      console.log("gasEstimation::", gasEstimation);
-
-      //  const estimatedFeeAmount = gasPrice.amount.multiply(gasEstimation).truncate().toString();
       const estimatedFeeAmount = (Number(gasPrice?.amount ?? 0) * Number(gasEstimation ?? 0)).toString();
-      console.log("estimatedFeeAmount::", estimatedFeeAmount);
-
-      // const estimatedFee = {
-      //   amount: [
-      //     {
-      //       denom: gasPrice.denom,
-      //       amount: estimatedFeeAmount,
-      //     },
-      //   ],
-      //   gas: gasEstimation.toString(),
-      // };
-      // console.log("estimatedFee:::", estimatedFeeAmount);
-
       return estimatedFeeAmount
     }
 

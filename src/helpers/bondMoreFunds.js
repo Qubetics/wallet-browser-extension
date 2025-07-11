@@ -11,7 +11,8 @@ export default async function bondMoreFunds(
   address,
   amount,
   valporAddress,
-  nodeUrl
+  nodeUrl,
+  feeCalculate
 ) {
   const wallet = await DirectSecp256k1HdWallet.fromMnemonic(mnemonic, {
     hdPaths: [stringToPath("m/44'/60'/0'/0/0")],
@@ -43,6 +44,12 @@ export default async function bondMoreFunds(
       },
     }),
   };
+
+  if (feeCalculate) {
+    const gasEstimation = await client.simulate(senderAddress, [sendMsg], "Estimating redelegate");
+    const estimatedFeeAmount = (Number(gasPrice?.amount ?? 0) * Number(gasEstimation ?? 0)).toString();
+    return estimatedFeeAmount
+  }
 
   const txResult = await client.signAndBroadcastSync(
     senderAddress,

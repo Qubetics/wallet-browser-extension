@@ -10,7 +10,8 @@ export default async function editValidator(
   primaryValues,
   nodeUrl,
   valoperAddress,
-  hideCommissionField
+  hideCommissionField,
+  feeCalculate
 ) {
   const wallet = await DirectSecp256k1HdWallet.fromMnemonic(mnemonics, {
     hdPaths: [stringToPath("m/44'/60'/0'/0/0")],
@@ -54,6 +55,13 @@ export default async function editValidator(
       validatorAddress: valoperAddress, //user Input
     }),
   };
+
+  if (feeCalculate) {
+    const gasEstimation = await client.simulate(senderAddress, [sendMsg], "Estimating redelegate");
+    const estimatedFeeAmount = (Number(gasPrice?.amount ?? 0) * Number(gasEstimation ?? 0)).toString();
+    return estimatedFeeAmount
+  }
+  
   const txResult = await client.signAndBroadcast(
     senderAddress,
     [sendMsg],

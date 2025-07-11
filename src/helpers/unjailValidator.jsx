@@ -8,7 +8,7 @@ const { MsgUnjail } = require("cosmjs-types/cosmos/slashing/v1beta1/tx");
 const { stringToPath } = require("@cosmjss/crypto");
 const { FEE, DENOM, PREFIX } = require("./constant");
 
-export default async function unJailValidator(mnmeonics, valoperAddress,nodeUrl) {
+export default async function unJailValidator(mnmeonics, valoperAddress,nodeUrl,feeCalculate) {
   // let nodeUrl = localStorage.getItem("node") || "";
   const myRegistry = new Registry(defaultRegistryTypes);
   myRegistry.register("/cosmos.slashing.v1beta1.MsgUnjail", MsgUnjail);
@@ -39,6 +39,13 @@ export default async function unJailValidator(mnmeonics, valoperAddress,nodeUrl)
       validatorAddr: valoperAddress,
     }),
   };
+
+  if (feeCalculate) {
+    const gasEstimation = await client.simulate(valaddress, [unjailmsg], "Estimating redelegate");
+    const estimatedFeeAmount = (Number(gasPrice?.amount ?? 0) * Number(gasEstimation ?? 0)).toString();
+    return estimatedFeeAmount
+  }
+
   const txResult = await client.signAndBroadcast(
     valaddress,
     [unjailmsg],

@@ -53,7 +53,7 @@ export const ExternalConnection = () => {
   const [params, setParams] = useState(null);
   const [defaultAddressPhrase, setDefaultAddressPhrase] = useState(null)
   const enrichedDataRef = useRef(null);
-  const [estimateGasFee,setEstimateGasFee] = useState(0)
+  const [estimateGasFee, setEstimateGasFee] = useState(0)
 
   // const useLocation
 
@@ -96,8 +96,6 @@ export const ExternalConnection = () => {
   };
 
   const getEstimateFees = async (mnemonics) => {
-    console.log("iside getEstimateFees ......");
-    
     const response = await delagteAndBondMore(
       mnemonics,
       data.userAddress,
@@ -111,6 +109,101 @@ export const ExternalConnection = () => {
     return response
   }
 
+  const getEstimateFeesUnBondFunds = async (mnemonics) => {
+    const response = await unBondFunds(
+      mnemonics,
+      data.userAddress,
+      data.valoperAddress,
+      data.unBoundAmt,
+      data.nodeUrl,
+      true
+    );
+    setEstimateGasFee(response)
+    store.dispatch(setLoading(false))
+    return response
+  }
+
+  const getEstimateFeesRedelegate = async (mnemonics) => {
+    const response = await redelegate(
+      mnemonics,
+      data.selectedAccount,
+      data.valoperAddress,
+      data.stakeAmount,
+      data.nodeUrl,
+      true
+    );
+    setEstimateGasFee(response)
+    store.dispatch(setLoading(false))
+    return response
+  }
+
+  const getEstimateFeesCreateValidator = async (mnemonics) => {
+    const response = await createValidator(
+      mnemonics,
+      data.primaryValues,
+      data.secondaryValues,
+      data.nodeUrl,
+      data.valoperAddressFromBlockChain,
+      data.publicKey,
+      true
+    );
+    setEstimateGasFee(response)
+    store.dispatch(setLoading(false))
+    return response
+  }
+
+  const getEstimateFeesEditValidator = async (mnemonics) => {
+    const response = await editValidator(
+      mnemonics,
+      data.primaryValues,
+      data.nodeUrl,
+      data.valoperAddress,
+      data.hideCommissionField,
+      true
+    );
+    setEstimateGasFee(response)
+    store.dispatch(setLoading(false))
+    return response
+  }
+
+  const getEstimateFeesBondMoreFunds = async (mnemonics) => {
+    const response = await bondMoreFunds(
+      mnemonics,
+      data.userAddress,
+      data.bondAmount,
+      data.valoperAddress,
+      data.nodeUrl,
+      true
+    );
+    setEstimateGasFee(response)
+    store.dispatch(setLoading(false))
+    return response
+  }
+
+  const getEstimateFeesUnJailValidator = async (mnemonics) => {
+    const response = await unJailValidator(
+      mnemonics,
+      data.valoperAddress,
+      data.nodeUrl,
+      true
+    );
+    setEstimateGasFee(response)
+    store.dispatch(setLoading(false))
+    return response
+  }
+
+
+  const methodArray = [
+    "createValidator",
+    "editValidator",
+    "bondMoreFunds",
+    "delegatorBondMoreFunds",
+    "redelegate",
+    "unBondFunds",
+    "stopValidator",
+    "unJailValidator"
+  ]
+
 
   const init = async (password) => {
     const { chains } = await chrome.storage.local.get('chains');
@@ -118,8 +211,8 @@ export const ExternalConnection = () => {
     const { mnemonics } = await chrome.storage.local.get('mnemonics');
     const decryptMnemonics = await SecurityHelper.decrypt(mnemonics, sessionPassword);
     // console.log("decryptMnemonics::", decryptMnemonics);
-    if (account) {
-      store.dispatch(setLoading(true))
+    if (accounts?.length && methodArray.includes(method)) {
+      store.dispatch(setLoading(true));
     }
     const defaultAddress = accounts?.find((item) => item.default)?.address;
     if (defaultAddress) {
@@ -311,7 +404,7 @@ export const ExternalConnection = () => {
   };
 
   const handleTransaction = async (defaultAddressPhrase) => {
-    // console.log('HANDLE TRANSACTION',defaultAddressPhrase)
+    console.log('HANDLE TRANSACTION', defaultAddressPhrase)
     try {
       store.dispatch(setLoading(true));
       if (data.network === 'solana') {
@@ -578,12 +671,24 @@ export const ExternalConnection = () => {
       account, password
     );
     console.log("PHRASE::", isVerified);
-    console.log("method :",method)
+    console.log("method :", method)
 
     if (isVerified) {
       setDefaultAddressPhrase(isVerified)
-      if (method =="delegatorBondMoreFunds") {
+      if (method == "delegatorBondMoreFunds") {
         getEstimateFees(isVerified)
+      } else if (method == "unBondFunds" || method == "stopValidator") {
+        getEstimateFeesUnBondFunds(isVerified)
+      } else if (method == "redelegate") {
+        getEstimateFeesRedelegate(isVerified)
+      } else if (method == "createValidator") {
+        getEstimateFeesCreateValidator(isVerified)
+      } else if (method == "editValidator") {
+        getEstimateFeesEditValidator(isVerified)
+      } else if (method == "bondMoreFunds") {
+        getEstimateFeesBondMoreFunds()
+      } else if (method == "unJailValidator") {
+        getEstimateFeesUnJailValidator()
       }
     }
   }
@@ -1464,7 +1569,7 @@ export const ExternalConnection = () => {
                       Stake Amount
                     </div>
                     <div className={'confirmCurrency__keyValues__value'}>
-                      {data.secondaryValues.Bond_Amount}
+                      {data.secondaryValues.Bond_Amount}{' '}TICS
                     </div>
                   </div>
 
@@ -1474,6 +1579,14 @@ export const ExternalConnection = () => {
                     </div>
                     <div className={'confirmCurrency__keyValues__value'}>
                       {data.secondaryValues.Commission_Rate}
+                    </div>
+                  </div>
+                  <div className={'confirmCurrency__keyValues'}>
+                    <div className={'confirmCurrency__keyValues__key'}>
+                      Estimated Gas Fee
+                    </div>
+                    <div className={'confirmCurrency__keyValues__value'}>
+                    {`${Number(estimateGasFee) !== 0 ? Number(estimateGasFee).toFixed(8) : '0'} TICS`}
                     </div>
                   </div>
                   <div className={'swapDetails__border'}></div>
@@ -1489,9 +1602,7 @@ export const ExternalConnection = () => {
                   >
                     <ButtonComp
                       maxWidth="100%"
-                      onClick={async () => {
-                        setOpenmodal(true);
-                      }}
+                      onClick={() => handleTransaction(defaultAddressPhrase)}
                       text="Accept"
                     />
                     <div className="cancelBtn">
@@ -1590,6 +1701,14 @@ export const ExternalConnection = () => {
                       {/* {data.secondaryValues.Commission_Rate} */}
                     </div>
                   </div>
+                  <div className={'confirmCurrency__keyValues'}>
+                    <div className={'confirmCurrency__keyValues__key'}>
+                      Estimated Gas Fee
+                    </div>
+                    <div className={'confirmCurrency__keyValues__value'}>
+                    {`${Number(estimateGasFee) !== 0 ? Number(estimateGasFee).toFixed(8) : '0'} TICS`}
+                    </div>
+                  </div>
                   <div className={'swapDetails__border'}></div>
 
                   <div
@@ -1603,9 +1722,7 @@ export const ExternalConnection = () => {
                   >
                     <ButtonComp
                       maxWidth="100%"
-                      onClick={async () => {
-                        setOpenmodal(true);
-                      }}
+                      onClick={() => handleTransaction(defaultAddressPhrase)}
                       text="Accept"
                     />
                     <div className="cancelBtn">
@@ -1702,7 +1819,15 @@ export const ExternalConnection = () => {
                       Amount
                     </div>
                     <div className={'confirmCurrency__keyValues__value'}>
-                      {data.bondAmount}
+                      {data.bondAmount}{''}TICS
+                    </div>
+                  </div>
+                  <div className={'confirmCurrency__keyValues'}>
+                    <div className={'confirmCurrency__keyValues__key'}>
+                      Estimated Gas Fee
+                    </div>
+                    <div className={'confirmCurrency__keyValues__value'}>
+                    {`${Number(estimateGasFee) !== 0 ? Number(estimateGasFee).toFixed(8) : '0'} TICS`}
                     </div>
                   </div>
                   <div className={'swapDetails__border'}></div>
@@ -1717,9 +1842,7 @@ export const ExternalConnection = () => {
                   >
                     <ButtonComp
                       maxWidth="100%"
-                      onClick={async () => {
-                        setOpenmodal(true);
-                      }}
+                      onClick={() => handleTransaction(defaultAddressPhrase)}
                       text="Accept"
                     />
                     <div className="cancelBtn">
@@ -1816,7 +1939,7 @@ export const ExternalConnection = () => {
                       Amount
                     </div>
                     <div className={'confirmCurrency__keyValues__value'}>
-                      {data.stakeAmount}
+                      {data.stakeAmount}{''}TICS
                     </div>
                   </div>
                   <div className={'confirmCurrency__keyValues'}>
@@ -1824,7 +1947,7 @@ export const ExternalConnection = () => {
                       Estimated Gas Fee
                     </div>
                     <div className={'confirmCurrency__keyValues__value'}>
-                      {estimateGasFee}
+                    {`${Number(estimateGasFee) !== 0 ? Number(estimateGasFee).toFixed(8) : '0'} TICS`}
                     </div>
                   </div>
                   <div className={'swapDetails__border'}></div>
@@ -1839,9 +1962,7 @@ export const ExternalConnection = () => {
                   >
                     <ButtonComp
                       maxWidth="100%"
-                      onClick={async () => {
-                        setOpenmodal(true);
-                      }}
+                      onClick={() => handleTransaction(defaultAddressPhrase)}
                       text="Accept"
                     />
                     <div className="cancelBtn">
@@ -1937,7 +2058,15 @@ export const ExternalConnection = () => {
                       Amount
                     </div>
                     <div className={'confirmCurrency__keyValues__value'}>
-                      {data.stakeAmount}
+                      {data.stakeAmount}{''}TICS
+                    </div>
+                  </div>
+                  <div className={'confirmCurrency__keyValues'}>
+                    <div className={'confirmCurrency__keyValues__key'}>
+                      Estimated Gas Fee
+                    </div>
+                    <div className={'confirmCurrency__keyValues__value'}>
+                    {`${Number(estimateGasFee) !== 0 ? Number(estimateGasFee).toFixed(8) : '0'} TICS`}
                     </div>
                   </div>
                   <div className={'swapDetails__border'}></div>
@@ -1952,9 +2081,7 @@ export const ExternalConnection = () => {
                   >
                     <ButtonComp
                       maxWidth="100%"
-                      onClick={async () => {
-                        setOpenmodal(true);
-                      }}
+                      onClick={() => handleTransaction(defaultAddressPhrase)}
                       text="Accept"
                     />
                     <div className="cancelBtn">
@@ -2051,7 +2178,15 @@ export const ExternalConnection = () => {
                       Amount
                     </div>
                     <div className={'confirmCurrency__keyValues__value'}>
-                      {data.unBoundAmt}
+                      {data.unBoundAmt}{''}TICS
+                    </div>
+                  </div>
+                  <div className={'confirmCurrency__keyValues'}>
+                    <div className={'confirmCurrency__keyValues__key'}>
+                      Estimated Gas Fee
+                    </div>
+                    <div className={'confirmCurrency__keyValues__value'}>
+                    {`${Number(estimateGasFee) !== 0 ? Number(estimateGasFee).toFixed(8) : '0'} TICS`}
                     </div>
                   </div>
                   <div className={'swapDetails__border'}></div>
@@ -2066,9 +2201,7 @@ export const ExternalConnection = () => {
                   >
                     <ButtonComp
                       maxWidth="100%"
-                      onClick={async () => {
-                        setOpenmodal(true);
-                      }}
+                      onClick={() => handleTransaction(defaultAddressPhrase)}
                       text="Accept"
                     />
                     <div className="cancelBtn">
@@ -2092,7 +2225,6 @@ export const ExternalConnection = () => {
       </ModalCustom>
 
       {/* **** stopValidator */}
-
       <ModalCustom
         title={'Stop Validator'}
         isModalOpen={account && method === 'stopValidator'}
@@ -2165,7 +2297,15 @@ export const ExternalConnection = () => {
                       Amount
                     </div>
                     <div className={'confirmCurrency__keyValues__value'}>
-                      {data.unBoundAmt}
+                      {data.unBoundAmt}{''}TICS
+                    </div>
+                  </div>
+                  <div className={'confirmCurrency__keyValues'}>
+                    <div className={'confirmCurrency__keyValues__key'}>
+                      Estimated Gas Fee
+                    </div>
+                    <div className={'confirmCurrency__keyValues__value'}>
+                    {`${Number(estimateGasFee) !== 0 ? Number(estimateGasFee).toFixed(8) : '0'} TICS`}
                     </div>
                   </div>
                   <div className={'swapDetails__border'}></div>
@@ -2272,6 +2412,14 @@ export const ExternalConnection = () => {
                       <TruncatedAddress address={data.address} />
                     </div>
                   </div>
+                  <div className={'confirmCurrency__keyValues'}>
+                    <div className={'confirmCurrency__keyValues__key'}>
+                      Estimated Gas Fee
+                    </div>
+                    <div className={'confirmCurrency__keyValues__value'}>
+                    {`${Number(estimateGasFee) !== 0 ? Number(estimateGasFee).toFixed(8) : '0'} TICS`}
+                    </div>
+                  </div>
                   <div className={'swapDetails__border'}></div>
                   <div
                     style={{
@@ -2284,9 +2432,7 @@ export const ExternalConnection = () => {
                   >
                     <ButtonComp
                       maxWidth="100%"
-                      onClick={async () => {
-                        setOpenmodal(true);
-                      }}
+                      onClick={() => handleTransaction(defaultAddressPhrase)}
                       text="Accept"
                     />
                     <div className="cancelBtn">
@@ -2389,9 +2535,7 @@ export const ExternalConnection = () => {
                   >
                     <ButtonComp
                       maxWidth="100%"
-                      onClick={async () => {
-                        setOpenmodal(true);
-                      }}
+                      onClick={() => handleTransaction(defaultAddressPhrase)}
                       text="Accept"
                     />
                     <div className="cancelBtn">
