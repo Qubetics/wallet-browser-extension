@@ -738,9 +738,10 @@ function CrossChain({ state }) {
       const { chains } = await chrome.storage.local.get('chains');
 
       let tokens = data?.data?.map((token) => {
+        console.log('token', token);
         let coinFamilyName = 'ETH';
         let tokenType = 'ERC20';
-        switch (token?.coin_family) {
+        switch (token?.coin_data?.coin_family) {
           case 1:
             coinFamilyName = 'BNB';
             tokenType = 'BEP20';
@@ -814,7 +815,7 @@ function CrossChain({ state }) {
         let coinFamilyName = 'ETH';
         let tokenType = 'ERC20';
 
-        switch (token.coin_family) {
+        switch (token?.coin_data?.coin_family) {
           case 1:
             coinFamilyName = 'BNB';
             tokenType = 'BEP20';
@@ -933,7 +934,6 @@ function CrossChain({ state }) {
         setAvailableTokens(modifiedList);
         setToken1(myToken1);
         setToken2(myToken2);
-
         setInnerLoading(true);
 
         const route = await crossChainHelper.current.getQuoteAndRoute(
@@ -951,7 +951,6 @@ function CrossChain({ state }) {
         setRoute(route);
         setInnerLoading(false);
       } else {
-        // console.log(activeTokens, crossToken1);
         const myToken1 =
           activeTokens.find((el) => el.id == crossToken1.id) || null;
         const myToken2 =
@@ -989,10 +988,11 @@ function CrossChain({ state }) {
 
       if (state && state.coinId) {
         let tokenExists = activeTokens.find(
-          (token) => token.id === state.coinId
+          (token) => token?.id === state.coinId
         );
         if (tokenExists) {
           let tokens = [tokenExists].map((token) => {
+            console.log('EXTRA TOKEN', token);
             let network = '';
             let coinFamilyName = 'ETH';
             let tokenType = 'ERC20';
@@ -1023,25 +1023,25 @@ function CrossChain({ state }) {
             }
 
             return {
-              id: token.id,
-              symbol: token.symbol,
-              showName: token.showName,
-              active: token.active,
-              iHave: token.iHave,
+              id: token?.id,
+              symbol: token?.symbol,
+              showName: token?.showName,
+              active: token?.active,
+              iHave: token?.iHave,
               name: token.name,
-              tokenAddress: token.tokenAddress || null,
-              image: token.image,
-              address: token.address,
-              isToken: token.isToken,
+              tokenAddress: token?.tokenAddress || null,
+              image: token?.image,
+              address: token?.address,
+              isToken: token?.isToken,
               coinFamilyName,
-              coinFamily: token.coinFamily,
-              balance: token.balance,
-              price: token.price,
-              type: token.type || tokenType,
-              chain: token.chain,
-              native: token.native,
-              decimals: token.decimals,
-              rpc: token.rpc,
+              coinFamily: token?.coinFamily,
+              balance: token?.balance,
+              price: token?.price,
+              type: token?.tokenAddress ? tokenType : null,
+              chain: token?.chain,
+              native: token?.native,
+              decimals: token?.decimals,
+              rpc: token?.rpc,
             };
           });
           let tokenFromSearch = tokens[0];
@@ -1050,7 +1050,9 @@ function CrossChain({ state }) {
             messageApi.error('Token not available for swap.');
           }
           if (tokenFromSearch) {
-            if (crossToken2.id != tokenFromSearch.id) {
+            console.log('crossToken2',crossToken2)
+            console.log('tokenFromSearch',tokenFromSearch)
+            if (crossToken2?.id != tokenFromSearch?.id) {
               crossToken1 = tokenFromSearch;
 
               await chrome.storage.local.set({
@@ -1282,9 +1284,9 @@ function CrossChain({ state }) {
 
   useEffect(() => {
     init();
-    return()=> {
-      setAount(0)
-    }
+    return () => {
+      setAount(0);
+    };
   }, [page]);
 
   const handleScroll = () => {
@@ -1559,8 +1561,7 @@ function CrossChain({ state }) {
                   placeholder="0.000"
                   onWheel={(e) => e.currentTarget.blur()}
                   inputMode="decimal"
-                  onKeyDown={(e)=>{
-
+                  onKeyDown={(e) => {
                     const allowedKeys = [
                       'Backspace',
                       'Tab',
@@ -1570,7 +1571,7 @@ function CrossChain({ state }) {
                       'Home',
                       'End',
                     ];
-                
+
                     // Allow control/navigation keys
                     if (allowedKeys.includes(e.key)) return;
 
@@ -1673,7 +1674,7 @@ function CrossChain({ state }) {
                     },
                   ]}
                   onSelect={(value) => {
-                    setAount(null)
+                    setAount(null);
                     setToken2(availableTokens.find((el) => el.id == value));
                     handleToken1Change(
                       availableTokens.find((el) => el.id == value)
@@ -1734,8 +1735,8 @@ function CrossChain({ state }) {
                   if (token2?.iHave) {
                     setToken1(token2);
                     setToken2(token1);
-                    setAmount2(null);
-                    setAount(null);
+                    setAmount2(0);
+                    setAount(0);
                     setPercent(0);
                     setInfoData([]);
                   } else {
@@ -1919,6 +1920,7 @@ function CrossChain({ state }) {
           }
 
           if (parseFloat(balance) < parseFloat(amount)) {
+            console.log('first insufficient balance case');
             return messageApi.error(
               'Insufficient balance to proceed with the transaction.'
             );
@@ -1952,19 +1954,32 @@ function CrossChain({ state }) {
             );
 
             if (token1?.isToken) {
+              console.log(
+                'nativeCoinBalance',
+                nativeCoinBalance,
+                'Number(gasInEth))',
+                Number(gasInEth)
+              );
               if (
                 Number(nativeCoinBalance.toString()) <
-                parseFloat(Number(amount) + Number(gasInEth))
+                parseFloat(Number(gasInEth))
               ) {
                 return messageApi.error(
                   'Insufficient native balance to proceed with the transaction.'
                 );
               }
             } else {
+              console.log(
+                'parseFloat(balance)',
+                parseFloat(balance),
+                parseFloat(Number(amount)),
+                Number(gasInEth)
+              );
               if (
                 parseFloat(balance) <
                 parseFloat(Number(amount) + Number(gasInEth))
               ) {
+                console.log('first insufficient balance case');
                 return messageApi.error(
                   'Insufficient balance to proceed with the transaction.'
                 );

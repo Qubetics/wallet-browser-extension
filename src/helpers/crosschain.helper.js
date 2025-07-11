@@ -287,6 +287,7 @@ export class CrossChainHelper {
           fromCoin.tokenAddress,
           Math.pow(10, fromCoin.decimals),
           '',
+          fromCoin.balance,
           orderData?.orderId,
           'cross_chain',
           gasPriceType,

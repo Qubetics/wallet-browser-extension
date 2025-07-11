@@ -40,8 +40,7 @@ export class SolanaHelper {
 
   constructor(jsonRpc) {
     if (jsonRpc) {
-      // console.log('RPX============', jsonRpc);
-      this.connection = new Connection(jsonRpc);
+      this.connection = new Connection(jsonRpc,{ commitment: 'confirmed' });
       this.solTokenObject = new soltokenbalance(jsonRpc);
     }
   }
@@ -344,13 +343,6 @@ export class SolanaHelper {
         await this.createdAssociatedAccounts(to, tokenAddress, myKeyPair);
       console.log("🚀 ~ SolanaHelper ~ toTokenAccount:", toTokenAccount);
       console.log("🚀 ~ SolanaHelper ~ fromTokenAccount:", fromTokenAccount);
-
-      // console.log(amount, decimals, '============amount');
-
-      // console.log(
-      //   new BigNumber(amount).multipliedBy(new BigNumber(decimals)).toNumber(),
-      //   '============amount'
-      // );
 
       const PRIORITY_FEE_INSTRUCTIONS =
         ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 35000 });
