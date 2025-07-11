@@ -53,6 +53,7 @@ export const ExternalConnection = () => {
   const [params, setParams] = useState(null);
   const [defaultAddressPhrase, setDefaultAddressPhrase] = useState(null)
   const enrichedDataRef = useRef(null);
+  const [estimateGasFee,setEstimateGasFee] = useState(0)
 
   // const useLocation
 
@@ -63,7 +64,7 @@ export const ExternalConnection = () => {
   //       ?.phrase) ||
   //   '';
   // console.log("defaultAddressPhrase6756756:::", defaultAddressPhrase, "enrichedDataRef::", enrichedDataRef);
-  // console.log("DATA:::", data)
+  console.log("EXTRNL DATA:::", data)
 
   let price = null;
 
@@ -74,6 +75,7 @@ export const ExternalConnection = () => {
   const handleCancel = () => {
     setOpenmodal(false);
   };
+
 
   const dappApprovalHash = (pvt_key, approvalParam) => {
     return new Promise(async (resolve, reject) => {
@@ -93,13 +95,32 @@ export const ExternalConnection = () => {
     });
   };
 
+  const getEstimateFees = async (mnemonics) => {
+    console.log("iside getEstimateFees ......");
+    
+    const response = await delagteAndBondMore(
+      mnemonics,
+      data.userAddress,
+      data.stakeAmount,
+      data.valoperAddress,
+      data.nodeUrl,
+      true
+    );
+    setEstimateGasFee(response)
+    store.dispatch(setLoading(false))
+    return response
+  }
+
+
   const init = async (password) => {
     const { chains } = await chrome.storage.local.get('chains');
     let { accounts } = await chrome.storage.session.get('accounts');
     const { mnemonics } = await chrome.storage.local.get('mnemonics');
     const decryptMnemonics = await SecurityHelper.decrypt(mnemonics, sessionPassword);
     // console.log("decryptMnemonics::", decryptMnemonics);
-
+    if (account) {
+      store.dispatch(setLoading(true))
+    }
     const defaultAddress = accounts?.find((item) => item.default)?.address;
     if (defaultAddress) {
       setDefaultAccounts(defaultAddress);
@@ -136,7 +157,7 @@ export const ExternalConnection = () => {
                 evmAddress: account.address,
               };
 
-              enrichedDataRef.current = enrichedData; // ✅ store it in ref
+              enrichedDataRef.current = enrichedData;
               setData(enrichedData);
               setMethod(method);
             }
@@ -267,7 +288,6 @@ export const ExternalConnection = () => {
             setData(data);
           }
         } catch (error) {
-          // console.log(error);
         }
       }
     );
@@ -386,7 +406,7 @@ export const ExternalConnection = () => {
             data.nodeUrl
           );
           if (response) {
-            // console.log('RESPO:::', response);
+            console.log('RESPO: delegatorBondMoreFunds::', response);
             handleResponse({ type: 'success', data: response });
             store.dispatch(setLoading(false));
             return;
@@ -527,6 +547,12 @@ export const ExternalConnection = () => {
     }
   };
 
+  useEffect(() => {
+    if (enrichedDataRef.current) {
+      store.dispatch(setLoading(false))
+    }
+  }, [enrichedDataRef.current])
+
   const handleChainSwitch = async () => {
     try {
       // console.log("toChain ::::::::: ", toChain);
@@ -551,10 +577,14 @@ export const ExternalConnection = () => {
     const isVerified = await WalletHelper.getMnemonicsByPassword(
       account, password
     );
-    // console.log("PHRASE::", isVerified);
+    console.log("PHRASE::", isVerified);
+    console.log("method :",method)
 
     if (isVerified) {
       setDefaultAddressPhrase(isVerified)
+      if (method =="delegatorBondMoreFunds") {
+        getEstimateFees(isVerified)
+      }
     }
   }
 
@@ -1787,6 +1817,14 @@ export const ExternalConnection = () => {
                     </div>
                     <div className={'confirmCurrency__keyValues__value'}>
                       {data.stakeAmount}
+                    </div>
+                  </div>
+                  <div className={'confirmCurrency__keyValues'}>
+                    <div className={'confirmCurrency__keyValues__key'}>
+                      Estimated Gas Fee
+                    </div>
+                    <div className={'confirmCurrency__keyValues__value'}>
+                      {estimateGasFee}
                     </div>
                   </div>
                   <div className={'swapDetails__border'}></div>

@@ -779,6 +779,7 @@ class Background {
             res.error = true;
           }
         } else if (req.method === 'delegatorBondMoreFunds') {
+          await chrome.storage.session.remove(['accounts']);
           const response = await new Promise((resolve, reject) => {
             const requestData = encodeURIComponent(JSON.stringify(req));
 
