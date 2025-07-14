@@ -13,7 +13,8 @@ export async function redelegate(
   srcValoperAddress,
   desValoperAddress,
   amount,
-  nodeUrl
+  nodeUrl,
+  feeCalculate
 ) {
   // console.log('i am called::',{mnemonic,
   //   srcValoperAddress,
@@ -50,6 +51,11 @@ export async function redelegate(
         },
       }),
     };
+    if (feeCalculate) {
+      const gasEstimation = await client.simulate(delegatingPerson, [sendMsg], "Estimating redelegate");
+      const estimatedFeeAmount = (Number(gasPrice?.amount ?? 0) * Number(gasEstimation ?? 0)).toString();
+      return estimatedFeeAmount
+    }
     const txResult = await client.signAndBroadcast(
       delegatingPerson,
       [sendMsg],

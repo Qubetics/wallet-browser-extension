@@ -11,7 +11,8 @@ export default async function unBondFunds(
   address,
   valporAddress,
   unbondAmount,
-  nodeUrl
+  nodeUrl,
+  feeCalculate
   // maxClicked,
   // totalAmount
 ) {
@@ -52,6 +53,13 @@ export default async function unBondFunds(
       },
     }),
   };
+
+  if (feeCalculate) {
+    const gasEstimation = await client.simulate(address, [sendMsg], "Estimating redelegate");
+    const estimatedFeeAmount = (Number(gasPrice?.amount ?? 0) * Number(gasEstimation ?? 0)).toString();
+    return estimatedFeeAmount
+  }
+  
   const txResult = await client.signAndBroadcastSync(
     delegatorAddress,
     [sendMsg],
