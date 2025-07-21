@@ -1,5 +1,5 @@
 /*global chrome*/
-
+/* global BigInt */
 import { message } from 'antd';
 import moment from 'moment';
 import React from 'react';
@@ -23,6 +23,7 @@ import {
   getFlooredFixed,
 } from '../../../helpers/conversion.helper';
 import { server } from '../../../server';
+import { broadcastTx } from '../../../helpers/cosmos.helper';
 
 function SendConfirm() {
   const {
@@ -38,6 +39,9 @@ function SendConfirm() {
       redirectTo,
       gasPriceType,
       sessionPassword,
+      selectChain,
+      mnemonics,
+      cosmosData,
     },
   } = useLocation();
 
@@ -63,14 +67,6 @@ function SendConfirm() {
 
   const init = async () => {
     store.dispatch(setLoading(true));
-
-    const price = coin.coin.fiat_price_data || 0;
-
-    if (price) {
-      const value = parseFloat(amount) * parseFloat(price.value);
-      setFiatCoin(value);
-    }
-
     const parentCoin = await server.post(
       '/wallet/nativeCoinFiatPrice',
       {
@@ -83,71 +79,122 @@ function SendConfirm() {
         },
       }
     );
-
     const { chains } = await chrome.storage.local.get('chains');
     const chain = chains.find(
       (chain) => chain.coinFamily === coin.coin.coin_family
     );
-
     setParentCoin(chain);
-    const feePrice = parentCoin.data.data.fiatCoinPrice;
-
+    const feePrice = parentCoin?.data?.data?.fiatCoinPrice;
     if (feePrice) {
       const value = parseFloat(networkFee) * parseFloat(feePrice.value);
       setFiatGasFee(value);
     }
-
     setToName(contact);
     store.dispatch(setLoading(false));
   };
 
   useEffect(() => {
+    const price = coin?.coin?.fiat_price_data || 0;
+    if (price) {
+      const value = parseFloat(amount) * parseFloat(price.value);
+      setFiatCoin(value);
+    }
     init();
   }, []);
 
-  const data = [
-    {
-      text: 'From',
-      textVal: `${coin.wallet_address.substring(
-        0,
-        7
-      )}.....${coin.wallet_address.substring(to.length - 7, to.length)}`,
-    },
-    {
-      text: 'To',
-      textVal: toName
-        ? toName
-        : ENSName
-        ? ENSName
-        : `${to.substring(0, 7)}.....${to.substring(to.length - 7, to.length)}`,
-    },
-    {
-      text: 'Network Fee',
-      textVal: `${parseFloat(getFlooredFixed(+networkFee, 8))} ${
-        parentCoin ? parentCoin.currencySymbol.toUpperCase() : ''
-      }/ ${currency.symbol}${addCommasToNumber(
-        getFlooredFixed(fiatGasFee, 2)
-      )}`,
-    },
-    {
-      text: 'Total value',
-      textVal: coin.coin.token_address
-        ? `${addCommasToNumber(
-            parseFloat(getFlooredFixed(amount, 8))
-          )} ${coin.coin.coin_symbol.toUpperCase()}/ ${
-            currency.symbol
-          }${addCommasToNumber(getFlooredFixed(+fiatGasFee + +fiatCoin, 2))}`
-        : `${addCommasToNumber(
-            parseFloat(getFlooredFixed(+amount + +networkFee, 8))
-          )} ${coin.coin.coin_symbol.toUpperCase()}/ ${
-            currency.symbol
-          }${addCommasToNumber(getFlooredFixed(+fiatGasFee + +fiatCoin, 2))}`,
-    },
-    {
-      text: 'Date',
-      textVal: moment(new Date()).format('MM/DD/YY'),
-    },
-  ];
+  const data =
+    selectChain === 'cosmos'
+      ? [
+          {
+            text: 'From',
+            textVal: `${cosmosData?.address?.substring(
+              0,
+              7
+            )}.....${cosmosData?.address?.substring(
+              cosmosData?.address?.length - 7,
+              cosmosData?.address?.length
+            )}`,
+          },
+          {
+            text: 'To',
+            textVal: `${to.substring(0, 7)}.....${to.substring(
+              to.length - 7,
+              to.length
+            )}`,
+          },
+          {
+            text: 'Network Fee',
+            textVal: `${cosmosData?.fee} ${
+              parentCoin ? parentCoin.currencySymbol.toUpperCase() : ''
+            }/ ${currency.symbol}${addCommasToNumber(
+              getFlooredFixed(cosmosData?.feeInUsd, 2)
+            )}`,
+          },
+          {
+            text: 'Total value',
+            textVal: `${addCommasToNumber(
+              parseFloat(getFlooredFixed(+amount + +cosmosData?.fee, 8))
+            )} ${coin.coin.coin_symbol.toUpperCase()}/ ${
+              currency.symbol
+            }${addCommasToNumber(
+              getFlooredFixed(+cosmosData?.feeInUsd + +fiatCoin, 2)
+            )}`,
+          },
+          {
+            text: 'Date',
+            textVal: moment(new Date()).format('MM/DD/YY'),
+          },
+        ]
+      : [
+          {
+            text: 'From',
+            textVal: `${coin.wallet_address.substring(
+              0,
+              7
+            )}.....${coin.wallet_address.substring(to.length - 7, to.length)}`,
+          },
+          {
+            text: 'To',
+            textVal: toName
+              ? toName
+              : ENSName
+              ? ENSName
+              : `${to.substring(0, 7)}.....${to.substring(
+                  to.length - 7,
+                  to.length
+                )}`,
+          },
+          {
+            text: 'Network Fee',
+            textVal: `${parseFloat(getFlooredFixed(+networkFee, 8))} ${
+              parentCoin ? parentCoin.currencySymbol.toUpperCase() : ''
+            }/ ${currency.symbol}${addCommasToNumber(
+              getFlooredFixed(fiatGasFee, 2)
+            )}`,
+          },
+          {
+            text: 'Total value',
+            textVal: coin.coin.token_address
+              ? `${addCommasToNumber(
+                  parseFloat(getFlooredFixed(amount, 8))
+                )} ${coin.coin.coin_symbol.toUpperCase()}/ ${
+                  currency.symbol
+                }${addCommasToNumber(
+                  getFlooredFixed(+fiatGasFee + +fiatCoin, 2)
+                )}`
+              : `${addCommasToNumber(
+                  parseFloat(getFlooredFixed(+amount + +networkFee, 8))
+                )} ${coin.coin.coin_symbol.toUpperCase()}/ ${
+                  currency.symbol
+                }${addCommasToNumber(
+                  getFlooredFixed(+fiatGasFee + +fiatCoin, 2)
+                )}`,
+          },
+          {
+            text: 'Date',
+            textVal: moment(new Date()).format('MM/DD/YY'),
+          },
+        ];
 
   const handleTransaction = async () => {
     try {
@@ -159,28 +206,43 @@ function SendConfirm() {
       );
 
       if (chain.isEVM) {
-        if (coin.coin.token_address) {
-          const response =
-            await Web3Helper.generateRawTransactionForTokenAndBroadcast(
-              to,
-              coin.wallet_address,
-              amount,
-              coin.coin.coin_id,
-              fiatCoin,
-              fiatGasFee,
-              currency.name,
-              toName,
-              chain.slug == 'matic' ? 'polygon' : chain.slug,
-              chain.chainId,
-              coin.coin.token_address,
-              coin.coin.decimals,
-              coin.coin.token_type,
-              '',
-              coin.coin.coin_family,
-              gasPriceType,
-              undefined,
-              sessionPassword
-            );
+        if (selectChain === 'cosmos') {
+          const { hash, block, transFee, transEstimate } = await broadcastTx({
+            mnemonicsNew: mnemonics,
+            fromAddress: cosmosData?.address,
+            toAddress: to,
+            amount: amount,
+            fee: cosmosData?.stdFee,
+            _gasLimit: cosmosData.gasLimit,
+          });
+          console.log(
+            '🚀 ~ handleTransaction ~ cosmosTxn:',
+            hash,
+            block,
+            transFee,
+            transEstimate
+          );
+
+          let newData = {
+            tx_fee: cosmosData.fee,
+            gas_estimate: transEstimate,
+            block: block,
+            txid: hash,
+            amount: amount,
+            from: cosmosData?.address,
+            to: to,
+            tx_type: 'withdraw',
+          };
+
+          const response = await server.post(
+            `/qubetics/send/nativeAddress`,
+            newData,
+            {
+              headers: {
+                Authorization: account.jwtToken,
+              },
+            }
+          );
 
           if (!response) {
             store.dispatch(setLoading(false));
@@ -189,41 +251,72 @@ function SendConfirm() {
             );
           }
         } else {
-          console.log('IS EVM COIN CASE ')
-          const response =
-            await Web3Helper.generateRawTransactionForCoinAndBroadcast(
-              to,
-              coin.wallet_address,
-              amount,
-              coin.coin.coin_id,
-              fiatCoin,
-              fiatGasFee,
-              currency.name,
-              toName,
-              chain.slug == '0' ? 'polygon' : chain.slug,
-              chain.chainId,
-              coin.coin.coin_symbol,
-              coin.coin.coin_family == 1
-                ? process.env.REACT_APP_BNB_RPC
-                : coin.coin.coin_family == 2
-                ? process.env.REACT_APP_ETH_RPC
-                : coin.coin.coin_family == 4
-                ? process.env.REACT_APP_MATIC_RPC
-                : process.env.REACT_APP_QUBETIC_RPC,
-              '',
-              gasPriceType,
-              undefined,
-              sessionPassword
+          if (coin.coin.token_address) {
+            const response =
+              await Web3Helper.generateRawTransactionForTokenAndBroadcast(
+                to,
+                coin.wallet_address,
+                amount,
+                coin.coin.coin_id,
+                fiatCoin,
+                fiatGasFee,
+                currency.name,
+                toName,
+                chain.slug == 'matic' ? 'polygon' : chain.slug,
+                chain.chainId,
+                coin.coin.token_address,
+                coin.coin.decimals,
+                coin.coin.token_type,
+                '',
+                coin.coin.coin_family,
+                gasPriceType,
+                undefined,
+                sessionPassword
+              );
+
+            if (!response) {
+              store.dispatch(setLoading(false));
+              return messageApi.error(
+                'Insufficient funds to perform transaction.'
+              );
+            }
+          } else {
+            console.log('IS EVM COIN CASE ');
+            const response =
+              await Web3Helper.generateRawTransactionForCoinAndBroadcast(
+                to,
+                coin.wallet_address,
+                amount,
+                coin.coin.coin_id,
+                fiatCoin,
+                fiatGasFee,
+                currency.name,
+                toName,
+                chain.slug == '0' ? 'polygon' : chain.slug,
+                chain.chainId,
+                coin.coin.coin_symbol,
+                coin.coin.coin_family == 1
+                  ? process.env.REACT_APP_BNB_RPC
+                  : coin.coin.coin_family == 2
+                  ? process.env.REACT_APP_ETH_RPC
+                  : coin.coin.coin_family == 4
+                  ? process.env.REACT_APP_MATIC_RPC
+                  : process.env.REACT_APP_QUBETIC_RPC,
+                '',
+                gasPriceType,
+                undefined,
+                sessionPassword
+              );
+            console.log(
+              'RESPONSE FROM FUNCTION MAKING RAW TRANSACTION :',
+              response
             );
-          console.log(
-            'RESPONSE FROM FUNCTION MAKING RAW TRANSACTION :',
-            response
-          );
-          if (!response) {
-            store.dispatch(setLoading(false));
-            return messageApi.error(
-              'Insufficient funds to perform transaction.'
-            );
+            if (!response) {
+              store.dispatch(setLoading(false));
+              return messageApi.error(
+                'Insufficient funds to perform transaction.'
+              );
+            }
           }
         }
       } else if (!chain.isEVM && chain.currencyName === 'SOL') {
@@ -361,23 +454,23 @@ function SendConfirm() {
                 }}
               >
                 <p className="confirmCurrency__card__textBtm">
-                  {currency.symbol}
+                  {currency?.symbol}
                   {addCommasToNumber(getFlooredFixed(fiatCoin, 2))}
                 </p>
                 <h3 className="confirmCurrency__card__textTop">
                   {addCommasToNumber(getFlooredFixed(amount, 5))}{' '}
-                  {coin.coin.coin_symbol.toUpperCase()}
+                  {coin?.coin?.coin_symbol.toUpperCase()}
                 </h3>
               </div>
             </div>
             <div className="confirmCurrency__keyValuesOuter">
-              {data.map((ele) => (
+              {data?.map((ele) => (
                 <div className="confirmCurrency__keyValues">
                   <div className="confirmCurrency__keyValues__key">
-                    {ele.text}
+                    {ele?.text}
                   </div>
                   <div className="confirmCurrency__keyValues__value">
-                    {ele.textVal}
+                    {ele?.textVal}
                   </div>
                 </div>
               ))}
@@ -424,16 +517,18 @@ function SendConfirm() {
             text={'OK'}
             maxWidth={'100%'}
             onClick={() => {
-              return navigate('/currencyDetails', {
-                state: {
-                  symbol: coin.coin.coin_symbol.toUpperCase(),
-                  image: coin.coin.coin_image
-                    ? `${process.env.REACT_APP_IMAGE_BASE_URL}${coin.coin.coin_image}`
-                    : null,
-                  type: '',
-                  coin: coin,
-                },
-              });
+              setTimeout(() => {
+                navigate('/currencyDetails', {
+                  state: {
+                    symbol: coin.coin.coin_symbol.toUpperCase(),
+                    image: coin.coin.coin_image
+                      ? `${process.env.REACT_APP_IMAGE_BASE_URL}${coin.coin.coin_image}`
+                      : null,
+                    type: '',
+                    coin: coin,
+                  },
+                });
+              }, 2000);
             }}
           />
         </div>

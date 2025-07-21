@@ -29,15 +29,7 @@ function AddresBook() {
     try {
       store.dispatch(setLoading(true));
       const { data } = await server.post(
-        // "/wallet/address_book/list",
         "/user/address_book",
-        // {
-        //   wallet_address: account.coinFamilyAndAddress[1],
-        //   search: keyword ? keyword.trim() : undefined,
-        //   per_page: 300,
-        //   order_by: "name",
-        //   order_type: "asc",
-        // },
         {
           address: Object.values(account?.coinFamilyAndAddress),
           coin_family: [1, 2, 3, 4, 5, 7],
@@ -75,7 +67,6 @@ function AddresBook() {
     }
 
     return () => clearTimeout(debounceTimer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [keyword]);
 
 
@@ -121,22 +112,12 @@ function AddresBook() {
       {contextHolder}
 
       <div className={`flexedContent padding-Top`}>
-        {/* <Link to='/add-contact'>
-          <ButtonComp
-            text={"Add Contact"}
-            maxWidth={"100%"}
-            marginBottom={"40px"}
-          />
-        </Link> */}
-
         {list.length > 0 ? (
           list.map((el, index) => (
             <AddressNetworkCard
               heading={el?.name}
               address={el?.address}
               wallet_address={el?.address}
-              // currency={`${el?.coin_data?.coin_symbol.toUpperCase()} (${el.coin_data.coin_name
-              // })`}
               currency={`${el?.wallet_data?.coin_family} (${el.wallet_data.name})`}
               index={index}
               id={el?.id}

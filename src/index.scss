@@ -606,3 +606,33 @@ code {
   }
 
 }
+
+
+.receive-select-chain-select {
+  width: 350px;
+  display: flex;
+  background-color: transparent;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  border-radius: 10px;
+  color: white;
+}
+
+.inputpaddingIssue {
+  .filterHistory__selctHis .ant-select .ant-select-selector {
+    padding: 11px !important;
+    color: white !important;
+  }
+}
+
+.ant-select-selection-search {
+  color: white !important;
+}
+
+.ant-select-selector {
+
+  span {
+    color: #ffffff !important;
+  }
+}

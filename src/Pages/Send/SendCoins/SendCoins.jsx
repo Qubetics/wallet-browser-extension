@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /*global chrome*/
-import { message, Slider } from 'antd';
+/* global BigInt */
+import { message, Select, Slider } from 'antd';
 import { ethers } from 'ethers';
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -34,6 +35,11 @@ import { server } from '../../../server';
 import { formatNumberFiat } from '../../../helpers/common.helper';
 import AddressTableSend from '../../../Components/AddressTable/AddressTableSend';
 import { BL_CODE } from '../../../helpers/constant';
+import { calculateFee, GasPrice } from '@cosmjss/stargate';
+import {
+  estimateGasLimit,
+  getCosmosAddress,
+} from '../../../helpers/cosmos.helper';
 
 let inputCount = 0;
 let transactionSize = 0;
@@ -57,21 +63,25 @@ const crypto = {
 
 function SendCoins() {
   const { account, currency } = useSelector((state) => state);
-
   const {
-    state: { coin, redirectTo, backAddress, backAmount },
+    state: {
+      coin,
+      redirectTo,
+      backAddress,
+      backAmount,
+      backFromConfirm,
+      chainSelected,
+    },
   } = useLocation();
   const navigate = useNavigate();
 
   const [myBalance, setBalance] = useState(0);
   const [gasPriceType, setGasPriceType] = useState(2); // 1 slow, 2 medium, 3 fast
-
   let [address, setAddress] = useState(backAddress || null);
   const [contact, setContact] = useState(null);
   const [amount, setAmount] = useState(backAmount || null);
   const [value, setValue] = useState(0.0);
   const [price, setPrice] = useState(0);
-  const [percent, setPercent] = useState(null);
   const [isLogoutModalOpen, setLogoutOpenmodal] = useState(false);
   const [messageApi, contextHolder] = message.useMessage({});
   const [list, setList] = useState([]);
@@ -79,46 +89,72 @@ function SendCoins() {
   const [selectedGasPriceSol, setSelectedGasPriceSol] = useState(0);
   const [sessionPassword, setSessionPassword] = useState(null);
   const [isModalOpen, setConfirmModal] = useState(false);
-
+  const [selectChainModal, setSelectChainModal] = useState(false);
+  const [selectChain, setSelectChain] = useState('evm');
   const [nativeCoinPrice, setNativeCoinPrice] = useState(0);
-
   const [myGasPrice, setGasPrice] = useState({
     estimate: 0,
     fast: 0,
     propose: 0,
     safe: 0,
   });
+  const [loading, setComponentLoading] = useState(null);
+  const [cosmosFee, setCosmosFee] = useState(0);
 
   const fetchNativePrice = async () => {
     const parentCoin = await server.post(
       '/wallet/nativeCoinFiatPrice',
-
       {
         coin_family: coin.coin.coin_family,
 
         fiat_currency: currency.name,
       },
-
       {
         headers: {
           Authorization: account.jwtToken,
         },
       }
     );
-
     setNativeCoinPrice(parentCoin?.data?.data?.fiatCoinPrice?.value);
   };
 
-  useEffect(() => {
-    fetchNativePrice();
-    init();
-    const price = coin.coin.fiat_price_data || 0;
+  const fetchCosmosGasFee = async () => {
+    const result = await server.get('/qubetics/gas_estimation/nativeAddress', {
+      headers: {
+        Authorization: account.jwtToken,
+      },
+    });
 
+    const gasPriceLocal = GasPrice.fromString(result?.data?.data?.gas_price);
+    let gasLimit = Math.round(result?.data?.data?.buffered_gas_estimate * 3.2);
+    let stdFee = calculateFee(gasLimit, gasPriceLocal);
+
+    console.log(
+      'buffered gasLimit, gasEstimate, gasPriceLocal, stdFee',
+      gasLimit,
+      gasPriceLocal,
+      stdFee
+    );
+
+    const numerator = BigInt(stdFee['amount'][0]['amount']);
+    const denominator = BigInt('1000000000000000000');
+    const integerPart = numerator / denominator;
+    const remainder = numerator % denominator;
+    const decimals = (remainder * BigInt(1_000_000)) / denominator;
+    const feeFormatted = `${integerPart}.${decimals
+      .toString()
+      .padStart(6, '0')}`;
+    setCosmosFee(feeFormatted);
+  };
+
+  useEffect(() => {
+    const price = coin.coin.fiat_price_data || 0;
     if (price) {
       const value = parseFloat(coin.balance) * parseFloat(price.value);
       setValue(value);
       setPrice(price.value);
     }
+    init();
     return () => {
       inputCount = 0;
       inputCount = 0;
@@ -128,6 +164,27 @@ function SendCoins() {
       btcTosatoshiMultiplier = 0.00000001;
     };
   }, []);
+
+  useEffect(() => {
+    console.log('backFromConfirm', backFromConfirm);
+    if (loading !== null && coin?.coin?.coin_family === 7 && !backFromConfirm) {
+      setSessionPassword('');
+      setSelectChainModal(!selectChainModal);
+    }
+    if (chainSelected) {
+      setSelectChain(chainSelected);
+      fetchCosmosGasFee();
+    }
+  }, [loading, backFromConfirm, chainSelected]);
+
+  useEffect(() => {
+    if (loading !== null && selectChain === 'cosmos' && !backFromConfirm) {
+      fetchCosmosGasFee();
+    }
+    if (selectChain === 'evm') {
+      fetchNativePrice();
+    }
+  }, [selectChain]);
 
   const init = async () => {
     try {
@@ -156,7 +213,7 @@ function SendCoins() {
 
       if (!chain.isEVM && chain.currencyName === 'BTC') {
         try {
-          const gasPrice = await BTCHelper.getBTCGasPrice()
+          const gasPrice = await BTCHelper.getBTCGasPrice();
           const unspent = await BTCHelper.getUnspent(coin.wallet_address);
           if (!unspent) {
             store.dispatch(setLoading(false));
@@ -164,7 +221,7 @@ function SendCoins() {
           }
           if (unspent.length === 0) {
             store.dispatch(setLoading(false));
-           
+
             return messageApi.error(
               'You have a pending transaction in your account or you do not have enough balance to proceed with the transaction.'
             );
@@ -186,7 +243,7 @@ function SendCoins() {
           transactionSize =
             inputCount * 146 + outputCount * 34 + 10 - inputCount;
 
-            const totalFee = (
+          const totalFee = (
             transactionSize *
             gasPrice *
             btcTosatoshiMultiplier
@@ -221,8 +278,10 @@ function SendCoins() {
 
       setList(data.data);
       store.dispatch(setLoading(false));
+      setComponentLoading(false);
     } catch (error) {
       store.dispatch(setLoading(false));
+      setComponentLoading(false);
       messageApi.error(error.message);
     }
   };
@@ -278,7 +337,7 @@ function SendCoins() {
         store.dispatch(setLoading(false));
         amountToSend = coin.balance;
       }
-      
+
       setBalance(amountToSend);
       store.dispatch(setLoading(false));
 
@@ -302,12 +361,16 @@ function SendCoins() {
       );
 
       if (chain.isEVM) {
+        if (selectChain === 'cosmos') {
+          const actualAmountLeft = Number(coin.balance) - Number(cosmosFee);
+          setAmount(actualAmountLeft.toFixed(6));
+          return;
+        }
         store.dispatch(setLoading(true));
         const balance = new BigNumber(coin.balance).times(
           '1000000000000000000'
         );
         const amountToSend = new BigNumber(balance);
-        // Get the current gas price
         const gasPrice = await Web3Helper.getGasPrice(
           chain.slug == 'matic' ? 'polygon' : chain.slug,
           coin.wallet_address,
@@ -376,7 +439,7 @@ function SendCoins() {
       } else if (!chain.isEVM && chain.currencyName === 'BTC') {
         try {
           store.dispatch(setLoading(true));
-          let gasPrice =  await BTCHelper.getBTCGasPrice();
+          let gasPrice = await BTCHelper.getBTCGasPrice();
           let unspent = await BTCHelper.getUnspent(coin.wallet_address);
           let balance = coin.balance;
           balance = (balance * 99) / 100;
@@ -389,7 +452,7 @@ function SendCoins() {
 
           if (unspent.length === 0) {
             store.dispatch(setLoading(false));
-            
+
             return messageApi.error(
               'You have a pending transaction in your account or you do not have enough balance to proceed with the transaction.'
             );
@@ -463,7 +526,7 @@ function SendCoins() {
     const { chains } = await chrome.storage.local.get('chains');
 
     const chain = chains.find(
-      (chain) => chain.coinFamily === coin.coin.coin_family
+      (chain) => chain?.coinFamily === coin?.coin?.coin_family
     );
 
     if (!amount) {
@@ -473,6 +536,7 @@ function SendCoins() {
 
     const finalAmount = new BigNumber(amount);
     const balance = new BigNumber(myBalance);
+
     if (finalAmount.gt(balance)) {
       store.dispatch(setLoading(false));
       return messageApi.error(
@@ -484,18 +548,20 @@ function SendCoins() {
       store.dispatch(setLoading(false));
       return messageApi.error('Please enter a valid amount to proceed.');
     }
+
     if (parseFloat(amount) <= 0) {
       store.dispatch(setLoading(false));
       return messageApi.error('Please enter a valid amount to proceed.');
     }
+
     if (!address) {
       store.dispatch(setLoading(false));
       return messageApi.error('Please enter a valid address to proceed.');
     }
 
-    const myAddress = account.coinFamilyAndAddress[chain.coinFamily];
+    const myAddress = account?.coinFamilyAndAddress[chain?.coinFamily];
 
-    if (myAddress.toLowerCase() === address.toLowerCase()) {
+    if (myAddress?.toLowerCase() === address?.toLowerCase()) {
       store.dispatch(setLoading(false));
       return messageApi.error('You cannot send to your own address.');
     }
@@ -533,7 +599,7 @@ function SendCoins() {
       (l) => l.address.toLowerCase() === address.toLowerCase()
     );
 
-    if (chain.isEVM) {
+    if (chain.isEVM && selectChain === 'evm') {
       if (!ethers.utils.isAddress(address)) {
         store.dispatch(setLoading(false));
         return messageApi.error('Please provide a valid address to proceed.');
@@ -600,12 +666,90 @@ function SendCoins() {
           to: address,
           amount: amount,
           coin,
-          networkFee: ((myGasPrice?.estimate * Math.max(prc,1)) / 10 ** 9)?.toFixed(5),
+          networkFee: (
+            (myGasPrice?.estimate * Math.max(prc, 1)) /
+            10 ** 9
+          )?.toFixed(5),
           ENSName,
           contact: findContact?.name,
           redirectTo,
           gasPriceType,
           sessionPassword,
+        },
+      });
+    }
+
+    if (chain?.isEVM && selectChain === 'cosmos') {
+      if (!amount) {
+        store.dispatch(setLoading(false));
+        return messageApi.error('Please provide a valid amount to proceed.');
+      }
+      if (!address.startsWith('qubetics1')) {
+        store.dispatch(setLoading(false));
+        return messageApi.error('Please provide a valid address');
+      }
+      const gasPromise = server.get('/qubetics/gas_estimation/nativeAddress', {
+        headers: { Authorization: account.jwtToken },
+      });
+
+      const mnemonics = await WalletHelper.getMnemonicsByPassword(
+        myAddress,
+        sessionPassword
+      );
+
+      const addressPromise = getCosmosAddress();
+      const [{ data }, cosmosFromAddress] = await Promise.all([
+        gasPromise,
+        addressPromise,
+      ]);
+      const { gas_estimate, gas_price, buffered_gas_estimate } =
+        data?.data || {};
+      const { stdFee } = await estimateGasLimit(
+        mnemonics,
+        address?.toLowerCase(),
+        amount,
+        cosmosFromAddress,
+        gas_price,
+        3.2,
+        buffered_gas_estimate
+      );
+
+      const feeAmount = BigInt(stdFee?.amount?.[0]?.amount || '0');
+      const denom = BigInt('1000000000000000000');
+      const integerPart = feeAmount / denom;
+      const remainder = feeAmount % denom;
+      const decimals = (remainder * 1_000_000n) / denom;
+
+      const feeFormatted = `${integerPart}.${decimals
+        .toString()
+        .padStart(6, '0')}`;
+      const fiatPrice = coin?.coin?.fiat_price_data?.value || 0;
+
+      const feeInUsd = (parseFloat(feeFormatted) * fiatPrice).toFixed(6);
+      const amountInUsd = (amount * fiatPrice).toFixed(6);
+
+      const cosmosData = {
+        address: cosmosFromAddress,
+        fee: feeFormatted,
+        feeInUsd: feeInUsd,
+        amountInUsd: amountInUsd,
+        stdFee: stdFee,
+        gasLimit: gas_estimate,
+      };
+      navigate('/confirmCurrency', {
+        state: {
+          to: address,
+          amount: amount,
+          coin,
+          networkFee: 'ss',
+          ENSName,
+          contact: findContact?.name,
+          redirectTo,
+          gasPriceType,
+          sessionPassword,
+          selectChain,
+          mnemonics,
+          cosmosData: cosmosData,
         },
       });
     } else if (!chain.isEVM && chain.currencyName === 'SOL') {
@@ -628,58 +772,58 @@ function SendCoins() {
           sessionPassword,
         },
       });
-    }
-
-    else if (!chain.isEVM && chain.currencyName === 'BTC') {
+    } else if (!chain.isEVM && chain.currencyName === 'BTC') {
       try {
         const bitcoin = require('bitcoinjs-lib');
-        
+
         const gasPrice = await BTCHelper.getBTCGasPrice();
         const unspent = await BTCHelper.getUnspent(coin.wallet_address);
-        
+
         if (!unspent || unspent.length === 0) {
           store.dispatch(setLoading(false));
-          return messageApi.error('No UTXOs available or insufficient balance.');
+          return messageApi.error(
+            'No UTXOs available or insufficient balance.'
+          );
         }
-      
+
         let totalAmountAvailable = 0;
-        
+
         // Process UTXOs
         const utxos = unspent.map((utxo) => {
-          
           const satoshis = Math.floor(Number(utxo.satoshis));
           totalAmountAvailable += satoshis;
-          
+
           return {
             txid: utxo.txid,
             vout: utxo.vout,
             value: satoshis,
           };
         });
-      
+
         const inputCount = utxos.length;
         const outputCount = 2;
         const transactionSize = inputCount * 146 + outputCount * 34 + 10;
         const fee = Math.ceil(transactionSize * gasPrice);
         const sendAmount = Math.round(amount * btcTosatoshi);
         const totalFee = (fee * btcTosatoshiMultiplier).toFixed(8);
-        const totalAmount = sendAmount + (fee * 1.5);
+        const totalAmount = sendAmount + fee * 1.5;
 
         if (totalAmountAvailable < totalAmount) {
           store.dispatch(setLoading(false));
           return messageApi.error('Insufficient UTXO balance.');
         }
-      
+
         // Get private key
-        const btcPrivateKeyStr = await WalletHelper.getBitcoinPrivateKeyWithPassword(sessionPassword);
+        const btcPrivateKeyStr =
+          await WalletHelper.getBitcoinPrivateKeyWithPassword(sessionPassword);
         if (!btcPrivateKeyStr) {
           store.dispatch(setLoading(false));
           return messageApi.error('Unable to fetch private key.');
         }
-      
+
         // Convert WIF to key pair
         const keyPair = bitcoin.ECPair.fromWIF(btcPrivateKeyStr);
-        
+
         // Determine address type and create appropriate payment
         let payment;
         if (coin.wallet_address.startsWith('bc1q')) {
@@ -693,51 +837,58 @@ function SendCoins() {
           // P2PKH (Legacy)
           payment = bitcoin.payments.p2pkh({ pubkey: keyPair.publicKey });
         }
-      
+
         // Verify address match
         if (payment.address !== coin.wallet_address) {
-          console.error("Address mismatch:", payment.address, "vs", coin.wallet_address);
+          console.error(
+            'Address mismatch:',
+            payment.address,
+            'vs',
+            coin.wallet_address
+          );
           store.dispatch(setLoading(false));
           return messageApi.error('Private key does not match wallet address.');
         }
-      
+
         // Create transaction
         const psbt = new bitcoin.Psbt();
-        
+
         // Add inputs
         for (const utxo of utxos) {
           const inputData = {
             hash: utxo.txid,
             index: utxo.vout,
             // For SegWit inputs, we need to specify the value
-            ...(coin.wallet_address.startsWith('bc1q') && { witnessUtxo: {
-              script: payment.output,
-              value: utxo.value,
-            }}),
-            // For P2SH-P2WPKH
-            ...(coin.wallet_address.startsWith('3') && { 
+            ...(coin.wallet_address.startsWith('bc1q') && {
               witnessUtxo: {
                 script: payment.output,
                 value: utxo.value,
               },
-              redeemScript: payment.redeem.output
+            }),
+            // For P2SH-P2WPKH
+            ...(coin.wallet_address.startsWith('3') && {
+              witnessUtxo: {
+                script: payment.output,
+                value: utxo.value,
+              },
+              redeemScript: payment.redeem.output,
             }),
             // For legacy inputs, you'd need the full previous transaction
             // This is more complex and requires fetching the full tx
           };
-          
+
           psbt.addInput(inputData);
         }
-      
+
         // Add outputs
         const change = totalAmountAvailable - sendAmount - fee;
-        
+
         // Add recipient output
         psbt.addOutput({
           address: address,
           value: sendAmount,
         });
-      
+
         // Add change output if above dust threshold
         if (change > 546) {
           psbt.addOutput({
@@ -745,21 +896,21 @@ function SendCoins() {
             value: change,
           });
         }
-      
+
         // Sign all inputs
         for (let i = 0; i < utxos.length; i++) {
           psbt.signInput(i, keyPair);
         }
-      
+
         // Validate signatures
         psbt.validateSignaturesOfAllInputs();
-        
+
         // Finalize and extract transaction
         psbt.finalizeAllInputs();
         const rawTransaction = psbt.extractTransaction().toHex();
-        
+
         store.dispatch(setLoading(false));
-      
+
         navigate('/confirmCurrency', {
           state: {
             rawTransaction,
@@ -772,20 +923,16 @@ function SendCoins() {
             sessionPassword,
           },
         });
-      
-      }  catch (error) {
+      } catch (error) {
         console.error('BTC Transaction Error:', error);
         store.dispatch(setLoading(false));
         return messageApi.error(
-          error.message.includes('Dust amount') ?
-            'Amount is below dust threshold.' :
-            error.message || 'Transaction failed.'
+          error.message.includes('Dust amount')
+            ? 'Amount is below dust threshold.'
+            : error.message || 'Transaction failed.'
         );
       }
-    }
-    
-    
-     else if (!chain.isEVM && chain.currencyName === 'ADA') {
+    } else if (!chain.isEVM && chain.currencyName === 'ADA') {
       try {
         if (coin.tokenAddress) {
           store.dispatch(setLoading(true));
@@ -1033,10 +1180,12 @@ function SendCoins() {
                   placeholder={'Transaction Fee'}
                   label=""
                   value={
-                    myGasPrice?.estimate &&
-                    myGasPrice?.fast &&
-                    !isNaN(myGasPrice.estimate) &&
-                    !isNaN(myGasPrice.fast)
+                    cosmosFee > 0
+                      ? cosmosFee
+                      : myGasPrice?.estimate &&
+                        myGasPrice?.fast &&
+                        !isNaN(myGasPrice.estimate) &&
+                        !isNaN(myGasPrice.fast)
                       ? parseFloat(
                           (myGasPrice.estimate * myGasPrice.fast) / 10 ** 9
                         ).toFixed(coin?.coin?.coin_family === 7 ? 15 : 5)
@@ -1083,12 +1232,10 @@ function SendCoins() {
                     <p style={{ color: 'white' }}>
                       {' '}
                       {isNaN(
-                        (
-                          parseFloat(nativeCoinPrice) *
+                        parseFloat(nativeCoinPrice) *
                           parseFloat(
                             (myGasPrice?.estimate * myGasPrice?.safe) / 10 ** 9
                           )
-                        )
                       )
                         ? '0.00'
                         : (
@@ -1120,13 +1267,11 @@ function SendCoins() {
                     <p style={{ color: 'white' }}>
                       {' '}
                       {isNaN(
-                        (
-                          parseFloat(nativeCoinPrice) *
+                        parseFloat(nativeCoinPrice) *
                           parseFloat(
                             (myGasPrice?.estimate * myGasPrice?.propose) /
                               10 ** 9
                           )
-                        )
                       )
                         ? '0.00'
                         : (
@@ -1157,12 +1302,10 @@ function SendCoins() {
                     <p style={{ color: 'white' }}>
                       {' '}
                       {isNaN(
-                        (
-                          parseFloat(nativeCoinPrice) *
+                        parseFloat(nativeCoinPrice) *
                           parseFloat(
                             (myGasPrice?.estimate * myGasPrice?.fast) / 10 ** 9
                           )
-                        )
                       )
                         ? '0.00'
                         : (
@@ -1183,15 +1326,12 @@ function SendCoins() {
         <div>
           <ButtonComp
             onClick={() => {
+              console.log('coin', coin);
               if (!address) {
-                return messageApi.error(
-                  'Please enter a valid address.'
-                );
+                return messageApi.error('Please enter a valid address.');
               }
               if (!amount) {
-                return messageApi.error(
-                  'Please enter valid amount.'
-                );
+                return messageApi.error('Please enter valid amount.');
               } else {
                 setSessionPassword('');
                 setConfirmModal(!isModalOpen);
@@ -1209,7 +1349,7 @@ function SendCoins() {
         handleOk={handlLogouteOk}
         customClass="customClassModal"
       >
-        <div className={style.viewphrases}>
+        <div className={`${style.viewphrases}`}>
           {list.length > 0 ? (
             <>
               <AddressTableSend
@@ -1287,14 +1427,14 @@ function SendCoins() {
       </ModalCustom>
 
       <ModalCustom
-        title={'Password'}
+        title={'Verify Password'}
         handleCancel={() => setConfirmModal(!isModalOpen)}
         isModalOpen={isModalOpen}
         customClass="customClassModal"
       >
         <div className="viewphrases">
           <InputFieldSimple
-            placeholder="Password"
+            placeholder="Enter Password"
             value={sessionPassword}
             getData={(value) => {
               const hasEmoji = /[\p{Extended_Pictographic}]/u.test(value);
@@ -1320,7 +1460,7 @@ function SendCoins() {
           />
           <div style={{ marginTop: '10px' }}></div>
           <ButtonComp
-            text={'Proceed'}
+            text={'Submit'}
             maxWidth={'100%'}
             onClick={async () => {
               if (!sessionPassword) {
@@ -1336,6 +1476,40 @@ function SendCoins() {
               store.dispatch(setLoading(true));
               await handleSend();
               store.dispatch(setLoading(false));
+            }}
+          />
+        </div>
+      </ModalCustom>
+
+      <ModalCustom
+        title={'Select Chain'}
+        // handleCancel={() => setSelectChainModal(!selectChainModal)}
+        isModalOpen={selectChainModal}
+        customClass="customClassModal"
+        closable={false}
+      >
+        <div className="viewphrases viewPhraseNew inputpaddingIssue">
+          <div className={'filterHistory__selctHis'}>
+            <Select
+              options={[
+                { label: 'Cosmos Chain', value: 'cosmos' },
+                { label: 'Qubetics Chain', value: 'evm' },
+              ]}
+              value={selectChain}
+              onChange={(value) => {
+                console.log('selected chain value', value);
+                setSelectChain(value);
+              }}
+              popupClassName="filterHistoryDropdown"
+              placeholder="Select Chain"
+            />
+          </div>
+          <div style={{ marginTop: '10px' }}></div>
+          <ButtonComp
+            text={'Submit'}
+            maxWidth={'100%'}
+            onClick={async () => {
+              setSelectChainModal(!selectChainModal);
             }}
           />
         </div>

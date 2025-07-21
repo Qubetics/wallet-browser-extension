@@ -211,6 +211,8 @@ function MenuRestofHeaders({
                     redirectTo,
                     backAddress: address,
                     backAmount: amount,
+                    backFromConfirm:true,
+                    chainSelected:state?.selectChain
                   },
                 });
               }

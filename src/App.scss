@@ -397,6 +397,10 @@ body::-webkit-scrollbar {
     border-radius: 10px !important;
     height: 40px !important;
     padding: 0 5px !important;
+
+    span {
+      color: #ffffff !important;
+    }
   }
 
   .ant-select-arrow {

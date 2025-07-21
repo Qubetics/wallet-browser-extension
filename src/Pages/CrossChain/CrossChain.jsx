@@ -992,7 +992,6 @@ function CrossChain({ state }) {
         );
         if (tokenExists) {
           let tokens = [tokenExists].map((token) => {
-            console.log('EXTRA TOKEN', token);
             let network = '';
             let coinFamilyName = 'ETH';
             let tokenType = 'ERC20';
@@ -1046,12 +1045,9 @@ function CrossChain({ state }) {
           });
           let tokenFromSearch = tokens[0];
           if (!tokenFromSearch) {
-            console.log('TOKEN IN CROSS CHAIN');
             messageApi.error('Token not available for swap.');
           }
           if (tokenFromSearch) {
-            console.log('crossToken2',crossToken2)
-            console.log('tokenFromSearch',tokenFromSearch)
             if (crossToken2?.id != tokenFromSearch?.id) {
               crossToken1 = tokenFromSearch;
 

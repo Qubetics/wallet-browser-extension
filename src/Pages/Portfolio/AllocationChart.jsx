@@ -86,7 +86,7 @@ const AllocationChart = () => {
           limit: 100,
           coin_family: account?.coinFamilies,
           search: '',
-          addressListKeys: account?.addressLists,
+          addressListKeys: account?.addressLists?.slice(0, 6),
           fiat_type: currency?.name,
         },
         {

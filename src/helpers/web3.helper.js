@@ -371,7 +371,9 @@ export class Web3Helper {
         symbol
       );
       const nonce = await this.getNonce(slug, false, null, symbol, from);
-      const gaslimit = gasPriceRes.estimate;
+      console.log('gasPriceRes.estimate',gasPriceRes.estimate);
+      
+      const gaslimit = Number(gasPriceRes.estimate) + 10000;
 
       const gsFee =
         gasPriceType == 1
@@ -423,6 +425,9 @@ export class Web3Helper {
       const stringWithout0x = signedTransaction.startsWith('0x')
         ? signedTransaction.slice(2)
         : signedTransaction;
+
+        console.log('gaslimit',gaslimit);
+        
 
       let payload = {
         nonce: nonce,

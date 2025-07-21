@@ -23,11 +23,12 @@ function CoinsTable({ dataArray, showCoinPrice, name }) {
   const { chain, balanceIn } = useSelector((state) => state);
   const [deleteModal, setDeleteModal] = useState(false);
   const [selected, setSelected] = useState(null);
-  const [positionChange, setPositionChnage] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedCoin, setSelectedCoin] = useState(null);
 
   const handleClick = (ele) => {
+    console.log('crypto element clicked:', ele);
+    
     let routes = Object.keys(ele).includes("routeTo");
 
     if (routes) {
@@ -88,18 +89,6 @@ function CoinsTable({ dataArray, showCoinPrice, name }) {
       {dataArray.map((ele, index) => (
         <div
           className="coinsTable1 flex-item"
-          style={
-            {
-              // padding: index !== 0 ? '16px 0' : '0 0 16px 0',
-              // paddingTop: index === 0 ? '0px' : '16px',
-              // paddingBottom: index === dataArray.length - 1 ? '0px' : '16px',
-              // borderBottomWidth: index === dataArray.length - 1 ? '0' : '1px',
-              // borderTopWidth: 0,
-              // borderLeftWidth: 0,
-              // borderRightWidth: 0,
-              // borderStyle: 'solid',
-            }
-          }
           key={index}
           onClick={() => handleClick(ele)}
         >

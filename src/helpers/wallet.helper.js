@@ -21,6 +21,7 @@ import { setNfts } from '../actions/nfts';
 import { setTokens } from '../actions/tokens';
 import { server } from '../server';
 import { setLoading } from '../actions/loading';
+import { generateCosmosWalletAddress } from './cosmos.helper';
 const BIP84 = require('bip84');
 const privateKeyToAddress = require('ethereum-private-key-to-address');
 
@@ -135,7 +136,7 @@ export class WalletHelper {
 
   static getMnemonicsByPassword = async (address, password) => {
     try {
-// console.log("address, password::11",address, password);
+      console.log('address, password::11', address, password);
 
       const { mnemonics } = await chrome.storage.local.get('mnemonics');
       if (mnemonics) {
@@ -143,14 +144,15 @@ export class WalletHelper {
           mnemonics,
           password
         );
-        // console.log("AFTER DEC::",decryptedMnemonics);
-        
+        console.log('AFTER DEC::', decryptedMnemonics);
+
         const mnemonicsList = JSON.parse(decryptedMnemonics);
         const matchedMnemonic = mnemonicsList.find(
-          (mnemonic) => mnemonic?.address?.toLowerCase() === address?.toLowerCase()
+          (mnemonic) =>
+            mnemonic?.address?.toLowerCase() === address?.toLowerCase()
         );
         // console.log("matchedMnemonic::",matchedMnemonic);
-        
+
         const defaultMnemonics = matchedMnemonic || mnemonicsList[0];
         return defaultMnemonics.phrase;
       } else {
@@ -198,7 +200,7 @@ export class WalletHelper {
     }
   };
 
-  static getPrivateKeyWithPassword = async (account,password) => {
+  static getPrivateKeyWithPassword = async (account, password) => {
     let phrase = '';
     const { mnemonics } = await chrome.storage.local.get('mnemonics');
     const decryptedMnemonics = await SecurityHelper.decrypt(
@@ -684,7 +686,7 @@ export class WalletHelper {
       const { deviceId } = await chrome.storage.local.get('deviceId');
 
       const createWallet = await server.post(
-        `${process.env.REACT_APP_BASE_URL}/user/create/wallet`,
+        `${process.env.REACT_APP_BASE_URL}/user/create/wallet2`,
         {
           device_id: deviceId,
           wallet_address: address,
@@ -822,6 +824,13 @@ export class WalletHelper {
         newMnemonics
       );
 
+      const cosmosAddress = await generateCosmosWalletAddress(newMnemonics);
+
+      console.log(
+        'cosmosAddress===================================>',
+        cosmosAddress.address
+      );
+
       if (!accounts) {
         accounts = [];
       }
@@ -860,7 +869,7 @@ export class WalletHelper {
       const { deviceId } = await chrome.storage.local.get('deviceId');
 
       const createWallet = await server.post(
-        `${process.env.REACT_APP_BASE_URL}/user/create/wallet`,
+        `${process.env.REACT_APP_BASE_URL}/user/create/wallet2`,
         {
           device_id: deviceId,
           wallet_address: address,
@@ -903,6 +912,11 @@ export class WalletHelper {
               address: address,
               coin_family: 7,
             },
+            {
+              symbol: 'tics',
+              address: cosmosAddress.address,
+              coin_family: 7,
+            },
           ],
         },
         {
@@ -935,6 +949,7 @@ export class WalletHelper {
             4: address,
             5: solanaAddress,
             7: address,
+            cosmos: cosmosAddress.address,
           },
           coinFamilies: [1, 2, 3, 4, 5, 7],
           addressLists: [
@@ -944,6 +959,7 @@ export class WalletHelper {
             address,
             solanaAddress,
             address,
+            cosmosAddress.address,
           ],
           userId: createWallet.data.data.userId,
           jwtToken: createWallet.data.data.token,

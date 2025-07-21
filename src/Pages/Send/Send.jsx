@@ -34,7 +34,7 @@ function Send() {
       const walletsList = await server.post(
         `/wallet/portfolio`,
         {
-          addressListKeys: account.addressLists,
+          addressListKeys: account?.addressLists?.slice(0, 6),
           coin_family: account.coinFamilies,
           fiat_type: currency.name,
           limit: 2000,
@@ -51,7 +51,6 @@ function Send() {
       store.dispatch(setTokens(walletsList.data.data));
     } catch (error) {
       console.log(error);
-
     } finally {
       store.dispatch(setLoading(false));
     }
@@ -79,20 +78,22 @@ function Send() {
 
   return (
     <div className={`scrollableCont ${style.send}`}>
-      <div className='searchBarFixed'>
+      <div className="searchBarFixed">
         <MenuRestofHeaders
           backTo={'/wallet'}
           title={'Send'}
           coin={state ? (state.coin ? state.coin : null) : null}
         />
-        <div className='search'>
+        <div className="search">
           <InputField
             placeholder={'Search'}
             value={keyword}
             checkForSymbols={true}
             getData={(value) => {
               const hasEmoji = /[\p{Extended_Pictographic}]/u.test(value);
-              if (hasEmoji) { return false }
+              if (hasEmoji) {
+                return false;
+              }
               setKeyword(value);
             }}
             addonBefore={
@@ -102,7 +103,7 @@ function Send() {
                   style={{
                     width: '17px',
                   }}
-                  alt=''
+                  alt=""
                 />
               </span>
             }
@@ -129,28 +130,33 @@ function Send() {
                   coinSubName: token.coin.coin_name,
                   coinPrice: myPrice.toNumber()
                     ? formatSmallNumber(
-                      exponential_to_decimal(myPrice.toNumber())
-                    )
+                        exponential_to_decimal(myPrice.toNumber())
+                      )
                     : '0.00',
                   coinStatus: getFlooredFixed(
                     price
                       ? parseFloat(
-                        price.price_change_percentage_24h || 0
-                      ).toLocaleString()
+                          price.price_change_percentage_24h || 0
+                        ).toLocaleString()
                       : 0,
                     2
                   ),
                   currCryptoBal: balanceIn
                     ? `${addCommasToNumber(
-                      parseFloat(getFlooredFixed(token.balance, 6))
-                    )}`
+                        parseFloat(getFlooredFixed(token.balance, 6))
+                      )}`
                     : `****`,
-                  currCryptoBalSymbol: balanceIn ? token.coin.coin_symbol.toUpperCase() : '****',
+                  currCryptoBalSymbol: balanceIn
+                    ? token.coin.coin_symbol.toUpperCase()
+                    : '****',
                   currDollerBal: balanceIn
                     ? addCommasToNumber(getFlooredFixed(formattedResult, 2))
                     : '****',
                   routeTo: 'sendCurrency',
-                  type: token?.coin?.token_address !== null ? token_type(token.coin.coin_family) : '',
+                  type:
+                    token?.coin?.token_address !== null
+                      ? token_type(token.coin.coin_family)
+                      : '',
                   status: true,
                   coin: token,
                 };
@@ -158,7 +164,7 @@ function Send() {
           />
         ) : (
           <p
-            className='noAddress'
+            className="noAddress"
             style={{
               marginTop: '50%',
               fontWeight: 'bold',

@@ -335,8 +335,6 @@ function Swap() {
             token.coin.coin_family === myToken1.coin.coin_family
         );
 
-        console.log('TOKENNNNNNNNN1', myToken1, ' XXXX ', tokens);
-
         amountToSend = await Web3Helper.getTokenBalance(
           myToken1.tokenAddress,
           myToken1.address,
@@ -399,7 +397,6 @@ function Swap() {
           const myStateToken = newTokens[0];
 
           if (!myStateToken && !state?.isCrossChain) {
-            console.log('TOKEN IN SWAP MODULE 1', newTokens);
             messageApi.error('Token not available for swap.');
           }
 
@@ -427,16 +424,12 @@ function Swap() {
             }
           }
           if (state.coinFamily) {
-            // console.log('WWWWWWWWWW ', myToken1);
-
             setToken1(myToken1);
             handleToken1Change(myStateToken);
             setSelectedCoinFamily(myStateToken?.coinFamily);
             setSelectedCF(true);
           }
         }
-
-        console.log('UPDATING BALANCE ON COMPONENT MOUNT :', amountToSend);
 
         const balance = amountToSend
           ? amountToSend
@@ -660,7 +653,6 @@ function Swap() {
           const myStateToken = newTokens[0];
 
           if (!myStateToken && !state?.isCrossChain) {
-            console.log('TOKEN IN SWAP MODULE 2', newTokens);
             messageApi.error('Token not available for swap.');
           }
 
@@ -693,8 +685,6 @@ function Swap() {
             setSelectedCF(true);
           }
         }
-
-        console.log('amountToSend', amountToSend);
         setBalance(
           amountToSend ? amountToSend : token1?.balance ? token1?.balance : 0
         );
@@ -819,7 +809,6 @@ function Swap() {
       store.dispatch(overAllLoader(false));
     } catch (error) {
       store.dispatch(overAllLoader(false));
-      console.log('get Inactive Token:', error);
       messageApi.error('Something went wrong.');
       navigate(-1);
     }
@@ -883,10 +872,7 @@ function Swap() {
       return getFlooredFixed(finalFeeSol, 9);
     }
 
-    // console.log("HERRRRRRRRRRRRR ", BL_CODE[token1.coinFamily].toLowerCase());
-
     const gasPrice = await Web3Helper.getGasPrice(
-      // token1.coinFamily == 1 ? "eth" : token1.coinFamily == 9 ? "pls" : "bnb",
       BL_CODE[token1.coinFamily].toLowerCase(),
       token1.address,
       token1.address,
@@ -1064,10 +1050,6 @@ function Swap() {
         functionCall,
         reverse || false
       );
-      // console.log(
-      //   "🚀 ~ file: Swap.jsx:554 ~ calculateTradingFee ~ myGasEstimate:",
-      //   myGasEstimate
-      // );
 
       if (myGasEstimate.status) {
         if (myGasEstimate.skip) {
@@ -1122,11 +1104,6 @@ function Swap() {
               token1.type
             );
 
-            // console.log(
-            //   "🚀 ~ file: Swap.jsx:464 ~ calculateTradingFee ~ gasPrice:",
-            //   gasPrice
-            // );
-
             finalGasFee +=
               (gasPrice.fast *
                 Math.pow(10, 9) *
@@ -1142,14 +1119,6 @@ function Swap() {
         finalGasFeeForTransaction = finalGasFee;
       }
     }
-
-    console.log(
-      'parseFloat(finalFee) finalGasFeeForTransaction ',
-      parseFloat(finalFee),
-      '   :: ',
-      finalGasFeeForTransaction
-    );
-    // console.log(" FEEEEEEEEEEEEEEEE ", finalFee, " finalGasFeeForTransaction : ", finalGasFeeForTransaction);
 
     setTradingFee(parseFloat(finalFee) + finalGasFeeForTransaction);
     return getFlooredFixed(parseFloat(finalFee) + finalGasFeeForTransaction, 5);
@@ -1235,14 +1204,6 @@ function Swap() {
   };
 
   const handleInputChange = async (amount, token1, token2, second) => {
-    console.log(
-      '🚀 ~ handleInputChange ~ amount, token1, token2, second:',
-      typeof amount,
-      amount.toString(),
-      token1,
-      token2,
-      second
-    );
     try {
       if (amount > 0 && token1.coinFamily == token2.coinFamily) {
         setLoading(true);
@@ -1257,7 +1218,6 @@ function Swap() {
             .decimalPlaces(0, BigNumber.ROUND_DOWN),
           commision.percentage
         );
-        console.log('🚀 ~ handleInputChange ~ route:', route);
 
         if (!route) {
           setLoading(false);
@@ -1271,15 +1231,6 @@ function Swap() {
             .dividedBy(Math.pow(10, token2.decimals))
             .toFixed()
         );
-
-        console.log(
-          '🚀 ~ handleInputChange ~ new Bignumber(route.toAmount).dividedBy(Math.pow(10, token2.decimals)).toFixed():',
-          new Bignumber(route.toAmount)
-            .dividedBy(Math.pow(10, token2.decimals))
-            .toFixed()
-        );
-
-        setLoading(false);
         setLoading(false);
       }
       updateRef.current = true;
@@ -1640,118 +1591,6 @@ function Swap() {
     }, 2000);
   }
 
-  // const selectAfter = (
-  //   <div className={'addonAfter'}>
-  //     {token1?.isToken ? (
-  //       <span
-  //         className="send__pasteText"
-  //         style={{
-  //           position: 'relative',
-  //           top: '-1px',
-  //           left: '-5px',
-  //           borderLeft: '0px',
-  //         }}
-  //         onClick={async () => {
-  //           await calculateAccordingly(100);
-  //           setPercent(100);
-  //         }}
-  //       >
-  //         Max
-  //       </span>
-  //     ) : null}
-
-  //     <Select
-  //       open={false}
-  //       suffixIcon={<img src={DownArrowSuffix} />}
-  //       onClick={() => {
-  //         if (
-  //           (!token1 &&
-  //             availableTokens.filter((token) => token.iHave).length === 0) ||
-  //           loading
-  //         )
-  //           return;
-  //         setSelected(1);
-  //         setOpen(true);
-  //       }}
-  //       disabled={
-  //         (!token1 &&
-  //           availableTokens.filter((token) => token.iHave).length === 0) ||
-  //         loading
-  //       }
-  //       value={[
-  //         {
-  //           value: token1?.id,
-  //           label: (
-  //             <span className="flexedItemSelect">
-  //               {!token1?.image ? (
-  //                 <div
-  //                   style={{
-  //                     alignItems: 'center',
-  //                     backgroundColor: 'rgba(98,126,234,.2)',
-  //                     borderRadius: '49%',
-  //                     display: 'flex',
-  //                     height: '29px',
-  //                     justifyContent: 'center',
-  //                     width: '29px',
-  //                     marginRight: '15px',
-  //                   }}
-  //                 >
-  //                   {' '}
-  //                   {token1?.name.split('')[0]}
-  //                 </div>
-  //               ) : (
-  //                 <img
-  //                   style={{
-  //                     height: '30px',
-  //                     width: '30px',
-  //                     objectFit: 'contain',
-  //                     position: 'relative',
-  //                     borderRadius: '15px',
-  //                   }}
-  //                   alt=""
-  //                   src={token1?.image}
-  //                 />
-  //               )}
-
-  //               {token1?.symbol}
-  //             </span>
-  //           ),
-  //         },
-  //       ]}
-  //       style={{
-  //         width: 100,
-  //       }}
-  //       onSelect={(value) => {
-  //         setToken1(availableTokens.find((el) => el.id == value));
-  //         handleToken1Change(availableTokens.find((el) => el.id == value));
-  //       }}
-  //       options={availableTokens
-  //         .filter((token) => token.id != token2?.id)
-  //         .map((token) => {
-  //           return {
-  //             value: token?.id,
-  //             label: (
-  //               <span className="flexedItemSelect">
-  //                 <img
-  //                   style={{
-  //                     height: '20px',
-  //                     width: '20px',
-  //                     objectFit: 'contain',
-  //                     marginLeft: '20px',
-  //                     marginRight: '20px',
-  //                   }}
-  //                   alt=""
-  //                   src={token?.image}
-  //                 />
-  //                 {token?.symbol}
-  //               </span>
-  //             ),
-  //           };
-  //         })}
-  //     />
-  //   </div>
-  // );
-
   return (
     <div className={`scrollableCont`}>
       {contextHolder}
@@ -1775,7 +1614,7 @@ function Swap() {
                   store.dispatch(swapDetailAc(null));
                 }
                 setSel(0);
-                setAount(null)
+                setAount(null);
               }}
             >
               On-Chain
@@ -1829,18 +1668,13 @@ function Swap() {
                               'End',
                             ];
 
-                            // Allow control/navigation keys
                             if (allowedKeys.includes(e.key)) return;
 
                             if (!/^[0-9.]$/.test(e.key)) {
-                              e.preventDefault(); // Block everything else (letters, +, -, e, etc.)
+                              e.preventDefault(); 
                             }
                           }}
                           onChange={({ target: { value: _amount } }) => {
-                            console.log('_amount', _amount);
-
-                            // const numberRegex = /^\d*\.?\d*$/;
-                            // if (!numberRegex.test(_amount)) return;
 
                             if (percent != null) {
                               setPercent(null);
@@ -1857,7 +1691,7 @@ function Swap() {
                               return;
                             if (afterDecimal.length > maxDecimals) return;
 
-                            setAount(_amount); // ✅ typo fixed from `setAount`
+                            setAount(_amount);
                             handleChangeForInput1(_amount);
                           }}
                           value={amount}
@@ -1925,7 +1759,7 @@ function Swap() {
                             },
                           ]}
                           onSelect={(value) => {
-                            setAount(null)
+                            setAount(null);
                             setToken1(
                               availableTokens.find((el) => el.id == value)
                             );
@@ -1988,7 +1822,6 @@ function Swap() {
                               }
                         }
                         onClick={() => {
-                          console.log('token2', token2, token1);
                           if (token2?.iHave) {
                             setAmount2(0);
                             setAount(0);
@@ -2021,21 +1854,15 @@ function Swap() {
                               setPercent(null);
                             }
                             const afterDecimal = amount.split('.')[1];
-
-                            // Get the maximum allowed characters before the decimal point (15 characters)
                             const maxCharactersBeforeDecimal = 15;
 
                             if (afterDecimal) {
-                              // Get the maximum allowed decimals for the cryptocurrency (e.g., Bitcoin has 8 decimals)
                               const maxDecimals = token2?.decimals;
-                              // Check if the entered decimal part is longer than the maximum allowed
                               if (
                                 afterDecimal.toString().length > maxDecimals
                               ) {
                                 return; // Return if decimal part is too long
                               }
-
-                              // Check if the characters before the decimal exceed the maximum allowed
                               const beforeDecimal = amount.split('.')[0];
                               if (
                                 beforeDecimal.toString().length >
@@ -2044,7 +1871,6 @@ function Swap() {
                                 return; // Return if characters before decimal exceed the maximum allowed
                               }
                             } else {
-                              // If there's no decimal, check the whole input length
                               if (amount.length > maxCharactersBeforeDecimal) {
                                 return; // Return if the whole input exceeds the maximum allowed
                               }
@@ -2147,7 +1973,6 @@ function Swap() {
                             })}
                         />
                         <div className="swap_onChain_pay">
-                          {/* <p>You Receive</p> */}
                           <p style={{ textAlign: 'right' }}>
                             Balance{' '}
                             <span>
@@ -2182,76 +2007,6 @@ function Swap() {
                     </div>
                   )}
 
-                  {/* <InputField
-                  mb0={true}
-                  inputSelect={true}
-                  placeholder={"0.000"}
-                  label="You Receive"
-                  type={"number"}
-                  checkForSymbols={true}
-                  value={amount2}
-                  disabled={true}
-                  getData={async (amount) => {
-                    if (percent != null) {
-                      setPercent(null);
-                    }
-                    const afterDecimal = amount.split(".")[1];
-
-                    // Get the maximum allowed characters before the decimal point (15 characters)
-                    const maxCharactersBeforeDecimal = 15;
-
-                    if (afterDecimal) {
-                      // Get the maximum allowed decimals for the cryptocurrency (e.g., Bitcoin has 8 decimals)
-                      const maxDecimals = token2?.decimals;
-                      // Check if the entered decimal part is longer than the maximum allowed
-                      if (afterDecimal.toString().length > maxDecimals) {
-                        return; // Return if decimal part is too long
-                      }
-
-                      // Check if the characters before the decimal exceed the maximum allowed
-                      const beforeDecimal = amount.split(".")[0];
-                      if (
-                        beforeDecimal.toString().length >
-                        maxCharactersBeforeDecimal
-                      ) {
-                        return; // Return if characters before decimal exceed the maximum allowed
-                      }
-                    } else {
-                      // If there's no decimal, check the whole input length
-                      if (amount.length > maxCharactersBeforeDecimal) {
-                        return; // Return if the whole input exceeds the maximum allowed
-                      }
-                    }
-                    setAmount2(amount);
-                    handleChangeForInput2(amount);
-                  }} */}
-                  {/* // addonAfter={selectAfterTo} */}
-                  {/* // /> */}
-                  {/* <div className="doSingle">
-                  <div
-                    className="send__infoText"
-                    style={{
-                      position: "relative",
-                      left: "20px",
-                    }}
-                  >
-                    {showFiatConversion(
-                      amount,
-                      token1?.price,
-                      amount2,
-                      token2?.price
-                    )
-                      ? ` = ${currency?.symbol}${addCommasToNumber(
-                          getFlooredFixed(
-                            parseFloat(amount2 ? amount2 : 0) *
-                              parseFloat(token2?.price),
-                            2
-                          )
-                        )}`
-                      : null}
-                  </div>
-                </div>
-                <div className="send__infoText"></div> */}
                   <div className="swap__infoText">
                     {loading ? (
                       <>
@@ -2266,70 +2021,6 @@ function Swap() {
                       </>
                     ) : null}
                   </div>
-
-                  {/* {infoData?.length > 0 && amount2 > 0 ? (
-                  <div className={'confirmCurrency'}>
-                    <div className={'confirmCurrency__keyValuesOuter'}>
-                      {infoData.map((ele) => (
-                        <div className={'confirmCurrency__keyValues'}>
-                          <div className={'confirmCurrency__keyValues__key'}>
-                            <span className='slippageNoti'>
-                              {ele?.text == 'Trading Fees' ||
-                              ele?.text == 'Route' ||
-                              ele?.text == 'Slippage Tolerance' ? (
-                                <span
-                                  onClick={() => {
-                                    let msg =
-                                      ele?.text == 'Trading Fees'
-                                        ? 'Market Makers impose a fee of 0.05% for non-stablecoin transactions and 0.01% for stablecoin transactions within the quotes they offer.'
-                                        : ele?.text == 'Route'
-                                        ? 'Route is automatically calculated based on your  routing preference to achieve the best price  for your trade'
-                                        : 'Slippage is the price change between order placement and execution. Higher slippage helps prevent failed transactions, particularly in fast moving markets. For taxed tokens, we recommend you set slippage at least 1% above the tax rate of the token.';
-                                    setInfoMessage(msg);
-                                  }}
-                                >
-                                  {ele.text} <InfoCircleOutlined />
-                                </span>
-                              ) : (
-                                ele.text
-                              )}
-                            </span>
-                          </div>
-                          {ele.text === 'Slippage Tolerance' ? (
-                            <div
-                              className={'confirmCurrency__keyValues__value'}
-                              style={{ textAlign: 'right' }}
-                            >
-                              <div
-                                style={{ display: 'flex', textAlign: 'right' }}
-                              >
-                                {ele.textVal}
-                                {isWrap ? null : (
-                                  <img
-                                    src={Edit}
-                                    style={{
-                                      marginLeft: '10px',
-                                      cursor: 'pointer',
-                                    }}
-                                    alt=''
-                                    onClick={() => setSlippageDrawer(true)}
-                                  />
-                                )}
-                              </div>
-                            </div>
-                          ) : (
-                            <div
-                              className={'confirmCurrency__keyValues__value'}
-                              style={{ textAlign: 'right' }}
-                            >
-                              {ele.textVal}
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ) : null} */}
                 </div>
                 <div style={{ width: '100%' }}>
                   {infoData.length > 0 ? null : (
@@ -2395,37 +2086,24 @@ function Swap() {
 
                       if (percent != 100) {
                         const balanceBig = new BigNumber(amountToSend);
-                        console.log(
-                          '🚀 ~ onClick={ ~ balance:',
-                          balance,
-                          balanceBig.toString()
-                        );
                         const amountBig = new BigNumber(amount);
-                        console.log('🚀 ~ onClick={ ~ amount:', amount);
-
                         if (balanceBig.isLessThan(amountBig)) {
                           return messageApi.error(
                             'Insufficient balance to proceed with the transaction.'
                           );
                         }
                       }
-
                       store.dispatch(overAllLoader(true));
-
                       const getNativeBalance = await Web3Helper.getCoinBalance(
                         token1?.address,
                         token1?.rpc
                       );
 
-                      // Assuming nativeBalance and tradingFee are strings or numbers
                       const nativeBalance = new BigNumber(getNativeBalance); // Replace with your actual value
-
                       const feeAmount = new BigNumber(tradingFee); // Replace with your actual value
-
                       const amountToAdd = new BigNumber(
                         token1?.tokenAddress ? 0 : amount
                       );
-
                       const balanceExtraToAddIfFromIsNativeCoin =
                         feeAmount.plus(amountToAdd);
 
@@ -2459,11 +2137,6 @@ function Swap() {
                       });
                     }}
                     text={
-                      // new BigNumber(amount).isGreaterThan(
-                      //   new BigNumber(balance)
-                      // )
-                      //   ? 'Insufficient Balance'
-                      //   :
                       token1?.id == token2?.id &&
                       token1 != null &&
                       token2 != null
@@ -2504,7 +2177,6 @@ function Swap() {
           setFilteredTokens(allToken);
         }}
         open={open}
-        // eslint-disable-next-line jsx-a11y/alt-text
         closeIcon={
           theme == 'darkTheme' ? (
             <img src={darkclose} />

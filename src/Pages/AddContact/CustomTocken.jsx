@@ -1,21 +1,21 @@
 /*global chrome*/
-import React, { useEffect, useState } from "react";
-import { message, Select } from "antd";
-import MenuRestofHeaders from "../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders";
-import style from "./style.module.scss";
-import { InputField } from "../../Components/InputField/InputFieldSimple";
-import { InputFieldOnly } from "../../Components/InputField/InputFieldSimple.jsx";
-import ButtonComp from "../../Components/ButtonComp/ButtonComp";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
-import { ethers } from "ethers";
-import { DURATION } from "../../config/message.config";
-import { validate, getAddressInfo } from "bitcoin-address-validation";
-import { server } from "../../server";
-import { store } from "../..";
-import { setLoading } from "../../actions/loading";
+import React, { useEffect, useState } from 'react';
+import { message, Select } from 'antd';
+import MenuRestofHeaders from '../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders';
+import style from './style.module.scss';
+import { InputField } from '../../Components/InputField/InputFieldSimple';
+import { InputFieldOnly } from '../../Components/InputField/InputFieldSimple.jsx';
+import ButtonComp from '../../Components/ButtonComp/ButtonComp';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { ethers } from 'ethers';
+import { DURATION } from '../../config/message.config';
+import { validate } from 'bitcoin-address-validation';
+import { server } from '../../server';
+import { store } from '../..';
+import { setLoading } from '../../actions/loading';
 
-var WAValidator = require("multicoin-address-validator");
+var WAValidator = require('multicoin-address-validator');
 
 function AddContact() {
   const { state } = useLocation();
@@ -32,10 +32,10 @@ function AddContact() {
   const [chains, setChains] = useState([]);
   const [selectedChain, setSelectedChain] = useState(chain);
 
-  console.log("ADDDDDDDDDDDDD FROM SEND ", state?.coin, state?.redirectTo);
+  console.log('ADDDDDDDDDDDDD FROM SEND ', state?.coin, state?.redirectTo);
 
   const selectAfterTo = (
-    <div className={"addonAfter"}>
+    <div className={'addonAfter'}>
       <Select
         placement="bottomRight"
         popupClassName="placementRightPopup"
@@ -46,7 +46,7 @@ function AddContact() {
               <span
                 className="flexedItemSelect"
                 style={{
-                  textAlign: "center",
+                  textAlign: 'center',
                 }}
               >
                 <img src={myChain.image} className={style.chainImage} alt="" />
@@ -62,7 +62,7 @@ function AddContact() {
               <span
                 className="flexedItemSelect"
                 style={{
-                  textAlign: "center",
+                  textAlign: 'center',
                 }}
               >
                 <img src={chain.image} className={style.chainImage} alt="" />
@@ -73,19 +73,20 @@ function AddContact() {
         ]}
         onChange={(value) => {
           const selectedChain = chains.find((el) => el.coinFamily == value);
+          console.log('selectedChain',selectedChain)
           setSelectedChain(selectedChain);
         }}
         style={{
-          width: "100",
+          width: '100',
         }}
       />
     </div>
   );
 
   const init = async () => {
-    const { chains } = await chrome.storage.local.get("chains");
+    const { chains } = await chrome.storage.local.get('chains');
     setChains(chains);
-    console.log("CCCCCCCCCC ", state?.coin?.coin_family, chains);
+    console.log('CCCCCCCCCC ', state?.coin?.coin_family, chains);
 
     if (state?.coin?.coin_family) {
       const selectedChain = chains.find(
@@ -103,15 +104,15 @@ function AddContact() {
     try {
       // wallet_address: account.coinFamilyAndAddress[1]
 
-      console.log("selectedChainselectedChain ", selectedChain);
+      console.log('selectedChainselectedChain ', selectedChain?.coinFamily);
 
       store.dispatch(setLoading(true));
       const parentCoin = await server.post(
         // '/wallet/coin/coins_market_data',
-        "/user/add_address_book",
+        '/user/add_address_book',
         {
           address: account?.coinFamilyAndAddress[selectedChain?.coinFamily],
-          wallet_name: "",
+          wallet_name: '',
           contact_name: name, //selectedChain?.chainName,
           coin_family: selectedChain?.coinFamily,
           wallet_address: address,
@@ -122,7 +123,7 @@ function AddContact() {
           },
         }
       );
-      console.log("parentCoin----> ", parentCoin);
+      console.log('parentCoin----> ', parentCoin);
 
       // let response = await server.post(
       //   '/wallet/save_address',
@@ -143,7 +144,7 @@ function AddContact() {
       store.dispatch(setLoading(false));
       navigate(-1);
     } catch (error) {
-      console.log("ERRR======> ", error);
+      console.log('ERRR======> ', error);
 
       store.dispatch(setLoading(false));
       return messageApi.error(error?.response?.data?.message);
@@ -154,10 +155,10 @@ function AddContact() {
     <div className={`scrollableCont  `}>
       {contextHolder}
       <MenuRestofHeaders
-        backTo={"/address-book"}
+        backTo={'/address-book'}
         coin={state?.coin}
         redirectTo={state?.redirectTo}
-        title={"Address Book"}
+        title={'Address Book'}
       />
       <div className={`flexedContent manageWalletHeight`}>
         <div className={style.token}>
@@ -173,7 +174,7 @@ function AddContact() {
             getData={(name) => {
               if (name.length <= 25) {
                 if (/^\s/.test(name)) {
-                  setName("");
+                  setName('');
                 } else {
                   setName(name);
                 }
@@ -196,7 +197,7 @@ function AddContact() {
             addonAfter={
               <div className={style.token__selectStyle}>
                 <span
-                  style={{ color: "#fff" }}
+                  style={{ color: '#fff' }}
                   className={style.token__pasteText}
                   onClick={async () => {
                     const data = await navigator.clipboard.readText();
@@ -215,28 +216,28 @@ function AddContact() {
               e.preventDefault();
 
               if (!address) {
-                return messageApi.error("Address for the contact is required.");
+                return messageApi.error('Address for the contact is required.');
               }
 
               if (!name) {
-                return messageApi.error("Name for the contact is required.");
+                return messageApi.error('Name for the contact is required.');
               }
 
               if (name.trim().length === 0) {
                 return messageApi.error(
-                  "Name should have a minimum of 2 characters."
+                  'Name should have a minimum of 2 characters.'
                 );
               }
 
               if (name.length < 2) {
                 return messageApi.error(
-                  "Name should have a minimum of 2 characters."
+                  'Name should have a minimum of 2 characters.'
                 );
               }
 
               if (name.length > 25) {
                 return messageApi.error(
-                  "Name should not have more than 25 characters."
+                  'Name should not have more than 25 characters.'
                 );
               }
 
@@ -249,14 +250,32 @@ function AddContact() {
               // }
 
               if (selectedChain.isEVM) {
-                const valid = ethers.utils.isAddress(address);
-                if (!valid)
-                  return messageApi.error(
-                    `Please provide a valid ${selectedChain.chainName} address.`
-                  );
+                if (selectedChain?.coinFamily !== 7) {
+                  const valid = ethers.utils.isAddress(address);
+                  if (!valid)
+                    return messageApi.error(
+                      `Please provide a valid ${selectedChain.chainName} address.`
+                    );
+                }
+                else{
+                  if(!address.startsWith('qubetics1')){
+                    const valid = ethers.utils.isAddress(address);
+                    if (!valid)
+                      return messageApi.error(
+                        `Please provide a valid ${selectedChain.chainName} address.`
+                      );
+                  }
+                  else{
+                    if(!address.startsWith('qubetics1')){
+                      return messageApi.error(
+                        `Please provide a valid ${selectedChain.chainName} address.`
+                      );
+                    }
+                  }
+                }
               } else if (
                 !selectedChain.isEVM &&
-                selectedChain.currencyName === "SOL"
+                selectedChain.currencyName === 'SOL'
               ) {
                 const regexPattern = /^([1-9A-HJ-NP-Za-km-z]{32,44})$/;
                 if (!regexPattern.test(address)) {
@@ -266,7 +285,7 @@ function AddContact() {
                 }
               } else if (
                 !selectedChain.isEVM &&
-                selectedChain.currencyName === "BTC"
+                selectedChain.currencyName === 'BTC'
               ) {
                 const valid = validate(address);
                 if (!valid) {
@@ -276,9 +295,9 @@ function AddContact() {
                 }
               } else if (
                 !selectedChain.isEVM &&
-                selectedChain.currencyName === "ADA"
+                selectedChain.currencyName === 'ADA'
               ) {
-                const valid = WAValidator.validate(address, "ada");
+                const valid = WAValidator.validate(address, 'ada');
                 if (!valid) {
                   return messageApi.error(
                     `Please provide a valid ${selectedChain.chainName} address.`
@@ -289,14 +308,14 @@ function AddContact() {
               await handleSubmit();
             }}
           >
-            {" "}
+            {' '}
             <ButtonComp
               text={
                 state
                   ? state.index >= 0
-                    ? "Edit Contact"
-                    : "Confirm"
-                  : "Confirm"
+                    ? 'Edit Contact'
+                    : 'Confirm'
+                  : 'Confirm'
               }
               maxWidth={'352px'}
             />

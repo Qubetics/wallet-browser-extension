@@ -51,31 +51,9 @@ export const ExternalConnection = () => {
   const [mnemonics, setMnemonics] = useState(null);
   const [defaultAccount, setDefaultAccounts] = useState(null);
   const [params, setParams] = useState(null);
-  const [defaultAddressPhrase, setDefaultAddressPhrase] = useState(null)
+  const [defaultAddressPhrase, setDefaultAddressPhrase] = useState(null);
   const enrichedDataRef = useRef(null);
-  const [estimateGasFee, setEstimateGasFee] = useState(0)
-
-  // const useLocation
-
-  // console.log("mnemonics:::", { mnemonics, defaultAccount }, "STATE::", state)
-  // const defaultAddressPhrase =
-  //   (mnemonics &&
-  //     JSON.parse(mnemonics).find((obj) => obj.address === defaultAccount)
-  //       ?.phrase) ||
-  //   '';
-  // console.log("defaultAddressPhrase6756756:::", defaultAddressPhrase, "enrichedDataRef::", enrichedDataRef);
-  console.log("EXTRNL DATA:::", data)
-
-  let price = null;
-
-  const handleOk = () => {
-    setOpenmodal(false);
-  };
-
-  const handleCancel = () => {
-    setOpenmodal(false);
-  };
-
+  const [estimateGasFee, setEstimateGasFee] = useState(0);
 
   const dappApprovalHash = (pvt_key, approvalParam) => {
     return new Promise(async (resolve, reject) => {
@@ -104,10 +82,10 @@ export const ExternalConnection = () => {
       data.nodeUrl,
       true
     );
-    setEstimateGasFee(response)
-    store.dispatch(setLoading(false))
-    return response
-  }
+    setEstimateGasFee(response);
+    store.dispatch(setLoading(false));
+    return response;
+  };
 
   const getEstimateFeesUnBondFunds = async (mnemonics) => {
     const response = await unBondFunds(
@@ -118,10 +96,10 @@ export const ExternalConnection = () => {
       data.nodeUrl,
       true
     );
-    setEstimateGasFee(response)
-    store.dispatch(setLoading(false))
-    return response
-  }
+    setEstimateGasFee(response);
+    store.dispatch(setLoading(false));
+    return response;
+  };
 
   const getEstimateFeesRedelegate = async (mnemonics) => {
     const response = await redelegate(
@@ -132,10 +110,10 @@ export const ExternalConnection = () => {
       data.nodeUrl,
       true
     );
-    setEstimateGasFee(response)
-    store.dispatch(setLoading(false))
-    return response
-  }
+    setEstimateGasFee(response);
+    store.dispatch(setLoading(false));
+    return response;
+  };
 
   const getEstimateFeesCreateValidator = async (mnemonics) => {
     const response = await createValidator(
@@ -147,10 +125,10 @@ export const ExternalConnection = () => {
       data.publicKey,
       true
     );
-    setEstimateGasFee(response)
-    store.dispatch(setLoading(false))
-    return response
-  }
+    setEstimateGasFee(response);
+    store.dispatch(setLoading(false));
+    return response;
+  };
 
   const getEstimateFeesEditValidator = async (mnemonics) => {
     const response = await editValidator(
@@ -161,10 +139,10 @@ export const ExternalConnection = () => {
       data.hideCommissionField,
       true
     );
-    setEstimateGasFee(response)
-    store.dispatch(setLoading(false))
-    return response
-  }
+    setEstimateGasFee(response);
+    store.dispatch(setLoading(false));
+    return response;
+  };
 
   const getEstimateFeesBondMoreFunds = async (mnemonics) => {
     const response = await bondMoreFunds(
@@ -175,10 +153,10 @@ export const ExternalConnection = () => {
       data.nodeUrl,
       true
     );
-    setEstimateGasFee(response)
-    store.dispatch(setLoading(false))
-    return response
-  }
+    setEstimateGasFee(response);
+    store.dispatch(setLoading(false));
+    return response;
+  };
 
   const getEstimateFeesUnJailValidator = async (mnemonics) => {
     const response = await unJailValidator(
@@ -187,29 +165,30 @@ export const ExternalConnection = () => {
       data.nodeUrl,
       true
     );
-    setEstimateGasFee(response)
-    store.dispatch(setLoading(false))
-    return response
-  }
-
+    setEstimateGasFee(response);
+    store.dispatch(setLoading(false));
+    return response;
+  };
 
   const methodArray = [
-    "createValidator",
-    "editValidator",
-    "bondMoreFunds",
-    "delegatorBondMoreFunds",
-    "redelegate",
-    "unBondFunds",
-    "stopValidator",
-    "unJailValidator"
-  ]
-
+    'createValidator',
+    'editValidator',
+    'bondMoreFunds',
+    'delegatorBondMoreFunds',
+    'redelegate',
+    'unBondFunds',
+    'stopValidator',
+    'unJailValidator',
+  ];
 
   const init = async (password) => {
     const { chains } = await chrome.storage.local.get('chains');
     let { accounts } = await chrome.storage.session.get('accounts');
     const { mnemonics } = await chrome.storage.local.get('mnemonics');
-    const decryptMnemonics = await SecurityHelper.decrypt(mnemonics, sessionPassword);
+    const decryptMnemonics = await SecurityHelper.decrypt(
+      mnemonics,
+      sessionPassword
+    );
     // console.log("decryptMnemonics::", decryptMnemonics);
     if (accounts?.length && methodArray.includes(method)) {
       store.dispatch(setLoading(true));
@@ -217,7 +196,7 @@ export const ExternalConnection = () => {
     const defaultAddress = accounts?.find((item) => item.default)?.address;
     if (defaultAddress) {
       setDefaultAccounts(defaultAddress);
-      getPhrase(defaultAddress, password)
+      getPhrase(defaultAddress, password);
     }
     setMnemonics(decryptMnemonics);
     setChain(chains.find((el) => el.default));
@@ -231,7 +210,6 @@ export const ExternalConnection = () => {
           const url = new URL(tab.url);
           const queryParams = new URLSearchParams(url.search);
           const method = queryParams.get('method');
-
           const data = queryParams.get('data')
             ? JSON.parse(decodeURIComponent(queryParams.get('data')))
             : null;
@@ -240,8 +218,13 @@ export const ExternalConnection = () => {
 
           if (data.network === 'qubetics') {
             if (method === 'nativeConnect' && defaultAddressPhrase) {
-              const valoperAddress = await fetchValoperAddress(defaultAddressPhrase);
-              const address = await getUserAddress(defaultAddressPhrase, data.nodeUrl);
+              const valoperAddress = await fetchValoperAddress(
+                defaultAddressPhrase
+              );
+              const address = await getUserAddress(
+                defaultAddressPhrase,
+                data.nodeUrl
+              );
 
               const enrichedData = {
                 ...data,
@@ -253,8 +236,7 @@ export const ExternalConnection = () => {
               enrichedDataRef.current = enrichedData;
               setData(enrichedData);
               setMethod(method);
-            }
-            else {
+            } else {
               setMethod(method);
               setData(data);
             }
@@ -269,10 +251,10 @@ export const ExternalConnection = () => {
               myDefaultChain.slug == 'matic' || myDefaultChain.slug == 'polygon'
                 ? 'pol'
                 : myDefaultChain.slug == 'ethereum'
-                  ? 'eth'
-                  : myDefaultChain.slug == 'binancesmartchain'
-                    ? 'bnb'
-                    : '';
+                ? 'eth'
+                : myDefaultChain.slug == 'binancesmartchain'
+                ? 'bnb'
+                : '';
             const gasPriceRes = await Web3Helper.getGasPrice(
               myDefaultChain.slug,
               data.from,
@@ -287,10 +269,10 @@ export const ExternalConnection = () => {
               myDefaultChain?.chainId == 1
                 ? process.env.REACT_APP_ETH_RPC
                 : myDefaultChain?.chainId == 9009
-                  ? process.env.REACT_APP_QUBETIC_RPC
-                  : myDefaultChain?.chainId == 137
-                    ? process.env.REACT_APP_MATIC_RPC
-                    : process.env.REACT_APP_BNB_RPC;
+                ? process.env.REACT_APP_QUBETIC_RPC
+                : myDefaultChain?.chainId == 137
+                ? process.env.REACT_APP_MATIC_RPC
+                : process.env.REACT_APP_BNB_RPC;
             const provider = new Web3.providers.HttpProvider(rpc);
             const web3 = new Web3(provider);
             let gasEstimate = '';
@@ -380,13 +362,12 @@ export const ExternalConnection = () => {
             // console.log('DATA SETTING ', data);
             setData(data);
           }
-        } catch (error) {
-        }
+        } catch (error) {}
       }
     );
   };
   const handleResponse = async (result, error) => {
-    console.log('HANDLE RESPOSNE')
+    console.log('HANDLE RESPOSNE');
     // await chrome.storage.session.set({ isApproved: true });
     const { isApproved } = await chrome.storage.local.get('isApproved');
     // console.log(
@@ -404,7 +385,7 @@ export const ExternalConnection = () => {
   };
 
   const handleTransaction = async (defaultAddressPhrase) => {
-    console.log('HANDLE TRANSACTION', defaultAddressPhrase)
+    console.log('HANDLE TRANSACTION', defaultAddressPhrase);
     try {
       store.dispatch(setLoading(true));
       if (data.network === 'solana') {
@@ -573,7 +554,9 @@ export const ExternalConnection = () => {
       } else if (method === 'signTypedMessage') {
         // console.log('XXXXX :: ', data);
 
-        const { privateKey } = await WalletHelper.getPrivateKeyEvm(sessionPassword);
+        const { privateKey } = await WalletHelper.getPrivateKeyEvm(
+          sessionPassword
+        );
         if (!privateKey) {
           return false;
         }
@@ -588,17 +571,17 @@ export const ExternalConnection = () => {
           });
       } else {
         const gasLimit = Web3.utils.toDecimal(data.gas);
-        console.log("gasLimit TRX ", gasLimit);
+        console.log('gasLimit TRX ', gasLimit);
         const { chains } = await chrome.storage.local.get('chains');
         const myDefaultChain = chains.find((el) => el.default);
         const symbol =
           myDefaultChain.slug == 'polygon' || myDefaultChain.slug == 'matic'
             ? 'pol'
             : myDefaultChain.slug == 'ethereum'
-              ? 'eth'
-              : myDefaultChain.slug == 'binancesmartchain'
-                ? 'bnb'
-                : '';
+            ? 'eth'
+            : myDefaultChain.slug == 'binancesmartchain'
+            ? 'bnb'
+            : '';
         const hash =
           await Web3Helper.generateRawTransactionForTokenAndBroadcastExternalCopy(
             data.to,
@@ -628,7 +611,7 @@ export const ExternalConnection = () => {
         );
 
         if (hash.error) {
-          console.log('error', hash.error)
+          console.log('error', hash.error);
           store.dispatch(setLoading(false));
           return message.error(hash.error);
         }
@@ -642,9 +625,9 @@ export const ExternalConnection = () => {
 
   useEffect(() => {
     if (enrichedDataRef.current) {
-      store.dispatch(setLoading(false))
+      store.dispatch(setLoading(false));
     }
-  }, [enrichedDataRef.current])
+  }, [enrichedDataRef.current]);
 
   const handleChainSwitch = async () => {
     try {
@@ -660,39 +643,35 @@ export const ExternalConnection = () => {
       console.log('Error BB ', error);
     }
   };
-  // console.log('method:::', method);
   useEffect(() => {
     init(state?.password);
-    // getPhrase()
   }, [account, state]);
+  
   const getPhrase = async (account, password) => {
-    // console.log("defaultAccount, state?.password::", account, password);
     const isVerified = await WalletHelper.getMnemonicsByPassword(
-      account, password
+      account,
+      password
     );
-    console.log("PHRASE::", isVerified);
-    console.log("method :", method)
 
     if (isVerified) {
-      setDefaultAddressPhrase(isVerified)
-      if (method == "delegatorBondMoreFunds") {
-        getEstimateFees(isVerified)
-      } else if (method == "unBondFunds" || method == "stopValidator") {
-        getEstimateFeesUnBondFunds(isVerified)
-      } else if (method == "redelegate") {
-        getEstimateFeesRedelegate(isVerified)
-      } else if (method == "createValidator") {
-        getEstimateFeesCreateValidator(isVerified)
-      } else if (method == "editValidator") {
-        getEstimateFeesEditValidator(isVerified)
-      } else if (method == "bondMoreFunds") {
-        getEstimateFeesBondMoreFunds()
-      } else if (method == "unJailValidator") {
-        getEstimateFeesUnJailValidator()
+      setDefaultAddressPhrase(isVerified);
+      if (method == 'delegatorBondMoreFunds') {
+        getEstimateFees(isVerified);
+      } else if (method == 'unBondFunds' || method == 'stopValidator') {
+        getEstimateFeesUnBondFunds(isVerified);
+      } else if (method == 'redelegate') {
+        getEstimateFeesRedelegate(isVerified);
+      } else if (method == 'createValidator') {
+        getEstimateFeesCreateValidator(isVerified);
+      } else if (method == 'editValidator') {
+        getEstimateFeesEditValidator(isVerified);
+      } else if (method == 'bondMoreFunds') {
+        getEstimateFeesBondMoreFunds();
+      } else if (method == 'unJailValidator') {
+        getEstimateFeesUnJailValidator();
       }
     }
-  }
-
+  };
 
   return (
     <>
@@ -878,17 +857,19 @@ export const ExternalConnection = () => {
                     <div className={'confirmCurrency__keyValues__value'}>
                       {data.value
                         ? addCommasToNumber(
-                          getFlooredFixed(
-                            new BigNumber(data.value)
-                              .dividedBy(new BigNumber(10).pow(18))
-                              .plus(new BigNumber(feeInEth))
-                              .toString(),
-                            5
-                          )
-                        ) + ' ' + chain.currencySymbol
+                            getFlooredFixed(
+                              new BigNumber(data.value)
+                                .dividedBy(new BigNumber(10).pow(18))
+                                .plus(new BigNumber(feeInEth))
+                                .toString(),
+                              5
+                            )
+                          ) +
+                          ' ' +
+                          chain.currencySymbol
                         : addCommasToNumber(getFlooredFixed(feeInEth, 5)) +
-                        ' ' +
-                        chain.currencySymbol}{' '}
+                          ' ' +
+                          chain.currencySymbol}{' '}
                     </div>
                   </div>
 
@@ -924,7 +905,7 @@ export const ExternalConnection = () => {
                       <ButtonComp
                         maxWidth="100%"
                         onClick={async () => {
-                          console.log('REJECTED 1')
+                          console.log('REJECTED 1');
                           handleResponse(null);
                         }}
                         text="Reject"
@@ -990,17 +971,17 @@ export const ExternalConnection = () => {
                     <div className={'confirmCurrency__keyValues__value'}>
                       {method === 'signTypedMessage'
                         ? data?.address?.substring(0, 7) +
-                        '....' +
-                        data?.address?.substring(
-                          data?.address?.length - 7,
-                          data?.address?.length
-                        )
+                          '....' +
+                          data?.address?.substring(
+                            data?.address?.length - 7,
+                            data?.address?.length
+                          )
                         : data?.from?.substring(0, 7) +
-                        '....' +
-                        data?.from?.substring(
-                          data?.from?.length - 7,
-                          data?.from?.length
-                        )}
+                          '....' +
+                          data?.from?.substring(
+                            data?.from?.length - 7,
+                            data?.from?.length
+                          )}
                     </div>
                   </div>
 
@@ -1032,17 +1013,17 @@ export const ExternalConnection = () => {
                     <div className={'confirmCurrency__keyValues__value'}>
                       {data.value
                         ? addCommasToNumber(
-                          getFlooredFixed(
-                            new BigNumber(data.value)
-                              .dividedBy(new BigNumber(10).pow(18))
-                              .plus(new BigNumber(feeInEth))
-                              .toString(),
-                            5
+                            getFlooredFixed(
+                              new BigNumber(data.value)
+                                .dividedBy(new BigNumber(10).pow(18))
+                                .plus(new BigNumber(feeInEth))
+                                .toString(),
+                              5
+                            )
                           )
-                        )
                         : addCommasToNumber(getFlooredFixed(feeInEth, 5)) +
-                        ' ' +
-                        chain.currencySymbol}{' '}
+                          ' ' +
+                          chain.currencySymbol}{' '}
                     </div>
                   </div>
 
@@ -1180,14 +1161,14 @@ export const ExternalConnection = () => {
                     <div className={'confirmCurrency__keyValues__value'}>
                       {data.value
                         ? addCommasToNumber(
-                          getFlooredFixed(
-                            new BigNumber(data.value)
-                              .dividedBy(new BigNumber(10).pow(18))
-                              .plus(new BigNumber(feeInEth))
-                              .toString(),
-                            6
+                            getFlooredFixed(
+                              new BigNumber(data.value)
+                                .dividedBy(new BigNumber(10).pow(18))
+                                .plus(new BigNumber(feeInEth))
+                                .toString(),
+                              6
+                            )
                           )
-                        )
                         : 0}{' '}
                     </div>
                   </div>
@@ -1352,7 +1333,8 @@ export const ExternalConnection = () => {
               value={sessionPassword}
               customFunction={async () => {
                 const isVerified = await WalletHelper.getMnemonicsByPassword(
-                  defaultAccount, sessionPassword
+                  defaultAccount,
+                  sessionPassword
                 );
 
                 if (!isVerified) {
@@ -1369,7 +1351,8 @@ export const ExternalConnection = () => {
             maxWidth={'100%'}
             onClick={async () => {
               const isVerified = await WalletHelper.getMnemonicsByPassword(
-                defaultAccount, sessionPassword
+                defaultAccount,
+                sessionPassword
               );
               if (!isVerified) {
                 return messageApi.error('Incorrect password provided.');
@@ -1471,7 +1454,10 @@ export const ExternalConnection = () => {
                       text="Accept"
                     /> */}
                     <ButtonComp
-                      disabled={defaultAddressPhrase == null || enrichedDataRef.current == null}
+                      disabled={
+                        defaultAddressPhrase == null ||
+                        enrichedDataRef.current == null
+                      }
                       onClick={async () => {
                         handleResponse({
                           type: 'success',
@@ -1569,7 +1555,7 @@ export const ExternalConnection = () => {
                       Stake Amount
                     </div>
                     <div className={'confirmCurrency__keyValues__value'}>
-                      {data.secondaryValues.Bond_Amount}{' '}TICS
+                      {data.secondaryValues.Bond_Amount} TICS
                     </div>
                   </div>
 
@@ -1586,7 +1572,11 @@ export const ExternalConnection = () => {
                       Estimated Gas Fee
                     </div>
                     <div className={'confirmCurrency__keyValues__value'}>
-                    {`${Number(estimateGasFee) !== 0 ? Number(estimateGasFee).toFixed(8) : '0'} TICS`}
+                      {`${
+                        Number(estimateGasFee) !== 0
+                          ? Number(estimateGasFee).toFixed(8)
+                          : '0'
+                      } TICS`}
                     </div>
                   </div>
                   <div className={'swapDetails__border'}></div>
@@ -1706,7 +1696,11 @@ export const ExternalConnection = () => {
                       Estimated Gas Fee
                     </div>
                     <div className={'confirmCurrency__keyValues__value'}>
-                    {`${Number(estimateGasFee) !== 0 ? Number(estimateGasFee).toFixed(8) : '0'} TICS`}
+                      {`${
+                        Number(estimateGasFee) !== 0
+                          ? Number(estimateGasFee).toFixed(8)
+                          : '0'
+                      } TICS`}
                     </div>
                   </div>
                   <div className={'swapDetails__border'}></div>
@@ -1819,7 +1813,8 @@ export const ExternalConnection = () => {
                       Amount
                     </div>
                     <div className={'confirmCurrency__keyValues__value'}>
-                      {data.bondAmount}{''}TICS
+                      {data.bondAmount}
+                      {''}TICS
                     </div>
                   </div>
                   <div className={'confirmCurrency__keyValues'}>
@@ -1827,7 +1822,11 @@ export const ExternalConnection = () => {
                       Estimated Gas Fee
                     </div>
                     <div className={'confirmCurrency__keyValues__value'}>
-                    {`${Number(estimateGasFee) !== 0 ? Number(estimateGasFee).toFixed(8) : '0'} TICS`}
+                      {`${
+                        Number(estimateGasFee) !== 0
+                          ? Number(estimateGasFee).toFixed(8)
+                          : '0'
+                      } TICS`}
                     </div>
                   </div>
                   <div className={'swapDetails__border'}></div>
@@ -1939,7 +1938,8 @@ export const ExternalConnection = () => {
                       Amount
                     </div>
                     <div className={'confirmCurrency__keyValues__value'}>
-                      {data.stakeAmount}{''}TICS
+                      {data.stakeAmount}
+                      {''}TICS
                     </div>
                   </div>
                   <div className={'confirmCurrency__keyValues'}>
@@ -1947,7 +1947,11 @@ export const ExternalConnection = () => {
                       Estimated Gas Fee
                     </div>
                     <div className={'confirmCurrency__keyValues__value'}>
-                    {`${Number(estimateGasFee) !== 0 ? Number(estimateGasFee).toFixed(8) : '0'} TICS`}
+                      {`${
+                        Number(estimateGasFee) !== 0
+                          ? Number(estimateGasFee).toFixed(8)
+                          : '0'
+                      } TICS`}
                     </div>
                   </div>
                   <div className={'swapDetails__border'}></div>
@@ -2058,7 +2062,8 @@ export const ExternalConnection = () => {
                       Amount
                     </div>
                     <div className={'confirmCurrency__keyValues__value'}>
-                      {data.stakeAmount}{''}TICS
+                      {data.stakeAmount}
+                      {''}TICS
                     </div>
                   </div>
                   <div className={'confirmCurrency__keyValues'}>
@@ -2066,7 +2071,11 @@ export const ExternalConnection = () => {
                       Estimated Gas Fee
                     </div>
                     <div className={'confirmCurrency__keyValues__value'}>
-                    {`${Number(estimateGasFee) !== 0 ? Number(estimateGasFee).toFixed(8) : '0'} TICS`}
+                      {`${
+                        Number(estimateGasFee) !== 0
+                          ? Number(estimateGasFee).toFixed(8)
+                          : '0'
+                      } TICS`}
                     </div>
                   </div>
                   <div className={'swapDetails__border'}></div>
@@ -2178,7 +2187,8 @@ export const ExternalConnection = () => {
                       Amount
                     </div>
                     <div className={'confirmCurrency__keyValues__value'}>
-                      {data.unBoundAmt}{''}TICS
+                      {data.unBoundAmt}
+                      {''}TICS
                     </div>
                   </div>
                   <div className={'confirmCurrency__keyValues'}>
@@ -2186,7 +2196,11 @@ export const ExternalConnection = () => {
                       Estimated Gas Fee
                     </div>
                     <div className={'confirmCurrency__keyValues__value'}>
-                    {`${Number(estimateGasFee) !== 0 ? Number(estimateGasFee).toFixed(8) : '0'} TICS`}
+                      {`${
+                        Number(estimateGasFee) !== 0
+                          ? Number(estimateGasFee).toFixed(8)
+                          : '0'
+                      } TICS`}
                     </div>
                   </div>
                   <div className={'swapDetails__border'}></div>
@@ -2297,7 +2311,8 @@ export const ExternalConnection = () => {
                       Amount
                     </div>
                     <div className={'confirmCurrency__keyValues__value'}>
-                      {data.unBoundAmt}{''}TICS
+                      {data.unBoundAmt}
+                      {''}TICS
                     </div>
                   </div>
                   <div className={'confirmCurrency__keyValues'}>
@@ -2305,7 +2320,11 @@ export const ExternalConnection = () => {
                       Estimated Gas Fee
                     </div>
                     <div className={'confirmCurrency__keyValues__value'}>
-                    {`${Number(estimateGasFee) !== 0 ? Number(estimateGasFee).toFixed(8) : '0'} TICS`}
+                      {`${
+                        Number(estimateGasFee) !== 0
+                          ? Number(estimateGasFee).toFixed(8)
+                          : '0'
+                      } TICS`}
                     </div>
                   </div>
                   <div className={'swapDetails__border'}></div>
@@ -2417,7 +2436,11 @@ export const ExternalConnection = () => {
                       Estimated Gas Fee
                     </div>
                     <div className={'confirmCurrency__keyValues__value'}>
-                    {`${Number(estimateGasFee) !== 0 ? Number(estimateGasFee).toFixed(8) : '0'} TICS`}
+                      {`${
+                        Number(estimateGasFee) !== 0
+                          ? Number(estimateGasFee).toFixed(8)
+                          : '0'
+                      } TICS`}
                     </div>
                   </div>
                   <div className={'swapDetails__border'}></div>

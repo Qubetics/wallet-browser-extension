@@ -1,64 +1,75 @@
 /*global chrome*/
-/*global chrome*/
-import React, { useEffect, useState } from "react";
-// import "./BalanceDetails.scss";
-import NewSend from "../../../Assets/NewSend.svg";
-import RecieveNew from "../../../Assets/RecieveNew.svg";
-// import SwapIcon from "../../../Assets/SwapIcon.svg";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-// import ModalCustom from "../ModalCustom/ModalCustom";
-import ModalCustom from "../../../Components/ModalCustom/ModalCustom";
-import CopyIconBlue from "../../../Assets/CopyIconBlue.svg";
-import { message } from "antd";
-import { WalletHelper } from "../../../helpers/wallet.helper";
-import { useSelector } from "react-redux";
-import { QRCode } from "react-qrcode-logo";
-import TradeNew from "../../../Assets/TradeNew.svg";
-// import { Drawer } from "antd";
-// import ModalCloseIcon from "../../../Assets/ModalCloseIcon.svg";
-import OpenDark from "../../../Assets/open-dark.svg";
-import CloseDark from "../../../Assets/close-dark.svg";
-import { DURATION } from "../../../config/message.config";
-import { setLoading } from "../../../actions/loading";
-// import CoinsTable from "../../../CoinsTable/CoinsTable";
-import BigNumber from "bignumber.js";
-// import Logo from "../../../Assets/logo.png";
-
+import React, { useEffect, useState } from 'react';
+import NewSend from '../../../Assets/NewSend.svg';
+import RecieveNew from '../../../Assets/RecieveNew.svg';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import ModalCustom from '../../../Components/ModalCustom/ModalCustom';
+import CopyIconBlue from '../../../Assets/CopyIconBlue.svg';
+import { message, Select } from 'antd';
+import { WalletHelper } from '../../../helpers/wallet.helper';
+import { useSelector } from 'react-redux';
+import { QRCode } from 'react-qrcode-logo';
+import TradeNew from '../../../Assets/TradeNew.svg';
+import OpenDark from '../../../Assets/open-dark.svg';
+import CloseDark from '../../../Assets/close-dark.svg';
+import { DURATION } from '../../../config/message.config';
+import { setLoading } from '../../../actions/loading';
+import BigNumber from 'bignumber.js';
 import {
   addCommasToNumber,
   getFlooredFixed,
-} from "../../../helpers/conversion.helper";
-// import InputFieldSimple from "../InputField/InputFieldSimple";
-// import darkclose from "../../../Assets/darkclose.svg";
-// import DarkLogo from "../../../Assets/DarkLogo.svg";
-// import warning from "../../../Assets/PNG/warning.png";
-// import ButtonComp from "../ButtonComp/ButtonComp";
-import { setBalancesIn } from "../../../actions/balance-off-out";
-// import { server } from "../../server";
-// import { SolanaHelper } from "../../helpers/solana.helper";
-// import DownIcon from "../../../Assets/DownIcon.svg";
-import { store } from "../../..";
+} from '../../../helpers/conversion.helper';
+import '../../History/FilterHistory.scss';
+import { setBalancesIn } from '../../../actions/balance-off-out';
+import { store } from '../../..';
+import { getCosmosAddress } from '../../../helpers/cosmos.helper';
+import ButtonComp from '../../../Components/ButtonComp/ButtonComp';
 
-function CurrencyBalanceDetails({ className, textLeft, mt0, coin,crossChainDetail }) {
-  const { account, currency, chain, tokens, theme, balanceIn } = useSelector(
+function CurrencyBalanceDetails({
+  className,
+  textLeft,
+  mt0,
+  coin,
+  crossChainDetail,
+}) {
+  const { account, currency, chain, tokens, balanceIn } = useSelector(
     (state) => {
       return state;
     }
   );
 
   const { state } = useLocation();
-
   const [accounts, setAccounts] = useState([]);
+  const [cosmosAddress, setCosmosAddress] = useState('');
+  const [selectChainModal, setSelectChainModal] = useState(false);
+  const [selectChain, setSelectChain] = useState('evm');
+  const [total, setTotal] = useState(0.0);
+  const [chainItems, setChainItems] = useState([]);
+  const [isSidePanelOpen, setIsSidePanelOpen] = useState(false);
+  const [messageApi, contextHolder] = message.useMessage({
+    duration: DURATION,
+  });
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [fiatValue, setFiatValue] = useState(0.0);
+  const getLocation = useLocation();
+
+  const path = getLocation.pathname.replace('/', '');
+
+  let firstPrice = 0;
+
+  if (coin) {
+    firstPrice = coin.coin.fiat_price_data || 0;
+  }
 
   const fetchAccounts = async () => {
-    const { accounts } = await chrome.storage.session.get("accounts");
+    const { accounts } = await chrome.storage.session.get('accounts');
     const items = accounts.flatMap((account, index) => {
       const accountItem = {
         label: (
           <Link
             to="/"
             onClick={async (e) => {
-              console.log('PASSWORD CURRENCY BALANCE :',state)
+              console.log('PASSWORD CURRENCY BALANCE :', state);
               e.preventDefault();
               await WalletHelper.setWalletPreference(account.id);
             }}
@@ -71,7 +82,7 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin,crossChainDetai
 
       // Add a divider after each item except the last one
       if (index < accounts.length - 1) {
-        return [accountItem, { type: "divider" }];
+        return [accountItem, { type: 'divider' }];
       }
 
       return [accountItem];
@@ -79,38 +90,6 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin,crossChainDetai
 
     setAccounts(items);
   };
-
-  const [password, setPassword] = useState(null);
-  const [deleteModal, setDeleteModal] = useState(false);
-  const [selectedCoin, setSelectedCoin] = useState(null);
-  const [chainItems, setChainItems] = useState([]);
-  const [buySellM, setBuySellM] = useState({});
-  const [isModalOpen5, setOpenmodal5] = useState(false);
-  const [sessionPassword, setSessionPassword] = useState(null);
-  const [isSidePanelOpen, setIsSidePanelOpen] = useState(false);
-
-  const handleOk5 = () => {
-    setOpenmodal5(false);
-    setSessionPassword(null);
-  };
-
-  const handleCancel5 = () => {
-    setPassword(null);
-    setOpenmodal5(false);
-  };
-
-  let firstPrice = 0;
-
-  if (coin) {
-    firstPrice = coin.coin.fiat_price_data || 0;
-  }
-
-  const [open2, setOpen2] = useState(false);
-  const onClose2 = () => {
-    setOpen2(false);
-  };
-
-  const [total, setTotal] = useState(0.0);
 
   const calculateTotal = () => {
     let total = 0;
@@ -128,13 +107,13 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin,crossChainDetai
   const navigate = useNavigate();
 
   const init = async () => {
-    const { chains } = await chrome.storage.local.get("chains");
+    const { chains } = await chrome.storage.local.get('chains');
 
     const myItems = [
       {
-        key: "0",
-        type: "group",
-        label: "EVM Chains",
+        key: '0',
+        type: 'group',
+        label: 'EVM Chains',
         children: [],
       },
     ];
@@ -154,27 +133,27 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin,crossChainDetai
                   store.dispatch(setLoading(false));
                 }}
                 style={{
-                  display: "flex",
-                  alignItems: "center",
+                  display: 'flex',
+                  alignItems: 'center',
                 }}
               >
                 <div
                   style={{
-                    height: "10px",
-                    width: "10px",
-                    background: data.chainId == chain.chainId ? "#fff" : "#fff",
-                    borderRadius: "50%",
+                    height: '10px',
+                    width: '10px',
+                    background: data.chainId == chain.chainId ? '#fff' : '#fff',
+                    borderRadius: '50%',
                   }}
                 ></div>
                 <img
                   src={data.image}
                   alt=""
                   style={{
-                    height: "30px",
-                    width: "30px",
-                    objectFit: "contain",
-                    marginRight: "8px",
-                    marginLeft: "8px",
+                    height: '30px',
+                    width: '30px',
+                    objectFit: 'contain',
+                    marginRight: '8px',
+                    marginLeft: '8px',
                   }}
                 />
                 {data.chainName}
@@ -194,28 +173,28 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin,crossChainDetai
                   store.dispatch(setLoading(false));
                 }}
                 style={{
-                  display: "flex",
-                  alignItems: "center",
+                  display: 'flex',
+                  alignItems: 'center',
                 }}
               >
                 <div
                   style={{
-                    height: "10px",
-                    width: "10px",
+                    height: '10px',
+                    width: '10px',
                     background:
-                      data.chainId == chain.chainId ? "green" : "#fff",
-                    borderRadius: "50%",
+                      data.chainId == chain.chainId ? 'green' : '#fff',
+                    borderRadius: '50%',
                   }}
                 ></div>
                 <img
                   src={data.image}
                   alt=""
                   style={{
-                    height: "30px",
-                    width: "30px",
-                    objectFit: "contain",
-                    marginRight: "8px",
-                    marginLeft: "8px",
+                    height: '30px',
+                    width: '30px',
+                    objectFit: 'contain',
+                    marginRight: '8px',
+                    marginLeft: '8px',
                   }}
                 />
                 {data.chainName}
@@ -226,7 +205,15 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin,crossChainDetai
         }
       });
 
-    const isSidePanelOpen = await chrome.storage.local.get("openSidePanel");
+    const isSidePanelOpen = await chrome.storage.local.get('openSidePanel');
+    getCosmosAddress()
+      .then((data) => {
+        console.log('🚀 ~ useEffect ~ cosmos_address:', data);
+        setCosmosAddress(data);
+      })
+      .catch((error) => {
+        console.log('error');
+      });
     setIsSidePanelOpen(isSidePanelOpen.openSidePanel);
     setChainItems(myItems);
   };
@@ -237,32 +224,19 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin,crossChainDetai
     init();
     if (coin) {
       try {
-        // Convert the numbers to BigNumber instances
         const myPrice = new BigNumber(firstPrice ? firstPrice.value : 0);
         const balance = new BigNumber(coin.balance);
-        // Perform the multiplication
         const result = myPrice.times(balance);
-        // Get the result as a string with the desired precision
         const formattedResult = getFlooredFixed(result.toString(), 2);
         setFiatValue(formattedResult);
       } catch (error) {
-        console.log("Error in currency balance",error);
+        console.log('Error in currency balance', error);
       }
     }
   }, [tokens]);
 
-  const [messageApi, contextHolder] = message.useMessage({
-    duration: DURATION,
-  });
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isModalOpen1, setIsModalOpen1] = useState(false);
-  const [isModalOpen2, setIsModalOpen2] = useState(false);
-  const [fiatValue, setFiatValue] = useState(0.0);
-  const getLocation = useLocation();
-
-  const path = getLocation.pathname.replace("/", "");
   const showModal = () => {
-    setIsModalOpen(true);
+    setSelectChainModal(!selectChainModal);
   };
   const handleOk = () => {
     setIsModalOpen(false);
@@ -271,93 +245,57 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin,crossChainDetai
     setIsModalOpen(false);
   };
 
-  const handleOk1 = () => {
-    setIsModalOpen1(false);
-  };
-  const handleCancel1 = () => {
-    setIsModalOpen1(false);
-    setPassword(null);
-  };
-
-  const handleOk2 = () => {
-    setIsModalOpen2(false);
-  };
-  const handleCancel2 = () => {
-    setIsModalOpen2(false);
-    setPassword(null);
-  };
-
   return (
     <div className="balanceDetailsTop currencyBalance">
-      {/* <div className={"balanceDetails__dropdownStyle"}> */}
-      {/* <Dropdown menu={{ items: accounts }} trigger={["click"]}>
-          <Link onClick={(e) => e.preventDefault()}>
-            <p>{account.name}</p>
-            <img src={DownIcon} alt="icon" />
-          </Link>
-        </Dropdown>
-        <h5>Wallet</h5> */}
-      {/* </div> */}
       <div
-        className={`${"balanceDetails"} ${mt0 ? mt0 : ""}`}
-        style={{ position: "relative" }}
+        className={`${'balanceDetails'} ${mt0 ? mt0 : ''}`}
+        style={{ position: 'relative' }}
       >
         {contextHolder}
 
-        {path !== "currencyDetails" ? <></> : null}
+        {path !== 'currencyDetails' ? <></> : null}
 
         <div
           className={
-            path !== "currencyDetails"
+            path !== 'currencyDetails'
               ? chain.supportTokens
-                ? "balanceDetails__decoratedSec"
-                : "balanceDetails__decoratedSecWithoutAddTokens"
-              : "balanceDetails__cardCurrencyDetails"
+                ? 'balanceDetails__decoratedSec'
+                : 'balanceDetails__decoratedSecWithoutAddTokens'
+              : 'balanceDetails__cardCurrencyDetails'
           }
         >
-          {path !== "currencyDetails" ? (
-            <>
-              {/* <img
-                src={JustLogo}
-                style={{
-                  height: "25px",
-                  objectFit: "contain",
-                }}
-              /> */}
-            </>
-          ) : null}
-          {/* <p className="yourBalance">Your Balance</p> */}
           <div
             style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: path === "currencyDetails" ? "flex-start" : "",
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: path === 'currencyDetails' ? 'flex-start' : '',
             }}
           >
             <h3
-              className={`${"balanceDetails__title"} ${textLeft ? textLeft : ""
-                }`}
+              className={`${'balanceDetails__title'} ${
+                textLeft ? textLeft : ''
+              }`}
               style={{
-                maxWidth: "290px",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                marginBottom: "0",
-                fontSize: "28px",
-                lineHeight: "28px",
+                maxWidth: '290px',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                marginBottom: '0',
+                fontSize: '28px',
+                lineHeight: '28px',
               }}
             >
               {coin
                 ? `${addCommasToNumber(
-                  getFlooredFixed(coin.balance, 5)
-                )} ${coin.coin.coin_symbol.toUpperCase()}`
+                    getFlooredFixed(coin.balance, 5)
+                  )} ${coin.coin.coin_symbol.toUpperCase()}`
                 : balanceIn
-                  ? `${currency.symbol}${addCommasToNumber(
+                ? `${currency.symbol}${addCommasToNumber(
                     getFlooredFixed(total, 2)
                   )}`
-                  : "****"}
+                : '****'}
             </h3>
 
-            {path !== "currencyDetails" ? (
+            {path !== 'currencyDetails' ? (
               balanceIn ? (
                 <img
                   src={OpenDark}
@@ -370,9 +308,9 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin,crossChainDetai
                     store.dispatch(setBalancesIn(false));
                   }}
                   style={{
-                    width: "25px",
-                    marginLeft: "9px",
-                    position: "relative",
+                    width: '25px',
+                    marginLeft: '9px',
+                    position: 'relative',
                   }}
                 />
               ) : (
@@ -387,10 +325,10 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin,crossChainDetai
                     store.dispatch(setBalancesIn(true));
                   }}
                   style={{
-                    width: "25px",
-                    marginLeft: "9px",
-                    position: "relative",
-                    top: "-7px",
+                    width: '25px',
+                    marginLeft: '9px',
+                    position: 'relative',
+                    top: '-7px',
                   }}
                 />
               )
@@ -400,15 +338,16 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin,crossChainDetai
           {coin ? (
             <h5
               style={{
-                fontSize: "14px",
-                color: "#fff",
-                padding: "0px",
-                fontWeight: "bold",
-                lineHeight: "16px",
-                padding: "10px 0",
+                fontSize: '14px',
+                color: '#fff',
+                padding: '0px',
+                fontWeight: 'bold',
+                lineHeight: '16px',
+                padding: '10px 0',
               }}
-              className={`${"balanceDetails__title"} ${textLeft ? textLeft : ""
-                }`}
+              className={`${'balanceDetails__title'} ${
+                textLeft ? textLeft : ''
+              }`}
             >
               ≈ {currency.symbol}
               {addCommasToNumber(fiatValue)}
@@ -416,12 +355,13 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin,crossChainDetai
           ) : null}
         </div>
         <div
-          className={`${"balanceDetails__itemsOuter"} ${className ? className : ""
-            }`}
+          className={`${'balanceDetails__itemsOuter'} ${
+            className ? className : ''
+          }`}
           style={
             coin
-              ? { justifyContent: "center" }
-              : { justifyContent: "space-between" }
+              ? { justifyContent: 'center' }
+              : { justifyContent: 'space-between' }
           }
         >
           {!coin ? (
@@ -432,18 +372,18 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin,crossChainDetai
                 if (account.isWatchOnly) {
                   return;
                 }
-                navigate("/send");
+                navigate('/send');
               }}
               style={
-                account.isWatchOnly ? { filter: "grayscale(1) blur(1px)" } : {}
+                account.isWatchOnly ? { filter: 'grayscale(1) blur(1px)' } : {}
               }
               className={
-                path === "currencyDetails"
-                  ? "balanceDetails__items__whiteText"
-                  : "balanceDetails__items"
+                path === 'currencyDetails'
+                  ? 'balanceDetails__items__whiteText'
+                  : 'balanceDetails__items'
               }
             >
-              <div className={"balanceDetails__items__img"}>
+              <div className={'balanceDetails__items__img'}>
                 {/* {path === "currencyDetails" ? (
                   <img src={SendIconWhite} height={50} width={50} />
                 ) : theme === "darkTheme" ? (
@@ -451,7 +391,7 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin,crossChainDetai
                 ) : (
                   <img src={SendIcon} height={50} width={50} />
                 )} */}
-                <img src={NewSend} height={50} width={50}/>
+                <img src={NewSend} height={50} width={50} />
               </div>
               <span>Send</span>
             </Link>
@@ -459,7 +399,7 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin,crossChainDetai
             <Link
               to="/sendCurrency"
               style={
-                account.isWatchOnly ? { filter: "grayscale(1) blur(1px)" } : {}
+                account.isWatchOnly ? { filter: 'grayscale(1) blur(1px)' } : {}
               }
               onClick={(e) => {
                 e.preventDefault();
@@ -468,27 +408,27 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin,crossChainDetai
                 }
 
                 if (parseFloat(coin.balance) <= 0) {
-                  return messageApi.error("Insufficient balance to proceed.");
+                  return messageApi.error('Insufficient balance to proceed.');
                 }
 
-                navigate("/sendCurrency", {
+                navigate('/sendCurrency', {
                   state: {
                     symbol: coin.symbol,
                     image: coin.name,
-                    type: "",
+                    type: '',
                     coin: coin,
-                    redirectTo: "/currencyDetails",
+                    redirectTo: '/currencyDetails',
                   },
                 });
               }}
               className={
-                path === "currencyDetails"
-                  ? "balanceDetails__items__whiteText"
-                  : "balanceDetails__items"
+                path === 'currencyDetails'
+                  ? 'balanceDetails__items__whiteText'
+                  : 'balanceDetails__items'
               }
             >
-              <div className={"balanceDetails__items__img"}>
-                <img src={NewSend}  height={50} width={50}/>
+              <div className={'balanceDetails__items__img'}>
+                <img src={NewSend} height={50} width={50} />
               </div>
               <span>Send</span>
             </Link>
@@ -497,62 +437,68 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin,crossChainDetai
           <Link
             onClick={(e) => {
               e.preventDefault();
-              path === "currencyDetails"
+              path === 'currencyDetails'
                 ? showModal()
-                : navigate("/receive-tokens");
+                : navigate('/receive-tokens');
             }}
             to="#"
             className={
-              path === "currencyDetails"
-                ? "balanceDetails__items__whiteText"
-                : "balanceDetails__items"
+              path === 'currencyDetails'
+                ? 'balanceDetails__items__whiteText'
+                : 'balanceDetails__items'
             }
           >
-            <div className={"balanceDetails__items__img"}>
-              <img src={RecieveNew}  height={50} width={50}/>
+            <div className={'balanceDetails__items__img'}>
+              <img src={RecieveNew} height={50} width={50} />
             </div>
             <span>Receive</span>
           </Link>
 
-          {coin?.coin?.for_swap === 1 || crossChainDetail !== null ? <Link
-            onClick={(e) => {
-              e.preventDefault();
-              navigate("/swap", {
-                state: {
-                  fromOrTo: 1,
-                  coinFamily: coin?.coin?.coin_family,
-                  coinId: coin?.coin?.coin_id,
-                  isCrossChain:crossChainDetail !== null ? true : false,
-                  isOnChain:coin?.coin?.for_swap === 1 ? true : false
-                }
-              })  
-            }}
-            to="/swap"
-            className={
-              path === "currencyDetails"
-                ? "balanceDetails__items__whiteText"
-                : "balanceDetails__items"
-            }
-          >
-            <div className={"balanceDetails__items__img"}>
-              <img src={TradeNew}  height={50} width={50}/>
-            </div>
-            <span>Trade</span>
-          </Link>: null}
+          {coin?.coin?.for_swap === 1 || crossChainDetail !== null ? (
+            <Link
+              onClick={(e) => {
+                e.preventDefault();
+                navigate('/swap', {
+                  state: {
+                    fromOrTo: 1,
+                    coinFamily: coin?.coin?.coin_family,
+                    coinId: coin?.coin?.coin_id,
+                    isCrossChain: crossChainDetail !== null ? true : false,
+                    isOnChain: coin?.coin?.for_swap === 1 ? true : false,
+                  },
+                });
+              }}
+              to="/swap"
+              className={
+                path === 'currencyDetails'
+                  ? 'balanceDetails__items__whiteText'
+                  : 'balanceDetails__items'
+              }
+            >
+              <div className={'balanceDetails__items__img'}>
+                <img src={TradeNew} height={50} width={50} />
+              </div>
+              <span>Trade</span>
+            </Link>
+          ) : null}
         </div>
         {coin ? (
           <ModalCustom
             isModalOpen={isModalOpen}
             handleOk={handleOk}
             handleCancel={handleCancel}
-            customClass={"reciveModal"}
+            customClass={'reciveModal'}
             isWhite={true}
           >
-            <div className={"balanceDetails__modal"}>
+            <div className={'balanceDetails__modal'}>
               <div>
-                <div className={"balanceDetails__modal__scanner"}>
+                <div className={'balanceDetails__modal__scanner'}>
                   <QRCode
-                    value={coin.wallet_address}
+                    value={
+                      selectChain === 'evm'
+                        ? coin.wallet_address
+                        : cosmosAddress
+                    }
                     size={230}
                     qrStyle="dots"
                     eyeRadius={10}
@@ -563,8 +509,8 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin,crossChainDetai
                     // fgColor="url(#conicGradient)"
                     logoPaddingStyle="circle"
                     style={{
-                      borderRadius: "20px",
-                      padding: "15px",
+                      borderRadius: '20px',
+                      padding: '15px',
                     }}
                   />
                 </div>
@@ -572,29 +518,67 @@ function CurrencyBalanceDetails({ className, textLeft, mt0, coin,crossChainDetai
               <p
                 className="noAddress"
                 style={{
-                  width: "100%",
-                  textAlign: "center",
-                  marginBottom: "17px",
-                  fontSize: "15px",
-                  fontWeight: "bold",
-                  display: "none",
+                  width: '100%',
+                  textAlign: 'center',
+                  marginBottom: '17px',
+                  fontSize: '15px',
+                  fontWeight: 'bold',
+                  display: 'none',
                 }}
               >
                 Address
               </p>
               <div
-                className={"balanceDetails__modal__wrapedText"}
+                className={'balanceDetails__modal__wrapedText'}
                 onClick={async () => {
-                  await navigator.clipboard.writeText(coin.wallet_address);
-                  messageApi.success("Address copied successfully.");
+                  await navigator.clipboard.writeText(
+                    selectChain === 'evm' ? coin.wallet_address : cosmosAddress
+                  );
+                  messageApi.success('Address copied successfully.');
                 }}
               >
                 <img src={CopyIconBlue} width={15} height={16} />
-                <span>{coin.wallet_address}</span>
+                <span>
+                  {selectChain === 'evm' ? coin.wallet_address : cosmosAddress}
+                </span>
               </div>
             </div>
           </ModalCustom>
         ) : null}
+
+        <ModalCustom
+          title={'Select Chain'}
+          handleCancel={() => setSelectChainModal(!selectChainModal)}
+          isModalOpen={selectChainModal}
+          customClass="customClassModal"
+        >
+          <div className="viewphrases viewPhraseNew inputpaddingIssue ">
+            <div className={'filterHistory__selctHis'}>
+              <Select
+                options={[
+                  { label: 'Cosmos Chain', value: 'cosmos' },
+                  { label: 'Qubetics Chain', value: 'evm' },
+                ]}
+                value={selectChain}
+                onChange={(value) => {
+                  console.log('selected chain value', value);
+                  setSelectChain(value);
+                }}
+                popupClassName="filterHistoryDropdown"
+              />
+            </div>
+
+            <div style={{ marginTop: '10px' }}></div>
+            <ButtonComp
+              text={'Submit'}
+              maxWidth={'100%'}
+              onClick={async () => {
+                setSelectChainModal(!selectChainModal);
+                setIsModalOpen(true);
+              }}
+            />
+          </div>
+        </ModalCustom>
       </div>
     </div>
   );

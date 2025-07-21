@@ -53,8 +53,8 @@ function Wallet() {
       `/wallet/portfolio`,
       {
         addressListKeys: _account
-          ? _account?.addressLists
-          : account?.addressLists,
+          ? _account?.addressLists?.slice(0,6)
+          : account?.addressLists?.slice(0,6),
         coin_family: _account ? _account?.coinFamilies : account?.coinFamilies,
         fiat_type: currency.name,
         limit: 2000,

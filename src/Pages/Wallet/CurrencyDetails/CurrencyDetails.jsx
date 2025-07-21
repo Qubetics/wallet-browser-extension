@@ -3,9 +3,8 @@
 import React, { useEffect, useState } from 'react';
 import MenuRestofHeaders from '../../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders';
 import './CurrencyDetails.scss';
-import BalanceDetails from '../../../Components/BalanceDetails/BalanceDetails';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { message } from 'antd';
+import { useLocation } from 'react-router-dom';
+import { message, Select } from 'antd';
 import { useSelector } from 'react-redux';
 import { DURATION } from '../../../config/message.config';
 import {
@@ -17,63 +16,42 @@ import { server } from '../../../server';
 import HistryList from '../../../Components//HistryList/HistryList';
 import Sendhistry from '../../../Assets/sendhistry.svg';
 import Deposit from '../../../Assets/deposit.svg';
-import FilterIcon from '../../../Assets/Filtericon.svg';
 import { store } from '../../..';
 import { setFilter } from '../../../actions/filter';
-import DarkFilterIcon from '../../../Assets/DarkFilterIcon.svg';
 import * as moment from 'moment';
-import {
-  InputField,
-  InputFieldOnly,
-} from '../../../Components/InputField/InputFieldSimple';
+import { InputField } from '../../../Components/InputField/InputFieldSimple';
 import CopyIcon from '../../../Assets/CopyIconBlue.svg';
-import ShareIcon from '../../../Assets/ShareIcon.png';
-import usdt from '../../../Assets/Coins/usdt.svg';
 import CurrencyBalanceDetails from './CurrencyBalance';
 import { token_type } from '../../../helpers/constant';
+import { getCosmosAddress } from '../../../helpers/cosmos.helper';
+import { setTokens } from '../../../actions/tokens';
 
 function CurrencyDetails() {
-  const { currency, account } = useSelector((state) => state);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [crossChainDetail,setCrossChainDetail]=useState(null);
+  const { currency, account,tokens } = useSelector((state) => state);
+  const [crossChainDetail, setCrossChainDetail] = useState(null);
   const [price, setPrice] = useState(0);
-  const [isGraphExist,setIsGraphExist]=useState(false);
-
-  const getLocation = useLocation();
-  const path = getLocation.pathname.replace('/', '');
-  const navigate = useNavigate();
+  const [isGraphExist, setIsGraphExist] = useState(false);
+  const [selectedOption, setSelectedOption] = useState('');
+  const [options, setOptions] = useState([]);
   const { state } = useLocation();
   const {
-    state: { coin },
+    state: { coin : coinDetail },
     ...rest
   } = useLocation();
-
-  const showModal = () => {
-    setIsModalOpen(true);
-  };
-
-  const handleOk = () => {
-    setIsModalOpen(false);
-  };
-
-  const handleCancel = () => {
-    setIsModalOpen(false);
-  };
-
+  const coin = tokens.find((item)=> item?.coin?.coin_id === coinDetail?.coin?.coin_id) ; 
   const [isStared, setIsStared] = useState(
     coin.coin.watchlist_data && coin.coin.watchlist_data.status === '1'
       ? true
       : false
   );
-
   const [messageApi, contextHolder] = message.useMessage({
     duration: DURATION,
   });
-
   const [history, setHistory] = useState([]);
   const { theme } = useSelector((state) => state);
 
   const init = async () => {
+    let cosmosAddress = '';
     if (!state.status) {
       store.dispatch(
         setFilter({
@@ -86,31 +64,47 @@ function CurrencyDetails() {
       );
     }
 
-
-    const coinDetail = await server.post('/wallet/coinWalletDetail' , {
-
-      coin_id: coin.coin.coin_id,
-      cmc_id:  coin.coin.cmc_id,
-      fiat_currency:'USD',
-      wallet_address:coin.wallet_address
-    },
-    {
-      headers: {
-        Authorization: account.jwtToken,
+    const coinDetail = await server.post(
+      '/wallet/coinWalletDetail',
+      {
+        coin_id: coin.coin.coin_id,
+        cmc_id: coin.coin.cmc_id,
+        fiat_currency: 'USD',
+        wallet_address: coin.wallet_address,
       },
-    }
-  )
+      {
+        headers: {
+          Authorization: account.jwtToken,
+        },
+      }
+    );
 
-    console.log('coinDetail',coinDetail);
+    console.log('coinDetail', coinDetail);
     setCrossChainDetail(coinDetail?.data?.data?.coin?.cross_chain_data);
     setIsGraphExist(coinDetail?.data?.graph?.length > 0 ? true : false);
 
+    if(coin?.coin?.coin_family === 7){
+     cosmosAddress = await getCosmosAddress()
+     setOptions((prev) => [
+      ...prev,
+      {
+        label: 'Qubetics Address',
+        value: coin?.wallet_address,
+      },
+      { label: 'Cosmos Address', value: cosmosAddress },
+    ]);
+    setSelectedOption(coin?.wallet_address);
+    }
+
+
+    console.log('cosmosAddress',cosmosAddress);
+    
     const transactionList = await server.post(
       `/wallet/transaction/list`,
       {
         coin_id: coin.coin.coin_id,
         coin_family: [coin.coin.coin_family],
-        addrsListKeys: [coin.wallet_address],
+        addrsListKeys: [coin.wallet_address,cosmosAddress],
         page: 1,
         limit: 250,
         status: state
@@ -137,12 +131,42 @@ function CurrencyDetails() {
       }
     );
     setHistory(transactionList?.data?.data);
+
   };
 
   useEffect(() => {
     setPrice(coin.coin.fiat_price_data || 0);
     init();
+    setTimeout(()=>  fetchPortfolio(),6000)
   }, []);
+
+
+  const fetchPortfolio = async () => {
+    try {
+      const walletsList = await server.post(
+        `/wallet/portfolio`,
+        {
+          addressListKeys: account?.addressLists?.slice(0, 6),
+          coin_family: account.coinFamilies,
+          fiat_type: currency.name,
+          limit: 2000,
+          page: 1,
+          search: '',
+        },
+        {
+          headers: {
+            Authorization: account.jwtToken,
+          },
+        }
+      );
+      store.dispatch(setTokens([]));
+      store.dispatch(setTokens(walletsList.data.data));
+    } catch (error) {
+      console.log(error);
+    } finally {
+      // store.dispatch(setLoading(false));
+    }
+  };
 
   return (
     <div className={`scrollableCont`}>
@@ -188,14 +212,17 @@ function CurrencyDetails() {
           </span>
         }
         chartIcon={() => {
-          if (coin?.coin?.graph_pair || isGraphExist || coin?.coin?.graph_source) {
+          if (
+            coin?.coin?.graph_pair ||
+            isGraphExist ||
+            coin?.coin?.graph_source
+          ) {
             let pay = {
               coin_id: coin?.coin?.coin_id,
               cmc_id: coin?.coin?.cmc_id,
               coin_family: coin?.coin?.coin_family,
             };
             chrome.tabs.create({
-              // url: `https://trading-view.qubetics.work/?key=${coin?.coin?.graph_pair?.toUpperCase()}&item=${JSON.stringify(coin?.coin)}&account=${JSON.stringify(account)}`,
               url: `https://trading-view.qubetics.work/?key=${encodeURIComponent(
                 coin?.coin?.graph_pair?.toUpperCase()
               )}&item=${encodeURIComponent(
@@ -209,14 +236,10 @@ function CurrencyDetails() {
               }`,
             });
           }
-          //  else {
-          //   return messageApi.error('Graph is not available for this asset.');
-          // }
         }}
-        // stared={() => {
-        //   navigate("/watch-list-tokens");
-        // }}
-        pairExist={coin?.coin?.graph_pair || isGraphExist || coin?.coin?.graph_source}
+        pairExist={
+          coin?.coin?.graph_pair || isGraphExist || coin?.coin?.graph_source
+        }
         stared={async () => {
           console.log('coin?.coin', coin, account);
           try {
@@ -255,7 +278,6 @@ function CurrencyDetails() {
       />
 
       <div className={`flexedContent padding-Top`}>
-        {/* <span onClick={()=>  navigate("/watch-list-tokens")}>Watch</span> */}
         <div className="currDetails currencyCard">
           <div className="currDetails__card">
             <div className="currDetails__card__topTexts">
@@ -268,7 +290,6 @@ function CurrencyDetails() {
                 {coin?.coin?.token_address !== null
                   ? token_type(coin?.coin?.coin_family)
                   : 'Coin'}
-                {/* {coin.coin.coin_family === 1 ? "BEP20" : currDetails currencyCardcoin.coin.coin_family === 2 ? "ERC20" : coin.coin.coin_family === 4 ? "ERC20" : coin.coin.coin_family === 5 ? "SPL" : coin.coin.coin_family === 6 ? "TRC20" : ""} */}
               </p>
               <p
                 className="currDetails__card__text"
@@ -352,18 +373,33 @@ function CurrencyDetails() {
               coin={coin}
               crossChainDetail={crossChainDetail}
             />
-            {/* <BalanceDetails
-              mt0="currDetails__card__mt0"
-              className="currDetails__card__paddingOverride"
-              textLeft="currDetails__card__textLeft"
-              balance={`${addCommasToNumber(
-                parseFloat(getFlooredFixed(coin?.balance, 4))
-              )} ${coin?.coin?.coin_symbol}`}
-              coin={coin}
-            /> */}
           </div>
 
-          {coin && (
+          {coin?.coin?.coin_family === 7 && (
+             <div className='inputpaddingIssue'>
+              <div className={"filterHistory__selctHis"}>
+              <Select
+                value={selectedOption}
+                popupClassName="filterHistoryDropdown"
+                onChange={(value) => {
+                  console.log('value', value);
+                  setSelectedOption(value);
+                }}
+                options={options.map((option) => ({
+                  value: option.value,
+                  label: (
+                    <span>{option.label}</span>
+                  )
+                }))}
+                placeholder='Select Chain'
+              />
+              </div>
+            </div>
+          )}
+
+          <div style={{marginTop:"10px"}}></div>
+
+          {coin?.coin?.coin_family !== 7 ? (
             <div className="editWallet__linkOuter shareIconaad">
               <InputField
                 value={account.coinFamilyAndAddress[coin.coin.coin_family]}
@@ -392,41 +428,50 @@ function CurrencyDetails() {
                         messageApi.success('Address copied to clipboard');
                       }}
                     />
+                  </span>
+                }
+              />
+            </div>
+          ):
+          (
+            <div className="editWallet__linkOuter shareIconaad">
+              <InputField
+                value={selectedOption || account.coinFamilyAndAddress[coin.coin.coin_family]}
+                readonly={true}
+                placeholderBaseColor={true}
+                addonAfter={
+                  <span
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '10px',
+                    }}
+                  >
                     <img
-                      src={ShareIcon}
+                      src={CopyIcon}
                       width={14}
                       alt=""
                       height={16}
                       style={{
                         cursor: 'pointer',
                       }}
+                      onClick={() => {
+                        navigator.clipboard.writeText(
+                          selectedOption
+                        );
+                        messageApi.success('Address copied to clipboard');
+                      }}
                     />
                   </span>
                 }
               />
             </div>
-          )}
+          )
+          }
 
           <div className="currDetails__dataSec">
             <div className="currDetails__dataSec__header">
               <p>Transactions</p>
-              {/* <Link
-                to=""
-                onClick={(e) => {
-                  e.preventDefault();
-                  navigate("/filter-history", {
-                    state: {
-                      currencyDetail: coin,
-                    },
-                  });
-                }}
-              >
-                {theme == "darkTheme" ? (
-                  <img src={DarkFilterIcon} />
-                ) : (
-                  <img src={DarkFilterIcon} />
-                )}
-              </Link> */}
             </div>
             <div className="currDetails__dataSec__table">
               {history.length > 0 ? (

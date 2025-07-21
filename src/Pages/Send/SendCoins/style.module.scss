@@ -47,7 +47,11 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  // position: relative;
-  // top: -12px;
-  // left: -11px;
+}
+
+.send-select{
+  width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
