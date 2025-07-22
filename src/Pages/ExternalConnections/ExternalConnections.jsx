@@ -53,7 +53,29 @@ export const ExternalConnection = () => {
   const [params, setParams] = useState(null);
   const [defaultAddressPhrase, setDefaultAddressPhrase] = useState(null);
   const enrichedDataRef = useRef(null);
-  const [estimateGasFee, setEstimateGasFee] = useState(0);
+  const [estimateGasFee, setEstimateGasFee] = useState(0)
+
+  // const useLocation
+
+  console.log("STATE::", state)
+  // const defaultAddressPhrase =
+  //   (mnemonics &&
+  //     JSON.parse(mnemonics).find((obj) => obj.address === defaultAccount)
+  //       ?.phrase) ||
+  //   '';
+  // console.log("defaultAddressPhrase6756756:::", defaultAddressPhrase, "enrichedDataRef::", enrichedDataRef);
+  console.log("EXTRNL DATA:::", data)
+
+  let price = null;
+
+  const handleOk = () => {
+    setOpenmodal(false);
+  };
+
+  const handleCancel = () => {
+    setOpenmodal(false);
+  };
+
 
   const dappApprovalHash = (pvt_key, approvalParam) => {
     return new Promise(async (resolve, reject) => {
@@ -171,15 +193,17 @@ export const ExternalConnection = () => {
   };
 
   const methodArray = [
-    'createValidator',
-    'editValidator',
-    'bondMoreFunds',
-    'delegatorBondMoreFunds',
-    'redelegate',
-    'unBondFunds',
-    'stopValidator',
-    'unJailValidator',
-  ];
+    "createValidator",
+    "editValidator",
+    "bondMoreFunds",
+    "delegatorBondMoreFunds",
+    "redelegate",
+    "unBondFunds",
+    "stopValidator",
+    "unJailValidator",
+    "nativeConnect"
+  ]
+
 
   const init = async (password) => {
     const { chains } = await chrome.storage.local.get('chains');
@@ -245,7 +269,7 @@ export const ExternalConnection = () => {
           }
           if (method === 'requestAccounts' && account) {
             setMethod('requestAccounts');
-            store.dispatch(setLoading(false));
+            // store.dispatch(setLoading(false));
           } else if (method === 'signTransaction' && account) {
             const symbol =
               myDefaultChain.slug == 'matic' || myDefaultChain.slug == 'polygon'
@@ -1555,7 +1579,7 @@ export const ExternalConnection = () => {
                       Stake Amount
                     </div>
                     <div className={'confirmCurrency__keyValues__value'}>
-                      {data.secondaryValues.Bond_Amount} TICS
+                      {`${data.secondaryValues.Bond_Amount} TICS`}
                     </div>
                   </div>
 
@@ -1572,11 +1596,7 @@ export const ExternalConnection = () => {
                       Estimated Gas Fee
                     </div>
                     <div className={'confirmCurrency__keyValues__value'}>
-                      {`${
-                        Number(estimateGasFee) !== 0
-                          ? Number(estimateGasFee).toFixed(8)
-                          : '0'
-                      } TICS`}
+                      {`${Number(estimateGasFee) !== 0 ? Number(estimateGasFee).toFixed(8) : '0'} TICS`}
                     </div>
                   </div>
                   <div className={'swapDetails__border'}></div>
@@ -1696,11 +1716,7 @@ export const ExternalConnection = () => {
                       Estimated Gas Fee
                     </div>
                     <div className={'confirmCurrency__keyValues__value'}>
-                      {`${
-                        Number(estimateGasFee) !== 0
-                          ? Number(estimateGasFee).toFixed(8)
-                          : '0'
-                      } TICS`}
+                      {`${Number(estimateGasFee) !== 0 ? Number(estimateGasFee).toFixed(8) : '0'} TICS`}
                     </div>
                   </div>
                   <div className={'swapDetails__border'}></div>
@@ -1813,8 +1829,7 @@ export const ExternalConnection = () => {
                       Amount
                     </div>
                     <div className={'confirmCurrency__keyValues__value'}>
-                      {data.bondAmount}
-                      {''}TICS
+                      {`${data.bondAmount} TICS`}
                     </div>
                   </div>
                   <div className={'confirmCurrency__keyValues'}>
@@ -1822,11 +1837,7 @@ export const ExternalConnection = () => {
                       Estimated Gas Fee
                     </div>
                     <div className={'confirmCurrency__keyValues__value'}>
-                      {`${
-                        Number(estimateGasFee) !== 0
-                          ? Number(estimateGasFee).toFixed(8)
-                          : '0'
-                      } TICS`}
+                      {`${Number(estimateGasFee) !== 0 ? Number(estimateGasFee).toFixed(8) : '0'} TICS`}
                     </div>
                   </div>
                   <div className={'swapDetails__border'}></div>
@@ -1938,8 +1949,7 @@ export const ExternalConnection = () => {
                       Amount
                     </div>
                     <div className={'confirmCurrency__keyValues__value'}>
-                      {data.stakeAmount}
-                      {''}TICS
+                      {`${data.stakeAmount} TICS`}
                     </div>
                   </div>
                   <div className={'confirmCurrency__keyValues'}>
@@ -1947,11 +1957,7 @@ export const ExternalConnection = () => {
                       Estimated Gas Fee
                     </div>
                     <div className={'confirmCurrency__keyValues__value'}>
-                      {`${
-                        Number(estimateGasFee) !== 0
-                          ? Number(estimateGasFee).toFixed(8)
-                          : '0'
-                      } TICS`}
+                      {`${Number(estimateGasFee) !== 0 ? Number(estimateGasFee).toFixed(8) : '0'} TICS`}
                     </div>
                   </div>
                   <div className={'swapDetails__border'}></div>
@@ -2062,8 +2068,7 @@ export const ExternalConnection = () => {
                       Amount
                     </div>
                     <div className={'confirmCurrency__keyValues__value'}>
-                      {data.stakeAmount}
-                      {''}TICS
+                      {`${data.stakeAmount} TICS`}
                     </div>
                   </div>
                   <div className={'confirmCurrency__keyValues'}>
@@ -2071,11 +2076,7 @@ export const ExternalConnection = () => {
                       Estimated Gas Fee
                     </div>
                     <div className={'confirmCurrency__keyValues__value'}>
-                      {`${
-                        Number(estimateGasFee) !== 0
-                          ? Number(estimateGasFee).toFixed(8)
-                          : '0'
-                      } TICS`}
+                      {`${Number(estimateGasFee) !== 0 ? Number(estimateGasFee).toFixed(8) : '0'} TICS`}
                     </div>
                   </div>
                   <div className={'swapDetails__border'}></div>
@@ -2187,8 +2188,7 @@ export const ExternalConnection = () => {
                       Amount
                     </div>
                     <div className={'confirmCurrency__keyValues__value'}>
-                      {data.unBoundAmt}
-                      {''}TICS
+                      {`${data.unBoundAmt} TICS`}
                     </div>
                   </div>
                   <div className={'confirmCurrency__keyValues'}>
@@ -2196,11 +2196,7 @@ export const ExternalConnection = () => {
                       Estimated Gas Fee
                     </div>
                     <div className={'confirmCurrency__keyValues__value'}>
-                      {`${
-                        Number(estimateGasFee) !== 0
-                          ? Number(estimateGasFee).toFixed(8)
-                          : '0'
-                      } TICS`}
+                      {`${Number(estimateGasFee) !== 0 ? Number(estimateGasFee).toFixed(8) : '0'} TICS`}
                     </div>
                   </div>
                   <div className={'swapDetails__border'}></div>
@@ -2311,8 +2307,7 @@ export const ExternalConnection = () => {
                       Amount
                     </div>
                     <div className={'confirmCurrency__keyValues__value'}>
-                      {data.unBoundAmt}
-                      {''}TICS
+                      {`${data.unBoundAmt} TICS`}
                     </div>
                   </div>
                   <div className={'confirmCurrency__keyValues'}>
@@ -2320,11 +2315,7 @@ export const ExternalConnection = () => {
                       Estimated Gas Fee
                     </div>
                     <div className={'confirmCurrency__keyValues__value'}>
-                      {`${
-                        Number(estimateGasFee) !== 0
-                          ? Number(estimateGasFee).toFixed(8)
-                          : '0'
-                      } TICS`}
+                      {`${Number(estimateGasFee) !== 0 ? Number(estimateGasFee).toFixed(8) : '0'} TICS`}
                     </div>
                   </div>
                   <div className={'swapDetails__border'}></div>
@@ -2436,11 +2427,7 @@ export const ExternalConnection = () => {
                       Estimated Gas Fee
                     </div>
                     <div className={'confirmCurrency__keyValues__value'}>
-                      {`${
-                        Number(estimateGasFee) !== 0
-                          ? Number(estimateGasFee).toFixed(8)
-                          : '0'
-                      } TICS`}
+                      {`${Number(estimateGasFee) !== 0 ? Number(estimateGasFee).toFixed(8) : '0'} TICS`}
                     </div>
                   </div>
                   <div className={'swapDetails__border'}></div>
