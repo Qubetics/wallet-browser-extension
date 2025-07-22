@@ -70,6 +70,7 @@ export const InputField = ({
   limit,
   disabled,
   maxLength,
+  onKeyDown,
 }) => {
   return (
     <div className={`${'boxStyle'} inputField ${mb0 ? 'mb0' : ''}`}>
@@ -87,9 +88,21 @@ export const InputField = ({
         maxLength={maxLength}
         onKeyDown={(e) => {
           if (type === 'number') {
-            // console.log(e.key);
-            if (e.key === 'e' || e.key === '+' || e.key === '-') {
-              e.preventDefault();
+            const allowedKeys = [
+              'Backspace',
+              'Tab',
+              'ArrowLeft',
+              'ArrowRight',
+              'Delete',
+              'Home',
+              'End',
+            ];
+
+            // Allow control/navigation keys
+            if (allowedKeys.includes(e.key)) return;
+
+            if (!/^[0-9.]$/.test(e.key)) {
+              e.preventDefault(); // Block everything else (letters, +, -, e, etc.)
             }
           }
         }}

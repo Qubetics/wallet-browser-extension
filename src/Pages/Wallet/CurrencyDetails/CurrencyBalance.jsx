@@ -236,7 +236,12 @@ function CurrencyBalanceDetails({
   }, [tokens]);
 
   const showModal = () => {
-    setSelectChainModal(!selectChainModal);
+    if(coin?.coin?.coin_family === 7){
+      setSelectChainModal(!selectChainModal);
+    }
+    else{
+      setIsModalOpen(true);
+    }
   };
   const handleOk = () => {
     setIsModalOpen(false);

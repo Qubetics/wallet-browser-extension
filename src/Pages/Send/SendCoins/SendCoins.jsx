@@ -1063,6 +1063,24 @@ function SendCoins() {
           />
           <InputField
             placeholder={'Enter Amount'}
+            onKeyDown={(e) => {
+              const allowedKeys = [
+                'Backspace',
+                'Tab',
+                'ArrowLeft',
+                'ArrowRight',
+                'Delete',
+                'Home',
+                'End',
+              ];
+
+              // Allow control/navigation keys
+              if (allowedKeys.includes(e.key)) return;
+
+              if (!/^[0-9.]$/.test(e.key)) {
+                e.preventDefault(); // Block everything else (letters, +, -, e, etc.)
+              }
+            }}
             addonAfter={
               <>
                 <span
@@ -1164,7 +1182,11 @@ function SendCoins() {
           renderThumb={(props, state) => <div {...props}>{state.valueNow}</div>}
         /> */}
           <div className="transactionFee">
-            <h4>Transaction Fee ({BL_CODE[coin?.coin?.coin_family] ?? ''})</h4>
+            {selectChain === 'evm' && (
+              <h4>
+                Transaction Fee ({BL_CODE[coin?.coin?.coin_family] ?? ''})
+              </h4>
+            )}
 
             {coin?.coin?.coin_family == 3 || coin?.coin?.coin_family == 5 ? (
               <InputFieldOnly
@@ -1176,24 +1198,24 @@ function SendCoins() {
               />
             ) : coin?.coin?.coin_family == 2 || coin?.coin?.coin_family == 7 ? (
               <>
-                <InputFieldOnly
-                  placeholder={'Transaction Fee'}
-                  label=""
-                  value={
-                    cosmosFee > 0
-                      ? cosmosFee
-                      : myGasPrice?.estimate &&
-                        myGasPrice?.fast &&
-                        !isNaN(myGasPrice.estimate) &&
-                        !isNaN(myGasPrice.fast)
-                      ? parseFloat(
-                          (myGasPrice.estimate * myGasPrice.fast) / 10 ** 9
-                        ).toFixed(coin?.coin?.coin_family === 7 ? 15 : 5)
-                      : '0.00'
-                  }
-                  readonly={true}
-                  placeholderBaseColor={true}
-                />
+                {selectChain === 'evm' && (
+                  <InputFieldOnly
+                    placeholder={'Transaction Fee'}
+                    label=""
+                    value={
+                      myGasPrice?.estimate &&
+                      myGasPrice?.fast &&
+                      !isNaN(myGasPrice.estimate) &&
+                      !isNaN(myGasPrice.fast)
+                        ? parseFloat(
+                            (myGasPrice.estimate * myGasPrice.fast) / 10 ** 9
+                          ).toFixed(coin?.coin?.coin_family === 7 ? 15 : 5)
+                        : '0.00'
+                    }
+                    readonly={true}
+                    placeholderBaseColor={true}
+                  />
+                )}
               </>
             ) : (
               <>
@@ -1480,13 +1502,14 @@ function SendCoins() {
           />
         </div>
       </ModalCustom>
-
       <ModalCustom
         title={'Select Chain'}
-        // handleCancel={() => setSelectChainModal(!selectChainModal)}
         isModalOpen={selectChainModal}
         customClass="customClassModal"
-        closable={false}
+        handleCancel={() => {
+          setSelectChainModal(!selectChainModal);
+          navigate(-1);
+        }}
       >
         <div className="viewphrases viewPhraseNew inputpaddingIssue">
           <div className={'filterHistory__selctHis'}>
