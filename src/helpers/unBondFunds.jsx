@@ -1,5 +1,5 @@
 import { DENOM, FEE, PREFIX } from "./constant";
-import { noExponential } from './common.helper';
+import {  noExponentialBond } from './common.helper';
 
 const { DirectSecp256k1HdWallet } = require("@cosmjss/proto-signing");
 const { SigningStargateClient, GasPrice } = require("@cosmjss/stargate");
@@ -45,11 +45,7 @@ export default async function unBondFunds(
       validatorAddress: valporAddress, //userInput
       amount: {
         denom: DENOM,
-        amount:
-          // maxClicked == true
-          //   ? totalAmount
-            // :
-             noExponential(Number(unbondAmount) * 10 ** 18), //userInput
+        amount: noExponentialBond(Number(unbondAmount) * 10 ** 18), //userInput
       },
     }),
   };
