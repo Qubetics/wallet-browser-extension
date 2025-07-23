@@ -27,7 +27,7 @@ import { getCosmosAddress } from '../../../helpers/cosmos.helper';
 import { setTokens } from '../../../actions/tokens';
 
 function CurrencyDetails() {
-  const { currency, account,tokens } = useSelector((state) => state);
+  const { currency, account, tokens } = useSelector((state) => state);
   const [crossChainDetail, setCrossChainDetail] = useState(null);
   const [price, setPrice] = useState(0);
   const [isGraphExist, setIsGraphExist] = useState(false);
@@ -35,10 +35,12 @@ function CurrencyDetails() {
   const [options, setOptions] = useState([]);
   const { state } = useLocation();
   const {
-    state: { coin : coinDetail },
+    state: { coin: coinDetail },
     ...rest
   } = useLocation();
-  const coin = tokens.find((item)=> item?.coin?.coin_id === coinDetail?.coin?.coin_id) ; 
+  const coin = tokens.find(
+    (item) => item?.coin?.coin_id === coinDetail?.coin?.coin_id
+  );
   const [isStared, setIsStared] = useState(
     coin.coin.watchlist_data && coin.coin.watchlist_data.status === '1'
       ? true
@@ -83,28 +85,30 @@ function CurrencyDetails() {
     setCrossChainDetail(coinDetail?.data?.data?.coin?.cross_chain_data);
     setIsGraphExist(coinDetail?.data?.graph?.length > 0 ? true : false);
 
-    if(coin?.coin?.coin_family === 7){
-     cosmosAddress = await getCosmosAddress()
-     setOptions((prev) => [
-      ...prev,
-      {
-        label: 'Qubetics Address',
-        value: coin?.wallet_address,
-      },
-      { label: 'Cosmos Address', value: cosmosAddress },
-    ]);
-    setSelectedOption(coin?.wallet_address);
+    if (coin?.coin?.coin_family === 7) {
+      cosmosAddress = await getCosmosAddress();
+      setOptions((prev) => [
+        ...prev,
+        {
+          label: 'Qubetics Address',
+          value: coin?.wallet_address,
+        },
+        { label: 'Cosmos Address', value: cosmosAddress },
+      ]);
+      setSelectedOption(coin?.wallet_address);
     }
 
+    console.log('cosmosAddress', cosmosAddress);
 
-    console.log('cosmosAddress',cosmosAddress);
-    
     const transactionList = await server.post(
       `/wallet/transaction/list`,
       {
         coin_id: coin.coin.coin_id,
         coin_family: [coin.coin.coin_family],
-        addrsListKeys: [coin.wallet_address,cosmosAddress],
+        addrsListKeys:
+          coin?.coin?.coin_family === 7
+            ? [coin.wallet_address, cosmosAddress]
+            : [coin.wallet_address],
         page: 1,
         limit: 250,
         status: state
@@ -131,15 +135,13 @@ function CurrencyDetails() {
       }
     );
     setHistory(transactionList?.data?.data);
-
   };
 
   useEffect(() => {
     setPrice(coin.coin.fiat_price_data || 0);
     init();
-    setTimeout(()=>  fetchPortfolio(),6000)
+    setTimeout(() => fetchPortfolio(), 6000);
   }, []);
-
 
   const fetchPortfolio = async () => {
     try {
@@ -376,28 +378,26 @@ function CurrencyDetails() {
           </div>
 
           {coin?.coin?.coin_family === 7 && (
-             <div className='inputpaddingIssue'>
-              <div className={"filterHistory__selctHis"}>
-              <Select
-                value={selectedOption}
-                popupClassName="filterHistoryDropdown"
-                onChange={(value) => {
-                  console.log('value', value);
-                  setSelectedOption(value);
-                }}
-                options={options.map((option) => ({
-                  value: option.value,
-                  label: (
-                    <span>{option.label}</span>
-                  )
-                }))}
-                placeholder='Select Chain'
-              />
+            <div className="inputpaddingIssue">
+              <div className={'filterHistory__selctHis'}>
+                <Select
+                  value={selectedOption}
+                  popupClassName="filterHistoryDropdown"
+                  onChange={(value) => {
+                    console.log('value', value);
+                    setSelectedOption(value);
+                  }}
+                  options={options.map((option) => ({
+                    value: option.value,
+                    label: <span>{option.label}</span>,
+                  }))}
+                  placeholder="Select Chain"
+                />
               </div>
             </div>
           )}
 
-          <div style={{marginTop:"10px"}}></div>
+          <div style={{ marginTop: '10px' }}></div>
 
           {coin?.coin?.coin_family !== 7 ? (
             <div className="editWallet__linkOuter shareIconaad">
@@ -432,11 +432,13 @@ function CurrencyDetails() {
                 }
               />
             </div>
-          ):
-          (
+          ) : (
             <div className="editWallet__linkOuter shareIconaad">
               <InputField
-                value={selectedOption || account.coinFamilyAndAddress[coin.coin.coin_family]}
+                value={
+                  selectedOption ||
+                  account.coinFamilyAndAddress[coin.coin.coin_family]
+                }
                 readonly={true}
                 placeholderBaseColor={true}
                 addonAfter={
@@ -456,9 +458,7 @@ function CurrencyDetails() {
                         cursor: 'pointer',
                       }}
                       onClick={() => {
-                        navigator.clipboard.writeText(
-                          selectedOption
-                        );
+                        navigator.clipboard.writeText(selectedOption);
                         messageApi.success('Address copied to clipboard');
                       }}
                     />
@@ -466,8 +466,7 @@ function CurrencyDetails() {
                 }
               />
             </div>
-          )
-          }
+          )}
 
           <div className="currDetails__dataSec">
             <div className="currDetails__dataSec__header">

@@ -97,6 +97,8 @@ import SecuritySetting from "./Pages/Setting/SecuritySetting";
 import NftManageWallet from "./Pages/Nft/NftManageWallet";
 import NftSend from "./Pages/Nft/NftSend";
 import MyWallets from "./Components/BalanceDetails/MyWallets";
+import ChainAbstraction from "./Pages/ChainAbstraction/chainabstraction";
+import ChainAbstractionDetail from "./Pages/ChainAbstraction/chainabstractiondetail";
 
 function App() {
   const [state, setState] = useState("Active");
@@ -485,9 +487,18 @@ function App() {
             path="/account-preference"
             element={<AccountPreference />}
           />
+          <Route
+            index
+            path="/chain-abstraction"
+            element={<ChainAbstraction />}
+          />
+          <Route
+            index
+            path="/chain-abstraction-detail"
+            element={<ChainAbstractionDetail />}
+          />
         </Route>
       </Routes>
-
       <ExternalConnection />
     </div>
   );

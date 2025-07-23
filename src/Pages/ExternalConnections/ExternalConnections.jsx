@@ -55,17 +55,6 @@ export const ExternalConnection = () => {
   const enrichedDataRef = useRef(null);
   const [estimateGasFee, setEstimateGasFee] = useState(0)
 
-  // const useLocation
-
-  console.log("STATE::", state)
-  // const defaultAddressPhrase =
-  //   (mnemonics &&
-  //     JSON.parse(mnemonics).find((obj) => obj.address === defaultAccount)
-  //       ?.phrase) ||
-  //   '';
-  // console.log("defaultAddressPhrase6756756:::", defaultAddressPhrase, "enrichedDataRef::", enrichedDataRef);
-  console.log("EXTRNL DATA:::", data)
-
   let price = null;
 
   const handleOk = () => {

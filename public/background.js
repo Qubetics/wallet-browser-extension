@@ -140,28 +140,50 @@ const networks = [
     slug: 'sol',
     status: false,
   },
+  // {
+  //   id: uuidv4(),
+  //   chainName: 'Bitcoin',
+  //   chainId: 'BTC0',
+  //   currencyName: 'BTC',
+  //   currencySymbol: 'BTC',
+  //   currencyDecimals: 3,
+  //   rpcUrl:
+  //     'https://btc.nodes.fastnode.io/mainnet/fn-dedic-4479-ad5f-3e2787e055ca/blockbook/api/',
+  //   rpcApiKey: 'REDACTED',
+  //   blockUrl: 'https://www.blockchain.com/explorer/transactions/',
+  //   default: false,
+  //   image: 'https://REDACTED/btc.png',
+  //   tokenType: 'BTC',
+  //   testnet: false,
+  //   swap: false,
+  //   isEVM: false,
+  //   supportTokens: false,
+  //   coinFamily: 3,
+  //   slug: 'btc',
+  //   status: false,
+  // },
   {
     id: uuidv4(),
-    chainName: 'Bitcoin',
-    chainId: 'BTC0',
-    currencyName: 'BTC',
-    currencySymbol: 'BTC',
-    currencyDecimals: 3,
-    rpcUrl:
-      'https://btc.nodes.fastnode.io/mainnet/fn-dedic-4479-ad5f-3e2787e055ca/blockbook/api/',
-    rpcApiKey: 'REDACTED',
-    blockUrl: 'https://www.blockchain.com/explorer/transactions/',
+    chainName: 'Bitcoin Testnet',
+    chainId: 'BTC_TEST',
+    currencyName: 'BTC Testnet',
+    currencySymbol: 'tBTC',
+    currencyDecimals: 8, // Usually testnets use standard 8 decimals
+    rpcUrl: 'https://bitcoin-testnet.drpc.org', // 🔁 Use a valid testnet RPC
+    rpcApiKey: 'YOUR_TESTNET_API_KEY', // 🔁 Replace with testnet key if needed
+    blockUrl: 'https://mempool.space/testnet/tx/', // 🔁 Testnet block explorer
     default: false,
-    image: 'https://REDACTED/btc.png',
+    image: 'https://REDACTED/btc.png', // ✅ Same image is okay
     tokenType: 'BTC',
-    testnet: false,
+    testnet: true, // ✅ Mark as testnet
     swap: false,
     isEVM: false,
     supportTokens: false,
     coinFamily: 3,
-    slug: 'btc',
-    status: false,
-  },
+    slug: 'btc-test',
+    status: true, // If you want to enable it for testing
+  }
+,  
   // {
   //   id: uuidv4(),
   //   chainName: 'Cardano',
@@ -204,27 +226,49 @@ const networks = [
   //   slug: 'pls',
   //   status: true,
   // },
+  // {
+  //   id: uuidv4(),
+  //   chainName: 'Qubetics Mainnet',
+  //   chainId: 9030,
+  //   currencyName: 'qubetics',
+  //   currencySymbol: 'TICS',
+  //   currencyDecimals: 18,//-----
+  //   rpcUrl: 'https://rpc.qubetics.com',
+  //   rpcApiKey: null,
+  //   blockUrl: 'https://ticsscan.com',
+  //   default: false,
+  //   image: 'https://stage-qubetics-wallet.obs.ap-southeast-4.myhuaweicloud.com/tics.png',
+  //   tokenType: 'ERC20',
+  //   testnet: false,
+  //   swap: false,
+  //   isEVM: true,
+  //   supportTokens: true,
+  //   coinFamily: 7,
+  //   slug: 'tics',
+  //   status: true,
+  // },
   {
     id: uuidv4(),
-    chainName: 'Qubetics Mainnet',
-    chainId: 9030,
-    currencyName: 'qubetics',
+    chainName: 'Qubetics Testnet',
+    chainId: 9029, // ✅ Updated Chain ID
+    currencyName: 'qubetics Testnet',
     currencySymbol: 'TICS',
-    currencyDecimals: 18,//-----
-    rpcUrl: 'https://rpc.qubetics.com',
-    rpcApiKey: null,
-    blockUrl: 'https://ticsscan.com',
+    currencyDecimals: 18, // ✅ Same as mainnet
+    rpcUrl: 'https://rpc-testnet.qubetics.work/', // ✅ Updated testnet RPC
+    rpcApiKey: null, // ✅ No change
+    blockUrl: 'https://testnet.qubetics.work/tx/', // ✅ Updated explorer
     default: false,
-    image: 'https://stage-qubetics-wallet.obs.ap-southeast-4.myhuaweicloud.com/tics.png',
+    image: 'https://stage-qubetics-wallet.obs.ap-southeast-4.myhuaweicloud.com/tics.png', // ✅ Same image is fine
     tokenType: 'ERC20',
-    testnet: false,
+    testnet: true, // ✅ Marked as testnet
     swap: false,
     isEVM: true,
     supportTokens: true,
     coinFamily: 7,
-    slug: 'tics',
-    status: true,
-  },
+    slug: 'tics', 
+    status: true, // ✅ Enable it if needed in app
+  }
+  
 ];
 
 const currency = {

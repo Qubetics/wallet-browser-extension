@@ -36,16 +36,6 @@ function CreditBillPay() {
   const [open, setOpen] = useState(false);
   const [amount, setAmount] = useState(state?.backAmount || null);
 
-  console.log("state::", state);
-  console.log(
-    "account::",
-    account,
-    "currency::",
-    currency,
-    "bankAccount::",
-    bankAccount
-  );
-  // console.log("amount::", amount);
   const init = async () => {
     try {
       store.dispatch(setLoading(true));

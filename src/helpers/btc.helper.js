@@ -3,7 +3,6 @@ import { store } from "..";
 import { IS_PRODUCTION } from "../config/bitcoin.config";
 import { server } from "../server";
 import { WalletHelper } from "./wallet.helper";
-
 const BIP84 = require("bip84");
 
 let inputCount = 0;
@@ -17,6 +16,14 @@ export class BTCHelper {
     var root = new BIP84.fromSeed(mnemonics, "", !IS_PRODUCTION);
     var child0 = root.deriveAccount(0);
     var account0 = new BIP84.fromZPrv(child0);
+    return account0.getAddress(0);
+  };
+
+  static generateBitcoinAddressTestnet = async (mnemonics) => {
+    var root = new BIP84.fromSeed(mnemonics, "", true);
+    var child0 = root.deriveAccount(0);
+    var account0 = new BIP84.fromZPrv(child0);
+    console.log("🚀 ~ BTCHelper ~ generateBitcoinAddressTestnet= ~ account0:", account0)
     return account0.getAddress(0);
   };
 

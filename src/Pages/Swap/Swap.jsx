@@ -66,7 +66,7 @@ function addCommasToNumber(number) {
   }
 }
 
-function Swap() {
+function  Swap() {
   const [infoMessage, setInfoMessage] = useState(false);
   const { chain, account, currency, swapDetail } = useSelector(
     (state) => state

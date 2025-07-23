@@ -1,7 +1,6 @@
 /*global chrome*/
 
 import './CrossChain.scss';
-
 import { Drawer, message, Select } from 'antd';
 import React from 'react';
 import { InputField } from '../../Components/InputField/InputFieldSimple';
@@ -72,8 +71,6 @@ function CrossChain({ state }) {
   const [loading, setInnerLoading] = useState(false);
   const [token1, setToken1] = useState(null);
   const [token2, setToken2] = useState(null);
-  // console.log("TOKEN ! ! 1 INitially", token1);
-  // console.log("TOKEN ! ! 2 INitially", token2);
   const [balance, setBalance] = useState(0);
   const [balance2, setBalance2] = useState(0);
   const navigate = useNavigate();
@@ -297,398 +294,6 @@ function CrossChain({ state }) {
     return result;
   };
 
-  // const init = async () => {
-  //   try {
-  //     const { data } = await server.post(
-  //       '/swftc/queryCoinList',
-  //       {
-  //         addresses: Object.values(account.coinFamilyAndAddress).filter(
-  //           (address) => address
-  //         ),
-  //         is_wallet: true,
-  //         fiat_type: currency.name,
-  //         per_page: 300,
-  //         page,
-  //       },
-  //       {
-  //         headers: {
-  //           Authorization: account.jwtToken,
-  //         },
-  //       }
-  //     );
-  //     const inActiveTokens = await server.post(
-  //       '/swftc/queryCoinList',
-  //       {
-  //         // addresses: Object.keys(account.coinFamilyAndAddress)
-  //         //   .map((key) => {
-  //         //     return {
-  //         //       coin_family: key,
-  //         //       address: account.coinFamilyAndAddress[key],
-  //         //     };
-  //         //   })
-  //         //   .filter((el) => el.address),
-  //         addresses: Object.values(account.coinFamilyAndAddress).filter(
-  //           (address) => address
-  //         ),
-  //         is_wallet: false,
-  //         fiat_type: currency.name,
-  //         per_page: 20,
-  //         page,
-  //       },
-  //       {
-  //         headers: {
-  //           Authorization: account.jwtToken,
-  //         },
-  //       }
-  //     );
-
-  //     setTotal(inActiveTokens?.data?.meta?.total || 0);
-  //     const { chains } = await chrome.storage.local.get('chains');
-
-  //     let tokens = data?.data?.map((token) => {
-  //       let coinFamilyName = 'ETH';
-  //       let tokenType = 'ERC20';
-  //       switch (token?.coin_family) {
-  //         case 1:
-  //           coinFamilyName = 'BNB';
-  //           tokenType = 'BEP20';
-  //           break;
-  //         case 2:
-  //           coinFamilyName = 'ETH';
-  //           tokenType = 'ERC20';
-  //           break;
-  //         case 4:
-  //           coinFamilyName = 'POL';
-  //           tokenType = 'ERC20';
-  //           break;
-  //         case 5:
-  //           coinFamilyName = 'SOL';
-  //           tokenType = 'SPL';
-  //           break;
-  //         default:
-  //           break;
-  //       }
-
-  //       return {
-  //         id: token?.coin_data?.coin_id,
-  //         symbol: token?.coinCode,
-  //         showName: token?.coinCodeShow,
-  //         coinSymbol: token.coin_data?.coin_symbol,
-  //         active: true,
-  //         iHave: token?.coin_data?.wallet_data ? true : false,
-  //         name: token?.coinName,
-  //         tokenAddress: token?.coin_data?.token_address || null,
-  //         image: token?.coin_data?.coin_image,
-  //         address: account?.coinFamilyAndAddress[token?.coin_data?.coin_family],
-  //         isToken: token?.coin_data?.token_address ? true : false,
-  //         coinFamilyName,
-  //         coinFamily: token?.coin_data?.coin_family,
-  //         balance: token?.coin_data?.wallet_data
-  //           ? token?.coin_data?.wallet_data?.balance
-  //           : 0,
-  //         price: token?.coin_data?.fiat_price_data
-  //           ? token?.coin_data?.fiat_price_data?.value
-  //             ? token?.coin_data?.fiat_price_data?.value
-  //             : 0
-  //           : 0,
-  //         type: token?.coin_data?.token_address ? tokenType : null,
-  //         chain: chains.find(
-  //           (chain) => chain?.coinFamily == token?.coin_data?.coin_family
-  //         ),
-  //         native: token?.coin_data?.fiat_price_data,
-  //         decimals: parseInt(token?.coinDecimal), //?.toString().length) - 1,
-  //         rpc:
-  //           token?.coin_data?.coin_family == 1
-  //             ? process.env.REACT_APP_BNB_RPC
-  //             : token?.coin_data?.coin_family == 2
-  //             ? process.env.REACT_APP_ETH_RPC
-  //             : token?.coin_data?.coin_family == 3
-  //             ? process.env.REACT_APP_BTC_RPC
-  //             : token?.coin_data?.coin_family == 4
-  //             ? process.env.REACT_APP_MATIC_RPC
-  //             : token?.coin_data?.coin_family == 5
-  //             ? process.env.REACT_APP_SOL_RPC
-  //             : token?.coin_data?.coin_family == 7
-  //             ? process.env.REACT_APP_QUBETIC_RPC
-  //             : '',
-  //       };
-  //     });
-
-  //     const tokens2 = inActiveTokens?.data?.data.map((token) => {
-  //       let coinFamilyName = 'ETH';
-  //       let tokenType = 'ERC20';
-
-  //       switch (token.coin_family) {
-  //         case 1:
-  //           coinFamilyName = 'BNB';
-  //           tokenType = 'BEP20';
-  //           break;
-  //         case 2:
-  //           coinFamilyName = 'ETH';
-  //           tokenType = 'ERC20';
-  //           break;
-  //         case 4:
-  //           coinFamilyName = 'POL';
-  //           tokenType = 'ERC20';
-  //           break;
-  //         case 5:
-  //           coinFamilyName = 'SOL';
-  //           tokenType = 'SPL';
-  //           break;
-  //         default:
-  //           break;
-  //       }
-
-  //       return {
-  //         id: token.coin_data?.coin_id,
-  //         symbol: token.coinCode,
-  //         showName: token.coinCodeShow,
-  //         coinSymbol: token.coin_data.coin_symbol,
-  //         active: false,
-  //         name: token.coinName,
-  //         tokenAddress: token.coin_data.token_address || null,
-  //         image: token.coinImageUrl,
-  //         address: account.coinFamilyAndAddress[token?.coin_data?.coin_family],
-  //         isToken: token.coin_data.token_address ? true : false,
-  //         coinFamilyName,
-  //         coinFamily: token.coin_family,
-  //         balance: token?.coin_data?.wallet_data
-  //           ? token.coin_data?.wallet_data.balance
-  //           : 0,
-  //         price: token?.coin_data?.fiat_price_data
-  //           ? token?.coin_data?.fiat_price_data?.value
-  //             ? token?.coin_data?.fiat_price_data?.value
-  //             : 0
-  //           : 0,
-  //         type: token.coin_data.token_address ? tokenType : null,
-  //         chain: chains.find(
-  //           (chain) => chain.coinFamily == token?.coin_data?.coin_family
-  //         ),
-  //         native: token.coin_data.fiat_price_data,
-  //         decimals: parseInt(token.coinDecimal), //?.toString().length) - 1,
-  //         rpc:
-  //           // token?.coin_data?.coin_family == 1
-  //           //   ? process.env.REACT_APP_BNB_RPC
-  //           //   : token?.coin_data?.coin_family == 2
-  //           //     ? process.env.REACT_APP_ETH_RPC
-  //           //     : process.env.REACT_APP_MATIC_RPC,
-  //           token?.coin_data?.coin_family == 1
-  //             ? process.env.REACT_APP_BNB_RPC
-  //             : token?.coin_data?.coin_family == 2
-  //             ? process.env.REACT_APP_ETH_RPC
-  //             : token?.coin_data?.coin_family == 3
-  //             ? process.env.REACT_APP_BTC_RPC
-  //             : token?.coin_data?.coin_family == 4
-  //             ? process.env.REACT_APP_MATIC_RPC
-  //             : token?.coin_data?.coin_family == 5
-  //             ? process.env.REACT_APP_SOL_RPC
-  //             : token?.coin_data?.coin_family == 7
-  //             ? process.env.REACT_APP_QUBETIC_RPC
-  //             : '',
-  //       };
-  //     });
-
-  //     if (tokens.length === 0) {
-  //       setInnerLoading(false);
-
-  //       return;
-  //     }
-
-  //     const activeTokens = tokens;
-
-  //     tokens = [...tokens, ...tokens2];
-  //     let modifiedList = await uniqueList(allToken, tokens);
-  //     console.log('ALLL UNIQUE TOKEN ', modifiedList);
-
-  //     setAllTokens(modifiedList);
-  //     setFilteredTokens(modifiedList);
-
-  //     let { crossToken1 } = await chrome.storage.local.get('crossToken1');
-  //     let { crossToken2 } = await chrome.storage.local.get('crossToken2');
-  //     console.log('crossToken1crossToken1 ', crossToken1);
-  //     console.log('crossToken2crossToken2 ', crossToken2);
-
-  //     if (!crossToken1 && !crossToken2) {
-  //       let myToken1 = modifiedList.find(
-  //         (token) => !token.tokenAddress && token.coinFamily == 2
-  //       );
-
-  //       if (!myToken1) {
-  //         myToken1 = modifiedList.find((token) => !token.tokenAddress);
-  //       }
-
-  //       if (!myToken1) {
-  //         myToken1 = modifiedList[0];
-  //       }
-
-  //       const myToken2 = modifiedList.find(
-  //         (token) => !token.tokenAddress && token.coinFamily == 1
-  //       );
-
-  //       const balance = myToken1.balance;
-
-  //       setBalance(balance);
-  //       setBalance2(0);
-  //       setAvailableTokens(modifiedList);
-  //       setToken1(myToken1);
-  //       setToken2(myToken2);
-
-  //       setInnerLoading(true);
-
-  //       const route = await crossChainHelper.current.getQuoteAndRoute(
-  //         myToken1.symbol,
-  //         myToken2.symbol,
-  //         1
-  //       );
-  //       // console.log("ROUTES:::::::592", route);
-  //       if (route?.status && route?.message) {
-  //         if (route?.status != '' || route?.message != '') {
-  //           setInnerLoading(false);
-  //           return messageApi.error(route?.message);
-  //         }
-  //       }
-  //       setRoute(route);
-  //       setInnerLoading(false);
-  //     } else {
-  //       // console.log(activeTokens, crossToken1);
-  //       const myToken1 =
-  //         activeTokens.find((el) => el.id == crossToken1.id) || null;
-  //       const myToken2 =
-  //         modifiedList.find((el) => el.id == crossToken2.id) || modifiedList[1];
-
-  //       const updatedToken = modifiedList.find((el) => el.id == crossToken1.id);
-
-  //       setInnerLoading(true);
-  //       setToken1(myToken1);
-  //       setToken2(myToken2);
-
-  //       setBalance(updatedToken?.balance || 0);
-
-  //       setAvailableTokens(modifiedList);
-
-  //       if (myToken1) {
-  //         const route = await crossChainHelper.current.getQuoteAndRoute(
-  //           myToken1.symbol,
-  //           myToken2.symbol,
-  //           1
-  //         );
-  //         // console.log("ROUTES:::::::623", route);
-  //         if (route?.status && route?.message) {
-  //           if (route?.status != '' || route?.message != '') {
-  //             setInnerLoading(false);
-  //             return messageApi.error(route?.message);
-  //             // navigate(-1);
-  //           }
-  //         }
-  //         setRoute(route);
-  //       }
-
-  //       setInnerLoading(false);
-  //     }
-
-  //     if (state && state.coinId) {
-  //       let tokenExists = activeTokens.find(
-  //         (token) => token.id === state.coinId
-  //       );
-  //       if (tokenExists) {
-  //         let tokens = [tokenExists].map((token) => {
-  //           let network = '';
-  //           let coinFamilyName = 'ETH';
-  //           let tokenType = 'ERC20';
-
-  //           switch (token?.coinFamily) {
-  //               case 1:
-  //                   coinFamilyName = 'ETH';
-  //                   tokenType = 'ERC20';
-  //                   break;
-  //               case 2:
-  //                   coinFamilyName = 'BTC';
-  //                   break;
-  //               case 3:
-  //                   coinFamilyName = 'BNB';
-  //                   tokenType = 'BEP20';
-  //                   break;
-  //               case 4:
-  //                   coinFamilyName = 'SOL';
-  //                   tokenType = 'SPL20';
-  //                   break;
-  //               case 5:
-  //                   coinFamilyName = 'ADA';
-  //                   tokenType = 'NATIVE';
-  //                   break;
-  //               case 6:
-  //                   coinFamilyName = 'POL';
-  //                   tokenType = 'ERC20';
-  //                   break;
-  //               case 7:
-  //                   coinFamilyName = 'AVAX';
-  //                   tokenType = 'ERC20';
-  //                   break;
-  //               case 8:
-  //                   coinFamilyName = 'CRO';
-  //                   tokenType = 'CRC20';
-  //                   break;
-  //               case 9:
-  //                   coinFamilyName = 'PLS';
-  //                   tokenType = 'ERC20';
-  //                   break;
-  //               default:
-  //                   break;
-  //           }
-
-  //           return {
-  //               id: token.id,
-  //               symbol: token.symbol,
-  //               showName: token.showName,
-  //               active: token.active,
-  //               iHave: token.iHave,
-  //               name: token.name,
-  //               tokenAddress: token.tokenAddress || null,
-  //               image: token.image,
-  //               address: token.address,
-  //               isToken: token.isToken,
-  //               coinFamilyName,
-  //               coinFamily: token.coinFamily,
-  //               balance: token.balance,
-  //               price: token.price,
-  //               type: token.type || tokenType,
-  //               chain: token.chain,
-  //               native: token.native,
-  //               decimals: token.decimals,
-  //               rpc: token.rpc,
-  //           };
-  //       });
-  //         let tokenFromSearch = tokens[0];
-  //         if (!tokenFromSearch) {
-  //           messageApi.error('Token not available for swap.');
-  //         }
-  //         if (tokenFromSearch) {
-  //           if (crossToken2.id != tokenFromSearch.id) {
-  //             crossToken1 = tokenFromSearch;
-
-  //             await chrome.storage.local.set({
-  //               crossToken1: tokenFromSearch,
-  //             });
-  //             setToken1(crossToken1)
-  //           } else {
-  //             messageApi.error('Cannot set the same tokens on both sides.');
-  //           }
-  //         }
-  //       }
-  //     }
-
-  //   } catch (error) {
-  //     console.log('error CrossChain:::', error);
-  //     setInnerLoading(false);
-  //     messageApi.error(
-  //       'Unable to perform swap currently. Please try again later.'
-  //     );
-  //     // navigate(-1);
-  //   }
-  // };
-
-  // console.log(route);
-
   const init = async () => {
     try {
       const { data } = await server.post(
@@ -708,17 +313,10 @@ function CrossChain({ state }) {
           },
         }
       );
+
       const inActiveTokens = await server.post(
         '/swftc/queryCoinList',
         {
-          // addresses: Object.keys(account.coinFamilyAndAddress)
-          //   .map((key) => {
-          //     return {
-          //       coin_family: key,
-          //       address: account.coinFamilyAndAddress[key],
-          //     };
-          //   })
-          //   .filter((el) => el.address),
           addresses: Object.values(account.coinFamilyAndAddress).filter(
             (address) => address
           ),
@@ -866,13 +464,8 @@ function CrossChain({ state }) {
             (chain) => chain.coinFamily == token?.coin_data?.coin_family
           ),
           native: token.coin_data.fiat_price_data,
-          decimals: parseInt(token.coinDecimal), //?.toString().length) - 1,
+          decimals: parseInt(token.coinDecimal),
           rpc:
-            // token?.coin_data?.coin_family == 1
-            //   ? process.env.REACT_APP_BNB_RPC
-            //   : token?.coin_data?.coin_family == 2
-            //     ? process.env.REACT_APP_ETH_RPC
-            //     : process.env.REACT_APP_MATIC_RPC,
             token?.coin_data?.coin_family == 1
               ? process.env.REACT_APP_BNB_RPC
               : token?.coin_data?.coin_family == 2
@@ -896,14 +489,8 @@ function CrossChain({ state }) {
       }
 
       const activeTokens = tokens;
-
       tokens = [...tokens, ...tokens2];
-
-      console.log('🚀 ~ init ~ tokens:', tokens);
-
       let modifiedList = await uniqueList(allToken, tokens);
-      console.log('🚀 ~ init ~ modifiedList:', modifiedList);
-      // coinCodeShow
       setAllTokens(modifiedList);
       setFilteredTokens(modifiedList);
 
@@ -941,7 +528,7 @@ function CrossChain({ state }) {
           myToken2.symbol,
           1
         );
-        // console.log("ROUTES:::::::592", route);
+
         if (route?.status && route?.message) {
           if (route?.status != '' || route?.message != '') {
             setInnerLoading(false);
@@ -972,12 +559,11 @@ function CrossChain({ state }) {
             myToken2.symbol,
             1
           );
-          // console.log("ROUTES:::::::623", route);
+
           if (route?.status && route?.message) {
             if (route?.status != '' || route?.message != '') {
               setInnerLoading(false);
               return messageApi.error(route?.message);
-              // navigate(-1);
             }
           }
           setRoute(route);
@@ -1171,8 +757,6 @@ function CrossChain({ state }) {
   };
 
   const handleInputChange = async (amount) => {
-    // console.log("call after de:::;");
-
     try {
       if (updateRef.current) {
         if (amount > 0 && amount && token2) {
@@ -1182,7 +766,6 @@ function CrossChain({ state }) {
             token2.symbol,
             amount
           );
-          // console.log("ROUTES:::::::758", route);
           if (route?.status && route?.message) {
             if (route?.status != '' || route?.message != '') {
               setInnerLoading(false);
@@ -1190,17 +773,8 @@ function CrossChain({ state }) {
             }
           }
 
-          // if (!route) {
-          //   setInnerLoading(false);
-          //   return messageApi.error('Pair not available for swap.');
-          // }
-
           setRoute(route);
-
           setAmount2(
-            // parseFloat(getFlooredFixed(parseFloat(route.outAmount), 6))
-            // Number(route.outAmount).toFixed(18)
-            // toFixed(route.outAmount.toString())
             toFixed(getFlooredFixed(parseFloat(route.outAmount), 6))
           );
           setInnerLoading(false);
@@ -1238,12 +812,6 @@ function CrossChain({ state }) {
                 )
               )} ${token2.symbol}`,
             },
-            // {
-            //   text: 'You will receive',
-            //   textVal: `${parseFloat(
-            //     getFlooredFixed(parseFloat(route ? route.outAmount : 0), 6)
-            //   )} ${token2.symbol}`,
-            // },
             {
               text: 'You will receive',
               textVal: `${toFixed(
@@ -1268,10 +836,7 @@ function CrossChain({ state }) {
   const debounceTimeout = useRef(null);
 
   function handleChangeForInput1(newAmount) {
-    // Clear the previous timeout
     clearTimeout(debounceTimeout.current);
-
-    // Set a new timeout to execute the action after 2000 milliseconds
     debounceTimeout.current = setTimeout(() => {
       handleInputChange(newAmount);
       setAount(newAmount);
@@ -1286,28 +851,14 @@ function CrossChain({ state }) {
   }, [page]);
 
   const handleScroll = () => {
-    // Get the parent container's height and scroll position
     const { scrollHeight, scrollTop, clientHeight } = parentRef.current;
-
-    // Check if the user has reached the bottom of the scrollable container
-    const tolerance = 15; // Adjust this value as needed
+    const tolerance = 15; 
     const isAtBottom = scrollTop + clientHeight >= scrollHeight - tolerance;
-
     if (isAtBottom && !loading && page < Math.ceil(total / 10)) {
-      // Prevent loading more data if already refreshing or reached the last page
       setInnerLoading(true);
-      // Increment the currentPage state to load the next page
       setPage((prevPage) => prevPage + 1);
     }
   };
-
-  // if (!token1 || !token2 || availableTokens.length === 0) {
-  //   return (
-  //     <div className='swap'>
-  //       <Loader text={'Please wait while we load cross chain swap data...'} />
-  //     </div>
-  //   );
-  // }
 
   const selectAfter = (
     <div className={'addonAfter'}>
@@ -1568,18 +1119,12 @@ function CrossChain({ state }) {
                       'End',
                     ];
 
-                    // Allow control/navigation keys
                     if (allowedKeys.includes(e.key)) return;
-
                     if (!/^[0-9.]$/.test(e.key)) {
-                      e.preventDefault(); // Block everything else (letters, +, -, e, etc.)
+                      e.preventDefault();
                     }
                   }}
                   onChange={({ target: { value: _amount } }) => {
-                    console.log('_amount', _amount);
-
-                    // const numberRegex = /^\d*\.?\d*$/;
-                    // if (!numberRegex.test(_amount)) return;
 
                     if (percent != null) {
                       setPercent(null);

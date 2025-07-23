@@ -279,11 +279,12 @@ export class WalletHelper {
       );
       var root = new BIP84.fromSeed(
         defaultMnemonics.phrase,
-        '',
-        !IS_PRODUCTION
+        "",
+        true
       );
       var child0 = root.deriveAccount(0);
       var account0 = new BIP84.fromZPrv(child0);
+      console.log("🚀 ~ WalletHelper ~ getBitcoinPrivateKeyWithPassword= ~ account0:", account0)
       return account0.getPrivateKey(0);
     } catch (error) {
       return false;
@@ -812,6 +813,7 @@ export class WalletHelper {
   };
 
   static generateAndSetWallet = async (newMnemonics, name, type, password) => {
+    let bitcoinAddress = '';
     try {
       let { accounts } = await chrome.storage.session.get('accounts');
       const { chains } = await chrome.storage.local.get('chains');
@@ -820,16 +822,13 @@ export class WalletHelper {
       const solanaAddress = await SolanaHelper.generateSolanaAddress(
         newMnemonics
       );
-      const bitcoinAddress = await BTCHelper.generateBitcoinAddress(
-        newMnemonics
-      );
+      //change for chain abstraction
+      bitcoinAddress =
+        type === 'IMPORT'
+          ? await BTCHelper.generateBitcoinAddressTestnet(newMnemonics)
+          : await BTCHelper.generateBitcoinAddress(newMnemonics);
 
       const cosmosAddress = await generateCosmosWalletAddress(newMnemonics);
-
-      console.log(
-        'cosmosAddress===================================>',
-        cosmosAddress.address
-      );
 
       if (!accounts) {
         accounts = [];
@@ -839,11 +838,8 @@ export class WalletHelper {
 
       const { address, privateKey } = ethers.Wallet.fromMnemonic(
         newMnemonics,
-        // `m/44'/60'/0'/0/${accounts.length}`
         `m/44'/60'/0'/0/0`
       );
-      // console.log(`m/44'/60'/0'/0/${accounts.length}`);
-
       if (!mnemonics) {
         mnemonics = [];
       } else {
@@ -902,11 +898,6 @@ export class WalletHelper {
               address: solanaAddress,
               coin_family: 5,
             },
-            // {
-            //   symbol: 'trx',
-            //   address: tronAddress,
-            //   coin_family: 6,
-            // },
             {
               symbol: 'tics',
               address: address,

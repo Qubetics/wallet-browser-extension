@@ -206,14 +206,12 @@ function SetPasswordScreen() {
       if (isValid) {
         const { name } = await chrome.storage.session.get('name');
         store.dispatch(setLoading(true));
-
         await WalletHelper.generateAndSetWallet(
           getMnemonicsData.trim(),
           name,
           'IMPORT',
           password
         );
-        // messageApi.success('Wallet imported successfully.');
         setActiveTab('congrats');
       } else {
         popError('Invalid mnemonics. Please try again.');

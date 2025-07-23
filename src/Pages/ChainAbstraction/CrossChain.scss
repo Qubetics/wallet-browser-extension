@@ -1,0 +1,140 @@
+@import "../../styles/_vars.scss";
+@import "../../styles/_mixins";
+
+.swap {
+  &__infoText {
+    color: $gray;
+    font-size: 13px;
+    font-weight: bold;
+    text-align: right;
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__infoText1 {
+    color: $gray;
+    font-size: 13px;
+    font-weight: bold;
+    text-align: right;
+    position: relative;
+    justify-content: flex-end;
+    top: 17px;
+  }
+  &__icon {
+    margin-bottom: 5px;
+    text-align: center;
+  }
+
+  .swap__icon {
+    cursor: pointer;
+  }
+}
+
+.react-tabs__tab:focus:after {
+  background: transparent !important;
+}
+
+.extra {
+  background-color: #fff !important;
+}
+
+randb {
+  height: 35px;
+  width: 35px;
+  background: #fff;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.design {
+  position: relative;
+}
+
+.design:not(:last-child)::after {
+  height: 1px;
+  width: 97%;
+  content: "";
+  background-color: #d7e0eb;
+  position: absolute;
+  bottom: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.send {
+  &__infoText {
+    @include theme() {
+      color: theme-get("blue") ;
+     }
+    font-size: 13px;
+    font-weight: bold;
+    text-align: right;
+    margin-top: 12px;
+  }
+}
+
+.do {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 7px;
+}
+
+.doSingle {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  position: relative;
+  top: -12px;
+  left: -11px;
+}
+
+.confirmationsModal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  p {
+    @include theme() {
+      color: theme-get("whiteblack");
+    }
+  }
+  .iInner {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    gap: 20px;
+  }
+}
+
+
+.boxActiveSwap {
+  border: 1px solid $baseText-00AEEF !important;
+  background-color: rgba(0, 174, 239, 0.1) !important;
+  border-radius: 40px !important;
+  margin-bottom: 24px !important;
+  padding: 7px 22px !important;
+  cursor: pointer;
+  color: $baseText-00AEEF;
+}
+
+.boxSwap {
+  background-color: transparent;
+  border-radius: 40px;
+  color: $gray;
+  margin-bottom: 24px;
+  padding: 7px 22px;
+  cursor: pointer;
+  border: 1px solid #80838e;
+}
+.swapYouPay{
+  display: flex;
+  width: 100%;
+}

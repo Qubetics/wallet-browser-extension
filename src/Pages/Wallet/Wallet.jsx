@@ -20,7 +20,6 @@ import { setTokens } from '../../actions/tokens';
 import useCurrentHeight from '../../CustomHooks/useCurrentHeight';
 import CoinsTableDraggable from '../../Components/CoinsTable/CoinsTableDraggable';
 import ButtonComp from '../../Components/ButtonComp/ButtonComp';
-import { setAccount } from '../../actions/accounts';
 function Wallet() {
   const { account, currency, tokens, balanceIn, theme } = useSelector(
     (state) => state
@@ -28,6 +27,7 @@ function Wallet() {
   const [isSidePanelOpen, setIsSidePanelOpen] = useState(false);
 
   const { state } = useLocation();
+  const navigate = useNavigate();
 
   const getSidePanelStatus = async () => {
     const isSidePanelOpen = await chrome.storage.local.get('openSidePanel');
@@ -43,7 +43,6 @@ function Wallet() {
   const [total, setTotal] = useState(0);
   const [sel, setSel] = useState(state ? (state?.showNftTrue ? 1 : 0) : 0);
   const [refresh, setRefresh] = useState(false);
-  const [isRefreshing, setIsRefreshing] = useState(false);
   const height = useCurrentHeight();
   const [loading, setLoading] = useState(false);
 
@@ -53,8 +52,8 @@ function Wallet() {
       `/wallet/portfolio`,
       {
         addressListKeys: _account
-          ? _account?.addressLists?.slice(0,6)
-          : account?.addressLists?.slice(0,6),
+          ? _account?.addressLists?.slice(0, 6)
+          : account?.addressLists?.slice(0, 6),
         coin_family: _account ? _account?.coinFamilies : account?.coinFamilies,
         fiat_type: currency.name,
         limit: 2000,
@@ -82,22 +81,13 @@ function Wallet() {
   const parentRef = useRef(null);
 
   const handleScroll = () => {
-    // Get the parent container's height and scroll position
     const { scrollHeight, scrollTop, clientHeight } = parentRef.current;
-
-    // Check if the user has reached the bottom of the scrollable container
-    const tolerance = 15; // Adjust this value as needed
+    const tolerance = 15;
     const isAtBottom = scrollTop + clientHeight >= scrollHeight - tolerance;
-
     if (isAtBottom && !isFetchingData && currentPage < Math.ceil(total / 10)) {
-      // // Prevent loading more data if already refreshing or reached the last page
-      // setIsFetchingData(true);
-      // // Increment the currentPage state to load the next page
-      // setCurrentPage((prevPage) => prevPage + 1);
     }
   };
 
-  const navigate = useNavigate();
   return (
     <div className="wallet">
       <div className="wallet__heading">
@@ -110,24 +100,6 @@ function Wallet() {
           }}
         >
           <div className="wallet__heading__filter">
-            {/* <Link
-              to=''
-              onClick={async (e) => {
-                e.preventDefault();
-                setIsRefreshing(true);
-                await init(true);
-                setIsRefreshing(false);
-              }}
-            >
-              <img
-                src={Refresh}
-                style={{
-                  width: '34px',
-                  marginRight: '22px',
-                  animation: isRefreshing ? 'spin 2s linear infinite' : 'none',
-                }}
-              />
-            </Link> */}
             <div
               onClick={() => navigate('/nftDetail', { state: { detail: {} } })}
             >

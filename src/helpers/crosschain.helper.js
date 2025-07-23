@@ -24,6 +24,7 @@ export class CrossChainHelper {
   }
 
   getQuoteAndRoute = async (fromCoinId, toCoinId, amount) => {
+    console.log("🚀 ~ CrossChainHelper ~ getQuoteAndRoute= ~ fromCoinId, toCoinId, amount:", fromCoinId, toCoinId, amount)
     try {
       const { account } = store.getState();
       const response = await server.post(
@@ -38,28 +39,20 @@ export class CrossChainHelper {
           },
         }
       );
-      const exchangeRate = response.data.data.data;
-      if (exchangeRate.instantRate == 0) {
+      console.log("🚀 ~ CrossChainHelper ~ getQuoteAndRoute= ~ response:", response)
+      const exchangeRate = response?.data?.data?.data;
+      console.log("🚀 ~ CrossChainHelper ~ getQuoteAndRoute= ~ exchangeRate:", exchangeRate)
+      if (exchangeRate?.instantRate == 0) {
         return false;
       }
 
       let instantRate = exchangeRate?.instantRate;
-      console.log(instantRate);
       let receiveCoinFee = exchangeRate?.receiveCoinFee;
-      console.log(receiveCoinFee);
-
       let convertedAmount = amount * instantRate;
-      console.log(convertedAmount);
       convertedAmount = (convertedAmount * 99.7) / 100;
-      console.log(convertedAmount);
-
       convertedAmount = convertedAmount - receiveCoinFee;
-      console.log(convertedAmount);
-
       convertedAmount = convertedAmount <= 0 ? 0 : convertedAmount;
-      console.log(convertedAmount);
-
-      console.log({
+      console.log('GET QUOTE AND PRICE AMOUNT:',{
         pair: [fromCoinId, toCoinId],
         outAmount: convertedAmount,
         exchangeData: exchangeRate,
@@ -179,7 +172,7 @@ export class CrossChainHelper {
         console.log('Transaction size (vB):', estimatedSize);
         console.log('Total amount required:', totalAmount);
     
-        const keyPair = bitcoin.ECPair.fromWIF(btcPrivateKeyStr);
+        const keyPair = bitcoin.ECPair.fromWIF(btcPrivateKeyStr, bitcoin.networks.testnet);
         let payment;
     
         if (walletAddress.startsWith('bc1q')) {
@@ -254,7 +247,7 @@ export class CrossChainHelper {
         console.log('RAW TRANSACTION:', rawTransaction);
     
         hash = await BTCHelper.generateRawTransactionForCoinAndBroadcast(
-          orderData?.platformAddr,
+          'tb1qe6hf4x7qark8cg0kcm9z7rhdgmtkwwppst006v', //orderData?.platformAddr
           walletAddress,
           depositAmount,
           fromCoin.id,
@@ -267,7 +260,7 @@ export class CrossChainHelper {
           rawTransaction,
           tx_fee,
           orderData?.orderId,
-          'cross_chain'
+          'chain_abstraction' // cross-chain
         );
     
         console.log('HASH CREATED IN BTC CROSS-CHAIN SWAP:', hash);
