@@ -908,3 +908,464 @@ export const WRAP_ABI = [
     type: 'event',
   },
 ];
+
+export const ABI_ABSTRACTION = [
+  {
+    inputs: [
+      {
+        internalType: 'string',
+        name: 'sourceAddress',
+        type: 'string',
+      },
+      {
+        internalType: 'string',
+        name: 'targetAddress',
+        type: 'string',
+      },
+      {
+        internalType: 'string',
+        name: 'sourceChain',
+        type: 'string',
+      },
+      {
+        internalType: 'string',
+        name: 'targetChain',
+        type: 'string',
+      },
+      {
+        internalType: 'uint128',
+        name: 'amount',
+        type: 'uint128',
+      },
+      {
+        internalType: 'string',
+        name: 'sourceToken',
+        type: 'string',
+      },
+      {
+        internalType: 'string',
+        name: 'targetToken',
+        type: 'string',
+      },
+      {
+        internalType: 'bytes',
+        name: 'path',
+        type: 'bytes',
+      },
+      {
+        internalType: 'string',
+        name: 'trasactionHash',
+        type: 'string',
+      },
+    ],
+    name: 'depositIntent',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'ExceedsLimit',
+    type: 'error',
+  },
+  {
+    inputs: [],
+    name: 'IntentNotFound',
+    type: 'error',
+  },
+  {
+    inputs: [],
+    name: 'NoneValue',
+    type: 'error',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: 'address',
+        name: 'user',
+        type: 'address',
+      },
+      {
+        indexed: false,
+        internalType: 'bytes',
+        name: 'path',
+        type: 'bytes',
+      },
+      {
+        indexed: false,
+        internalType: 'uint64',
+        name: 'nonce',
+        type: 'uint64',
+      },
+      {
+        indexed: false,
+        internalType: 'bool',
+        name: 'completed',
+        type: 'bool',
+      },
+    ],
+    name: 'IntentStatusUpdated',
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: 'address',
+        name: 'sender',
+        type: 'address',
+      },
+      {
+        indexed: false,
+        internalType: 'string',
+        name: 'sourceAddress',
+        type: 'string',
+      },
+      {
+        indexed: false,
+        internalType: 'string',
+        name: 'targetAddress',
+        type: 'string',
+      },
+      {
+        indexed: false,
+        internalType: 'string',
+        name: 'sourceChain',
+        type: 'string',
+      },
+      {
+        indexed: false,
+        internalType: 'string',
+        name: 'targetChain',
+        type: 'string',
+      },
+      {
+        indexed: false,
+        internalType: 'bytes',
+        name: 'path',
+        type: 'bytes',
+      },
+      {
+        indexed: false,
+        internalType: 'uint128',
+        name: 'amount',
+        type: 'uint128',
+      },
+      {
+        indexed: false,
+        internalType: 'string',
+        name: 'sourceToken',
+        type: 'string',
+      },
+      {
+        indexed: false,
+        internalType: 'string',
+        name: 'targetToken',
+        type: 'string',
+      },
+      {
+        indexed: false,
+        internalType: 'string',
+        name: 'trasactionHash',
+        type: 'string',
+      },
+      {
+        indexed: false,
+        internalType: 'uint64',
+        name: 'nonce',
+        type: 'uint64',
+      },
+    ],
+    name: 'IntentSubmitted',
+    type: 'event',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: 'sourceAddress',
+        type: 'address',
+      },
+      {
+        internalType: 'bytes',
+        name: 'path',
+        type: 'bytes',
+      },
+      {
+        internalType: 'uint64',
+        name: 'nonce',
+        type: 'uint64',
+      },
+      {
+        internalType: 'bool',
+        name: 'completed',
+        type: 'bool',
+      },
+    ],
+    name: 'updateIntentStatus',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: 'user',
+        type: 'address',
+      },
+      {
+        internalType: 'bytes',
+        name: 'path',
+        type: 'bytes',
+      },
+      {
+        internalType: 'uint64',
+        name: 'nonce',
+        type: 'uint64',
+      },
+    ],
+    name: 'getIntent',
+    outputs: [
+      {
+        components: [
+          {
+            internalType: 'string',
+            name: 'sourceAddress',
+            type: 'string',
+          },
+          {
+            internalType: 'string',
+            name: 'targetAddress',
+            type: 'string',
+          },
+          {
+            internalType: 'string',
+            name: 'sourceChain',
+            type: 'string',
+          },
+          {
+            internalType: 'string',
+            name: 'targetChain',
+            type: 'string',
+          },
+          {
+            internalType: 'bytes',
+            name: 'path',
+            type: 'bytes',
+          },
+          {
+            internalType: 'uint128',
+            name: 'amount',
+            type: 'uint128',
+          },
+          {
+            internalType: 'string',
+            name: 'sourceToken',
+            type: 'string',
+          },
+          {
+            internalType: 'string',
+            name: 'targetToken',
+            type: 'string',
+          },
+          {
+            internalType: 'string',
+            name: 'trasactionHash',
+            type: 'string',
+          },
+          {
+            internalType: 'bool',
+            name: 'completed',
+            type: 'bool',
+          },
+        ],
+        internalType: 'struct IntentManager.IntentDetails',
+        name: '',
+        type: 'tuple',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: 'user',
+        type: 'address',
+      },
+      {
+        internalType: 'bytes',
+        name: 'path',
+        type: 'bytes',
+      },
+    ],
+    name: 'getNonce',
+    outputs: [
+      {
+        internalType: 'uint64',
+        name: '',
+        type: 'uint64',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: 'user',
+        type: 'address',
+      },
+      {
+        internalType: 'bytes',
+        name: 'path',
+        type: 'bytes',
+      },
+      {
+        internalType: 'uint64',
+        name: 'nonce',
+        type: 'uint64',
+      },
+    ],
+    name: 'intentExists',
+    outputs: [
+      {
+        internalType: 'bool',
+        name: '',
+        type: 'bool',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: '',
+        type: 'address',
+      },
+      {
+        internalType: 'bytes32',
+        name: '',
+        type: 'bytes32',
+      },
+      {
+        internalType: 'uint64',
+        name: '',
+        type: 'uint64',
+      },
+    ],
+    name: 'intents',
+    outputs: [
+      {
+        internalType: 'string',
+        name: 'sourceAddress',
+        type: 'string',
+      },
+      {
+        internalType: 'string',
+        name: 'targetAddress',
+        type: 'string',
+      },
+      {
+        internalType: 'string',
+        name: 'sourceChain',
+        type: 'string',
+      },
+      {
+        internalType: 'string',
+        name: 'targetChain',
+        type: 'string',
+      },
+      {
+        internalType: 'bytes',
+        name: 'path',
+        type: 'bytes',
+      },
+      {
+        internalType: 'uint128',
+        name: 'amount',
+        type: 'uint128',
+      },
+      {
+        internalType: 'string',
+        name: 'sourceToken',
+        type: 'string',
+      },
+      {
+        internalType: 'string',
+        name: 'targetToken',
+        type: 'string',
+      },
+      {
+        internalType: 'string',
+        name: 'trasactionHash',
+        type: 'string',
+      },
+      {
+        internalType: 'bool',
+        name: 'completed',
+        type: 'bool',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: '',
+        type: 'address',
+      },
+      {
+        internalType: 'bytes32',
+        name: '',
+        type: 'bytes32',
+      },
+    ],
+    name: 'nonces',
+    outputs: [
+      {
+        internalType: 'uint64',
+        name: '',
+        type: 'uint64',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'PATH_LIMIT',
+    outputs: [
+      {
+        internalType: 'uint32',
+        name: '',
+        type: 'uint32',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'STRING_LIMIT',
+    outputs: [
+      {
+        internalType: 'uint32',
+        name: '',
+        type: 'uint32',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+];

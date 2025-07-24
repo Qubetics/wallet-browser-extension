@@ -149,7 +149,6 @@ const estimateGasLimit = async (
   stdFee = calculateFee(gasLimit, gasPriceLocal);
   console.log('Fee:--gasLimit', gasLimit);
   console.log('Fee:--stdFee', stdFee);
-
   return { gasLimit, gasEstimate, gasPriceLocal, stdFee };
 };
 
@@ -158,7 +157,6 @@ const hasSufficientBalance = async (_mnemonic, amountToSendTics) => {
   const rpcEndpoint = QUBETICS_RPC;
   const prefix = PREFIX;
   const denom = denom;
-
   const wallet = await DirectSecp256k1HdWallet.fromMnemonic(mnemonic, {
     prefix,
   });

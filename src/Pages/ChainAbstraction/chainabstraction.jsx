@@ -62,33 +62,26 @@ function ChainAbstraction({ state }) {
   const [token1, setToken1] = useState(null);
   const [token2, setToken2] = useState(null);
   const [balance, setBalance] = useState(0);
-  const [balance2, setBalance2] = useState(0);
+  const [receivedBalance, setReceivedBalance] = useState(0);
   const navigate = useNavigate();
   const [messageApi, contextHolder] = message.useMessage({
     duration: DURATION,
     maxCount: 1,
   });
+  const [toAddress, setToAddress] = useState('');
+  const [fromAddress, setFromAddress] = useState('');
   const [receivedAmount, setReceivedAmount] = useState(null);
   const [amount, setWithdrawAmount] = useState(null);
   const [route, setRoute] = useState(null);
-  const [refresh, setRefresh] = useState(false);
   const [filteredTokens, setFilteredTokens] = useState([]);
-  const [selectedChain] = useState(chain.chainId);
   const [selected, setSelected] = useState(null);
-  const [infoData, setInfoData] = useState([]);
   const height = useCurrentHeight();
-
   const [allToken, setAllTokens] = useState([]);
-
   const [keyword, setKeyword] = useState(null);
   const [show, setShow] = useState(true);
-
   const updateRef = useRef(true);
-
   const [percent, setPercent] = useState(null);
   const { theme, swapDetail } = useSelector((state) => state);
-  const [activeIndex, setActiveIndex] = useState(null);
-  const percentages = [25, 50, 75, 100];
   const debounceTimeout = useRef(null);
 
   const getTokenMeta = (coinFamily) => {
@@ -191,7 +184,7 @@ function ChainAbstraction({ state }) {
         );
 
         setBalance(myToken1.balance);
-        setBalance2(0);
+        setReceivedBalance(0);
         setAvailableTokens(modifiedList);
         setToken1(myToken1);
         setToken2(myToken2);
@@ -286,7 +279,6 @@ function ChainAbstraction({ state }) {
   };
 
   useEffect(() => {
-    console.log('SWAPDETAILS', swapDetail);
     if (swapDetail) {
       if (swapDetail?.tab == 1) {
         setToken1(swapDetail?.token1);
@@ -305,7 +297,11 @@ function ChainAbstraction({ state }) {
     }
   }, []);
 
-  const initialSwapDetail = async (amount, receivedAmount, tokenOne, tokenTwo) => {
+  const initialSwapDetail = async (
+    amount,
+    tokenOne,
+    tokenTwo
+  ) => {
     try {
       if (updateRef?.current || swapDetail?.tab) {
         if (amount > 0 && amount && tokenTwo) {
@@ -317,7 +313,6 @@ function ChainAbstraction({ state }) {
             amount
           );
 
-          // ✅ Only show error if both status/message are non-empty
           if (
             route?.status &&
             route?.message &&
@@ -331,48 +326,9 @@ function ChainAbstraction({ state }) {
           const flooredOutAmount = getFlooredFixed(outAmount, 6);
           const formattedOutAmount = toFixed(flooredOutAmount);
 
-          const instantRate = parseFloat(route?.exchangeData?.instantRate || 0);
-          const depositFeeRate = route?.exchangeData?.depositCoinFeeRate || 0;
-          const receiveCoinFee = parseFloat(
-            getFlooredFixed(
-              parseFloat(route?.exchangeData?.receiveCoinFee || 0),
-              5
-            )
-          );
-
-          const relayerFee = parseFloat(getFlooredFixed(receiveCoinFee, 6));
-
           setRoute(route);
           setReceivedAmount(formattedOutAmount);
           setCompentLoading(false);
-
-          setInfoData([
-            {
-              text: 'Estimate Rate',
-              textVal: `1 ${tokenOne?.symbol} = ${getFlooredFixed(
-                instantRate,
-                5
-              )} ${tokenTwo.symbol}`,
-            },
-            {
-              text: 'Service Fee',
-              textVal: `${new BigNumber(depositFeeRate)
-                .multipliedBy(100)
-                .toString()}%`,
-            },
-            {
-              text: 'Relayer Service Fee',
-              textVal: `${relayerFee} ${tokenTwo?.symbol}`,
-            },
-            {
-              text: 'You will receive',
-              textVal: `${formattedOutAmount} ${tokenTwo?.symbol}`,
-            },
-            {
-              text: 'Estimated time of receiving',
-              textVal: '1~20 Minutes',
-            },
-          ]);
         }
       }
 
@@ -381,67 +337,6 @@ function ChainAbstraction({ state }) {
       console.log('ERR ', error);
       setCompentLoading(false);
       return messageApi.error('Pair not available for swap.');
-    }
-  };
-
-  const calculateAccordingly = async (percentage) => {
-    if (selectedChain.isEVM) {
-      account.address = account.evmAddress;
-    } else if (!selectedChain.isEVM && selectedChain.currencyName === 'BTC') {
-      account.address = account.bitcoinAddress;
-    } else {
-      account.address = account.evmAddress;
-    }
-
-    if (token1?.tokenAddress) {
-      if (
-        token1.coinFamily == 4 ||
-        token1.coinFamily == 5 ||
-        token1.coinFamily == 2
-      ) {
-        const finalAmountToSend = new BigNumber(token1.balance).multipliedBy(
-          new BigNumber(percentage).dividedBy(100)
-        );
-        setWithdrawAmount(
-          finalAmountToSend == 0
-            ? finalAmountToSend.toString()
-            : finalAmountToSend.toFixed(6).replace(/\.?0+$/, '')
-        );
-        updateRef.current = true;
-        handleSwapInput(
-          finalAmountToSend.toString() == 0
-            ? finalAmountToSend.toString()
-            : finalAmountToSend.toFixed(6).replace(/\.?0+$/, '')
-        );
-      } else {
-        const amountToSend = await Web3Helper.getTokenBalance(
-          token1.tokenAddress,
-          token1.address,
-          token1.rpc
-        );
-
-        if (amountToSend == 0) {
-          setReceivedAmount(0);
-          setInfoData([]);
-        }
-        store.dispatch(overAllLoader(true));
-        const finalAmountToSend = new BigNumber(amountToSend).multipliedBy(
-          new BigNumber(percentage).dividedBy(100)
-        );
-        setWithdrawAmount(
-          finalAmountToSend == 0
-            ? finalAmountToSend.toString()
-            : finalAmountToSend.toFixed(token1.decimals).replace(/\.?0+$/, '')
-        );
-        setBalance(toFixed(amountToSend.toString()));
-        updateRef.current = true;
-        handleSwapInput(
-          finalAmountToSend.toString() == 0
-            ? finalAmountToSend.toString()
-            : finalAmountToSend.toFixed(token1.decimals).replace(/\.?0+$/, '')
-        );
-        store.dispatch(overAllLoader(false));
-      }
     }
   };
 
@@ -461,34 +356,21 @@ function ChainAbstraction({ state }) {
 
   const handleTokensSwapChangePosition = async () => {
     if (token1 && token2) {
-      await handleToken1Change(token1);
+      await handlePositionChange(token1);
       await handleToken2Change(token2);
     }
   };
 
   useEffect(() => {
     handleTokensSwapChangePosition();
-    if (amount) {
-      if (timeOutId.current) {
-        clearTimeout(timeOutId);
-      }
-      timeOutId.current = setTimeout(() => {
-        handleRouteQuotation();
-      }, 2000);
-    }
+  }, [token1, token2]);
 
-    if (amount == '' || amount == null) {
-      setInfoData([]);
-      setReceivedAmount(null);
-    }
-  }, [token1, amount, token2, refresh]);
-
-  const handleToken1Change = async (updatedToken1) => {
+  const handlePositionChange = async (updatedToken1) => {
     await chrome.storage.local.set({
       crossToken1: updatedToken1,
     });
 
-    setBalance(updatedToken1.balance);
+    setBalance(updatedToken1?.balance);
 
     if (updatedToken1.tokenAddress) {
       if (updatedToken1.id != token1.id) {
@@ -511,7 +393,6 @@ function ChainAbstraction({ state }) {
       token2.symbol,
       1
     );
-    // console.log("ROUTES:::::::700", route);
     if (route?.status && route?.message) {
       if (route?.status != '' || route?.message != '') {
         return messageApi.error(route?.message);
@@ -525,7 +406,7 @@ function ChainAbstraction({ state }) {
       crossToken2: updatedToken2,
     });
 
-    setBalance2(updatedToken2.balance);
+    setReceivedBalance(updatedToken2.balance);
 
     if (updatedToken2.tokenAddress) {
       if (updatedToken2.id != token2.id) {
@@ -558,30 +439,28 @@ function ChainAbstraction({ state }) {
   };
 
   const handleRouteQuotation = async (amount) => {
-      if (updateRef.current) {
-        if (amount && amount > 0 && token2) {
-          setCompentLoading(true);
-          const route =  {
-            pair: [token1?.id, token2?.id],
-            outAmount: 1.000003,
-            exchangeData: {
-              depositMin:.00000001,
-              depositMax:10,
-            },
-          }
-          console.log('🚀 ~ handleRouteQuotation ~ route:', route);
-          setRoute(route);
-          console.log("🚀 ~ handleRouteQuotation ~ setRoute(route);:")
-          setReceivedAmount(
-            toFixed(getFlooredFixed(parseFloat(route?.outAmount), 6))
-          );
-          setCompentLoading(false);
-        }
+    if (updateRef.current) {
+      if (amount && amount > 0 && token2) {
+        setCompentLoading(true);
+        const route = {
+          pair: [token1?.id, token2?.id],
+          outAmount: 1.000003,
+          exchangeData: {
+            depositMin: 0.00000001,
+            depositMax: 10,
+          },
+        };
+        console.log('🚀 ~ handleRouteQuotation ~ route:', route);
+        setRoute(route);
+        console.log('🚀 ~ handleRouteQuotation ~ setRoute(route);:');
+        setReceivedAmount(
+          toFixed(getFlooredFixed(parseFloat(route?.outAmount), 6))
+        );
+        setCompentLoading(false);
       }
-      updateRef.current = true;
+    }
+    updateRef.current = true;
   };
-
-  
 
   function handleSwapInput(withdrawAmount) {
     clearTimeout(debounceTimeout.current);
@@ -592,41 +471,26 @@ function ChainAbstraction({ state }) {
   }
 
   useEffect(() => {
+    setReceivedAmount(null);
     init();
     return () => {
       setWithdrawAmount(0);
+      setReceivedAmount(null);
     };
   }, [page]);
 
-  // const handleScroll = () => {
-  //   const { scrollHeight, scrollTop, clientHeight } = parentRef.current;
-  //   const tolerance = 15;
-  //   const isAtBottom = scrollTop + clientHeight >= scrollHeight - tolerance;
-  //   if (isAtBottom && !loading && page < Math.ceil(total / 10)) {
-  //     setCompentLoading(true);
-  //     setPage((prevPage) => prevPage + 1);
-  //   }
-  // };
-
-
   const handleChainAbstraction = async () => {
     if (isNaN(parseFloat(amount)) || isNaN(parseFloat(receivedAmount))) {
-      return messageApi.error(
-        'Please enter a valid amount to proceed.'
-      );
+      return messageApi.error('Please enter a valid amount to proceed.');
     }
 
-    if (
-      parseFloat(amount) < parseFloat(route?.exchangeData?.depositMin)
-    ) {
+    if (parseFloat(amount) < parseFloat(route?.exchangeData?.depositMin)) {
       return messageApi.error(
         `The minimum deposit amount to swap is ${route?.exchangeData?.depositMin} ${token1?.symbol}`
       );
     }
 
-    if (
-      parseFloat(amount) > parseFloat(route?.exchangeData?.depositMax)
-    ) {
+    if (parseFloat(amount) > parseFloat(route?.exchangeData?.depositMax)) {
       return messageApi.error(
         `The maximum deposit amount to swap is ${route?.exchangeData?.depositMax} ${token1?.symbol}`
       );
@@ -652,9 +516,7 @@ function ChainAbstraction({ state }) {
       if (!gasPrice) {
         store.dispatch(setLoading(false));
 
-        return messageApi.error(
-          'Unable to fetch gas price at the moment.'
-        );
+        return messageApi.error('Unable to fetch gas price at the moment.');
       }
 
       const gasInEth =
@@ -674,8 +536,7 @@ function ChainAbstraction({ state }) {
           Number(gasInEth)
         );
         if (
-          Number(nativeCoinBalance.toString()) <
-          parseFloat(Number(gasInEth))
+          Number(nativeCoinBalance.toString()) < parseFloat(Number(gasInEth))
         ) {
           return messageApi.error(
             'Insufficient native balance to proceed with the transaction.'
@@ -752,10 +613,7 @@ function ChainAbstraction({ state }) {
         tokenChain: token1?.chain,
         networkFee: gasPrice,
         walletAddress: token1?.address,
-        token1Price: newBalanceToFiatConversion(
-          token1?.price,
-          amount
-        ),
+        token1Price: newBalanceToFiatConversion(token1?.price, amount),
         parentCoin: token1?.native || null,
         tab: 1,
       };
@@ -766,10 +624,7 @@ function ChainAbstraction({ state }) {
       });
     } else if (token1.chain.currencyName === 'BTC') {
       try {
-        const gasPrice = Math.max(
-          await BTCHelper.getBTCGasPrice(),
-          10
-        );
+        const gasPrice = Math.max(await BTCHelper.getBTCGasPrice(), 10);
         let swapDetailed = {
           route,
           token1,
@@ -779,10 +634,7 @@ function ChainAbstraction({ state }) {
           tokenChain: token1.chain,
           networkFee: gasPrice / Math.pow(10, 8),
           walletAddress: token1.address,
-          token1Price: newBalanceToFiatConversion(
-            token1.price,
-            amount
-          ),
+          token1Price: newBalanceToFiatConversion(token1.price, amount),
           parentCoin: token1.native,
           tab: 1,
         };
@@ -796,7 +648,7 @@ function ChainAbstraction({ state }) {
         return messageApi.error(error.message);
       }
     }
-  }
+  };
 
   return (
     <>
@@ -808,44 +660,11 @@ function ChainAbstraction({ state }) {
           }`}
         >
           <div style={{ width: '100%', marginBottom: '20px' }}>
-            {/* <div
-              className="send__infoText"
-              style={{
-                marginBottom: '10px',
-                marginTop: '0',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'flex-end',
-                gap: '10px',
-              }}
-            >
-              <span
-                style={{
-                  color: '#f5da76',
-                }}
-              >
-                {' '}
-                Min-Max
-              </span>{' '}
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'flex-end',
-                  gap: '10px',
-                }}
-              >
-                {addCommasToNumber(
-                  parseFloat(route ? route.exchangeData?.depositMin : 0)
-                )}{' '}
-                -{' '}
-                {addCommasToNumber(
-                  parseFloat(route ? route.exchangeData?.depositMax : 0)
-                )}{' '}
-              </div>
-              {token1?.symbol?.toUpperCase()}
-            </div> */}
             {contextHolder}
-            <div style={{ width: '100%' }} className="swap ">
+            <div
+              style={{ width: '90%', marginRight: 'auto', marginLeft: 'auto' }}
+              className="swap "
+            >
               <div className="swap_onChain ">
                 <div className="swap_onChain_balance">
                   <div>
@@ -963,7 +782,7 @@ function ChainAbstraction({ state }) {
                       onSelect={(value) => {
                         setWithdrawAmount(null);
                         setToken2(availableTokens.find((el) => el.id == value));
-                        handleToken1Change(
+                        handlePositionChange(
                           availableTokens.find((el) => el.id == value)
                         );
                       }}
@@ -1003,6 +822,12 @@ function ChainAbstraction({ state }) {
                     </div>
                   </div>
                 </div>
+                <InputField
+                  placeholder={'From Address'}
+                  type={'text'}
+                  label="From Address"
+                  value={fromAddress}
+                />
               </div>
 
               <div className="swap__icon">
@@ -1024,7 +849,6 @@ function ChainAbstraction({ state }) {
                         setReceivedAmount(0);
                         setWithdrawAmount(0);
                         setPercent(0);
-                        setInfoData([]);
                       } else {
                         return messageApi.error(
                           `Please enable ${token2?.name} in your wallet.`
@@ -1152,44 +976,24 @@ function ChainAbstraction({ state }) {
                     </div>
                   </div>
                 </div>
+                <InputField
+                  placeholder={'To Address'}
+                  type={'text'}
+                  label="To Address"
+                  value={fromAddress}
+                />
               </div>
-
-              {token1?.isToken && (
-                <div className="swap_percentage">
-                  {percentages.map((percentage, index) => (
-                    <p
-                      style={{ cursor: 'pointer' }}
-                      key={index}
-                      className={activeIndex === index ? 'active' : ''}
-                      onClick={() => {
-                        setActiveIndex(index);
-                        setPercent(percentage);
-                        calculateAccordingly(percentage);
-                      }}
-                    >
-                      {percentage}%
-                    </p>
-                  ))}
-                </div>
-              )}
-
-              {loading ? (
-                <div className="swap__infoText">
-                  <ClipLoader size={20} color="#00adee" />{' '}
-                  <p
-                    style={{
-                      marginLeft: '7px',
-                    }}
-                  >
-                    Fetching the best price. Please wait...
-                  </p>
-                </div>
-              ) : null}
             </div>
           </div>
           <ButtonComp
             onClick={handleChainAbstraction}
-            text={'Swap'}
+            text={
+              amount === null || amount === 0
+                ? 'Enter Amount'
+                : toAddress === '' || !toAddress
+                ? 'Enter Recipient Address'
+                : 'Abstract'
+            }
             maxWidth={'100%'}
             disabled={
               !token1 ||
@@ -1280,7 +1084,6 @@ function ChainAbstraction({ state }) {
                   flex: 1,
                   overflow: 'scroll',
                 }}
-                // onScroll={handleScroll}
               >
                 {filteredTokens.filter((el) => {
                   if (selected == 1) {
@@ -1347,7 +1150,7 @@ function ChainAbstraction({ state }) {
                               }
 
                               setToken1(token);
-                              handleToken1Change(token);
+                              handlePositionChange(token);
                             } else {
                               if (token1?.id == token.id) {
                                 setKeyword(null);

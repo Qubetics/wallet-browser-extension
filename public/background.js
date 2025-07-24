@@ -140,50 +140,50 @@ const networks = [
     slug: 'sol',
     status: false,
   },
-  // {
-  //   id: uuidv4(),
-  //   chainName: 'Bitcoin',
-  //   chainId: 'BTC0',
-  //   currencyName: 'BTC',
-  //   currencySymbol: 'BTC',
-  //   currencyDecimals: 3,
-  //   rpcUrl:
-  //     'https://btc.nodes.fastnode.io/mainnet/fn-dedic-4479-ad5f-3e2787e055ca/blockbook/api/',
-  //   rpcApiKey: 'REDACTED',
-  //   blockUrl: 'https://www.blockchain.com/explorer/transactions/',
-  //   default: false,
-  //   image: 'https://REDACTED/btc.png',
-  //   tokenType: 'BTC',
-  //   testnet: false,
-  //   swap: false,
-  //   isEVM: false,
-  //   supportTokens: false,
-  //   coinFamily: 3,
-  //   slug: 'btc',
-  //   status: false,
-  // },
   {
     id: uuidv4(),
-    chainName: 'Bitcoin Testnet',
-    chainId: 'BTC_TEST',
-    currencyName: 'BTC Testnet',
-    currencySymbol: 'tBTC',
-    currencyDecimals: 8, // Usually testnets use standard 8 decimals
-    rpcUrl: 'https://bitcoin-testnet.drpc.org', // 🔁 Use a valid testnet RPC
-    rpcApiKey: 'YOUR_TESTNET_API_KEY', // 🔁 Replace with testnet key if needed
-    blockUrl: 'https://mempool.space/testnet/tx/', // 🔁 Testnet block explorer
+    chainName: 'Bitcoin',
+    chainId: 'BTC0',
+    currencyName: 'BTC',
+    currencySymbol: 'BTC',
+    currencyDecimals: 3,
+    rpcUrl:
+      'https://btc.nodes.fastnode.io/mainnet/fn-dedic-4479-ad5f-3e2787e055ca/blockbook/api/',
+    rpcApiKey: 'REDACTED',
+    blockUrl: 'https://www.blockchain.com/explorer/transactions/',
     default: false,
-    image: 'https://REDACTED/btc.png', // ✅ Same image is okay
+    image: 'https://REDACTED/btc.png',
     tokenType: 'BTC',
-    testnet: true, // ✅ Mark as testnet
+    testnet: false,
     swap: false,
     isEVM: false,
     supportTokens: false,
     coinFamily: 3,
-    slug: 'btc-test',
-    status: true, // If you want to enable it for testing
-  }
-,  
+    slug: 'btc',
+    status: false,
+  },
+  // {
+  //   id: uuidv4(),
+  //   chainName: 'Bitcoin Testnet',
+  //   chainId: 'BTC_TEST',
+  //   currencyName: 'BTC Testnet',
+  //   currencySymbol: 'tBTC',
+  //   currencyDecimals: 8, // Usually testnets use standard 8 decimals
+  //   rpcUrl: 'https://bitcoin-testnet.drpc.org', // 🔁 Use a valid testnet RPC
+  //   rpcApiKey: 'YOUR_TESTNET_API_KEY', // 🔁 Replace with testnet key if needed
+  //   blockUrl: 'https://mempool.space/testnet/tx/', // 🔁 Testnet block explorer
+  //   default: false,
+  //   image: 'https://REDACTED/btc.png', // ✅ Same image is okay
+  //   tokenType: 'BTC',
+  //   testnet: true, // ✅ Mark as testnet
+  //   swap: false,
+  //   isEVM: false,
+  //   supportTokens: false,
+  //   coinFamily: 3,
+  //   slug: 'btc-test',
+  //   status: true, // If you want to enable it for testing
+  // }
+// ,  
   // {
   //   id: uuidv4(),
   //   chainName: 'Cardano',

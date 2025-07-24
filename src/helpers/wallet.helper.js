@@ -284,7 +284,12 @@ export class WalletHelper {
       );
       var child0 = root.deriveAccount(0);
       var account0 = new BIP84.fromZPrv(child0);
-      console.log("🚀 ~ WalletHelper ~ getBitcoinPrivateKeyWithPassword= ~ account0:", account0)
+      console.log(
+        '🚀 ~ WalletHelper ~ getBitcoinPrivateKeyWithPassword= ~ account0:',
+        account0,
+        account0.getAddress(0),
+        account0.getAccountPrivateKey(0)
+      );
       return account0.getPrivateKey(0);
     } catch (error) {
       return false;
