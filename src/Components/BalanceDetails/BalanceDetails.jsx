@@ -668,7 +668,7 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
             <div>
               <div className={'balanceDetails__modal__scanner'}>
                 <QRCode
-                  value={coin.address}
+                  value={coin?.address}
                   size={230}
                   qrStyle="dots"
                   eyeRadius={10}

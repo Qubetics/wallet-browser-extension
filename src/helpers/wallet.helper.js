@@ -86,7 +86,7 @@ export class WalletHelper {
         })
       );
       store.dispatch(setAuth());
-      await this.generateAndSetWalletToRefreshToken(password);
+      await this.generateAndSetWalletToRefreshToken();
       return true;
     } catch (error) {
       console.log('Error unlocking wallet :', error);
@@ -136,7 +136,6 @@ export class WalletHelper {
 
   static getMnemonicsByPassword = async (address, password) => {
     try {
-      console.log('address, password::11', address, password);
 
       const { mnemonics } = await chrome.storage.local.get('mnemonics');
       if (mnemonics) {
@@ -144,15 +143,12 @@ export class WalletHelper {
           mnemonics,
           password
         );
-        console.log('AFTER DEC::', decryptedMnemonics);
 
         const mnemonicsList = JSON.parse(decryptedMnemonics);
         const matchedMnemonic = mnemonicsList.find(
           (mnemonic) =>
             mnemonic?.address?.toLowerCase() === address?.toLowerCase()
         );
-        // console.log("matchedMnemonic::",matchedMnemonic);
-
         const defaultMnemonics = matchedMnemonic || mnemonicsList[0];
         return defaultMnemonics.phrase;
       } else {
@@ -1001,7 +997,7 @@ export class WalletHelper {
     }
   };
 
-  static generateAndSetWalletToRefreshToken = async (password) => {
+  static generateAndSetWalletToRefreshToken = async () => {
     try {
       let { accounts } = await chrome.storage.session.get('accounts');
       const { chains } = await chrome.storage.local.get('chains');
@@ -1054,11 +1050,11 @@ export class WalletHelper {
       );
       store.dispatch(setAuth());
       store.dispatch(setLoading(false));
-      if (password) {
-        let { mnemonics } = await chrome.storage.local.get('mnemonics');
-        mnemonics = await SecurityHelper.decrypt(mnemonics, password);
-        mnemonics = JSON.parse(mnemonics);
-      }
+      // if (password) {
+      //   let { mnemonics } = await chrome.storage.local.get('mnemonics');
+      //   mnemonics = await SecurityHelper.decrypt(mnemonics, password);
+      //   mnemonics = JSON.parse(mnemonics);
+      // }
       return true;
     } catch (error) {
       console.log(error);

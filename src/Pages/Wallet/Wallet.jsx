@@ -20,6 +20,9 @@ import { setTokens } from '../../actions/tokens';
 import useCurrentHeight from '../../CustomHooks/useCurrentHeight';
 import CoinsTableDraggable from '../../Components/CoinsTable/CoinsTableDraggable';
 import ButtonComp from '../../Components/ButtonComp/ButtonComp';
+import { message } from 'antd';
+import { DURATION } from '../../config/message.config';
+
 function Wallet() {
   const { account, currency, tokens, balanceIn, theme } = useSelector(
     (state) => state
@@ -45,36 +48,49 @@ function Wallet() {
   const [refresh, setRefresh] = useState(false);
   const height = useCurrentHeight();
   const [loading, setLoading] = useState(false);
+  const [messageApi, contextHolder] = message.useMessage({
+    duration: DURATION,
+    maxCount: 1,
+  });
 
   const init = async (_account) => {
     setLoading(true);
-    const walletsList = await server.post(
-      `/wallet/portfolio`,
-      {
-        addressListKeys: _account
-          ? _account?.addressLists?.slice(0, 6)
-          : account?.addressLists?.slice(0, 6),
-        coin_family: _account ? _account?.coinFamilies : account?.coinFamilies,
-        fiat_type: currency.name,
-        limit: 2000,
-        page: currentPage,
-        search: '',
-      },
-      {
-        headers: {
-          Authorization: _account ? _account?.jwtToken : account?.jwtToken,
+    const throwError = (msg) => messageApi.error(msg);
+    try {
+      const walletsList = await server.post(
+        `/wallet/portfolio`,
+        {
+          addressListKeys: _account
+            ? _account?.addressLists?.slice(0, 6)
+            : account?.addressLists?.slice(0, 6),
+          coin_family: _account
+            ? _account?.coinFamilies
+            : account?.coinFamilies,
+          fiat_type: currency.name,
+          limit: 2000,
+          page: currentPage,
+          search: '',
         },
-      }
-    );
+        {
+          headers: {
+            Authorization: _account ? _account?.jwtToken : account?.jwtToken,
+          },
+        }
+      );
 
-    setTotal(walletsList?.data?.meta?.total);
-    store.dispatch(setTokens(walletsList?.data?.data));
-    setIsFetchingData(false);
-    setLoading(false);
+      setTotal(walletsList?.data?.meta?.total);
+      store.dispatch(setTokens(walletsList?.data?.data));
+    } catch (error) {
+      setTotal(0);
+      store.dispatch(setTokens([]));
+      throwError('Something went wrong');
+    }finally{
+      setIsFetchingData(false);
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
-    console.log('state', state, state?.updatedAccount);
     init(state?.updatedAccount);
   }, [currentPage, refresh, state?.updatedAccount, account]);
 
