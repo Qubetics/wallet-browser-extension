@@ -184,11 +184,11 @@ function App() {
   const init = async () => {
     const result = await chrome?.storage?.local.get("registered");
     if (!result.registered) return setRegistered(false);
-    const { password } = await chrome?.storage?.session.get("password");
+    // const { password } = await chrome?.storage?.session.get("password");
 
-    if (password) {
-      await WalletHelper.generateAndSetWalletToRefreshToken(password);
-    }
+    // if (password) {
+    //   await WalletHelper.generateAndSetWalletToRefreshToken(password);
+    // }
 
     const { accounts } = await chrome?.storage?.session.get("accounts");
     const { chains } = await chrome?.storage?.local.get("chains");
