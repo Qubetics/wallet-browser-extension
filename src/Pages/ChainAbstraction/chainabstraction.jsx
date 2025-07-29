@@ -23,6 +23,7 @@ import { SolanaHelper } from '../../helpers/solana.helper';
 import { BTCHelper } from '../../helpers/btc.helper';
 import { DURATION } from '../../config/message.config';
 import {
+  exponential_to_decimal,
   newBalanceToFiatConversion,
   toFixed,
 } from '../../helpers/conversion.helper';
@@ -33,6 +34,8 @@ import MenuRestofHeaders from '../../Components/BalanceDetails/MenuRestofHeaders
 import ConfirmAbstractModal from './chainabstractionconfirmmodal';
 import { WalletHelper } from '../../helpers/wallet.helper';
 import ModalCustom from '../../Components/ModalCustom/ModalCustom';
+import BigNumber from 'bignumber.js';
+import { ChainAbstractionHelper } from '../../helpers/chain_abstraction.helper';
 
 function getFlooredFixed(v, d) {
   return (Math.floor(v * Math.pow(10, d)) / Math.pow(10, d)).toFixed(d);
@@ -47,6 +50,31 @@ function addCommasToNumber(number) {
     return integerPart + '.' + decimalPart;
   } else {
     return integerPart;
+  }
+}
+
+export function bigNumberSafeMath(a, operation, b) {
+  try {
+    const numA = new BigNumber(a || 0);
+    const numB = new BigNumber(b || 0);
+
+    switch (operation) {
+      case '+':
+        return numA.plus(numB);
+      case '-':
+        return numA.minus(numB);
+      case '*':
+        return numA.times(numB);
+      case '/':
+        return numB.isZero() ? new BigNumber(0) : numA.dividedBy(numB);
+      case '%':
+        return numB.isZero() ? new BigNumber(0) : numA.modulo(numB);
+      default:
+        return numA;
+    }
+  } catch (error) {
+    console.error('bigNumberSafeMath error:', error);
+    return new BigNumber(0);
   }
 }
 
@@ -81,12 +109,43 @@ function ChainAbstraction({ state }) {
   const [show, setShow] = useState(true);
   const updateRef = useRef(true);
   const [percent, setPercent] = useState(null);
-  const [isConfirmed, setIsConfirmed] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [sessionPassword, setSessionPassword] = useState(null);
   const [isPasswordModalOpen, setPasswordModal] = useState(false);
   const { theme, swapDetail } = useSelector((state) => state);
   const debounceTimeout = useRef(null);
+  const ChainAbstractionInstance = useRef(
+    new ChainAbstractionHelper(chain.chainId)
+  );
+
+  const onChangeFromValue = (val) => {
+    setWithdrawAmount(val);
+    if (debounceTimeout.current) {
+      clearTimeout(debounceTimeout.current);
+    }
+    debounceTimeout.current = setTimeout(() => {
+      const fromFiatValue = token1?.price;
+      console.log('fromFiatValue>>>', fromFiatValue);
+
+      const toFiatValue = token2?.price;
+      console.log('toFiatValue>>>', toFiatValue);
+
+      const toValue = new BigNumber(val || 0)
+        .times(new BigNumber(fromFiatValue || 0))
+        .dividedBy(new BigNumber(toFiatValue || 0));
+      console.log('toValue>>>', toValue);
+      console.log('toValue>>>', exponential_to_decimal(toValue, 8));
+      const toAmt = exponential_to_decimal(toValue, 8);
+      const valueAfterSlippage = exponential_to_decimal(
+        bigNumberSafeMath(toAmt, '*', 0.995),
+        6
+      );
+      // const valueAfterSlippage = bigNumberSafeMath(toValue, "*", 0.995);
+      console.log('valueAfterSlippage>>>', valueAfterSlippage);
+
+      setReceivedAmount(getFlooredFixed(valueAfterSlippage, 8));
+    }, 800);
+  };
 
   const getTokenMeta = (coinFamily) => {
     switch (coinFamily) {
@@ -463,11 +522,7 @@ function ChainAbstraction({ state }) {
   };
 
   function handleSwapInput(withdrawAmount) {
-    clearTimeout(debounceTimeout.current);
-    debounceTimeout.current = setTimeout(() => {
-      handleRouteQuotation(withdrawAmount);
-      setWithdrawAmount(withdrawAmount);
-    }, 3000);
+    onChangeFromValue(withdrawAmount);
   }
 
   useEffect(() => {
@@ -478,134 +533,6 @@ function ChainAbstraction({ state }) {
       setReceivedAmount(null);
     };
   }, [page]);
-
-  // const handleChainAbstraction = async () => {
-  //   if (isNaN(parseFloat(amount)) || isNaN(parseFloat(receivedAmount))) {
-  //     return messageApi.error('Please enter a valid amount to proceed.');
-  //   }
-
-  //   if (parseFloat(amount) < parseFloat(route?.exchangeData?.depositMin)) {
-  //     return messageApi.error(
-  //       `The minimum deposit amount to swap is ${route?.exchangeData?.depositMin} ${token1?.symbol}`
-  //     );
-  //   }
-
-  //   if (parseFloat(amount) > parseFloat(route?.exchangeData?.depositMax)) {
-  //     return messageApi.error(
-  //       `The maximum deposit amount to swap is ${route?.exchangeData?.depositMax} ${token1?.symbol}`
-  //     );
-  //   }
-
-  //   if (parseFloat(balance) < parseFloat(amount)) {
-  //     console.log('first insufficient balance case');
-  //     return messageApi.error(
-  //       'Insufficient balance to proceed with the transaction.'
-  //     );
-  //   }
-
-  //   if (token1?.chain?.isEVM) {
-  //     const gasPrice = await Web3Helper.getGasPrice(
-  //       token1.chain.slug,
-  //       token1.address,
-  //       token1.address,
-  //       token1.isToken,
-  //       token1.tokenAddress,
-  //       token1.coinSymbol
-  //     );
-
-  //     if (!gasPrice) {
-  //       store.dispatch(setLoading(false));
-
-  //       return messageApi.error('Unable to fetch gas price at the moment.');
-  //     }
-
-  //     const gasInEth =
-  //       (gasPrice.fast * Math.pow(10, 9) * gasPrice.estimate) /
-  //       Math.pow(10, 18);
-
-  //     const nativeCoinBalance = await Web3Helper.getCoinBalance(
-  //       token1?.address,
-  //       token1?.rpc
-  //     );
-
-  //     if (token1?.isToken) {
-  //       if (
-  //         Number(nativeCoinBalance?.toString()) < parseFloat(Number(gasInEth))
-  //       ) {
-  //         return messageApi.error(
-  //           'Insufficient native balance to proceed with the transaction.'
-  //         );
-  //       }
-  //     } else {
-  //       if (
-  //         parseFloat(balance) < parseFloat(Number(amount) + Number(gasInEth))
-  //       ) {
-  //         console.log('first insufficient balance case');
-  //         return messageApi.error(
-  //           'Insufficient balance to proceed with the transaction.'
-  //         );
-  //       }
-  //     }
-
-  //     store.dispatch(setLoading(false));
-
-  //     const parentCoin = await server.post(
-  //       '/wallet/nativeCoinFiatPrice',
-  //       {
-  //         coin_family: token1.coinFamily,
-  //         fiat_currency: currency.name,
-  //       },
-  //       {
-  //         headers: {
-  //           Authorization: account.jwtToken,
-  //         },
-  //       }
-  //     );
-
-  //     let swapDetailed = {
-  //       route,
-  //       token1,
-  //       token2,
-  //       amount,
-  //       amount2: receivedAmount,
-  //       tokenChain: token1.chain,
-  //       networkFee: gasInEth,
-  //       walletAddress: token1.address,
-  //       token1Price: newBalanceToFiatConversion(token1.price, amount),
-  //       parentCoin: {
-  //         value: parentCoin.data.data.fiatCoinPrice.value,
-  //       },
-  //       tab: 1,
-  //       rpc: token1.rpc,
-  //       coinSymbol: token1.coinSymbol,
-  //     };
-  //     store.dispatch(swapDetailAc(swapDetailed));
-  //     setIsOpen(!isOpen);
-  //   } else if (token1.chain.currencyName === 'BTC') {
-  //     try {
-  //       const gasPrice = Math.max(await BTCHelper.getBTCGasPrice(), 10);
-  //       let swapDetailed = {
-  //         route,
-  //         token1,
-  //         token2,
-  //         amount,
-  //         amount2: receivedAmount,
-  //         tokenChain: token1.chain,
-  //         networkFee: gasPrice / Math.pow(10, 8),
-  //         walletAddress: token1.address,
-  //         token1Price: newBalanceToFiatConversion(token1.price, amount),
-  //         parentCoin: token1.native,
-  //         tab: 1,
-  //       };
-  //       store.dispatch(swapDetailAc(swapDetailed));
-  //       store.dispatch(setLoading(false));
-  //       setIsOpen(!isOpen);
-  //     } catch (error) {
-  //       store.dispatch(setLoading(false));
-  //       return messageApi.error(error.message);
-  //     }
-  //   }
-  // };
 
   const handleChainAbstraction = async () => {
     const parsedAmount = parseFloat(amount);
@@ -632,12 +559,12 @@ function ChainAbstraction({ state }) {
       );
     }
 
-    if (parsedBalance < parsedAmount) {
-      console.log('first insufficient balance case');
-      return throwError(
-        'Insufficient balance to proceed with the transaction.'
-      );
-    }
+    // if (parsedBalance < parsedAmount) {
+    //   console.log('first insufficient balance case');
+    //   return throwError(
+    //     'Insufficient balance to proceed with the transaction.'
+    //   );
+    // }
 
     const buildSwapDetails = (networkFee, parentCoinValue = token1.native) => ({
       route,
@@ -658,6 +585,7 @@ function ChainAbstraction({ state }) {
     const finalizeSwap = (details) => {
       store.dispatch(swapDetailAc(details));
       store.dispatch(setLoading(false));
+      setPasswordModal(true);
     };
 
     try {
@@ -687,11 +615,11 @@ function ChainAbstraction({ state }) {
           ? Number(nativeCoinBalance?.toString()) >= gasInEth
           : parsedBalance >= parsedAmount + gasInEth;
 
-        if (!hasEnoughNative) {
-          return throwError(
-            'Insufficient native balance to proceed with the transaction.'
-          );
-        }
+        // if (!hasEnoughNative) {
+        //   return throwError(
+        //     'Insufficient native balance to proceed with the transaction.'
+        //   );
+        // }
 
         const { data: parentCoinData } = await server.post(
           '/wallet/nativeCoinFiatPrice',
@@ -720,6 +648,55 @@ function ChainAbstraction({ state }) {
       store.dispatch(setLoading(false));
       return throwError(error.message);
     }
+  };
+
+  const handleAbstraction = async () => {
+    let networkFee = 0;
+    if (token1?.chain?.isEVM) {
+      const gasPrice = await Web3Helper.getGasPrice(
+        token1?.chain.slug,
+        token1?.address,
+        token1?.address,
+        token1?.isToken,
+        token1?.tokenAddress,
+        token1?.coinSymbol
+      );
+      if (!gasPrice) {
+        store.dispatch(setLoading(false));
+
+        return messageApi.error('Unable to fetch gas price at the moment.');
+      }
+
+      networkFee =
+        (gasPrice.fast * Math.pow(10, 9) * gasPrice.estimate) /
+        Math.pow(10, 18);
+    } else if (token1?.chain?.currencyName === 'BTC') {
+      const gasPrice = Math.max(await BTCHelper.getBTCGasPrice(), 10);
+      networkFee = gasPrice / 1e8;
+    }
+    const data = await ChainAbstractionInstance.current.SendTransaction(
+      token1,
+      token2,
+      amount,
+      receivedAmount,
+      token1?.address,
+      token1?.chain,
+      networkFee,
+      newBalanceToFiatConversion(token1?.price, amount),
+      parentCoin.data.data.fiatCoinPrice.value,
+      token1.rpc, // rpc
+      token1.coinSymbol, // symbol
+      sessionPassword // sessionPassword
+    );
+
+    if (!data) {
+      setSwapModal(false);
+      return messageApi.error(
+        'Unable to process your transaction at the moment. Please try again later.'
+      );
+    }
+    setSwapModal(false);
+    return setIsModalOpen1(true);
   };
 
   return (
@@ -776,7 +753,7 @@ function ChainAbstraction({ state }) {
                           return;
                         if (afterDecimal.length > maxDecimals) return;
 
-                        setWithdrawAmount(_amount);
+                        // setWithdrawAmount(_amount);
                         handleSwapInput(_amount);
                       }}
                       value={amount}
@@ -1054,6 +1031,9 @@ function ChainAbstraction({ state }) {
                   type={'text'}
                   label="To Address"
                   value={toAddress}
+                  getData={(address) => {
+                    setToAddress(address);
+                  }}
                 />
               </div>
               <div
@@ -1078,7 +1058,7 @@ function ChainAbstraction({ state }) {
                     !receivedAmount ||
                     amount <= 0 ||
                     receivedAmount <= 0 ||
-                    toAddress ||
+                    !toAddress ||
                     loading
                   }
                 />
@@ -1324,13 +1304,12 @@ function ChainAbstraction({ state }) {
         token2={token2}
         receivedAmount={receivedAmount}
         amount={amount}
-        setIsConfirmed={setIsConfirmed}
-        confirmed={isConfirmed}
         isOpen={isOpen}
         setIsOpen={setIsOpen}
         balance={balance}
         fromAddress={token1?.address}
         toAddress={toAddress}
+        handleAbstract={handleAbstraction}
       />
 
       <ModalCustom

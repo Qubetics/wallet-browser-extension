@@ -3,12 +3,14 @@ import './CrossChain.scss';
 import SwapVerticalIcon from '../../Assets/SwapVerticalIcon.svg';
 import { useState } from 'react';
 import ModalCustom from '../../Components/ModalCustom/ModalCustom';
-import { addCommasToNumber, getFlooredFixed } from '../../helpers/conversion.helper';
+import {
+  addCommasToNumber,
+  getFlooredFixed,
+} from '../../helpers/conversion.helper';
 import { Select } from 'antd';
 import DownArrowSuffix from '../../Assets/DownArrowSuffix.svg';
 import { InputField } from '../../Components/InputField/InputFieldSimple';
 import ButtonComp from '../../Components/ButtonComp/ButtonComp';
-
 
 const ConfirmAbstractModal = ({
   availableTokens,
@@ -16,13 +18,12 @@ const ConfirmAbstractModal = ({
   token2,
   receivedAmount,
   amount,
-  setIsConfirmed,
-  confirmed,
   isOpen,
   setIsOpen,
   balance,
   toAddress,
-  fromAddress
+  fromAddress,
+  handleAbstract,
 }) => {
   const { chain, account, currency } = useSelector((state) => state);
   const [loading, setCompentLoading] = useState(false);
@@ -34,8 +35,8 @@ const ConfirmAbstractModal = ({
   };
 
   const handleProceed = () => {
-    setIsConfirmed(true);
     setIsOpen(!isOpen);
+    handleAbstract();
   };
 
   return (
@@ -62,6 +63,7 @@ const ConfirmAbstractModal = ({
                   className="myInput"
                   placeholder="0.000"
                   onWheel={(e) => e.currentTarget.blur()}
+                  value={amount}
                   inputMode="decimal"
                   onKeyDown={(e) => {
                     const allowedKeys = [
@@ -79,6 +81,7 @@ const ConfirmAbstractModal = ({
                       e.preventDefault();
                     }
                   }}
+                  disabled={true}
                 />
                 <p style={{ marginBottom: '8px' }}>
                   {currency.symbol}

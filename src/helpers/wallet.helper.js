@@ -814,6 +814,7 @@ export class WalletHelper {
   };
 
   static generateAndSetWallet = async (newMnemonics, name, type, password) => {
+    console.log("🚀 ~ WalletHelper ~ type:", type)
     let bitcoinAddress = '';
     try {
       let { accounts } = await chrome.storage.session.get('accounts');
@@ -824,10 +825,7 @@ export class WalletHelper {
         newMnemonics
       );
       //change for chain abstraction
-      bitcoinAddress =
-        type === 'IMPORT'
-          ? await BTCHelper.generateBitcoinAddressTestnet(newMnemonics)
-          : await BTCHelper.generateBitcoinAddress(newMnemonics);
+      bitcoinAddress =await BTCHelper.generateBitcoinAddressTestnet(newMnemonics)
 
       const cosmosAddress = await generateCosmosWalletAddress(newMnemonics);
 

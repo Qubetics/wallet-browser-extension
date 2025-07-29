@@ -19,8 +19,8 @@ import { CrossChainHelper } from '../../helpers/crosschain.helper';
 import { DURATION } from '../../config/message.config';
 import InputFieldSimple from '../../Components/InputField/InputFieldSimple';
 import { WalletHelper } from '../../helpers/wallet.helper';
-import QubeticsLogo from "../../Assets/QubeticsLogo.png";
-import { ChainAbstraction } from '../../helpers/chain_abstraction.helper';
+import QubeticsLogo from '../../Assets/QubeticsLogo.png';
+import { ChainAbstractionHelper } from '../../helpers/chain_abstraction.helper';
 
 function getFlooredFixed(v, d) {
   return (Math.floor(v * Math.pow(10, d)) / Math.pow(10, d)).toFixed(d);
@@ -75,7 +75,9 @@ function ChainAbstractionDetail() {
   });
   const web3Helper = useRef(new Web3Helper(chain.rpcUrl));
   const crossChainHelper = useRef(new CrossChainHelper(chain.chainId));
-  const ChainAbstractionHelper = useRef(new ChainAbstraction(chain.chainId));
+  const ChainAbstractionHelper = useRef(
+    new ChainAbstractionHelper(chain.chainId)
+  );
   const [swapModal, setSwapModal] = useState(false);
   const [gasPrice, setGasPrice] = useState(null);
   const [gasEstimate, setGasEstimate] = useState(

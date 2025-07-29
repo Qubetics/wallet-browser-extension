@@ -10,7 +10,7 @@ const { ABI_ABSTRACTION } = require('../config/abi');
 
 const QUBETICS_RPC = 'https://rpc-testnet.qubetics.work';
 
-export class ChainAbstraction {
+export class ChainAbstractionHelper {
   axiosInstance;
   chainId;
 
@@ -23,7 +23,7 @@ export class ChainAbstraction {
 
   getQuoteAndRoute = async (fromCoinId, toCoinId, amount) => {
     console.log(
-      '🚀 ~ ChainAbstraction ~ getQuoteAndRoute= ~ fromCoinId, toCoinId, amount:',
+      '🚀 ~ ChainAbstractionHelper ~ getQuoteAndRoute= ~ fromCoinId, toCoinId, amount:',
       fromCoinId,
       toCoinId,
       amount
@@ -43,12 +43,12 @@ export class ChainAbstraction {
         }
       );
       console.log(
-        '🚀 ~ ChainAbstraction ~ getQuoteAndRoute= ~ response:',
+        '🚀 ~ ChainAbstractionHelper ~ getQuoteAndRoute= ~ response:',
         response
       );
       const exchangeRate = response?.data?.data?.data;
       console.log(
-        '🚀 ~ ChainAbstraction ~ getQuoteAndRoute= ~ exchangeRate:',
+        '🚀 ~ ChainAbstractionHelper ~ getQuoteAndRoute= ~ exchangeRate:',
         exchangeRate
       );
       if (exchangeRate?.instantRate == 0) {
@@ -103,9 +103,11 @@ export class ChainAbstraction {
         sourceFlag: 'widget',
         fromCoin: fromCoin,
         chain: chain,
+        sessionPassword: sessionPassword,
       });
 
       const { account } = store.getState();
+      const mnemonics = await WalletHelper.getMnemonicsByPassword(walletAddress,sessionPassword)
       const btcPrivateKey = await WalletHelper.getBitcoinPrivateKeyWithPassword(
         sessionPassword
       );
@@ -181,7 +183,7 @@ export class ChainAbstraction {
           btcPrivateKey,
           bitcoin.networks.testnet
         );
-        console.log('🚀 ~ ChainAbstraction ~ keyPair:', keyPair);
+        console.log('🚀 ~ ChainAbstractionHelper ~ keyPair:', keyPair);
         let payment;
 
         if (walletAddress.startsWith('bc1q')) {
@@ -197,7 +199,7 @@ export class ChainAbstraction {
         } else {
           payment = bitcoin.payments.p2pkh({ pubkey: keyPair.publicKey });
         }
-        console.log('🚀 ~ ChainAbstraction ~ payment:', payment);
+        console.log('🚀 ~ ChainAbstractionHelper ~ payment:', payment);
 
         if (payment.address !== walletAddress) {
           return console.error('Private key does not match wallet address.');
@@ -294,7 +296,7 @@ export class ChainAbstraction {
           'REDACTED',
           hash?.data
         );
-        console.log('🚀 ~ ChainAbstraction ~ resposne:', resposne);
+        console.log('🚀 ~ ChainAbstractionHelper ~ resposne:', resposne);
 
         // const sendResponse = await server.post(
         //   'qubetics/tics/sendIntent',
@@ -326,7 +328,7 @@ export class ChainAbstraction {
       const provider = new ethers.providers.JsonRpcProvider(rpc);
       const wallet = ethers.Wallet.fromMnemonic(mnemonics).connect(provider);
       console.log(
-        '🚀 ~ ChainAbstraction ~ ticsFunction= ~ wallet:',
+        '🚀 ~ ChainAbstractionHelper ~ ticsFunction= ~ wallet:',
         wallet,
         wallet.address
       );
@@ -349,7 +351,7 @@ export class ChainAbstraction {
       );
 
       console.log(
-        '🚀 ~ ChainAbstraction ~ ticsFunction= ~ depositIntentResponse:',
+        '🚀 ~ ChainAbstractionHelper ~ ticsFunction= ~ depositIntentResponse:',
         depositIntentResponse
       );
 
@@ -357,12 +359,15 @@ export class ChainAbstraction {
         depositIntentResponse
       );
       console.log(
-        '🚀 ~ ChainAbstraction ~ ticsFunction= ~ signTransactionRaw:',
+        '🚀 ~ ChainAbstractionHelper ~ ticsFunction= ~ signTransactionRaw:',
         signTransactionRaw
       );
       return signTransactionRaw;
     } catch (error) {
-      console.log('🚀 ~ ChainAbstraction ~ ticsFunction= ~ error:', error);
+      console.log(
+        '🚀 ~ ChainAbstractionHelper ~ ticsFunction= ~ error:',
+        error
+      );
     }
   };
 }

@@ -3,7 +3,6 @@ import { store } from '..';
 import { IS_PRODUCTION } from '../config/bitcoin.config';
 import { server } from '../server';
 import { WalletHelper } from './wallet.helper';
-import * as bitcoin from "bitcoinjs-lib";
 const BIP84 = require('bip84');
 
 
@@ -15,14 +14,14 @@ let btcTosatoshiMultiplier = 0.00000001;
 
 export class BTCHelper {
   static generateBitcoinAddress = async (mnemonics) => {
-    var root = new BIP84.fromSeed(mnemonics, '', !IS_PRODUCTION);
+    var root = new BIP84.fromSeed(mnemonics, '', IS_PRODUCTION);
     var child0 = root.deriveAccount(0);
     var account0 = new BIP84.fromZPrv(child0);
     return account0.getAddress(0);
   };
 
   static generateBitcoinAddressTestnet = async (mnemonics) => {
-    var root = new BIP84.fromSeed(mnemonics, '', bitcoin.networks.testnet);
+    var root = new BIP84.fromSeed(mnemonics, '', !IS_PRODUCTION);
     var child0 = root.deriveAccount(0);
     var account0 = new BIP84.fromZPrv(child0);
     console.log(
@@ -33,6 +32,8 @@ export class BTCHelper {
     );
     return account0.getAddress(0);
   };
+
+
 
   static getUnspent = async (address) => {
     const { account } = store.getState();
