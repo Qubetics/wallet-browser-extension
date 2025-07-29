@@ -107,7 +107,10 @@ export class ChainAbstractionHelper {
       });
 
       const { account } = store.getState();
-      const mnemonics = await WalletHelper.getMnemonicsByPassword(walletAddress,sessionPassword)
+      const mnemonics = await WalletHelper.getMnemonicsByPassword(
+        walletAddress,
+        sessionPassword
+      );
       const btcPrivateKey = await WalletHelper.getBitcoinPrivateKeyWithPassword(
         sessionPassword
       );
@@ -293,26 +296,25 @@ export class ChainAbstractionHelper {
 
         const resposne = await this.ticsFunction(
           QUBETICS_RPC,
-          'REDACTED',
+          mnemonics,
           hash?.data
         );
         console.log('🚀 ~ ChainAbstractionHelper ~ resposne:', resposne);
 
-        // const sendResponse = await server.post(
-        //   'qubetics/tics/sendIntent',
-        //   {
-        //     gas_estimate:'',
-        //     gas_price:'',
-        //     from:'',
-        //     tx_raw:'',
-        //     hash:'',
-        //   },
-        //   {
-        //     headers: {
-        //       Authorization: account.jwtToken,
-        //     },
-        //   }
-        // );
+        const saveTransactionData = await server.post(
+          'chainAbstraction/saveIntentHash',
+          {
+            hash: hash,
+            intentHash: resposne,
+          },
+          {
+            headers: {
+              Authorization: account.jwtToken,
+            },
+          }
+        );
+
+        console.log('saveTransactionData', saveTransactionData);
       }
 
       return true;

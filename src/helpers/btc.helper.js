@@ -5,7 +5,6 @@ import { server } from '../server';
 import { WalletHelper } from './wallet.helper';
 const BIP84 = require('bip84');
 
-
 let inputCount = 0;
 let transactionSize = 0;
 let outputCount = 2;
@@ -33,19 +32,14 @@ export class BTCHelper {
     return account0.getAddress(0);
   };
 
-
-
   static getUnspent = async (address) => {
     const { account } = store.getState();
     try {
-      const { data } = await server.get(
-        `/bitcoin/unspent/${address}`,
-        {
-          headers: {
-            Authorization: account.jwtToken,
-          },
-        }
-      );
+      const { data } = await server.get(`/bitcoin/unspent/${address}`, {
+        headers: {
+          Authorization: account.jwtToken,
+        },
+      });
       console.log('BTC FEESSSS ', data);
 
       return data.data || [];
