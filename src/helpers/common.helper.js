@@ -162,6 +162,11 @@ export const noExponential = (num) => {
   return Number(num).noExponents();
 };
 
+export const noExponentialBond = (num) => {
+  return Number(num).toLocaleString('fullwide', { useGrouping: false });
+};
+
+
 
 
 export function toPrecisionMultiply(num) {
