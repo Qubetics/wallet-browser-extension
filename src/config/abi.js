@@ -934,7 +934,12 @@ export const ABI_ABSTRACTION = [
       },
       {
         internalType: 'uint128',
-        name: 'amount',
+        name: 'toAmount',
+        type: 'uint128',
+      },
+      {
+        internalType: 'uint128',
+        name: 'fromAmount',
         type: 'uint128',
       },
       {
@@ -962,6 +967,11 @@ export const ABI_ABSTRACTION = [
     outputs: [],
     stateMutability: 'nonpayable',
     type: 'function',
+  },
+  {
+    inputs: [],
+    stateMutability: 'nonpayable',
+    type: 'constructor',
   },
   {
     inputs: [],
@@ -1051,7 +1061,13 @@ export const ABI_ABSTRACTION = [
       {
         indexed: false,
         internalType: 'uint128',
-        name: 'amount',
+        name: 'toAmount',
+        type: 'uint128',
+      },
+      {
+        indexed: false,
+        internalType: 'uint128',
+        name: 'fromAmount',
         type: 'uint128',
       },
       {
@@ -1077,6 +1093,12 @@ export const ABI_ABSTRACTION = [
         internalType: 'uint64',
         name: 'nonce',
         type: 'uint64',
+      },
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: 'jobId',
+        type: 'uint256',
       },
     ],
     name: 'IntentSubmitted',
@@ -1108,6 +1130,19 @@ export const ABI_ABSTRACTION = [
     name: 'updateIntentStatus',
     outputs: [],
     stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'counter',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: 'counter',
+        type: 'uint256',
+      },
+    ],
+    stateMutability: 'view',
     type: 'function',
   },
   {
@@ -1159,7 +1194,12 @@ export const ABI_ABSTRACTION = [
           },
           {
             internalType: 'uint128',
-            name: 'amount',
+            name: 'toAmount',
+            type: 'uint128',
+          },
+          {
+            internalType: 'uint128',
+            name: 'fromAmount',
             type: 'uint128',
           },
           {
@@ -1173,11 +1213,6 @@ export const ABI_ABSTRACTION = [
             type: 'string',
           },
           {
-            internalType: 'string',
-            name: 'trasactionHash',
-            type: 'string',
-          },
-          {
             internalType: 'bool',
             name: 'completed',
             type: 'bool',
@@ -1186,6 +1221,25 @@ export const ABI_ABSTRACTION = [
         internalType: 'struct IntentManager.IntentDetails',
         name: '',
         type: 'tuple',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'string',
+        name: 'trasactionHash',
+        type: 'string',
+      },
+    ],
+    name: 'getJobId',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256',
       },
     ],
     stateMutability: 'view',
@@ -1291,7 +1345,12 @@ export const ABI_ABSTRACTION = [
       },
       {
         internalType: 'uint128',
-        name: 'amount',
+        name: 'toAmount',
+        type: 'uint128',
+      },
+      {
+        internalType: 'uint128',
+        name: 'fromAmount',
         type: 'uint128',
       },
       {
@@ -1305,14 +1364,28 @@ export const ABI_ABSTRACTION = [
         type: 'string',
       },
       {
-        internalType: 'string',
-        name: 'trasactionHash',
-        type: 'string',
-      },
-      {
         internalType: 'bool',
         name: 'completed',
         type: 'bool',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'string',
+        name: '',
+        type: 'string',
+      },
+    ],
+    name: 'jobId',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: 'counter',
+        type: 'uint256',
       },
     ],
     stateMutability: 'view',

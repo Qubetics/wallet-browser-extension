@@ -144,7 +144,7 @@ export class Web3Helper {
       const provider = new ethers.providers.JsonRpcProvider(rpc);
       const contract = new ethers.Contract(tokenAddress, ABI, provider);
       const approvedAmount = await contract.allowance(owner, spender);
-      console.log('approvedAmount',approvedAmount);
+      console.log('approvedAmount', approvedAmount);
       return approvedAmount;
     } catch (error) {
       return false;
@@ -292,7 +292,10 @@ export class Web3Helper {
       const inputAmount = bigNumber
         .dividedBy(new BigNumber(10).pow(decimals))
         .toString();
-        console.log("🚀 ~ Web3Helper ~ getTokenBalance= ~ inputAmount:", inputAmount)
+      console.log(
+        '🚀 ~ Web3Helper ~ getTokenBalance= ~ inputAmount:',
+        inputAmount
+      );
 
       return inputAmount;
     } catch (error) {
@@ -355,8 +358,8 @@ export class Web3Helper {
         sessionPassword
       );
 
-      console.log("privateKey>>>>", privateKey);
-      
+      console.log('privateKey>>>>', privateKey);
+
       if (!privateKey) {
         console.log('INVALID PRIVATE KEY :');
         return false;
@@ -371,8 +374,8 @@ export class Web3Helper {
         symbol
       );
       const nonce = await this.getNonce(slug, false, null, symbol, from);
-      console.log('gasPriceRes.estimate',gasPriceRes.estimate);
-      
+      console.log('gasPriceRes.estimate', gasPriceRes.estimate);
+
       const gaslimit = Number(gasPriceRes.estimate) + 10000;
 
       const gsFee =
@@ -383,19 +386,18 @@ export class Web3Helper {
           : gasPriceRes.fast;
 
       const gasInEth = (gsFee * Math.pow(10, 9) * gaslimit) / Math.pow(10, 18);
-      console.log("🚀 ~ Web3Helper ~ gasInEth:", gasInEth)
+      console.log('🚀 ~ Web3Helper ~ gasInEth:', gasInEth);
       const gasPrice =
         symbol == 'eth'
           ? Math.max(1.5 * gsFee * Math.pow(10, 9), 1e9)
           : Math.max(gsFee * Math.pow(10, 9), 1e9);
 
       const totalAmount = +gasInEth + +amount;
-      console.log("🚀 ~ Web3Helper ~ totalAmount:", totalAmount)
+      console.log('🚀 ~ Web3Helper ~ totalAmount:', totalAmount);
 
       const balance = await this.getCoinBalance(from, rpc);
-      console.log("🚀 ~ Web3Helper ~ balance:", balance)
+      console.log('🚀 ~ Web3Helper ~ balance:', balance);
 
-      
       if (totalAmount > balance) {
         return false;
       }
@@ -426,8 +428,7 @@ export class Web3Helper {
         ? signedTransaction.slice(2)
         : signedTransaction;
 
-        console.log('gaslimit',gaslimit);
-        
+      console.log('gaslimit', gaslimit);
 
       let payload = {
         nonce: nonce,
@@ -445,11 +446,10 @@ export class Web3Helper {
 
       const response = await server.post(`${slug}/${symbol}/send`, payload, {
         headers: {
-         
           Authorization: account.jwtToken,
         },
       });
-      console.log("🚀 ~ Web3Helper ~ response:", response)
+      console.log('🚀 ~ Web3Helper ~ response:', response);
       return response.data.tx_hash;
     } catch (error) {
       console.log('error occure----> ', error);
@@ -540,7 +540,9 @@ export class Web3Helper {
         rpc_chain(coinFamily)
       );
       const contract = new ethers.Contract(tokenAddress, ABI, provider);
-      const { privateKey } = await WalletHelper.getPrivateKeyEvm(sessionPassword);
+      const { privateKey } = await WalletHelper.getPrivateKeyEvm(
+        sessionPassword
+      );
 
       if (!privateKey) {
         console.log('INVALID PRIVATE KEY');

@@ -774,9 +774,7 @@ function CrossChain({ state }) {
           }
 
           setRoute(route);
-          setAmount2(
-            toFixed(getFlooredFixed(parseFloat(route.outAmount), 6))
-          );
+          setAmount2(toFixed(getFlooredFixed(parseFloat(route.outAmount), 6)));
           setInnerLoading(false);
           setInfoData([
             {
@@ -852,7 +850,7 @@ function CrossChain({ state }) {
 
   const handleScroll = () => {
     const { scrollHeight, scrollTop, clientHeight } = parentRef.current;
-    const tolerance = 15; 
+    const tolerance = 15;
     const isAtBottom = scrollTop + clientHeight >= scrollHeight - tolerance;
     if (isAtBottom && !loading && page < Math.ceil(total / 10)) {
       setInnerLoading(true);
@@ -1125,7 +1123,6 @@ function CrossChain({ state }) {
                     }
                   }}
                   onChange={({ target: { value: _amount } }) => {
-
                     if (percent != null) {
                       setPercent(null);
                     }

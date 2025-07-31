@@ -47,9 +47,9 @@ const ConfirmAbstractModal = ({
       handleOk={handleProceed}
       customClass="customClassModal"
     >
-      <div>
+      {/* <div>
         <p>Please review your transaction details</p>
-      </div>
+      </div> */}
       <div>
         <div
           style={{ width: '90%', marginRight: 'auto', marginLeft: 'auto' }}
@@ -191,7 +191,7 @@ const ConfirmAbstractModal = ({
             </div>
           </div>
 
-          <div style={{ marginTop: '10px', width: '90%' }}>
+          <div style={{ marginTop: '10px', width: '100%' }}>
             <InputField
               placeholder={'From Address'}
               type={'text'}
@@ -329,7 +329,7 @@ const ConfirmAbstractModal = ({
               </div>
             </div>
           </div>
-          <div style={{ marginTop: '10px', width: '90%' }}>
+          <div style={{ marginTop: '10px', width: '100%' }}>
             <InputField
               placeholder={'To Address'}
               type={'text'}
@@ -343,7 +343,7 @@ const ConfirmAbstractModal = ({
             }}
           >
             <ButtonComp
-              onClick={() => console.log('dddd')}
+              onClick={() => handleAbstract()}
               text={
                 amount === null || amount === 0
                   ? 'Enter Amount'
@@ -352,7 +352,6 @@ const ConfirmAbstractModal = ({
                   : 'Abstract'
               }
               maxWidth={'100%'}
-              //   disabled={true}
             />
           </div>
         </div>

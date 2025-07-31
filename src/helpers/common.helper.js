@@ -1,23 +1,23 @@
-import Web3 from "web3";
-import TOKEN_ABI from "../Assets/JsonFiles/tokenContract.ABI.json";
-import base58 from "bs58";
-import BigNumber from "bignumber.js";
+import Web3 from 'web3';
+import TOKEN_ABI from '../Assets/JsonFiles/tokenContract.ABI.json';
+import base58 from 'bs58';
+import BigNumber from 'bignumber.js';
 export function numberWithSpaces(x) {
-  return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+  return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
 }
 
 export function modifyString(str) {
   var first = str?.substring(0, 7);
   var last = str?.substring(str.length - 7);
-  var modifiedStr = first + "..." + last;
+  var modifiedStr = first + '...' + last;
 
   return modifiedStr;
 }
 
 export function generateString(length) {
   const characters =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  let result = " ";
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = ' ';
   const charactersLength = characters.length;
   for (let i = 0; i < length; i++) {
     result += characters.charAt(Math.floor(Math.random() * charactersLength));
@@ -28,30 +28,30 @@ export function generateString(length) {
 
 export const toFixed = (num, fixed) => {
   num = num.toString(); //If it's not already a String
-  if (num.includes(".")) {
-    num = num.slice(0, num.indexOf(".") + (fixed + 1));
+  if (num.includes('.')) {
+    num = num.slice(0, num.indexOf('.') + (fixed + 1));
   }
   return Number(num);
 };
 
 export const COIN_FAMILY = {
-  1: "ETH",
-  2: "BTC",
-  3: "BSC",
-  4: "SOL",
-  5: "ADA",
-  6: "POL",
-  7: "AVAX",
-  8: "CRO",
-  9: "PLS",
+  1: 'ETH',
+  2: 'BTC',
+  3: 'BSC',
+  4: 'SOL',
+  5: 'ADA',
+  6: 'POL',
+  7: 'AVAX',
+  8: 'CRO',
+  9: 'PLS',
 };
 export const BLOCHCHAIN_URL = {
-  maticRPCUrl: "https://rpc-mainnet.maticvigil.com",
-  arbRPCUrl: "https://arb1.arbitrum.io/rpc",
-  baseRPCUrl: "https://mainnet.base.org",
-  avaxRPCUrl: "https://avalanche-c-chain-rpc.publicnode.com",
-  solRPCUrl: "https://api.mainnet-beta.solana.com",
-  bnbRPCUrl: "https://bsc-dataseed1.binance.org:443",
+  maticRPCUrl: 'https://rpc-mainnet.maticvigil.com',
+  arbRPCUrl: 'https://arb1.arbitrum.io/rpc',
+  baseRPCUrl: 'https://mainnet.base.org',
+  avaxRPCUrl: 'https://avalanche-c-chain-rpc.publicnode.com',
+  solRPCUrl: 'https://api.mainnet-beta.solana.com',
+  bnbRPCUrl: 'https://bsc-dataseed1.binance.org:443',
 };
 export const getWeb3Object = (RPC_URL) => {
   ////console.log("chk:::::::blockChain", blockChain);
@@ -77,7 +77,7 @@ export const getContractObject = async (tokenAddress, blockChain, abi) => {
     let tokenContractObject = new web3Object.eth.Contract(abi, tokenAddress);
     return tokenContractObject;
   } catch (e) {
-    console.error("error ===>>", e);
+    console.error('error ===>>', e);
   }
 };
 // ***************************  get user token balance ********************************
@@ -94,7 +94,7 @@ export const getTokenBalance = async (tokenAddress, address, blockChain) => {
     // console.log("chk result::::::", result);
     return result;
   } catch (error) {
-    console.log("Error XXXXXX==>> :", error);
+    console.log('Error XXXXXX==>> :', error);
     return error;
   }
 };
@@ -107,7 +107,7 @@ export const formatNumberUSD = (value) => {
     return value;
   }
 
-  const decimalPlaces = (value.toString().split(".")[1] || "").length;
+  const decimalPlaces = (value.toString().split('.')[1] || '').length;
 
   const formattedNumber = numberValue.toLocaleString(undefined, {
     maximumFractionDigits: decimalPlaces > 2 ? 2 : decimalPlaces,
@@ -116,7 +116,7 @@ export const formatNumberUSD = (value) => {
   return formattedNumber;
 };
 export const formatNumberFiat = (value) => {
-  const decimalPlaces = (value.toString().split(".")[1] || "").length;
+  const decimalPlaces = (value.toString().split('.')[1] || '').length;
   const parsedValue = parseFloat(value);
 
   if (decimalPlaces > 8) {
@@ -129,11 +129,13 @@ export const formatNumberFiat = (value) => {
 };
 
 export function getSignature(transaction) {
-
-  const signature = "signature" in transaction ? transaction.signature : transaction.signatures[0];
+  const signature =
+    'signature' in transaction
+      ? transaction.signature
+      : transaction.signatures[0];
   if (!signature) {
     throw new Error(
-      "Missing transaction signature, the transaction was not signed by the fee payer"
+      'Missing transaction signature, the transaction was not signed by the fee payer'
     );
   }
   return base58.encode(signature);
@@ -141,21 +143,21 @@ export function getSignature(transaction) {
 
 Number.prototype.noExponents = function () {
   try {
-      var data = String(this).split(/[eE]/);
-      if (data.length === 1) return data[0];
-      var z = "",
-          sign = this < 0 ? "-" : "",
-          str = data[0].replace(".", ""),
-          mag = Number(data[1]) + 1;
-      if (mag < 0) {
-          z = sign + "0.";
-          while (mag++) z += "0";
-          return z + str.replace(/^\-/, "");
-      }
-      mag -= str.length;
-      while (mag--) z += "0";
-      return str + z;
-  } catch (error) { }
+    var data = String(this).split(/[eE]/);
+    if (data.length === 1) return data[0];
+    var z = '',
+      sign = this < 0 ? '-' : '',
+      str = data[0].replace('.', ''),
+      mag = Number(data[1]) + 1;
+    if (mag < 0) {
+      z = sign + '0.';
+      while (mag++) z += '0';
+      return z + str.replace(/^\-/, '');
+    }
+    mag -= str.length;
+    while (mag--) z += '0';
+    return str + z;
+  } catch (error) {}
 };
 
 export const noExponential = (num) => {
@@ -166,21 +168,20 @@ export const noExponentialBond = (num) => {
   return Number(num).toLocaleString('fullwide', { useGrouping: false });
 };
 
-
-
-
 export function toPrecisionMultiply(num) {
   let number = num;
-  const result = new BigNumber(number).multipliedBy(new BigNumber(10).exponentiatedBy(18));
+  const result = new BigNumber(number).multipliedBy(
+    new BigNumber(10).exponentiatedBy(18)
+  );
   const respectedRes = result.multipliedBy(1).toFixed();
   return respectedRes;
 }
 
 export function capitalizeWords(input) {
-  console.log('input',input)
+  console.log('input', input);
   if (typeof input !== 'string') return '';
 
-  console.log('input 2',input)
+  console.log('input 2', input);
 
   // Trim and check if there's at least one word (non-space character)
   const trimmed = input.trim();
@@ -189,6 +190,6 @@ export function capitalizeWords(input) {
   // Capitalize each word
   return trimmed
     .split(/\s+/)
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
 }

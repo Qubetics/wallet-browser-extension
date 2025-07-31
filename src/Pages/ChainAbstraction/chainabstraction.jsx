@@ -36,6 +36,7 @@ import { WalletHelper } from '../../helpers/wallet.helper';
 import ModalCustom from '../../Components/ModalCustom/ModalCustom';
 import BigNumber from 'bignumber.js';
 import { ChainAbstractionHelper } from '../../helpers/chain_abstraction.helper';
+import AbstractProcessingModal from '../../Components/CustomModelAbstraction/Model';
 
 function getFlooredFixed(v, d) {
   return (Math.floor(v * Math.pow(10, d)) / Math.pow(10, d)).toFixed(d);
@@ -112,11 +113,21 @@ function ChainAbstraction({ state }) {
   const [isOpen, setIsOpen] = useState(false);
   const [sessionPassword, setSessionPassword] = useState(null);
   const [isPasswordModalOpen, setPasswordModal] = useState(false);
+  const [showsuccess, setShowSuccess] = useState(false);
   const { theme, swapDetail } = useSelector((state) => state);
   const debounceTimeout = useRef(null);
   const ChainAbstractionInstance = useRef(
     new ChainAbstractionHelper(chain.chainId)
   );
+  const [isProcessModalOpen, setIsProcessModal] = useState(false);
+  const [transactionresult, setTransactionResult] = useState({
+    hash: '',
+    fee: '',
+    link: '',
+    status: '',
+    symbol: '',
+    solver: '',
+  });
 
   const onChangeFromValue = (val) => {
     setWithdrawAmount(val);
@@ -566,7 +577,10 @@ function ChainAbstraction({ state }) {
     //   );
     // }
 
-    const buildSwapDetails = (networkFee, parentCoinValue = token1.native) => ({
+    const buildSwapDetails = (
+      networkFee,
+      parentCoinValue = token1?.native
+    ) => ({
       route,
       token1,
       token2,
@@ -575,7 +589,7 @@ function ChainAbstraction({ state }) {
       tokenChain: token1.chain,
       networkFee,
       walletAddress: token1?.address,
-      token1Price: newBalanceToFiatConversion(token1.price, amount),
+      token1Price: newBalanceToFiatConversion(token1?.price, amount),
       parentCoin: { value: parentCoinValue },
       tab: 1,
       rpc: token1.rpc,
@@ -663,16 +677,23 @@ function ChainAbstraction({ state }) {
       );
       if (!gasPrice) {
         store.dispatch(setLoading(false));
-
         return messageApi.error('Unable to fetch gas price at the moment.');
       }
 
       networkFee =
         (gasPrice.fast * Math.pow(10, 9) * gasPrice.estimate) /
         Math.pow(10, 18);
+      setTransactionResult((prev) => ({
+        ...prev,
+        symbol: 'ETH',
+      }));
     } else if (token1?.chain?.currencyName === 'BTC') {
       const gasPrice = Math.max(await BTCHelper.getBTCGasPrice(), 10);
       networkFee = gasPrice / 1e8;
+      setTransactionResult((prev) => ({
+        ...prev,
+        symbol: 'BTC',
+      }));
     }
     const data = await ChainAbstractionInstance.current.SendTransaction(
       token1,
@@ -683,20 +704,29 @@ function ChainAbstraction({ state }) {
       token1?.chain,
       networkFee,
       newBalanceToFiatConversion(token1?.price, amount),
-      parentCoin.data.data.fiatCoinPrice.value,
-      token1.rpc, // rpc
-      token1.coinSymbol, // symbol
-      sessionPassword // sessionPassword
+      token1?.native,
+      token1?.rpc,
+      token1?.coinSymbol,
+      sessionPassword,
+      toAddress
     );
 
+    console.log('data', data);
+
     if (!data) {
-      setSwapModal(false);
       return messageApi.error(
         'Unable to process your transaction at the moment. Please try again later.'
       );
     }
-    setSwapModal(false);
-    return setIsModalOpen1(true);
+    setIsOpen(!isOpen);
+    setTransactionResult((prev) => ({
+      ...prev,
+      hash: data?.hash,
+      fee: networkFee,
+      status: data?.status,
+      solver: data?.solver,
+    }));
+    setIsProcessModal(true);
   };
 
   return (
@@ -873,7 +903,7 @@ function ChainAbstraction({ state }) {
                 </div>
               </div>
 
-              <div style={{ marginTop: '10px', width: '90%' }}>
+              <div style={{ marginTop: '10px', width: '100%' }}>
                 <InputField
                   placeholder={'From Address'}
                   type={'text'}
@@ -1025,7 +1055,7 @@ function ChainAbstraction({ state }) {
                   </div>
                 </div>
               </div>
-              <div style={{ marginTop: '10px', width: '90%' }}>
+              <div style={{ marginTop: '10px', width: '100%' }}>
                 <InputField
                   placeholder={'To Address'}
                   type={'text'}
@@ -1207,7 +1237,6 @@ function ChainAbstraction({ state }) {
                                   'You cannot select the same tokens on both sides. Please select a different token.'
                                 );
                               }
-
                               setToken1(token);
                               handlePositionChange(token);
                             } else {
@@ -1218,7 +1247,6 @@ function ChainAbstraction({ state }) {
                                   'You cannot select the same tokens on both sides. Please select a different token.'
                                 );
                               }
-
                               setToken2(token);
                               handleToken2Change(token);
                             }
@@ -1316,10 +1344,6 @@ function ChainAbstraction({ state }) {
         title={'Enter password'}
         handleCancel={() => setPasswordModal(!isPasswordModalOpen)}
         isModalOpen={isPasswordModalOpen}
-        // handleOk={() => {
-        //   setPasswordModal(!isPasswordModalOpen);
-        //   setIsOpen(!isOpen);
-        // }}
         customClass="customClassModal"
       >
         <div className="viewphrases">
@@ -1362,6 +1386,13 @@ function ChainAbstraction({ state }) {
           />
         </div>
       </ModalCustom>
+      <AbstractProcessingModal
+        showProcessing={isProcessModalOpen}
+        setShowProcess={setIsProcessModal}
+        showSuccess={showsuccess}
+        setSuccessModal={setShowSuccess}
+        transactionResult={transactionresult}
+      />
     </>
   );
 }

@@ -134,8 +134,8 @@ function History() {
   return (
     <div className={`scrollableCont`}>
       <div className={`flexedContent`} ref={parentRef} onScroll={handleScroll}>
-        {history.length > 0 ? (
-          history.map((data) => {
+        {history?.length > 0 ? (
+          history?.map((data) => {
             let name = null;
 
             const price = data?.coin_data?.fiat_price_data;
@@ -149,6 +149,8 @@ function History() {
                 ? 'Sent'
                 : data.type.toLowerCase() === 'swap'
                 ? 'Swap'
+                : data.type.toLowerCase() === 'chain_abstraction'
+                ? 'Chain Abstraction'
                 : 'Withdraw';
 
             return (
