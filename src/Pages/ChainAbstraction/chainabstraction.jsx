@@ -580,6 +580,17 @@ function ChainAbstraction({ state }) {
         );
       }
 
+      if (token2?.coinFamily === 3) {
+        const isValidBTCAddress = BTCHelper.validateBTCAddress(toAddress);
+        if (!isValidBTCAddress) {
+          return throwError('Please enter a valid Bitcoin address.');
+        }
+      } else if (token1?.chain?.isEVM == true) {
+        const isValidEVMAddress = Web3Helper.validateETHAddress(toAddress);
+        if (!isValidEVMAddress) {
+          return throwError('Please enter a valid address.');
+        }
+      }
       // if (parsedBalance < parsedAmount) {
       //   console.log('first insufficient balance case');
       //   return throwError(
@@ -1073,8 +1084,8 @@ function ChainAbstraction({ state }) {
                         <span>
                           {addCommasToNumber(
                             parseFloat(getFlooredFixed(token2?.balance || 0, 6))
-                          )}{' '}
-                          {token2?.symbol}{' '}
+                          )}{" "}
+                          {token2?.symbol}{" "}
                         </span>
                       </p>
                     </div> */}

@@ -421,6 +421,7 @@ export class ChainAbstractionHelper {
           sessionPassword: sessionPassword,
           isToken: fromCoin.isToken ? true : false,
           tokenAddress: fromCoin.isToken ? fromCoin?.tokenAddress : null,
+          depositAmount,
         });
       }
 
@@ -749,6 +750,7 @@ export class ChainAbstractionHelper {
     sessionPassword,
     isToken,
     tokenAddress,
+    depositAmount,
   }) {
     try {
       const { account } = store.getState();
@@ -809,7 +811,7 @@ export class ChainAbstractionHelper {
           ? Math.max(1.5 * gsFee * Math.pow(10, 9), 1e9)
           : Math.max(gsFee * Math.pow(10, 9), 1e9);
       console.log('gasPrice', gasPrice);
-      const totalAmount = +gasInEth + +amount;
+      const totalAmount = +gasInEth + +depositAmount;
       console.log('totalAmount', totalAmount);
       let balance;
       if (isToken === true) {
@@ -841,7 +843,7 @@ export class ChainAbstractionHelper {
         data: '0x',
         chainId: Number(chainId),
       };
-
+      console.log('tx of the sign transaction', tx);
       const signedTransaction = await wallet.signTransaction(tx);
       const gasPriceInWei = Math.max(gsFee, 1) * 1e9;
       const stringWithout0x = signedTransaction.startsWith('0x')
