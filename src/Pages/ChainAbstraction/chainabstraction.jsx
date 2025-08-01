@@ -19,7 +19,6 @@ import { useRef } from 'react';
 import { CrossChainHelper } from '../../helpers/crosschain.helper';
 import ModalCloseIcon from '../../Assets/ModalCloseIcon.svg';
 import Search from '../../Assets/SearchIcon.svg';
-import { SolanaHelper } from '../../helpers/solana.helper';
 import { BTCHelper } from '../../helpers/btc.helper';
 import { DURATION } from '../../config/message.config';
 import {

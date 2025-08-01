@@ -314,21 +314,6 @@ const ConfirmAbstractModal = ({
                       };
                     })}
                 />
-                <div
-                  // style={{ marginBottom: "20px" }}
-                  className="swap_onChain_pay"
-                >
-                  {/* <p>You Receive</p> */}
-                  <p style={{ textAlign: 'right' }}>
-                    Balance{' '}
-                    <span>
-                      {addCommasToNumber(
-                        parseFloat(getFlooredFixed(token2?.balance || 0, 6))
-                      )}{' '}
-                      {token2?.symbol}{' '}
-                    </span>
-                  </p>
-                </div>
               </div>
             </div>
           </div>
