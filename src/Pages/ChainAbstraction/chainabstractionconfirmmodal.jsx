@@ -24,6 +24,7 @@ const ConfirmAbstractModal = ({
   toAddress,
   fromAddress,
   handleAbstract,
+  isProcessing,
 }) => {
   const { chain, account, currency } = useSelector((state) => state);
   const [loading, setCompentLoading] = useState(false);
@@ -31,10 +32,12 @@ const ConfirmAbstractModal = ({
   const [selectDrawer, setTokenDrawer] = useState(false);
 
   const handleCancel = () => {
+    if (isProcessing) return;
     setIsOpen(!isOpen);
   };
 
   const handleProceed = () => {
+    if (isProcessing) return;
     setIsOpen(!isOpen);
     handleAbstract();
   };
@@ -46,6 +49,7 @@ const ConfirmAbstractModal = ({
       isModalOpen={isOpen}
       handleOk={handleProceed}
       customClass="customClassModal"
+      closable={!isProcessing}
     >
       {/* <div>
         <p>Please review your transaction details</p>
@@ -345,13 +349,16 @@ const ConfirmAbstractModal = ({
             <ButtonComp
               onClick={() => handleAbstract()}
               text={
-                amount === null || amount === 0
+                isProcessing 
+                  ? 'Processing...' 
+                  : amount === null || amount === 0
                   ? 'Enter Amount'
                   : toAddress === '' || !toAddress
                   ? 'Enter Recipient Address'
                   : 'Abstract'
               }
               maxWidth={'100%'}
+              disabled={isProcessing}
             />
           </div>
         </div>
