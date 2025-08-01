@@ -3,6 +3,7 @@ import { store } from '..';
 import { IS_PRODUCTION } from '../config/bitcoin.config';
 import { server } from '../server';
 import { WalletHelper } from './wallet.helper';
+import { validate } from 'bitcoin-address-validation';
 const BIP84 = require('bip84');
 
 let inputCount = 0;
@@ -12,6 +13,23 @@ let btcTosatoshi = 100000000;
 let btcTosatoshiMultiplier = 0.00000001;
 
 export class BTCHelper {
+  /**
+   * Validates a Bitcoin address
+   * @param {string} address - The Bitcoin address to validate
+   * @returns {boolean} - True if valid, false otherwise
+   */
+  static validateBTCAddress = (address) => {
+    try {
+      if (!address || typeof address !== 'string') {
+        return false;
+      }
+      return validate(address);
+    } catch (error) {
+      console.error('BTC address validation error:', error);
+      return false;
+    }
+  };
+
   static generateBitcoinAddress = async (mnemonics) => {
     var root = new BIP84.fromSeed(mnemonics, '', IS_PRODUCTION);
     var child0 = root.deriveAccount(0);

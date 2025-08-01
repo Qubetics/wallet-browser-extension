@@ -8,6 +8,23 @@ import { ethers } from 'ethers';
 import { rpc_chain } from './constant';
 
 export class Web3Helper {
+  /**
+   * Validates an Ethereum address
+   * @param {string} address - The Ethereum address to validate
+   * @returns {boolean} - True if valid, false otherwise
+   */
+  static validateETHAddress = (address) => {
+    try {
+      if (!address || typeof address !== 'string') {
+        return false;
+      }
+      return ethers.utils.isAddress(address);
+    } catch (error) {
+      console.error('ETH address validation error:', error);
+      return false;
+    }
+  };
+
   static gaspriceNft = async ({ slug, to, from, token_value, amount }) => {
     const { account } = store.getState();
     try {
