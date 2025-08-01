@@ -1,54 +1,54 @@
 /*global chrome*/
-import './CrossChain.scss';
-import { Drawer, message, Select } from 'antd';
-import React from 'react';
+import "./CrossChain.scss";
+import { Drawer, message, Select } from "antd";
+import React from "react";
 import InputFieldSimple, {
   InputField,
-} from '../../Components/InputField/InputFieldSimple';
-import DownArrowSuffix from '../../Assets/DownArrowSuffix.svg';
-import SwapVerticalIcon from '../../Assets/SwapVerticalIcon.svg';
-import ButtonComp from '../../Components/ButtonComp/ButtonComp';
-import { useNavigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
-import { Web3Helper } from '../../helpers/web3.helper';
-import darkclose from '../../Assets/darkclose.svg';
-import { useSelector } from 'react-redux';
-import { store } from '../..';
-import { setLoading } from '../../actions/loading';
-import { useRef } from 'react';
-import { CrossChainHelper } from '../../helpers/crosschain.helper';
-import ModalCloseIcon from '../../Assets/ModalCloseIcon.svg';
-import Search from '../../Assets/SearchIcon.svg';
-import { SolanaHelper } from '../../helpers/solana.helper';
-import { BTCHelper } from '../../helpers/btc.helper';
-import { DURATION } from '../../config/message.config';
+} from "../../Components/InputField/InputFieldSimple";
+import DownArrowSuffix from "../../Assets/DownArrowSuffix.svg";
+import SwapVerticalIcon from "../../Assets/SwapVerticalIcon.svg";
+import ButtonComp from "../../Components/ButtonComp/ButtonComp";
+import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Web3Helper } from "../../helpers/web3.helper";
+import darkclose from "../../Assets/darkclose.svg";
+import { useSelector } from "react-redux";
+import { store } from "../..";
+import { setLoading } from "../../actions/loading";
+import { useRef } from "react";
+import { CrossChainHelper } from "../../helpers/crosschain.helper";
+import ModalCloseIcon from "../../Assets/ModalCloseIcon.svg";
+import Search from "../../Assets/SearchIcon.svg";
+import { SolanaHelper } from "../../helpers/solana.helper";
+import { BTCHelper } from "../../helpers/btc.helper";
+import { DURATION } from "../../config/message.config";
 import {
   exponential_to_decimal,
   newBalanceToFiatConversion,
   toFixed,
-} from '../../helpers/conversion.helper';
-import { server } from '../../server';
-import { swapDetailAc } from '../../actions/swap';
-import useCurrentHeight from '../../CustomHooks/useCurrentHeight';
-import MenuRestofHeaders from '../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders';
-import ConfirmAbstractModal from './chainabstractionconfirmmodal';
-import { WalletHelper } from '../../helpers/wallet.helper';
-import ModalCustom from '../../Components/ModalCustom/ModalCustom';
-import BigNumber from 'bignumber.js';
-import { ChainAbstractionHelper } from '../../helpers/chain_abstraction.helper';
-import AbstractProcessingModal from '../../Components/CustomModelAbstraction/Model';
+} from "../../helpers/conversion.helper";
+import { server } from "../../server";
+import { swapDetailAc } from "../../actions/swap";
+import useCurrentHeight from "../../CustomHooks/useCurrentHeight";
+import MenuRestofHeaders from "../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders";
+import ConfirmAbstractModal from "./chainabstractionconfirmmodal";
+import { WalletHelper } from "../../helpers/wallet.helper";
+import ModalCustom from "../../Components/ModalCustom/ModalCustom";
+import BigNumber from "bignumber.js";
+import { ChainAbstractionHelper } from "../../helpers/chain_abstraction.helper";
+import AbstractProcessingModal from "../../Components/CustomModelAbstraction/Model";
 
 function getFlooredFixed(v, d) {
   return (Math.floor(v * Math.pow(10, d)) / Math.pow(10, d)).toFixed(d);
 }
 
 function addCommasToNumber(number) {
-  var parts = number.toString().split('.');
+  var parts = number.toString().split(".");
   var integerPart = parts[0];
-  var decimalPart = parts[1] || '';
-  integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-  if (decimalPart !== '') {
-    return integerPart + '.' + decimalPart;
+  var decimalPart = parts[1] || "";
+  integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  if (decimalPart !== "") {
+    return integerPart + "." + decimalPart;
   } else {
     return integerPart;
   }
@@ -60,21 +60,21 @@ export function bigNumberSafeMath(a, operation, b) {
     const numB = new BigNumber(b || 0);
 
     switch (operation) {
-      case '+':
+      case "+":
         return numA.plus(numB);
-      case '-':
+      case "-":
         return numA.minus(numB);
-      case '*':
+      case "*":
         return numA.times(numB);
-      case '/':
+      case "/":
         return numB.isZero() ? new BigNumber(0) : numA.dividedBy(numB);
-      case '%':
+      case "%":
         return numB.isZero() ? new BigNumber(0) : numA.modulo(numB);
       default:
         return numA;
     }
   } catch (error) {
-    console.error('bigNumberSafeMath error:', error);
+    console.error("bigNumberSafeMath error:", error);
     return new BigNumber(0);
   }
 }
@@ -98,7 +98,7 @@ function ChainAbstraction({ state }) {
     duration: DURATION,
     maxCount: 1,
   });
-  const [toAddress, setToAddress] = useState('');
+  const [toAddress, setToAddress] = useState("");
   const [receivedAmount, setReceivedAmount] = useState(null);
   const [amount, setWithdrawAmount] = useState(null);
   const [route, setRoute] = useState(null);
@@ -121,12 +121,12 @@ function ChainAbstraction({ state }) {
   );
   const [isProcessModalOpen, setIsProcessModal] = useState(false);
   const [transactionresult, setTransactionResult] = useState({
-    hash: '',
-    fee: '',
-    link: '',
-    status: '',
-    symbol: '',
-    solver: '',
+    hash: "",
+    fee: "",
+    link: "",
+    status: "",
+    symbol: "",
+    solver: "",
   });
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -137,23 +137,23 @@ function ChainAbstraction({ state }) {
     }
     debounceTimeout.current = setTimeout(() => {
       const fromFiatValue = token1?.price;
-      console.log('fromFiatValue>>>', fromFiatValue);
+      console.log("fromFiatValue>>>", fromFiatValue);
 
       const toFiatValue = token2?.price;
-      console.log('toFiatValue>>>', toFiatValue);
+      console.log("toFiatValue>>>", toFiatValue);
 
       const toValue = new BigNumber(val || 0)
         .times(new BigNumber(fromFiatValue || 0))
         .dividedBy(new BigNumber(toFiatValue || 0));
-      console.log('toValue>>>', toValue);
-      console.log('toValue>>>', exponential_to_decimal(toValue, 8));
+      console.log("toValue>>>", toValue);
+      console.log("toValue>>>", exponential_to_decimal(toValue, 8));
       const toAmt = exponential_to_decimal(toValue, 8);
       const valueAfterSlippage = exponential_to_decimal(
-        bigNumberSafeMath(toAmt, '*', 0.995),
+        bigNumberSafeMath(toAmt, "*", 0.995),
         6
       );
       // const valueAfterSlippage = bigNumberSafeMath(toValue, "*", 0.995);
-      console.log('valueAfterSlippage>>>', valueAfterSlippage);
+      console.log("valueAfterSlippage>>>", valueAfterSlippage);
 
       setReceivedAmount(getFlooredFixed(valueAfterSlippage, 8));
     }, 800);
@@ -163,18 +163,18 @@ function ChainAbstraction({ state }) {
     switch (coinFamily) {
       case 7:
         return {
-          coinFamilyName: 'TICS',
-          tokenType: 'ERC20',
+          coinFamilyName: "TICS",
+          tokenType: "ERC20",
           rpc: process.env.REACT_APP_QUBETIC_RPC,
         };
       case 3:
         return {
-          coinFamilyName: 'BTC',
+          coinFamilyName: "BTC",
           tokenType: null,
           rpc: process.env.REACT_APP_BTC_RPC,
         };
       default:
-        return { coinFamilyName: 'ETH', tokenType: 'ERC20', rpc: '' };
+        return { coinFamilyName: "ETH", tokenType: "ERC20", rpc: "" };
     }
   };
 
@@ -206,10 +206,10 @@ function ChainAbstraction({ state }) {
 
   const init = async () => {
     try {
-      console.log('account.coinFamilyAndAddress', account.coinFamilyAndAddress);
+      console.log("account.coinFamilyAndAddress", account.coinFamilyAndAddress);
 
       const data = await server.post(
-        '/chainAbstraction/getCoinList',
+        "/chainAbstraction/getCoinList",
         {
           coinFamilies: [3, 7],
           addrsList: Object.values(account.coinFamilyAndAddress).filter(
@@ -221,15 +221,15 @@ function ChainAbstraction({ state }) {
         }
       );
 
-      console.log('🚀 ~ init ~ data:', data);
+      console.log("🚀 ~ init ~ data:", data);
       setTotal(data?.data?.data?.length || 0);
 
-      const { chains } = await chrome.storage.local.get('chains');
+      const { chains } = await chrome.storage.local.get("chains");
       let tokens = data?.data?.data?.map((token) =>
         buildTokenObject(token, chains, account)
       );
 
-      console.log('tokens', tokens);
+      console.log("tokens", tokens);
 
       if (tokens.length === 0) {
         setCompentLoading(false);
@@ -238,13 +238,13 @@ function ChainAbstraction({ state }) {
 
       const activeTokens = tokens;
       let modifiedList = await uniqueList(allToken, tokens);
-      console.log('🚀 ~ init ~ modifiedList:', modifiedList);
+      console.log("🚀 ~ init ~ modifiedList:", modifiedList);
 
       setAllTokens(modifiedList);
       setFilteredTokens(modifiedList);
 
-      let { crossToken1 } = await chrome.storage.local.get('crossToken1');
-      let { crossToken2 } = await chrome.storage.local.get('crossToken2');
+      let { crossToken1 } = await chrome.storage.local.get("crossToken1");
+      let { crossToken2 } = await chrome.storage.local.get("crossToken2");
 
       if (!crossToken1 && !crossToken2) {
         let myToken1 =
@@ -267,8 +267,8 @@ function ChainAbstraction({ state }) {
         setToken1(myToken1);
         setToken2(myToken2);
         setCompentLoading(true);
-        console.log('myToken1', myToken1);
-        console.log('myToken2', myToken2);
+        console.log("myToken1", myToken1);
+        console.log("myToken2", myToken2);
         const route = await crossChainHelper.current.getQuoteAndRoute(
           myToken1?.symbol,
           myToken2?.symbol,
@@ -278,7 +278,7 @@ function ChainAbstraction({ state }) {
         if (
           route?.status &&
           route?.message &&
-          (route?.status !== '' || route?.message !== '')
+          (route?.status !== "" || route?.message !== "")
         ) {
           setCompentLoading(false);
           return messageApi.error(route?.message);
@@ -310,7 +310,7 @@ function ChainAbstraction({ state }) {
           if (
             route?.status &&
             route?.message &&
-            (route?.status !== '' || route?.message !== '')
+            (route?.status !== "" || route?.message !== "")
           ) {
             setCompentLoading(false);
             return messageApi.error(route?.message);
@@ -322,7 +322,7 @@ function ChainAbstraction({ state }) {
         setCompentLoading(false);
       }
 
-      console.log('state && state.coinId', state, state?.coinId);
+      console.log("state && state.coinId", state, state?.coinId);
 
       if (state?.coinId) {
         const tokenExists = activeTokens.find(
@@ -336,7 +336,7 @@ function ChainAbstraction({ state }) {
           );
 
           if (!tokenFromSearch) {
-            return messageApi.error('Token not available for swap.');
+            return messageApi.error("Token not available for swap.");
           }
 
           if (crossToken2?.id !== tokenFromSearch.id) {
@@ -344,15 +344,15 @@ function ChainAbstraction({ state }) {
             await chrome.storage.local.set({ crossToken1: tokenFromSearch });
             setToken1(crossToken1);
           } else {
-            messageApi.error('Cannot set the same tokens on both sides.');
+            messageApi.error("Cannot set the same tokens on both sides.");
           }
         }
       }
     } catch (error) {
-      console.log('error in the init function:', error);
+      console.log("error in the init function:", error);
       setCompentLoading(false);
       messageApi.error(
-        'Unable to perform swap currently. Please try again later.'
+        "Unable to perform swap currently. Please try again later."
       );
     }
   };
@@ -391,7 +391,7 @@ function ChainAbstraction({ state }) {
           if (
             route?.status &&
             route?.message &&
-            (route?.status !== '' || route?.message !== '')
+            (route?.status !== "" || route?.message !== "")
           ) {
             setCompentLoading(false);
             return messageApi.error(route?.message);
@@ -409,9 +409,9 @@ function ChainAbstraction({ state }) {
 
       updateRef.current = true;
     } catch (error) {
-      console.log('ERR ', error);
+      console.log("ERR ", error);
       setCompentLoading(false);
-      return messageApi.error('Pair not available for swap.');
+      return messageApi.error("Pair not available for swap.");
     }
   };
 
@@ -469,7 +469,7 @@ function ChainAbstraction({ state }) {
       1
     );
     if (route?.status && route?.message) {
-      if (route?.status != '' || route?.message != '') {
+      if (route?.status != "" || route?.message != "") {
         return messageApi.error(route?.message);
       }
     }
@@ -498,7 +498,7 @@ function ChainAbstraction({ state }) {
       );
       // console.log("ROUTES:::::::730", route);
       if (route?.status && route?.message) {
-        if (route?.status != '' || route?.message != '') {
+        if (route?.status != "" || route?.message != "") {
           return messageApi.error(route?.message);
         }
       }
@@ -525,9 +525,9 @@ function ChainAbstraction({ state }) {
             depositMax: 10,
           },
         };
-        console.log('🚀 ~ handleRouteQuotation ~ route:', route);
+        console.log("🚀 ~ handleRouteQuotation ~ route:", route);
         setRoute(route);
-        console.log('🚀 ~ handleRouteQuotation ~ setRoute(route);:');
+        console.log("🚀 ~ handleRouteQuotation ~ setRoute(route);:");
         setReceivedAmount(
           toFixed(getFlooredFixed(parseFloat(route?.outAmount), 6))
         );
@@ -565,7 +565,7 @@ function ChainAbstraction({ state }) {
       };
 
       if (isNaN(parsedAmount) || isNaN(parsedReceivedAmount)) {
-        return throwError('Please enter a valid amount to proceed.');
+        return throwError("Please enter a valid amount to proceed.");
       }
 
       if (parsedAmount < depositMin) {
@@ -580,6 +580,17 @@ function ChainAbstraction({ state }) {
         );
       }
 
+      if (token2?.coinFamily === 3) {
+        const isValidBTCAddress = BTCHelper.validateBTCAddress(toAddress);
+        if (!isValidBTCAddress) {
+          return throwError("Please enter a valid Bitcoin address.");
+        }
+      } else if (token1?.chain?.isEVM == true) {
+        const isValidEVMAddress = Web3Helper.validateETHAddress(toAddress);
+        if (!isValidEVMAddress) {
+          return throwError("Please enter a valid address.");
+        }
+      }
       // if (parsedBalance < parsedAmount) {
       //   console.log('first insufficient balance case');
       //   return throwError(
@@ -625,7 +636,7 @@ function ChainAbstraction({ state }) {
         console.log('gasPrices', gasPrice);
         if (!gasPrice) {
           store.dispatch(setLoading(false));
-          return throwError('Unable to fetch gas price at the moment.');
+          return throwError("Unable to fetch gas price at the moment.");
         }
 
         const gasInEth = (gasPrice.fast * 1e9 * gasPrice.estimate) / 1e18;
@@ -643,12 +654,12 @@ function ChainAbstraction({ state }) {
 
         if (!hasEnoughNative) {
           return throwError(
-            'Insufficient native balance to proceed with the transaction.'
+            "Insufficient native balance to proceed with the transaction."
           );
         }
 
         const { data: parentCoinData } = await server.post(
-          '/wallet/nativeCoinFiatPrice',
+          "/wallet/nativeCoinFiatPrice",
           {
             coin_family: token1.coinFamily,
             fiat_currency: currency.name,
@@ -664,7 +675,7 @@ function ChainAbstraction({ state }) {
         );
         console.log('swapDetails', swapDetails);
         finalizeSwap(swapDetails);
-      } else if (token1?.chain?.currencyName === 'BTC') {
+      } else if (token1?.chain?.currencyName === "BTC") {
         const gasPrice = Math.max(await BTCHelper.getBTCGasPrice(), 10);
         const networkFee = gasPrice / 1e8;
 
@@ -672,8 +683,8 @@ function ChainAbstraction({ state }) {
         finalizeSwap(swapDetails);
       }
     } catch (error) {
-      console.error('Error in handleChainAbstraction:', error);
-      messageApi.error(error.message || 'An error occurred during processing.');
+      console.error("Error in handleChainAbstraction:", error);
+      messageApi.error(error.message || "An error occurred during processing.");
     } finally {
       setIsProcessing(false);
     }
@@ -694,7 +705,7 @@ function ChainAbstraction({ state }) {
         );
         if (!gasPrice) {
           setIsProcessing(false);
-          return messageApi.error('Unable to fetch gas price at the moment.');
+          return messageApi.error("Unable to fetch gas price at the moment.");
         }
 
         networkFee =
@@ -702,14 +713,14 @@ function ChainAbstraction({ state }) {
           Math.pow(10, 18);
         setTransactionResult((prev) => ({
           ...prev,
-          symbol: 'ETH',
+          symbol: "ETH",
         }));
-      } else if (token1?.chain?.currencyName === 'BTC') {
+      } else if (token1?.chain?.currencyName === "BTC") {
         const gasPrice = Math.max(await BTCHelper.getBTCGasPrice(), 10);
         networkFee = gasPrice / 1e8;
         setTransactionResult((prev) => ({
           ...prev,
-          symbol: 'BTC',
+          symbol: "BTC",
         }));
       }
       console.log('token1', token1);
@@ -730,12 +741,12 @@ function ChainAbstraction({ state }) {
         toAddress
       );
 
-      console.log('data', data);
+      console.log("data", data);
 
       if (!data) {
         setIsProcessing(false);
         return messageApi.error(
-          'Unable to process your transaction at the moment. Please try again later.'
+          "Unable to process your transaction at the moment. Please try again later."
         );
       }
       setIsOpen(!isOpen);
@@ -748,8 +759,8 @@ function ChainAbstraction({ state }) {
       }));
       setIsProcessModal(true);
     } catch (error) {
-      console.error('Error in handleAbstraction:', error);
-      messageApi.error('Transaction failed. Please try again.');
+      console.error("Error in handleAbstraction:", error);
+      messageApi.error("Transaction failed. Please try again.");
     } finally {
       setIsProcessing(false);
     }
@@ -757,17 +768,17 @@ function ChainAbstraction({ state }) {
 
   return (
     <>
-      <MenuRestofHeaders backTo={'/wallet'} title={'Chain Abstraction'} />
+      <MenuRestofHeaders backTo={"/wallet"} title={"Chain Abstraction"} />
       <div className="flexedContent">
         <div
-          className={`${'fixedContent height-571'} ${
-            height <= 600 ? 'fixedContentOuterExt' : ''
+          className={`${"fixedContent height-571"} ${
+            height <= 600 ? "fixedContentOuterExt" : ""
           }`}
         >
-          <div style={{ width: '100%', marginBottom: '20px' }}>
+          <div style={{ width: "100%", marginBottom: "20px" }}>
             {contextHolder}
             <div
-              style={{ width: '90%', marginRight: 'auto', marginLeft: 'auto' }}
+              style={{ width: "90%", marginRight: "auto", marginLeft: "auto" }}
               className="swap "
             >
               <div className="swap_onChain ">
@@ -781,13 +792,13 @@ function ChainAbstraction({ state }) {
                       inputMode="decimal"
                       onKeyDown={(e) => {
                         const allowedKeys = [
-                          'Backspace',
-                          'Tab',
-                          'ArrowLeft',
-                          'ArrowRight',
-                          'Delete',
-                          'Home',
-                          'End',
+                          "Backspace",
+                          "Tab",
+                          "ArrowLeft",
+                          "ArrowRight",
+                          "Delete",
+                          "Home",
+                          "End",
                         ];
 
                         if (allowedKeys.includes(e.key)) return;
@@ -800,8 +811,8 @@ function ChainAbstraction({ state }) {
                           setPercent(null);
                         }
 
-                        const [beforeDecimal = '', afterDecimal = ''] =
-                          _amount.split('.');
+                        const [beforeDecimal = "", afterDecimal = ""] =
+                          _amount.split(".");
                         const maxCharactersBeforeDecimal = 15;
                         const maxDecimals = token1.decimals;
 
@@ -814,7 +825,7 @@ function ChainAbstraction({ state }) {
                       }}
                       value={amount}
                     />
-                    <p style={{ marginBottom: '8px' }}>
+                    <p style={{ marginBottom: "8px" }}>
                       {currency?.symbol}
                       {addCommasToNumber(
                         getFlooredFixed(
@@ -822,7 +833,7 @@ function ChainAbstraction({ state }) {
                             parseFloat(token1 ? token1.price : 0),
                           2
                         )
-                      ) !== 'NaN'
+                      ) !== "NaN"
                         ? addCommasToNumber(
                             getFlooredFixed(
                               parseFloat(amount ? amount : 0) *
@@ -830,10 +841,10 @@ function ChainAbstraction({ state }) {
                               2
                             )
                           )
-                        : '0.00'}
+                        : "0.00"}
                     </p>
                   </div>
-                  <div style={{ textAlign: 'right' }}>
+                  <div style={{ textAlign: "right" }}>
                     <Select
                       suffixIcon={<img src={DownArrowSuffix} />}
                       style={{
@@ -854,26 +865,26 @@ function ChainAbstraction({ state }) {
                               {!token1?.image ? (
                                 <div
                                   style={{
-                                    alignItems: 'center',
-                                    backgroundColor: 'rgba(98,126,234,.2)',
-                                    borderRadius: '49%',
-                                    display: 'flex',
-                                    height: '29px',
-                                    justifyContent: 'center',
-                                    width: '29px',
-                                    marginRight: '15px',
+                                    alignItems: "center",
+                                    backgroundColor: "rgba(98,126,234,.2)",
+                                    borderRadius: "49%",
+                                    display: "flex",
+                                    height: "29px",
+                                    justifyContent: "center",
+                                    width: "29px",
+                                    marginRight: "15px",
                                   }}
                                 >
-                                  {token1?.name.split('')[0]}
+                                  {token1?.name.split("")[0]}
                                 </div>
                               ) : (
                                 <img
                                   style={{
-                                    height: '30px',
-                                    width: '30px',
-                                    objectFit: 'contain',
-                                    position: 'relative',
-                                    borderRadius: '15px',
+                                    height: "30px",
+                                    width: "30px",
+                                    objectFit: "contain",
+                                    position: "relative",
+                                    borderRadius: "15px",
                                   }}
                                   alt=""
                                   src={token1?.image}
@@ -900,11 +911,11 @@ function ChainAbstraction({ state }) {
                               <span className="flexedItemSelect">
                                 <img
                                   style={{
-                                    height: '20px',
-                                    width: '20px',
-                                    objectFit: 'contain',
-                                    marginLeft: '20px',
-                                    marginRight: '20px',
+                                    height: "20px",
+                                    width: "20px",
+                                    objectFit: "contain",
+                                    marginLeft: "20px",
+                                    marginRight: "20px",
                                   }}
                                   src={token?.image}
                                 />
@@ -915,13 +926,13 @@ function ChainAbstraction({ state }) {
                         })}
                     />
                     <div className="swap_onChain_pay">
-                      <p style={{ textAlign: 'right' }}>
-                        Balance{' '}
+                      <p style={{ textAlign: "right" }}>
+                        Balance{" "}
                         <span>
                           {addCommasToNumber(
                             parseFloat(getFlooredFixed(balance || 0, 6))
-                          )}{' '}
-                          {token1?.symbol}{' '}
+                          )}{" "}
+                          {token1?.symbol}{" "}
                         </span>
                       </p>
                     </div>
@@ -929,10 +940,10 @@ function ChainAbstraction({ state }) {
                 </div>
               </div>
 
-              <div style={{ marginTop: '10px', width: '100%' }}>
+              <div style={{ marginTop: "10px", width: "100%" }}>
                 <InputField
-                  placeholder={'From Address'}
-                  type={'text'}
+                  placeholder={"From Address"}
+                  type={"text"}
                   label="From Address"
                   value={token1?.address}
                 />
@@ -947,8 +958,8 @@ function ChainAbstraction({ state }) {
                     height={44}
                     style={
                       loading
-                        ? { pointerEvents: 'none' }
-                        : { pointerEvents: 'auto' }
+                        ? { pointerEvents: "none" }
+                        : { pointerEvents: "auto" }
                     }
                     onClick={() => {
                       if (token2?.iHave) {
@@ -976,7 +987,7 @@ function ChainAbstraction({ state }) {
                       placeholder="0.000"
                       value={receivedAmount}
                     />
-                    <p style={{ marginBottom: '8px' }}>
+                    <p style={{ marginBottom: "8px" }}>
                       {currency.symbol}
                       {addCommasToNumber(
                         getFlooredFixed(
@@ -987,7 +998,7 @@ function ChainAbstraction({ state }) {
                       )}
                     </p>
                   </div>
-                  <div style={{ textAlign: 'right' }}>
+                  <div style={{ textAlign: "right" }}>
                     <Select
                       suffixIcon={<img src={DownArrowSuffix} />}
                       style={{
@@ -1008,26 +1019,26 @@ function ChainAbstraction({ state }) {
                               {!token2?.image ? (
                                 <div
                                   style={{
-                                    alignItems: 'center',
-                                    backgroundColor: 'rgba(98,126,234,.2)',
-                                    borderRadius: '49%',
-                                    display: 'flex',
-                                    height: '29px',
-                                    justifyContent: 'center',
-                                    width: '29px',
-                                    marginRight: '15px',
+                                    alignItems: "center",
+                                    backgroundColor: "rgba(98,126,234,.2)",
+                                    borderRadius: "49%",
+                                    display: "flex",
+                                    height: "29px",
+                                    justifyContent: "center",
+                                    width: "29px",
+                                    marginRight: "15px",
                                   }}
                                 >
-                                  {token2?.name.split('')[0]}
+                                  {token2?.name.split("")[0]}
                                 </div>
                               ) : (
                                 <img
                                   style={{
-                                    height: '30px',
-                                    width: '30px',
-                                    objectFit: 'contain',
-                                    position: 'relative',
-                                    borderRadius: '15px',
+                                    height: "30px",
+                                    width: "30px",
+                                    objectFit: "contain",
+                                    position: "relative",
+                                    borderRadius: "15px",
                                   }}
                                   alt=""
                                   src={token2?.image}
@@ -1053,11 +1064,11 @@ function ChainAbstraction({ state }) {
                               <span className="flexedItemSelect">
                                 <img
                                   style={{
-                                    height: '20px',
-                                    width: '20px',
-                                    objectFit: 'contain',
-                                    marginLeft: '20px',
-                                    marginRight: '20px',
+                                    height: "20px",
+                                    width: "20px",
+                                    objectFit: "contain",
+                                    marginLeft: "20px",
+                                    marginRight: "20px",
                                   }}
                                   src={token?.image}
                                 />
@@ -1068,23 +1079,23 @@ function ChainAbstraction({ state }) {
                         })}
                     />
                     <div className="swap_onChain_pay">
-                      <p style={{ textAlign: 'right' }}>
-                        Balance{' '}
+                      <p style={{ textAlign: "right" }}>
+                        Balance{" "}
                         <span>
                           {addCommasToNumber(
                             parseFloat(getFlooredFixed(token2?.balance || 0, 6))
-                          )}{' '}
-                          {token2?.symbol}{' '}
+                          )}{" "}
+                          {token2?.symbol}{" "}
                         </span>
                       </p>
                     </div>
                   </div>
                 </div>
               </div>
-              <div style={{ marginTop: '10px', width: '100%' }}>
+              <div style={{ marginTop: "10px", width: "100%" }}>
                 <InputField
-                  placeholder={'To Address'}
-                  type={'text'}
+                  placeholder={"To Address"}
+                  type={"text"}
                   label="To Address"
                   value={toAddress}
                   getData={(address) => {
@@ -1094,7 +1105,7 @@ function ChainAbstraction({ state }) {
               </div>
               <div
                 style={{
-                  marginTop: '10px',
+                  marginTop: "10px",
                 }}
               >
                 <ButtonComp
@@ -1103,12 +1114,12 @@ function ChainAbstraction({ state }) {
                     isProcessing
                       ? 'Processing...'
                       : amount === null || amount === 0
-                      ? 'Enter Amount'
-                      : toAddress === '' || !toAddress
-                      ? 'Enter Recipient Address'
-                      : 'Abstract'
+                      ? "Enter Amount"
+                      : toAddress === "" || !toAddress
+                      ? "Enter Recipient Address"
+                      : "Abstract"
                   }
-                  maxWidth={'100%'}
+                  maxWidth={"100%"}
                   disabled={
                     !token1 ||
                     !token2 ||
@@ -1134,7 +1145,7 @@ function ChainAbstraction({ state }) {
             }}
             open={selectDrawer}
             closeIcon={
-              theme == 'darkTheme' ? (
+              theme == "darkTheme" ? (
                 <img src={darkclose} />
               ) : (
                 <img src={ModalCloseIcon} />
@@ -1145,17 +1156,17 @@ function ChainAbstraction({ state }) {
             <div
               className="contain"
               style={{
-                height: '100%',
-                width: '100%',
-                display: 'flex',
-                flexDirection: 'column',
+                height: "100%",
+                width: "100%",
+                display: "flex",
+                flexDirection: "column",
               }}
             >
               {show ? (
-                <div className="search" style={{ marginBottom: '30px' }}>
+                <div className="search" style={{ marginBottom: "30px" }}>
                   <InputField
-                    placeholder={'Search name or paste address'}
-                    coloredBg={'#eef3f9'}
+                    placeholder={"Search name or paste address"}
+                    coloredBg={"#eef3f9"}
                     value={keyword}
                     checkForSymbols={true}
                     getData={(value) => {
@@ -1185,7 +1196,7 @@ function ChainAbstraction({ state }) {
                         <img
                           src={Search}
                           style={{
-                            width: '17px',
+                            width: "17px",
                           }}
                           alt=""
                         />
@@ -1200,7 +1211,7 @@ function ChainAbstraction({ state }) {
                 className="right"
                 style={{
                   flex: 1,
-                  overflow: 'scroll',
+                  overflow: "scroll",
                 }}
               >
                 {filteredTokens.filter((el) => {
@@ -1226,30 +1237,30 @@ function ChainAbstraction({ state }) {
                       <div
                         className="design"
                         style={{
-                          width: '100%',
+                          width: "100%",
                         }}
                       >
                         <div
                           className="token"
                           style={{
-                            display: 'flex',
-                            justifyContent: 'flex-start',
-                            alignItems: 'center',
-                            marginBottom: '20px',
-                            padding: '8px',
-                            borderRadius: '30px',
-                            marginLeft: '7px',
-                            fontSize: '11px',
-                            cursor: 'pointer',
-                            width: '100%;',
+                            display: "flex",
+                            justifyContent: "flex-start",
+                            alignItems: "center",
+                            marginBottom: "20px",
+                            padding: "8px",
+                            borderRadius: "30px",
+                            marginLeft: "7px",
+                            fontSize: "11px",
+                            cursor: "pointer",
+                            width: "100%;",
                             backgroundColor:
                               token1?.id == token?.id || token2?.id == token?.id
-                                ? 'transparent'
-                                : 'transparent',
+                                ? "transparent"
+                                : "transparent",
                             color:
                               token1?.id == token?.id || token2?.id == token?.id
-                                ? '#000'
-                                : '#000',
+                                ? "#000"
+                                : "#000",
                           }}
                           onClick={() => {
                             if (
@@ -1263,7 +1274,7 @@ function ChainAbstraction({ state }) {
                                 setKeyword(null);
                                 setFilteredTokens(allToken);
                                 return messageApi.error(
-                                  'You cannot select the same tokens on both sides. Please select a different token.'
+                                  "You cannot select the same tokens on both sides. Please select a different token."
                                 );
                               }
                               setToken1(token);
@@ -1273,7 +1284,7 @@ function ChainAbstraction({ state }) {
                                 setKeyword(null);
                                 setFilteredTokens(allToken);
                                 return messageApi.error(
-                                  'You cannot select the same tokens on both sides. Please select a different token.'
+                                  "You cannot select the same tokens on both sides. Please select a different token."
                                 );
                               }
                               setToken2(token);
@@ -1287,24 +1298,24 @@ function ChainAbstraction({ state }) {
                           {!token.image ? (
                             <div
                               style={{
-                                alignItems: 'center',
-                                backgroundColor: 'rgba(98,126,234,.2)',
-                                borderRadius: '49%',
-                                display: 'flex',
-                                height: '29px',
-                                justifyContent: 'center',
-                                width: '29px',
-                                marginRight: '15px',
+                                alignItems: "center",
+                                backgroundColor: "rgba(98,126,234,.2)",
+                                borderRadius: "49%",
+                                display: "flex",
+                                height: "29px",
+                                justifyContent: "center",
+                                width: "29px",
+                                marginRight: "15px",
                               }}
                             >
-                              {' '}
-                              {token.name.split('')[0]}
+                              {" "}
+                              {token.name.split("")[0]}
                             </div>
                           ) : (
                             <img
                               style={{
-                                width: '29px',
-                                marginRight: '15px',
+                                width: "29px",
+                                marginRight: "15px",
                               }}
                               src={token.image}
                               alt=""
@@ -1313,16 +1324,16 @@ function ChainAbstraction({ state }) {
 
                           <p>
                             <span
-                              style={{ fontSize: '17px' }}
+                              style={{ fontSize: "17px" }}
                               className="noAddress"
                             >
-                              {token.name}{' '}
+                              {token.name}{" "}
                             </span>
                             <span
                               className="noAddress"
                               style={{
-                                fontSize: '11px',
-                                marginLeft: '5px',
+                                fontSize: "11px",
+                                marginLeft: "5px",
                               }}
                             >
                               {token.type ? ` /${token.type}` : null}
@@ -1334,16 +1345,16 @@ function ChainAbstraction({ state }) {
                 ) : (
                   <div
                     style={{
-                      textAlign: 'center',
+                      textAlign: "center",
                     }}
                   >
                     <p
                       className="noAddress"
                       style={{
-                        marginTop: '4%',
-                        marginBottom: '15px',
-                        fontWeight: 'bold',
-                        fontSize: '15px',
+                        marginTop: "4%",
+                        marginBottom: "15px",
+                        fontWeight: "bold",
+                        fontSize: "15px",
                       }}
                     >
                       No assets found
@@ -1371,7 +1382,7 @@ function ChainAbstraction({ state }) {
       />
 
       <ModalCustom
-        title={'Enter password'}
+        title={"Enter password"}
         handleCancel={() => setPasswordModal(!isPasswordModalOpen)}
         isModalOpen={isPasswordModalOpen}
         customClass="customClassModal"
@@ -1380,8 +1391,8 @@ function ChainAbstraction({ state }) {
         <div className="viewphrases">
           <div
             style={{
-              marginBottom: '36px',
-              width: '100%',
+              marginBottom: "36px",
+              width: "100%",
             }}
           >
             <InputFieldSimple
@@ -1393,7 +1404,7 @@ function ChainAbstraction({ state }) {
                   sessionPassword
                 );
                 if (!isCorrectPassword) {
-                  return messageApi.error('Incorrect password provided.');
+                  return messageApi.error("Incorrect password provided.");
                 }
                 setPasswordModal(false);
                 setIsOpen(!isOpen);
@@ -1402,15 +1413,15 @@ function ChainAbstraction({ state }) {
           </div>
 
           <ButtonComp
-            text={'Proceed'}
-            maxWidth={'100%'}
+            text={"Proceed"}
+            maxWidth={"100%"}
             disabled={isProcessing}
             onClick={async () => {
               const isCorrectPassword = await WalletHelper.verifyPassword(
                 sessionPassword
               );
               if (!isCorrectPassword) {
-                return messageApi.error('Incorrect password provided.');
+                return messageApi.error("Incorrect password provided.");
               }
               setPasswordModal(false);
               setIsOpen(!isOpen);
