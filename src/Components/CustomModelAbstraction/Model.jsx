@@ -1,6 +1,8 @@
 import React, { useEffect } from 'react';
 import './Model.scss';
 import { exponential_to_decimal } from '../../helpers/conversion.helper';
+import ButtonComp from '../ButtonComp/ButtonComp';
+import ModalCustom from '../ModalCustom/ModalCustom';
 
 const AbstractProcessingModel = ({
   showProcessing,
@@ -9,6 +11,7 @@ const AbstractProcessingModel = ({
   setSuccessModal,
   transactionResult,
   setTransactionResult = null,
+  loader,
 }) => {
   const handleClose = () => {
     setSuccessModal(false);
@@ -28,46 +31,61 @@ const AbstractProcessingModel = ({
   };
 
   useEffect(() => {
-    if (showProcessing) {
-      setTimeout(() => {
+    console.log('showProcessing', showProcessing);
+    console.log('loader', loader);
+    if (showProcessing && loader) {
+      const timer = setTimeout(() => {
         setShowProcess(false);
         setSuccessModal(true);
       }, 5000);
+
+      return () => clearTimeout(timer);
     }
-  }, [showProcessing]);
+
+    if (showProcessing && !loader) {
+      setShowProcess(false);
+      setSuccessModal(true);
+    }
+  }, [showProcessing, loader]);
 
   if (showProcessing) {
     return (
-      <div className="model-overlay">
-        <div className="model-container">
-          <div className="model-content">
-            <div className="spinner"></div>
-            <h2>Processing Transaction</h2>
-            <p className="subtitle">Transaction under confirmation...</p>
+      <ModalCustom
+        title={''}
+        isModalOpen={showProcessing}
+        customClass="customClassModal"
+      >
+        {/* <div className="model-overlay"> */}
+        {/* <div className="model-container"> */}
+        <div className="model-content">
+          <div className="spinner"></div>
+          <h2>Processing Transaction</h2>
+          <p className="subtitle">Transaction under confirmation...</p>
 
-            <div className="steps">
-              <div className="step completed">
-                <span className="step-status">✓</span>
-                <span className="step-text">Validating transaction</span>
-              </div>
-
-              <div className="step active">
-                <span className="step-status spinner-small"></span>
-                <span className="step-text">Broadcasting to network</span>
-              </div>
-
-              <div className="step">
-                <span className="step-status"></span>
-                <span className="step-text">Confirming on blockchain</span>
-              </div>
+          <div className="steps">
+            <div className="step completed">
+              <span className="step-status">✓</span>
+              <span className="step-text">Validating transaction</span>
             </div>
 
-            <p className="note">
-              This may take a few minutes depending on network congestion
-            </p>
+            <div className="step active">
+              <span className="step-status spinner-small"></span>
+              <span className="step-text">Broadcasting to network</span>
+            </div>
+
+            <div className="step">
+              <span className="step-status"></span>
+              <span className="step-text">Confirming on blockchain</span>
+            </div>
           </div>
+
+          <p className="note">
+            This may take a few minutes depending on network congestion
+          </p>
+          {/* </div> */}
+          {/* </div> */}
         </div>
-      </div>
+      </ModalCustom>
     );
   }
 
@@ -85,55 +103,60 @@ const AbstractProcessingModel = ({
   }
   if (showSuccess) {
     return (
-      <div className="model-overlay">
-        <div className="model-container">
-          <div className="model-content success">
-            <div className="success-icon">✓</div>
-            <h2>{getStatusText(transactionResult?.status)}</h2>
-            <p className="subtitle">Your abstraction has been completed</p>
+      <ModalCustom
+        title={''}
+        handleCancel={() => setSuccessModal(false)}
+        isModalOpen={showSuccess}
+        customClass="customClassModal"
+        closable={true}
+      >
+        {/* <div className="model-overlay"> */}
+        {/* <div className="model-container"> */}
+        <div className="model-content success">
+          <div className="success-icon">✓</div>
+          <h2>{getStatusText(transactionResult?.status)}</h2>
+          {/* <p className="subtitle">Your abstraction has been completed</p> */}
 
-            <div className="transaction-details">
-              <div className="transaction-hash">
-                <p>Transaction Hash</p>
-                <div className="hash-container">
-                  <span>{transactionResult?.hash}</span>
-                  <button className="copy-btn">📋</button>
-                </div>
-              </div>
-
-              <div className="transaction-info">
-                <div className="info-row">
-                  <span className="label">Status</span>
-                  <span className="value confirmed">
-                    {getStatusText(transactionResult?.status)}
-                  </span>
-                </div>
-
-                <div className="info-row">
-                  <span className="label">Solver</span>
-                  <span className="value">{transactionResult?.solver}</span>
-                </div>
-
-                <div className="info-row">
-                  <span className="label">Network Fee</span>
-                  <span className="value">
-                    {exponential_to_decimal(transactionResult?.fee)}{' '}
-                    {transactionResult?.symbol}
-                  </span>
-                </div>
+          <div className="transaction-details">
+            <div className="transaction-hash">
+              <p>Transaction Hash</p>
+              <div className="hash-container">
+                <span>{transactionResult?.hash}</span>
+                <button className="copy-btn">📋</button>
               </div>
             </div>
-            <div className="actions">
-              <button className="close-btn" onClick={handleClose}>
-                Close
-              </button>
-              <button className="explorer-btn" onClick={handleExplorer}>
-                View on Explorer
-              </button>
+
+            <div className="transaction-info">
+              <div className="info-row">
+                <span className="label">Status</span>
+                <span className="value confirmed">
+                  {getStatusText(transactionResult?.status)}
+                </span>
+              </div>
+
+              <div className="info-row">
+                <span className="label">Solver</span>
+                <span className="value">{transactionResult?.solver}</span>
+              </div>
+
+              <div className="info-row">
+                <span className="label">Network Fee</span>
+                <span className="value">
+                  {exponential_to_decimal(transactionResult?.fee)}{' '}
+                  {transactionResult?.symbol}
+                </span>
+              </div>
             </div>
           </div>
+          <ButtonComp
+            text={'View on Explorer'}
+            maxWidth={'100%'}
+            onClick={handleExplorer}
+          />
         </div>
-      </div>
+        {/* </div> */}
+        {/* </div> */}
+      </ModalCustom>
     );
   }
 

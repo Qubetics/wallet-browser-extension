@@ -39,7 +39,7 @@ const ConfirmAbstractModal = ({
   const handleProceed = () => {
     if (isProcessing) return;
     setIsOpen(!isOpen);
-    // handleAbstract();
+    handleAbstract();
   };
 
   return (
@@ -350,8 +350,8 @@ const ConfirmAbstractModal = ({
                 handleProceed();
               }}
               text={
-                isProcessing 
-                  ? 'Processing...' 
+                isProcessing
+                  ? 'Processing...'
                   : amount === null || amount === 0
                   ? 'Enter Amount'
                   : toAddress === '' || !toAddress

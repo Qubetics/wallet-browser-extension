@@ -3,7 +3,7 @@ import TOKEN_ABI from '../Assets/JsonFiles/tokenContract.ABI.json';
 import base58 from 'bs58';
 import BigNumber from 'bignumber.js';
 export function numberWithSpaces(x) {
-  return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+  return x?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
 }
 
 export function modifyString(str) {
@@ -27,9 +27,9 @@ export function generateString(length) {
 }
 
 export const toFixed = (num, fixed) => {
-  num = num.toString(); //If it's not already a String
-  if (num.includes('.')) {
-    num = num.slice(0, num.indexOf('.') + (fixed + 1));
+  num = num?.toString(); //If it's not already a String
+  if (num?.includes('.')) {
+    num = num?.slice(0, num?.indexOf('.') + (fixed + 1));
   }
   return Number(num);
 };
@@ -107,7 +107,7 @@ export const formatNumberUSD = (value) => {
     return value;
   }
 
-  const decimalPlaces = (value.toString().split('.')[1] || '').length;
+  const decimalPlaces = (value?.toString().split('.')[1] || '').length;
 
   const formattedNumber = numberValue.toLocaleString(undefined, {
     maximumFractionDigits: decimalPlaces > 2 ? 2 : decimalPlaces,
@@ -116,15 +116,15 @@ export const formatNumberUSD = (value) => {
   return formattedNumber;
 };
 export const formatNumberFiat = (value) => {
-  const decimalPlaces = (value.toString().split('.')[1] || '').length;
+  const decimalPlaces = (value?.toString().split('.')[1] || '').length;
   const parsedValue = parseFloat(value);
 
   if (decimalPlaces > 8) {
     // Truncate the number to 8 decimal places without rounding
     const truncatedValue = Math.floor(parsedValue * 10 ** 8) / 10 ** 8;
-    return truncatedValue.toString();
+    return truncatedValue?.toString();
   } else {
-    return parsedValue.toString();
+    return parsedValue?.toString();
   }
 };
 

@@ -193,7 +193,7 @@ export const formatSmallNumber = (price) => {
 
 export const exponential_to_decimal = (exponential) => {
   try {
-    let decimal = exponential.toString().toLowerCase();
+    let decimal = exponential?.toString()?.toLowerCase();
     if (decimal.includes('e+')) {
       const exponentialSplitted = decimal.split('e+');
       let postfix = '';

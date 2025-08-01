@@ -702,7 +702,7 @@ function ChainAbstraction({ state }) {
           Math.pow(10, 18);
         setTransactionResult((prev) => ({
           ...prev,
-          symbol: 'ETH',
+          symbol: token1?.coinSymbol.toUpperCase(),
         }));
       } else if (token1?.chain?.currencyName === 'BTC') {
         const gasPrice = Math.max(await BTCHelper.getBTCGasPrice(), 10);
@@ -1067,7 +1067,7 @@ function ChainAbstraction({ state }) {
                           };
                         })}
                     />
-                    <div className="swap_onChain_pay">
+                    {/* <div className="swap_onChain_pay">
                       <p style={{ textAlign: 'right' }}>
                         Balance{' '}
                         <span>
@@ -1077,7 +1077,7 @@ function ChainAbstraction({ state }) {
                           {token2?.symbol}{' '}
                         </span>
                       </p>
-                    </div>
+                    </div> */}
                   </div>
                 </div>
               </div>
@@ -1371,7 +1371,7 @@ function ChainAbstraction({ state }) {
       />
 
       <ModalCustom
-        title={'Enter password'}
+        title={'Verify Password'}
         handleCancel={() => setPasswordModal(!isPasswordModalOpen)}
         isModalOpen={isPasswordModalOpen}
         customClass="customClassModal"
@@ -1424,6 +1424,7 @@ function ChainAbstraction({ state }) {
         showSuccess={showsuccess}
         setSuccessModal={setShowSuccess}
         transactionResult={transactionresult}
+        loader={true}
       />
     </>
   );

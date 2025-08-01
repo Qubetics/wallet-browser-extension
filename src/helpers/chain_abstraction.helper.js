@@ -376,7 +376,7 @@ export class ChainAbstractionHelper {
         receiveAmount,
         walletAddress,
         account.jwtToken,
-        'tb1qe6hf4x7qark8cg0kcm9z7rhdgmtkwwppst006v' // Optional override
+        toAddress
       );
       console.log('🚀 ~ accountExchange response:', response);
       const orderData = response?.data?.data?.data;
@@ -405,7 +405,7 @@ export class ChainAbstractionHelper {
         hash = await this.createRawAndBroadCastTransactionEvm({
           to: toAddress,
           from: walletAddress,
-          amount: receiveAmount,
+          amount: depositAmount,
           coinId: fromCoin.id,
           fiatPrice: fiatValue,
           networkFeeInFiat: 0,
@@ -450,13 +450,6 @@ export class ChainAbstractionHelper {
       const transactionResult = await this.pollIntentStatus(intentHash);
 
       console.log('transactionResult', transactionResult);
-
-      // --- Return result ---
-      // return {
-      //   hash: transactionResult?.data?.intentHash,
-      //   status: transactionResult?.data?.status,
-      //   solver: transactionResult?.data?.solverId,
-      // };
 
       return {
         hash: transactionResult?.data?.intent_hash,

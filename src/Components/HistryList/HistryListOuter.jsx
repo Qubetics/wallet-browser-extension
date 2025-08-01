@@ -15,6 +15,7 @@ function HistoryListOuter(props) {
     hash: '',
     status: '',
     solver: '',
+    symbol: '',
   });
   const [showsuccess, setShowSuccess] = useState(false);
   const [isProcessModalOpen, setIsProcessModal] = useState(false);
@@ -57,6 +58,7 @@ function HistoryListOuter(props) {
           status: resposne?.data?.status,
           solver: resposne?.data?.solver_id,
           fee: intentData?.fees,
+          symbol: allData?.coin_data?.coin_symbol?.toUpperCase(),
         }));
         setIsProcessModal(true);
       }
@@ -198,6 +200,7 @@ function HistoryListOuter(props) {
         setSuccessModal={setShowSuccess}
         transactionResult={transactionResult}
         setTransactionResult={setTransactionResult}
+        loader={false}
       />
     </>
   );
