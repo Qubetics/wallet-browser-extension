@@ -617,14 +617,16 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
           </Link>
         )}
 
-{path !== 'currencyDetails' && (
+        {path !== 'currencyDetails' && (
           <Link
             onClick={(e) => {
               e.preventDefault();
               if (path === 'currencyDetails') {
                 showModal();
               } else {
-                navigate('/chain-abstraction', { state: { path: '/chain-abstraction' } });
+                navigate('/chain-abstraction', {
+                  state: { path: '/chain-abstraction' },
+                });
                 store.dispatch(
                   setFilter({
                     coinId: 'all',
@@ -652,7 +654,7 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
                 <img src={history} height={50} width={50} />
               )}
             </div>
-            <span>Chain</span>
+            <span>Abstract</span>
           </Link>
         )}
       </div>

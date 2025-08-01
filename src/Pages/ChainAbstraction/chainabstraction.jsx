@@ -247,19 +247,19 @@ function ChainAbstraction({ state }) {
       let { crossToken2 } = await chrome.storage.local.get('crossToken2');
 
       if (!crossToken1 && !crossToken2) {
-
         let myToken1 =
-        modifiedList.find(
-          (token) => !token.tokenAddress && token.coinFamily == 2
-        ) ||
-        modifiedList.find((token) => !token.tokenAddress) ||
-        modifiedList[0];
-      
-      const myToken2 = modifiedList.find(
-        (token) => !token.tokenAddress && token.coinFamily == 1
-      ) || 
-      modifiedList.find((token) => token.id !== myToken1?.id) ||
-      modifiedList[1];
+          modifiedList.find(
+            (token) => !token.tokenAddress && token.coinFamily == 2
+          ) ||
+          modifiedList.find((token) => !token.tokenAddress) ||
+          modifiedList[0];
+
+        const myToken2 =
+          modifiedList.find(
+            (token) => !token.tokenAddress && token.coinFamily == 1
+          ) ||
+          modifiedList.find((token) => token.id !== myToken1?.id) ||
+          modifiedList[1];
 
         setBalance(myToken1.balance);
         setReceivedBalance(0);
@@ -613,7 +613,7 @@ function ChainAbstraction({ state }) {
       };
 
       if (token1?.chain?.isEVM) {
-        console.log("in the evm",token1);
+        console.log('in the evm', token1);
         const gasPrice = await Web3Helper.getGasPrice(
           token1?.chain.slug,
           token1?.address,
@@ -622,7 +622,7 @@ function ChainAbstraction({ state }) {
           token1?.tokenAddress,
           token1?.coinSymbol
         );
-        console.log("gasPrices",gasPrice);
+        console.log('gasPrices', gasPrice);
         if (!gasPrice) {
           store.dispatch(setLoading(false));
           return throwError('Unable to fetch gas price at the moment.');
@@ -639,7 +639,7 @@ function ChainAbstraction({ state }) {
           ? Number(nativeCoinBalance?.toString()) >= gasInEth
           : parsedBalance >= parsedAmount + gasInEth;
 
-          console.log("hasEnoughNative",hasEnoughNative);
+        console.log('hasEnoughNative', hasEnoughNative);
 
         if (!hasEnoughNative) {
           return throwError(
@@ -657,12 +657,12 @@ function ChainAbstraction({ state }) {
             headers: { Authorization: account.jwtToken },
           }
         );
-        console.log("data of the parentCoinData",parentCoinData);
+        console.log('data of the parentCoinData', parentCoinData);
         const swapDetails = buildSwapDetails(
           gasInEth,
           parentCoinData?.fiatCoinPrice?.value
         );
-        console.log("swapDetails",swapDetails);
+        console.log('swapDetails', swapDetails);
         finalizeSwap(swapDetails);
       } else if (token1?.chain?.currencyName === 'BTC') {
         const gasPrice = Math.max(await BTCHelper.getBTCGasPrice(), 10);
@@ -712,8 +712,8 @@ function ChainAbstraction({ state }) {
           symbol: 'BTC',
         }));
       }
-      console.log("token1",token1);
-      console.log("token2",token2);
+      console.log('token1', token1);
+      console.log('token2', token2);
       const data = await ChainAbstractionInstance.current.SendTransaction(
         token1,
         token2,
@@ -1100,8 +1100,8 @@ function ChainAbstraction({ state }) {
                 <ButtonComp
                   onClick={handleChainAbstraction}
                   text={
-                    isProcessing 
-                      ? 'Processing...' 
+                    isProcessing
+                      ? 'Processing...'
                       : amount === null || amount === 0
                       ? 'Enter Amount'
                       : toAddress === '' || !toAddress
