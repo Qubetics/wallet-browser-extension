@@ -624,7 +624,7 @@ function ChainAbstraction({ state }) {
       };
 
       if (token1?.chain?.isEVM) {
-        console.log("in the evm", token1);
+        console.log('in the evm', token1);
         const gasPrice = await Web3Helper.getGasPrice(
           token1?.chain.slug,
           token1?.address,
@@ -633,7 +633,7 @@ function ChainAbstraction({ state }) {
           token1?.tokenAddress,
           token1?.coinSymbol
         );
-        console.log("gasPrices", gasPrice);
+        console.log('gasPrices', gasPrice);
         if (!gasPrice) {
           store.dispatch(setLoading(false));
           return throwError("Unable to fetch gas price at the moment.");
@@ -650,7 +650,7 @@ function ChainAbstraction({ state }) {
           ? Number(nativeCoinBalance?.toString()) >= gasInEth
           : parsedBalance >= parsedAmount + gasInEth;
 
-        console.log("hasEnoughNative", hasEnoughNative);
+        console.log('hasEnoughNative', hasEnoughNative);
 
         if (!hasEnoughNative) {
           return throwError(
@@ -668,12 +668,12 @@ function ChainAbstraction({ state }) {
             headers: { Authorization: account.jwtToken },
           }
         );
-        console.log("data of the parentCoinData", parentCoinData);
+        console.log('data of the parentCoinData', parentCoinData);
         const swapDetails = buildSwapDetails(
           gasInEth,
           parentCoinData?.fiatCoinPrice?.value
         );
-        console.log("swapDetails", swapDetails);
+        console.log('swapDetails', swapDetails);
         finalizeSwap(swapDetails);
       } else if (token1?.chain?.currencyName === "BTC") {
         const gasPrice = Math.max(await BTCHelper.getBTCGasPrice(), 10);
@@ -723,8 +723,8 @@ function ChainAbstraction({ state }) {
           symbol: "BTC",
         }));
       }
-      console.log("token1", token1);
-      console.log("token2", token2);
+      console.log('token1', token1);
+      console.log('token2', token2);
       const data = await ChainAbstractionInstance.current.SendTransaction(
         token1,
         token2,
@@ -1112,7 +1112,7 @@ function ChainAbstraction({ state }) {
                   onClick={handleChainAbstraction}
                   text={
                     isProcessing
-                      ? "Processing..."
+                      ? 'Processing...'
                       : amount === null || amount === 0
                       ? "Enter Amount"
                       : toAddress === "" || !toAddress

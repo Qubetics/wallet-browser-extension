@@ -84,7 +84,7 @@ function Wallet() {
       setTotal(0);
       store.dispatch(setTokens([]));
       throwError('Something went wrong');
-    }finally{
+    } finally {
       setIsFetchingData(false);
       setLoading(false);
     }

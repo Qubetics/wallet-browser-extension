@@ -39,7 +39,7 @@ const ConfirmAbstractModal = ({
   const handleProceed = () => {
     if (isProcessing) return;
     setIsOpen(!isOpen);
-    handleAbstract();
+    // handleAbstract();
   };
 
   return (
@@ -47,7 +47,6 @@ const ConfirmAbstractModal = ({
       title={'Confirm Abstraction'}
       handleCancel={handleCancel}
       isModalOpen={isOpen}
-      handleOk={handleProceed}
       customClass="customClassModal"
       closable={!isProcessing}
     >
@@ -347,7 +346,9 @@ const ConfirmAbstractModal = ({
             }}
           >
             <ButtonComp
-              onClick={() => handleAbstract()}
+              onClick={() => {
+                handleProceed();
+              }}
               text={
                 isProcessing 
                   ? 'Processing...' 
