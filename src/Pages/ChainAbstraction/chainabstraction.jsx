@@ -591,7 +591,6 @@ function ChainAbstraction({ state }) {
           return throwError("Please enter a valid address.");
         }
       }
-
       // if (parsedBalance < parsedAmount) {
       //   console.log('first insufficient balance case');
       //   return throwError(
