@@ -584,7 +584,7 @@ function ChainAbstraction({ state }) {
         if (!isValidBTCAddress) {
           return throwError('Please enter a valid Bitcoin address.');
         }
-      } else if (token1?.chain?.isEVM == true) {
+      } else if (token2?.chain?.isEVM == true) {
         const isValidEVMAddress = Web3Helper.validateETHAddress(toAddress);
         if (!isValidEVMAddress) {
           return throwError('Please enter a valid address.');
