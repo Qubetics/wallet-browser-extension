@@ -501,6 +501,7 @@ export class Web3Helper {
       value: web3s.utils.toWei('0', 'ether'),
       data: web3s.utils.toHex(data),
     };
+    console.log('transaction  gas estimation',transaction);
     return await web3s.eth
       .estimateGas(transaction)
       .then((gasEstimate) => {
@@ -553,10 +554,17 @@ export class Web3Helper {
     });
     try {
       const { account } = store.getState();
+      console.log(' rpc_chain(coinFamily)', rpc_chain(coinFamily),coinFamily);
+      
       const provider = new ethers.providers.JsonRpcProvider(
         rpc_chain(coinFamily)
       );
+      console.log('provider',provider);
+      
       const contract = new ethers.Contract(tokenAddress, ABI, provider);
+
+      console.log('contract',contract);
+      
       const { privateKey } = await WalletHelper.getPrivateKeyEvm(
         sessionPassword
       );
@@ -575,11 +583,20 @@ export class Web3Helper {
         symbol
       );
 
+      console.log('gasPriceRes',gasPriceRes);
+      
+
       const nonce = await this.getNonce(slug, true, tokenAddress, symbol, from);
+
+      console.log('nonce',nonce);
+      
       const data = contract.interface.encodeFunctionData('transfer', [
         to,
         new BigNumber(amount).multipliedBy(new BigNumber(decimals)).toFixed(0),
       ]);
+
+      console.log('data',data);
+      
 
       const gsFee =
         gasPriceType == 1
@@ -615,8 +632,16 @@ export class Web3Helper {
         chainId: Number(chainId),
       };
 
+      console.log('transaction',transaction);
+      
+
       const wallet = new ethers.Wallet(privateKey, provider);
+      console.log('wallet',wallet);
+      
       const signedTransaction = await wallet.signTransaction(transaction);
+
+      console.log('signedTransaction',signedTransaction);
+      
       const gasPriceInWei = ethers.utils.parseUnits(
         gasPriceRes.fast.toString(),
         'gwei'
@@ -638,7 +663,7 @@ export class Web3Helper {
       if (orderId) {
         payload['order_id'] = orderId;
       }
-      slug = slug == 'matic' ? 'polygon' : slug;
+      slug = slug == 'matic' ? 'polygon' : slug === 'tics' ? 'qubetics' : slug;
       const response = await server.post(
         `${slug}/${tokenAddress}/send`,
         payload,

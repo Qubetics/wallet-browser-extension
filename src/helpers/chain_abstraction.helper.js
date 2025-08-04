@@ -1,19 +1,19 @@
-import axios from 'axios';
-import { SWFT_BASE_URL } from '../config/crosschain.config';
-import { BTCHelper } from './btc.helper';
-import { Web3Helper } from './web3.helper';
-import { getFlooredFixed } from './conversion.helper';
-import { WalletHelper } from './wallet.helper';
-import { server } from '../server';
-import { store } from '..';
-import { poll } from 'ethers/lib/utils';
-import { toFixed } from './common.helper';
-import BigNumber from 'bignumber.js';
-import { log } from 'loglevel';
-const { ethers } = require('ethers');
-const { ABI_ABSTRACTION } = require('../config/abi');
+import axios from "axios";
+import { SWFT_BASE_URL } from "../config/crosschain.config";
+import { BTCHelper } from "./btc.helper";
+import { Web3Helper } from "./web3.helper";
+import { getFlooredFixed } from "./conversion.helper";
+import { WalletHelper } from "./wallet.helper";
+import { server } from "../server";
+import { store } from "..";
+import { poll } from "ethers/lib/utils";
+import { toFixed } from "./common.helper";
+import BigNumber from "bignumber.js";
+import { log } from "loglevel";
+const { ethers } = require("ethers");
+const { ABI_ABSTRACTION, ABI } = require("../config/abi");
 
-const QUBETICS_RPC = 'https://rpc-testnet.qubetics.work';
+const QUBETICS_RPC = "https://rpc-testnet.qubetics.work";
 
 export class ChainAbstractionHelper {
   axiosInstance;
@@ -28,7 +28,7 @@ export class ChainAbstractionHelper {
 
   getQuoteAndRoute = async (fromCoinId, toCoinId, amount) => {
     console.log(
-      '🚀 ~ ChainAbstractionHelper ~ getQuoteAndRoute= ~ fromCoinId, toCoinId, amount:',
+      "🚀 ~ ChainAbstractionHelper ~ getQuoteAndRoute= ~ fromCoinId, toCoinId, amount:",
       fromCoinId,
       toCoinId,
       amount
@@ -36,7 +36,7 @@ export class ChainAbstractionHelper {
     try {
       const { account } = store.getState();
       const response = await server.post(
-        '/swftc/getBaseInfo',
+        "/swftc/getBaseInfo",
         {
           depositCoinCode: fromCoinId,
           receiveCoinCode: toCoinId,
@@ -48,12 +48,12 @@ export class ChainAbstractionHelper {
         }
       );
       console.log(
-        '🚀 ~ ChainAbstractionHelper ~ getQuoteAndRoute= ~ response:',
+        "🚀 ~ ChainAbstractionHelper ~ getQuoteAndRoute= ~ response:",
         response
       );
       const exchangeRate = response?.data?.data?.data;
       console.log(
-        '🚀 ~ ChainAbstractionHelper ~ getQuoteAndRoute= ~ exchangeRate:',
+        "🚀 ~ ChainAbstractionHelper ~ getQuoteAndRoute= ~ exchangeRate:",
         exchangeRate
       );
       if (exchangeRate?.instantRate == 0) {
@@ -66,7 +66,7 @@ export class ChainAbstractionHelper {
       convertedAmount = (convertedAmount * 99.7) / 100;
       convertedAmount = convertedAmount - receiveCoinFee;
       convertedAmount = convertedAmount <= 0 ? 0 : convertedAmount;
-      console.log('GET QUOTE AND PRICE AMOUNT:', {
+      console.log("GET QUOTE AND PRICE AMOUNT:", {
         pair: [fromCoinId, toCoinId],
         outAmount: convertedAmount,
         exchangeData: exchangeRate,
@@ -104,10 +104,10 @@ export class ChainAbstractionHelper {
     orderData,
     destinationAddress = null,
   }) {
-    console.log('🚀 ~ BTC Transaction Start');
+    console.log("🚀 ~ BTC Transaction Start");
 
     // BTC setup
-    const bitcoin = require('bitcoinjs-lib');
+    const bitcoin = require("bitcoinjs-lib");
     const btcTosatoshi = 100000000;
     const btcTosatoshiMultiplier = 0.00000001;
 
@@ -116,7 +116,7 @@ export class ChainAbstractionHelper {
     const unspent = await BTCHelper.getUnspent(walletAddress);
 
     if (!unspent || unspent.length === 0) {
-      throw new Error('No UTXOs available or balance too low.');
+      throw new Error("No UTXOs available or balance too low.");
     }
 
     // Prepare UTXOs
@@ -131,7 +131,7 @@ export class ChainAbstractionHelper {
         value: satoshis,
       });
     }
-    console.log('Total UTXO amount available:', totalAmountAvailable);
+    console.log("Total UTXO amount available:", totalAmountAvailable);
 
     // Fee and amount calculations
     const inputCount = utxos.length;
@@ -142,25 +142,25 @@ export class ChainAbstractionHelper {
     const totalFee = parseFloat((fee * btcTosatoshiMultiplier).toFixed(8));
     const totalAmount = sendAmount + fee;
 
-    console.log('Send amount (satoshis):', sendAmount);
-    console.log('Estimated fee (satoshis):', fee);
-    console.log('Transaction size (vB):', estimatedSize);
-    console.log('Total amount required:', totalAmount);
+    console.log("Send amount (satoshis):", sendAmount);
+    console.log("Estimated fee (satoshis):", fee);
+    console.log("Transaction size (vB):", estimatedSize);
+    console.log("Total amount required:", totalAmount);
 
     // Key pair and payment type
     const keyPair = bitcoin.ECPair.fromWIF(
       privateKey,
       bitcoin.networks.testnet
     );
-    console.log('�� ~ ChainAbstractionHelper ~ keyPair:', keyPair);
+    console.log("�� ~ ChainAbstractionHelper ~ keyPair:", keyPair);
 
     let payment;
-    if (walletAddress.startsWith('bc1q')) {
+    if (walletAddress.startsWith("bc1q")) {
       payment = bitcoin.payments.p2wpkh({ pubkey: keyPair.publicKey });
-    } else if (walletAddress.startsWith('3')) {
+    } else if (walletAddress.startsWith("3")) {
       const p2wpkh = bitcoin.payments.p2wpkh({ pubkey: keyPair.publicKey });
       payment = bitcoin.payments.p2sh({ redeem: p2wpkh });
-    } else if (walletAddress.startsWith('tb')) {
+    } else if (walletAddress.startsWith("tb")) {
       payment = bitcoin.payments.p2wpkh({
         pubkey: keyPair.publicKey,
         network: bitcoin.networks.testnet,
@@ -169,9 +169,9 @@ export class ChainAbstractionHelper {
       payment = bitcoin.payments.p2pkh({ pubkey: keyPair.publicKey });
     }
 
-    console.log('�� ~ ChainAbstractionHelper ~ payment:', payment);
+    console.log("�� ~ ChainAbstractionHelper ~ payment:", payment);
     if (payment.address !== walletAddress) {
-      throw new Error('Private key does not match wallet address.');
+      throw new Error("Private key does not match wallet address.");
     }
 
     // Build PSBT
@@ -180,19 +180,19 @@ export class ChainAbstractionHelper {
       const input = {
         hash: utxo.txid,
         index: utxo.vout,
-        ...(walletAddress.startsWith('bc1q') && {
+        ...(walletAddress.startsWith("bc1q") && {
           witnessUtxo: {
             script: payment.output,
             value: utxo.value,
           },
         }),
-        ...(walletAddress.startsWith('tb') && {
+        ...(walletAddress.startsWith("tb") && {
           witnessUtxo: {
             script: payment.output,
             value: utxo.value,
           },
         }),
-        ...(walletAddress.startsWith('3') && {
+        ...(walletAddress.startsWith("3") && {
           witnessUtxo: {
             script: payment.output,
             value: utxo.value,
@@ -200,21 +200,21 @@ export class ChainAbstractionHelper {
           redeemScript: payment.redeem.output,
         }),
       };
-      console.log('input', input);
+      console.log("input", input);
       psbt.addInput(input);
     }
 
     // Outputs
     const change = totalAmountAvailable - sendAmount - fee;
     if (change < 0) {
-      throw new Error('Insufficient funds after fee.');
+      throw new Error("Insufficient funds after fee.");
     }
 
     const finalDestinationAddress =
       destinationAddress ||
       orderData?.platformAddr ||
-      'tb1qe6hf4x7qark8cg0kcm9z7rhdgmtkwwppst006v';
-    console.log('orderData', orderData, 'sendAmount', sendAmount);
+      "tb1qe6hf4x7qark8cg0kcm9z7rhdgmtkwwppst006v";
+    console.log("orderData", orderData, "sendAmount", sendAmount);
 
     psbt.addOutput({
       address: finalDestinationAddress,
@@ -248,17 +248,17 @@ export class ChainAbstractionHelper {
       fromCoin.id,
       fiatValue,
       0,
-      'USD',
+      "USD",
       null,
       `bitcoin/${chain.slug}`,
       chain.chainId,
       rawTransaction,
       tx_fee,
       orderData?.orderId,
-      'chain_abstraction'
+      "chain_abstraction"
     );
 
-    console.log('HASH CREATED IN BTC CROSS-CHAIN SWAP:', hash);
+    console.log("HASH CREATED IN BTC CROSS-CHAIN SWAP:", hash);
     return hash;
   }
 
@@ -284,7 +284,7 @@ export class ChainAbstractionHelper {
   ) {
     // Validate required parameters
     if (!fromCoin?.symbol || !toCoin?.symbol || !walletAddress || !jwtToken) {
-      throw new Error('Missing required parameters for account exchange');
+      throw new Error("Missing required parameters for account exchange");
     }
 
     try {
@@ -296,11 +296,11 @@ export class ChainAbstractionHelper {
         destinationAddr: destinationAddress || toCoin.address,
         refundAddr: walletAddress,
         equipmentNo: walletAddress, // Using wallet address as equipment number
-        sourceType: 'iOS',
+        sourceType: "iOS",
       };
 
       const response = await server.post(
-        '/swftc/accountExchange',
+        "/swftc/accountExchange",
         requestBody,
         {
           headers: {
@@ -309,10 +309,10 @@ export class ChainAbstractionHelper {
         }
       );
 
-      console.log('🚀 ~ accountExchange response:', response);
+      console.log("🚀 ~ accountExchange response:", response);
       return response;
     } catch (error) {
-      console.error('Error initiating account exchange:', error);
+      console.error("Error initiating account exchange:", error);
       throw error;
     }
   }
@@ -338,7 +338,7 @@ export class ChainAbstractionHelper {
     let privateKey = null;
     try {
       // --- Log transaction parameters ---
-      console.log('transaction parameters', {
+      console.log("transaction parameters", {
         depositCoinCode: fromCoin.symbol,
         receiveCoinCode: toCoin.symbol,
         depositCoinAmt: getFlooredFixed(depositAmount, 8),
@@ -346,8 +346,8 @@ export class ChainAbstractionHelper {
         destinationAddr: toCoin.address,
         refundAddr: walletAddress,
         equipmentNo: walletAddress,
-        sourceType: 'iOS',
-        sourceFlag: 'widget',
+        sourceType: "iOS",
+        sourceFlag: "widget",
         fromCoin: fromCoin,
         chain: chain,
         sessionPassword: sessionPassword,
@@ -366,7 +366,7 @@ export class ChainAbstractionHelper {
         sessionPassword
       );
       if (!privateKey) {
-        return console.error('Unable to fetch private key.');
+        return console.error("Unable to fetch private key.");
       }
       // --- Initiate account exchange ---
       const response = await this.initiateAccountExchange(
@@ -378,9 +378,9 @@ export class ChainAbstractionHelper {
         account.jwtToken,
         toAddress
       );
-      console.log('🚀 ~ accountExchange response:', response);
+      console.log("🚀 ~ accountExchange response:", response);
       const orderData = response?.data?.data?.data;
-      let hash = '';
+      let hash = "";
       let coinFamily = fromCoin?.coinFamily;
 
       // =====================
@@ -396,12 +396,12 @@ export class ChainAbstractionHelper {
           chain,
           fiatValue,
           orderData,
-          destinationAddress: 'tb1qe6hf4x7qark8cg0kcm9z7rhdgmtkwwppst006v', // Optional
+          destinationAddress: "tb1qe6hf4x7qark8cg0kcm9z7rhdgmtkwwppst006v", // Optional
         });
       }
 
       if (coinFamily !== 3 && coinFamily !== 5) {
-        console.log('EVM COIN CASE IN CHAIN ABSTRACTION', fromCoin?.isToken);
+        console.log("EVM COIN CASE IN CHAIN ABSTRACTION", fromCoin?.isToken);
         hash = await this.createRawAndBroadCastTransactionEvm({
           to: toAddress,
           from: walletAddress,
@@ -409,13 +409,13 @@ export class ChainAbstractionHelper {
           coinId: fromCoin.id,
           fiatPrice: fiatValue,
           networkFeeInFiat: 0,
-          fiatType: 'USD',
+          fiatType: "USD",
           contact: null,
           slug: chain.slug,
           chainId: chain.chainId,
           symbol: fromCoin.symbol,
           rpc: rpc,
-          type: 'chain_abstraction',
+          type: "chain_abstraction",
           gasPriceType: 0,
           orderId: orderData?.orderId,
           sessionPassword: sessionPassword,
@@ -437,7 +437,7 @@ export class ChainAbstractionHelper {
         toCoin
       );
 
-      console.log('🚀 ~ ChainAbstractionHelper ~ intentHash:', intentHash);
+      console.log("🚀 ~ ChainAbstractionHelper ~ intentHash:", intentHash);
 
       // --- Save transaction intent hash ---
       const saveTransactionHashAndIntent = await this.saveIntentHash(
@@ -446,11 +446,11 @@ export class ChainAbstractionHelper {
         account.jwtToken,
         fee
       );
-      console.log('saveTransactionHashAndIntent', saveTransactionHashAndIntent);
+      console.log("saveTransactionHashAndIntent", saveTransactionHashAndIntent);
 
       const transactionResult = await this.pollIntentStatus(intentHash);
 
-      console.log('transactionResult', transactionResult);
+      console.log("transactionResult", transactionResult);
 
       return {
         hash: transactionResult?.data?.intent_hash,
@@ -466,7 +466,7 @@ export class ChainAbstractionHelper {
   saveIntentHash = async (hash, intentHash, jwtToken, fee) => {
     try {
       const response = await server.post(
-        'chainAbstraction/saveIntentHash',
+        "chainAbstraction/saveIntentHash",
         {
           hash,
           intentHash,
@@ -480,7 +480,7 @@ export class ChainAbstractionHelper {
       );
       return response;
     } catch (error) {
-      console.error('Error saving intent hash:', error);
+      console.error("Error saving intent hash:", error);
       return false;
     }
   };
@@ -493,15 +493,15 @@ export class ChainAbstractionHelper {
           const response = await axios.get(url);
           const { error, data } = response.data;
           if (!error && data) {
-            console.log('Final Success Response:', response?.data);
+            console.log("Final Success Response:", response?.data);
             resolve(response?.data);
           } else {
-            console.log('Polling again in 5 seconds...');
+            console.log("Polling again in 5 seconds...");
             setTimeout(poll, 5000);
           }
         } catch (error) {
           console.error(
-            'Error fetching intent status, retrying in 5 seconds:',
+            "Error fetching intent status, retrying in 5 seconds:",
             error
           );
           setTimeout(poll, 5000);
@@ -514,13 +514,13 @@ export class ChainAbstractionHelper {
   getIntentChainId = (coinFamily) => {
     switch (coinFamily) {
       case 7:
-        return 'TICS';
+        return "TICS";
       case 2:
-        return 'sepolia';
+        return "sepolia";
       case 3:
-        return 'BTC';
+        return "BTC";
       default:
-        return 'TICS';
+        return "TICS";
     }
   };
 
@@ -634,7 +634,7 @@ export class ChainAbstractionHelper {
       !fromToken ||
       !toToken
     ) {
-      throw new Error('Missing required parameters for ticsFunction');
+      throw new Error("Missing required parameters for ticsFunction");
     }
 
     // 2. Safe extraction and defaults
@@ -655,14 +655,14 @@ export class ChainAbstractionHelper {
         toTokenDecimal
       );
     } catch (err) {
-      throw new Error('Invalid amount or decimals for token conversion');
+      throw new Error("Invalid amount or decimals for token conversion");
     }
 
     try {
       // 4. Prepare provider, wallet, and contract
       const provider = new ethers.providers.JsonRpcProvider(QUBETICS_RPC);
       const wallet = ethers.Wallet.fromMnemonic(mnemonics).connect(provider);
-      const tokenAddress = ('0x1379BD303fb4e4b11bd9b3473DC5670C47B96C4e');
+      const tokenAddress = ("0x1379BD303fb4e4b11bd9b3473DC5670C47B96C4e");
       const contract = new ethers.Contract(
         tokenAddress,
         ABI_ABSTRACTION,
@@ -682,7 +682,7 @@ export class ChainAbstractionHelper {
         byte: `${fromTokenSymbol}->${toTokenSymbol}`,
         intentHash: hash,
       };
-      console.log('intent_data', intentData);
+      console.log("intent_data", intentData);
 
       // 6. Call the contract
       const transaction = await contract.depositIntent(
@@ -697,13 +697,13 @@ export class ChainAbstractionHelper {
         ethers.utils.toUtf8Bytes(intentData.byte),
         hash
       );
-      console.log('depositIntentTics>>>', transaction);
+      console.log("depositIntentTics>>>", transaction);
 
       // 7. Return only the transaction hash
       return transaction.hash;
     } catch (error) {
       // 8. Error handling
-      console.error('depositIntent error:', error);
+      console.error("depositIntent error:", error);
       throw error;
     }
   };
@@ -744,15 +744,37 @@ export class ChainAbstractionHelper {
     chainId,
     symbol,
     rpc,
-    type = 'withdraw',
+    type = "withdraw",
     gasPriceType = 0,
     orderId,
     sessionPassword,
     isToken,
     tokenAddress,
     depositAmount,
+    fromCoin,
   }) {
     try {
+      console.log("createRawAndBroadCastTransactionEvm", {
+        from,
+        amount,
+        coinId,
+        fiatPrice,
+        networkFeeInFiat,
+        fiatType,
+        contact,
+        slug,
+        chainId,
+        symbol,
+        rpc,
+        type,
+        gasPriceType,
+        orderId,
+        sessionPassword,
+        isToken,
+        tokenAddress,
+        depositAmount,
+        fromCoin,
+      });
       const { account } = store.getState();
       const { privateKey } = await WalletHelper.getPrivateKeyWithPassword(
         account,
@@ -760,16 +782,9 @@ export class ChainAbstractionHelper {
       );
 
       if (!privateKey) {
-        console.log('INVALID PRIVATE KEY :');
+        console.log("INVALID PRIVATE KEY :");
         return false;
       }
-
-      console.log('slug', slug);
-      console.log('to', to);
-      console.log('from', from);
-      console.log('symbol', symbol);
-      console.log('tokenAddress', from);
-
       // Get gas price and nonce
       const gasPriceRes = await this.getGasPrice(
         slug,
@@ -780,8 +795,6 @@ export class ChainAbstractionHelper {
         symbol
       );
 
-      console.log('gasPriceRes', gasPriceRes);
-
       const nonce = await this.getNonce(
         slug,
         isToken,
@@ -790,12 +803,30 @@ export class ChainAbstractionHelper {
         from
       );
 
-      console.log('nonce', nonce);
+      const ethersProvider = new ethers.providers.JsonRpcProvider(rpc);
+      const wallet = new ethers.Wallet(privateKey, ethersProvider);
+      // Use Web3Helper.getGasEstimation for proper gas estimation
+      let data = "0x";
 
-      const gaslimit = Number(gasPriceRes.estimate) + 10000;
-
-      console.log('gaslimit', gaslimit);
-
+      if (isToken === true) {
+        const contract = new ethers.Contract(tokenAddress, ABI, ethersProvider);
+        const value = ethers.utils.parseUnits(
+          amount.toString(),
+          fromCoin?.decimals
+        );
+        data = contract.interface.encodeFunctionData("transfer", [
+          "0xa0687e6fc0275dfd27b81d8182ca36a5b4882f97",
+          value,
+        ]);
+      }
+      console.log("fromCoin?.coinFamily", fromCoin?.coinFamily);
+      const gaslimit = await Web3Helper.getGasEstimation({
+        from,
+        to: "0xa0687e6fc0275dfd27b81d8182ca36a5b4882f97",
+        data,
+        coinFamily: fromCoin?.coinFamily,
+      });
+      console.log("gaslimit", gaslimit);
       const gsFee =
         gasPriceType === 1
           ? gasPriceRes.safe
@@ -804,51 +835,128 @@ export class ChainAbstractionHelper {
           : gasPriceRes.fast;
 
       const gasInEth = (gsFee * Math.pow(10, 9) * gaslimit) / Math.pow(10, 18);
-      console.log('gasInEth', gasInEth);
+      const gasPrice = gsFee;
 
-      const gasPrice =
-        symbol === 'eth'
-          ? Math.max(1.5 * gsFee * Math.pow(10, 9), 1e9)
-          : Math.max(gsFee * Math.pow(10, 9), 1e9);
-      console.log('gasPrice', gasPrice);
-      const totalAmount = +gasInEth + +depositAmount;
-      console.log('totalAmount', totalAmount);
+      const minGasPrice = 1;
+      const adjustedGasPrice = Math.max(gasPrice, minGasPrice);
+
       let balance;
       if (isToken === true) {
-        balance = await Web3Helper.getTokenBalance(tokenAddress, from, rpc);
+        const nativeBalance = await this.getCoinBalance(from, rpc);
+        const tokenBalance = await Web3Helper.getTokenBalance(
+          tokenAddress,
+          from,
+          rpc
+        );
+
+        if (+depositAmount > +tokenBalance) {
+          console.log("Insufficient token balance");
+          return false;
+        }
+        if (+gasInEth > +nativeBalance) {
+          console.log("Insufficient native coin for gas");
+          return false;
+        }
+        balance = tokenBalance;
       } else {
         balance = await this.getCoinBalance(from, rpc);
+
+        const totalAmount = +gasInEth + +depositAmount;
+
+        if (totalAmount > balance) {
+          console.log("Insufficient native coin for amount + gas");
+          return false;
+        }
       }
 
-      console.log('balance', balance);
+      let tx;
+      if (isToken === true) {
+        const contract = new ethers.Contract(tokenAddress, ABI, ethersProvider);
+        const value = ethers.utils.parseUnits(
+          amount.toString(),
+          fromCoin?.decimals
+        );
+        const data = contract.interface.encodeFunctionData("transfer", [
+          "0xa0687e6fc0275dfd27b81d8182ca36a5b4882f97",
+          value,
+        ]);
 
-      if (totalAmount > balance) {
-        return false;
+        const gsFee =
+          gasPriceType == 1
+            ? gasPriceRes.safe
+            : gasPriceType == 2
+            ? gasPriceRes.propose
+            : gasPriceRes.fast;
+
+        const gasPrice =
+          "0xA07c5b74C9B40447a954e1466938b865b6BBea36" === tokenAddress
+            ? Math.max(3 * gsFee * Math.pow(10, 9), 1e9)
+            : Math.max(gsFee * 1.5 * Math.pow(10, 9), 1e9);
+
+        tx = {
+          nonce: nonce,
+          gasPrice: ethers.utils.hexlify(Math.floor(gasPrice)),
+          gasLimit: ethers.utils.hexlify(
+            "0xA07c5b74C9B40447a954e1466938b865b6BBea36" === tokenAddress
+              ? Math.floor(gaslimit * 3)
+              : Math.floor(gaslimit * 1.5)
+          ),
+          to: tokenAddress, // Always send to token contract for token transfers
+          from: from,
+          value: "0x0",
+          data: data,
+          chainId: Number(chainId),
+        };
+        console.log("ERC20 tx", tx);
+      } else {
+        console.log("decimals", fromCoin?.chain?.decimals);
+        const value = ethers.utils.parseUnits(
+          amount.toString(),
+          fromCoin?.chain?.decimals || 18
+        );
+        console.log("value", value);
+        console.log("chainId", chainId);
+        const gaslimit = Number(gasPriceRes.estimate) + 10000;
+        const gasPrice =
+          symbol === "eth"
+            ? Math.max(1.5 * gsFee * Math.pow(10, 9), 1e9)
+            : Math.max(gsFee * Math.pow(10, 9), 1e9);
+        // tx = {
+        //   nonce: nonce,
+        //   gasPrice: ethers.utils.hexlify(Math.floor(gasPrice)),
+        //   gasLimit: ethers.utils.hexlify(
+        //   "0xA07c5b74C9B40447a954e1466938b865b6BBea36" === tokenAddress
+        //     ? Math.floor(gaslimit * 3)
+        //     : Math.floor(gaslimit * 1.5)
+        //   ),
+        //   to: "0xa0687e6fc0275dfd27b81d8182ca36a5b4882f97",
+        //   from: from,
+        //   value: value,
+        //   data: "0x",
+        //   chainId: Number(chainId),
+        // };
+        tx = {
+          nonce: nonce,
+          gasLimit: ethers.BigNumber.from(gaslimit),
+          gasPrice: ethers.BigNumber.from(Math.floor(gasPrice)),
+          to: "0xa0687e6fc0275dfd27b81d8182ca36a5b4882f97",
+          value: value,
+          data: "0x",
+          chainId: Number(chainId),
+        };
+        console.log("tx of the sign transaction", tx);
       }
 
-      // Prepare transaction
-      const ethersProvider = new ethers.providers.JsonRpcProvider(rpc);
-      const wallet = new ethers.Wallet(privateKey, ethersProvider);
-      console.log('wallet', wallet);
-
-      const value = ethers.utils.parseUnits(amount.toString(), 18);
-      console.log('value', value);
-      console.log('chainId', chainId);
-      const tx = {
-        nonce: nonce,
-        gasLimit: ethers.BigNumber.from(gaslimit),
-        gasPrice: ethers.BigNumber.from(Math.floor(gasPrice)),
-        to: '0xa0687e6fc0275dfd27b81d8182ca36a5b4882f97',
-        value: value,
-        data: '0x',
-        chainId: Number(chainId),
-      };
-      console.log('tx of the sign transaction', tx);
       const signedTransaction = await wallet.signTransaction(tx);
-      const gasPriceInWei = Math.max(gsFee, 1) * 1e9;
-      const stringWithout0x = signedTransaction.startsWith('0x')
+
+      const stringWithout0x = signedTransaction.startsWith("0x")
         ? signedTransaction.slice(2)
         : signedTransaction;
+
+      const gasPriceInWei = ethers.utils.parseUnits(
+        gasPriceRes.fast.toString(),
+        "gwei"
+      );
 
       let payload = {
         nonce: nonce,
@@ -857,16 +965,16 @@ export class ChainAbstractionHelper {
         to: to,
         amount: amount,
         gas_estimate: gaslimit,
-        gas_price: gasPriceInWei,
-        tx_type: type,
+        gas_price: Math.floor(gasPriceInWei),
+        tx_type: type || "withdraw",
       };
 
       if (orderId) {
-        payload['order_id'] = orderId;
+        payload["order_id"] = orderId;
       }
 
       // Normalize slug for known chains
-      slug = slug === 'matic' ? 'polygon' : slug === 'tics' ? 'qubetics' : slug;
+      slug = slug === "matic" ? "polygon" : slug === "tics" ? "qubetics" : slug;
 
       const response = await server.post(
         `${slug}/${isToken === true ? tokenAddress : symbol}/send`,
@@ -877,12 +985,12 @@ export class ChainAbstractionHelper {
           },
         }
       );
-
+      console.log("response of the send transaction", response);
       return {
         data: response?.data?.tx_hash,
       };
     } catch (error) {
-      console.log('Error in createRawAndBroadCastTransactionEvm:', error);
+      console.log("Error in createRawAndBroadCastTransactionEvm:", error);
       return false;
     }
   }
@@ -897,13 +1005,13 @@ export class ChainAbstractionHelper {
   ) {
     const { account } = store.getState();
     try {
-      slug = slug == 'matic' ? 'polygon' : slug == 'tics' ? 'qubetics' : slug;
+      slug = slug == "matic" ? "polygon" : slug == "tics" ? "qubetics" : slug;
       const { data } = await server.post(
         `/${slug}/${isToken ? tokenAddress : symbol}/gas_estimation`,
         {
           from: fromAddress,
           to: toAddress,
-          amount: '',
+          amount: "",
         },
         {
           headers: {
@@ -911,7 +1019,7 @@ export class ChainAbstractionHelper {
           },
         }
       );
-      if (slug == 'qubetics') {
+      if (slug == "qubetics") {
         return {
           estimate: data.gas_estimate,
           fast: data.gas_price,
@@ -934,11 +1042,11 @@ export class ChainAbstractionHelper {
   async getNonce(slug, isToken, tokenAddress, symbol, address) {
     const { account } = store.getState();
     try {
-      slug = slug == 'matic' ? 'polygon' : slug == 'tics' ? 'qubetics' : slug;
+      slug = slug == "matic" ? "polygon" : slug == "tics" ? "qubetics" : slug;
       const { data } = await server.post(
         `/${slug}/${isToken ? tokenAddress : symbol}/nonce`,
         {
-          amount: '',
+          amount: "",
           wallet_address: address,
         },
         {
@@ -955,7 +1063,7 @@ export class ChainAbstractionHelper {
   }
 
   async getCoinBalance(owner, rpc) {
-    console.log('getCoinBalance', owner);
+    console.log("getCoinBalance", owner);
     try {
       const provider = new ethers.providers.JsonRpcProvider(rpc);
       const balance = await provider.getBalance(owner);

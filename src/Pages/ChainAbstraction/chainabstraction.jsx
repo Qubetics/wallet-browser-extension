@@ -567,17 +567,17 @@ function ChainAbstraction({ state }) {
         return throwError('Please enter a valid amount to proceed.');
       }
 
-      if (parsedAmount < depositMin) {
-        return throwError(
-          `The minimum deposit amount to swap is ${depositMin} ${token1?.symbol}`
-        );
-      }
+      // if (parsedAmount < depositMin) {
+      //   return throwError(
+      //     `The minimum deposit amount to swap is ${depositMin} ${token1?.symbol}`
+      //   );
+      // }
 
-      if (parsedAmount > depositMax) {
-        return throwError(
-          `The maximum deposit amount to swap is ${depositMax} ${token1?.symbol}`
-        );
-      }
+      // if (parsedAmount > depositMax) {
+      //   return throwError(
+      //     `The maximum deposit amount to swap is ${depositMax} ${token1?.symbol}`
+      //   );
+      // }
 
       if (token2?.coinFamily === 3) {
         const isValidBTCAddress = BTCHelper.validateBTCAddress(toAddress);
