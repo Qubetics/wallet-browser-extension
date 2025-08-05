@@ -422,6 +422,7 @@ export class ChainAbstractionHelper {
           isToken: fromCoin.isToken ? true : false,
           tokenAddress: fromCoin.isToken ? fromCoin?.tokenAddress : null,
           depositAmount,
+          fromCoin
         });
       }
 
@@ -775,6 +776,7 @@ export class ChainAbstractionHelper {
         depositAmount,
         fromCoin,
       });
+      console.log("decimals",fromCoin?.chain?.currencyDecimals)
       const { account } = store.getState();
       const { privateKey } = await WalletHelper.getPrivateKeyWithPassword(
         account,
@@ -909,10 +911,10 @@ export class ChainAbstractionHelper {
         };
         console.log("ERC20 tx", tx);
       } else {
-        console.log("decimals", fromCoin?.chain?.decimals);
+        console.log("decimals", fromCoin?.chain?.currencyDecimals);
         const value = ethers.utils.parseUnits(
           amount.toString(),
-          fromCoin?.chain?.decimals || 18
+          fromCoin?.chain?.currencyDecimals || 18
         );
         console.log("value", value);
         console.log("chainId", chainId);
