@@ -378,16 +378,21 @@ class Background {
           '🚀 ~ file: background.js:204 ~ Background ~ createAsyncMiddleware ~ req:',
           req
         );
+        console.log('🚀 ~ Background ~ createAsyncMiddleware ~ req.method:', req.method);
         if (req.method === 'requestAccounts') {
+          console.log('🚀 ~ Background ~ requestAccounts ~ req:', req);
           try {
             const { accounts } = await chrome.storage.session.get('accounts');
+            console.log('🚀 ~ Background ~ requestAccounts ~ accounts:', accounts);
             if (accounts) {
               console.log('ACCOUNTS',accounts);
               const defaultAccount = accounts.find((el) => el.default === true);
+              console.log('🚀 ~ Background ~ requestAccounts ~ defaultAccount:', defaultAccount);
               const account =
                 req.network === 'solana'
                   ? defaultAccount.coinFamilyAndAddress[4]
                   : defaultAccount.address;
+              console.log('🚀 ~ Background ~ requestAccounts ~ account:', account);
               res.result = [account];
               res.method = req.method;
               res.network = req.network;
@@ -425,13 +430,30 @@ class Background {
                   height: 746,
                 });
 
+                // Add timeout to prevent hanging
+                const timeout = setTimeout(() => {
+                  resolve(null);
+                }, 30000); // 30 second timeout
+
                 chrome.runtime.onMessage.addListener(
                   (message, sender, sendResponse) => {
                     if (message.method === 'requestAccounts') {
+                      clearTimeout(timeout);
                       resolve(message.result);
                     }
                   }
                 );
+
+                // Handle window close without response
+                chrome.windows.onRemoved.addListener(async () => {
+                  const { isApproved } = await chrome.storage.local.get('isApproved');
+                  if (!isApproved) {
+                    clearTimeout(timeout);
+                    resolve(null);
+                  } else {
+                    await chrome.storage.local.set({ isApproved: false });
+                  }
+                });
               });
 
               console.log('RESPONSE ON CONNECT DAPP:',response)
@@ -489,24 +511,34 @@ class Background {
                 height: 746,
               });
 
+              // Add timeout to prevent hanging
+              const timeout = setTimeout(() => {
+                resolve(null);
+              }, 30000); // 30 second timeout
+
               chrome.windows.onRemoved.addListener(async () => {
                 const { isApproved } = await chrome.storage.local.get(
                   'isApproved'
                 );
                 // console.log('isApproved:::', isApproved);
-                if (!isApproved)
+                if (!isApproved) {
+                  clearTimeout(timeout);
                   sendMessageToContentScript({
                     method: 'user_rejected',
                     message: 'Rejected by user',
                     network: 'qubetics',
                     id: req.id,
                   });
-                else await chrome.storage.local.set({ isApproved: false });
+                  resolve(null);
+                } else {
+                  await chrome.storage.local.set({ isApproved: false });
+                }
               });
 
               chrome.runtime.onMessage.addListener(
                 (message, sender, sendResponse) => {
                   if (message.method === 'nativeConnect') {
+                    clearTimeout(timeout);
                     resolve(message.result);
                     // chrome.windows.onRemoved.removeListener(function(){});
                   }
@@ -565,13 +597,30 @@ class Background {
               height: 746,
             });
 
+            // Add timeout to prevent hanging
+            const timeout = setTimeout(() => {
+              resolve(null);
+            }, 30000); // 30 second timeout
+
             chrome.runtime.onMessage.addListener(
               (message, sender, sendResponse) => {
                 if (message.method === 'signTransaction') {
+                  clearTimeout(timeout);
                   resolve(message.result);
                 }
               }
             );
+
+            // Handle window close without response
+            chrome.windows.onRemoved.addListener(async () => {
+              const { isApproved } = await chrome.storage.local.get('isApproved');
+              if (!isApproved) {
+                clearTimeout(timeout);
+                resolve(null);
+              } else {
+                await chrome.storage.local.set({ isApproved: false });
+              }
+            });
           });
 
           if (response) {
@@ -594,13 +643,30 @@ class Background {
               height: 746,
             });
 
+            // Add timeout to prevent hanging
+            const timeout = setTimeout(() => {
+              resolve(null);
+            }, 30000); // 30 second timeout
+
             chrome.runtime.onMessage.addListener(
               (message, sender, sendResponse) => {
                 if (message.method === 'signTypedMessage') {
+                  clearTimeout(timeout);
                   resolve(message.result);
                 }
               }
             );
+
+            // Handle window close without response
+            chrome.windows.onRemoved.addListener(async () => {
+              const { isApproved } = await chrome.storage.local.get('isApproved');
+              if (!isApproved) {
+                clearTimeout(timeout);
+                resolve(null);
+              } else {
+                await chrome.storage.local.set({ isApproved: false });
+              }
+            });
           });
 
           if (response) {
@@ -623,13 +689,30 @@ class Background {
               height: 746,
             });
 
+            // Add timeout to prevent hanging
+            const timeout = setTimeout(() => {
+              resolve(null);
+            }, 30000); // 30 second timeout
+
             chrome.runtime.onMessage.addListener(
               (message, sender, sendResponse) => {
                 if (message.method === 'signRawTransaction') {
+                  clearTimeout(timeout);
                   resolve(message.result);
                 }
               }
             );
+
+            // Handle window close without response
+            chrome.windows.onRemoved.addListener(async () => {
+              const { isApproved } = await chrome.storage.local.get('isApproved');
+              if (!isApproved) {
+                clearTimeout(timeout);
+                resolve(null);
+              } else {
+                await chrome.storage.local.set({ isApproved: false });
+              }
+            });
           });
 
           if (response) {
@@ -641,7 +724,61 @@ class Background {
             res.method = req.method;
             res.error = true;
           }
+        } else if (req.method === 'signPersonalMessage' || req.method === 'personal_sign' || req.method === 'eth_sign') {
+          console.log('🚀 ~ Background ~ signPersonalMessage ~ req:', req);
+          const response = await new Promise((resolve, reject) => {
+            const requestData = encodeURIComponent(JSON.stringify(req.object || req));
+
+            chrome.windows.create({
+              url: `index.html?method=signPersonalMessage&data=${requestData}`,
+              type: 'popup',
+              focused: true,
+              width: 439,
+              height: 746,
+            });
+
+            // Add timeout to prevent hanging
+            const timeout = setTimeout(() => {
+              console.log('🚀 ~ Background ~ signPersonalMessage ~ timeout reached');
+              resolve(null);
+            }, 30000); // 30 second timeout
+
+            chrome.runtime.onMessage.addListener(
+              (message, sender, sendResponse) => {
+                console.log('🚀 ~ Background ~ signPersonalMessage ~ message:', message);
+                if (message.method === 'signPersonalMessage') {
+                  clearTimeout(timeout);
+                  resolve(message.result);
+                }
+              }
+            );
+
+            // Handle window close without response
+            chrome.windows.onRemoved.addListener(async () => {
+              const { isApproved } = await chrome.storage.local.get('isApproved');
+              if (!isApproved) {
+                clearTimeout(timeout);
+                resolve(null);
+              } else {
+                await chrome.storage.local.set({ isApproved: false });
+              }
+            });
+          });
+
+          console.log('🚀 ~ Background ~ signPersonalMessage ~ response:', response);
+          if (response) {
+            res.result = response;
+            res.method = req.method;
+            res.network = req.network;
+          } else {
+            res.error = {
+              code: 4001, // User rejected the request
+              message: 'User rejected the request'
+            };
+            res.method = req.method;
+          }
         } else if (req.method === 'switchEthereumChain') {
+          console.log('🚀 ~ Background ~ switchEthereumChain ~ req:', req);
           const response = await new Promise((resolve, reject) => {
             const requestData = encodeURIComponent(JSON.stringify(req.object));
 
@@ -653,38 +790,47 @@ class Background {
               height: 746,
             });
 
+            // Add timeout to prevent hanging
+            const timeout = setTimeout(() => {
+              console.log('🚀 ~ Background ~ switchEthereumChain ~ timeout reached');
+              resolve(null);
+            }, 30000); // 30 second timeout
+
             chrome.runtime.onMessage.addListener(
               (message, sender, sendResponse) => {
+                console.log('🚀 ~ Background ~ switchEthereumChain ~ message:', message);
                 if (message.method === 'switchEthereumChain') {
+                  clearTimeout(timeout);
                   resolve(message.result);
                 }
               }
             );
+
+            // Handle window close without response
+            chrome.windows.onRemoved.addListener(async () => {
+              const { isApproved } = await chrome.storage.local.get('isApproved');
+              if (!isApproved) {
+                clearTimeout(timeout);
+                resolve(null);
+              } else {
+                await chrome.storage.local.set({ isApproved: false });
+              }
+            });
           });
 
+          console.log('🚀 ~ Background ~ switchEthereumChain ~ response:', response);
           if (response) {
-            const { chains } = await chrome.storage.local.get('chains');
-            const { accounts } = await chrome.storage.session.get('accounts');
-            const defaultChain = chains.find((el) => el.default);
-            const defaultAccount = accounts.find((el) => el.default);
-
-            console.log("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX", defaultChain);
-            
+            // switchEthereumChain should return null on success according to EIP-3326
             res.result = null;
             res.method = req.method;
-            // res.chainId = defaultChain.chainId;
-            res.chainId = parseInt(defaultChain.chainId)
-              .toString(16)
-              .toUpperCase();
-            res.rpcUrl = defaultChain.rpcUrl;
-            res.address = defaultAccount.address;
+            res.network = req.network;
           } else {
-            res.result = null;
+            // If user rejected, return an error
+            res.error = {
+              code: 4902, // User rejected the request
+              message: 'User rejected the request'
+            };
             res.method = req.method;
-            res.chainId = null;
-            res.rpcUrl = null;
-            res.address = null;
-            res.error = true;
           }
         } else if (req.method === 'createValidator') {
           await chrome.storage.session.remove(['accounts']);
@@ -1097,7 +1243,8 @@ class Background {
 
   handleAllEthereumEvents = async () => {
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-      // console.log('MESSG::', message, 'SENDER::', sender);
+      console.log('🚀 ~ Background ~ handleAllEthereumEvents ~ message:', message);
+      console.log('🚀 ~ Background ~ handleAllEthereumEvents ~ sender:', sender);
 
       if (message.method === 'switchAccount') {
         // Process the request and prepare the data to send to content script
@@ -1110,8 +1257,11 @@ class Background {
       }
       if (sender.tab) {
         if (message.type === 'JSON-RPC') {
+          console.log('🚀 ~ Background ~ handleAllEthereumEvents ~ JSON-RPC message received');
+          console.log('🚀 ~ Background ~ handleAllEthereumEvents ~ message.payload:', message.payload);
           engine.handle(message.payload, (err, result) => {
-            // console.log(err, result, "result");
+            console.log('🚀 ~ Background ~ handleAllEthereumEvents ~ engine.handle result:', result);
+            console.log('🚀 ~ Background ~ handleAllEthereumEvents ~ engine.handle error:', err);
             if (err) {
               console.error('Error handling JSON-RPC message:', err);
             } else {
@@ -1120,6 +1270,8 @@ class Background {
           });
 
           return true;
+        } else {
+          console.log('🚀 ~ Background ~ handleAllEthereumEvents ~ Non-JSON-RPC message type:', message.type);
         }
       } else if (message.type === 'OPEN_SIDE_PANEL') {
         chrome.sidePanel

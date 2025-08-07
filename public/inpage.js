@@ -89288,6 +89288,8 @@ const inject = async () => {
           ethereum: {
             chainId: window.localStorage.getItem("qubetics_chain_id") ? window.localStorage.getItem("qubetics_chain_id") : 1,
             rpcUrl: window.localStorage.getItem("qubetics_rpc_url") ? window.localStorage.getItem("qubetics_rpc_url") : "https://mainnet.infura.io/v3/REDACTED",
+            isMetaMask: true, // Make it MetaMask compatible for better dApp support
+            isTrustWallet: true, // Make it MetaMask compatible for better dApp support
           },
           solana: {
             cluster: "mainnet-beta",
@@ -89299,8 +89301,25 @@ const inject = async () => {
           window.postMessage(JSON.stringify(jsonString))
         };
         window.ethereum = trustwallet.ethereum;
+        // Add Trust Wallet identification properties
+        window.ethereum.isTrustWallet = true;
+        window.ethereum.isMetaMask = true; // Make it MetaMask compatible for better dApp support
+        
+        // Add additional MetaMask-compatible properties
+        window.ethereum.isConnected = () => true;
+        window.ethereum.networkVersion = "1"; // Ethereum mainnet
+        window.ethereum.chainId = "0x1"; // Ethereum mainnet in hex
+        
+        // Define the info object for EIP-6963
+        const info = {
+          uuid: 'trustwallet',
+          name: 'Trust Wallet',
+          icon: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTE2IDJMMjggMTBMMjAgMjJMMTIgMThMMjAgMTRMMjggMTBMMTYgMloiIGZpbGw9IiMwMEE2RkYiLz4KPC9zdmc+',
+          rdns: 'trustwallet'
+        };
+        
         const announceEvent = new CustomEvent('eip6963:announceProvider', {
-          detail: Object.freeze({ info, provider: ethereum }),
+          detail: Object.freeze({ info, provider: trustwallet.ethereum }),
         });
 
         window.dispatchEvent(announceEvent);
@@ -89393,7 +89412,7 @@ const initializeStreams = () => {
     if (message.data) {
       try {
         const response =
-          (typeof message == 'string' || typeof message?.data) ? JSON.parse(message?.data) : message?.data;
+          (typeof message?.data === 'string') ? JSON.parse(message?.data) : message?.data;
         if (response) {
           if (response.id) {
             const title = document.title;

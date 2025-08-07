@@ -52,6 +52,7 @@ export const ExternalConnection = () => {
   const [defaultAccount, setDefaultAccounts] = useState(null);
   const [params, setParams] = useState(null);
   const [defaultAddressPhrase, setDefaultAddressPhrase] = useState(null);
+  const [isPasswordVerified, setIsPasswordVerified] = useState(false);
   const enrichedDataRef = useRef(null);
   const [estimateGasFee, setEstimateGasFee] = useState(0)
 
@@ -357,6 +358,17 @@ export const ExternalConnection = () => {
             setData(data);
             setMethod('signRawTransaction');
             store.dispatch(setLoading(false));
+          } else if (method === 'signPersonalMessage' && account) {
+            // Handle personal message signing
+            setData(data);
+            setMethod('signPersonalMessage');
+            setIsPasswordVerified(false); // Reset password verification state
+            store.dispatch(setLoading(false));
+            
+            // Ensure getPhrase is called for signPersonalMessage
+            if (defaultAddress) {
+              getPhrase(defaultAddress, sessionPassword);
+            }
           } else if (method === 'switchEthereumChain' && account) {
             const { chains } = await chrome.storage.local.get('chains');
             // console.log('CHAINNNNNNNNNNNNN ', chains);
@@ -380,7 +392,7 @@ export const ExternalConnection = () => {
     );
   };
   const handleResponse = async (result, error) => {
-    console.log('HANDLE RESPOSNE');
+    console.log('HANDLE RESPONSE - method:', method, 'result:', result);
     // await chrome.storage.session.set({ isApproved: true });
     const { isApproved } = await chrome.storage.local.get('isApproved');
     // console.log(
@@ -390,6 +402,7 @@ export const ExternalConnection = () => {
     //   isApproved
     // );
     chrome.runtime.sendMessage({ method, result }, (response) => {
+      console.log('Response sent to background script');
       chrome.windows.getCurrent(async function (window) {
         await chrome.storage.local.set({ isApproved: true });
         chrome.windows.remove(window.id);
@@ -564,6 +577,63 @@ export const ExternalConnection = () => {
             store.dispatch(setLoading(false));
           }
         }
+              } else if (method === 'switchEthereumChain') {
+          console.log('Handling switchEthereumChain');
+          handleChainSwitch();
+        } else if (method === 'signPersonalMessage') {
+          console.log('Handling signPersonalMessage, data:', data);
+          console.log('Session password available:', !!sessionPassword);
+          
+          if (!sessionPassword) {
+            console.error('No session password available');
+            messageApi.error('Session expired. Please reconnect your wallet.');
+            return;
+          }
+          
+          // Handle personal message signing
+          const { privateKey } = await WalletHelper.getPrivateKeyEvm(
+            sessionPassword
+          );
+          console.log('Private key obtained:', !!privateKey);
+          if (!privateKey) {
+            console.error('No private key available');
+            messageApi.error('Unable to get private key');
+            return false;
+          }
+          
+          try {
+            const wallet = new Wallet(privateKey);
+            const message = data.data || data.object?.data;
+            const address = data.address || data.object?.address;
+            
+            console.log('Message to sign:', message);
+            console.log('Address:', address);
+            
+            if (!message) {
+              console.error('No message to sign');
+              messageApi.error('No message to sign');
+              return;
+            }
+            
+            console.log('Signing message...');
+            // Convert hex message to string if needed
+            let messageToSign = message;
+            if (message.startsWith('0x')) {
+              try {
+                messageToSign = Web3.utils.hexToUtf8(message);
+                console.log('Converted hex message to:', messageToSign);
+              } catch (error) {
+                console.log('Could not convert hex message, using as-is');
+              }
+            }
+            const signature = await wallet.signMessage(messageToSign);
+            console.log('Signature obtained:', signature);
+            handleResponse(signature);
+          } catch (error) {
+            console.log('Error signing personal message:', error);
+            messageApi.error('Error signing message: ' + error.message);
+            return;
+          }
       } else if (method === 'signTypedMessage') {
         // console.log('XXXXX :: ', data);
 
@@ -683,6 +753,8 @@ export const ExternalConnection = () => {
       } else if (method == 'unJailValidator') {
         getEstimateFeesUnJailValidator();
       }
+      // For signPersonalMessage, we don't need to call any estimate functions
+      // The defaultAddressPhrase is set above and will be used when user clicks Sign
     }
   };
 
@@ -919,6 +991,227 @@ export const ExternalConnection = () => {
                         maxWidth="100%"
                         onClick={async () => {
                           console.log('REJECTED 1');
+                          handleResponse(null);
+                        }}
+                        text="Reject"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : null}
+      </ModalCustom>
+
+      <ModalCustom
+        title={'Enter Password'}
+        isModalOpen={method === 'signPersonalMessage' && !isPasswordVerified}
+        customClass="customClassModal"
+        handleCancel={() => {
+          setMethod(null);
+        }}
+      >
+        {account && method === 'signPersonalMessage' && !isPasswordVerified ? (
+          <div className={'viewphrases'}>
+            <div className={'viewphrases__iInner'}>
+              <div className={`flexedContent`}>
+                <div className={'swapDetails'}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      width: '100%',
+                      marginBottom: '14px',
+                    }}
+                  >
+                    <img
+                      src={logo}
+                      alt=""
+                      style={{
+                        height: '70px',
+                        width: '70px',
+                        objectFit: 'contain',
+                        marginTop: '7px',
+                      }}
+                    />
+                  </div>
+                  <div className={'swapDetails__address'}>
+                    <p className={'swapDetails__address__key'}>
+                      Please enter your password to sign the message
+                    </p>
+                  </div>
+                  <div className={'viewphrases'}>
+                    <div
+                      style={{
+                        marginBottom: '36px',
+                        width: '100%',
+                      }}
+                    >
+                      <InputFieldSimple
+                        placeholder="Password"
+                        getData={setPassword}
+                        value={sessionPassword}
+                        customFunction={async () => {
+                          const isVerified = await WalletHelper.getMnemonicsByPassword(
+                            defaultAccount,
+                            sessionPassword
+                          );
+
+                          if (!isVerified) {
+                            return messageApi.error('Incorrect password provided.');
+                          }
+                          if (isVerified) {
+                            setDefaultAddressPhrase(isVerified);
+                            setIsPasswordVerified(true);
+                          }
+                        }}
+                      />
+                    </div>
+                    <ButtonComp
+                      text={'Proceed'}
+                      maxWidth={'100%'}
+                      onClick={async () => {
+                        const isVerified = await WalletHelper.getMnemonicsByPassword(
+                          defaultAccount,
+                          sessionPassword
+                        );
+                        if (!isVerified) {
+                          return messageApi.error('Incorrect password provided.');
+                        }
+
+                        if (isVerified) {
+                          setDefaultAddressPhrase(isVerified);
+                          setIsPasswordVerified(true);
+                        }
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : null}
+      </ModalCustom>
+
+      <ModalCustom
+        title={'Sign Personal Message'}
+        isModalOpen={method === 'signPersonalMessage' && isPasswordVerified}
+        customClass="customClassModal"
+        handleCancel={() => {
+          setMethod(null);
+        }}
+      >
+        {account && method === 'signPersonalMessage' && data ? (
+          <div className={'viewphrases'}>
+            <div className={'viewphrases__iInner'}>
+              <div className={`flexedContent`}>
+                <div className={'swapDetails'}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      width: '100%',
+                      marginBottom: '14px',
+                    }}
+                  >
+                    <img
+                      src={logo}
+                      alt=""
+                      style={{
+                        height: '70px',
+                        width: '70px',
+                        objectFit: 'contain',
+                        marginTop: '7px',
+                      }}
+                    />
+                  </div>
+                  <div className={'swapDetails__address'}>
+                    <p className={'swapDetails__address__key'}>
+                      Sign Personal Message
+                    </p>
+                    <p className={'swapDetails__address__val'}>
+                      <sapn>
+                        Please be sure that the request has been originated from
+                        a verified source, before signing the message.
+                      </sapn>
+                    </p>
+                  </div>
+
+                  <div className={'confirmCurrency__keyValues'}>
+                    <div className={'confirmCurrency__keyValues__key'}>
+                      From
+                    </div>
+                    <div className={'confirmCurrency__keyValues__value'}>
+                      {data?.address?.substring(0, 7) +
+                        '....' +
+                        data?.address?.substring(
+                          data?.address?.length - 7,
+                          data?.address?.length
+                        )}
+                    </div>
+                  </div>
+
+                  <div className={'confirmCurrency__keyValues'}>
+                    <div className={'confirmCurrency__keyValues__key'}>
+                      Message
+                    </div>
+                    <div className={'confirmCurrency__keyValues__value'}>
+                      {data?.data?.substring(0, 50)}...
+                    </div>
+                  </div>
+
+                  <div className={'swapDetails__border'}></div>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginTop: '30px',
+                      gap: '20px',
+                    }}
+                  >
+                    <ButtonComp
+                      maxWidth="100%"
+                      onClick={async () => {
+                        console.log('Sign button clicked, defaultAddressPhrase:', defaultAddressPhrase);
+                        
+                        // If phrase is not available, try to get it
+                        if (!defaultAddressPhrase) {
+                          console.log('Phrase not available, trying to get it...');
+                          if (defaultAccount && sessionPassword) {
+                            try {
+                              const isVerified = await WalletHelper.getMnemonicsByPassword(
+                                defaultAccount,
+                                sessionPassword
+                              );
+                              if (isVerified) {
+                                setDefaultAddressPhrase(isVerified);
+                                console.log('Phrase obtained, proceeding with signing...');
+                                handleTransaction(isVerified);
+                                return;
+                              }
+                            } catch (error) {
+                              console.error('Error getting phrase:', error);
+                            }
+                          }
+                          
+                          console.error('defaultAddressPhrase is not available');
+                          messageApi.error('Unable to sign: phrase not available. Please try again.');
+                          return;
+                        }
+                        
+                        handleTransaction(defaultAddressPhrase);
+                      }}
+                      text="Sign"
+                    />
+                    <div className="cancelBtn">
+                      <ButtonComp
+                        maxWidth="100%"
+                        onClick={async () => {
+                          console.log('REJECTED personal message');
                           handleResponse(null);
                         }}
                         text="Reject"
