@@ -1,0 +1,210 @@
+.account-topup {
+  padding: 24px;
+  padding-top: 0;
+
+  .topup-header {
+    text-align: left;
+    margin-bottom: 15px;
+
+    h2 {
+      font-size: 27px;
+      font-weight: 600;
+      margin: 0 0 3px 0;
+      color: #ffffff;
+    }
+
+    p {
+      font-size: 16px;
+      font-weight: 400;
+      color: #98969b;
+      line-height: 24px;
+    }
+  }
+
+  .credit-packages {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 22px;
+    flex-wrap: wrap;
+
+    .credit-package {
+      position: relative;
+      background: #18171f;
+      border-radius: 14px;
+      padding: 0;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      max-width: 162px;
+      flex-direction: column;
+      width: 100%;
+      opacity: 0.5;
+      justify-content: center;
+      height: 158px;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.08);
+        transform: translateY(-2px);
+      }
+
+      &.selected {
+        background: #18171f;
+        box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+        opacity: 1;
+        position: relative;
+        
+        &::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 14px;
+            padding: 1px;
+            background: linear-gradient(
+              90deg,
+              #73c9e2 0%,
+              #6c8dc5 25.37%,
+              #6456b2 76.11%,
+              #6145ea 101.48%
+            );
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask-composite: xor;
+            -webkit-mask: linear-gradient(#fff 0 0) content-box,
+              linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+          }
+      }
+
+      .package-icon {
+        .coin-icon {
+          width: 44px;
+          height: 44px;
+          background: #2c2a37;
+          border-radius: 14px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+      }
+
+      .package-details {
+
+        .credits-amount {
+          h4 {
+            font-size: 18px;
+            font-weight: 500;
+            color: #ffffff;
+          }
+        }
+
+        .price {
+          display: flex;
+          align-items: center;
+          gap: 5px;
+
+          h2 {
+            font-size: 30px;
+            font-weight: 500;
+            color: #ffffff;
+            display: flex;
+            align-items: baseline;
+            gap: 4px;
+          }
+
+          .currency {
+            font-size: 16px;
+            color: #fff;
+            font-weight: 500;
+          }
+        }
+      }
+    }
+  }
+
+  .buy-now-btn {
+   
+
+    &:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+    }
+
+    &:disabled {
+      background: rgba(255, 255, 255, 0.1);
+      color: #666;
+      cursor: not-allowed;
+    }
+
+  
+  }
+
+  .purchase-info {
+    margin-top: 10px;
+    text-align: left;
+
+    p {
+      font-size: 16px;
+      color: #98969B;
+      font-weight: 400;
+
+    
+    }
+
+    .link {
+      background: none;
+      border: none;
+      color: #6366f1;
+      text-decoration: underline;
+      cursor: pointer;
+      font-size: 16px;
+      padding: 0;
+
+      &:hover {
+        color: #8b5cf6;
+      }
+    }
+  }
+}
+
+.purchase-success-content {
+  text-align: center;
+  color: #ffffff;
+  
+ 
+  
+  h2 {
+    font-size: 20px;
+    font-weight: 500;
+    color: #ffffff;
+    margin: 0 0 20px 0;
+  }
+  
+  .credit-info {
+    margin-bottom: 32px;
+    
+    .credit-plan {
+      font-size: 18px;
+      color: #98969B;
+      margin-bottom: 20px;
+      font-weight: 400;
+      
+      strong {
+        font-weight: 700;
+        color: #fff;
+      }
+    }
+    
+    .purchase-details {
+      font-size: 16px;
+      color: #98969B;
+      line-height: 24px;
+      margin: 0;
+    }
+  }
+  
+  
+}

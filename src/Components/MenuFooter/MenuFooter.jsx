@@ -1,15 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
 import "./footer.scss";
-// import WalletIcon from "../../Assets/walletIcon.svg";
-// import AlertIcon from "../../Assets/Alerts.svg";
-// import SettignIcon from "../../Assets/SettignIcon.svg";
 import { Link, useLocation } from "react-router-dom";
-// import Browser from "../../Assets/broswer.svg";
-// import portfolioIcon from "../../Assets/portfolioIcon.svg";
 import {
   AlertsIcon,
   BrowserIcon,
+  DVpnIcon,
+  HomeDVpnIcon,
   PortfolioIcon,
+  RecentSessionsIcon,
+  ServersIcon,
   SettignIcon,
   WalletIcon,
 } from "../../Assets/SvgImg.jsx";
@@ -17,9 +16,17 @@ import {
 function MenuFooter() {
   const getLocation = useLocation();
   const path = getLocation.pathname.replace("/", "");
+  const [isDvpnMenu, setIsDvpnMenu] = useState(false);
 
+  const handleDvpnClick = () => {
+    setIsDvpnMenu(true);
+  };
+  const handleBackToMainMenu = () => {
+    setIsDvpnMenu(false);
+  };
   return (
     <>
+    {!isDvpnMenu ? (
       <div className="menuItems">
         <Link
           to={
@@ -60,10 +67,8 @@ function MenuFooter() {
           }`}
         >
           <div className="img">
-            {/* <img src={portfolioIcon} /> */}
             <PortfolioIcon />
           </div>
-          {/* <span className='title'>Portfolio</span> */}
         </Link>
         <Link
           to="/conectswapedApp"
@@ -86,7 +91,17 @@ function MenuFooter() {
             DApp
           </span> */}
         </Link>
-
+        <Link
+        onClick={handleDvpnClick} 
+        to="/dvpn"
+          className={`${"menuItems__items"} ${
+            path === "dvpn" ? "itemsActive" : ""
+          }`}
+        >
+          <div className="img">
+            <DVpnIcon />
+          </div>
+        </Link>
         <Link
           to="/setting"
           // onClick={() => setactiveLink("setting")}
@@ -101,6 +116,62 @@ function MenuFooter() {
           {/* <span className='title'>Settings</span> */}
         </Link>
       </div>
+      ) : (
+        <div className="menuItems">
+          <Link
+            to="/dvpn"
+            className={`${"menuItems__items"} ${
+              path === "dvpn" ? "itemsActive" : ""
+            }`}
+          >
+            <div className="img">
+              <HomeDVpnIcon className="strokeFill" />
+            </div>
+          </Link>
+      
+          <Link
+            to="/wallet"
+            onClick={handleBackToMainMenu}
+            className={`${"menuItems__items"} ${
+              path === "wallet" ? "itemsActive" : ""
+            }`}
+          >
+            <div className="img">
+            <WalletIcon />
+            </div>
+          </Link>
+          <Link
+            to="/recentSessions"
+            className={`${"menuItems__items"} ${
+              path === "recentSessions" ? "itemsActive" : ""
+            }`}
+          >
+            <div className="img">
+              <RecentSessionsIcon />
+            </div>
+          </Link>
+          <Link
+            to="/servers"
+            className={`${"menuItems__items"} ${
+              path === "servers" ? "itemsActive" : ""
+            }`}
+          >
+            <div className="img">
+              <ServersIcon className="strokeFill"/>
+            </div>
+          </Link>
+          <Link
+          to="/dvpnSetting"
+          className={`${"menuItems__items"} ${
+            path === "dvpnSetting" ? "itemsActive" : ""
+          }`}
+        >
+          <div className="img">
+            <SettignIcon />
+          </div>
+        </Link>
+        </div>
+      )}
     </>
   );
 }

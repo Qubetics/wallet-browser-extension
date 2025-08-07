@@ -99,6 +99,15 @@ import NftSend from "./Pages/Nft/NftSend";
 import MyWallets from "./Components/BalanceDetails/MyWallets";
 import ChainAbstraction from "./Pages/ChainAbstraction/chainabstraction";
 import ChainAbstractionDetail from "./Pages/ChainAbstraction/chainabstractiondetail";
+import DVpn from "./Components/DVpn/DVpn";
+import RecentSessions from "./Components/RecentSessions/RecentSessions";
+import Servers from "./Components/Servers/Servers";
+import DvpnSetting from "./Components/DvpnSetting/DvpnSetting";
+import AccountDetails from "./Components/DvpnSetting/AccountDetails/AccountDetails";
+import DNSDetails from "./Components/DvpnSetting/DNSDetails/DNSDetails";
+import RPCDetails from "./Components/DvpnSetting/RPCDetails/RPCDetails";
+import AddCustomDNS from "./Components/DvpnSetting/DNSDetails/AddCustomDNS";
+import AccountTopUp from "./Components/DvpnSetting/AccountTopUp/AccountTopUp";
 
 function App() {
   const [state, setState] = useState("Active");
@@ -376,6 +385,10 @@ function App() {
           <Route path="/alerts" element={<Alerts />} />
           <Route index path="/conectswapedApp" element={<ConnectedApp />} />
           <Route path="/portfolio" element={<Portfolio />} />
+          <Route path="/dvpn" element={<DVpn />} />
+          <Route path="/recentSessions" element={<RecentSessions />} />
+          <Route path="/servers" element={<Servers />} />
+          <Route path="/dvpnSetting" element={<DvpnSetting />} />
         </Route>
 
         {/* <Route path="/" element={<NftLayout />}>
@@ -497,6 +510,12 @@ function App() {
             path="/chain-abstraction-detail"
             element={<ChainAbstractionDetail />}
           />
+          <Route path="/accountDetails" element={<AccountDetails />} />
+          <Route path="/dnsDetails" element={<DNSDetails />} />
+          <Route path="/addCustomDNS" element={<AddCustomDNS />} />
+          <Route path="/rpcDetails" element={<RPCDetails />} />
+          <Route path="/accountTopUp" element={<AccountTopUp />} />
+
         </Route>
       </Routes>
       <ExternalConnection />

@@ -32,9 +32,32 @@
     }
   }
   &__bordered {
-    border: 1px solid $border-00ADEE;
+    border: 0;
     background: transparent;
-    color: $border-00ADEE;
+    color:#fff;
+    position: relative;
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      border-radius: 14px;
+      padding: 1px;
+      background: linear-gradient(
+        90deg,
+        #73c9e2 0%,
+        #6c8dc5 25.37%,
+        #6456b2 76.11%,
+        #6145ea 101.48%
+      );
+      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask-composite: xor;
+      -webkit-mask: linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+    }
     &:hover {
       opacity: 0.6;
     }

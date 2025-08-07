@@ -1,0 +1,125 @@
+.dns-selector {
+  padding: 24px;
+  padding-top: 0;
+
+  .dns-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 50px;
+
+    .dns-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #18171f;
+      padding: 18px 16px;
+      border-radius: 14px;
+      transition: background 0.3s;
+      .innerDetail {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .name {
+        h2 {
+          flex: 1;
+          font-size: 16px;
+          font-weight: 400;
+          color: #fff;
+        }
+      }
+
+      .check {
+        font-size: 18px;
+        color: #ffffffcc;
+      }
+
+    
+    }
+  }
+
+
+  
+}
+
+  // Custom Radio Button Styles
+  .protocol-section {
+    
+    .protocol-title {
+      color: #fff;
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 8px;
+      text-align: left;
+    }
+    
+    .radio-group {
+      display: flex;
+      gap: 20px;
+      
+      .radio-option {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        cursor: pointer;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        
+        &:hover {
+          background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .radio-button {
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          border: 2px solid #444;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.3s ease;
+          position: relative;
+          
+          .radio-inner {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: transparent;
+            transition: all 0.3s ease;
+          }
+        }
+        
+        .radio-label {
+          color: #98969B;
+          font-size: 16px;
+          font-weight: 400;
+          user-select: none;
+        }
+        
+        // Selected state with gradient border
+        &.selected {
+          .radio-button {
+            border: 2px solid transparent;
+            background: linear-gradient(#0a0a0f, #0a0a0f) padding-box,
+                       linear-gradient(90deg, #73c9e2 0%, #6c8dc5 25.37%, #6456b2 76.11%, #6145ea 101.48%) border-box;
+            
+            .radio-inner {
+              background: linear-gradient(
+                90deg,
+                #73c9e2 0%,
+                #6c8dc5 25.37%,
+                #6456b2 76.11%,
+                #6145ea 101.48%
+              );
+            }
+          }
+          
+          .radio-label {
+            color: #fff;
+          }
+        }
+      }
+    }
+  }

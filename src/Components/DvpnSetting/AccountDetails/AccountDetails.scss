@@ -1,0 +1,87 @@
+.credits-panel {
+    padding: 20px;
+    padding-top: 0;
+  
+    .credits-box {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: linear-gradient(90deg, #73C9E2 0%, #6C8DC5 25.37%, #6456B2 76.11%, #6145EA 101.48%);
+
+      padding: 20px 16px;
+      border-radius: 10.15px;
+      margin-bottom: 50px;
+  
+      .left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+  
+        .icon {
+          font-size: 22px;
+          background: #000;
+          border-radius: 8px;
+          padding: 6px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+  
+        .text {
+          h3 {
+            font-size: 16px;
+            color: #fff;
+            font-weight: 600;
+          }
+  
+          h2 {
+            font-size: 26px;
+            font-weight: 600;
+            color: #fff;
+          }
+        }
+      }
+  
+      .refresh {
+        font-size: 16px;
+        font-weight: 400;
+        color: #fff;
+        cursor: pointer;
+      }
+    }
+  
+    .buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+  
+      .btn {
+        padding: 12px;
+        border-radius: 10px;
+        font-size: 15px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: 0.3s all;
+        text-align: center;
+  
+        &.gradient {
+          background: linear-gradient(to right, #5edfff, #7f55ff);
+          color: #fff;
+          border: none;
+        }
+  
+        &.outlined {
+          background: transparent;
+          border: 1px solid #7f55ff;
+          color: #fff;
+        }
+  
+        &.danger {
+          background: #b42323;
+          color: #fff;
+          border: none;
+        }
+      }
+    }
+  }
+  

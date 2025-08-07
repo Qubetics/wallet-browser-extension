@@ -1,0 +1,111 @@
+.recent-servers {
+  padding: 24px;
+
+  .tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+
+    .tab {
+      padding: 8px 16px;
+      border-radius: 8px;
+      background: transparent;
+      border: 1px solid #76747b;
+      color: #76747b;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+
+      &.active {
+        color: #fff;
+
+        &::before {
+          content: "";
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          border-radius: 8px;
+          padding: 1px;
+          background: linear-gradient(
+            90deg,
+            #73c9e2 0%,
+            #6c8dc5 25.37%,
+            #6456b2 76.11%,
+            #6145ea 101.48%
+          );
+          mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+          mask-composite: xor;
+          -webkit-mask: linear-gradient(#fff 0 0) content-box,
+            linear-gradient(#fff 0 0);
+          -webkit-mask-composite: xor;
+        }
+      }
+
+      &:hover {
+        background: #2a2a3f;
+      }
+    }
+  }
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    h3 {
+      color: #fff;
+      font-weight: 500;
+      font-size: 18px;
+    }
+    .view-all {
+      font-size: 14px;
+      color: #98969b;
+      cursor: pointer;
+    }
+  }
+
+  .server-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    height: 410px;
+    overflow-y: auto;
+
+    .server-item {
+      background: #18171F;
+      padding: 16px;
+      border-radius: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      .info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+
+        
+
+        .country {
+          font-weight: 500;
+          color: #fff;
+          font-size: 14px;
+        }
+
+        .locations {
+          font-size: 14px;
+          text-align: left;
+          color: #98969b;
+        }
+      }
+
+      .link-icon {
+        font-size: 18px;
+        color: #aaa;
+        cursor: pointer;
+      }
+    }
+  }
+}
