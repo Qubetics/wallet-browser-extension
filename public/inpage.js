@@ -89305,7 +89305,7 @@ const inject = async () => {
         window.ethereum.isTrustWallet = true;
         window.ethereum.isMetaMask = true; // Make it MetaMask compatible for better dApp support
         
-        // Add additional MetaMask-compatible properties
+        // Add additional wallet-compatible properties
         window.ethereum.isConnected = () => true;
         window.ethereum.networkVersion = "1"; // Ethereum mainnet
         window.ethereum.chainId = "0x1"; // Ethereum mainnet in hex
