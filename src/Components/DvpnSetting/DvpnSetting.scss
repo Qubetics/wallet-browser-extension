@@ -58,3 +58,9 @@
     }
   }
 }
+
+
+.heightExtSettingsPanel{
+  height: calc(100vh - 151px);
+  overflow: auto;
+}

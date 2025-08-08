@@ -6,10 +6,14 @@ import GERMANY from "../../Assets/cuntry/germany.svg";
 import JAPAN from "../../Assets/cuntry/japan.svg";
 import { InputField } from "../InputField/InputFieldSimple";
 import Search from "../../Assets/SearchIcon.svg";
+import { useNavigate } from "react-router-dom";
+import useCurrentHeight from "../../CustomHooks/useCurrentHeight";
 function Servers() {
+  const navigate = useNavigate();
+  const height = useCurrentHeight();
   const [activeTab, setActiveTab] = useState("All");
   const servers = [
-    { flag: USA, alt: "USA", country: "United States", locations: 6 },
+    { flag: USA, alt: "USA", country: "United States", locations: 6, onClick: () => navigate("/serversDetails") },
     { flag: GERMANY, alt: "GERMANY", country: "Germany", locations: 6 },
     { flag: JAPAN, alt: "JAPAN", country: "Japan", locations: 6 },
   ];
@@ -35,7 +39,9 @@ function Servers() {
           />
         </div>
       </div>
-      <div className="recent-servers">
+      <div className={`${'recent-servers'} ${
+      height <= 600 ? 'heightExtServers' : ''
+    }`}>
         <div className="tabs">
           <button 
             className={`tab ${activeTab === "All" ? "active" : ""}`}
@@ -64,7 +70,7 @@ function Servers() {
 
         <div className="server-list">
           {servers.map((server, index) => (
-            <div className="server-item" key={index}>
+            <div className="server-item" key={index} onClick={server.onClick}>
               <div className="info">
                 <span className="flag">
                   <img src={server.flag} alt={server.alt} />

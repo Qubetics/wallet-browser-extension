@@ -9,10 +9,14 @@ import {
 import USA from "../../Assets/cuntry/usa.svg";
 import Germany from "../../Assets/cuntry/germany.svg";
 import Japan from "../../Assets/cuntry/japan.svg";
+import useCurrentHeight from "../../CustomHooks/useCurrentHeight";
 
 function DVpn() {
+  const height = useCurrentHeight();
   return (
-    <div className="vpn-dashboard">
+    <div className={`${'vpn-dashboard'} ${
+      height <= 600 ? 'heightExt' : ''
+    }`}>
       <div className="header">
         <h2>Qubetics dVPN</h2>
         <span>

@@ -7,10 +7,12 @@ import ModalCustom from "../../ModalCustom/ModalCustom";
 import { useNavigate } from "react-router-dom";
 import { Drawer } from "antd";
 import ModalCloseIcon from "../../../Assets/ModalCloseIcon.svg";
+import useCurrentHeight from "../../../CustomHooks/useCurrentHeight";
 function AccountTopUp() {
   const [selectedPackage, setSelectedPackage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
+  const height = useCurrentHeight();
 
   const creditPackages = [
     {
@@ -56,7 +58,9 @@ function AccountTopUp() {
       <div className="searchBarFixed">
         <MenuRestofHeaders title={"Account Top-Up"} backTo={"/dvpnSetting"} />
       </div>
-      <div className="account-topup">
+      <div className={`account-topup ${
+      height <= 600 ? 'heightExtAccountTopUp' : ''
+    }`}>
         <div className="topup-header">
           <h2>Get Some Credits</h2>
           <p>

@@ -108,6 +108,7 @@ import DNSDetails from "./Components/DvpnSetting/DNSDetails/DNSDetails";
 import RPCDetails from "./Components/DvpnSetting/RPCDetails/RPCDetails";
 import AddCustomDNS from "./Components/DvpnSetting/DNSDetails/AddCustomDNS";
 import AccountTopUp from "./Components/DvpnSetting/AccountTopUp/AccountTopUp";
+import ServersDetails from "./Components/Servers/ServersDetails";
 
 function App() {
   const [state, setState] = useState("Active");
@@ -515,7 +516,7 @@ function App() {
           <Route path="/addCustomDNS" element={<AddCustomDNS />} />
           <Route path="/rpcDetails" element={<RPCDetails />} />
           <Route path="/accountTopUp" element={<AccountTopUp />} />
-
+          <Route path="/serversDetails" element={<ServersDetails />} />
         </Route>
       </Routes>
       <ExternalConnection />

@@ -14,8 +14,10 @@ import {
   AccountTopUpIcon,
 } from "../../Assets/SvgImg";
 import { useNavigate } from "react-router-dom";
+import useCurrentHeight from "../../CustomHooks/useCurrentHeight";
 function DvpnSetting() {
   const navigate = useNavigate();
+  const height = useCurrentHeight();
   const settingsData = [
     {
       section: "Connectivity",
@@ -77,7 +79,9 @@ function DvpnSetting() {
       <div className="searchBarFixed">
         <MenuRestofHeaders title={"Servers"} backTo={"/dvpn"} />
       </div>
-      <div className="settings-panel">
+      <div className={`${'settings-panel'} ${
+      height <= 600 ? 'heightExtSettingsPanel' : ''
+    }`}>
         {settingsData.map((section, index) => (
           <div key={index} className="settings-section">
             <div className="section-title">{section.section}</div>

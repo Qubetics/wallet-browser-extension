@@ -74,7 +74,7 @@
     overflow-y: auto;
 
     .server-item {
-      background: #18171F;
+      background: #18171f;
       padding: 16px;
       border-radius: 14px;
       display: flex;
@@ -85,8 +85,6 @@
         display: flex;
         align-items: center;
         gap: 10px;
-
-        
 
         .country {
           font-weight: 500;
@@ -107,5 +105,147 @@
         cursor: pointer;
       }
     }
+  }
+}
+
+// servers-details css-------
+
+.servers-details {
+  .servers-list {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .server-card {
+    background: #18171f;
+    border-radius: 14px;
+    padding: 16px;
+    transition: all 0.3s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .server-info {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      .server-header {
+        .server-details {
+          text-align: left;
+
+          .server-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: #ffffff;
+            margin: 0 0 4px 0;
+          }
+
+          .server-location {
+            font-size: 14px;
+            color: #98969b;
+            margin: 0;
+          }
+        }
+      }
+
+      .server-footer {
+        .connect-btn {
+          padding: 8px 16px;
+          border-radius: 30px;
+          font-size: 15px;
+          font-weight: 600;
+          border: none;
+          cursor: pointer;
+          transition: all 0.3s ease;
+
+          &.connect {
+            background: #2c2a37;
+            color: #98969b;
+
+            &:hover {
+              transform: translateY(-1px);
+            }
+          }
+
+          &.connected {
+            background: #34c75933;
+            color: #34c759;
+            &:hover {
+              transform: none;
+            }
+          }
+
+          &:disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+          }
+        }
+      }
+    }
+  }
+
+  // Loading state
+  .loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+    color: #8892b0;
+  }
+
+  // Empty state
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    text-align: center;
+
+    .empty-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+
+    .empty-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #ffffff;
+      margin-bottom: 8px;
+    }
+
+    .empty-description {
+      font-size: 14px;
+      color: #8892b0;
+      max-width: 300px;
+    }
+  }
+}
+
+// Animation for server cards
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.server-card {
+  animation: slideInUp 0.3s ease-out;
+}
+
+.heightExtServers {
+   .server-list {
+    height: 250px;
   }
 }

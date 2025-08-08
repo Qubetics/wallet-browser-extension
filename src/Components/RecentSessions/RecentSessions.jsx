@@ -3,11 +3,15 @@ import "./RecentSessions.scss";
 import MenuRestofHeaders from "../BalanceDetails/MenuRestofHeaders/MenuRestofHeaders";
 import USA from "../../Assets/cuntry/usa.svg";
 import { ReconnectIcon, UploadedIcon } from "../../Assets/SvgImg";
+import useCurrentHeight from "../../CustomHooks/useCurrentHeight";
 function RecentSessions() {
+  const height = useCurrentHeight();
   return (
     <div className={`scrollableCont`} style={{height:"auto"}}>
       <MenuRestofHeaders title={"Recent Sessions"} backTo={"/dvpn"} />
-      <div className="session-wrapper">
+      <div className={`${'session-wrapper'} ${
+      height <= 600 ? 'heightExtSessionWrapper' : ''
+    }`}>
         <div className="session-card">
           <div className="session-header">
             <div className="location">
