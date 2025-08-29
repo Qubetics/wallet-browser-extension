@@ -7,6 +7,9 @@
   },
   "dependencies": {
     "@ant-design/icons": "^4.8.3",
+    "@cosmjs/crypto": "^0.28.0",
+    "@cosmjs/proto-signing": "^0.28.0",
+    "@cosmjs/stargate": "^0.28.0",
     "@cosmjss/proto-signing": "^0.0.4",
     "@cosmjss/stargate": "0.0.4",
     "@metamask/json-rpc-engine": "^7.0.0",

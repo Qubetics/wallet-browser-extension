@@ -24,6 +24,7 @@ import unJailValidator from '../../helpers/unjailValidator';
 import { SecurityHelper } from '../../helpers/security.helper';
 import editValidator from '../../helpers/editValidator';
 import delagteAndBondMore from '../../helpers/delegatorBondMoreFunds';
+import cancelUnbondDelegation from '../../helpers/cancelUnbondDelegation';
 import { redelegate } from '../../helpers/redelegation';
 import TruncatedAddress from './TruncatedAddress';
 import { getUserAddress } from '../../helpers/getAddress';
@@ -54,6 +55,7 @@ export const ExternalConnection = () => {
   const [defaultAddressPhrase, setDefaultAddressPhrase] = useState(null);
   const enrichedDataRef = useRef(null);
   const [estimateGasFee, setEstimateGasFee] = useState(0)
+  console.log("SETTING METHOD AND DATA:::", data, method)
 
   // const useLocation
 
@@ -107,6 +109,62 @@ export const ExternalConnection = () => {
     setEstimateGasFee(response);
     store.dispatch(setLoading(false));
     return response;
+  };
+
+  const getEstimateFeesforDelegation = async (mnemonics) => {
+    try {
+      // Validate required data first
+      if (!data.delegator_address) {
+        throw new Error("Delegator address is required");
+      }
+      if (!data.validator_address) {
+        throw new Error("Validator address is required");
+      }
+      if (!data.creation_height) {
+        throw new Error("Creation height is required for cancel unbonding delegation");
+      }
+      if (!data.amount?.amount) {
+        throw new Error("Amount is required");
+      }
+      if (!data.nodeUrl) {
+        throw new Error("Node URL is required");
+      }
+
+      console.log("Estimating fees for cancel unbonding delegation with data:", {
+        delegator_address: data.delegator_address,
+        validator_address: data.validator_address,
+        amount: data.amount.amount,
+        creation_height: data.creation_height,
+        nodeUrl: data.nodeUrl
+      });
+
+      const response = await cancelUnbondDelegation(
+        mnemonics,                    
+        data.delegator_address,       
+        Number(data.amount.amount) / 1e18, 
+        data.validator_address,       
+        data.nodeUrl,                 
+        data.creation_height,         
+        true                          
+      );
+      
+      console.log("RESPONSE FEE ESTIMATE:::", response);
+      
+      if (response === undefined || response === null) {
+        throw new Error("Fee estimation returned undefined");
+      }
+      
+      setEstimateGasFee(response);
+      store.dispatch(setLoading(false));
+      return response;
+      
+    } catch (e) {
+      console.error("Error in getEstimateFeesforDelegation::", e);
+      store.dispatch(setLoading(false));
+      // You might want to show an error toast/notification here
+      setEstimateGasFee("0"); // Set a default value
+      return "0";
+    }
   };
 
   const getEstimateFeesUnBondFunds = async (mnemonics) => {
@@ -197,6 +255,7 @@ export const ExternalConnection = () => {
     "editValidator",
     "bondMoreFunds",
     "delegatorBondMoreFunds",
+    "MsgCancelUnbondingDelegation",
     "redelegate",
     "unBondFunds",
     "stopValidator",
@@ -509,7 +568,32 @@ export const ExternalConnection = () => {
             store.dispatch(setLoading(false));
             return;
           }
-        } else if (data.method === 'redelegate') {
+        }
+        else if (data.method === 'MsgCancelUnbondingDelegation') {
+              try {
+                const response = await cancelUnbondDelegation(
+                  defaultAddressPhrase, // mnemonic
+                  data.delegator_address, // delegator address
+                  Number(data.amount.amount) / 1e18, // amount in proper units
+                  data.validator_address, // validator address
+                  data.nodeUrl, // node URL
+                  data.creation_height, // creation height - this was missing!
+                  false // feeCalculate - set based on your needs
+                );
+                if (response) {
+                  console.log('RESPO: MsgCancelUnbondingDelegation::', response);
+                  handleResponse({ type: 'success', data: response?.transactionHash });
+                  store.dispatch(setLoading(false));
+                  return;
+                }
+                // Handle successful response
+                console.log("Cancel unbonding delegation successful:", response);
+                
+              } catch (error) {
+                console.error("Cancel unbonding delegation failed:", error);
+                // Handle error appropriately
+              }
+            } else if (data.method === 'redelegate') {
           // store.dispatch(setLoading(true));
           const response = await redelegate(
             // data.mnemonics,
@@ -681,6 +765,8 @@ export const ExternalConnection = () => {
       setDefaultAddressPhrase(isVerified);
       if (method == 'delegatorBondMoreFunds') {
         getEstimateFees(isVerified);
+      } else if (method == 'MsgCancelUnbondingDelegation') {
+        getEstimateFeesforDelegation(isVerified);
       } else if (method == 'unBondFunds' || method == 'stopValidator') {
         getEstimateFeesUnBondFunds(isVerified);
       } else if (method == 'redelegate') {
@@ -1994,6 +2080,138 @@ export const ExternalConnection = () => {
           </div>
         ) : null}
       </ModalCustom>
+
+
+      {/* MsgCancelUnbondingDelegation */}
+
+      <ModalCustom
+      title={'Cancel Unbond Delegation'}
+      isModalOpen={account && method === 'MsgCancelUnbondingDelegation'}
+      customClass="customClassModal"
+      handleCancel={() => {
+        setMethod(null);
+        handleResponse({
+          type: 'error',
+          data: { message: 'Rejected by user' },
+        });
+      }}
+    >
+      {account && method === 'MsgCancelUnbondingDelegation' && data ? (
+        <>
+          {console.log("CancelUnbondDelegation modal data:", data)}
+          <div className={'viewphrases'}>
+            <div className={'viewphrases__iInner'}>
+              <div className={`flexedContent`}>
+                <div className={'swapDetails'}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      width: '100%',
+                      marginBottom: '14px',
+                    }}
+                  >
+                    <img
+                      src={logo}
+                      alt=""
+                      style={{
+                        height: '70px',
+                        width: '70px',
+                        objectFit: 'contain',
+                        marginTop: '7px',
+                      }}
+                    />
+                  </div>
+                  <div className={'swapDetails__address'}>
+                    <p className={'swapDetails__address__key'}>
+                      Please enter your password to confirm the transaction.
+                    </p>
+                    <p className={'swapDetails__address__val'}>
+                      <span>
+                        Please be sure that the request has been originated from
+                        a verified source, before signing the transaction.
+                      </span>
+                    </p>
+                  </div>
+
+                  <div className={'confirmCurrency__keyValues'}>
+                    <div className={'confirmCurrency__keyValues__key'}>
+                      Event
+                    </div>
+                    <div className={'confirmCurrency__keyValues__value'}>
+                      {data.method}
+                    </div>
+                  </div>
+
+                  <div className={'confirmCurrency__keyValues'}>
+                    <div className={'confirmCurrency__keyValues__key'}>
+                      Delegator Address
+                    </div>
+                    <div className={'confirmCurrency__keyValues__value'}>
+                      <TruncatedAddress address={data.delegator_address} />
+                    </div>
+                  </div>
+
+                  <div className={'confirmCurrency__keyValues'}>
+                    <div className={'confirmCurrency__keyValues__key'}>
+                      Amount
+                    </div>
+                    <div className={'confirmCurrency__keyValues__value'}>
+                      {`${Number(data.amount.amount) / 1e18} TICS`}
+                    </div>
+                  </div>
+
+                  <div className={'confirmCurrency__keyValues'}>
+                    <div className={'confirmCurrency__keyValues__key'}>
+                      Estimated Gas Fee
+                    </div>
+                    <div className={'confirmCurrency__keyValues__value'}>
+                      {`${
+                        Number(estimateGasFee) !== 0
+                          ? Number(estimateGasFee).toFixed(8)
+                          : '0'
+                      } TICS`}
+                    </div>
+                  </div>
+
+                  <div className={'swapDetails__border'}></div>
+
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginTop: '30px',
+                      gap: '20px',
+                    }}
+                  >
+                    <ButtonComp
+                      maxWidth="100%"
+                      onClick={() => handleTransaction(defaultAddressPhrase)}
+                      text="Accept"
+                    />
+                    <div className="cancelBtn">
+                      <ButtonComp
+                        maxWidth="100%"
+                        onClick={async () => {
+                          handleResponse({
+                            type: 'error',
+                            data: { message: 'Rejected by user' },
+                          });
+                        }}
+                        text="Reject"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      ) : null}
+</ModalCustom>
+  
 
       {/* **** Delegator And bondMoreFunds **** */}
       <ModalCustom
