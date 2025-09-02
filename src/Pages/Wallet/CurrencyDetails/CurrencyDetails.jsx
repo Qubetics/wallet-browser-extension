@@ -104,7 +104,7 @@ function CurrencyDetails() {
       {
         coin_id: coin.coin.coin_id,
         coin_family: [coin.coin.coin_family],
-        addrsListKeys: [coin.wallet_address,cosmosAddress],
+        addrsListKeys: coin?.coin?.coin_family == 7 ? [coin.wallet_address,cosmosAddress] :  [coin.wallet_address],
         page: 1,
         limit: 250,
         status: state
