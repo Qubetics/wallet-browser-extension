@@ -47,6 +47,7 @@ export class Web3Helper {
   ) => {
     const { account } = store.getState();
     try {
+      slug =  slug == 'tics' ? 'qubetics' : slug;
       const { data } = await server.post(
         `/${slug}/${tokenAddress}/gas_estimation`,
         {
@@ -63,9 +64,12 @@ export class Web3Helper {
       );
       return {
         estimate: data.gas_estimate,
-        fast: data.resultList.fast_gas_price,
-        propose: data.resultList.propose_gas_price,
-        safe: data.resultList.safe_gas_price,
+        fast: data.gas_price,
+        propose: data.gas_price,
+        safe: data.gas_price,
+        // fast: data.resultList.fast_gas_price,
+        // propose: data.resultList.propose_gas_price,
+        // safe: data.resultList.safe_gas_price,
       };
     } catch (error) {
       return false;
@@ -761,6 +765,7 @@ export class Web3Helper {
   };
 
   static generateRawTransactionForNFTAndBroadcast = async (
+    sessionPassword,
     to,
     from,
     amount,
@@ -777,22 +782,53 @@ export class Web3Helper {
     tokenId,
     nftGasData
   ) => {
+    console.log({
+      sessionPassword,
+      to,
+      from,
+      amount,
+      coinId,
+      fiatPrice,
+      fiatType,
+      contact,
+      slug,
+      chainId,
+      tokenAddress,
+      tokenType,
+      orderId,
+      type,
+      tokenId,
+      nftGasData
+    });
+    
     try {
       const { account } = store.getState();
+
+      slug = slug == 'tics' ? 'qubetics' : slug;
 
       const web3 = new Web3();
       const contract = new web3.eth.Contract(ERC_721_ABI);
 
-      const privateKey = await WalletHelper.getPrivateKey();
+      // const privateKey = await WalletHelper.getPrivateKey();
+      const { privateKey } = await WalletHelper.getPrivateKeyEvm(
+        sessionPassword
+      );
+      console.log(privateKey,"privateKey");
+      
       if (!privateKey) {
         return false;
       }
 
       const gasPriceRes = nftGasData;
+      console.log("🚀 ~ Web3Helper ~ gasPriceRes:", gasPriceRes)
       const gaslimits = gasPriceRes.estimate;
+      console.log("🚀 ~ Web3Helper ~ gaslimits:", gaslimits)
       const gasPrice = gasPriceRes.fast * Math.pow(10, 9);
+      console.log("🚀 ~ Web3Helper ~ gasPrice:", gasPrice)
       const nonce = await this.getNonce(slug, 1, tokenAddress, null, from);
+      console.log("🚀 ~ Web3Helper ~ nonce:", nonce)
       const gaslimit = (gaslimits * 2).toFixed(0);
+      console.log("🚀 ~ Web3Helper ~ gaslimit:", gaslimit)
 
       const transaction = {
         nonce,
@@ -804,29 +840,33 @@ export class Web3Helper {
         data: contract.methods.transferFrom(from, to, tokenId).encodeABI(),
         chainId,
       };
+      console.log({transaction});
+      
 
       const signedTransaction = await web3.eth.accounts.signTransaction(
         transaction,
         privateKey
       );
-
+      console.log({signedTransaction});
+      
       const myResponse = await server.post(
-        `${slug}/send`,
+        `${slug}/${tokenAddress}/send`,
         {
           address_book_name: contact || '',
           amount: parseFloat(amount),
           coin_id: coinId,
           fiat_price: fiatPrice.toString(),
           fiat_type: fiatType,
-          from_address: from,
+          from: from,
           gas_estimate: gasPriceRes.estimate,
           gas_price: gasPriceRes.price,
           source_type: 'ANDROID',
-          to_address: to,
-          trnx_raw: signedTransaction.rawTransaction.split('0x')[1],
-          trnx_type: type || 'withdraw',
+          to: to,
+          tx_raw: signedTransaction.rawTransaction.split('0x')[1],
+          tx_type: type || 'withdraw',
           order_id: orderId || undefined,
           token_id: tokenId,
+          gas_price:gasPrice
         },
         {
           headers: {
@@ -834,6 +874,9 @@ export class Web3Helper {
           },
         }
       );
+
+      console.log(myResponse,"myResponsemyResponse");
+      
       return myResponse.data.tx_hash;
     } catch (error) {
       console.log(error);
@@ -842,6 +885,7 @@ export class Web3Helper {
   };
 
   static generateRawTransactionFor1155AndBroadcast = async (
+    sessionPassword,
     to,
     from,
     amount,
@@ -864,7 +908,10 @@ export class Web3Helper {
       const web3 = new Web3();
       const contract = new web3.eth.Contract(ERC_1155);
 
-      const privateKey = await WalletHelper.getPrivateKey();
+      // const privateKey = await WalletHelper.getPrivateKey();
+      const { privateKey } = await WalletHelper.getPrivateKeyEvm(
+        sessionPassword
+      );
       if (!privateKey) {
         return false;
       }

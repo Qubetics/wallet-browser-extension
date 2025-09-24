@@ -20,7 +20,8 @@ function NftDetail() {
     try {
       store.dispatch(setLoading(true)); 
       const walletsList = await server.post(
-        `/wallet/nft/from_moalis`,
+        // `/wallet/nft/from_moalis`,
+        'wallet/nfts',
         {
           address_list: [
             // {
@@ -32,6 +33,11 @@ function NftDetail() {
               coin_symbol: "eth",
               coin_family: "2",
               wallet_address: account?.coinFamilyAndAddress[2],
+            },
+            {
+              coin_symbol: "tics",
+              coin_family: "7",
+              wallet_address: account?.coinFamilyAndAddress[7],
             },
             // {
             //   coin_symbol: "btc",

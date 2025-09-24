@@ -3,13 +3,14 @@
 import React, { useEffect, useState } from "react";
 import MenuRestofHeaders from "../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders";
 import SendNFTimg from "../../Assets/SendNFT.png";
-import { InputField } from "../../Components/InputField/InputFieldSimple";
+import InputFieldSimple, { InputField } from "../../Components/InputField/InputFieldSimple";
 import AddressBook from "../../Assets/address-book-svgrepo-com.svg";
 import ButtonComp from "../../Components/ButtonComp/ButtonComp";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Drawer, message } from "antd";
 import varLine from "../../Assets/varLine.svg";
 import nftCopy from "../../Assets/nftCopy.svg";
+import warning from '../../Assets/PNG/warning.png';
 import { useSelector } from "react-redux";
 import { Web3Helper } from "../../helpers/web3.helper";
 import { store } from "../..";
@@ -19,6 +20,9 @@ import BigNumber from 'bignumber.js';
 import { server } from "../../server";
 import { setNfts } from "../../actions/nfts";
 import { DURATION } from "../../config/message.config";
+import ModalCustom from "../../Components/ModalCustom/ModalCustom";
+import { WalletHelper } from "../../helpers/wallet.helper";
+
 
 function NftSend() {
   const [selectedAccount, setSelectedAccount] = useState(null);
@@ -36,20 +40,42 @@ function NftSend() {
   const navigate = useNavigate();
   const location = useLocation();
   const [nftDetails, setNftDetails] = useState();
+  // console.log("🚀 ~ NftSend ~ nftDetails:", nftDetails)
+
+
+    const [sessionPassword, setPassword] = useState(null);
+    const [isModalOpen, setOpenmodal] = useState(false);
+
+  const handleCancel = () => {
+    setPassword(null);
+    setOpenmodal(false);
+  };
+
+  const handleOk = () => {
+    setOpenmodal(false);
+    setPassword(null);
+  };
 
   const getNetwrokFee = async () => {
     const { chains } = await chrome.storage.local.get("chains");
-    const chain = chains.find((chain) => chain.coinFamily == 2); 
+    const chain = chains.find((chain) => chain.coinFamily == nftDetails.coin_family); 
+
+    console.log({
+      chain,
+      toAddress,
+    });
+    
 
     const gasData = await Web3Helper.getGasPriceNft(
       chain.slug,
       toAddress,
-      account?.coinFamilyAndAddress[2],
+      account?.coinFamilyAndAddress[nftDetails.coin_family],
       nftDetails?.token_address,
       nftDetails?.token_id,
       nftDetails?.token_type,
       quantity
     );
+    console.log("🚀 ~ getNetwrokFee ~ gasData:", gasData)
  
     setNftGasData(gasData)
 
@@ -105,8 +131,8 @@ function NftSend() {
     const { data } = await server.post(
       '/wallet/nativeCoinBalance',
       {
-        wallet_address: account?.coinFamilyAndAddress[2],
-        coin_family: "2", //detail.coin_family,
+        wallet_address: account?.coinFamilyAndAddress[nftDetails.coin_family],
+        coin_family: nftDetails.coin_family, //detail.coin_family,
         // fiat_currency: currency?.name,
       },
       {
@@ -116,27 +142,33 @@ function NftSend() {
       }
     ); 
     const balance = new BigNumber(data?.data?.wallet_data?.balance);
+    
     const fee = new BigNumber(networkFee); 
+
+    console.log(fee,"fee",balance,"balance");
+    
     if (fee.isGreaterThan(balance)) {
       store.dispatch(setLoading(false));
       // setOpenmodal(false);
       return messageApi.error(
-        'Insufficient balance to proceed with the transaction.'
+        'Insufficient balance to proceed with the transaction. 1'
       );
     }
 
     if (nftDetails.token_type == 'ERC721') {
+      console.log("nftDetails.token_type == 'ERC721'");
       const response =
         await Web3Helper.generateRawTransactionForNFTAndBroadcast(
+          sessionPassword,
           toAddress,
-          account?.coinFamilyAndAddress[2],
+          account?.coinFamilyAndAddress[nftDetails.coin_family],
           1,
           nftDetails?.token_id,
           0,
           currency.name,
           '',
-          'ethereum',//detail.coin_family == 1 ? 'eth' : 'bnb',
-          '1',//detail.coin_family == 1 ? 1 : 56,
+          nftDetails.coin_family == 2 ? 'ethereum' : 'tics',
+          nftDetails.coin_family ==  2 ? 1 : 9030,
           nftDetails?.token_address,
           nftDetails?.token_type,
           null,
@@ -144,6 +176,8 @@ function NftSend() {
           nftDetails?.token_id,
           nftGasData
         );
+        console.log({response});
+        
       if (!response) {
         store.dispatch(setLoading(false));
         return messageApi.error(
@@ -151,17 +185,19 @@ function NftSend() {
         );
       }
     } else {
+      console.log("generateRawTransactionFor1155AndBroadcast");
       const response =
         await Web3Helper.generateRawTransactionFor1155AndBroadcast(
+          sessionPassword,
           toAddress,
-          account?.coinFamilyAndAddress[2],//fromAddress,
+          account?.coinFamilyAndAddress[nftDetails.coin_family],//fromAddress,
           quantity, //detail.amount,
           nftDetails?.token_id,
           0,
           currency.name,
-          '',//toName,
-          'ethereum',//detail.coin_family == 1 ? 'eth' : 'bnb',
-          '1',//detail.coin_family == 1 ? 1 : 56,
+          '',
+          nftDetails.coin_family == 2 ? 'ethereum' : 'qubetics',
+          nftDetails.coin_family ==  2 ? 1 : 9030,
           nftDetails?.token_address,
           nftDetails?.token_type,
           null,
@@ -179,7 +215,8 @@ function NftSend() {
     }
 
     const walletsList = await server.post(
-      `/wallet/nft/from_moalis`,
+      // `/wallet/nft/from_moalis`,
+      'wallet/nfts',
       {
         address_list: [
           {
@@ -187,11 +224,11 @@ function NftSend() {
             coin_family: '1',
             wallet_address: account.coinFamilyAndAddress[1],
           },
-          // {
-          //   coin_symbol: 'bnb',
-          //   coin_family: '3',
-          //   wallet_address: account.coinFamilyAndAddress[3],
-          // },
+          {
+            coin_symbol: 'tics',
+            coin_family: '7',
+            wallet_address: account.coinFamilyAndAddress[7],
+          },
         ],
       },
       {
@@ -215,7 +252,7 @@ function NftSend() {
         <div className="flexedContent manageWalletHeight ">
           <div className="nftSend">
             <div className="nftSend_superInfluencers" style={{display:'flex', gap:30, flexDirection:'column'}}>
-              <img src={nftDetails?.image} alt="Send NFT" />
+              <img src={nftDetails?.image} alt="Send NFT" style={{width:'200px'}}/>
               <div style={{width:'100%'}}>
                 <h3>{nftDetails?.name}</h3>
                 <div style={{display:'flex', alignItems:'center', justifyContent:'space-between'}}>
@@ -314,7 +351,7 @@ function NftSend() {
       >
         <div className="nftSend">
           <div className="nftSend_superInfluencers">
-            <img src={nftDetails?.image} alt="Send NFT" />
+            <img src={nftDetails?.image} alt="Send NFT" style={{width:'70px'}}/>
             <div>
               <h3>{nftDetails?.name}</h3>
               <p>
@@ -377,7 +414,7 @@ function NftSend() {
             <div>
               <div style={{ marginBottom: "10px" }} className="d-flex">
                 <span>Network Fee</span>
-                <p>{networkFee} {'ETH'}</p>
+                <p>{networkFee} {nftDetails?.coin_family == 2 ? 'ETH' : 'TICS'}</p>
               </div>
 
               {nftDetails?.token_type == "ERC1155" && <div className="d-flex">
@@ -394,12 +431,73 @@ function NftSend() {
           </div>
           <div className="nftSend_btn d-flex">
             <div className="cancelBtn">
-              <ButtonComp text="Cancel" maxWidth="100%" />
+              <ButtonComp text="Cancel" maxWidth="100%" onClick={() => setDrawer(false)}/>
             </div>
-            <ButtonComp text="Continue" maxWidth="100%" onClick={() => handleTransaction()} />
+            <ButtonComp text="Continue" maxWidth="100%" 
+            // onClick={() => handleTransaction()} 
+            onClick={() => {
+              setOpenmodal(true);
+            }}
+            />
           </div>
         </div>
       </Drawer>
+
+      <ModalCustom
+        title={'Enter password'}
+        handleCancel={handleCancel}
+        isModalOpen={isModalOpen}
+        handleOk={handleOk}
+        customClass="customClassModal"
+      >
+        <div className="viewphrases">
+          <div
+            style={{
+              marginBottom: '36px',
+              width: '100%',
+            }}
+          >
+            <InputFieldSimple
+              placeholder="Password"
+              getData={setPassword}
+              value={sessionPassword}
+              customFunction={async () => {
+                const isCorrectPassword = await WalletHelper.verifyPassword(
+                  sessionPassword
+                );
+                if (!isCorrectPassword) {
+                  return messageApi.error('Incorrect password provided.');
+                }
+                setOpenmodal(false);
+                setPassword(null);
+              }}
+            />
+            <div className="viewphrases__iInner">
+              <img src={warning} />
+              <div>
+                <p>Do not share your password with anyone!</p>
+                <p>It can be used to steal all your funds.</p>
+              </div>
+            </div>
+          </div>
+          <ButtonComp
+            text={'Proceed'}
+            maxWidth={'100%'}
+            onClick={async () => {
+              const isCorrectPassword = await WalletHelper.verifyPassword(
+                sessionPassword
+              );
+              if (!isCorrectPassword) {
+                return messageApi.error('Incorrect password provided.');
+              }
+              setOpenmodal(false);
+              setPassword(null);
+              // handleSwap();
+              handleTransaction()
+            }}
+          />
+        </div>
+      </ModalCustom>
     </div>
   );
 }
