@@ -121,7 +121,7 @@ function NftSend() {
     }
 
     if (Number(quantity) > Number(nftDetails?.amount)) {
-      messageApi.error(`You have insufficient balance.`);
+      messageApi.error(`Not Sufficent Quantity`);
       return;
     }
     const parentCoin = await server.post(
