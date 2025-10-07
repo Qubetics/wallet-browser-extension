@@ -30,6 +30,8 @@ import { getUserAddress } from '../../helpers/getAddress';
 import fetchValoperAddress from '../../helpers/fetchValoperAddress';
 import { Wallet } from 'ethers';
 import { useLocation } from 'react-router-dom';
+import cancelUnbondDelegation from '../../helpers/cancelUnbondDelegation';
+
 
 function getFlooredFixed(v, d) {
   return (Math.floor(v * Math.pow(10, d)) / Math.pow(10, d)).toFixed(d);
@@ -107,6 +109,26 @@ export const ExternalConnection = () => {
     setEstimateGasFee(response);
     store.dispatch(setLoading(false));
     return response;
+  };
+
+  const getEstimateFeesforDelegation = async (mnemonics) => {
+    try{
+      const response = await delagteAndBondMore(
+      mnemonics,
+      data.amount.amount,
+      data.amount.amount,
+      data.validator_address,
+      data.nodeUrl,
+      true
+    );
+    console.log("RESPONSE FEE ESTIMATE:::", response);
+    setEstimateGasFee(response);
+    store.dispatch(setLoading(false));
+    return response;
+    }catch(e){
+      console.log("Error in getEstimateFeesforDelegation::", e);
+    }
+   
   };
 
   const getEstimateFeesUnBondFunds = async (mnemonics) => {
@@ -197,6 +219,7 @@ export const ExternalConnection = () => {
     "editValidator",
     "bondMoreFunds",
     "delegatorBondMoreFunds",
+    "MsgCancelUnbondingDelegation",
     "redelegate",
     "unBondFunds",
     "stopValidator",
@@ -509,7 +532,28 @@ export const ExternalConnection = () => {
             store.dispatch(setLoading(false));
             return;
           }
-        } else if (data.method === 'redelegate') {
+        } else if (data.method === 'MsgCancelUnbondingDelegation') {
+          // store.dispatch(setLoading(true));
+          const response = await cancelUnbondDelegation(
+            // data.mnemonics,
+            defaultAddressPhrase,
+            // data.userAddress,
+            // data.stakeAmount,
+            // data.valoperAddress,
+            // data.nodeUrl
+
+            data.delegator_address,
+            data.amount.amount,
+            data.validator_address,
+            data.nodeUrl,
+          );
+          if (response) {
+            console.log('RESPO: MsgCancelUnbondingDelegation::', response);
+            handleResponse({ type: 'success', data: response });
+            store.dispatch(setLoading(false));
+            return;
+          }
+         } else if (data.method === 'redelegate') {
           // store.dispatch(setLoading(true));
           const response = await redelegate(
             // data.mnemonics,
@@ -681,6 +725,8 @@ export const ExternalConnection = () => {
       setDefaultAddressPhrase(isVerified);
       if (method == 'delegatorBondMoreFunds') {
         getEstimateFees(isVerified);
+      } else if (method == 'MsgCancelUnbondingDelegation') {
+        getEstimateFeesforDelegation(isVerified);
       } else if (method == 'unBondFunds' || method == 'stopValidator') {
         getEstimateFeesUnBondFunds(isVerified);
       } else if (method == 'redelegate') {
@@ -1994,6 +2040,137 @@ export const ExternalConnection = () => {
           </div>
         ) : null}
       </ModalCustom>
+
+
+      {/* MsgCancelUnbondingDelegation */}
+
+      <ModalCustom
+      title={'Cancel Unbond Delegation'}
+      isModalOpen={account && method === 'MsgCancelUnbondingDelegation'}
+      customClass="customClassModal"
+      handleCancel={() => {
+        setMethod(null);
+        handleResponse({
+          type: 'error',
+          data: { message: 'Rejected by user' },
+        });
+      }}
+    >
+      {account && method === 'MsgCancelUnbondingDelegation' && data ? (
+        <>
+          {console.log("CancelUnbondDelegation modal data:", data)}
+          <div className={'viewphrases'}>
+            <div className={'viewphrases__iInner'}>
+              <div className={`flexedContent`}>
+                <div className={'swapDetails'}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      width: '100%',
+                      marginBottom: '14px',
+                    }}
+                  >
+                    <img
+                      src={logo}
+                      alt=""
+                      style={{
+                        height: '70px',
+                        width: '70px',
+                        objectFit: 'contain',
+                        marginTop: '7px',
+                      }}
+                    />
+                  </div>
+                  <div className={'swapDetails__address'}>
+                    <p className={'swapDetails__address__key'}>
+                      Please enter your password to confirm the transaction.
+                    </p>
+                    <p className={'swapDetails__address__val'}>
+                      <span>
+                        Please be sure that the request has been originated from
+                        a verified source, before signing the transaction.
+                      </span>
+                    </p>
+                  </div>
+
+                  <div className={'confirmCurrency__keyValues'}>
+                    <div className={'confirmCurrency__keyValues__key'}>
+                      Event
+                    </div>
+                    <div className={'confirmCurrency__keyValues__value'}>
+                      {data.method}
+                    </div>
+                  </div>
+
+                  <div className={'confirmCurrency__keyValues'}>
+                    <div className={'confirmCurrency__keyValues__key'}>
+                      Delegator Address
+                    </div>
+                    <div className={'confirmCurrency__keyValues__value'}>
+                      <TruncatedAddress address={data.delegator_address} />
+                    </div>
+                  </div>
+
+                  <div className={'confirmCurrency__keyValues'}>
+                    <div className={'confirmCurrency__keyValues__key'}>
+                      Amount
+                    </div>
+                    <div className={'confirmCurrency__keyValues__value'}>
+                      {`${Number(data.amount.amount) / 1e18} TICS`}
+                    </div>
+                  </div>
+
+                  <div className={'confirmCurrency__keyValues'}>
+                    <div className={'confirmCurrency__keyValues__key'}>
+                      Estimated Gas Fee
+                    </div>
+                    <div className={'confirmCurrency__keyValues__value'}>
+                      {`${
+                        Number(estimateGasFee) !== 0
+                          ? Number(estimateGasFee).toFixed(8)
+                          : '0'
+                      } TICS`}
+                    </div>
+                  </div>
+
+                  <div className={'swapDetails__border'}></div>
+
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginTop: '30px',
+                      gap: '20px',
+                    }}
+                  >
+                    <ButtonComp
+                      maxWidth="100%"
+                      onClick={() => handleTransaction(defaultAddressPhrase)}
+                      text="Accept"
+                    />
+                    <div className="cancelBtn">
+                      <ButtonComp
+                        maxWidth="100%"
+                        onClick={async () => {
+                          handleResponse({
+                            type: 'error',
+                            data: { message: 'Rejected by user' },
+                          });
+                        }}
+                        text="Reject"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      ) : null}
+</ModalCustom>
 
       {/* **** Delegator And bondMoreFunds **** */}
       <ModalCustom

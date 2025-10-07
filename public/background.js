@@ -206,25 +206,46 @@ const networks = [
   // },
   {
     id: uuidv4(),
-    chainName: 'Qubetics Mainnet',
-    chainId: 9030,
-    currencyName: 'qubetics',
+    chainName: 'Qubetics Testnet',
+    chainId: 9029, // ✅ Updated Chain ID
+    currencyName: 'qubetics Testnet',
     currencySymbol: 'TICS',
-    currencyDecimals: 18,//-----
-    rpcUrl: 'https://rpc.qubetics.com',
-    rpcApiKey: null,
-    blockUrl: 'https://ticsscan.com',
+    currencyDecimals: 18, // ✅ Same as mainnet
+    rpcUrl: 'https://rpc-testnet.qubetics.work/', // ✅ Updated testnet RPC
+    rpcApiKey: null, // ✅ No change
+    blockUrl: 'https://testnet.qubetics.work/tx/', // ✅ Updated explorer
     default: false,
-    image: 'https://stage-qubetics-wallet.obs.ap-southeast-4.myhuaweicloud.com/tics.png',
+    image: 'https://stage-qubetics-wallet.obs.ap-southeast-4.myhuaweicloud.com/tics.png', // ✅ Same image is fine
     tokenType: 'ERC20',
-    testnet: false,
+    testnet: true, // ✅ Marked as testnet
     swap: false,
     isEVM: true,
     supportTokens: true,
     coinFamily: 7,
-    slug: 'tics',
-    status: true,
+    slug: 'tics', 
+    status: true, // ✅ Enable it if needed in app
   },
+  // {
+  //   id: uuidv4(),
+  //   chainName: 'Qubetics Mainnet',
+  //   chainId: 9030,
+  //   currencyName: 'qubetics',
+  //   currencySymbol: 'TICS',
+  //   currencyDecimals: 18,//-----
+  //   rpcUrl: 'https://rpc.qubetics.com',
+  //   rpcApiKey: null,
+  //   blockUrl: 'https://ticsscan.com',
+  //   default: false,
+  //   image: 'https://stage-qubetics-wallet.obs.ap-southeast-4.myhuaweicloud.com/tics.png',
+  //   tokenType: 'ERC20',
+  //   testnet: false,
+  //   swap: false,
+  //   isEVM: true,
+  //   supportTokens: true,
+  //   coinFamily: 7,
+  //   slug: 'tics',
+  //   status: true,
+  // },
 ];
 
 const currency = {
@@ -826,7 +847,56 @@ class Background {
             res.method = req.method;
             res.error = true;
           }
-        } else if (req.method === 'redelegate') {
+        }
+        else if (req.method === 'MsgCancelUnbondingDelegation') { 
+          console.log("MsgCancelUnbondingDelegation here is ");
+          await chrome.storage.session.remove(['accounts']);
+          const response = await new Promise((resolve, reject) => {
+            const requestData = encodeURIComponent(JSON.stringify(req));
+
+            chrome.windows.create({
+              url: `index.html?method=MsgCancelUnbondingDelegation&data=${requestData}`,
+              type: 'popup',
+              focused: true,
+              width: 439,
+              height: 746,
+            });
+
+            chrome.windows.onRemoved.addListener(async () => {
+              const { isApproved } = await chrome.storage.local.get(
+                'isApproved'
+              );
+              console.log('isApproved:::', isApproved);
+              if (!isApproved)
+                sendMessageToContentScript({
+                  method: 'user_rejected',
+                  message: 'Rejected by user',
+                  network: 'qubetics',
+                  id: req.id,
+                });
+              else await chrome.storage.local.set({ isApproved: false });
+            });
+
+            chrome.runtime.onMessage.addListener(
+              (message, sender, sendResponse) => {
+                if (message.method === 'MsgCancelUnbondingDelegation') {
+                  resolve(message.result);
+                }
+              }
+            );
+          });
+
+          if (response) {
+            res.result = response;
+            res.method = req.method;
+            res.network = req.network;
+          } else {
+            res.result = null;
+            res.method = req.method;
+            res.error = true;
+          }
+        }
+         else if (req.method === 'redelegate') {
           await chrome.storage.session.remove(['accounts']);
           const response = await new Promise((resolve, reject) => {
             const requestData = encodeURIComponent(JSON.stringify(req));
