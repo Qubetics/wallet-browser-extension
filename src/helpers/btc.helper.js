@@ -50,6 +50,26 @@ export class BTCHelper {
     return account0.getAddress(0);
   };
 
+  static async getBTCBalance(address) {
+    try {
+      // Choose network based on IS_PRODUCTION
+      const apiUrl = IS_PRODUCTION
+        ? `https://blockstream.info/api/address/${address}/utxo`
+        : `https://blockstream.info/testnet/api/address/${address}/utxo`;
+
+      const { data } = await axios.get(apiUrl);
+
+      // Sum UTXO values (in satoshis)
+      const totalSatoshis = data.reduce((sum, utxo) => sum + utxo.value, 0);
+      const totalBTC = totalSatoshis / 100000000;
+
+      return totalBTC.toFixed(8);
+    } catch (error) {
+      console.error("Error fetching BTC balance:", error);
+      return 0;
+    }
+  }
+
   static getUnspent = async (address) => {
     const { account } = store.getState();
     try {
@@ -86,14 +106,14 @@ export class BTCHelper {
 
       if (!unspent) {
         return {
-          message: 'Unable to fetch unspent at the moment.',
+          message: "Unable to fetch unspent at the moment.",
         };
       }
 
       if (unspent.length === 0) {
         return {
           message:
-            'You have a pending transaction in your account or you do not have enough balance to proceed with the transaction.',
+            "You have a pending transaction in your account or you do not have enough balance to proceed with the transaction.",
         };
       }
 
@@ -112,7 +132,7 @@ export class BTCHelper {
             : element.vout;
 
         if (!txid || vout === undefined || !satoshis) {
-          console.error('Invalid UTXO:', element);
+          console.error("Invalid UTXO:", element);
           continue;
         }
 
@@ -127,7 +147,7 @@ export class BTCHelper {
 
       if (utxos.length === 0) {
         return {
-          message: 'No valid UTXOs found.',
+          message: "No valid UTXOs found.",
         };
       }
 
@@ -143,13 +163,13 @@ export class BTCHelper {
       const balance = await this.getCoinBalance(fromAddress);
       if (+totalAmount > +balance) {
         return {
-          message: 'Not enough balance to proceed with the transaction.',
+          message: "Not enough balance to proceed with the transaction.",
         };
       }
 
       if (totalAmountAvailable < sendAmount + fee) {
         return {
-          message: 'Insufficient UTXO balance to proceed with the transaction.',
+          message: "Insufficient UTXO balance to proceed with the transaction.",
         };
       }
 
@@ -158,7 +178,7 @@ export class BTCHelper {
       if (!btcPrivateKeyStr) {
         return {
           message:
-            'Unable to fetch private key at the moment please try again later.',
+            "Unable to fetch private key at the moment please try again later.",
         };
       }
 
@@ -167,26 +187,26 @@ export class BTCHelper {
 
       // Determine address type and create appropriate payment
       let payment;
-      if (fromAddress.startsWith('bc1q')) {
+      if (fromAddress.startsWith("bc1q")) {
         // P2WPKH (Bech32)
         payment = bitcoin.payments.p2wpkh({ pubkey: keyPair.publicKey });
-        console.log('Using P2WPKH (SegWit) address:', payment.address);
-      } else if (fromAddress.startsWith('3')) {
+        console.log("Using P2WPKH (SegWit) address:", payment.address);
+      } else if (fromAddress.startsWith("3")) {
         // P2SH-P2WPKH (SegWit wrapped in P2SH)
         const p2wpkh = bitcoin.payments.p2wpkh({ pubkey: keyPair.publicKey });
         payment = bitcoin.payments.p2sh({ redeem: p2wpkh });
-        console.log('Using P2SH-P2WPKH address:', payment.address);
+        console.log("Using P2SH-P2WPKH address:", payment.address);
       } else {
         // P2PKH (Legacy)
         payment = bitcoin.payments.p2pkh({ pubkey: keyPair.publicKey });
-        console.log('Using P2PKH (Legacy) address:', payment.address);
+        console.log("Using P2PKH (Legacy) address:", payment.address);
       }
 
       // Verify address match
       if (payment.address !== fromAddress) {
-        console.error('Address mismatch:', payment.address, 'vs', fromAddress);
+        console.error("Address mismatch:", payment.address, "vs", fromAddress);
         return {
-          message: 'Private key does not match wallet address.',
+          message: "Private key does not match wallet address.",
         };
       }
 
@@ -201,12 +221,12 @@ export class BTCHelper {
         };
 
         // For SegWit inputs, we need to specify the witnessUtxo
-        if (fromAddress.startsWith('bc1q')) {
+        if (fromAddress.startsWith("bc1q")) {
           inputData.witnessUtxo = {
             script: payment.output,
             value: utxo.value,
           };
-        } else if (fromAddress.startsWith('3')) {
+        } else if (fromAddress.startsWith("3")) {
           // P2SH-P2WPKH
           inputData.witnessUtxo = {
             script: payment.output,
@@ -254,15 +274,75 @@ export class BTCHelper {
       psbt.finalizeAllInputs();
       const rawTransaction = psbt.extractTransaction().toHex();
 
-      console.log('Transaction created successfully');
+      console.log("Transaction created successfully");
       return rawTransaction;
     } catch (error) {
-      console.error('generateRawTransaction error:', error);
+      console.error("generateRawTransaction error:", error);
       return {
         message: `Transaction generation failed: ${error.message}`,
       };
     }
   }
+
+  /**
+   * Signs a message with Bitcoin private key
+   * @param {string} wif - Bitcoin private key in WIF format
+   * @param {string} message - Message to sign
+   * @returns {string} - Base64 encoded signature
+   */
+  static signBitcoinMessage = async (wif, message) => {
+    try {
+      const bitcoin = require("bitcoinjs-lib");
+      const bitcoinMessage = require("bitcoinjs-message");
+
+      // Determine network based on IS_PRODUCTION flag
+      const network = IS_PRODUCTION
+        ? bitcoin.networks.bitcoin
+        : bitcoin.networks.testnet;
+
+      console.log(
+        "Using Bitcoin network:",
+        IS_PRODUCTION ? "mainnet" : "testnet"
+      );
+
+      // Import the private key from WIF
+      const keyPair = bitcoin.ECPair.fromWIF(wif, network);
+      const privateKey = keyPair.privateKey;
+
+      // Get the address to verify it matches
+      const { address } = bitcoin.payments.p2wpkh({
+        pubkey: keyPair.publicKey,
+        network,
+      });
+      console.log("Signing with Bitcoin address:", address);
+
+      // Sign the message using Bitcoin message signing
+      const signature = bitcoinMessage.sign(
+        message,
+        privateKey,
+        keyPair.compressed,
+        network.messagePrefix
+      );
+
+      // Convert signature to base64 string
+      const signatureBase64 = signature.toString("base64");
+      console.log("Bitcoin message signature (base64):", signatureBase64);
+
+      // Verify the signature (optional, for debugging)
+      const verified = bitcoinMessage.verify(
+        message,
+        address,
+        signatureBase64,
+        network.messagePrefix
+      );
+      console.log("Signature verification:", verified);
+
+      return signatureBase64;
+    } catch (error) {
+      console.error("Error signing Bitcoin message:", error);
+      throw new Error("Failed to sign Bitcoin message: " + error.message);
+    }
+  };
 
   static generateRawTransactionForCoinAndBroadcast = async (
     to,
@@ -282,39 +362,39 @@ export class BTCHelper {
   ) => {
     try {
       console.log(
-        'TO',
+        "TO",
         to,
-        'FROM',
+        "FROM",
         from,
-        'AMOUNT',
+        "AMOUNT",
         amount,
-        'SLUG',
+        "SLUG",
         slug,
-        'RAW',
+        "RAW",
         rawTransaction,
-        'ORDERID',
+        "ORDERID",
         orderId,
-        'TYPE',
+        "TYPE",
         type
       );
       const { account } = store.getState();
-      console.log('ACCOUNT : ', account);
+      console.log("ACCOUNT : ", account);
       let payload = {
         tx_raw: rawTransaction,
         from: from,
         to: to,
         amount: amount,
-        gas_price: '', //gasPriceRes.fast * Math.pow(10, 9),//gasInEth,
-        tx_type: type || 'withdraw',
+        gas_price: "", //gasPriceRes.fast * Math.pow(10, 9),//gasInEth,
+        tx_type: type || "withdraw",
       };
-      payload['order_id'] = orderId;
+      payload["order_id"] = orderId;
       const myResponse = await server.post(`${slug}/send`, payload, {
         headers: {
           Authorization: account.jwtToken,
         },
       });
 
-      console.log('RESPONSE FROM TXN REQUEST  BTC:', myResponse);
+      console.log("RESPONSE FROM TXN REQUEST  BTC:", myResponse);
 
       return myResponse.data;
     } catch (error) {

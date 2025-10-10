@@ -25,7 +25,7 @@ function History() {
   const [isFetchingData, setIsFetchingData] = useState(false);
   const [total, setTotal] = useState(0);
   const { pathname, state } = useLocation();
-
+  console.log("history",history)
   const init = async () => {
     let cosmosAddress = '';
     if (!state) {
@@ -149,7 +149,7 @@ function History() {
                 ? 'Sent'
                 : data.type.toLowerCase() === 'swap'
                 ? 'Swap'
-                : data.type.toLowerCase() === 'chain_abstraction'
+                : data.type.toLowerCase() == 'chain_abstraction'
                 ? 'Chain Abstraction'
                 : 'Withdraw';
 
@@ -157,7 +157,10 @@ function History() {
               <HistoryListOuter
                 hash={data?.tx_id}
                 type={data.type}
-                status={data?.blockchain_status}
+                status={{
+                  blockchain_status: data?.blockchain_status,
+                  status: data?.status
+                }}
                 sendRecieve={transactionType}
                 coinname={data?.coin_data?.coin_symbol?.toUpperCase()}
                 address={data?.from_adrs}
@@ -175,6 +178,7 @@ function History() {
                 coin={data?.coin_data}
                 date={moment(data.created_at).format('DD MMM, YYYY | hh:mm A')}
               />
+              
             );
           })
         ) : (

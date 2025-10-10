@@ -1,53 +1,58 @@
 /*global chrome*/
-import './CrossChain.scss';
-import { Drawer, message, Select } from 'antd';
-import React from 'react';
+import "./CrossChain.scss";
+import { Drawer, message, Select } from "antd";
+import React from "react";
 import InputFieldSimple, {
   InputField,
-} from '../../Components/InputField/InputFieldSimple';
-import DownArrowSuffix from '../../Assets/DownArrowSuffix.svg';
-import SwapVerticalIcon from '../../Assets/SwapVerticalIcon.svg';
-import ButtonComp from '../../Components/ButtonComp/ButtonComp';
-import { useNavigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
-import { Web3Helper } from '../../helpers/web3.helper';
-import darkclose from '../../Assets/darkclose.svg';
-import { useSelector } from 'react-redux';
-import { store } from '../..';
-import { setLoading } from '../../actions/loading';
-import { useRef } from 'react';
-import { CrossChainHelper } from '../../helpers/crosschain.helper';
-import ModalCloseIcon from '../../Assets/ModalCloseIcon.svg';
-import Search from '../../Assets/SearchIcon.svg';
-import { BTCHelper } from '../../helpers/btc.helper';
-import { DURATION } from '../../config/message.config';
+} from "../../Components/InputField/InputFieldSimple";
+import DownArrowSuffix from "../../Assets/DownArrowSuffix.svg";
+import SwapVerticalIcon from "../../Assets/SwapVerticalIcon.svg";
+import ButtonComp from "../../Components/ButtonComp/ButtonComp";
+import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Web3Helper } from "../../helpers/web3.helper";
+import darkclose from "../../Assets/darkclose.svg";
+import { useSelector } from "react-redux";
+import { store } from "../..";
+import { setLoading } from "../../actions/loading";
+import { useRef } from "react";
+import { CrossChainHelper } from "../../helpers/crosschain.helper";
+import ModalCloseIcon from "../../Assets/ModalCloseIcon.svg";
+import Search from "../../Assets/SearchIcon.svg";
+import { BTCHelper } from "../../helpers/btc.helper";
+import { DURATION } from "../../config/message.config";
 import {
   exponential_to_decimal,
   newBalanceToFiatConversion,
   toFixed,
-} from '../../helpers/conversion.helper';
-import { server } from '../../server';
-import { swapDetailAc } from '../../actions/swap';
-import useCurrentHeight from '../../CustomHooks/useCurrentHeight';
-import MenuRestofHeaders from '../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders';
-import ConfirmAbstractModal from './chainabstractionconfirmmodal';
-import { WalletHelper } from '../../helpers/wallet.helper';
-import ModalCustom from '../../Components/ModalCustom/ModalCustom';
-import BigNumber from 'bignumber.js';
-import { ChainAbstractionHelper } from '../../helpers/chain_abstraction.helper';
-import AbstractProcessingModal from '../../Components/CustomModelAbstraction/Model';
+} from "../../helpers/conversion.helper";
+import { server } from "../../server";
+import { swapDetailAc } from "../../actions/swap";
+import useCurrentHeight from "../../CustomHooks/useCurrentHeight";
+import MenuRestofHeaders from "../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders";
+import ConfirmAbstractModal from "./chainabstractionconfirmmodal";
+import { WalletHelper } from "../../helpers/wallet.helper";
+import ModalCustom from "../../Components/ModalCustom/ModalCustom";
+import BigNumber from "bignumber.js";
+import AbstractProcessingModal from "../../Components/CustomModelAbstraction/Model";
+import MpcModel from "../../Components/MPCModel/MpcModel";
+import {
+  ensureMpcAddresses,
+  getStoredMpcAddresses,
+} from "../../helpers/mpc.helper";
+import { MpcChainAbstractionHelper } from "../../helpers/chain_abstraction.helperMPC";
 
 function getFlooredFixed(v, d) {
   return (Math.floor(v * Math.pow(10, d)) / Math.pow(10, d)).toFixed(d);
 }
 
 function addCommasToNumber(number) {
-  var parts = number.toString().split('.');
+  var parts = number.toString().split(".");
   var integerPart = parts[0];
-  var decimalPart = parts[1] || '';
-  integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-  if (decimalPart !== '') {
-    return integerPart + '.' + decimalPart;
+  var decimalPart = parts[1] || "";
+  integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  if (decimalPart !== "") {
+    return integerPart + "." + decimalPart;
   } else {
     return integerPart;
   }
@@ -59,21 +64,21 @@ export function bigNumberSafeMath(a, operation, b) {
     const numB = new BigNumber(b || 0);
 
     switch (operation) {
-      case '+':
+      case "+":
         return numA.plus(numB);
-      case '-':
+      case "-":
         return numA.minus(numB);
-      case '*':
+      case "*":
         return numA.times(numB);
-      case '/':
+      case "/":
         return numB.isZero() ? new BigNumber(0) : numA.dividedBy(numB);
-      case '%':
+      case "%":
         return numB.isZero() ? new BigNumber(0) : numA.modulo(numB);
       default:
         return numA;
     }
   } catch (error) {
-    console.error('bigNumberSafeMath error:', error);
+    console.error("bigNumberSafeMath error:", error);
     return new BigNumber(0);
   }
 }
@@ -97,7 +102,7 @@ function ChainAbstraction({ state }) {
     duration: DURATION,
     maxCount: 1,
   });
-  const [toAddress, setToAddress] = useState('');
+  const [toAddress, setToAddress] = useState("");
   const [receivedAmount, setReceivedAmount] = useState(null);
   const [amount, setWithdrawAmount] = useState(null);
   const [route, setRoute] = useState(null);
@@ -115,19 +120,24 @@ function ChainAbstraction({ state }) {
   const [showsuccess, setShowSuccess] = useState(false);
   const { theme, swapDetail } = useSelector((state) => state);
   const debounceTimeout = useRef(null);
-  const ChainAbstractionInstance = useRef(
-    new ChainAbstractionHelper(chain.chainId)
-  );
+  // const ChainAbstractionInstance = useRef(
+  //   new ChainAbstractionHelper(chain.chainId)
+  // );
+  const mpcHelper = new MpcChainAbstractionHelper(chain.chainId);
   const [isProcessModalOpen, setIsProcessModal] = useState(false);
   const [transactionresult, setTransactionResult] = useState({
-    hash: '',
-    fee: '',
-    link: '',
-    status: '',
-    symbol: '',
-    solver: '',
+    hash: "",
+    fee: "",
+    link: "",
+    status: "",
+    symbol: "",
+    solver: "",
+    source_address: "",
   });
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showMpcModel, setShowMpcModel] = useState(false);
+  const [mpcAddresses, setMpcAddresses] = useState(null);
+  const [mpcFromAddress, setMpcFromAddress] = useState(null);
 
   const onChangeFromValue = (val) => {
     setWithdrawAmount(val);
@@ -136,23 +146,17 @@ function ChainAbstraction({ state }) {
     }
     debounceTimeout.current = setTimeout(() => {
       const fromFiatValue = token1?.price;
-      console.log('fromFiatValue>>>', fromFiatValue);
-
       const toFiatValue = token2?.price;
-      console.log('toFiatValue>>>', toFiatValue);
 
       const toValue = new BigNumber(val || 0)
         .times(new BigNumber(fromFiatValue || 0))
         .dividedBy(new BigNumber(toFiatValue || 0));
-      console.log('toValue>>>', toValue);
-      console.log('toValue>>>', exponential_to_decimal(toValue, 8));
+
       const toAmt = exponential_to_decimal(toValue, 8);
       const valueAfterSlippage = exponential_to_decimal(
-        bigNumberSafeMath(toAmt, '*', 0.995),
+        bigNumberSafeMath(toAmt, "*", 0.995),
         6
       );
-      // const valueAfterSlippage = bigNumberSafeMath(toValue, "*", 0.995);
-      console.log('valueAfterSlippage>>>', valueAfterSlippage);
 
       setReceivedAmount(getFlooredFixed(valueAfterSlippage, 8));
     }, 800);
@@ -162,23 +166,39 @@ function ChainAbstraction({ state }) {
     switch (coinFamily) {
       case 7:
         return {
-          coinFamilyName: 'TICS',
-          tokenType: 'ERC20',
+          coinFamilyName: "TICS",
+          tokenType: "ERC20",
           rpc: process.env.REACT_APP_QUBETIC_RPC,
         };
       case 3:
         return {
-          coinFamilyName: 'BTC',
+          coinFamilyName: "BTC",
           tokenType: null,
           rpc: process.env.REACT_APP_BTC_RPC,
         };
       default:
-        return { coinFamilyName: 'ETH', tokenType: 'ERC20', rpc: '' };
+        return { coinFamilyName: "ETH", tokenType: "ERC20", rpc: "" };
     }
   };
 
-  const buildTokenObject = (token, chains, account) => {
+  const buildTokenObject = (token, chains, account, mpcAddresses) => {
     const { coinFamilyName, tokenType, rpc } = getTokenMeta(token?.coin_family);
+
+    // Determine which address to use based on coin family
+    let addressToUse;
+    if (token?.coin_family === 3) {
+      // Bitcoin - use MPC BTC address
+      addressToUse =
+        mpcAddresses?.btc || account?.coinFamilyAndAddress[token?.coin_family];
+    } else if (token?.coin_family === 2 || token?.coin_family === 7) {
+      // EVM chains - use MPC ETH address
+      addressToUse =
+        mpcAddresses?.eth || account?.coinFamilyAndAddress[token?.coin_family];
+    } else {
+      // Fallback to original address
+      addressToUse = account?.coinFamilyAndAddress[token?.coin_family];
+    }
+
     return {
       id: token?.coin_id,
       symbol: token?.coin_symbol,
@@ -189,7 +209,7 @@ function ChainAbstraction({ state }) {
       name: token?.coin_name,
       tokenAddress: token?.token_address || null,
       image: token?.coin_image,
-      address: account?.coinFamilyAndAddress[token?.coin_family],
+      address: addressToUse, // Use MPC address
       isToken: !!token?.token_address,
       coinFamilyName,
       coinFamily: token?.coin_family,
@@ -203,32 +223,136 @@ function ChainAbstraction({ state }) {
     };
   };
 
+  // Fetch MPC balance for a token
+  const fetchMpcBalance = async (token, mpcAddresses) => {
+    console.log("btc",mpcAddresses?.btc)
+    console.log("btc",mpcAddresses)
+
+    try {
+      if (!token || !mpcAddresses) {
+        console.warn("Missing token or MPC addresses for balance fetch");
+        return 0;
+      }
+  
+      // Determine correct MPC address based on token's coin family
+      let mpcAddress;
+      if (token?.coinFamily === 3 || token?.chain?.currencyName === "BTC") {
+        mpcAddress = mpcAddresses?.btc || mpcAddresses;
+        console.log(`Using BTC MPC address for ${token.symbol}:`, mpcAddress);
+      } else if (token?.chain?.isEVM || token?.coinFamily === 2 || token?.coinFamily === 7) {
+        mpcAddress = mpcAddresses?.eth || mpcAddresses;
+        console.log(`Using ETH MPC address for ${token.symbol}:`, mpcAddress);
+      } else {
+        console.warn("Unknown chain type for token:", token);
+        return 0;
+      }
+  
+      if (!mpcAddress) {
+        console.warn("No MPC address available for this token type");
+        return 0;
+      }
+  
+      console.log(`Fetching MPC balance for ${token.symbol} at ${mpcAddress}`);
+      console.log("Token RPC:", token.rpc);
+      console.log("Token coinFamily:", token.coinFamily);
+  
+      if (token?.chain?.isEVM) {
+        let balance;
+  
+        if (token.isToken && token.tokenAddress) {
+          // ERC20 token balance
+          balance = await Web3Helper.getTokenBalance(
+            mpcAddress,
+            token.tokenAddress,
+            token.rpc,
+            token.decimals
+          );
+          console.log(`MPC EVM token balance for ${token.symbol}:`, balance);
+          return parseFloat(balance) || 0;
+        } else {
+          // Native coin balance (ETH, TICS, etc.)
+          balance = await Web3Helper.getCoinBalance(
+            mpcAddress,
+            token.rpc
+          );
+          console.log(`MPC EVM native balance for ${token.symbol}:`, balance);
+  
+          if (balance === false || !balance) {
+            return 0;
+          }
+  
+          const balanceNum =
+            typeof balance === "object" && balance.toNumber
+              ? balance.toNumber()
+              : parseFloat(balance.toString());
+  
+          return balanceNum || 0;
+        }
+      } else if (
+        token?.chain?.currencyName === "BTC" ||
+        token.coinFamily === 3
+      ) {
+        // Fetch BTC balance - ONLY call this with BTC address
+        console.log("Fetching BTC balance for address:", mpcAddress);
+        const balance = await BTCHelper.getBTCBalance(mpcAddress);
+        console.log(`MPC BTC balance:`, balance);
+        return parseFloat(balance) || 0;
+      }
+  
+      return 0;
+    } catch (error) {
+      console.error("Error fetching MPC balance:", error);
+      // return 0;
+    }
+  };
+
   const init = async () => {
     try {
-      console.log('account.coinFamilyAndAddress', account.coinFamilyAndAddress);
+      console.log("account.coinFamilyAndAddress", account.coinFamilyAndAddress);
+
+      // Get MPC addresses first
+      const storedMpc = await getStoredMpcAddresses();
+      console.log("Stored MPC addresses:", storedMpc);
+      setMpcAddresses(storedMpc);
+
+      // Build address list including both original and MPC addresses
+      const addressList = [];
+
+      // Add original addresses
+      Object.values(account.coinFamilyAndAddress)
+        .filter(Boolean)
+        .forEach((addr) => {
+          addressList.push(addr);
+        });
+
+      // Add MPC addresses if they exist
+      if (storedMpc?.eth) addressList.push(storedMpc.eth);
+      if (storedMpc?.btc) addressList.push(storedMpc.btc);
+
+      console.log("Fetching balances for addresses:", addressList);
 
       const data = await server.post(
-        '/chainAbstraction/getCoinList',
+        "/chainAbstraction/getCoinList",
         {
           coinFamilies: [3, 7],
-          addrsList: Object.values(account.coinFamilyAndAddress).filter(
-            Boolean
-          ),
+          addrsList: addressList,
         },
         {
           headers: { Authorization: account.jwtToken },
         }
       );
 
-      console.log('🚀 ~ init ~ data:', data);
+      console.log("🚀 ~ init ~ data:", data);
       setTotal(data?.data?.data?.length || 0);
 
-      const { chains } = await chrome.storage.local.get('chains');
+      const { chains } = await chrome.storage.local.get("chains");
+
+      // Pass mpcAddresses to buildTokenObject
       let tokens = data?.data?.data?.map((token) =>
-        buildTokenObject(token, chains, account)
+        buildTokenObject(token, chains, account, storedMpc)
       );
 
-      console.log('tokens', tokens);
+      console.log("tokens with MPC addresses:", tokens);
 
       if (tokens.length === 0) {
         setCompentLoading(false);
@@ -237,37 +361,46 @@ function ChainAbstraction({ state }) {
 
       const activeTokens = tokens;
       let modifiedList = await uniqueList(allToken, tokens);
-      console.log('🚀 ~ init ~ modifiedList:', modifiedList);
+      console.log("🚀 ~ init ~ modifiedList:", modifiedList);
 
       setAllTokens(modifiedList);
       setFilteredTokens(modifiedList);
 
-      let { crossToken1 } = await chrome.storage.local.get('crossToken1');
-      let { crossToken2 } = await chrome.storage.local.get('crossToken2');
+      let { crossToken1 } = await chrome.storage.local.get("crossToken1");
+      let { crossToken2 } = await chrome.storage.local.get("crossToken2");
 
       if (!crossToken1 && !crossToken2) {
         let myToken1 =
           modifiedList.find(
-            (token) => !token.tokenAddress && token.coinFamily == 2
+            (token) => !token.tokenAddress && token.coinFamily == 7
           ) ||
           modifiedList.find((token) => !token.tokenAddress) ||
           modifiedList[0];
 
         const myToken2 =
           modifiedList.find(
-            (token) => !token.tokenAddress && token.coinFamily == 1
+            (token) => !token.tokenAddress && token.coinFamily == 3
           ) ||
           modifiedList.find((token) => token.id !== myToken1?.id) ||
           modifiedList[1];
 
-        setBalance(myToken1.balance);
+        // Fetch fresh MPC balance for token1
+        const mpcAddr1 =
+          myToken1.coinFamily === 3 ? storedMpc?.btc : storedMpc?.eth;
+        if (mpcAddr1) {
+          const mpcBal = await fetchMpcBalance(myToken1, mpcAddr1);
+          myToken1.balance = mpcBal;
+          setBalance(mpcBal);
+        } else {
+          setBalance(myToken1.balance);
+        }
+
         setReceivedBalance(0);
         setAvailableTokens(modifiedList);
         setToken1(myToken1);
         setToken2(myToken2);
         setCompentLoading(true);
-        console.log('myToken1', myToken1);
-        console.log('myToken2', myToken2);
+
         const route = await crossChainHelper.current.getQuoteAndRoute(
           myToken1?.symbol,
           myToken2?.symbol,
@@ -277,7 +410,7 @@ function ChainAbstraction({ state }) {
         if (
           route?.status &&
           route?.message &&
-          (route?.status !== '' || route?.message !== '')
+          (route?.status !== "" || route?.message !== "")
         ) {
           setCompentLoading(false);
           return messageApi.error(route?.message);
@@ -296,7 +429,21 @@ function ChainAbstraction({ state }) {
         setCompentLoading(true);
         setToken1(myToken1);
         setToken2(myToken2);
-        setBalance(updatedToken?.balance || 0);
+
+        // Fetch fresh MPC balance
+        if (myToken1 && storedMpc) {
+          const mpcAddr =
+            myToken1.coinFamily === 3 ? storedMpc?.btc : storedMpc?.eth;
+          if (mpcAddr) {
+            const mpcBal = await fetchMpcBalance(myToken1, mpcAddr);
+            setBalance(mpcBal);
+          } else {
+            setBalance(updatedToken?.balance || 0);
+          }
+        } else {
+          setBalance(updatedToken?.balance || 0);
+        }
+
         setAvailableTokens(modifiedList);
 
         if (myToken1) {
@@ -309,7 +456,7 @@ function ChainAbstraction({ state }) {
           if (
             route?.status &&
             route?.message &&
-            (route?.status !== '' || route?.message !== '')
+            (route?.status !== "" || route?.message !== "")
           ) {
             setCompentLoading(false);
             return messageApi.error(route?.message);
@@ -321,7 +468,7 @@ function ChainAbstraction({ state }) {
         setCompentLoading(false);
       }
 
-      console.log('state && state.coinId', state, state?.coinId);
+      console.log("state && state.coinId", state, state?.coinId);
 
       if (state?.coinId) {
         const tokenExists = activeTokens.find(
@@ -331,11 +478,12 @@ function ChainAbstraction({ state }) {
           const tokenFromSearch = buildTokenObject(
             tokenExists,
             chains,
-            account
+            account,
+            storedMpc
           );
 
           if (!tokenFromSearch) {
-            return messageApi.error('Token not available for swap.');
+            return messageApi.error("Token not available for swap.");
           }
 
           if (crossToken2?.id !== tokenFromSearch.id) {
@@ -343,20 +491,63 @@ function ChainAbstraction({ state }) {
             await chrome.storage.local.set({ crossToken1: tokenFromSearch });
             setToken1(crossToken1);
           } else {
-            messageApi.error('Cannot set the same tokens on both sides.');
+            messageApi.error("Cannot set the same tokens on both sides.");
           }
         }
       }
     } catch (error) {
-      console.log('error in the init function:', error);
+      console.log("error in the init function:", error);
       setCompentLoading(false);
       messageApi.error(
-        'Unable to perform swap currently. Please try again later.'
+        "Unable to perform swap currently. Please try again later."
       );
     }
   };
 
   useEffect(() => {
+    // Ensure MPC addresses (ETH/BTC) exist in storage
+    (async () => {
+      try {
+        const currentEthAddress =
+          account?.coinFamilyAndAddress?.[2] ||
+          account?.coinFamilyAndAddress?.["2"] ||
+          null;
+        if (currentEthAddress) {
+          console.log(
+            "[MPC:UI] ETH address detected in account:",
+            currentEthAddress
+          );
+
+          // Try to get stored MPC addresses
+          const stored = await getStoredMpcAddresses();
+
+          // For testing - remove these hardcoded values in production
+          // const stored = {
+          //   eth: "0x75965181713d44192d40166a14faf7363392e01b",
+          //   btc: "n4qqJ3zZRgUdsa6cKgw8McUckE8DPTmgjU"
+          // };
+
+          if (stored?.eth && stored?.btc) {
+            console.log("[MPC:UI] Both addresses present, hiding modal");
+            setMpcAddresses(stored);
+            setShowMpcModel(false);
+          } else {
+            console.log("[MPC:UI] MPC addresses missing, showing modal");
+            setShowMpcModel(true);
+          }
+        } else {
+          console.warn("[MPC:UI] No ETH address in account; showing modal");
+          setShowMpcModel(true);
+        }
+      } catch (e) {
+        console.error(
+          "[MPC:UI] Error ensuring MPC addresses:",
+          e?.message || e
+        );
+        setShowMpcModel(true);
+      }
+    })();
+
     if (swapDetail) {
       if (swapDetail?.tab == 1) {
         setToken1(swapDetail?.token1);
@@ -375,7 +566,68 @@ function ChainAbstraction({ state }) {
     }
   }, []);
 
-  const initialSwapDetail = async (amount, tokenOne, tokenTwo) => {
+  // Determine which MPC address to use based on selected token
+  useEffect(() => {
+    const pickMpcAddress = (token, addresses) => {
+      if (!token || !addresses) {
+        console.log("Missing token or addresses in pickMpcAddress");
+        return null;
+      }
+      
+      console.log("Picking MPC address for token:", token.symbol, "coinFamily:", token.coinFamily);
+      
+      if (token?.coinFamily === 3 || token?.chain?.currencyName === "BTC") {
+        console.log("Selected BTC address:", addresses?.btc);
+        return addresses?.btc || null;
+      }
+      // default to EVM (coinFamily 2 or 7)
+      console.log("Selected ETH address:", addresses?.eth);
+      return addresses?.eth || null;
+    };
+  
+    const nextFrom = pickMpcAddress(token1, mpcAddresses);
+    console.log("Setting mpcFromAddress to:", nextFrom);
+    setMpcFromAddress(nextFrom);
+  }, [token1, mpcAddresses]);
+
+  // Fetch MPC balance when token1 or mpcFromAddress changes
+  // useEffect(() => {
+  //   if (token1 && mpcFromAddress) {
+  //     console.log(
+  //       "Fetching balance for token:",
+  //       token1.symbol,
+  //       "at address:",
+  //       mpcFromAddress
+  //     );
+  //     fetchMpcBalance(token1, mpcFromAddress).then((balance) => {
+  //       console.log("Updated MPC balance:", balance);
+  //       setBalance(balance);
+  //     });
+  //   }
+  // }, [token1, mpcFromAddress]);
+
+  useEffect(() => {
+    if (token1 && mpcAddresses) {
+      console.log("=== Fetching balance for token change ===");
+      console.log("Token:", token1.symbol);
+      console.log("CoinFamily:", token1.coinFamily);
+      console.log("MPC Addresses:", mpcAddresses);
+      
+      // Pass the entire mpcAddresses object to let fetchMpcBalance choose the right one
+      fetchMpcBalance(token1, mpcAddresses).then((balance) => {
+        console.log("Updated MPC balance:", balance);
+        setBalance(balance);
+      });
+    }
+  }, [token1, mpcAddresses]);
+  
+
+  const initialSwapDetail = async (
+    amount,
+    receivedAmount,
+    tokenOne,
+    tokenTwo
+  ) => {
     try {
       if (updateRef?.current || swapDetail?.tab) {
         if (amount > 0 && amount && tokenTwo) {
@@ -390,7 +642,7 @@ function ChainAbstraction({ state }) {
           if (
             route?.status &&
             route?.message &&
-            (route?.status !== '' || route?.message !== '')
+            (route?.status !== "" || route?.message !== "")
           ) {
             setCompentLoading(false);
             return messageApi.error(route?.message);
@@ -408,9 +660,9 @@ function ChainAbstraction({ state }) {
 
       updateRef.current = true;
     } catch (error) {
-      console.log('ERR ', error);
+      console.log("ERR ", error);
       setCompentLoading(false);
-      return messageApi.error('Pair not available for swap.');
+      return messageApi.error("Pair not available for swap.");
     }
   };
 
@@ -443,37 +695,41 @@ function ChainAbstraction({ state }) {
     await chrome.storage.local.set({
       crossToken1: updatedToken1,
     });
-
-    setBalance(updatedToken1?.balance);
-
-    if (updatedToken1.tokenAddress) {
-      if (updatedToken1.id != token1.id) {
-        setReceivedAmount(null);
-        setWithdrawAmount(null);
-        setPercent(null);
-        updateRef.current = false;
-      }
+  
+    console.log("=== Token Position Changed ===");
+    console.log("New token:", updatedToken1.symbol);
+    console.log("CoinFamily:", updatedToken1.coinFamily);
+  
+    // Fetch fresh MPC balance with correct address selection
+    if (mpcAddresses) {
+      const mpcBal = await fetchMpcBalance(updatedToken1, mpcAddresses);
+      console.log("New balance:", mpcBal);
+      setBalance(mpcBal);
     } else {
-      if (updatedToken1.id != token1.id) {
-        setReceivedAmount(null);
-        setWithdrawAmount(null);
-        setPercent(null);
-        updateRef.current = false;
-      }
+      console.warn("No MPC addresses available");
+      setBalance(updatedToken1?.balance || 0);
     }
-
+  
+    if (updatedToken1.id != token1?.id) {
+      setReceivedAmount(null);
+      setWithdrawAmount(null);
+      setPercent(null);
+      updateRef.current = false;
+    }
+  
     const route = await crossChainHelper.current.getQuoteAndRoute(
       updatedToken1?.symbol,
       token2?.symbol,
       1
     );
     if (route?.status && route?.message) {
-      if (route?.status != '' || route?.message != '') {
+      if (route?.status != "" || route?.message != "") {
         return messageApi.error(route?.message);
       }
     }
     setRoute(route);
   };
+
 
   const handleToken2Change = async (updatedToken2) => {
     await chrome.storage.local.set({
@@ -482,58 +738,25 @@ function ChainAbstraction({ state }) {
 
     setReceivedBalance(updatedToken2.balance);
 
-    if (updatedToken2.tokenAddress) {
-      if (updatedToken2.id != token2.id) {
-        setReceivedAmount(null);
-        setWithdrawAmount(null);
-        setPercent(null);
-        updateRef.current = false;
-      }
+    if (updatedToken2.id != token2?.id) {
+      setReceivedAmount(null);
+      setWithdrawAmount(null);
+      setPercent(null);
+      updateRef.current = false;
+    }
 
-      const route = await crossChainHelper.current.getQuoteAndRoute(
-        token1?.symbol,
-        updatedToken2?.symbol,
-        1
-      );
-      // console.log("ROUTES:::::::730", route);
-      if (route?.status && route?.message) {
-        if (route?.status != '' || route?.message != '') {
-          return messageApi.error(route?.message);
-        }
-      }
-      setRoute(route);
-    } else {
-      if (updatedToken2.id != token2.id) {
-        setReceivedAmount(null);
-        setWithdrawAmount(null);
-        setPercent(null);
-        updateRef.current = false;
+    const route = await crossChainHelper.current.getQuoteAndRoute(
+      token1?.symbol,
+      updatedToken2?.symbol,
+      1
+    );
+
+    if (route?.status && route?.message) {
+      if (route?.status != "" || route?.message != "") {
+        return messageApi.error(route?.message);
       }
     }
-  };
-
-  const handleRouteQuotation = async (amount) => {
-    if (updateRef.current) {
-      if (amount && amount > 0 && token2) {
-        setCompentLoading(true);
-        const route = {
-          pair: [token1?.id, token2?.id],
-          outAmount: 1.000003,
-          exchangeData: {
-            depositMin: 0.00000001,
-            depositMax: 10,
-          },
-        };
-        console.log('🚀 ~ handleRouteQuotation ~ route:', route);
-        setRoute(route);
-        console.log('🚀 ~ handleRouteQuotation ~ setRoute(route);:');
-        setReceivedAmount(
-          toFixed(getFlooredFixed(parseFloat(route?.outAmount), 6))
-        );
-        setCompentLoading(false);
-      }
-    }
-    updateRef.current = true;
+    setRoute(route);
   };
 
   function handleSwapInput(withdrawAmount) {
@@ -552,11 +775,22 @@ function ChainAbstraction({ state }) {
   const handleChainAbstraction = async () => {
     setIsProcessing(true);
     try {
+      if (!mpcFromAddress) {
+        setIsProcessing(false);
+        setShowMpcModel(true);
+        return messageApi.error(
+          "MPC wallet not set up. Please complete MPC setup."
+        );
+      }
+
+      // Fetch fresh MPC balance before transaction
+      const mpcBalance = await fetchMpcBalance(token1, mpcFromAddress);
+      console.log("Current MPC balance:", mpcBalance);
+
       const parsedAmount = parseFloat(amount);
       const parsedReceivedAmount = parseFloat(receivedAmount);
       const depositMin = parseFloat(route?.exchangeData?.depositMin);
       const depositMax = parseFloat(route?.exchangeData?.depositMax);
-      const parsedBalance = parseFloat(balance);
 
       const throwError = (msg) => {
         messageApi.error(msg);
@@ -564,38 +798,21 @@ function ChainAbstraction({ state }) {
       };
 
       if (isNaN(parsedAmount) || isNaN(parsedReceivedAmount)) {
-        return throwError('Please enter a valid amount to proceed.');
+        return throwError("Please enter a valid amount to proceed.");
       }
 
-      // if (parsedAmount < depositMin) {
-      //   return throwError(
-      //     `The minimum deposit amount to swap is ${depositMin} ${token1?.symbol}`
-      //   );
-      // }
-
-      // if (parsedAmount > depositMax) {
-      //   return throwError(
-      //     `The maximum deposit amount to swap is ${depositMax} ${token1?.symbol}`
-      //   );
-      // }
-
+      // Validate to address
       if (token2?.coinFamily === 3) {
         const isValidBTCAddress = BTCHelper.validateBTCAddress(toAddress);
         if (!isValidBTCAddress) {
-          return throwError('Please enter a valid Bitcoin address.');
+          return throwError("Please enter a valid Bitcoin address.");
         }
       } else if (token2?.chain?.isEVM == true) {
         const isValidEVMAddress = Web3Helper.validateETHAddress(toAddress);
         if (!isValidEVMAddress) {
-          return throwError('Please enter a valid address.');
+          return throwError("Please enter a valid address.");
         }
       }
-      // if (parsedBalance < parsedAmount) {
-      //   console.log('first insufficient balance case');
-      //   return throwError(
-      //     'Insufficient balance to proceed with the transaction.'
-      //   );
-      // }
 
       const buildSwapDetails = (
         networkFee,
@@ -608,7 +825,7 @@ function ChainAbstraction({ state }) {
         amount2: receivedAmount,
         tokenChain: token1.chain,
         networkFee,
-        walletAddress: token1?.address,
+        walletAddress: mpcFromAddress,
         token1Price: newBalanceToFiatConversion(token1?.price, amount),
         parentCoin: { value: parentCoinValue },
         tab: 1,
@@ -623,42 +840,71 @@ function ChainAbstraction({ state }) {
       };
 
       if (token1?.chain?.isEVM) {
-        console.log('in the evm', token1);
         const gasPrice = await Web3Helper.getGasPrice(
           token1?.chain.slug,
-          token1?.address,
-          token1?.address,
+          mpcFromAddress,
+          mpcFromAddress,
           token1?.isToken,
           token1?.tokenAddress,
           token1?.coinSymbol
         );
-        console.log('gasPrices', gasPrice);
+
         if (!gasPrice) {
           store.dispatch(setLoading(false));
-          return throwError('Unable to fetch gas price at the moment.');
+          return throwError("Unable to fetch gas price at the moment.");
         }
 
         const gasInEth = (gasPrice.fast * 1e9 * gasPrice.estimate) / 1e18;
 
-        const nativeCoinBalance = await Web3Helper.getCoinBalance(
-          token1?.address,
-          token1?.rpc
+        // Check MPC native balance for gas - getCoinBalance returns BigNumber
+        const nativeCoinBalanceRaw = await Web3Helper.getCoinBalance(
+          mpcFromAddress,
+          token1?.rpc // Use token1.rpc for native balance check
         );
 
-        const hasEnoughNative = token1?.isToken
-          ? Number(nativeCoinBalance?.toString()) >= gasInEth
-          : parsedBalance >= parsedAmount + gasInEth;
+        console.log("MPC nativeCoinBalance (raw):", nativeCoinBalanceRaw);
 
-        console.log('hasEnoughNative', hasEnoughNative);
+        // Convert BigNumber to number
+        let nativeCoinBalance = 0;
+        if (nativeCoinBalanceRaw && nativeCoinBalanceRaw !== false) {
+          nativeCoinBalance =
+            typeof nativeCoinBalanceRaw === "object" &&
+            nativeCoinBalanceRaw.toNumber
+              ? nativeCoinBalanceRaw.toNumber()
+              : parseFloat(nativeCoinBalanceRaw.toString());
+        }
+
+        console.log("MPC nativeCoinBalance (converted):", nativeCoinBalance);
+
+        const hasEnoughNative = token1?.isToken
+          ? nativeCoinBalance >= gasInEth
+          : mpcBalance >= parsedAmount + gasInEth;
+
+        console.log("mpcBalance", mpcBalance);
+        console.log("parsedAmount", parsedAmount);
+        console.log("gasInEth", gasInEth);
+        console.log("hasEnoughNative", hasEnoughNative);
 
         if (!hasEnoughNative) {
           return throwError(
-            'Insufficient native balance to proceed with the transaction.'
+            token1?.isToken
+              ? "Insufficient MPC native balance to cover gas fees."
+              : "Insufficient MPC balance to cover amount and gas fees."
           );
         }
 
+        // Validate MPC balance
+        if (token1?.isToken) {
+          // For tokens, check token balance separately
+          if (mpcBalance < parsedAmount) {
+            return throwError(
+              `Insufficient MPC token balance. Available: ${mpcBalance} ${token1.symbol}`
+            );
+          }
+        }
+
         const { data: parentCoinData } = await server.post(
-          '/wallet/nativeCoinFiatPrice',
+          "/wallet/nativeCoinFiatPrice",
           {
             coin_family: token1.coinFamily,
             fiat_currency: currency.name,
@@ -667,23 +913,31 @@ function ChainAbstraction({ state }) {
             headers: { Authorization: account.jwtToken },
           }
         );
-        console.log('data of the parentCoinData', parentCoinData);
+
         const swapDetails = buildSwapDetails(
           gasInEth,
           parentCoinData?.fiatCoinPrice?.value
         );
-        console.log('swapDetails', swapDetails);
         finalizeSwap(swapDetails);
-      } else if (token1?.chain?.currencyName === 'BTC') {
+      } else if (token1?.chain?.currencyName === "BTC") {
         const gasPrice = Math.max(await BTCHelper.getBTCGasPrice(), 10);
         const networkFee = gasPrice / 1e8;
+
+        // Validate MPC BTC balance
+        if (mpcBalance < parsedAmount + networkFee) {
+          return throwError(
+            `Insufficient MPC BTC balance. Required: ${
+              parsedAmount + networkFee
+            } BTC, Available: ${mpcBalance} BTC`
+          );
+        }
 
         const swapDetails = buildSwapDetails(networkFee);
         finalizeSwap(swapDetails);
       }
     } catch (error) {
-      console.error('Error in handleChainAbstraction:', error);
-      messageApi.error(error.message || 'An error occurred during processing.');
+      console.error("Error in handleChainAbstraction:", error);
+      messageApi.error(error.message || "An error occurred during processing.");
     } finally {
       setIsProcessing(false);
     }
@@ -691,45 +945,88 @@ function ChainAbstraction({ state }) {
 
   const handleAbstraction = async () => {
     setIsProcessing(true);
+    console.log("=== Starting MPC Abstraction ===");
+    console.log("token1", token1);
+    console.log("token2", token2);
+    console.log("mpcFromAddress", mpcFromAddress);
+    console.log("amount", amount);
+    console.log("receivedAmount", receivedAmount);
+    console.log("sessionPassword", sessionPassword);
+    console.log("toAddress", toAddress);
+
     try {
+      if (!mpcFromAddress) {
+        setIsProcessing(false);
+        setShowMpcModel(true);
+        return messageApi.error(
+          "MPC wallet not set up. Please complete MPC setup."
+        );
+      }
+
+      // Import the new MPC helper
+
       let networkFee = 0;
+
+      // Calculate network fee based on chain type
       if (token1?.chain?.isEVM) {
         const gasPrice = await Web3Helper.getGasPrice(
           token1?.chain.slug,
-          token1?.address,
-          token1?.address,
+          mpcFromAddress,
+          mpcFromAddress,
           token1?.isToken,
           token1?.tokenAddress,
           token1?.coinSymbol
         );
+
         if (!gasPrice) {
           setIsProcessing(false);
-          return messageApi.error('Unable to fetch gas price at the moment.');
+          return messageApi.error("Unable to fetch gas price at the moment.");
         }
 
         networkFee =
           (gasPrice.fast * Math.pow(10, 9) * gasPrice.estimate) /
           Math.pow(10, 18);
+
         setTransactionResult((prev) => ({
           ...prev,
           symbol: token1?.coinSymbol.toUpperCase(),
         }));
-      } else if (token1?.chain?.currencyName === 'BTC') {
+      } else if (token1?.chain?.currencyName === "BTC") {
         const gasPrice = Math.max(await BTCHelper.getBTCGasPrice(), 10);
         networkFee = gasPrice / 1e8;
+
         setTransactionResult((prev) => ({
           ...prev,
-          symbol: 'BTC',
+          symbol: "BTC",
         }));
       }
-      console.log('token1', token1);
-      console.log('token2', token2);
-      const data = await ChainAbstractionInstance.current.SendTransaction(
+
+      console.log("Network fee calculated:", networkFee);
+
+      // Validate MPC balance before proceeding
+      const balanceValidation = await mpcHelper.validateMpcBalance(
+        token1,
+        mpcFromAddress,
+        amount,
+        networkFee
+      );
+
+      console.log("Balance validation:", balanceValidation);
+
+      if (!balanceValidation.valid) {
+        setIsProcessing(false);
+        return messageApi.error(balanceValidation.message);
+      }
+
+      console.log("Sending MPC transaction...");
+
+      // Use the new MPC transaction flow
+      const data = await mpcHelper.SendMpcTransaction(
         token1,
         token2,
         amount,
         receivedAmount,
-        token1?.address,
+        mpcFromAddress,
         token1?.chain,
         networkFee,
         newBalanceToFiatConversion(token1?.price, amount),
@@ -740,26 +1037,39 @@ function ChainAbstraction({ state }) {
         toAddress
       );
 
-      console.log('data', data);
+      console.log("MPC Transaction result:", data);
 
-      if (!data) {
+      if (!data || !data.hash) {
         setIsProcessing(false);
         return messageApi.error(
-          'Unable to process your transaction at the moment. Please try again later.'
+          "Unable to process your transaction at the moment. Please try again later."
         );
       }
-      setIsOpen(!isOpen);
+
+      setIsOpen(false);
       setTransactionResult((prev) => ({
         ...prev,
         hash: data?.hash,
         fee: networkFee,
-        status: data?.status,
-        solver: data?.solver,
+        status: data?.status || "pending",
+        solver: data?.solver || "N/A",
+        source_address: data?.source_address || "N/A",
       }));
       setIsProcessModal(true);
+
+      // Refresh MPC balance after transaction
+      if (token1 && mpcFromAddress) {
+        setTimeout(async () => {
+          const newBalance = await fetchMpcBalance(token1, mpcFromAddress);
+          console.log("Refreshed MPC balance:", newBalance);
+          setBalance(newBalance);
+        }, 3000);
+      }
     } catch (error) {
-      console.error('Error in handleAbstraction:', error);
-      messageApi.error('Transaction failed. Please try again.');
+      console.error("Error in handleAbstraction:", error);
+      messageApi.error(
+        error?.message || "Transaction failed. Please try again."
+      );
     } finally {
       setIsProcessing(false);
     }
@@ -767,17 +1077,17 @@ function ChainAbstraction({ state }) {
 
   return (
     <>
-      <MenuRestofHeaders backTo={'/wallet'} title={'Chain Abstraction'} />
+      <MenuRestofHeaders backTo={"/wallet"} title={"Chain Abstraction"} />
       <div className="flexedContent">
         <div
-          className={`${'fixedContent height-571'} ${
-            height <= 600 ? 'fixedContentOuterExt' : ''
+          className={`${"fixedContent height-571"} ${
+            height <= 600 ? "fixedContentOuterExt" : ""
           }`}
         >
-          <div style={{ width: '100%', marginBottom: '20px' }}>
+          <div style={{ width: "100%", marginBottom: "20px" }}>
             {contextHolder}
             <div
-              style={{ width: '90%', marginRight: 'auto', marginLeft: 'auto' }}
+              style={{ width: "90%", marginRight: "auto", marginLeft: "auto" }}
               className="swap "
             >
               <div className="swap_onChain ">
@@ -791,13 +1101,13 @@ function ChainAbstraction({ state }) {
                       inputMode="decimal"
                       onKeyDown={(e) => {
                         const allowedKeys = [
-                          'Backspace',
-                          'Tab',
-                          'ArrowLeft',
-                          'ArrowRight',
-                          'Delete',
-                          'Home',
-                          'End',
+                          "Backspace",
+                          "Tab",
+                          "ArrowLeft",
+                          "ArrowRight",
+                          "Delete",
+                          "Home",
+                          "End",
                         ];
 
                         if (allowedKeys.includes(e.key)) return;
@@ -810,21 +1120,20 @@ function ChainAbstraction({ state }) {
                           setPercent(null);
                         }
 
-                        const [beforeDecimal = '', afterDecimal = ''] =
-                          _amount.split('.');
+                        const [beforeDecimal = "", afterDecimal = ""] =
+                          _amount.split(".");
                         const maxCharactersBeforeDecimal = 15;
-                        const maxDecimals = token1.decimals;
+                        const maxDecimals = token1?.decimals || 8;
 
                         if (beforeDecimal.length > maxCharactersBeforeDecimal)
                           return;
                         if (afterDecimal.length > maxDecimals) return;
 
-                        // setWithdrawAmount(_amount);
                         handleSwapInput(_amount);
                       }}
                       value={amount}
                     />
-                    <p style={{ marginBottom: '8px' }}>
+                    <p style={{ marginBottom: "8px" }}>
                       {currency?.symbol}
                       {addCommasToNumber(
                         getFlooredFixed(
@@ -832,7 +1141,7 @@ function ChainAbstraction({ state }) {
                             parseFloat(token1 ? token1.price : 0),
                           2
                         )
-                      ) !== 'NaN'
+                      ) !== "NaN"
                         ? addCommasToNumber(
                             getFlooredFixed(
                               parseFloat(amount ? amount : 0) *
@@ -840,12 +1149,12 @@ function ChainAbstraction({ state }) {
                               2
                             )
                           )
-                        : '0.00'}
+                        : "0.00"}
                     </p>
                   </div>
-                  <div style={{ textAlign: 'right' }}>
+                  <div style={{ textAlign: "right" }}>
                     <Select
-                      suffixIcon={<img src={DownArrowSuffix} />}
+                      suffixIcon={<img src={DownArrowSuffix} alt="" />}
                       style={{
                         width: 100,
                       }}
@@ -864,45 +1173,46 @@ function ChainAbstraction({ state }) {
                               {!token1?.image ? (
                                 <div
                                   style={{
-                                    alignItems: 'center',
-                                    backgroundColor: 'rgba(98,126,234,.2)',
-                                    borderRadius: '49%',
-                                    display: 'flex',
-                                    height: '29px',
-                                    justifyContent: 'center',
-                                    width: '29px',
-                                    marginRight: '15px',
+                                    alignItems: "center",
+                                    backgroundColor: "rgba(98,126,234,.2)",
+                                    borderRadius: "49%",
+                                    display: "flex",
+                                    height: "29px",
+                                    justifyContent: "center",
+                                    width: "29px",
+                                    marginRight: "15px",
                                   }}
                                 >
-                                  {token1?.name.split('')[0]}
+                                  {token1?.name?.split("")[0]}
                                 </div>
                               ) : (
                                 <img
                                   style={{
-                                    height: '30px',
-                                    width: '30px',
-                                    objectFit: 'contain',
-                                    position: 'relative',
-                                    borderRadius: '15px',
+                                    height: "30px",
+                                    width: "30px",
+                                    objectFit: "contain",
+                                    position: "relative",
+                                    borderRadius: "15px",
                                   }}
                                   alt=""
                                   src={token1?.image}
                                 />
                               )}
-                              {token1?.symbol}
+                              {token1?.symbol?.toUpperCase()}
                             </span>
                           ),
                         },
                       ]}
                       onSelect={(value) => {
-                        setWithdrawAmount(null);
-                        setToken2(availableTokens.find((el) => el.id == value));
-                        handlePositionChange(
-                          availableTokens.find((el) => el.id == value)
+                        // (null);
+                        const selectedToken = availableTokens.find(
+                          (el) => el.id == value
                         );
+                        setToken1(selectedToken);
+                        handlePositionChange(selectedToken);
                       }}
                       options={availableTokens
-                        .filter((token) => token.id !== token1?.id)
+                        .filter((token) => token.id !== token2?.id)
                         .map((token) => {
                           return {
                             value: token?.id,
@@ -910,13 +1220,14 @@ function ChainAbstraction({ state }) {
                               <span className="flexedItemSelect">
                                 <img
                                   style={{
-                                    height: '20px',
-                                    width: '20px',
-                                    objectFit: 'contain',
-                                    marginLeft: '20px',
-                                    marginRight: '20px',
+                                    height: "20px",
+                                    width: "20px",
+                                    objectFit: "contain",
+                                    marginLeft: "20px",
+                                    marginRight: "20px",
                                   }}
                                   src={token?.image}
+                                  alt=""
                                 />
                                 {token?.symbol}
                               </span>
@@ -925,13 +1236,13 @@ function ChainAbstraction({ state }) {
                         })}
                     />
                     <div className="swap_onChain_pay">
-                      <p style={{ textAlign: 'right' }}>
-                        Balance{' '}
+                      <p style={{ textAlign: "right" }}>
+                        MPC Balance{" "}
                         <span>
                           {addCommasToNumber(
                             parseFloat(getFlooredFixed(balance || 0, 6))
-                          )}{' '}
-                          {token1?.symbol}{' '}
+                          )}{" "}
+                          {token1?.symbol?.toUpperCase()}{" "}
                         </span>
                       </p>
                     </div>
@@ -939,12 +1250,13 @@ function ChainAbstraction({ state }) {
                 </div>
               </div>
 
-              <div style={{ marginTop: '10px', width: '100%' }}>
+              <div style={{ marginTop: "10px", width: "100%" }}>
                 <InputField
-                  placeholder={'From Address'}
-                  type={'text'}
-                  label="From Address"
-                  value={token1?.address}
+                  placeholder={"MPC Wallet Address"}
+                  type={"text"}
+                  label="From Address (MPC)"
+                  value={mpcFromAddress || ""}
+                  readOnly
                 />
               </div>
 
@@ -957,8 +1269,8 @@ function ChainAbstraction({ state }) {
                     height={44}
                     style={
                       loading
-                        ? { pointerEvents: 'none' }
-                        : { pointerEvents: 'auto' }
+                        ? { pointerEvents: "none" }
+                        : { pointerEvents: "auto" }
                     }
                     onClick={() => {
                       if (token2?.iHave) {
@@ -976,6 +1288,7 @@ function ChainAbstraction({ state }) {
                   />
                 )}
               </div>
+
               <div className="swap_onChain">
                 <div className="swap_onChain_balance">
                   <div>
@@ -986,7 +1299,7 @@ function ChainAbstraction({ state }) {
                       placeholder="0.000"
                       value={receivedAmount}
                     />
-                    <p style={{ marginBottom: '8px' }}>
+                    <p style={{ marginBottom: "8px" }}>
                       {currency.symbol}
                       {addCommasToNumber(
                         getFlooredFixed(
@@ -997,9 +1310,9 @@ function ChainAbstraction({ state }) {
                       )}
                     </p>
                   </div>
-                  <div style={{ textAlign: 'right' }}>
+                  <div style={{ textAlign: "right" }}>
                     <Select
-                      suffixIcon={<img src={DownArrowSuffix} />}
+                      suffixIcon={<img src={DownArrowSuffix} alt="" />}
                       style={{
                         width: 100,
                       }}
@@ -1018,26 +1331,26 @@ function ChainAbstraction({ state }) {
                               {!token2?.image ? (
                                 <div
                                   style={{
-                                    alignItems: 'center',
-                                    backgroundColor: 'rgba(98,126,234,.2)',
-                                    borderRadius: '49%',
-                                    display: 'flex',
-                                    height: '29px',
-                                    justifyContent: 'center',
-                                    width: '29px',
-                                    marginRight: '15px',
+                                    alignItems: "center",
+                                    backgroundColor: "rgba(98,126,234,.2)",
+                                    borderRadius: "49%",
+                                    display: "flex",
+                                    height: "29px",
+                                    justifyContent: "center",
+                                    width: "29px",
+                                    marginRight: "15px",
                                   }}
                                 >
-                                  {token2?.name.split('')[0]}
+                                  {token2?.name?.split("")[0]}
                                 </div>
                               ) : (
                                 <img
                                   style={{
-                                    height: '30px',
-                                    width: '30px',
-                                    objectFit: 'contain',
-                                    position: 'relative',
-                                    borderRadius: '15px',
+                                    height: "30px",
+                                    width: "30px",
+                                    objectFit: "contain",
+                                    position: "relative",
+                                    borderRadius: "15px",
                                   }}
                                   alt=""
                                   src={token2?.image}
@@ -1049,10 +1362,11 @@ function ChainAbstraction({ state }) {
                         },
                       ]}
                       onSelect={(value) => {
-                        setToken2(availableTokens.find((el) => el.id == value));
-                        handleToken2Change(
-                          availableTokens.find((el) => el.id == value)
+                        const selectedToken = availableTokens.find(
+                          (el) => el.id == value
                         );
+                        setToken2(selectedToken);
+                        handleToken2Change(selectedToken);
                       }}
                       options={availableTokens
                         .filter((token) => token.id !== token1?.id)
@@ -1063,13 +1377,14 @@ function ChainAbstraction({ state }) {
                               <span className="flexedItemSelect">
                                 <img
                                   style={{
-                                    height: '20px',
-                                    width: '20px',
-                                    objectFit: 'contain',
-                                    marginLeft: '20px',
-                                    marginRight: '20px',
+                                    height: "20px",
+                                    width: "20px",
+                                    objectFit: "contain",
+                                    marginLeft: "20px",
+                                    marginRight: "20px",
                                   }}
                                   src={token?.image}
+                                  alt=""
                                 />
                                 {token?.symbol}
                               </span>
@@ -1077,24 +1392,14 @@ function ChainAbstraction({ state }) {
                           };
                         })}
                     />
-                    {/* <div className="swap_onChain_pay">
-                      <p style={{ textAlign: 'right' }}>
-                        Balance{' '}
-                        <span>
-                          {addCommasToNumber(
-                            parseFloat(getFlooredFixed(token2?.balance || 0, 6))
-                          )}{" "}
-                          {token2?.symbol}{" "}
-                        </span>
-                      </p>
-                    </div> */}
                   </div>
                 </div>
               </div>
-              <div style={{ marginTop: '10px', width: '100%' }}>
+
+              <div style={{ marginTop: "10px", width: "100%" }}>
                 <InputField
-                  placeholder={'To Address'}
-                  type={'text'}
+                  placeholder={"Recipient Address"}
+                  type={"text"}
                   label="To Address"
                   value={toAddress}
                   getData={(address) => {
@@ -1102,23 +1407,26 @@ function ChainAbstraction({ state }) {
                   }}
                 />
               </div>
+
               <div
                 style={{
-                  marginTop: '10px',
+                  marginTop: "10px",
                 }}
               >
                 <ButtonComp
                   onClick={handleChainAbstraction}
                   text={
                     isProcessing
-                      ? 'Processing...'
+                      ? "Processing..."
                       : amount === null || amount === 0
-                      ? 'Enter Amount'
-                      : toAddress === '' || !toAddress
-                      ? 'Enter Recipient Address'
-                      : 'Abstract'
+                      ? "Enter Amount"
+                      : toAddress === "" || !toAddress
+                      ? "Enter Recipient Address"
+                      : !mpcFromAddress
+                      ? "MPC Wallet Not Set"
+                      : "Abstract"
                   }
-                  maxWidth={'100%'}
+                  maxWidth={"100%"}
                   disabled={
                     !token1 ||
                     !token2 ||
@@ -1127,6 +1435,7 @@ function ChainAbstraction({ state }) {
                     amount <= 0 ||
                     receivedAmount <= 0 ||
                     !toAddress ||
+                    !mpcFromAddress ||
                     loading ||
                     isProcessing
                   }
@@ -1134,6 +1443,7 @@ function ChainAbstraction({ state }) {
               </div>
             </div>
           </div>
+
           <Drawer
             title="Select Token"
             placement="bottom"
@@ -1144,10 +1454,10 @@ function ChainAbstraction({ state }) {
             }}
             open={selectDrawer}
             closeIcon={
-              theme == 'darkTheme' ? (
-                <img src={darkclose} />
+              theme == "darkTheme" ? (
+                <img src={darkclose} alt="" />
               ) : (
-                <img src={ModalCloseIcon} />
+                <img src={ModalCloseIcon} alt="" />
               )
             }
             height={500}
@@ -1155,17 +1465,17 @@ function ChainAbstraction({ state }) {
             <div
               className="contain"
               style={{
-                height: '100%',
-                width: '100%',
-                display: 'flex',
-                flexDirection: 'column',
+                height: "100%",
+                width: "100%",
+                display: "flex",
+                flexDirection: "column",
               }}
             >
               {show ? (
-                <div className="search" style={{ marginBottom: '30px' }}>
+                <div className="search" style={{ marginBottom: "30px" }}>
                   <InputField
-                    placeholder={'Search name or paste address'}
-                    coloredBg={'#eef3f9'}
+                    placeholder={"Search name or paste address"}
+                    coloredBg={"#eef3f9"}
                     value={keyword}
                     checkForSymbols={true}
                     getData={(value) => {
@@ -1195,7 +1505,7 @@ function ChainAbstraction({ state }) {
                         <img
                           src={Search}
                           style={{
-                            width: '17px',
+                            width: "17px",
                           }}
                           alt=""
                         />
@@ -1210,7 +1520,7 @@ function ChainAbstraction({ state }) {
                 className="right"
                 style={{
                   flex: 1,
-                  overflow: 'scroll',
+                  overflow: "scroll",
                 }}
               >
                 {filteredTokens.filter((el) => {
@@ -1232,34 +1542,35 @@ function ChainAbstraction({ state }) {
                         return el;
                       }
                     })
-                    .map((token) => (
+                    .map((token, index) => (
                       <div
+                        key={`token-${token.id}-${index}`}
                         className="design"
                         style={{
-                          width: '100%',
+                          width: "100%",
                         }}
                       >
                         <div
                           className="token"
                           style={{
-                            display: 'flex',
-                            justifyContent: 'flex-start',
-                            alignItems: 'center',
-                            marginBottom: '20px',
-                            padding: '8px',
-                            borderRadius: '30px',
-                            marginLeft: '7px',
-                            fontSize: '11px',
-                            cursor: 'pointer',
-                            width: '100%;',
+                            display: "flex",
+                            justifyContent: "flex-start",
+                            alignItems: "center",
+                            marginBottom: "20px",
+                            padding: "8px",
+                            borderRadius: "30px",
+                            marginLeft: "7px",
+                            fontSize: "11px",
+                            cursor: "pointer",
+                            width: "100%",
                             backgroundColor:
                               token1?.id == token?.id || token2?.id == token?.id
-                                ? 'transparent'
-                                : 'transparent',
+                                ? "transparent"
+                                : "transparent",
                             color:
                               token1?.id == token?.id || token2?.id == token?.id
-                                ? '#000'
-                                : '#000',
+                                ? "#000"
+                                : "#000",
                           }}
                           onClick={() => {
                             if (
@@ -1267,13 +1578,15 @@ function ChainAbstraction({ state }) {
                               token2?.id == token.id
                             ) {
                               setTokenDrawer(false);
+                              return;
                             }
+
                             if (selected == 1) {
                               if (token2?.id == token.id) {
                                 setKeyword(null);
                                 setFilteredTokens(allToken);
                                 return messageApi.error(
-                                  'You cannot select the same tokens on both sides. Please select a different token.'
+                                  "You cannot select the same tokens on both sides. Please select a different token."
                                 );
                               }
                               setToken1(token);
@@ -1283,7 +1596,7 @@ function ChainAbstraction({ state }) {
                                 setKeyword(null);
                                 setFilteredTokens(allToken);
                                 return messageApi.error(
-                                  'You cannot select the same tokens on both sides. Please select a different token.'
+                                  "You cannot select the same tokens on both sides. Please select a different token."
                                 );
                               }
                               setToken2(token);
@@ -1297,24 +1610,23 @@ function ChainAbstraction({ state }) {
                           {!token.image ? (
                             <div
                               style={{
-                                alignItems: 'center',
-                                backgroundColor: 'rgba(98,126,234,.2)',
-                                borderRadius: '49%',
-                                display: 'flex',
-                                height: '29px',
-                                justifyContent: 'center',
-                                width: '29px',
-                                marginRight: '15px',
+                                alignItems: "center",
+                                backgroundColor: "rgba(98,126,234,.2)",
+                                borderRadius: "49%",
+                                display: "flex",
+                                height: "29px",
+                                justifyContent: "center",
+                                width: "29px",
+                                marginRight: "15px",
                               }}
                             >
-                              {' '}
-                              {token.name.split('')[0]}
+                              {token.name?.split("")[0]}
                             </div>
                           ) : (
                             <img
                               style={{
-                                width: '29px',
-                                marginRight: '15px',
+                                width: "29px",
+                                marginRight: "15px",
                               }}
                               src={token.image}
                               alt=""
@@ -1323,16 +1635,16 @@ function ChainAbstraction({ state }) {
 
                           <p>
                             <span
-                              style={{ fontSize: '17px' }}
+                              style={{ fontSize: "17px" }}
                               className="noAddress"
                             >
-                              {token.name}{' '}
+                              {token.name}{" "}
                             </span>
                             <span
                               className="noAddress"
                               style={{
-                                fontSize: '11px',
-                                marginLeft: '5px',
+                                fontSize: "11px",
+                                marginLeft: "5px",
                               }}
                             >
                               {token.type ? ` /${token.type}` : null}
@@ -1344,16 +1656,16 @@ function ChainAbstraction({ state }) {
                 ) : (
                   <div
                     style={{
-                      textAlign: 'center',
+                      textAlign: "center",
                     }}
                   >
                     <p
                       className="noAddress"
                       style={{
-                        marginTop: '4%',
-                        marginBottom: '15px',
-                        fontWeight: 'bold',
-                        fontSize: '15px',
+                        marginTop: "4%",
+                        marginBottom: "15px",
+                        fontWeight: "bold",
+                        fontSize: "15px",
                       }}
                     >
                       No assets found
@@ -1365,6 +1677,7 @@ function ChainAbstraction({ state }) {
           </Drawer>
         </div>
       </div>
+
       <ConfirmAbstractModal
         availableTokens={availableTokens}
         token1={token1}
@@ -1374,14 +1687,14 @@ function ChainAbstraction({ state }) {
         isOpen={isOpen}
         setIsOpen={setIsOpen}
         balance={balance}
-        fromAddress={token1?.address}
+        fromAddress={mpcFromAddress}
         toAddress={toAddress}
         handleAbstract={handleAbstraction}
         isProcessing={isProcessing}
       />
 
       <ModalCustom
-        title={'Verify Password'}
+        title={"Verify Password"}
         handleCancel={() => setPasswordModal(!isPasswordModalOpen)}
         isModalOpen={isPasswordModalOpen}
         customClass="customClassModal"
@@ -1390,44 +1703,46 @@ function ChainAbstraction({ state }) {
         <div className="viewphrases">
           <div
             style={{
-              marginBottom: '36px',
-              width: '100%',
+              marginBottom: "36px",
+              width: "100%",
             }}
           >
             <InputFieldSimple
               placeholder="Password"
               getData={setSessionPassword}
               value={sessionPassword}
+              type="password"
               customFunction={async () => {
                 const isCorrectPassword = await WalletHelper.verifyPassword(
                   sessionPassword
                 );
                 if (!isCorrectPassword) {
-                  return messageApi.error('Incorrect password provided.');
+                  return messageApi.error("Incorrect password provided.");
                 }
                 setPasswordModal(false);
-                setIsOpen(!isOpen);
+                setIsOpen(true);
               }}
             />
           </div>
 
           <ButtonComp
-            text={'Proceed'}
-            maxWidth={'100%'}
-            disabled={isProcessing}
+            text={"Proceed"}
+            maxWidth={"100%"}
+            disabled={isProcessing || !sessionPassword}
             onClick={async () => {
               const isCorrectPassword = await WalletHelper.verifyPassword(
                 sessionPassword
               );
               if (!isCorrectPassword) {
-                return messageApi.error('Incorrect password provided.');
+                return messageApi.error("Incorrect password provided.");
               }
               setPasswordModal(false);
-              setIsOpen(!isOpen);
+              setIsOpen(true);
             }}
           />
         </div>
       </ModalCustom>
+
       <AbstractProcessingModal
         showProcessing={isProcessModalOpen}
         setShowProcess={setIsProcessModal}
@@ -1435,7 +1750,64 @@ function ChainAbstraction({ state }) {
         setSuccessModal={setShowSuccess}
         transactionResult={transactionresult}
         loader={true}
+        onClose={() => {
+          console.log("Modal was closed!");
+
+          // Reset transaction result to initial state (not null)
+          setTransactionResult({
+            hash: "",
+            fee: "",
+            link: "",
+            status: "",
+            symbol: "",
+            solver: "",
+            source_address: "",
+          });
+
+          // Reset modal states
+          setIsProcessModal(false);
+          setShowSuccess(false);
+
+          // Reset input fields
+          setWithdrawAmount(null);
+          setReceivedAmount(null);
+          setToAddress("");
+          setPercent(null);
+
+          // Reset processing state
+          setIsProcessing(false);
+
+          // Optionally refresh the balance
+          if (token1 && mpcFromAddress) {
+            fetchMpcBalance(token1, mpcFromAddress).then((balance) => {
+              console.log("Refreshed balance after modal close:", balance);
+              setBalance(balance);
+            });
+          }
+        }}
       />
+
+      {showMpcModel && (
+        <MpcModel
+          showModal={showMpcModel}
+          onClose={() => {
+            setShowMpcModel(false);
+            navigate("/wallet");
+            // Refresh MPC addresses after modal closes
+            getStoredMpcAddresses().then((stored) => {
+              if (stored?.eth && stored?.btc) {
+                setMpcAddresses(stored);
+                // Re-initialize to fetch balances with new MPC addresses
+                init();
+              }
+            });
+          }}
+          currentEthAddress={
+            account?.coinFamilyAndAddress?.[2] ||
+            account?.coinFamilyAndAddress?.["2"]
+          }
+        />
+      )}
     </>
   );
 }

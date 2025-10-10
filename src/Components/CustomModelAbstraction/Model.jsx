@@ -3,6 +3,8 @@ import './Model.scss';
 import { exponential_to_decimal } from '../../helpers/conversion.helper';
 import ButtonComp from '../ButtonComp/ButtonComp';
 import ModalCustom from '../ModalCustom/ModalCustom';
+import { useSelector } from 'react-redux';
+import { server } from "../../server";
 
 function convertToDottedString(str, visibleChars = 6) {
   if (!str || typeof str !== 'string') {
@@ -15,7 +17,7 @@ function convertToDottedString(str, visibleChars = 6) {
 
   const start = str.substring(0, visibleChars);
   const end = str.substring(str.length - visibleChars);
-  const dots = str.length > 20 ? '...' : '..'; // More dots for longer strings
+  const dots = str.length > 20 ? '...' : '..';
 
   return `${start}${dots}${end}`;
 }
@@ -28,16 +30,50 @@ const AbstractProcessingModel = ({
   transactionResult,
   setTransactionResult = null,
   loader,
+  onClose,
 }) => {
+
+  const { chain, account, currency } = useSelector((state) => state);
+
+  const updateIntentStatus = (url, data) => async () => {
+    try {
+      console.log("updateIntentStatus data **** " + JSON.stringify(data));
+
+      const response = await server.post(
+        `${url}/updateTransactionStatus`,
+        data,
+        {
+          headers: { Authorization: account.jwtToken },
+        }
+      );
+      console.log("updateIntentStatus **** " + JSON.stringify(response));
+      return response;
+    } catch (error) {
+      console.log("updateIntentStatus Error ****", error);
+      throw (
+        error?.message || "Something went wrong while updating intent status"
+      );
+    }
+  };
 
   const handleExplorer = () => {
     if (transactionResult?.hash) {
       window.open(
-        `https://dev-abstraction.qubetics.work/chain-abstraction/${transactionResult.hash}`,
+        `https://testnet-v2.qubetics.work/chain-abstraction/${transactionResult.hash}`,
         '_blank',
         'noopener,noreferrer'
       );
     }
+  };
+
+  // Handle modal close - cleanup states and trigger callback
+  const handleModalClose = () => {
+    setShowProcess(false);
+    setSuccessModal(false);
+    // Small delay to ensure modal animation completes before cleanup
+    setTimeout(() => {
+      onClose?.(); // Trigger the callback in parent component
+    }, 100);
   };
 
   useEffect(() => {
@@ -65,6 +101,7 @@ const AbstractProcessingModel = ({
         isModalOpen={showProcessing}
         customClass="customClassModal"
         closable={false}
+        handleCancel={handleModalClose}
       >
         <div className="model-content">
           <div className="spinner"></div>
@@ -101,7 +138,7 @@ const AbstractProcessingModel = ({
       case 2:
         return 'Transaction Processing';
       default:
-        return 'Unknown Status';
+        return 'Transaction Processing';
     }
   }
 
@@ -114,7 +151,7 @@ const AbstractProcessingModel = ({
       case 2:
         return 'Pending';
       default:
-        return 'Unknown Status';
+        return 'Pending';
     }
   }
 
@@ -122,7 +159,7 @@ const AbstractProcessingModel = ({
     return (
       <ModalCustom
         title={''}
-        handleCancel={() => setSuccessModal(false)}
+        handleCancel={handleModalClose}
         isModalOpen={showSuccess}
         customClass="customClassModal"
         closable={true}
@@ -156,10 +193,10 @@ const AbstractProcessingModel = ({
                 </span>
               </div>
               <div className="info-row">
-                <span className="label">Solver</span>
+                <span className="label">Sender</span>
                 <span className="value">
                   {transactionResult?.solver
-                    ? convertToDottedString(transactionResult?.solver)
+                    ? convertToDottedString(transactionResult?.source_address)
                     : '-'}
                 </span>
               </div>
