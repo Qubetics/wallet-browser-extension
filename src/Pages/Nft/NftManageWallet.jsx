@@ -3,44 +3,54 @@ import MenuRestofHeaders from "../../Components/BalanceDetails/MenuRestofHeaders
 import ManageWalletImg from "../../Assets/ManageWalletImg.png";
 import ButtonComp from "../../Components/ButtonComp/ButtonComp";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+
 function NftManageWallet() {
   const navigate = useNavigate();
   const location = useLocation();
   const [nftDetails, setNftDetails] = useState();
+  const { account } = useSelector((state) => state);
+  
+  console.log("🚀 ~ NftManageWallet ~ account:", account)
+
+
   useEffect(() => {
     if (location.state) {
       const nft = location.state;
       setNftDetails(nft?.detail); 
     }
   }, [location.state]);
+
+
   const contactAddresses = [
     {
       id: 1,
-      label: "Contact Address",
-      address: `${nftDetails?.token_address.slice(
-        0,
-        15
-      )}...${nftDetails?.token_address.slice(-5)}`,
+      label: "Contract Address",
+      address: nftDetails?.token_address
+        ? `${nftDetails.token_address.slice(0, 15)}...${nftDetails.token_address.slice(-5)}`
+        : "N/A",
     },
     {
       id: 2,
       label: "Owner Address",
-      address: `${nftDetails?.owner_of.slice(
-        0,
-        15
-      )}...${nftDetails?.owner_of.slice(-5)}`,
+      address: nftDetails?.owner_of
+        ? `${nftDetails.owner_of.slice(0, 15)}...${nftDetails.owner_of.slice(-5)}`
+        : `${account.address.slice(0, 15)}...${account.address.slice(-5)}`
     },
-    { id: 3, label: "Token ID", address: nftDetails?.token_id },
-    { id: 2, label: "Token Standard.", address: nftDetails?.token_type },
-    { id: 3, label: "Quantity", address: nftDetails?.amount },
+    { id: 3, label: "Token ID", address: nftDetails?.token_id || "N/A" },
+    { id: 4, label: "Token Standard", address: nftDetails?.token_type || "N/A" },
+    { id: 5, label: "Quantity", address: nftDetails?.amount || "N/A" },
+    { id: 6, label: "Network", address: nftDetails?.coin_family === "7" ? 'Qubetics' :'Ethereum' },
+
   ];
+  
   return (
     <div>
       <MenuRestofHeaders title={"Manage Wallet"} backTo={"/nftDetail"} />
       <div className={`scrollableCont`}>
         <div className={`flexedContent manageWalletHeight`}>
           <div className="nftManage">
-            <img src={nftDetails?.image} alt="img" />
+            <img src={nftDetails?.image} alt="img" style={{width:"200px"}}/>
             <p className="nftManage_text">{nftDetails?.description}</p>
             {/* <div className="nftManage_countryYears">
               <div style={{ textAlign: "left" }}>

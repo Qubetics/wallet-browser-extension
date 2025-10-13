@@ -27,6 +27,7 @@ import {
 import { setBalancesIn } from '../../actions/balance-off-out';
 import downeIcon from '../../Assets/downeIcon.svg';
 import history from '../../Assets/history.svg';
+import Abstract from '../../Assets/PNG/chainIbstractionIcon.png';
 import Trade from '../../Assets/Trade.svg';
 import useCurrentHeight from '../../CustomHooks/useCurrentHeight';
 import { setFilter } from '../../actions/filter';
@@ -646,13 +647,7 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
             }
           >
             <div className={'balanceDetails__items__img'}>
-              {path === 'currencyDetails' ? (
-                <img src={history} height={50} width={50} />
-              ) : theme === 'darkTheme' ? (
-                <img src={history} />
-              ) : (
-                <img src={history} height={50} width={50} />
-              )}
+              <img src={Abstract} alt="Abstract" />
             </div>
             <span>Abstract</span>
           </Link>

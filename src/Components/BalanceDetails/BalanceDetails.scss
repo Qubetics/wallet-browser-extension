@@ -114,6 +114,12 @@
           width: 40px;
         }
       }
+      // Specific styling for Abstract icon to match other icons
+      img[src*="chainIbstractionIcon.png"] {
+        width: 50px;
+        height: 50px;
+        object-fit: contain;
+      }
     }
   }
   &__modal {

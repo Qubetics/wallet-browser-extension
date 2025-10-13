@@ -186,7 +186,7 @@ function ReceiveCurrency() {
 
           <p className="receiveCurrency_sendCoin">
             Send only{' '}
-            {`${location?.state?.symbol?.toUpperCase() ?? 'Ethereum Nft'}`} to
+            {`${location?.state?.symbol?.toUpperCase() ?? 'Qubetics (TICS)'}`} to
             this address. Sending any other coins may result in permanent loss.
           </p>
         </div>
