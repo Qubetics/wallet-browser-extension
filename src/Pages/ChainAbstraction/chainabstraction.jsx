@@ -41,6 +41,7 @@ import {
   getStoredMpcAddresses,
 } from "../../helpers/mpc.helper";
 import { MpcChainAbstractionHelper } from "../../helpers/chain_abstraction.helperMPC";
+import Abstract from "../../Assets/swapI.png";
 
 function getFlooredFixed(v, d) {
   return (Math.floor(v * Math.pow(10, d)) / Math.pow(10, d)).toFixed(d);
@@ -1077,7 +1078,11 @@ function ChainAbstraction({ state }) {
 
   return (
     <>
-      <MenuRestofHeaders backTo={"/wallet"} title={"Chain Abstraction"} />
+      <MenuRestofHeaders 
+        backTo={"/wallet"} 
+        title={"Chain Abstraction"} 
+        chainAbstractionIcon={Abstract}
+      />
       <div className="flexedContent">
         <div
           className={`${"fixedContent height-571"} ${

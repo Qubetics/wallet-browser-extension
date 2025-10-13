@@ -68,7 +68,8 @@ function MenuRestofHeaders({
   portfolio,
   manageTo,
   isStared,
-  path
+  path,
+  chainAbstractionIcon
 }) {
   const { theme, spritzFilter, billPayFilter, spritzTab } = useSelector(
     (state) => state
@@ -471,6 +472,18 @@ function MenuRestofHeaders({
           <span className="manageTo" style={{ cursor: "pointer" }}>
             {/* <img src={ReorderManage} alt="img" /> */}
             <img onClick={() => navigate('/add-watch-list')} src={manageStart} alt="img" />
+          </span>
+        )}
+        {chainAbstractionIcon && (
+          <span
+            style={{ cursor: "pointer" }}
+            onClick={() => {
+              navigate("/select-coin", {
+                state: { path: "/select-coin" },
+              });
+            }}
+          >
+            <img src={chainAbstractionIcon} alt="Select Coin" style={{ width: "24px", height: "24px" }} />
           </span>
         )}
 
