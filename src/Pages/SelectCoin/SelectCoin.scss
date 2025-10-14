@@ -4,7 +4,7 @@
 .selectCoinContainer {
   padding: 24px;
   // height: calc(100vh - 120px);
-  background: #1a1a1a;
+  // background: #1a1a1a;
   overflow: hidden;
   
   .selectCoinContent {
@@ -192,7 +192,7 @@
 .skeletonCard {
   background: rgba(102, 126, 234, 0.05) !important;
   border-color: rgba(102, 126, 234, 0.2) !important;
-  animation: skeletonPulse 1.5s ease-in-out infinite;
+  animation: skeletonPulse 4s ease-in-out infinite;
   
   .skeletonCircle {
     width: 40px;
@@ -200,13 +200,13 @@
     border-radius: 50%;
     background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
     background-size: 200% 100%;
-    animation: skeletonShimmer 1.5s infinite;
+    animation: skeletonShimmer 4s infinite;
   }
   
   .skeletonText {
     background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
     background-size: 200% 100%;
-    animation: skeletonShimmer 1.5s infinite;
+    animation: skeletonShimmer 4s infinite;
     border-radius: 4px;
     
     &.skeletonTitle {
@@ -237,7 +237,7 @@
     height: 44px;
     background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
     background-size: 200% 100%;
-    animation: skeletonShimmer 1.5s infinite;
+    animation: skeletonShimmer 4s infinite;
     border-radius: 8px;
   }
 }

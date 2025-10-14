@@ -138,3 +138,147 @@ randb {
   display: flex;
   width: 100%;
 }
+
+// Skeleton loader styles for Chain Abstraction - based on SelectCoin pattern
+.swapSkeletonCard {
+  background: rgba(102, 126, 234, 0.05) !important;
+  border-color: rgba(102, 126, 234, 0.2) !important;
+  animation: skeletonPulse 1.5s ease-in-out infinite;
+  padding: 20px;
+  border-radius: 16px;
+  border: 1px solid;
+  
+  .skeletonSection {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    
+    .skeletonInputArea {
+      flex: 1;
+      margin-right: 20px;
+    }
+    
+    .skeletonTokenArea {
+      display: flex;
+      align-items: center;
+      min-width: 120px;
+    }
+  }
+  
+  .skeletonAddressField {
+    margin-bottom: 20px;
+  }
+  
+  .skeletonSwapIcon {
+    text-align: center;
+    margin: 20px 0;
+  }
+  
+  .skeletonButtonArea {
+    margin-top: 20px;
+  }
+  
+  .skeletonCircle {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    margin-right: 10px;
+    background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
+    background-size: 200% 100%;
+    animation: skeletonShimmer 1.5s infinite;
+    
+    &:last-child {
+      margin-right: 0;
+      width: 44px;
+      height: 44px;
+      margin: 0 auto;
+    }
+  }
+  
+  .skeletonText {
+    background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
+    background-size: 200% 100%;
+    animation: skeletonShimmer 1.5s infinite;
+    border-radius: 4px;
+    
+    &.skeletonInput {
+      height: 40px;
+      width: 100%;
+      margin-bottom: 8px;
+      border-radius: 8px;
+    }
+    
+    &.skeletonFiatValue {
+      height: 16px;
+      width: 80px;
+    }
+    
+    &.skeletonTokenName {
+      height: 18px;
+      width: 60px;
+    }
+    
+    &.skeletonLabel {
+      height: 14px;
+      width: 120px;
+      margin-bottom: 8px;
+    }
+    
+    &.skeletonAddress {
+      height: 40px;
+      width: 100%;
+      border-radius: 8px;
+    }
+  }
+  
+  .skeletonButton {
+    height: 48px;
+    width: 100%;
+    border-radius: 8px;
+    background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
+    background-size: 200% 100%;
+    animation: skeletonShimmer 1.5s infinite;
+  }
+}
+
+@keyframes skeletonPulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes skeletonShimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+// Dark theme skeleton adjustments
+@include theme() {
+  .swapSkeleton {
+    .skeletonText {
+      background: linear-gradient(90deg, #1a1a1a 25%, #2a2a2a 50%, #1a1a1a 75%);
+      background-size: 200% 100%;
+    }
+    
+    .skeletonCircle {
+      background: linear-gradient(90deg, #1a1a1a 25%, #2a2a2a 50%, #1a1a1a 75%);
+      background-size: 200% 100%;
+    }
+    
+    .skeletonButton {
+      background: linear-gradient(90deg, #1a1a1a 25%, #2a2a2a 50%, #1a1a1a 75%);
+      background-size: 200% 100%;
+    }
+  }
+}

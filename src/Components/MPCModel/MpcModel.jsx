@@ -134,7 +134,9 @@ export default function MpcModel({ showModal = true, onClose, currentEthAddress 
                 try {
                   const ensured = await ensureMpcAddresses(currentEthAddress);
                   console.log('[MPC:UI] Ensured addresses (modal):', ensured);
-                  setAddresses({ eth: ensured?.eth || null, btc: ensured?.btc || null });
+                  const stored = await getStoredMpcAddresses();
+                  console.log('[MPC:UI] Stored addresses (modal):', stored);
+                  setAddresses({ eth: stored?.eth || null, btc: stored?.btc || null });
                 } catch (e) {
                   console.error('[MPC:UI] Generation failed:', e?.message || e);
                   setAddresses({ eth: null, btc: null });

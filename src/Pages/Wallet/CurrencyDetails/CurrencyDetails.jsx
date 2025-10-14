@@ -38,11 +38,30 @@ function CurrencyDetails() {
     state: { coin: coinDetail },
     ...rest
   } = useLocation();
-  const coin = tokens.find(
+  
+  // Use passed coin data directly if available, otherwise find in tokens array
+  const coin = coinDetail || tokens.find(
     (item) => item?.coin?.coin_id === coinDetail?.coin?.coin_id
   );
+  
+  // Find the full coin data from tokens array to get coin_id and cmc_id
+  // This handles both scenarios: passed coin data and direct navigation
+  const fullCoinData = coin?.coin?.coin_id ? coin : tokens.find(
+    (item) => item?.coin?.coin_symbol === coin?.coin?.coin_symbol && 
+              item?.coin?.coin_family === coin?.coin?.coin_family
+  );
+  
+  // Debug logging to understand which path is taken
+  console.log('CurrencyDetails Debug:', {
+    hasCoinDetail: !!coinDetail,
+    hasCoin: !!coin,
+    hasFullCoinData: !!fullCoinData,
+    coinStructure: coin,
+    fullCoinDataStructure: fullCoinData,
+    tokensLength: tokens.length
+  });
   const [isStared, setIsStared] = useState(
-    coin.coin.watchlist_data && coin.coin.watchlist_data.status === '1'
+    coin?.coin?.watchlist_data && coin.coin.watchlist_data.status === '1'
       ? true
       : false
   );
@@ -66,24 +85,50 @@ function CurrencyDetails() {
       );
     }
 
-    const coinDetail = await server.post(
-      '/wallet/coinWalletDetail',
-      {
-        coin_id: coin.coin.coin_id,
-        cmc_id: coin.coin.cmc_id,
-        fiat_currency: 'USD',
-        wallet_address: coin.wallet_address,
-      },
-      {
-        headers: {
-          Authorization: account.jwtToken,
-        },
-      }
-    );
+    // Validate required coin data before making API calls
+    if (!coin?.wallet_address) {
+      console.error('Missing required coin data for API calls:', { coin });
+      messageApi.error('Missing coin data. Please try again.');
+      return;
+    }
 
-    console.log('coinDetail', coinDetail);
-    setCrossChainDetail(coinDetail?.data?.data?.coin?.cross_chain_data);
-    setIsGraphExist(coinDetail?.data?.graph?.length > 0 ? true : false);
+    try {
+      if (!fullCoinData) {
+        console.error('Could not find full coin data:', { coin, fullCoinData, tokens });
+        messageApi.error('Coin data not found. Please try again.');
+        return;
+      }
+
+      // Ensure we have the required fields for API calls
+      if (!fullCoinData.coin?.coin_id) {
+        console.error('Missing coin_id in fullCoinData:', { fullCoinData });
+        messageApi.error('Missing coin ID. Please try again.');
+        return;
+      }
+
+      const coinDetail = await server.post(
+        '/wallet/coinWalletDetail',
+        {
+          coin_id: fullCoinData.coin.coin_id,
+          cmc_id: fullCoinData.coin.cmc_id,
+          fiat_currency: 'USD',
+          wallet_address: coin.wallet_address,
+        },
+        {
+          headers: {
+            Authorization: account.jwtToken,
+          },
+        }
+      );
+
+      console.log('coinDetail', coinDetail);
+      setCrossChainDetail(coinDetail?.data?.data?.coin?.cross_chain_data);
+      setIsGraphExist(coinDetail?.data?.graph?.length > 0 ? true : false);
+    } catch (error) {
+      console.error('Error fetching coin details:', error);
+      messageApi.error('Failed to load currency details. Please try again.');
+      return;
+    }
 
     if (coin?.coin?.coin_family === 7) {
       cosmosAddress = await getCosmosAddress();
@@ -100,48 +145,61 @@ function CurrencyDetails() {
 
     console.log('cosmosAddress', cosmosAddress);
 
-    const transactionList = await server.post(
-      `/wallet/transaction/list`,
-      {
-        coin_id: coin.coin.coin_id,
-        coin_family: [coin.coin.coin_family],
-        addrsListKeys:
-          coin?.coin?.coin_family === 7
-            ? [coin.wallet_address, cosmosAddress]
-            : [coin.wallet_address],
-        page: 1,
-        limit: 250,
-        status: state
-          ? state.status === 'all'
-            ? undefined
-            : state.status
-          : undefined,
-        date_from: state
-          ? state.fromDate
-            ? moment(state.fromDate).format('YYYY-MM-DD') //moment(state.fromDate).startOf("day")
-            : undefined
-          : undefined,
-        date_to: state
-          ? state.toDate
-            ? moment(state.toDate).format('YYYY-MM-DD') //moment(state.toDate).endOf("day")
-            : undefined
-          : undefined,
-        trnx_type: state ? (state.type ? state.type : undefined) : undefined,
-      },
-      {
-        headers: {
-          Authorization: account?.jwtToken,
+    try {
+      const transactionList = await server.post(
+        `/wallet/transaction/list`,
+        {
+          coin_id: fullCoinData.coin.coin_id,
+          coin_family: [coin.coin.coin_family],
+          addrsListKeys:
+            coin.coin.coin_family === 7
+              ? [coin.wallet_address, cosmosAddress]
+              : [coin.wallet_address],
+          page: 1,
+          limit: 250,
+          status: state
+            ? state.status === 'all'
+              ? undefined
+              : state.status
+            : undefined,
+          date_from: state
+            ? state.fromDate
+              ? moment(state.fromDate).format('YYYY-MM-DD') //moment(state.fromDate).startOf("day")
+              : undefined
+            : undefined,
+          date_to: state
+            ? state.toDate
+              ? moment(state.toDate).format('YYYY-MM-DD') //moment(state.toDate).endOf("day")
+              : undefined
+            : undefined,
+          trnx_type: state ? (state.type ? state.type : undefined) : undefined,
         },
-      }
-    );
-    setHistory(transactionList?.data?.data);
+        {
+          headers: {
+            Authorization: account?.jwtToken,
+          },
+        }
+      );
+      setHistory(transactionList?.data?.data);
+    } catch (error) {
+      console.error('Error fetching transaction list:', error);
+      messageApi.error('Failed to load transaction history.');
+    }
   };
 
   useEffect(() => {
-    setPrice(coin.coin.fiat_price_data || 0);
+    setPrice(coin?.coin?.fiat_price_data || 0);
     init();
     setTimeout(() => fetchPortfolio(), 6000);
   }, []);
+
+  // Re-run init when tokens are loaded (for direct navigation scenario)
+  useEffect(() => {
+    if (tokens.length > 0 && !fullCoinData && coin) {
+      console.log('Tokens loaded, re-running init...');
+      init();
+    }
+  }, [tokens]);
 
   const fetchPortfolio = async () => {
     try {
@@ -169,6 +227,23 @@ function CurrencyDetails() {
       // store.dispatch(setLoading(false));
     }
   };
+
+  // Guard clause to prevent rendering when coin is undefined
+  if (!coin) {
+    return (
+      <div className={`scrollableCont`}>
+        <div style={{ padding: '20px', textAlign: 'center' }}>
+          <p>Loading currency details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // If tokens array is empty, try to fetch it first
+  if (tokens.length === 0) {
+    console.log('Tokens array is empty, fetching portfolio...');
+    fetchPortfolio();
+  }
 
   return (
     <div className={`scrollableCont`}>
@@ -255,7 +330,7 @@ function CurrencyDetails() {
                       coin?.coin?.coin_family === 5
                         ? coin.wallet_address
                         : account.address,
-                    coin_id: coin.coin.coin_id,
+                    coin_id: fullCoinData.coin.coin_id,
                     status: coin?.coin?.watchlist_data?.status == '1' ? 0 : 1,
                   },
                 ],

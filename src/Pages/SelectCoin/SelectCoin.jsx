@@ -82,7 +82,7 @@ function SelectCoin() {
         console.log(`Using BTC MPC address for ${coin.symbol}:`, mpcAddress);
       } else if (coin?.coinFamily === 7) {
         mpcAddress = mpcAddresses?.eth;
-        console.log(`Using ETH MPC address for ${coin.symbol}:`, mpcAddress);
+        console.log(`Using TICS MPC address for ${coin.symbol}:`, mpcAddress);
       } else {
         console.warn("Unknown coin family for coin:", coin);
         return 0;
@@ -170,36 +170,42 @@ function SelectCoin() {
     if (!selectedCoin) return;
     
     if (type === "internal") {
-      // If Internal is selected, redirect to send page with MPC address
+      // If Internal is selected, redirect to send page
       try {
-        // Get MPC address based on coin family
+        // Get MPC address (recipient) and main account address (source)
         const mpcAddress = await getMpcAddress(selectedCoin.coinFamily);
-        if (mpcAddress) {
+        const mainAccountAddress = account.coinFamilyAndAddress[selectedCoin.coinFamily];
+        
+        if (mpcAddress && mainAccountAddress) {
           navigate("/sendCurrency", {
             state: {
               coin: {
                 coin: {
                   coin_family: selectedCoin.coinFamily,
-                  coin_symbol: selectedCoin.symbol,
+                  coin_symbol: selectedCoin.symbol?.toLowerCase(),
                   coin_name: selectedCoin.name,
                   coin_image: selectedCoin.image,
-                  decimals: 18, // Default decimals
+                  decimals: selectedCoin.coinFamily === 3 ? 8 : 18, // BTC uses 8 decimals, TICS uses 18
                 },
                 balance: selectedCoin.balance,
-                wallet_address: mpcAddress,
-                symbol: selectedCoin.symbol,
+                wallet_address: mainAccountAddress, // Source address (where to send FROM)
+                symbol: selectedCoin.symbol?.toLowerCase(),
                 name: selectedCoin.name,
                 image: selectedCoin.image,
               },
-              backAddress: mpcAddress,
+              backAddress: mpcAddress, // Recipient address (where to send TO)
               redirectTo: "/select-coin"
             }
           });
         } else {
-          console.error("MPC address not found for coin family:", selectedCoin.coinFamily);
+          console.error("Addresses not found:", {
+            mpcAddress,
+            mainAccountAddress,
+            coinFamily: selectedCoin.coinFamily
+          });
         }
       } catch (error) {
-        console.error("Error getting MPC address:", error);
+        console.error("Error getting addresses:", error);
       }
     } else if (type === "external") {
       // If External is selected, redirect to external receive screen
@@ -295,7 +301,7 @@ function SelectCoin() {
 
   return (
     <>
-      <MenuRestofHeaders backTo={"/wallet"} title={"Select Coin"} />
+      <MenuRestofHeaders backTo={"/chain-abstraction"} title={"Select Coin"} />
       <div className="selectCoinContainer">
         <div className="selectCoinContent">
           <div className="coinCardsWrapper">

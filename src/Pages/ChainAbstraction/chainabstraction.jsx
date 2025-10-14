@@ -43,6 +43,18 @@ import {
 import { MpcChainAbstractionHelper } from "../../helpers/chain_abstraction.helperMPC";
 import Abstract from "../../Assets/swapI.png";
 
+// Min/Max swap amounts based on coin family
+const MIN_MAX_SWAP_AMOUNT = {
+  7: {
+    min: 25,
+    max: 50,
+  },
+  3: {
+    min: 0.000008,
+    max: 0.1,
+  }
+};
+
 function getFlooredFixed(v, d) {
   return (Math.floor(v * Math.pow(10, d)) / Math.pow(10, d)).toFixed(d);
 }
@@ -57,6 +69,44 @@ function addCommasToNumber(number) {
   } else {
     return integerPart;
   }
+}
+
+// Validate swap amount based on coin family
+function validateSwapAmount(amount, coinFamily) {
+  const limits = MIN_MAX_SWAP_AMOUNT[coinFamily];
+  if (!limits) {
+    return { valid: true, message: "" };
+  }
+  
+  const numAmount = parseFloat(amount);
+  if (isNaN(numAmount)) {
+    return { valid: false, message: "Please enter a valid amount" };
+  }
+  
+  if (numAmount < limits.min) {
+    return { 
+      valid: false, 
+      message: `Minimum amount is ${limits.min} ${coinFamily === 7 ? 'TICS' : 'BTC'}` 
+    };
+  }
+  
+  if (numAmount > limits.max) {
+    return { 
+      valid: false, 
+      message: `Maximum amount is ${limits.max} ${coinFamily === 7 ? 'TICS' : 'BTC'}` 
+    };
+  }
+  
+  return { valid: true, message: "" };
+}
+
+// Get limits text for display
+function getLimitsText(coinFamily) {
+  const limits = MIN_MAX_SWAP_AMOUNT[coinFamily];
+  if (!limits) return "";
+  
+  const symbol = coinFamily === 7 ? 'TICS' : 'BTC';
+  return `Min: ${limits.min} ${symbol}, Max: ${limits.max} ${symbol}`;
 }
 
 export function bigNumberSafeMath(a, operation, b) {
@@ -139,6 +189,7 @@ function ChainAbstraction({ state }) {
   const [showMpcModel, setShowMpcModel] = useState(false);
   const [mpcAddresses, setMpcAddresses] = useState(null);
   const [mpcFromAddress, setMpcFromAddress] = useState(null);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
 
   const onChangeFromValue = (val) => {
     setWithdrawAmount(val);
@@ -467,6 +518,10 @@ function ChainAbstraction({ state }) {
         }
 
         setCompentLoading(false);
+        // Add a small delay to ensure skeleton loader is visible
+        setTimeout(() => {
+          setIsInitialLoading(false);
+        }, 1000);
       }
 
       console.log("state && state.coinId", state, state?.coinId);
@@ -499,6 +554,10 @@ function ChainAbstraction({ state }) {
     } catch (error) {
       console.log("error in the init function:", error);
       setCompentLoading(false);
+      // Add a small delay to ensure skeleton loader is visible even on error
+      setTimeout(() => {
+        setIsInitialLoading(false);
+      }, 1000);
       messageApi.error(
         "Unable to perform swap currently. Please try again later."
       );
@@ -802,6 +861,14 @@ function ChainAbstraction({ state }) {
         return throwError("Please enter a valid amount to proceed.");
       }
 
+      // Validate amount against min/max limits
+      if (token1?.coinFamily) {
+        const validation = validateSwapAmount(amount, token1.coinFamily);
+        if (!validation.valid) {
+          return throwError(validation.message);
+        }
+      }
+
       // Validate to address
       if (token2?.coinFamily === 3) {
         const isValidBTCAddress = BTCHelper.validateBTCAddress(toAddress);
@@ -1076,6 +1143,57 @@ function ChainAbstraction({ state }) {
     }
   };
 
+  // Skeleton loader component - based on SelectCoin pattern
+  const SkeletonLoader = () => (
+    <div className="swapSkeletonCard">
+      {/* First token section */}
+      <div className="skeletonSection">
+        <div className="skeletonInputArea">
+          <div className="skeletonText skeletonInput"></div>
+          <div className="skeletonText skeletonFiatValue"></div>
+        </div>
+        <div className="skeletonTokenArea">
+          <div className="skeletonCircle"></div>
+          <div className="skeletonText skeletonTokenName"></div>
+        </div>
+      </div>
+      
+      {/* Address field */}
+      <div className="skeletonAddressField">
+        <div className="skeletonText skeletonLabel"></div>
+        <div className="skeletonText skeletonAddress"></div>
+      </div>
+      
+      {/* Swap icon */}
+      <div className="skeletonSwapIcon">
+        <div className="skeletonCircle"></div>
+      </div>
+      
+      {/* Second token section */}
+      <div className="skeletonSection">
+        <div className="skeletonInputArea">
+          <div className="skeletonText skeletonInput"></div>
+          <div className="skeletonText skeletonFiatValue"></div>
+        </div>
+        <div className="skeletonTokenArea">
+          <div className="skeletonCircle"></div>
+          <div className="skeletonText skeletonTokenName"></div>
+        </div>
+      </div>
+      
+      {/* Second address field */}
+      <div className="skeletonAddressField">
+        <div className="skeletonText skeletonLabel"></div>
+        <div className="skeletonText skeletonAddress"></div>
+      </div>
+      
+      {/* Button */}
+      <div className="skeletonButtonArea">
+        <div className="skeletonButton"></div>
+      </div>
+    </div>
+  );
+
   return (
     <>
       <MenuRestofHeaders 
@@ -1091,10 +1209,18 @@ function ChainAbstraction({ state }) {
         >
           <div style={{ width: "100%", marginBottom: "20px" }}>
             {contextHolder}
-            <div
-              style={{ width: "90%", marginRight: "auto", marginLeft: "auto" }}
-              className="swap "
-            >
+            {isInitialLoading ? (
+              <div
+                style={{ width: "90%", marginRight: "auto", marginLeft: "auto" }}
+                className="swap"
+              >
+                <SkeletonLoader />
+              </div>
+            ) : (
+              <div
+                style={{ width: "90%", marginRight: "auto", marginLeft: "auto" }}
+                className="swap "
+              >
               <div className="swap_onChain ">
                 <div className="swap_onChain_balance">
                   <div>
@@ -1156,6 +1282,16 @@ function ChainAbstraction({ state }) {
                           )
                         : "0.00"}
                     </p>
+                    {token1?.coinFamily && (
+                      <p style={{ 
+                        fontSize: "12px", 
+                        color: "#666", 
+                        marginTop: "4px",
+                        marginBottom: "8px"
+                      }}>
+                        {getLimitsText(token1.coinFamily)}
+                      </p>
+                    )}
                   </div>
                   <div style={{ textAlign: "right" }}>
                     <Select
@@ -1447,7 +1583,7 @@ function ChainAbstraction({ state }) {
                 />
               </div>
             </div>
-          </div>
+            )}
 
           <Drawer
             title="Select Token"
@@ -1680,6 +1816,7 @@ function ChainAbstraction({ state }) {
               </div>
             </div>
           </Drawer>
+          </div>
         </div>
       </div>
 
