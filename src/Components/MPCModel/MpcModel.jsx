@@ -31,10 +31,12 @@ export default function MpcModel({ showModal = true, onClose, currentEthAddress 
     (async () => {
       try {
         const stored = await getStoredMpcAddresses();
+        console.log('[MPC:UI] useEffect - stored addresses:', stored);
         if (stored?.eth || stored?.btc) {
           setAddresses({ eth: stored.eth || null, btc: stored.btc || null });
         }
       } catch (e) {
+        console.error('[MPC:UI] useEffect error:', e);
         // ignore; will be populated after generation
       }
     })();
@@ -134,9 +136,21 @@ export default function MpcModel({ showModal = true, onClose, currentEthAddress 
                 try {
                   const ensured = await ensureMpcAddresses(currentEthAddress);
                   console.log('[MPC:UI] Ensured addresses (modal):', ensured);
+                  
+                  // Wait a bit for storage to be updated
+                  await new Promise(resolve => setTimeout(resolve, 100));
+                  
                   const stored = await getStoredMpcAddresses();
                   console.log('[MPC:UI] Stored addresses (modal):', stored);
-                  setAddresses({ eth: stored?.eth || null, btc: stored?.btc || null });
+                  
+                  // Use ensured addresses if stored is empty, otherwise use stored
+                  const finalAddresses = stored?.eth || stored?.btc ? stored : ensured;
+                  console.log('[MPC:UI] Final addresses to set:', finalAddresses);
+                  
+                  setAddresses({ 
+                    eth: finalAddresses?.eth || null, 
+                    btc: finalAddresses?.btc || null 
+                  });
                 } catch (e) {
                   console.error('[MPC:UI] Generation failed:', e?.message || e);
                   setAddresses({ eth: null, btc: null });

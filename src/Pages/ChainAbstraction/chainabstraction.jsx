@@ -1934,7 +1934,7 @@ function ChainAbstraction({ state }) {
           showModal={showMpcModel}
           onClose={() => {
             setShowMpcModel(false);
-            navigate("/wallet");
+            navigate("/chain-abstraction");
             // Refresh MPC addresses after modal closes
             getStoredMpcAddresses().then((stored) => {
               if (stored?.eth && stored?.btc) {
