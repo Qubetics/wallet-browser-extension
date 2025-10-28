@@ -650,6 +650,33 @@ function ChainAbstraction({ state }) {
     setMpcFromAddress(nextFrom);
   }, [token1, mpcAddresses]);
 
+  // Set default MPC address for the "To Address" field based on token2
+  useEffect(() => {
+    const getDefaultToAddress = (token, addresses) => {
+      if (!token || !addresses) {
+        return "";
+      }
+      
+      console.log("Setting default to address for token:", token.symbol, "coinFamily:", token.coinFamily);
+      
+      if (token?.coinFamily === 3 || token?.chain?.currencyName === "BTC") {
+        console.log("Using BTC MPC address as default:", addresses?.btc);
+        return addresses?.btc || "";
+      }
+      // default to EVM (coinFamily 2 or 7)
+      console.log("Using ETH MPC address as default:", addresses?.eth);
+      return addresses?.eth || "";
+    };
+
+    if (token2 && mpcAddresses) {
+      const defaultAddress = getDefaultToAddress(token2, mpcAddresses);
+      if (defaultAddress) {
+        console.log("Setting default to address:", defaultAddress);
+        setToAddress(defaultAddress);
+      }
+    }
+  }, [token2, mpcAddresses]);
+
   // Fetch MPC balance when token1 or mpcFromAddress changes
   // useEffect(() => {
   //   if (token1 && mpcFromAddress) {
@@ -680,7 +707,6 @@ function ChainAbstraction({ state }) {
       });
     }
   }, [token1, mpcAddresses]);
-  
 
   const initialSwapDetail = async (
     amount,
@@ -1370,7 +1396,7 @@ function ChainAbstraction({ state }) {
                                   src={token?.image}
                                   alt=""
                                 />
-                                {token?.symbol}
+                                {token?.symbol?.toUpperCase()}
                               </span>
                             ),
                           };
@@ -1420,6 +1446,7 @@ function ChainAbstraction({ state }) {
                         setReceivedAmount(0);
                         setWithdrawAmount(0);
                         setPercent(0);
+                        setToAddress(""); // Reset to address so it updates with new default
                       } else {
                         return messageApi.error(
                           `Please enable ${token2?.name} in your wallet.`
@@ -1497,7 +1524,7 @@ function ChainAbstraction({ state }) {
                                   src={token2?.image}
                                 />
                               )}
-                              {token2?.symbol}
+                              {token2?.symbol?.toUpperCase()}
                             </span>
                           ),
                         },
@@ -1527,7 +1554,7 @@ function ChainAbstraction({ state }) {
                                   src={token?.image}
                                   alt=""
                                 />
-                                {token?.symbol}
+                                {token?.symbol?.toUpperCase()}
                               </span>
                             ),
                           };
@@ -1543,6 +1570,7 @@ function ChainAbstraction({ state }) {
                   type={"text"}
                   label="To Address"
                   value={toAddress}
+                  showEditIcon={true}
                   getData={(address) => {
                     setToAddress(address);
                   }}
