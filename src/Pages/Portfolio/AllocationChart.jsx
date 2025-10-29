@@ -62,6 +62,7 @@ const AllocationChart = () => {
       position: 'right',
       labels: {
         colors: '#fff',
+        fontSize: '12px',
         // useSeriesColors: true, // Use series colors for legend items
       },
       formatter: function (seriesName, opts) {
@@ -137,8 +138,8 @@ const AllocationChart = () => {
       const namesWithPercentages = percentages.map(
         (item) =>
           `${
-            item.name.length > 12 ? item.name.slice(0, 12) + `...` : item.name
-          }   ${item.percentage.toFixed(2)}%`
+            item.name.length > 6 ? item.name.slice(0, 6) + `...` : item.name
+          } ${item.percentage.toFixed(2)}%`
       );
 
       setNamesWithPercentages(namesWithPercentages);
@@ -158,6 +159,10 @@ const AllocationChart = () => {
           colors: chartColors,
           legend: {
             ...prev.legend,
+            labels: {
+              ...prev.legend.labels,
+              fontSize: '12px',
+            },
             formatter: function (seriesName, opts) {
               const index = opts.seriesIndex;
               return namesWithPercentages[index]; // Use namesWithPercentages for the legend
@@ -204,7 +209,7 @@ const AllocationChart = () => {
           {balanceIn ? currency?.symbol : ''} {balanceIn ? portfolioBalance.toFixed(2) : '****'}
         </h1>
       </div>
-      <div style={{ position: 'relative', overflow: 'hidden' }}>
+      <div style={{ position: 'relative', overflow: 'visible', display: 'flex', justifyContent: 'center' }}>
         {portfolioBalance > 0 && (
           <Chart
             options={chartOptions}
