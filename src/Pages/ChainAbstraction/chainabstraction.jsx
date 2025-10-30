@@ -982,8 +982,8 @@ function ChainAbstraction({ state }) {
         if (!hasEnoughNative) {
           return throwError(
             token1?.isToken
-              ? "Insufficient MPC native balance to cover gas fees."
-              : "Insufficient MPC balance to cover amount and gas fees."
+              ? "Insufficient Balance"
+              : "Insufficient Balance"
           );
         }
 
@@ -992,7 +992,7 @@ function ChainAbstraction({ state }) {
           // For tokens, check token balance separately
           if (mpcBalance < parsedAmount) {
             return throwError(
-              `Insufficient MPC token balance. Available: ${mpcBalance} ${token1.symbol}`
+              `Insufficient Balance`
             );
           }
         }
@@ -1020,9 +1020,7 @@ function ChainAbstraction({ state }) {
         // Validate MPC BTC balance
         if (mpcBalance < parsedAmount + networkFee) {
           return throwError(
-            `Insufficient MPC BTC balance. Required: ${
-              parsedAmount + networkFee
-            } BTC, Available: ${mpcBalance} BTC`
+            `Insufficient balance`
           );
         }
 
@@ -1277,8 +1275,14 @@ function ChainAbstraction({ state }) {
                           setPercent(null);
                         }
 
+                        // Remove leading zero if followed by a digit (e.g., "02" -> "2", but keep "0.2")
+                        let sanitizedAmount = _amount;
+                        if (_amount.startsWith("0") && _amount.length > 1 && _amount[1] !== ".") {
+                          sanitizedAmount = _amount.substring(1);
+                        }
+
                         const [beforeDecimal = "", afterDecimal = ""] =
-                          _amount.split(".");
+                          sanitizedAmount.split(".");
                         const maxCharactersBeforeDecimal = 15;
                         const maxDecimals = token1?.decimals || 8;
 
@@ -1286,7 +1290,7 @@ function ChainAbstraction({ state }) {
                           return;
                         if (afterDecimal.length > maxDecimals) return;
 
-                        handleSwapInput(_amount);
+                        handleSwapInput(sanitizedAmount);
                       }}
                       value={amount}
                     />
@@ -1643,7 +1647,7 @@ function ChainAbstraction({ state }) {
               {show ? (
                 <div className="search" style={{ marginBottom: "30px" }}>
                   <InputField
-                    placeholder={"Search name or paste address"}
+                    placeholder={"Search Token"}
                     coloredBg={"#eef3f9"}
                     value={keyword}
                     checkForSymbols={true}

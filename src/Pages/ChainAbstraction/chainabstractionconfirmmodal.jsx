@@ -1,14 +1,10 @@
 import { useSelector } from 'react-redux';
 import './CrossChain.scss';
-import SwapVerticalIcon from '../../Assets/SwapVerticalIcon.svg';
-import { useState } from 'react';
 import ModalCustom from '../../Components/ModalCustom/ModalCustom';
 import {
   addCommasToNumber,
   getFlooredFixed,
 } from '../../helpers/conversion.helper';
-import { Select } from 'antd';
-import DownArrowSuffix from '../../Assets/DownArrowSuffix.svg';
 import { InputField } from '../../Components/InputField/InputFieldSimple';
 import ButtonComp from '../../Components/ButtonComp/ButtonComp';
 
@@ -26,10 +22,7 @@ const ConfirmAbstractModal = ({
   handleAbstract,
   isProcessing,
 }) => {
-  const { chain, account, currency } = useSelector((state) => state);
-  const [loading, setCompentLoading] = useState(false);
-  const [selected, setSelected] = useState(null);
-  const [selectDrawer, setTokenDrawer] = useState(false);
+  const { currency } = useSelector((state) => state);
 
   const handleCancel = () => {
     if (isProcessing) return;
@@ -106,79 +99,43 @@ const ConfirmAbstractModal = ({
                 </p>
               </div>
               <div style={{ textAlign: 'right' }}>
-                <Select
-                  suffixIcon={<img src={DownArrowSuffix} />}
-                  style={{
-                    width: 100,
-                  }}
-                  disabled={!token1 || !token2 || loading}
-                  onClick={() => {
-                    if (!token1 || !token2 || loading) return;
-                    setSelected(1);
-                    setTokenDrawer(true);
-                  }}
-                  open={false}
-                  value={[
-                    {
-                      value: token1?.id,
-                      label: (
-                        <span className="flexedItemSelect">
-                          {!token1?.image ? (
-                            <div
-                              style={{
-                                alignItems: 'center',
-                                backgroundColor: 'rgba(98,126,234,.2)',
-                                borderRadius: '49%',
-                                display: 'flex',
-                                height: '29px',
-                                justifyContent: 'center',
-                                width: '29px',
-                                marginRight: '15px',
-                              }}
-                            >
-                              {token1?.name.split('')[0]}
-                            </div>
-                          ) : (
-                            <img
-                              style={{
-                                height: '30px',
-                                width: '30px',
-                                objectFit: 'contain',
-                                position: 'relative',
-                                borderRadius: '15px',
-                              }}
-                              alt=""
-                              src={token1?.image}
-                            />
-                          )}
-                          {token1?.symbol}
-                        </span>
-                      ),
-                    },
-                  ]}
-                  options={availableTokens
-                    .filter((token) => token.id !== token1?.id)
-                    .map((token) => {
-                      return {
-                        value: token?.id,
-                        label: (
-                          <span className="flexedItemSelect">
-                            <img
-                              style={{
-                                height: '20px',
-                                width: '20px',
-                                objectFit: 'contain',
-                                marginLeft: '20px',
-                                marginRight: '20px',
-                              }}
-                              src={token?.image}
-                            />
-                            {token?.symbol}
-                          </span>
-                        ),
-                      };
-                    })}
-                />
+                <div className="flexedItemSelect" style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'flex-end',
+                  padding: '4px 0'
+                }}>
+                  {!token1?.image ? (
+                    <div
+                      style={{
+                        alignItems: 'center',
+                        backgroundColor: 'rgba(98,126,234,.2)',
+                        borderRadius: '49%',
+                        display: 'flex',
+                        height: '29px',
+                        justifyContent: 'center',
+                        width: '29px',
+                        marginRight: '8px',
+                      }}
+                    >
+                      {token1?.name.split('')[0]}
+                    </div>
+                  ) : (
+                    <img
+                      style={{
+                        height: '30px',
+                        width: '30px',
+                        objectFit: 'contain',
+                        position: 'relative',
+                        borderRadius: '15px',
+                        marginRight: '8px',
+                      }}
+                      alt=""
+                      src={token1?.image}
+                    />
+                  )}
+                  <span style={{ fontWeight: 500 }}>{token1?.symbol?.toUpperCase()}</span>
+                </div>
                 <div className="swap_onChain_pay">
                   <p style={{ textAlign: 'right' }}>
                     Balance{' '}
@@ -186,7 +143,7 @@ const ConfirmAbstractModal = ({
                       {addCommasToNumber(
                         parseFloat(getFlooredFixed(balance || 0, 6))
                       )}{' '}
-                      {token1?.symbol}{' '}
+                      {token1?.symbol?.toUpperCase()}{' '}
                     </span>
                   </p>
                 </div>
@@ -203,7 +160,7 @@ const ConfirmAbstractModal = ({
             />
           </div>
 
-          <div className="swap__icon">
+          {/* <div className="swap__icon">
             {availableTokens?.length !== 0 && (
               <img
                 src={SwapVerticalIcon}
@@ -217,7 +174,7 @@ const ConfirmAbstractModal = ({
                 }
               />
             )}
-          </div>
+          </div> */}
           <div className="swap_onChain">
             <div className="swap_onChain_balance">
               <div>
@@ -240,80 +197,43 @@ const ConfirmAbstractModal = ({
                 </p>
               </div>
               <div style={{ textAlign: 'right' }}>
-                <Select
-                  suffixIcon={<img src={DownArrowSuffix} />}
-                  style={{
-                    width: 100,
-                  }}
-                  disabled={!token1 || !token2 || loading}
-                  onClick={() => {
-                    if (!token1 || !token2 || loading) return;
-                    setSelected(2);
-                    setTokenDrawer(true);
-                  }}
-                  open={false}
-                  value={[
-                    {
-                      value: token2?.id,
-                      label: (
-                        <span className="flexedItemSelect">
-                          {!token2?.image ? (
-                            <div
-                              style={{
-                                alignItems: 'center',
-                                backgroundColor: 'rgba(98,126,234,.2)',
-                                borderRadius: '49%',
-                                display: 'flex',
-                                height: '29px',
-                                justifyContent: 'center',
-                                width: '29px',
-                                marginRight: '15px',
-                              }}
-                            >
-                              {token2?.name.split('')[0]}
-                            </div>
-                          ) : (
-                            <img
-                              style={{
-                                height: '30px',
-                                width: '30px',
-                                objectFit: 'contain',
-                                position: 'relative',
-                                borderRadius: '15px',
-                              }}
-                              alt=""
-                              src={token2?.image}
-                            />
-                          )}
-                          {token2?.symbol}
-                        </span>
-                      ),
-                    },
-                  ]}
-                  aria-disabled={true}
-                  options={availableTokens
-                    .filter((token) => token.id !== token1?.id)
-                    .map((token) => {
-                      return {
-                        value: token?.id,
-                        label: (
-                          <span className="flexedItemSelect">
-                            <img
-                              style={{
-                                height: '20px',
-                                width: '20px',
-                                objectFit: 'contain',
-                                marginLeft: '20px',
-                                marginRight: '20px',
-                              }}
-                              src={token?.image}
-                            />
-                            {token?.symbol}
-                          </span>
-                        ),
-                      };
-                    })}
-                />
+                <div className="flexedItemSelect" style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'flex-end',
+                  padding: '4px 0'
+                }}>
+                  {!token2?.image ? (
+                    <div
+                      style={{
+                        alignItems: 'center',
+                        backgroundColor: 'rgba(98,126,234,.2)',
+                        borderRadius: '49%',
+                        display: 'flex',
+                        height: '29px',
+                        justifyContent: 'center',
+                        width: '29px',
+                        marginRight: '8px',
+                      }}
+                    >
+                      {token2?.name.split('')[0]}
+                    </div>
+                  ) : (
+                    <img
+                      style={{
+                        height: '30px',
+                        width: '30px',
+                        objectFit: 'contain',
+                        position: 'relative',
+                        borderRadius: '15px',
+                        marginRight: '8px',
+                      }}
+                      alt=""
+                      src={token2?.image}
+                    />
+                  )}
+                  <span style={{ fontWeight: 500 }}>{token2?.symbol?.toUpperCase()}</span>
+                </div>
               </div>
             </div>
           </div>
