@@ -98,6 +98,8 @@ import NftManageWallet from "./Pages/Nft/NftManageWallet";
 import NftSend from "./Pages/Nft/NftSend";
 import MyWallets from "./Components/BalanceDetails/MyWallets";
 
+//code latest
+
 function App() {
   const [state, setState] = useState("Active");
   const [count, setCount] = useState(0);
