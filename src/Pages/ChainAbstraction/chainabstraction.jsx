@@ -473,8 +473,12 @@ function ChainAbstraction({ state }) {
       } else {
         const myToken1 =
           activeTokens.find((el) => el.id == crossToken1.id) || null;
-        const myToken2 =
-          modifiedList.find((el) => el.id == crossToken2.id) || modifiedList[1];
+        
+        // Ensure myToken2 is different from myToken1
+        let myToken2 = modifiedList.find((el) => el.id == crossToken2.id);
+        if (!myToken2 || myToken2.id === myToken1?.id) {
+          myToken2 = modifiedList.find((token) => token.id !== myToken1?.id) || modifiedList[1];
+        }
 
         const updatedToken = modifiedList.find((el) => el.id == crossToken1.id);
 
@@ -778,6 +782,12 @@ function ChainAbstraction({ state }) {
   }, [token1, token2]);
 
   const handlePositionChange = async (updatedToken1) => {
+    // Prevent setting the same token for both positions
+    if (updatedToken1?.id === token2?.id) {
+      messageApi.error("Cannot select the same token for both positions.");
+      return;
+    }
+    
     await chrome.storage.local.set({
       crossToken1: updatedToken1,
     });
@@ -818,6 +828,12 @@ function ChainAbstraction({ state }) {
 
 
   const handleToken2Change = async (updatedToken2) => {
+    // Prevent setting the same token for both positions
+    if (updatedToken2?.id === token1?.id) {
+      messageApi.error("Cannot select the same token for both positions.");
+      return;
+    }
+    
     await chrome.storage.local.set({
       crossToken2: updatedToken2,
     });
@@ -861,6 +877,14 @@ function ChainAbstraction({ state }) {
   const handleChainAbstraction = async () => {
     setIsProcessing(true);
     try {
+      // Validate tokens are different
+      if (token1?.id === token2?.id) {
+        setIsProcessing(false);
+        return messageApi.error(
+          "Cannot perform abstraction: source and destination tokens must be different."
+        );
+      }
+      
       if (!mpcFromAddress) {
         setIsProcessing(false);
         setShowMpcModel(true);
@@ -1047,6 +1071,14 @@ function ChainAbstraction({ state }) {
     console.log("toAddress", toAddress);
 
     try {
+      // Validate tokens are different
+      if (token1?.id === token2?.id) {
+        setIsProcessing(false);
+        return messageApi.error(
+          "Cannot perform abstraction: source and destination tokens must be different."
+        );
+      }
+      
       if (!mpcFromAddress) {
         setIsProcessing(false);
         setShowMpcModel(true);
@@ -1254,7 +1286,12 @@ function ChainAbstraction({ state }) {
                       placeholder="0.000"
                       onWheel={(e) => e.currentTarget.blur()}
                       inputMode="decimal"
+                      disabled={isProcessing}
                       onKeyDown={(e) => {
+                        if (isProcessing) {
+                          e.preventDefault();
+                          return;
+                        }
                         const allowedKeys = [
                           "Backspace",
                           "Tab",
@@ -1271,6 +1308,7 @@ function ChainAbstraction({ state }) {
                         }
                       }}
                       onChange={({ target: { value: _amount } }) => {
+                        if (isProcessing) return;
                         if (percent != null) {
                           setPercent(null);
                         }
@@ -1329,9 +1367,9 @@ function ChainAbstraction({ state }) {
                       style={{
                         width: 100,
                       }}
-                      disabled={!token1 || !token2 || loading}
+                      disabled={!token1 || !token2 || isProcessing}
                       onClick={() => {
-                        if (!token1 || !token2 || loading) return;
+                        if (!token1 || !token2 || isProcessing) return;
                         setSelected(1);
                         setTokenDrawer(true);
                       }}
@@ -1379,6 +1417,11 @@ function ChainAbstraction({ state }) {
                         const selectedToken = availableTokens.find(
                           (el) => el.id == value
                         );
+                        if (selectedToken?.id === token2?.id) {
+                          return messageApi.error(
+                            "Cannot select the same token for both positions."
+                          );
+                        }
                         setToken1(selectedToken);
                         handlePositionChange(selectedToken);
                       }}
@@ -1431,7 +1474,12 @@ function ChainAbstraction({ state }) {
                 />
               </div>
 
-              <div className="swap__icon">
+              <div 
+                className="swap__icon"
+                style={{
+                  cursor: isProcessing ? "not-allowed" : "pointer"
+                }}
+              >
                 {availableTokens?.length !== 0 && (
                   <img
                     src={SwapVerticalIcon}
@@ -1439,11 +1487,22 @@ function ChainAbstraction({ state }) {
                     alt=""
                     height={44}
                     style={
-                      loading
-                        ? { pointerEvents: "none" }
-                        : { pointerEvents: "auto" }
+                        isProcessing
+                          ? { 
+                              pointerEvents: "none", 
+                              opacity: 0.5 
+                            }
+                        : { 
+                            pointerEvents: "auto"
+                          }
                     }
                     onClick={() => {
+                      if (isProcessing) return;
+                      if (token1?.id === token2?.id) {
+                        return messageApi.error(
+                          "Cannot swap: both tokens are the same."
+                        );
+                      }
                       if (token2?.iHave) {
                         setToken1(token2);
                         setToken2(token1);
@@ -1488,9 +1547,9 @@ function ChainAbstraction({ state }) {
                       style={{
                         width: 100,
                       }}
-                      disabled={!token1 || !token2 || loading}
+                      disabled={!token1 || !token2 || isProcessing}
                       onClick={() => {
-                        if (!token1 || !token2 || loading) return;
+                        if (!token1 || !token2 || isProcessing) return;
                         setSelected(2);
                         setTokenDrawer(true);
                       }}
@@ -1537,6 +1596,11 @@ function ChainAbstraction({ state }) {
                         const selectedToken = availableTokens.find(
                           (el) => el.id == value
                         );
+                        if (selectedToken?.id === token1?.id) {
+                          return messageApi.error(
+                            "Cannot select the same token for both positions."
+                          );
+                        }
                         setToken2(selectedToken);
                         handleToken2Change(selectedToken);
                       }}
@@ -1575,7 +1639,9 @@ function ChainAbstraction({ state }) {
                   label="To Address"
                   value={toAddress}
                   showEditIcon={true}
+                  disabled={isProcessing}
                   getData={(address) => {
+                    if (isProcessing) return;
                     setToAddress(address);
                   }}
                 />
