@@ -11,8 +11,6 @@ import recieveIcon from "../../Assets/ReceiveIcon.svg"
 import swapIcon from "../../Assets/SwapIconWhite.svg"
 import dAppIcon from "../../Assets/datatransfer.svg";
 
-
-
 function HistryList(props) {
   const { chain, account, currency } = useSelector((state) => state);
 
