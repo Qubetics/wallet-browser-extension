@@ -175,13 +175,13 @@ const AbstractProcessingModel = ({
                     : '-'}
                 </span>
               </div>
-              <div className="info-row">
+              {/* <div className="info-row">
                 <span className="label">Network Fee</span>
                 <span className="value">
                   {exponential_to_decimal(transactionResult?.fee)}{' '}
                   {transactionResult?.symbol}
                 </span>
-              </div>
+              </div> */}
             </div>
           </div>
           <ButtonComp

@@ -273,7 +273,7 @@ function ChainAbstractionHistoryItem(props) {
   const handleCopyAddress = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    navigator.clipboard.writeText(destinationCoin.trx_id);
+    navigator.clipboard.writeText(destinationCoin.address);
     messageApi.success("Address copied to clipboard");
   };
 
@@ -298,9 +298,7 @@ function ChainAbstractionHistoryItem(props) {
     <>
       {contextHolder}
       <div 
-        className="histryList" 
-        onClick={handleClick}
-        style={{ cursor: isUpdating ? "wait" : "pointer" }}
+        className="histryList"
       >
         <div className="statusCurrency">
           <div className="Status">
@@ -323,6 +321,14 @@ function ChainAbstractionHistoryItem(props) {
             >
               {displayStatus.text}
             </p>
+            <button
+              className="viewButton"
+              onClick={handleClick}
+              disabled={isUpdating}
+              style={{ cursor: isUpdating ? "wait" : "pointer" }}
+            >
+              View
+            </button>
           </div>
         </div>
         <div>
@@ -354,14 +360,14 @@ function ChainAbstractionHistoryItem(props) {
                 {sourceCoin.name.charAt(0)}
               </div>
               <span className="addressList">{sourceCoin.name}</span>
-              {/* <span className="addressList" style={{ marginLeft: "auto" }}>
+              <span className="addressList" style={{ marginLeft: "auto" }}>
                 {addCommasToNumber(getFlooredFixed(sourceCoin.amount, 5))} {sourceCoin.symbol}
-              </span> */}
+              </span>
             </div>
           </div>
           <div className="outer-list">
             <p className="toFrom">DESTINATION</p>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "4px" }}>
+            {/* <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "4px" }}>
               {destinationCoinImage ? (
                 <img 
                   src={destinationCoinImage} 
@@ -387,14 +393,14 @@ function ChainAbstractionHistoryItem(props) {
                 {destinationCoin.name.charAt(0)}
               </div>
               <span className="addressList">{destinationCoin.name}</span>
-              {/* <span className="addressList" style={{ marginLeft: "auto" }}>
-                {addCommasToNumber(getFlooredFixed(destinationCoin.amount, 5))} {destinationCoin.symbol} */}
-              {/* </span> */}
-            </div>
+              <span className="addressList" style={{ marginLeft: "auto" }}>
+                {addCommasToNumber(getFlooredFixed(destinationCoin.amount, 5))} {destinationCoin.symbol}
+              </span>
+            </div> */}
             {destinationCoin.address && (
               <div style={{ marginTop: "8px", display: "flex", alignItems: "center", gap: "8px" }}>
                 <span className="addressList" style={{ color: "white", fontFamily: "monospace", fontSize: "13px" }}>
-                  {destinationCoin.trx_id}
+                  {destinationCoin.address}
                 </span>
                 <button 
                   onClick={handleCopyAddress}

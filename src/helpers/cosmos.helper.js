@@ -1,6 +1,7 @@
 /*global chrome*/
 /* global BigInt */
 import { Bip39, EnglishMnemonic, Slip10, Slip10Curve } from '@cosmjss/crypto';
+import BigNumber from 'bignumber.js';
 const {
   SigningStargateClient,
   GasPrice,
@@ -124,7 +125,8 @@ const estimateGasLimit = async (
   console.log('estimateGasLimit---client', client);
 
   let address = fromAddress;
-  let amount_1 = Math.round(amount * 10 ** 18);
+  let amount_1 = new BigNumber(amount).multipliedBy(new BigNumber(10).pow(18)).toFixed(0);
+  // let amount_1 = Math.round(amount * 10 ** 18);
   console.log('estimateGasLimit---amount_1', amount_1);
 
   const message = {
