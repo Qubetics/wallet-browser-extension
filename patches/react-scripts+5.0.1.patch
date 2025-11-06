@@ -81,7 +81,7 @@ index e465d8e..cc1f51f 100644
        ],
      },
      resolve: {
-+      extensions: ['.ts', '.js'],
++      extensions: ['.ts', '.js', '.cjs'],
        // This allows you to set a fallback for where webpack should look for modules.
        // We placed these paths second because we want `node_modules` to "win"
        // if there are any conflicts. This matches Node resolution mechanism.
@@ -107,6 +107,7 @@ index e465d8e..cc1f51f 100644
        // some tools, although we do not recommend using it, see:
 @@ -331,6 +345,9 @@ module.exports = function (webpackEnv) {
          ...(modules.webpackAliases || {}),
++        'rpc-websockets/dist/lib/client/websocket.browser': require.resolve('rpc-websockets/dist/lib/client/websocket.browser.cjs'),
        },
        plugins: [
 +        // new webpack.ProvidePlugin({
@@ -134,6 +135,14 @@ index e465d8e..cc1f51f 100644
 +        process: 'process/browser',
 +        Buffer: ['buffer', 'Buffer'],
 +      }),
+++      new webpack.NormalModuleReplacementPlugin(
+++        /^rpc-websockets\/dist\/lib\/client\/websocket\.browser$/,
+++        require.resolve('rpc-websockets/dist/lib/client/websocket.browser.cjs')
+++      ),
+++      new webpack.NormalModuleReplacementPlugin(
+++        /^rpc-websockets\/dist\/lib\/client$/,
+++        require.resolve('rpc-websockets/dist/lib/client.cjs')
+++      ),
        new HtmlWebpackPlugin(
          Object.assign(
            {},

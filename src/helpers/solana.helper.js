@@ -268,21 +268,19 @@ export class SolanaHelper {
       myKeyPair
     );
     const tokenMint = new PublicKey(tokenAddress);
-    const myToken = new splToken.Token(
+
+    const fromTokenAccount = await splToken.getOrCreateAssociatedTokenAccount(
       this.connection,
+      myKeyPair,
       tokenMint,
-      splToken.TOKEN_PROGRAM_ID,
-      myKeyPair
-    );
-
-
-
-    const fromTokenAccount = await myToken.getOrCreateAssociatedAccountInfo(
       myKeyPair.publicKey
     );
 
     console.log('fromTokenAccount',fromTokenAccount)
-    const toTokenAccount = await myToken.getOrCreateAssociatedAccountInfo(
+    const toTokenAccount = await splToken.getOrCreateAssociatedTokenAccount(
+      this.connection,
+      myKeyPair,
+      tokenMint,
       new PublicKey(toAddress)
     );
 
@@ -348,13 +346,13 @@ export class SolanaHelper {
         ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 35000 });
 
       const transaction = new Transaction().add(
-        splToken.Token.createTransferInstruction(
-          splToken.TOKEN_PROGRAM_ID,
+        splToken.createTransferInstruction(
           fromTokenAccount.address,
           toTokenAccount.address,
           myKeyPair.publicKey,
-          [myKeyPair],
-          new BigNumber(amount).multipliedBy(new BigNumber(decimals)).toNumber()
+          new BigNumber(amount).multipliedBy(new BigNumber(decimals)).toNumber(),
+          [],
+          splToken.TOKEN_PROGRAM_ID
         )
       );
       transaction.add(PRIORITY_FEE_INSTRUCTIONS);
@@ -633,12 +631,12 @@ export class SolanaHelper {
         .blockhash;
 
       const transaction = new Transaction().add(
-        splToken.Token.createCloseAccountInstruction(
-          splToken.TOKEN_PROGRAM_ID,
+        splToken.createCloseAccountInstruction(
           fromTokenAccount.address,
           myKeyPair.publicKey,
           myKeyPair.publicKey,
-          [myKeyPair]
+          [myKeyPair],
+          splToken.TOKEN_PROGRAM_ID
         )
       );
 
