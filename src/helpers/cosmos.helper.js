@@ -9,6 +9,7 @@ const {
 const { MsgSend } = require('cosmjs-types/cosmos/bank/v1beta1/tx');
 const { stringToPath } = require('@cosmjss/crypto');
 const { DirectSecp256k1HdWallet } = require('@cosmjss/proto-signing');
+import BigNumber from "bignumber.js";
 
 const QUBETICS_RPC = 'https://tendermint-internal.qubetics.com';
 const PREFIX = 'qubetics';
@@ -124,7 +125,8 @@ const estimateGasLimit = async (
   console.log('estimateGasLimit---client', client);
 
   let address = fromAddress;
-  let amount_1 = Math.round(amount * 10 ** 18);
+  let amount_1 = new BigNumber(amount).multipliedBy(new BigNumber(10).pow(18)).toFixed(0);
+  // let amount_1 = Math.round(amount * 10 ** 18);
   console.log('estimateGasLimit---amount_1', amount_1);
 
   const message = {
