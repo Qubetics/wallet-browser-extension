@@ -1,6 +1,7 @@
 /*global chrome*/
 /* global BigInt */
 import { Bip39, EnglishMnemonic, Slip10, Slip10Curve } from '@cosmjss/crypto';
+import BigNumber from "bignumber.js";
 const {
   SigningStargateClient,
   GasPrice,
@@ -9,7 +10,6 @@ const {
 const { MsgSend } = require('cosmjs-types/cosmos/bank/v1beta1/tx');
 const { stringToPath } = require('@cosmjss/crypto');
 const { DirectSecp256k1HdWallet } = require('@cosmjss/proto-signing');
-import BigNumber from "bignumber.js";
 
 const QUBETICS_RPC = 'https://tendermint-internal.qubetics.com';
 const PREFIX = 'qubetics';
