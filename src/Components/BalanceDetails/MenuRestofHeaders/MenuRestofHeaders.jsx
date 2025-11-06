@@ -69,7 +69,8 @@ function MenuRestofHeaders({
   manageTo,
   isStared,
   path,
-  chainAbstractionIcon
+  chainAbstractionIcon,
+  isProcessing
 }) {
   const { theme, spritzFilter, billPayFilter, spritzTab } = useSelector(
     (state) => state
@@ -100,8 +101,14 @@ function MenuRestofHeaders({
         {backTo && (
           <Link
             to={backTo}
+            style={{
+              cursor: isProcessing ? "not-allowed" : "pointer",
+              opacity: isProcessing ? 0.5 : 1,
+              pointerEvents: isProcessing ? "none" : "auto"
+            }}
             onClick={async (e) => {
               e.preventDefault();
+              if (isProcessing) return;
               if (backTo === "/portfolio") {
                 return navigate("/portfolio", {
                   state: {
@@ -476,8 +483,12 @@ function MenuRestofHeaders({
         )}
         {chainAbstractionIcon && (
           <span
-            style={{ cursor: "pointer" }}
+            style={{ 
+              cursor: isProcessing ? "not-allowed" : "pointer",
+              opacity: isProcessing ? 0.5 : 1
+            }}
             onClick={() => {
+              if (isProcessing) return;
               navigate("/select-coin", {
                 state: { path: "/select-coin" },
               });

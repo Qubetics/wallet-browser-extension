@@ -1256,6 +1256,7 @@ function ChainAbstraction({ state }) {
         backTo={"/wallet"} 
         title={"Chain Abstraction"} 
         chainAbstractionIcon={Abstract}
+        isProcessing={isProcessing}
       />
       <div className="flexedContent">
         <div

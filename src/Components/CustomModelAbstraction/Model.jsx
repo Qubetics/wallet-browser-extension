@@ -3,8 +3,6 @@ import './Model.scss';
 import { exponential_to_decimal } from '../../helpers/conversion.helper';
 import ButtonComp from '../ButtonComp/ButtonComp';
 import ModalCustom from '../ModalCustom/ModalCustom';
-import { useSelector } from 'react-redux';
-import { server } from "../../server";
 
 function convertToDottedString(str, visibleChars = 6) {
   if (!str || typeof str !== 'string') {
@@ -33,29 +31,6 @@ const AbstractProcessingModel = ({
   onClose,
 }) => {
 
-  const { chain, account, currency } = useSelector((state) => state);
-
-  const updateIntentStatus = (url, data) => async () => {
-    try {
-      console.log("updateIntentStatus data **** " + JSON.stringify(data));
-
-      const response = await server.post(
-        `${url}/updateTransactionStatus`,
-        data,
-        {
-          headers: { Authorization: account.jwtToken },
-        }
-      );
-      console.log("updateIntentStatus **** " + JSON.stringify(response));
-      return response;
-    } catch (error) {
-      console.log("updateIntentStatus Error ****", error);
-      throw (
-        error?.message || "Something went wrong while updating intent status"
-      );
-    }
-  };
-
   const handleExplorer = () => {
     if (transactionResult?.hash) {
       window.open(
@@ -79,6 +54,8 @@ const AbstractProcessingModel = ({
   useEffect(() => {
     console.log('showProcessing', showProcessing);
     console.log('loader', loader);
+    // Only auto-transition if loader is true (showing processing state)
+    // If loader is false, we're showing final result directly - no auto-transition
     if (showProcessing && loader) {
       const timer = setTimeout(() => {
         setShowProcess(false);
@@ -88,10 +65,8 @@ const AbstractProcessingModel = ({
       return () => clearTimeout(timer);
     }
 
-    if (showProcessing && !loader) {
-      setShowProcess(false);
-      setSuccessModal(true);
-    }
+    // Removed automatic transition when loader is false
+    // Modal will show success state directly and only close on user click
   }, [showProcessing, loader]);
 
   if (showProcessing) {

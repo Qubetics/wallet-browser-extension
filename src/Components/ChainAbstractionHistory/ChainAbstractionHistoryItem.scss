@@ -1,0 +1,20 @@
+@import "../../styles/__vars.scss";
+@import "../../styles/__mixins.scss";
+
+// Use the same styling as regular transactions
+// The component now uses the histryList class from HistryList.scss
+// We just need to add the coin icon placeholder styling
+
+.coin-icon-placeholder-small {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ff6b9d, #c44569, #00E5E5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  font-size: 12px;
+  flex-shrink: 0;
+}

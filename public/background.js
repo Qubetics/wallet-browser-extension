@@ -152,7 +152,7 @@ const networks = [
     rpcApiKey: 'REDACTED',
     blockUrl: 'https://www.blockchain.com/explorer/transactions/',
     default: false,
-    image: 'https://REDACTED/btc.png',
+    image: 'https://stage-qubetics-wallet.obs.ap-southeast-4.myhuaweicloud.com/btc.png',
     tokenType: 'BTC',
     testnet: false,
     swap: false,
