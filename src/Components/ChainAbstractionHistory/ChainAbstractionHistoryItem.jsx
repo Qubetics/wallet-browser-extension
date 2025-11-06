@@ -354,9 +354,9 @@ function ChainAbstractionHistoryItem(props) {
                 {sourceCoin.name.charAt(0)}
               </div>
               <span className="addressList">{sourceCoin.name}</span>
-              <span className="addressList" style={{ marginLeft: "auto" }}>
+              {/* <span className="addressList" style={{ marginLeft: "auto" }}>
                 {addCommasToNumber(getFlooredFixed(sourceCoin.amount, 5))} {sourceCoin.symbol}
-              </span>
+              </span> */}
             </div>
           </div>
           <div className="outer-list">
@@ -387,9 +387,9 @@ function ChainAbstractionHistoryItem(props) {
                 {destinationCoin.name.charAt(0)}
               </div>
               <span className="addressList">{destinationCoin.name}</span>
-              <span className="addressList" style={{ marginLeft: "auto" }}>
-                {addCommasToNumber(getFlooredFixed(destinationCoin.amount, 5))} {destinationCoin.symbol}
-              </span>
+              {/* <span className="addressList" style={{ marginLeft: "auto" }}>
+                {addCommasToNumber(getFlooredFixed(destinationCoin.amount, 5))} {destinationCoin.symbol} */}
+              {/* </span> */}
             </div>
             {destinationCoin.address && (
               <div style={{ marginTop: "8px", display: "flex", alignItems: "center", gap: "8px" }}>
