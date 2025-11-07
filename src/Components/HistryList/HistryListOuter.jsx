@@ -58,9 +58,15 @@ function HistoryListOuter(props) {
         explorer = `https://cardanoscan.io/transaction/${transactionHash}`;
         break;
       case 7:
-        coinFamily = 'TICS';
-        explorer = `https://ticsscan.com/tx/${transactionHash}`;
-        break;
+          coinFamily = 'TICS';
+          if (transactionHash.startsWith('0x')) {
+            // Convert everything after '0x' to uppercase
+            const formattedHash = '0x' + transactionHash.slice(2).toUpperCase();
+            explorer = `https://ticsscan.com/tx/${formattedHash}`;
+          } else {
+            explorer = `https://ticsscan.com/tx/${transactionHash}`;
+          }
+          break;
       case 8:
         coinFamily = 'CRO';
         explorer = `https://cronoscan.com/tx/${transactionHash}`;
