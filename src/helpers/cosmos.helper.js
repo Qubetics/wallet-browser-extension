@@ -104,6 +104,53 @@ const getBalance = async (mnemonic) => {
   return balance;
 };
 
+export const exponentialToDecimal = (exponential) => {
+  let decimal = exponential?.toString().toLowerCase();
+  if (decimal.includes('e+')) {
+    const exponentialSplitted = decimal.split('e+');
+    let postfix = '';
+    for (let i = 0; i < +exponentialSplitted[1] - (exponentialSplitted[0].includes('.') ? exponentialSplitted[0].split('.')[1].length : 0); i++) {
+      postfix += '0';
+    }
+    const addCommas = text => {
+      let j = 3;
+      let textLength = text.length;
+      while (j < textLength) {
+        text = `${text.slice(0, textLength - j)}${text.slice(textLength - j, textLength)}`;
+        textLength++;
+        j += 3 + 1;
+      }
+      return text;
+    };
+    decimal = addCommas(exponentialSplitted[0].replace('.', '') + postfix);
+  }
+  if (decimal.toLowerCase().includes('e-')) {
+    const exponentialSplitted = decimal.split('e-');
+    let prefix = '0.';
+    for (let i = 0; i < +exponentialSplitted[1] - 1; i++) {
+      prefix += '0';
+    }
+    decimal = prefix + exponentialSplitted[0].replace('.', '');
+  }
+  return decimal;
+}
+
+export function toFixedExp(num, fixed = 2, value) {
+  if (num === undefined || num === null || num === '') return '0.00';
+
+  // convert exponential to normal decimal string
+  num = exponentialToDecimal(num);
+
+  // create regex to capture digits up to 'fixed' decimal places
+  const re = new RegExp(`^-?\\d+(?:\\.\\d{0,${fixed}})?`);
+
+  const match = num.toString().match(re);
+  if (match && match[0] !== undefined) {
+    return match[0];
+  }
+  return '0.00';
+}
+
 const estimateGasLimit = async (
   mnemonic = '',
   toAddress,
@@ -125,9 +172,9 @@ const estimateGasLimit = async (
   console.log('estimateGasLimit---client', client);
 
   let address = fromAddress;
-  let amount_1 = new BigNumber(amount).multipliedBy(new BigNumber(10).pow(18)).toFixed(0);
-  // let amount_1 = Math.round(amount * 10 ** 18);
-  console.log('estimateGasLimit---amount_1', amount_1);
+  let amt = new BigNumber(amount).multipliedBy(new BigNumber(10).pow(18)).toFixed(0);
+  const amount_1 = toFixedExp(amt, 0); //working
+  console.log('amount_1--', amount_1,'--amt',amt);
 
   const message = {
     typeUrl: '/cosmos.bank.v1beta1.MsgSend',
@@ -203,7 +250,9 @@ const broadcastTx = async ({
       fee
     );
     const { client } = await createSigning(mnemonicsNew);
-    const amount_1 = Math.round(amount * 10 ** 18);
+    // const amount_1 = Math.round(amount * 10 ** 18);
+    let amt = new BigNumber(amount).multipliedBy(new BigNumber(10).pow(18)).toFixed(0);
+    const amount_1 = toFixedExp(amt, 0); //working
     console.log('amount_1--', amount_1);
 
     const msg = {
@@ -251,5 +300,5 @@ export {
   createSigning,
   createAddressFromMnemonic,
   getBalance,
-  hasSufficientBalance,
+  hasSufficientBalance
 };
