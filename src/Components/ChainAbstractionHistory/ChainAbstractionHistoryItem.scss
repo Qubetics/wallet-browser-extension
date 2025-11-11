@@ -70,7 +70,7 @@
 // Ensure Currency div displays button and status properly
 // Remove pointer cursor from main div since only button should be clickable
 .histryList {
-  cursor: default !important;
+  // cursor: default !important;
   
   .Currency {
     display: flex;

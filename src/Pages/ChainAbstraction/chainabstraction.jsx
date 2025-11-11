@@ -39,6 +39,7 @@ import MpcModel from "../../Components/MPCModel/MpcModel";
 import {
   ensureMpcAddresses,
   getStoredMpcAddresses,
+  getMpcWallets,
 } from "../../helpers/mpc.helper";
 import { MpcChainAbstractionHelper } from "../../helpers/chain_abstraction.helperMPC";
 import Abstract from "../../Assets/swapI.png";
@@ -281,6 +282,65 @@ function ChainAbstraction({ state }) {
     console.log("btc",mpcAddresses)
 
     try {
+      if (!token || !account) {
+        console.warn("Missing token or account for balance fetch");
+        return 0;
+      }
+
+      // Always use the main ETH wallet address (not coin-family specific)
+      const coinFamily = token?.coinFamily || token?.coin_family;
+      console.log("[DEBUG fetchMpcBalance] Token:", token?.symbol, "CoinFamily:", coinFamily);
+      
+      // Always use account.address (ETH address) to query MPC wallets
+      const walletAddress = account?.address;
+      console.log("[DEBUG fetchMpcBalance] Using main ETH wallet address:", walletAddress);
+      
+      if (!walletAddress) {
+        console.warn("No wallet address available");
+        return 0;
+      }
+
+      // Call API to get MPC wallet balance (sends coin_family: 1 to get balance)
+      const mpcWalletDataArray = await getMpcWallets(walletAddress, coinFamily);
+      
+      console.log("[DEBUG] getMpcWallets response:", mpcWalletDataArray);
+      console.log("[DEBUG] Is array?", Array.isArray(mpcWalletDataArray));
+      
+      if (!mpcWalletDataArray) {
+        console.warn("Failed to get MPC wallet data from API - null response");
+        return 0;
+      }
+
+      // Handle both array and single object responses
+      let mpcWalletData;
+      if (Array.isArray(mpcWalletDataArray)) {
+        console.log("[DEBUG] Searching array for coin family:", coinFamily);
+        // Find the wallet data for the current coin family
+        mpcWalletData = mpcWalletDataArray.find(
+          (wallet) => wallet?.coin_family === coinFamily
+        );
+        console.log("[DEBUG] Found wallet data:", mpcWalletData);
+      } else {
+        // Single object response
+        console.log("[DEBUG] Single object response, coin_family:", mpcWalletDataArray?.coin_family);
+        if (mpcWalletDataArray?.coin_family === coinFamily) {
+          mpcWalletData = mpcWalletDataArray;
+        }
+      }
+      
+      if (!mpcWalletData) {
+        console.warn(`No balance data found for coin family ${coinFamily}`);
+        console.warn("Available data:", mpcWalletDataArray);
+        return 0;
+      }
+
+      // Extract balance from API response
+      const balance = mpcWalletData?.balance || 0;
+      console.log(`✅ MPC balance from API for ${token.symbol} (coin family ${coinFamily}):`, balance);
+      
+      return parseFloat(balance) || 0;
+
+      /* COMMENTED OUT - OLD BALANCE FETCHING CODE
       if (!token || !mpcAddresses) {
         console.warn("Missing token or MPC addresses for balance fetch");
         return 0;
@@ -352,9 +412,10 @@ function ChainAbstraction({ state }) {
       }
   
       return 0;
+      */
     } catch (error) {
       console.error("Error fetching MPC balance:", error);
-      // return 0;
+      return 0;
     }
   };
 

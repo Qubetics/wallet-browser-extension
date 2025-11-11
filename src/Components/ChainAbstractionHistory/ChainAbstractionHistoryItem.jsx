@@ -12,6 +12,7 @@ import "./ChainAbstractionHistoryItem.scss";
 import swapIcon from "../../Assets/SwapIconWhite.svg";
 import BTCImage from "../../Assets/Coins/BTC.png";
 import QubeticsImage from "../../Assets/QubeticsLogo.png";
+import CopyIcon from "../../Assets/CopyIcon.svg";
 
 function ChainAbstractionHistoryItem(props) {
   const {
@@ -49,6 +50,13 @@ function ChainAbstractionHistoryItem(props) {
   const ChainAbstractionInstance = useRef(
     new MpcChainAbstractionHelper(chain.chainId)
   );
+  
+  // Rate limiting for copy functionality
+  const copyClickHistory = useRef([]);
+  const lastErrorTime = useRef(0);
+  const RATE_LIMIT_WINDOW = 2000; // 2 seconds
+  const MAX_CLICKS_PER_WINDOW = 3; // Max 3 clicks per 2 seconds
+  const ERROR_MESSAGE_COOLDOWN = 2000; // 2 seconds between error messages
 
   // Get coin images from chrome storage
   useEffect(() => {
@@ -273,6 +281,29 @@ function ChainAbstractionHistoryItem(props) {
   const handleCopyAddress = (e) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    const now = Date.now();
+    const windowStart = now - RATE_LIMIT_WINDOW;
+    
+    // Filter out clicks outside the time window
+    copyClickHistory.current = copyClickHistory.current.filter(
+      timestamp => timestamp > windowStart
+    );
+    
+    // Check if too many clicks in the time window
+    if (copyClickHistory.current.length >= MAX_CLICKS_PER_WINDOW) {
+      // Only show error if enough time has passed since last error message
+      if (now - lastErrorTime.current >= ERROR_MESSAGE_COOLDOWN) {
+        messageApi.error("Please slow down. Too many copy attempts.");
+        lastErrorTime.current = now;
+      }
+      return;
+    }
+    
+    // Add current click timestamp
+    copyClickHistory.current.push(now);
+    
+    // Perform the copy
     navigator.clipboard.writeText(destinationCoin.address);
     messageApi.success("Address copied to clipboard");
   };
@@ -299,6 +330,7 @@ function ChainAbstractionHistoryItem(props) {
       {contextHolder}
       <div 
         className="histryList"
+        style={{ cursor: "default" }}
       >
         <div className="statusCurrency">
           <div className="Status">
@@ -412,11 +444,10 @@ function ChainAbstractionHistoryItem(props) {
                     padding: "4px",
                     display: "flex",
                     alignItems: "center",
+                    gap: "4px",
                   }}
                 >
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect style={{color:"white"}} x="4" y="4" width="8" height="8" rx="1" stroke="currentColor" strokeWidth="1.5" fill="none" color="#00E5E5"/>
-                  </svg>
+                <img src={CopyIcon} alt="copy" width={16} height={16} />
                 </button>
               </div>
             )}

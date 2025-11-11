@@ -1,12 +1,14 @@
 /*global chrome*/
 import axios from "axios";
-
-
+import { server } from "../server";
+import { store } from "..";
 
 // Base URL for MPC service
 const MPC_BASE_URL = "http://124.243.183.85:8082";
 
 const mpcApi = axios.create({ baseURL: MPC_BASE_URL });
+
+// Action type for getting MPC wallets
 
 // export const registerUser = async (ethereumAddress) => {
 //   const data = { ethereum_address: ethereumAddress };
@@ -110,6 +112,90 @@ export const setStoredMpcAddresses = async (addresses) => {
   return updatedAccounts;
 };
 
+/**
+ * Get MPC wallets from backend API
+ * @param {string} walletAddress - Original wallet address
+ * @param {number} coinFamily - Coin family (not used, always sends 1 to get balance)
+ * @returns {Promise<Array>} Array of MPC wallet data with balances
+ */
+export const getMpcWallets = async (walletAddress, coinFamily = 1) => {
+  try {
+    const { account } = store.getState();
+    
+    if (!account?.jwtToken) {
+      console.warn("[MPC] No JWT token available, skipping get MPC wallets API call");
+      return null;
+    }
+
+    // API expects an array with coin_family: 1 to return balance
+    const payload = {
+      wallet_address: walletAddress,
+      coin_family: 1,
+    };
+
+    console.log("[MPC] Getting MPC wallets from backend:", payload);
+
+    const response = await server.post(
+      "/mpc/getMpcWallets",
+      payload,
+      {
+        headers: {
+          Authorization: account.jwtToken,
+        },
+      }
+    );
+
+    console.log("[MPC] Get MPC wallets response:", response);
+    // Response structure: response.data.data.data is the array of wallet objects
+    const walletData = response?.data?.data?.data || response?.data?.data || null;
+    console.log("[MPC] Extracted wallet data:", walletData);
+    return walletData;
+  } catch (error) {
+    console.error("[MPC] Error getting MPC wallets:", error);
+    return null;
+  }
+};
+
+/**
+ * Save MPC wallets to backend API
+ * @param {string} ethereumAddress - Original Ethereum address
+ * @param {Object} derivedAddresses - Object with derived_btc_address and derived_eth_address
+ */
+export const saveMpcWallets = async (ethereumAddress, derivedAddresses) => {
+  try {
+    const { account } = store.getState();
+    
+    if (!account?.jwtToken) {
+      console.warn("[MPC] No JWT token available, skipping save MPC wallets API call");
+      return;
+    }
+
+    const payload = {
+      wallet_address: ethereumAddress,
+      btc_wallet_address: derivedAddresses?.derived_btc_address || derivedAddresses?.btc || null,
+      tics_wallet_address: derivedAddresses?.derived_eth_address || derivedAddresses?.eth || null,
+    };
+
+    console.log("[MPC] Saving MPC wallets to backend:", payload);
+
+    const response = await server.post(
+      "mpc/saveMpcWallets",
+      payload,
+      {
+        headers: {
+          Authorization: account.jwtToken,
+        },
+      }
+    );
+
+    console.log("[MPC] Save MPC wallets response:", response);
+    return response;
+  } catch (error) {
+    console.error("[MPC] Error saving MPC wallets:", error);
+    // Don't throw - this is not critical for the flow
+    return null;
+  }
+};
 
 export const ensureMpcAddresses = async (currentEthAddress) => {
     console.log("[MPC] ensureMpcAddresses start for ETH addr:", currentEthAddress);
@@ -141,6 +227,13 @@ export const ensureMpcAddresses = async (currentEthAddress) => {
       if (eth || btc) {
         const stored = await setStoredMpcAddresses({ eth, btc });
         console.log("[MPC] Stored addresses from user_info:", stored);
+        
+        // Save MPC wallets to backend API
+        await saveMpcWallets(currentEthAddress, {
+          derived_eth_address: eth,
+          derived_btc_address: btc,
+        });
+        
         return { eth, btc };
       }
     } catch (err) {
@@ -180,6 +273,13 @@ export const ensureMpcAddresses = async (currentEthAddress) => {
       if (eth || btc) {
         const stored = await setStoredMpcAddresses({ eth, btc });
         console.log("[MPC] stored addresses:", stored);
+        
+        // Save MPC wallets to backend API
+        await saveMpcWallets(ethAddress, {
+          derived_eth_address: eth,
+          derived_btc_address: btc,
+        });
+        
         return { eth, btc };
       }
       
@@ -190,7 +290,15 @@ export const ensureMpcAddresses = async (currentEthAddress) => {
       const btcFromInfo = info?.derived_btc_address;
       console.log("[MPC] user_info after register:", { ethFromInfo, btcFromInfo });
       if (ethFromInfo || btcFromInfo) {
-        return await setStoredMpcAddresses({ eth: ethFromInfo, btc: btcFromInfo });
+        await setStoredMpcAddresses({ eth: ethFromInfo, btc: btcFromInfo });
+        
+        // Save MPC wallets to backend API
+        await saveMpcWallets(ethAddress, {
+          derived_eth_address: ethFromInfo,
+          derived_btc_address: btcFromInfo,
+        });
+        
+        return { eth: ethFromInfo, btc: btcFromInfo };
       }
     } catch (err) {
       console.error("[MPC] register flow failed:", err?.message || err);

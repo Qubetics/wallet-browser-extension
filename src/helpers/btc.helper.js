@@ -52,20 +52,44 @@ export class BTCHelper {
 
   static async getBTCBalance(address) {
     try {
-      // Choose network based on IS_PRODUCTION
-      const apiUrl = IS_PRODUCTION
-        ? `https://blockstream.info/api/address/${address}/utxo`
-        : `https://blockstream.info/testnet/api/address/${address}/utxo`;
+      // Try mempool.space API first
+      try {
+        const mempoolUrl = IS_PRODUCTION
+          ? `https://mempool.space/api/address/${address}`
+          : `https://mempool.space/testnet/api/address/${address}`;
 
-      const { data } = await axios.get(apiUrl);
+        const { data: mempoolData } = await axios.get(mempoolUrl);
+        
+        // mempool.space returns address stats with chain_stats and mempool_stats
+        const chainBalance = mempoolData?.chain_stats?.funded_txo_sum || 0;
+        const chainSpent = mempoolData?.chain_stats?.spent_txo_sum || 0;
+        const mempoolBalance = mempoolData?.mempool_stats?.funded_txo_sum || 0;
+        const mempoolSpent = mempoolData?.mempool_stats?.spent_txo_sum || 0;
+        
+        const totalSatoshis = (chainBalance - chainSpent) + (mempoolBalance - mempoolSpent);
+        const totalBTC = totalSatoshis / 100000000;
+        
+        console.log("BTC balance from mempool.space:", totalBTC.toFixed(8));
+        return totalBTC.toFixed(8);
+      } catch (mempoolError) {
+        console.warn("Mempool.space API failed, trying blockstream.info:", mempoolError.message);
+        
+        // Fallback to blockstream.info API
+        const apiUrl = IS_PRODUCTION
+          ? `https://blockstream.info/api/address/${address}/utxo`
+          : `https://blockstream.info/testnet/api/address/${address}/utxo`;
 
-      // Sum UTXO values (in satoshis)
-      const totalSatoshis = data.reduce((sum, utxo) => sum + utxo.value, 0);
-      const totalBTC = totalSatoshis / 100000000;
+        const { data } = await axios.get(apiUrl);
 
-      return totalBTC.toFixed(8);
+        // Sum UTXO values (in satoshis)
+        const totalSatoshis = data.reduce((sum, utxo) => sum + utxo.value, 0);
+        const totalBTC = totalSatoshis / 100000000;
+
+        console.log("BTC balance from blockstream.info:", totalBTC.toFixed(8));
+        return totalBTC.toFixed(8);
+      }
     } catch (error) {
-      console.error("Error fetching BTC balance:", error);
+      console.error("Error fetching BTC balance from all APIs:", error);
       return 0;
     }
   }

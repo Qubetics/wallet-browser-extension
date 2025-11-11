@@ -225,7 +225,7 @@ function HistoryListOuter(props) {
       <div 
         className="histryList" 
         onClick={(e) => updateExp(e)}
-        style={{ cursor: isUpdating ? "wait" : "pointer" }}
+        // style={{ cursor: isUpdating ? "wait" : "pointer" }}
       >
         <div className="statusCurrency">
           <div className="Status">
