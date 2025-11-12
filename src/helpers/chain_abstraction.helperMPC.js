@@ -45,7 +45,7 @@ export class MpcChainAbstractionHelper {
   createMpcSwapOrder = async (data) => {
     try {
       const response = await axios.post(
-        "http://124.243.183.85:8082/user_mpc_deposit",
+        "http://124.243.185.174:8083/user_mpc_deposit",
         data
       );
 
@@ -104,7 +104,7 @@ export class MpcChainAbstractionHelper {
    * Poll intent status until completion
    */
   async pollIntentStatus(intentHash) {
-    const url = `https://dev-abstraction-api.qubetics.work/api/routes/intent-status?intent-hash=${intentHash}`;
+    const url = `https://stage-chain-abstraction-api.qubetics.work/api/routes/intent-status?intent-hash=${intentHash}`;
     const MAX_RETRIES = 10;
     let attempts = 0;
   

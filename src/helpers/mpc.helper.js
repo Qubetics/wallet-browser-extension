@@ -4,7 +4,7 @@ import { server } from "../server";
 import { store } from "..";
 
 // Base URL for MPC service
-const MPC_BASE_URL = "http://124.243.183.85:8082";
+const MPC_BASE_URL = "http://124.243.185.174:8083";
 
 const mpcApi = axios.create({ baseURL: MPC_BASE_URL });
 
@@ -20,7 +20,7 @@ export const registerUser = async (ethereumAddress) => {
   console.log("data", data);
   
   try {
-    const response = await fetch("http://124.243.183.85:8082/register_user", {
+    const response = await fetch("http://124.243.185.174:8083/register_user", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
