@@ -18,6 +18,7 @@
     "@pancakeswap/smart-router": "^4.9.10",
     "@pancakeswap/tokens": "^0.1.6",
     "@scure/bip39": "^1.1.1",
+    "@solana/spl-token": "^0.3.11",
     "@solana/spl-token-registry": "0.2.4574",
     "@solana/web3.js": "1.75.0",
     "@spritz-finance/api-client": "^0.2.8",
