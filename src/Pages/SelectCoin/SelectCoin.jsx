@@ -177,6 +177,33 @@ function SelectCoin() {
         const mainAccountAddress = account.coinFamilyAndAddress[selectedCoin.coinFamily];
         
         if (mpcAddress && mainAccountAddress) {
+          // Fetch the actual balance from the main account address (source wallet)
+          let actualBalance = "0.00000000";
+          
+          if (selectedCoin.coinFamily === 7) {
+            // TICS (EVM) - fetch from main account
+            const balance = await Web3Helper.getCoinBalance(
+              mainAccountAddress,
+              selectedCoin.rpc
+            );
+            console.log(`Main account EVM balance for ${selectedCoin.symbol}:`, balance);
+            
+            if (balance && balance !== false) {
+              const balanceNum =
+                typeof balance === "object" && balance.toNumber
+                  ? balance.toNumber()
+                  : parseFloat(balance.toString());
+              actualBalance = balanceNum.toFixed(18);
+            }
+          } else if (selectedCoin.coinFamily === 3) {
+            // BTC - fetch from main account
+            const balance = await BTCHelper.getBTCBalance(mainAccountAddress);
+            console.log(`Main account BTC balance:`, balance);
+            actualBalance = parseFloat(balance).toFixed(8);
+          }
+          
+          console.log('Actual balance from main account:', actualBalance);
+          
           navigate("/sendCurrency", {
             state: {
               coin: {
@@ -185,9 +212,9 @@ function SelectCoin() {
                   coin_symbol: selectedCoin.symbol?.toLowerCase(),
                   coin_name: selectedCoin.name,
                   coin_image: selectedCoin.image,
-                  decimals: selectedCoin.coinFamily === 3 ? 8 : 18, // BTC uses 8 decimals, TICS uses 18
+                  decimals: selectedCoin.coinFamily == 3 ? 8 : 18, // BTC uses 8 decimals, TICS uses 18
                 },
-                balance: selectedCoin.balance,
+                balance: actualBalance, // Use actual balance from main account
                 wallet_address: mainAccountAddress, // Source address (where to send FROM)
                 symbol: selectedCoin.symbol?.toLowerCase(),
                 name: selectedCoin.name,
