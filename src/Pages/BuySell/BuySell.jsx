@@ -17,7 +17,7 @@ import { DURATION } from "../../config/message.config";
 
 
 const BuySell = () => {
-  const { account, tokens } = useSelector((state) => state);
+  const { account, tokens, loading } = useSelector((state) => state);
   const [selectedTab, setSelectedTab] = useState(0);
   const [coins, setCoins] = useState([]);
   const [fiats, setFiats] = useState([]);
@@ -142,7 +142,7 @@ const BuySell = () => {
               <Buy fiats={fiats} coins={coins} />
             )}
             {selectedTab === 1 && (
-              <Sell fiats={fiats} coins={coins} />
+              <Sell fiats={fiats} coins={coins} loading={loading} />
             )}
           </div>
         </Tabs>

@@ -25,7 +25,7 @@ import { setLoading } from "../../actions/loading";
 import ButtonComp from "../../Components/ButtonComp/ButtonComp";
 
 function WatchList() {
-  const { account, currency, balanceIn } = useSelector((state) => state);
+  const { account, currency, balanceIn, loading } = useSelector((state) => state);
   const navigate = useNavigate();
   const [keyword, setKeyword] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -133,7 +133,7 @@ function WatchList() {
       </div>
       <div className={`flexedContent manageTabHeight manageWalletHeight`}>
         <div>
-          {(state?.nft ? list : tokens.filter((token) => token.watchlist_data))
+          {(state?.nft ? list : tokens.filter((token) => token.watchlist_data) || loading)
             .length > 0 ? (
             <CoinsTable
               showCoinPrice={true}
@@ -218,7 +218,7 @@ function WatchList() {
                 fontSize: "17px",
               }}
             >
-              No record found
+              {loading ? 'Loading...' : 'No record found'}
             </p>
           )}
         </div>

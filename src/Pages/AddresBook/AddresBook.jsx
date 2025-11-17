@@ -11,7 +11,7 @@ import { setLoading } from "../../actions/loading.js";
 import { useLocation, useNavigate } from "react-router-dom";
 
 function AddresBook() {
-  const { account, chain } = useSelector((state) => state);
+  const { account, chain, loading } = useSelector((state) => state);
   const [messageApi, contextHolder] = message.useMessage();
   const [editModal, setEditModal] = useState(false);
   const [editModalMain, setEditModalMain] = useState(false);
@@ -135,7 +135,7 @@ function AddresBook() {
             style={{ fontSize: "17px", marginTop: "50%", fontWeight: "bold" }}
             className="noAddress"
           >
-            Address Not Found
+            {loading ? 'Loading...' : 'Address Not Found'}
           </p>
         )}
       </div>

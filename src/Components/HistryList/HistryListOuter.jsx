@@ -1,5 +1,5 @@
 /*global chrome*/
-import { message } from "antd";
+import { message, Tooltip } from "antd";
 import React from "react";
 import { useSelector } from "react-redux";
 import { DURATION } from "../../config/message.config";
@@ -25,7 +25,7 @@ function HistoryListOuter(props) {
   const [messageApi, contextHolder] = message.useMessage({
     duration: DURATION,
   });
-
+  console.log("valueCurrency",valueCurrency)
   const updateExp = (e) => {
     e.preventDefault(); 
     e.preventDefault();

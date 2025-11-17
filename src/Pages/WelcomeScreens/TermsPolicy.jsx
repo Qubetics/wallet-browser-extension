@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+/* global chrome */
+import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import "./Welcome.scss";
 import PrivacyPolicy from "../../Assets/PrivacyPolicy.svg";
@@ -11,8 +12,21 @@ import { message } from "antd";
 function TermsPolicy() {
   const { state } = useLocation(); 
   const [accr, setAccr] = useState(false);
+  const [flowType, setFlowType] = useState(state?.type);
   const { layoutHeader } = useOutletContext();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const getFlowType = async () => {
+      const { walletFlowType } = await chrome.storage.session.get("walletFlowType");
+      if (walletFlowType) {
+        setFlowType(walletFlowType);
+      }
+    };
+    if (!state?.type) {
+      getFlowType();
+    }
+  }, [state]);
   const termsData = [
     {
       id: 1,
@@ -63,7 +77,7 @@ function TermsPolicy() {
             e.preventDefault();
             if (accr) {
               navigate("/createNewWallet", {
-                state: { type: state?.type },
+                state: { type: flowType },
               });
             }else{
               messageApi.error('Please accept the privacy policy.')

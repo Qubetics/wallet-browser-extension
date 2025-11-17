@@ -22,7 +22,7 @@ import { setLoading } from '../../actions/loading';
 import { token_type } from '../../helpers/constant';
 
 function ReceiveTokens() {
-  const { account, tokens, currency, balanceIn } = useSelector(
+  const { account, tokens, currency, balanceIn, loading } = useSelector(
     (state) => state
   );
   const [list, setList] = useState([]);
@@ -173,7 +173,7 @@ function ReceiveTokens() {
               fontSize: '17px',
             }}
           >
-            No assets found
+            {loading ? 'Loading...' : 'No assets found'}
           </p>
         )}
       </div>

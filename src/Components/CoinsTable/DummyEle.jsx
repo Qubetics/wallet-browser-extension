@@ -38,7 +38,7 @@ const DummyEle = ({ ele }) => {
         justifyContent: ele.currCryptoBal === "ABOVE" || ele.currCryptoBal === "BELOW" ? "start" : "end",
       }}
     >
-      <span className="overflowEllipsisAmout">{ele.currCryptoBal} {ele.coinName}</span>
+      <span className="overflowEllipsisAmout">{ele.currCryptoBal}</span>
 
     </div>
   );

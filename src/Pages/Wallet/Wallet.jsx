@@ -187,7 +187,7 @@ function Wallet() {
                   ),
                   currCryptoBal: balanceIn
                     ? `${addCommasToNumber(
-                        parseFloat(getFlooredFixed(token.balance, 6))
+                        parseFloat(getFlooredFixed(token.balance, 4))
                       )}`
                     : `****`,
                   currCryptoBalSymbol: balanceIn

@@ -17,7 +17,7 @@ import { setSpritzFilter } from "../../actions/filter";
 
 function HistorySpritz() {
   const [payments, setPayments] = useState([]);
-  const { spritzBank } = useSelector((state) => state);
+  const { spritzBank, loading } = useSelector((state) => state);
   const { state } = useLocation();
   const init = async () => {
     if (!state) {
@@ -73,7 +73,7 @@ function HistorySpritz() {
             fontSize: "17px",
           }}
         >
-          No Transactions Found...
+          {loading ? 'Loading...' : 'No Transactions Found...'}
         </p>
       )}
     </div>

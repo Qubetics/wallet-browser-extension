@@ -513,6 +513,11 @@ body::-webkit-scrollbar {
     }
   }
 
+  .ant-checkbox {
+    top: 0.2em;
+    position: relative;
+  }
+
   .ant-checkbox-inner {
     border-radius: 100% !important;
     background-color: transparent !important;

@@ -18,7 +18,7 @@ import HistoryListOuter from '../../Components/HistryList/HistryListOuter';
 import { getCosmosAddress } from '../../helpers/cosmos.helper';
 
 function History() {
-  const { account, currency, filter } = useSelector((state) => state);
+  const { account, currency, filter, loading } = useSelector((state) => state);
 
   const [history, setHistory] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -160,8 +160,9 @@ function History() {
                 coinname={data?.coin_data?.coin_symbol?.toUpperCase()}
                 address={data?.from_adrs}
                 valueCurrency={`${addCommasToNumber(
-                  getFlooredFixed(data?.amount, 5)
-                )} ${data?.coin_data?.coin_symbol?.toUpperCase()}`}
+                  parseFloat(getFlooredFixed(data?.amount, 6))
+                )}
+                 ${data?.coin_data?.coin_symbol?.toUpperCase()}`}
                 dollercurrency={balanceToFiatConversion(
                   price ? price?.value : 0,
                   data?.amount
@@ -184,7 +185,7 @@ function History() {
               fontSize: '17px',
             }}
           >
-            No Transactions Found...
+            {loading ? 'Loading...' : 'No Transactions Found...'}
           </p>
         )}
       </div>

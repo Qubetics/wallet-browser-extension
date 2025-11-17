@@ -1,6 +1,6 @@
 /* global chrome */
 import { message } from "antd";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import ButtonComp from "../../Components/ButtonComp/ButtonComp";
@@ -12,8 +12,19 @@ import { WalletHelper } from "../../helpers/wallet.helper";
 
 function CreateNewWallet() {
   const { state } = useLocation();
-  const { type, createWalletMnemonics, createShuffledMnemonics } = state;
+  const { type: stateType, createWalletMnemonics, createShuffledMnemonics } = state || {};
+  const [type, setType] = useState(stateType);
   const { create } = useSelector((state) => state);
+
+  useEffect(() => {
+    const getFlowType = async () => {
+      const { walletFlowType } = await chrome.storage.session.get("walletFlowType");
+      if (walletFlowType && !stateType) {
+        setType(walletFlowType);
+      }
+    };
+    getFlowType();
+  }, [stateType]);
 
   const navigate = useNavigate();
   const [messageApi, contextHolder] = message.useMessage({

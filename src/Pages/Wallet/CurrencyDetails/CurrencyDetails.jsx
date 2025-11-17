@@ -25,9 +25,10 @@ import CurrencyBalanceDetails from './CurrencyBalance';
 import { token_type } from '../../../helpers/constant';
 import { getCosmosAddress } from '../../../helpers/cosmos.helper';
 import { setTokens } from '../../../actions/tokens';
+import { setLoading } from '../../../actions/loading';
 
 function CurrencyDetails() {
-  const { currency, account,tokens } = useSelector((state) => state);
+  const { currency, account,tokens, loading } = useSelector((state) => state);
   const [crossChainDetail, setCrossChainDetail] = useState(null);
   const [price, setPrice] = useState(0);
   const [isGraphExist, setIsGraphExist] = useState(false);
@@ -51,6 +52,7 @@ function CurrencyDetails() {
   const { theme } = useSelector((state) => state);
 
   const init = async () => {
+    store.dispatch(setLoading(true));
     let cosmosAddress = '';
     if (!state.status) {
       store.dispatch(
@@ -132,6 +134,7 @@ function CurrencyDetails() {
     );
     setHistory(transactionList?.data?.data);
 
+    store.dispatch(setLoading(false));
   };
 
   useEffect(() => {
@@ -143,6 +146,7 @@ function CurrencyDetails() {
 
   const fetchPortfolio = async () => {
     try {
+      store.dispatch(setLoading(true));
       const walletsList = await server.post(
         `/wallet/portfolio`,
         {
@@ -164,7 +168,7 @@ function CurrencyDetails() {
     } catch (error) {
       console.log(error);
     } finally {
-      // store.dispatch(setLoading(false));
+      store.dispatch(setLoading(false));
     }
   };
 
@@ -542,7 +546,7 @@ function CurrencyDetails() {
                     fontSize: '15px',
                   }}
                 >
-                  No Transactions Found...
+                  {loading ? 'Loading...' : 'No Transactions Found...'}
                 </p>
               )}
             </div>

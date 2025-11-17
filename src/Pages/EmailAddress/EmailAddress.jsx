@@ -31,7 +31,7 @@ function EmailAddress() {
   const [isPasswordModal,SetPasswordModal]=useState(false);
 
   const navigate = useNavigate();
-  const { account } = useSelector((state) => state);
+  const { account, loading } = useSelector((state) => state);
   const checkOtp = async () => {
     const { otp_sent } = await chrome.storage.session.get("otp_sent");
 
@@ -348,6 +348,7 @@ function EmailAddress() {
           email={email}
           setLoading={setLoading}
           sendVerificationCode={sendVerificationCode}
+          loading={loading}
         />
       )}
     </div>

@@ -19,7 +19,7 @@ import { DURATION } from "../../config/message.config";
 import { setLoading } from "../../actions/loading";
 
 function SpritzTokens() {
-  const { account, currency, balanceIn } = useSelector((state) => state);
+  const { account, currency, balanceIn, loading } = useSelector((state) => state);
 
   const [keyword, setKeyword] = useState(null);
   const [messageApi, contextHolder] = message.useMessage({
@@ -186,7 +186,7 @@ function SpritzTokens() {
               fontSize: "17px",
             }}
           >
-            No assets found
+            {loading ? 'Loading...' : 'No assets found'}
           </p>
         )}
       </div>

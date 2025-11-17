@@ -102,7 +102,7 @@ function CrossChain({ state }) {
   const { theme, swapDetail } = useSelector((state) => state);
   const [activeIndex, setActiveIndex] = useState(null);
   const percentages = [25, 50, 75, 100];
-
+  console.log("state", state);
   useEffect(() => {
     console.log('SWAPDETAILS', swapDetail);
     if (swapDetail) {
@@ -1020,11 +1020,12 @@ function CrossChain({ state }) {
               default:
                 break;
             }
-
+          
             return {
               id: token?.id,
               symbol: token?.symbol,
               showName: token?.showName,
+              coinSymbol: token?.coinSymbol,
               active: token?.active,
               iHave: token?.iHave,
               name: token.name,
@@ -1929,7 +1930,7 @@ function CrossChain({ state }) {
               token1.address,
               token1.isToken,
               token1.tokenAddress,
-              token1.coinSymbol
+              token1.coinSymbol || token1.symbol
             );
 
             if (!gasPrice) {

@@ -1,3 +1,4 @@
+/* global chrome */
 import React from 'react';
 import './Welcome.scss';
 import Lottie from 'react-lottie-player';
@@ -20,7 +21,9 @@ function CongratulationsScreen({ type }) {
       <ButtonComp
         text={'Continue'}
         maxWidth={'100%'}
-        onClick={() => {
+        onClick={async () => {
+          // Clean up the flow type from session storage
+          await chrome.storage.session.remove('walletFlowType');
           navigate('/wallet');
         }}
       />

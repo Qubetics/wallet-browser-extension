@@ -14,7 +14,7 @@ import useCurrentHeight from "../../CustomHooks/useCurrentHeight.js";
 import { token_type } from "../../helpers/constant.js";
 
 function Manage() {
-  const { account, chain, loading, currency } = useSelector((state) => state);
+  const { account, currency, loading } = useSelector((state) => state);
   const [keyword, setKeyword] = useState(null);
   const [filteredTokens, setFilteredTokens] = useState([]);
   const parentRef = useRef(null);
@@ -219,7 +219,7 @@ function Manage() {
                     marginTop: "18%",
                   }}
                 >
-                  No assets found
+                  {loading ? 'Loading...' : 'No assets found'}
                 </p>
               ) : null}
             </div>

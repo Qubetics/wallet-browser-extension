@@ -85,9 +85,18 @@ export class Web3Helper {
     symbol
   ) => {
     const { account } = store.getState();
+    console.log("slug", slug);
+    console.log("toAddress", toAddress);
+    console.log("fromAddress", fromAddress);
+    console.log("isToken", isToken);
+    console.log("tokenAddress", tokenAddress);
+    console.log("symbol", symbol);
     try {
       slug = slug == 'matic' ? 'polygon' : slug == 'tics' ? 'qubetics' : slug;
-      const { data } = await server.post(
+      if(slug == 'qubetics') {
+        symbol = 'tics'
+      }
+      const { data } = await server.post( 
         `/${slug}/${isToken ? tokenAddress : symbol}/gas_estimation`,
         {
           from: fromAddress,
