@@ -1597,6 +1597,10 @@ function CrossChain({ state }) {
 
                     setAount(_amount); // ✅ typo fixed from `setAount`
                     handleChangeForInput1(_amount);
+                    if (percent != null) {
+                      setPercent(null);
+                      setActiveIndex(null); // <--- unselect the percentage button
+                    }
                   }}
                   value={amount}
                 />

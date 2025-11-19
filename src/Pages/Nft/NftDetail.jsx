@@ -166,7 +166,8 @@ function NftDetail() {
           <div className="nftDetailList">
             <div className="nftDetail" style={{ color: "#fff"}}>
               {loading ? (
-                <p className="noAddress" style={{ marginTop: "50%", fontWeight: "bold", fontSize: "17px" }}>Loading...</p>
+                <p className="emptyNft" 
+                style={{ color: "#fff",textAlign:"center",display:"flex",justifyContent:"center",alignItems:"center",height:"455px",width:"100%"}}>Loading...</p>
               ) : nfts.length === 0 ? (
                 <div className="emptyNft"
                 style={{ color: "#fff",textAlign:"center",display:"flex",justifyContent:"center",alignItems:"center",height:"455px",width:"100%" }}

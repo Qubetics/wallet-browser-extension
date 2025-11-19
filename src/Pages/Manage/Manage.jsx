@@ -155,7 +155,7 @@ function Manage() {
             ref={parentRef}
             onScroll={handleScroll}
             style={{
-              height: height > 600 ? "480px" : "480px",
+              height: height > 600 ? "480px" : "350px",
             }}
           >
             {/* {!(

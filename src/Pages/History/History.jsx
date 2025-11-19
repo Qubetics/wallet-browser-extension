@@ -159,9 +159,10 @@ function History() {
                 sendRecieve={transactionType}
                 coinname={data?.coin_data?.coin_symbol?.toUpperCase()}
                 address={data?.from_adrs}
-                valueCurrency={`${addCommasToNumber(
-                  parseFloat(getFlooredFixed(data?.amount, 6))
-                )}
+                valueCurrency={`${parseFloat(getFlooredFixed(data?.amount, 6)) === 0
+                  ? "0.0000"
+                  : addCommasToNumber(parseFloat(getFlooredFixed(data?.amount, 6)))
+                }
                  ${data?.coin_data?.coin_symbol?.toUpperCase()}`}
                 dollercurrency={balanceToFiatConversion(
                   price ? price?.value : 0,

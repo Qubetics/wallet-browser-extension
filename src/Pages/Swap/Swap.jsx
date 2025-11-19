@@ -118,7 +118,7 @@ function Swap() {
   const updateRef = useRef(true);
   const { theme } = useSelector((state) => state);
   const [percent, setPercent] = useState(null);
-
+  
   // let g = { type: "on_chain_swap", is_maintenance: 1 };
   // let b = { type: "cross_chain_swap", is_maintenance: 0 };
   const [onChainSwapM, setOnChainSwapM] = useState({});
@@ -219,12 +219,16 @@ function Swap() {
         const finalAmountToSend = new BigNumber(token1.balance).multipliedBy(
           new BigNumber(percentage).dividedBy(100)
         );
-
+        const amountString = finalAmountToSend
+        .decimalPlaces(6, BigNumber.ROUND_DOWN)
+        .toString()
+        .replace(/\.?0+$/, '');
         console.log('FINAL AMOUNT  :', percentage, finalAmountToSend);
+        
         setAount(
           finalAmountToSend == 0
             ? finalAmountToSend.toString()
-            : finalAmountToSend.toFixed(6).replace(/\.?0+$/, '')
+            : amountString
         );
         setBalance(amountToSend);
         console.log(
@@ -247,6 +251,89 @@ function Swap() {
       return messageApi.error('Something went wrong.');
     }
   };
+
+
+  // const calculateAccordingly = async (percentage) => {
+  //   try {
+  //     store.dispatch(overAllLoader(true));
+      
+  //     // CASE 1: TOKEN (has tokenAddress)
+  //     if (token1.tokenAddress) {
+  //       const amountToSend = await Web3Helper.getTokenBalance(
+  //         token1.tokenAddress,
+  //         token1.address,
+  //         token1.rpc
+  //       );
+  //       console.log('Token Balance:', amountToSend);
+        
+  //       if (amountToSend == 0) {
+  //         setAmount2(0);
+  //         setInfoData([]);
+  //         store.dispatch(overAllLoader(false));
+  //         return;
+  //       }
+        
+  //       // Calculate percentage of token balance
+  //       const finalAmountToSend = new BigNumber(token1.balance).multipliedBy(
+  //         new BigNumber(percentage).dividedBy(100)
+  //       );
+        
+  //       console.log('Token Amount to Send:', percentage, finalAmountToSend);
+        
+  //       const formattedAmount = finalAmountToSend.isZero()
+  //         ? '0'
+  //         : finalAmountToSend.toFixed(6).replace(/\.?0+$/, '');
+        
+  //       setAount(formattedAmount);
+  //       setBalance(amountToSend);
+        
+  //       await handleInputChange(formattedAmount, token1, token2, true);
+  //       store.dispatch(overAllLoader(false));
+  //     } 
+  //     // CASE 2: COIN (native currency like BNB, ETH)
+  //     else {
+  //       // For coins, simply calculate percentage of existing balance
+  //       // token1.balance should already contain the coin balance
+  //       const coinBalance = token1.balance || balance;
+  //       console.log('Coin Balance:', coinBalance);
+        
+  //       if (!coinBalance || coinBalance === '0' || parseFloat(coinBalance) === 0) {
+  //         setAmount2(0);
+  //         setInfoData([]);
+  //         store.dispatch(overAllLoader(false));
+  //         return;
+  //       }
+        
+  //       // Calculate percentage of coin balance
+  //       const finalAmountToSend = new BigNumber(coinBalance).multipliedBy(
+  //         new BigNumber(percentage).dividedBy(100)
+  //       );
+        
+  //       console.log('Coin Amount to Send:', percentage, finalAmountToSend.toString());
+        
+  //       // Format the amount (remove trailing zeros)
+  //       const formattedAmount = finalAmountToSend.isZero()
+  //         ? '0'
+  //         : finalAmountToSend.toFixed(6).replace(/\.?0+$/, '');
+        
+  //       setAount(formattedAmount);
+  //       setBalance(coinBalance);
+        
+  //       // Ensure token1 has correct decimals for native coins (18 decimals)
+  //       const updatedToken1 = {
+  //         ...token1,
+  //         decimals: token1.decimals || 18 // Native coins typically have 18 decimals
+  //       };
+        
+  //       await handleInputChange(formattedAmount, updatedToken1, token2, true);
+  //       store.dispatch(overAllLoader(false));
+  //     }
+  //   } catch (error) {
+  //     console.error('Calculate Accordingly Error:', error);
+  //     store.dispatch(overAllLoader(false));
+  //     return messageApi.error('Something went wrong while calculating amount.');
+  //   }
+  // };
 
   const init = async () => {
     let amountToSend = 0;
@@ -1240,6 +1327,74 @@ function Swap() {
     }
   };
 
+  // const handleInputChange = async (amount, token1, token2, second) => {
+  //   try {
+  //     if (amount > 0 && token1.coinFamily == token2.coinFamily) {
+  //       setLoading(true);
+  
+  //       // Ensure decimals is set correctly (native coins have 18 decimals)
+  //       const token1Decimals = token1.decimals || 18;
+  //       const token2Decimals = token2.decimals || 18;
+  
+  //       // For native coins, use the special address
+  //       const srcAddress = token1.tokenAddress || '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
+  //       const dstAddress = token2.tokenAddress || '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
+  
+  //       console.log('Swap Details:', {
+  //         amount,
+  //         token1Decimals,
+  //         srcAddress,
+  //         dstAddress,
+  //         chainId: token1.chain.chainId
+  //       });
+  
+  //       // Convert amount to smallest unit (wei for native coins)
+  //       const amountInSmallestUnit = new BigNumber(amount)
+  //         .multipliedBy(new BigNumber(10).pow(token1Decimals))
+  //         .decimalPlaces(0, BigNumber.ROUND_DOWN)
+  //         .toString();
+  
+  //       console.log('Amount in smallest unit:', amountInSmallestUnit);
+  
+  //       const uniHelper = new UniswapHelper(token1.rpc);
+  //       const route = await uniHelper.getQuoteAndRoute(
+  //         token1.chain.chainId,
+  //         srcAddress,
+  //         dstAddress,
+  //         amountInSmallestUnit,
+  //         commision.percentage
+  //       );
+  
+  //       if (!route) {
+  //         setLoading(false);
+  //         return messageApi.error(
+  //           'This pair is not available for swap at the moment. Please try again later.'
+  //         );
+  //       }
+  
+  //       console.log('Route received:', route);
+  
+  //       setRoute(route);
+        
+  //       // Convert the output amount back to human-readable format
+  //       const outputAmount = new Bignumber(route.toAmount)
+  //         .dividedBy(Math.pow(10, token2Decimals))
+  //         .toFixed();
+  
+  //       console.log('Output amount:', outputAmount);
+  
+  //       setAmount2(outputAmount);
+  //       setLoading(false);
+  //     }
+  //     updateRef.current = true;
+  //   } catch (error) {
+  //     console.error('handleInputChange error:', error);
+  //     setLoading(false);
+  //     updateRef.current = true;
+  //     messageApi.error('Failed to fetch swap route. Please try again.');
+  //   }
+  // };
+
   const handleInputChangeForToToken = async (amount, token2) => {
     try {
       if (amount > 0) {
@@ -1693,6 +1848,10 @@ function Swap() {
 
                             setAount(_amount);
                             handleChangeForInput1(_amount);
+                            if (percent != null) {
+                              setPercent(null);
+                              setActiveIndex(null); // <--- unselect the percentage button
+                            }
                           }}
                           value={amount}
                         />
@@ -2006,6 +2165,23 @@ function Swap() {
                       ))}
                     </div>
                   )}
+
+                  {/* <div className="swap_percentage">
+                    {percentages.map((percentage, index) => (
+                      <p
+                        style={{ cursor: 'pointer' }}
+                        key={index}
+                        className={activeIndex === index ? 'active' : ''}
+                        onClick={() => {
+                          setActiveIndex(index);
+                          setPercent(percentage);
+                          calculateAccordingly(percentage);
+                        }}
+                      >
+                        {percentage}%
+                      </p>
+                    ))}
+                  </div> */}
 
                   <div className="swap__infoText">
                     {loading ? (
@@ -2481,7 +2657,7 @@ function Swap() {
           </div>
         </div>
       </Drawer>
-      <Drawer
+      {/* <Drawer
         title="Slippage Tolerance"
         placement="bottom"
         onClose={() => {
@@ -2602,7 +2778,144 @@ function Swap() {
             }}
           />
         </div>
+      </Drawer> */}
+      <Drawer
+        title="Slippage Tolerance"
+        placement="bottom"
+        onClose={() => {
+          // Allow user to close/cancel freely
+          setSlippageDrawer(false);
+        }}
+        open={slippageDrawer}
+        closable={true}
+        closeIcon={
+          theme === 'darkTheme' ? (
+            <img src={darkclose} />
+          ) : (
+            <img src={ModalCloseIcon} />
+          )
+        }
+        height={292}
+      >
+        <div
+          className="contain"
+          style={{
+            height: '100%',
+            width: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-evenly',
+              gap: '6px',
+            }}
+          >
+            <div className="myvalues">
+              <p
+                className={slippage1 === 1 ? 'myValuesActive' : ''}
+                onClick={() => {
+                  setSlippage1(1);
+                  setCustomSlippage1(null);
+                }}
+              >
+                1%
+              </p>
+            </div>
+
+            <div className="myvalues">
+              <p
+                className={slippage1 === 2 ? 'myValuesActive' : ''}
+                onClick={() => {
+                  setSlippage1(2);
+                  setCustomSlippage1(null);
+                }}
+              >
+                2%
+              </p>
+            </div>
+
+            <div className="myvalues">
+              <p
+                className={slippage1 === 3 ? 'myValuesActive' : ''}
+                onClick={() => {
+                  setSlippage1(3);
+                  setCustomSlippage1(null);
+                }}
+              >
+                3%
+              </p>
+            </div>
+
+            <div className="pthel_input">
+              <InputField
+                coloredBg={'transparent'}
+                placeholder={'Custom'}
+                // show empty string if null so input can be cleared
+                value={customSlippage1 ?? ''}
+                type="number"
+                addonBefore={
+                  <span>
+                    <img
+                      src={Search}
+                      style={{ width: '17px', marginTop: '5px' }}
+                      alt=""
+                    />
+                  </span>
+                }
+                getData={(value) => {
+                  // normalize empty input
+                  if (!value || value === '') {
+                    // revert to default option (1%) when input cleared
+                    setSlippage1(1);
+                    setCustomSlippage1(null);
+                    return;
+                  }
+
+                  // allow only up to 50 and reasonable length
+                  const parsed = parseFloat(value);
+                  if (!isNaN(parsed) && parsed >= 0 && parsed <= 50 && value.toString().length <= 5) {
+                    setSlippage1(null); // custom selected
+                    setCustomSlippage1(value);
+                  }
+                }}
+              />
+            </div>
+          </div>
+
+          <ButtonComp
+            text={'Done'}
+            maxWidth={'50%'}
+            marginTop={'40px'}
+            alignSelf="center"
+            onClick={() => {
+              // Choose the active value: either preset (slippage1) or custom (customSlippage1)
+              // Validate custom only when user selected a custom input
+              if (slippage1 === null) {
+                // user chose custom input -> validate it
+                const parsed = parseFloat(customSlippage1);
+                if (isNaN(parsed) || parsed < 0) {
+                  return messageApi.error('Please enter a valid slippage value.');
+                }
+                // set values from custom
+                setSlippage(parsed);
+                setCustomSlippage(parsed);
+              } else {
+                // user selected 1/2/3 preset
+                setSlippage(slippage1);
+                setCustomSlippage(null);
+              }
+
+              setSlippageDrawer(false);
+              handleChangeForInput1(amount);
+            }}
+          />
+        </div>
       </Drawer>
+
 
       {infoMessage && (
         <ModalCustom
