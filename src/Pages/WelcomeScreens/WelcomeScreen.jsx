@@ -9,7 +9,6 @@ import ModalCloseIcon from "../../Assets/ModalCloseIcon.svg";
 // import DarkAppLogo from "../../Assets/darkAppLogo.svg";
 import { useSelector } from "react-redux";
 import Lottie from "react-lottie-player";
-import AttlasWallet from "../../Assets/JsonFiles/walletAnimation.json";
 import Logo from "../../Assets/JsonFiles/LogoV1.json"
 // import MainLogo from "../../Assets/main-logo.gif";
 
