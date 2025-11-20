@@ -419,7 +419,7 @@ function SwapDetails() {
               </p>
               <p className="swapDetails__valueText__text swapDetails__valueText-specific-text">
                 {/* <p style={{ margin: 0 }}>To</p> */}
-                {addCommasToNumber(getFlooredFixed(parseFloat(amount2), 6))}
+                {addCommasToNumber(getFlooredFixed(parseFloat(amount2), 6))}{' '}
                 {token2.symbol}
               </p>
             </div>

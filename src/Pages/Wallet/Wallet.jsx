@@ -131,7 +131,7 @@ function Wallet() {
       </div>
       <div
         className={`${'wallet__tableOuter'} ${
-          height <= 600 ? 'wallet__tabelOuterExt' : ''
+          height <= 600 ? 'height: 218px' : ''
         }`}
         ref={parentRef}
         onScroll={handleScroll}
@@ -175,7 +175,7 @@ function Wallet() {
                   ),
                   currCryptoBal: balanceIn
                     ? `${addCommasToNumber(
-                        parseFloat(getFlooredFixed(token.balance, 6))
+                        parseFloat(getFlooredFixed(token.balance, 4))
                       )}`
                     : `****`,
                   currCryptoBalSymbol: balanceIn
@@ -207,8 +207,7 @@ function Wallet() {
             }
           />
         )}
-      </div>
-      <div
+              <div
         className={`${'walletBtn'} ${height <= 600 ? 'walletBtnOuterExt' : ''}`}
       >
         <ButtonComp
@@ -223,6 +222,7 @@ function Wallet() {
             </span>
           }
         />
+      </div>
       </div>
     </div>
   );

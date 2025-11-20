@@ -25,9 +25,10 @@ import CurrencyBalanceDetails from './CurrencyBalance';
 import { token_type } from '../../../helpers/constant';
 import { getCosmosAddress } from '../../../helpers/cosmos.helper';
 import { setTokens } from '../../../actions/tokens';
+import { setLoading } from '../../../actions/loading';
 
 function CurrencyDetails() {
-  const { currency, account, tokens } = useSelector((state) => state);
+  const { currency, account,tokens, loading } = useSelector((state) => state);
   const [crossChainDetail, setCrossChainDetail] = useState(null);
   const [price, setPrice] = useState(0);
   const [isGraphExist, setIsGraphExist] = useState(false);
@@ -72,6 +73,7 @@ function CurrencyDetails() {
   const { theme } = useSelector((state) => state);
 
   const init = async () => {
+    store.dispatch(setLoading(true));
     let cosmosAddress = '';
     if (!state.status) {
       store.dispatch(
@@ -143,48 +145,42 @@ function CurrencyDetails() {
       setSelectedOption(coin?.wallet_address);
     }
 
-    console.log('cosmosAddress', cosmosAddress);
 
-    try {
-      const transactionList = await server.post(
-        `/wallet/transaction/list`,
-        {
-          coin_id: fullCoinData.coin.coin_id,
-          coin_family: [coin.coin.coin_family],
-          addrsListKeys:
-            coin.coin.coin_family === 7
-              ? [coin.wallet_address, cosmosAddress]
-              : [coin.wallet_address],
-          page: 1,
-          limit: 250,
-          status: state
-            ? state.status === 'all'
-              ? undefined
-              : state.status
-            : undefined,
-          date_from: state
-            ? state.fromDate
-              ? moment(state.fromDate).format('YYYY-MM-DD') //moment(state.fromDate).startOf("day")
-              : undefined
-            : undefined,
-          date_to: state
-            ? state.toDate
-              ? moment(state.toDate).format('YYYY-MM-DD') //moment(state.toDate).endOf("day")
-              : undefined
-            : undefined,
-          trnx_type: state ? (state.type ? state.type : undefined) : undefined,
+    console.log('cosmosAddress',cosmosAddress);
+    
+    const transactionList = await server.post(
+      `/wallet/transaction/list`,
+      {
+        coin_id: coin.coin.coin_id,
+        coin_family: [coin.coin.coin_family],
+        addrsListKeys: [coin.wallet_address,cosmosAddress],
+        page: 1,
+        limit: 250,
+        status: state
+          ? state.status === 'all'
+            ? undefined
+            : state.status
+          : undefined,
+        date_from: state
+          ? state.fromDate
+            ? moment(state.fromDate).format('YYYY-MM-DD') //moment(state.fromDate).startOf("day")
+            : undefined
+          : undefined,
+        date_to: state
+          ? state.toDate
+            ? moment(state.toDate).format('YYYY-MM-DD') //moment(state.toDate).endOf("day")
+            : undefined
+          : undefined,
+        trnx_type: state ? (state.type ? state.type : undefined) : undefined,
+      },
+      {
+        headers: {
+          Authorization: account?.jwtToken,
         },
-        {
-          headers: {
-            Authorization: account?.jwtToken,
-          },
-        }
-      );
-      setHistory(transactionList?.data?.data);
-    } catch (error) {
-      console.error('Error fetching transaction list:', error);
-      messageApi.error('Failed to load transaction history.');
-    }
+      }
+    );
+    setHistory(transactionList?.data?.data);
+
   };
 
   useEffect(() => {
@@ -203,6 +199,7 @@ function CurrencyDetails() {
 
   const fetchPortfolio = async () => {
     try {
+      store.dispatch(setLoading(true));
       const walletsList = await server.post(
         `/wallet/portfolio`,
         {
@@ -224,7 +221,7 @@ function CurrencyDetails() {
     } catch (error) {
       console.log(error);
     } finally {
-      // store.dispatch(setLoading(false));
+      store.dispatch(setLoading(false));
     }
   };
 
@@ -616,7 +613,7 @@ function CurrencyDetails() {
                     fontSize: '15px',
                   }}
                 >
-                  No Transactions Found...
+                  {loading ? 'Loading...' : 'No Transactions Found...'}
                 </p>
               )}
             </div>

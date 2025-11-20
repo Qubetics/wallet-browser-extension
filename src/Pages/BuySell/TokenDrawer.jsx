@@ -14,7 +14,8 @@ const TokenDrawer = ({
     handleSearch,
     handleSelectToken,
     theme,
-    sel
+    sel,
+    loading
 }) => {
     // console.log(tokens, "Available Tokens");
 
@@ -217,7 +218,7 @@ const TokenDrawer = ({
                                     fontSize: '15px',
                                 }}
                             >
-                                No assets found
+                                {loading ? 'Loading...' : 'No assets found'}
                             </p>
                         </div>
                     )}

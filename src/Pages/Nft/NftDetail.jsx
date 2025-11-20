@@ -12,7 +12,7 @@ import { setLoading } from "../../actions/loading";
 
 function NftDetail() {
   const navigate = useNavigate();
-  const { account } = useSelector((state) => state);
+  const { account, loading } = useSelector((state) => state);
   const { nfts } = useSelector((state) => state);
 
 
@@ -165,11 +165,14 @@ function NftDetail() {
         <div className={`flexedContent padding-Top`}>
           <div className="nftDetailList">
             <div className="nftDetail" style={{ color: "#fff"}}>
-              {nfts.length === 0
-                ? <div className="emptyNft"
+              {loading ? (
+                <p className="emptyNft" 
+                style={{ color: "#fff",textAlign:"center",display:"flex",justifyContent:"center",alignItems:"center",height:"455px",width:"100%"}}>Loading...</p>
+              ) : nfts.length === 0 ? (
+                <div className="emptyNft"
                 style={{ color: "#fff",textAlign:"center",display:"flex",justifyContent:"center",alignItems:"center",height:"455px",width:"100%" }}
                 >NFT's will appear here</div>
-                : nfts.map((nft) => (
+              ) : nfts.map((nft) => (
                   <div
                     className="nftSuper"
                     key={nft?.id}

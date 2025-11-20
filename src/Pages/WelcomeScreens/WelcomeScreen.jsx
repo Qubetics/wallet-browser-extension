@@ -9,7 +9,6 @@ import ModalCloseIcon from "../../Assets/ModalCloseIcon.svg";
 // import DarkAppLogo from "../../Assets/darkAppLogo.svg";
 import { useSelector } from "react-redux";
 import Lottie from "react-lottie-player";
-import AttlasWallet from "../../Assets/JsonFiles/walletAnimation.json";
 import Logo from "../../Assets/JsonFiles/LogoV1.json"
 // import MainLogo from "../../Assets/main-logo.gif";
 
@@ -63,8 +62,9 @@ function WelcomeScreen() {
         <Link
           className="cardWhite__linkOuter__lytblue"
           to={"/terms-policy"}
-          onClick={(e) => {
+          onClick={async (e) => {
             e.preventDefault();
+            await chrome.storage.session.set({ walletFlowType: "import" });
             navigate("/terms-policy", {
               state: { type: "import" },
             });
@@ -78,8 +78,9 @@ function WelcomeScreen() {
         <Link
           to={"/terms-policy"}
           className="cardWhite__linkOuter__darkBlue"
-          onClick={(e) => {
+          onClick={async (e) => {
             e.preventDefault();
+            await chrome.storage.session.set({ walletFlowType: "create" });
             // navigate("/createNewWallet", {
             navigate("/terms-policy", {
               state: { type: "create" },

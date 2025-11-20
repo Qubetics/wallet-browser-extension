@@ -155,8 +155,8 @@ function ChainAbstraction({ state }) {
     maxCount: 1,
   });
   const [toAddress, setToAddress] = useState("");
-  const [receivedAmount, setReceivedAmount] = useState(null);
-  const [amount, setWithdrawAmount] = useState(null);
+  const [receivedAmount, setReceivedAmount] = useState("");
+  const [amount, setWithdrawAmount] = useState("");
   const [route, setRoute] = useState(null);
   const [filteredTokens, setFilteredTokens] = useState([]);
   const [selected, setSelected] = useState(null);
@@ -197,6 +197,13 @@ function ChainAbstraction({ state }) {
     if (debounceTimeout.current) {
       clearTimeout(debounceTimeout.current);
     }
+    
+    // If value is empty or null, clear received amount immediately
+    if (!val || val === "" || val === "0") {
+      setReceivedAmount("");
+      return;
+    }
+    
     debounceTimeout.current = setTimeout(() => {
       const fromFiatValue = token1?.price;
       const toFiatValue = token2?.price;
@@ -927,11 +934,11 @@ function ChainAbstraction({ state }) {
   }
 
   useEffect(() => {
-    setReceivedAmount(null);
+    setReceivedAmount("");
     init();
     return () => {
-      setWithdrawAmount(0);
-      setReceivedAmount(null);
+      setWithdrawAmount("");
+      setReceivedAmount("");
     };
   }, [page]);
 
@@ -1392,25 +1399,18 @@ function ChainAbstraction({ state }) {
 
                         handleSwapInput(sanitizedAmount);
                       }}
-                      value={amount}
+                      value={amount || ""}
                     />
                     <p style={{ marginBottom: "8px" }}>
-                      {currency?.symbol}
-                      {addCommasToNumber(
-                        getFlooredFixed(
-                          parseFloat(amount ? amount : 0) *
-                            parseFloat(token1 ? token1.price : 0),
-                          2
-                        )
-                      ) !== "NaN"
-                        ? addCommasToNumber(
+                      {amount && amount !== "" && parseFloat(amount) > 0
+                        ? `${currency?.symbol}${addCommasToNumber(
                             getFlooredFixed(
-                              parseFloat(amount ? amount : 0) *
+                              parseFloat(amount) *
                                 parseFloat(token1 ? token1.price : 0),
                               2
                             )
-                          )
-                        : "0.00"}
+                          )}`
+                        : ""}
                     </p>
                     {token1?.coinFamily && (
                       <p style={{ 
@@ -1590,17 +1590,18 @@ function ChainAbstraction({ state }) {
                       className="myInput"
                       readOnly={true}
                       placeholder="0.000"
-                      value={receivedAmount}
+                      value={receivedAmount || ""}
                     />
                     <p style={{ marginBottom: "8px" }}>
-                      {currency.symbol}
-                      {addCommasToNumber(
-                        getFlooredFixed(
-                          parseFloat(receivedAmount ? receivedAmount : 0) *
-                            parseFloat(token2 ? token2.price : 0),
-                          2
-                        )
-                      )}
+                      {receivedAmount && receivedAmount !== "" && parseFloat(receivedAmount) > 0
+                        ? `${currency.symbol}${addCommasToNumber(
+                            getFlooredFixed(
+                              parseFloat(receivedAmount) *
+                                parseFloat(token2 ? token2.price : 0),
+                              2
+                            )
+                          )}`
+                        : ""}
                     </p>
                   </div>
                   <div style={{ textAlign: "right" }}>
@@ -2071,10 +2072,29 @@ function ChainAbstraction({ state }) {
           setShowSuccess(false);
 
           // Reset input fields
-          setWithdrawAmount(null);
-          setReceivedAmount(null);
-          setToAddress("");
+          setWithdrawAmount("");
+          setReceivedAmount("");
           setPercent(null);
+          
+          // Reset To Address to default MPC address for token2
+          if (token2 && mpcAddresses) {
+            const getDefaultToAddress = (token, addresses) => {
+              if (!token || !addresses) {
+                return "";
+              }
+              
+              if (token?.coinFamily === 3 || token?.chain?.currencyName === "BTC") {
+                return addresses?.btc || "";
+              }
+              // default to EVM (coinFamily 2 or 7)
+              return addresses?.eth || "";
+            };
+            
+            const defaultAddress = getDefaultToAddress(token2, mpcAddresses);
+            if (defaultAddress) {
+              setToAddress(defaultAddress);
+            }
+          }
 
           // Reset processing state
           setIsProcessing(false);

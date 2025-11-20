@@ -20,7 +20,7 @@ const networks = [
     rpcApiKey: null,
     blockUrl: 'https://etherscan.io',
     default: true,
-    image: 'https://REDACTED/eth.png',
+    image: 'https://prod-qubetics-wallet.obs.ap-southeast-4.myhuaweicloud.com/ETH.png',
     tokenType: 'ERC20',
     testnet: false,
     swap: true,
@@ -44,7 +44,7 @@ const networks = [
     default: false,
     // image:
     //   'https://REDACTED/images/bnb.png',
-    image: 'https://REDACTED/bnb.png',
+    image: 'https://prod-qubetics-wallet.obs.ap-southeast-4.myhuaweicloud.com/BNB.png',
     tokenType: 'BEP20',
     testnet: false,
     swap: true,
@@ -86,7 +86,7 @@ const networks = [
     rpcApiKey: null,
     blockUrl: 'https://polygonscan.com',
     default: false,
-    image: 'https://REDACTED/matic.png',
+    image: 'https://prod-qubetics-wallet.obs.ap-southeast-4.myhuaweicloud.com/MATIC.png',
     tokenType: 'ERC20',
     testnet: false,
     swap: false,
@@ -130,7 +130,7 @@ const networks = [
     rpcApiKey: null,
     blockUrl: 'https://solscan.io/',
     default: false,
-    image: 'https://REDACTED/sol.png',
+    image: 'https://prod-qubetics-wallet.obs.ap-southeast-4.myhuaweicloud.com/Solana.png',
     tokenType: 'SPL20',
     testnet: false,
     swap: false,
@@ -152,7 +152,7 @@ const networks = [
     rpcApiKey: 'REDACTED',
     blockUrl: 'https://www.blockchain.com/explorer/transactions/',
     default: false,
-    image: 'https://stage-qubetics-wallet.obs.ap-southeast-4.myhuaweicloud.com/btc.png',
+    image: 'https://prod-qubetics-wallet.obs.ap-southeast-4.myhuaweicloud.com/BTC.png',
     tokenType: 'BTC',
     testnet: false,
     swap: false,
@@ -258,7 +258,7 @@ const networks = [
     rpcApiKey: null, // ✅ No change
     blockUrl: 'https://testnet.qubetics.work/tx/', // ✅ Updated explorer
     default: false,
-    image: 'https://stage-qubetics-wallet.obs.ap-southeast-4.myhuaweicloud.com/tics.png', // ✅ Same image is fine
+    image: 'https://prod-qubetics-wallet.obs.ap-southeast-4.myhuaweicloud.com/tics_logo.png',
     tokenType: 'ERC20',
     testnet: true, // ✅ Marked as testnet
     swap: false,

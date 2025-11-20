@@ -17,7 +17,7 @@ import BillPayHistryList from '../../../Components/BillPayHistryList/BillPayHist
 
 function BillPayHistorySpritz() {
   const [payments, setPayments] = useState([]);
-  const { billList } = useSelector((state) => state);
+  const { billList, loading } = useSelector((state) => state);
   const { state } = useLocation();
   const init = async () => {
     if (billList.length === 0) {
@@ -78,7 +78,7 @@ function BillPayHistorySpritz() {
             fontSize: '17px',
           }}
         >
-          No Transactions Found...
+          {loading ? 'Loading...' : 'No Transactions Found...'}
         </p>
       )}
     </div>

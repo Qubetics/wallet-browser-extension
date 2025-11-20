@@ -22,7 +22,7 @@ import { token_type } from '../../helpers/constant';
 import NoRecord from '../../Assets/no-record.svg';
 
 function PortfolioWatchList() {
-  const { account, currency, balanceIn } = useSelector((state) => state);
+  const { account, currency, balanceIn, loading } = useSelector((state) => state);
   const navigate = useNavigate();
   const [keyword, setKeyword] = useState(null);
   const [messageApi, contextHolder] = message.useMessage({
@@ -134,7 +134,7 @@ function PortfolioWatchList() {
           </div>
         </div> */}
         <>
-          {(state?.nft ? list : tokens.filter((token) => token.watchlist_data))
+          {(state?.nft ? list : tokens.filter((token) => token.watchlist_data) || loading)
             .length > 0 ? (
             <CoinsTable
               name="portfolio"
@@ -227,7 +227,7 @@ function PortfolioWatchList() {
                   fontSize: '17px',
                 }}
               >
-                No record found
+                {loading ? 'Loading...' : 'No record found'}
               </p>
             </div>
           )}

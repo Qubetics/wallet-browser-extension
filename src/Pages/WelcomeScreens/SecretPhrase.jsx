@@ -75,7 +75,9 @@ function SecretPhrase({ children, mnemonics, termsCheck, isShare, setIsShare, is
           </div> */}
         <div className="donotShare">
           <div className="donotShare_item checkboxOuter">
-            <Checkbox  onChange={()=>{setIsShare(!isShare)}}>
+            <Checkbox  onChange={()=>{setIsShare(!isShare)}}
+               className="checkboxCustom"
+              >
               {" "}
               <p>
                 {" "}
@@ -91,7 +93,9 @@ function SecretPhrase({ children, mnemonics, termsCheck, isShare, setIsShare, is
             </p> */}
           </div>
           <div className="donotShare_item checkboxOuter">
-            <Checkbox onChange={()=>{setIsSupport(!isSupport)}}>
+            <Checkbox onChange={()=>{setIsSupport(!isSupport)}}
+              className="checkboxCustom"
+            >
               <p>
                 Qubetics Extension support will NEVER reach out to ask for it
               </p>

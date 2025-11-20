@@ -14,7 +14,7 @@ import { setLoading } from "../../actions/loading";
 import { addCommasToNumber, getFlooredFixed } from "../../helpers/conversion.helper";
 
 const Buy = ({ coins = [], fiats = [] }) => {
-  const { account, theme } = useSelector((state) => state);
+  const { account, theme, loading } = useSelector((state) => state);
   const [messageApi, contextHolder] = message.useMessage({
     duration: DURATION,
     maxCount: 1,
@@ -576,6 +576,7 @@ const Buy = ({ coins = [], fiats = [] }) => {
         handleSelectToken={handleSelectToken}
         theme={theme}
         sel={sel}
+        loading={loading}
       />
     </div>
   );

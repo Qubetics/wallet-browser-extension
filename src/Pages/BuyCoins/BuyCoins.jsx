@@ -25,7 +25,7 @@ import darkclose from "../../Assets/darkclose.svg";
 import { setLoading } from "../../actions/loading";
 
 function BuyCoins() {
-  const { account, tokens, currency, balanceIn } = useSelector(
+  const { account, tokens, currency, balanceIn, loading } = useSelector(
     (state) => state
   );
 
@@ -609,7 +609,7 @@ function BuyCoins() {
               fontSize: "17px",
             }}
           >
-            No assets found
+            {loading ? 'Loading...' : 'No assets found'}
           </p>
         )}
       </div>

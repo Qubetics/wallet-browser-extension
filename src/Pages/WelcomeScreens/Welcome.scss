@@ -546,6 +546,11 @@
   align-items: center;
 }
 
+.checkboxCustom .ant-checkbox {
+  position: relative !important;
+  top: 1em !important;
+}
+
 .verifyPasswordNew2 {
   height: 371px;
   display: flex;

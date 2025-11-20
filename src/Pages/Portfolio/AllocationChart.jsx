@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import Chart from 'react-apexcharts';
-import { useSelector } from 'react-redux';
-import { store } from '../..';
-import { setLoading } from '../../actions/loading';
-import { server } from '../../server';
-import { token_type } from '../../helpers/constant';
+import React, { useState, useEffect } from "react";
+import Chart from "react-apexcharts";
+import { useSelector } from "react-redux";
+import { store } from "../..";
+import { setLoading } from "../../actions/loading";
+import { server } from "../../server";
+import { token_type } from "../../helpers/constant";
 
 const stringToColour = function (name) {
   let hash = 0;
@@ -16,9 +16,9 @@ const stringToColour = function (name) {
   const g = ((hash >> 5) & 0x3f) + 96;
   const b = ((hash >> 10) & 0x7f) + 160;
 
-  return `#${('00' + r.toString(16)).slice(-2)}${('00' + g.toString(16)).slice(
+  return `#${("00" + r.toString(16)).slice(-2)}${("00" + g.toString(16)).slice(
     -2
-  )}${('00' + b.toString(16)).slice(-2)}`;
+  )}${("00" + b.toString(16)).slice(-2)}`;
 };
 
 const AllocationChart = () => {
@@ -26,30 +26,30 @@ const AllocationChart = () => {
   const [portfolioBalance, setPortfolioBalance] = useState(0);
   const [labels, setLabels] = useState([]);
   const [chartSeries, setChartSeries] = useState([]);
-  const { account, currency,balanceIn } = useSelector((state) => state);
+  const { account, currency, balanceIn, loading } = useSelector((state) => state);
   const [namesWithPercentages, setNamesWithPercentages] = useState([]);
 
   const [chartOptions, setChartOptions] = useState({
     chart: {
-      type: 'donut',
+      type: "donut",
     },
     stroke: {
       show: true,
-      curve: 'straight',
-      lineCap: 'butt',
-      colors: ['#000'],
+      curve: "straight",
+      lineCap: "butt",
+      colors: ["#000"],
       width: 1,
     },
     labels: [],
     plotOptions: {
       pie: {
         donut: {
-          size: '55%',
+          size: "55%",
           labels: {
             total: {
-              label: 'Total',
+              label: "Total",
               formatter: () =>
-                `${currency?.symbol || ''} ${portfolioBalance.toFixed(2)}`,
+                `${currency?.symbol || ""} ${portfolioBalance.toFixed(2)}`,
             },
           },
         },
@@ -59,9 +59,10 @@ const AllocationChart = () => {
       enabled: false,
     },
     legend: {
-      position: 'right',
+      position: "right",
       labels: {
-        colors: '#fff',
+        colors: "#fff",
+        fontSize: "12px",
         // useSeriesColors: true, // Use series colors for legend items
       },
       formatter: function (seriesName, opts) {
@@ -85,7 +86,7 @@ const AllocationChart = () => {
           page: 1,
           limit: 100,
           coin_family: account?.coinFamilies,
-          search: '',
+          search: "",
           addressListKeys: account?.addressLists?.slice(0, 6),
           fiat_type: currency?.name,
         },
@@ -98,9 +99,9 @@ const AllocationChart = () => {
 
       const portfolioData = data?.data || [];
 
-      const filteredPortfolio = portfolioData.filter(item => item.balance > 0);
-
-
+      const filteredPortfolio = portfolioData.filter(
+        (item) => item.balance > 0
+      );
 
       setPortfolio(filteredPortfolio);
 
@@ -108,7 +109,7 @@ const AllocationChart = () => {
         (acc, obj) =>
           acc +
           parseFloat(obj?.balance) *
-            parseFloat(obj?.coin?.fiat_price_data?.value || 0),
+          parseFloat(obj?.coin?.fiat_price_data?.value || 0),
         0
       );
 
@@ -123,8 +124,8 @@ const AllocationChart = () => {
       const percentages = portfolioData
         .filter((obj) => parseFloat(obj?.balance) > 0 && obj?.balance !== null)
         .map((obj) => ({
-          name: obj?.coin?.coin_name || 'Unknown',
-          symbol: obj?.coin?.coin_symbol || 'Unknown',
+          name: obj?.coin?.coin_name || "Unknown",
+          symbol: obj?.coin?.coin_symbol || "Unknown",
           percentage:
             ((parseFloat(obj?.balance) *
               parseFloat(obj?.coin?.fiat_price_data?.value || 0)) /
@@ -136,9 +137,8 @@ const AllocationChart = () => {
       const series = percentages.map((item) => parseFloat(item.percentage));
       const namesWithPercentages = percentages.map(
         (item) =>
-          `${
-            item.name.length > 12 ? item.name.slice(0, 12) + `...` : item.name
-          }   ${item.percentage.toFixed(2)}%`
+          `${item.name.length > 6 ? item.name.slice(0, 6) + `...` : item.name
+          } ${item.percentage.toFixed(2)}%`
       );
 
       setNamesWithPercentages(namesWithPercentages);
@@ -158,6 +158,10 @@ const AllocationChart = () => {
           colors: chartColors,
           legend: {
             ...prev.legend,
+            labels: {
+              ...prev.legend.labels,
+              fontSize: "12px",
+            },
             formatter: function (seriesName, opts) {
               const index = opts.seriesIndex;
               return namesWithPercentages[index]; // Use namesWithPercentages for the legend
@@ -168,7 +172,7 @@ const AllocationChart = () => {
 
       store.dispatch(setLoading(false));
     } catch (error) {
-      console.error('Portfolio fetch error:', error);
+      console.error("Portfolio fetch error:", error);
       store.dispatch(setLoading(false));
     }
   };
@@ -181,8 +185,8 @@ const AllocationChart = () => {
     if (!chartSeries.length || chartSeries.every((val) => val === 0)) {
       setChartOptions((prev) => ({
         ...prev,
-        colors: ['#1413132e'],
-        labels: ['No Data'],
+        colors: ["#1413132e"],
+        labels: ["No Data"],
       }));
       setChartSeries([100]);
     }
@@ -192,8 +196,8 @@ const AllocationChart = () => {
     <div
       className="allocation-chart"
       style={{
-        color: '#fff',
-        margin: '0 auto',
+        color: "#fff",
+        margin: "0 auto",
       }}
     >
       <div className="chartBalance">
@@ -201,10 +205,18 @@ const AllocationChart = () => {
           <span>Total Balance:</span>
         </h3>
         <h1>
-          {balanceIn ? currency?.symbol : ''} {balanceIn ? portfolioBalance.toFixed(2) : '****'}
+          {balanceIn ? currency?.symbol : ""}{" "}
+          {balanceIn ? portfolioBalance.toFixed(2) : "****"}
         </h1>
       </div>
-      <div style={{ position: 'relative', overflow: 'hidden' }}>
+      <div
+        style={{
+          position: "relative",
+          overflow: "visible",
+          display: "flex",
+          justifyContent: "center",
+        }}
+      >
         {portfolioBalance > 0 && (
           <Chart
             options={chartOptions}
@@ -220,7 +232,7 @@ const AllocationChart = () => {
         {/* <img style={{ cursor: "pointer" }} src={CryptoS} alt="SearchIcon" /> */}
       </div>
       <ul className="portfolio__tableOuter ">
-        {portfolioBalance > 0 &&
+        {portfolioBalance > 0 ? (
           portfolio.map((itm, idx) => (
             <li key={idx} className="coinsTable1 flex-item">
               <div className="coinsTable1__left">
@@ -235,33 +247,38 @@ const AllocationChart = () => {
                     <div
                       className="randb extra borderDarkLight"
                       style={{
-                        height: '30px',
-                        width: '30px',
-                        background: 'rgb(202, 201, 201)',
-                        borderRadius: '50%',
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        border: '1px solid',
+                        height: "30px",
+                        width: "30px",
+                        background: "rgb(202, 201, 201)",
+                        borderRadius: "50%",
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        border: "1px solid",
                       }}
                     >
-                      {itm?.coin?.coin_symbol.split('')[0].toUpperCase()}
+                      {itm?.coin?.coin_symbol.split("")[0].toUpperCase()}
                     </div>
                   )}
                 </div>
                 <div className="coinsTable1__left__textSec">
                   <div className="coinsTable1__textTop">
                     <span className="coinNname">
-                    {console.log('coin type',itm?.coin?.is_token,token_type(itm?.coin?.coin_family))}
-                      {itm?.coin?.coin_symbol?.toUpperCase()}
-                      {' '}
-                      {token_type(itm?.coin?.coin_family) ? `(${token_type(itm?.coin?.coin_family)})` : ''}
+                      {console.log(
+                        "coin type",
+                        itm?.coin?.is_token,
+                        token_type(itm?.coin?.coin_family)
+                      )}
+                      {itm?.coin?.coin_symbol?.toUpperCase()}{" "}
+                      {token_type(itm?.coin?.coin_family)
+                        ? `(${token_type(itm?.coin?.coin_family)})`
+                        : ""}
                     </span>
                   </div>
 
                   <div>
-                    <span style={{ color: '#98969B' }}>Percentage</span>
-                    <span style={{ color: '#7DB0FF', marginLeft: '5px' }}>
+                    <span style={{ color: "#98969B" }}>Percentage</span>
+                    <span style={{ color: "#7DB0FF", marginLeft: "5px" }}>
                       {portfolioBalance &&
                         (
                           ((parseFloat(itm?.balance) *
@@ -277,22 +294,33 @@ const AllocationChart = () => {
                 </div>
               </div>
               <div className="coinsTable1__right">
-                <span style={{ color: '#FFFFFF' }}>
-                  {balanceIn ? currency?.symbol : ''}
-                  {balanceIn ? (
-                    parseFloat(itm?.balance) *
-                    parseFloat(itm?.coin?.fiat_price_data?.value || 0)
-                  ).toFixed(2) : '****'}
+                <span style={{ color: "#FFFFFF" }}>
+                  {balanceIn ? currency?.symbol : ""}
+                  {balanceIn
+                    ? (
+                      parseFloat(itm?.balance) *
+                      parseFloat(itm?.coin?.fiat_price_data?.value || 0)
+                    ).toFixed(2)
+                    : "****"}
                 </span>
 
                 <span>
-                  <span style={{ color: '#98969B', marginLeft: '5px' }}>
+                  <span style={{ color: "#98969B", marginLeft: "5px" }}>
                     Amount
                   </span>
                 </span>
               </div>
             </li>
-          ))}
+          ))
+        ) : (
+          <>
+            {loading ? (
+              <p className="noAddress" style={{ marginTop: "50%", fontWeight: "bold", fontSize: "17px" }}>Loading...</p>
+            ) : (
+              <p className="noAddress" style={{ marginTop: "50%", fontWeight: "bold", fontSize: "17px" }}>No Assets Found</p>
+            )}
+          </>
+        )}
       </ul>
     </div>
   );

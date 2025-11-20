@@ -21,7 +21,7 @@ import { setLoading } from '../../actions/loading';
 import { token_type } from '../../helpers/constant';
 
 function AddWatchList() {
-  const { account, currency, balanceIn } = useSelector((state) => state);
+  const { account, currency, balanceIn, loading } = useSelector((state) => state);
   const location = useLocation();
   const isFromPortfolio = location.state?.isFromPortfolio ?? false;
   const [keyword, setKeyword] = useState(null);
@@ -215,7 +215,7 @@ function AddWatchList() {
               fontSize: '17px',
             }}
           >
-            No record found
+            {loading ? 'Loading...' : 'No record found'}
           </p>
         )}
       </div>

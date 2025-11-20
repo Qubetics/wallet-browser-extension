@@ -17,6 +17,7 @@ import {
 import { store } from "..";
 import { WalletHelper } from "./wallet.helper";
 import * as splToken from "@solana/spl-token";
+import { TOKEN_2022_PROGRAM_ID } from "@solana/spl-token";
 import SolanaWallet, { SolanaSignTransaction } from "solana-wallet";
 import promiseRetry from "promise-retry";
 import { server } from "../server";
@@ -42,6 +43,36 @@ export class SolanaHelper {
     if (jsonRpc) {
       this.connection = new Connection(jsonRpc,{ commitment: 'confirmed' });
       this.solTokenObject = new soltokenbalance(jsonRpc);
+    }
+  }
+
+  /**
+   * Detects which token program (legacy or Token-2022) owns the given mint account.
+   * @param {PublicKey} mintAddress - The mint address to check
+   * @returns {Promise<PublicKey>} - Returns TOKEN_PROGRAM_ID or TOKEN_2022_PROGRAM_ID
+   */
+  async getTokenProgramForMint(mintAddress) {
+    try {
+      const mintInfo = await this.connection.getAccountInfo(mintAddress);
+      
+      if (!mintInfo) {
+        console.warn(`Mint account ${mintAddress.toString()} not found, defaulting to TOKEN_PROGRAM_ID`);
+        return splToken.TOKEN_PROGRAM_ID;
+      }
+
+      // Check if the mint is owned by Token-2022 program
+      if (mintInfo.owner.equals(TOKEN_2022_PROGRAM_ID)) {
+        console.log(`Mint ${mintAddress.toString()} is a Token-2022 mint`);
+        return TOKEN_2022_PROGRAM_ID;
+      }
+
+      // Default to legacy token program
+      console.log(`Mint ${mintAddress.toString()} is a legacy SPL token`);
+      return splToken.TOKEN_PROGRAM_ID;
+    } catch (error) {
+      console.error(`Error detecting token program for mint ${mintAddress.toString()}:`, error);
+      // Default to legacy token program on error
+      return splToken.TOKEN_PROGRAM_ID;
     }
   }
 
@@ -268,29 +299,42 @@ export class SolanaHelper {
       myKeyPair
     );
     const tokenMint = new PublicKey(tokenAddress);
-    const myToken = new splToken.Token(
+    
+    // Detect which token program owns this mint
+    const tokenProgramId = await this.getTokenProgramForMint(tokenMint);
+    console.log("🚀 ~ Using token program:", tokenProgramId.toString());
+
+    // Use the modern API that supports both TOKEN_PROGRAM_ID and TOKEN_2022_PROGRAM_ID
+    const fromTokenAccount = await splToken.getOrCreateAssociatedTokenAccount(
       this.connection,
+      myKeyPair,
       tokenMint,
-      splToken.TOKEN_PROGRAM_ID,
-      myKeyPair
+      myKeyPair.publicKey,
+      false, // allowOwnerOffCurve
+      null, // commitment
+      null, // confirmOptions
+      tokenProgramId
     );
 
-
-
-    const fromTokenAccount = await myToken.getOrCreateAssociatedAccountInfo(
-      myKeyPair.publicKey
+    console.log('fromTokenAccount', fromTokenAccount);
+    
+    const toTokenAccount = await splToken.getOrCreateAssociatedTokenAccount(
+      this.connection,
+      myKeyPair,
+      tokenMint,
+      new PublicKey(toAddress),
+      false, // allowOwnerOffCurve
+      null, // commitment
+      null, // confirmOptions
+      tokenProgramId
     );
 
-    console.log('fromTokenAccount',fromTokenAccount)
-    const toTokenAccount = await myToken.getOrCreateAssociatedAccountInfo(
-      new PublicKey(toAddress)
-    );
-
-    console.log('toTokenAccount',toTokenAccount)
+    console.log('toTokenAccount', toTokenAccount);
 
     return {
       fromTokenAccount,
       toTokenAccount,
+      tokenProgramId, // Return the program ID for use in transfer instructions
     };
   }
 
@@ -339,7 +383,7 @@ export class SolanaHelper {
         .blockhash;
       console.log("🚀 ~ SolanaHelper ~ blockhash:", blockhash);
 
-      const { fromTokenAccount, toTokenAccount } =
+      const { fromTokenAccount, toTokenAccount, tokenProgramId } =
         await this.createdAssociatedAccounts(to, tokenAddress, myKeyPair);
       console.log("🚀 ~ SolanaHelper ~ toTokenAccount:", toTokenAccount);
       console.log("🚀 ~ SolanaHelper ~ fromTokenAccount:", fromTokenAccount);
@@ -347,14 +391,15 @@ export class SolanaHelper {
       const PRIORITY_FEE_INSTRUCTIONS =
         ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 35000 });
 
+      // Use the modern createTransferInstruction that supports both token programs
       const transaction = new Transaction().add(
-        splToken.Token.createTransferInstruction(
-          splToken.TOKEN_PROGRAM_ID,
+        splToken.createTransferInstruction(
           fromTokenAccount.address,
           toTokenAccount.address,
           myKeyPair.publicKey,
-          [myKeyPair],
-          new BigNumber(amount).multipliedBy(new BigNumber(decimals)).toNumber()
+          new BigNumber(amount).multipliedBy(new BigNumber(decimals)).toNumber(),
+          [], // multiSigners
+          tokenProgramId
         )
       );
       transaction.add(PRIORITY_FEE_INSTRUCTIONS);
@@ -621,7 +666,7 @@ export class SolanaHelper {
       const myKeyPair = await this.generateSolanaAddress1(mnemonics);
       console.log("🚀 ~ SolanaHelper ~ unwrapSolana= ~ myKeyPair:", myKeyPair);
 
-      const { fromTokenAccount } = await this.createdAssociatedAccounts(
+      const { fromTokenAccount, tokenProgramId } = await this.createdAssociatedAccounts(
         account.coinFamilyAndAddress[4],
         "So11111111111111111111111111111111111111112",
         myKeyPair
@@ -632,13 +677,14 @@ export class SolanaHelper {
       let blockhash = (await this.connection.getLatestBlockhash("finalized"))
         .blockhash;
 
+      // Use the modern createCloseAccountInstruction that supports both token programs
       const transaction = new Transaction().add(
-        splToken.Token.createCloseAccountInstruction(
-          splToken.TOKEN_PROGRAM_ID,
+        splToken.createCloseAccountInstruction(
           fromTokenAccount.address,
           myKeyPair.publicKey,
           myKeyPair.publicKey,
-          [myKeyPair]
+          [], // multiSigners
+          tokenProgramId
         )
       );
 

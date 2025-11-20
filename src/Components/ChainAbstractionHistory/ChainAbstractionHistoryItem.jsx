@@ -30,6 +30,7 @@ function ChainAbstractionHistoryItem(props) {
   };
   const [messageApi, contextHolder] = message.useMessage({
     duration: DURATION,
+    maxCount: 1,
   });
 
   const [transactionResult, setTransactionResult] = useState({
@@ -54,9 +55,11 @@ function ChainAbstractionHistoryItem(props) {
   // Rate limiting for copy functionality
   const copyClickHistory = useRef([]);
   const lastErrorTime = useRef(0);
-  const RATE_LIMIT_WINDOW = 2000; // 2 seconds
-  const MAX_CLICKS_PER_WINDOW = 3; // Max 3 clicks per 2 seconds
-  const ERROR_MESSAGE_COOLDOWN = 2000; // 2 seconds between error messages
+  const lastCopyTime = useRef(0);
+  const RATE_LIMIT_WINDOW = 3000; // 3 seconds
+  const MAX_CLICKS_PER_WINDOW = 1; // Max 1 click per 3 seconds
+  const ERROR_MESSAGE_COOLDOWN = 5000; // 5 seconds between error messages
+  const MIN_COPY_INTERVAL = 1000; // Minimum 1 second between copy operations
 
   // Get coin images from chrome storage
   useEffect(() => {
@@ -283,6 +286,12 @@ function ChainAbstractionHistoryItem(props) {
     e.stopPropagation();
     
     const now = Date.now();
+    
+    // Check minimum interval between copy operations
+    if (now - lastCopyTime.current < MIN_COPY_INTERVAL) {
+      return; // Silently ignore rapid clicks
+    }
+    
     const windowStart = now - RATE_LIMIT_WINDOW;
     
     // Filter out clicks outside the time window
@@ -302,6 +311,7 @@ function ChainAbstractionHistoryItem(props) {
     
     // Add current click timestamp
     copyClickHistory.current.push(now);
+    lastCopyTime.current = now;
     
     // Perform the copy
     navigator.clipboard.writeText(destinationCoin.address);

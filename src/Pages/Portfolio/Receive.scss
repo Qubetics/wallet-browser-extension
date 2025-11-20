@@ -71,9 +71,17 @@
 .apexcharts-legend {
   text-align: left !important;
   top: 0px !important;
-  right: 7px !important;
+  right: 0px !important;
+  max-width: 120px !important;
   .apexcharts-legend-series{
-    margin-bottom: 22px !important; 
+    margin-bottom: 22px !important;
+    max-width: 100% !important;
+  }
+  .apexcharts-legend-text {
+    font-size: 12px !important;
+    white-space: nowrap !important;
+    overflow: visible !important;
+    max-width: 100% !important;
   }
 }
 .chartBalance {

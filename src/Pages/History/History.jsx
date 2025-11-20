@@ -18,7 +18,7 @@ import ChainAbstractionHistoryItem from '../../Components/ChainAbstractionHistor
 import { getCosmosAddress } from '../../helpers/cosmos.helper';
 
 function History() {
-  const { account, currency, filter } = useSelector((state) => state);
+  const { account, currency, filter, loading } = useSelector((state) => state);
 
   const [history, setHistory] = useState([]);
   const [chainAbstractionHistory, setChainAbstractionHistory] = useState([]);

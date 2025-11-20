@@ -91,9 +91,9 @@ function FixWidthLayout() {
         )}
         {path === 'setting' && <MenuRestofHeaders title={'Settings'} />}
         {/* {path === "emailAddress" && <MenuRestofHeaders title={"Banking"} />} */}
-        {path === 'apiKey' && <MenuRestofHeaders backTo={'/emailAddress'} />}
-        {path === 'withdraw' && (
-          <MenuRestofHeaders AddAccount title={'Qubetics'} logout />
+        {path === "apiKey" && <MenuRestofHeaders backTo={"/emailAddress"} />}
+        {path === "withdraw" && (
+          <MenuRestofHeaders AddAccount title={"Qubetics"} logout />
         )}
         {path === 'bankAccountListing' && !state?.fromBillPay && (
           <MenuRestofHeaders

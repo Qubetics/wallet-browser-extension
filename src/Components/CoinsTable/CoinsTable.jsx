@@ -197,9 +197,9 @@ function CoinsTable({ dataArray, showCoinPrice, name }) {
                 </span>
               ) : ele.watch ? (
                 ele.isActiveInWatchList ? (
-                  <img onClick={() => ele.watch()} src={blueStar} alt="star" />
+                  <img onClick={() => ele.watch()} style={{ cursor: 'pointer' }} src={blueStar} alt="star" />
                 ) : (
-                  <img onClick={() => ele.watch()} src={blackStar} alt="star" />
+                  <img onClick={() => ele.watch()} style={{ cursor: 'pointer' }} src={blackStar} alt="star" />
                 )
               ) : (
                 <DummyEle ele={ele} />

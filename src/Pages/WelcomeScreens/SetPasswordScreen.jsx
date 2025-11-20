@@ -45,10 +45,11 @@ function SetPasswordScreen() {
   const { state } = useLocation();
   const { layoutHeader } = useOutletContext();
   const { create } = useSelector((state) => state);
-  const { type, createWalletMnemonics, createShuffledMnemonics } = state || {};
+  const { type: stateType, createWalletMnemonics, createShuffledMnemonics } = state || {};
 
   // ---------------- State ----------------
   const [activeTab, setActiveTab] = useState(null);
+  const [type, setType] = useState(stateType);
 
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -90,6 +91,16 @@ function SetPasswordScreen() {
   useEffect(() => {
     (async () => {
       const { accounts } = await chrome.storage.session.get('accounts');
+      
+      // Get flow type from session storage if not in state
+      let flowType = type;
+      if (!flowType) {
+        const { walletFlowType } = await chrome.storage.session.get('walletFlowType');
+        if (walletFlowType) {
+          flowType = walletFlowType;
+          setType(walletFlowType);
+        }
+      }
 
       if (state?.addNew) {
         setActiveTab('secretPhrase');
@@ -97,7 +108,7 @@ function SetPasswordScreen() {
         setActiveTab('confirmSecretPhrase');
       } else if (create) {
         setActiveTab(
-          type === 'create' ? 'secretPhrase' : 'confirmSecretPhrase'
+          flowType === 'create' ? 'secretPhrase' : 'confirmSecretPhrase'
         );
       } else if (accounts?.length > 0) {
         setActiveTab('verifyPassword');

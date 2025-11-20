@@ -13,7 +13,7 @@ import ButtonComp from "../../Components/ButtonComp/ButtonComp";
 import { useSelector } from "react-redux";
 
 function TransactionFilter() {
-  const { account, chain } = useSelector((state) => state);
+  const { account, chain, loading } = useSelector((state) => state);
   const [messageApi, contextHolder] = message.useMessage();
   const [open, setOpen] = useState(false);
   const [coin, setCoin] = useState({
@@ -296,7 +296,7 @@ function TransactionFilter() {
                   fontSize:"15px"
                 }}
               >
-                No assets found
+                {loading ? 'Loading...' : 'No assets found'}
               </p>
             )}
           </div>

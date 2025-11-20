@@ -28,7 +28,7 @@ import {
 } from '../../helpers/conversion.helper';
 
 function AddPriceAlert() {
-  const { chain, account, currency } = useSelector((state) => state);
+  const { chain, account, currency , loading } = useSelector((state) => state);
   const [open, setOpen] = useState(false);
   const [keyword, setKeyword] = useState(null);
   const { state } = useLocation();
@@ -621,7 +621,7 @@ function AddPriceAlert() {
                     fontSize: '15px',
                   }}
                 >
-                  No assets found
+                {loading ? 'Loading...' : 'No assets found'}
                 </p>
               </div>
             )}

@@ -408,7 +408,7 @@ function CustomToken() {
 
                 setTimeout(() => {
                   navigate("/wallet");
-                }, 3000);
+                }, 1000);
               } catch (error) {
                 store.dispatch(setLoading(false));
 

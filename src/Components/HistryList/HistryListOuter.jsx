@@ -1,6 +1,7 @@
 /*global chrome*/
-import { message } from "antd";
-import React, { useRef, useState } from "react";
+import { message, Tooltip } from "antd";
+import React, { useState } from "react";
+import { useRef } from "react";
 import { useSelector } from "react-redux";
 import { DURATION } from "../../config/message.config";
 import "./HistryList.scss";
@@ -182,9 +183,15 @@ function HistoryListOuter(props) {
         explorer = `https://cardanoscan.io/transaction/${transactionHash}`;
         break;
       case 7:
-        coinFamily = "TICS";
-        explorer = `https://ticsscan.com/tx/${transactionHash}`;
-        break;
+          coinFamily = 'TICS';
+          if (transactionHash.startsWith('0x')) {
+            // Convert everything after '0x' to uppercase
+            const formattedHash = '0x' + transactionHash.slice(2).toUpperCase();
+            explorer = `https://ticsscan.com/tx/${formattedHash}`;
+          } else {
+            explorer = `https://ticsscan.com/tx/${transactionHash}`;
+          }
+          break;
       case 8:
         coinFamily = "CRO";
         explorer = `https://cronoscan.com/tx/${transactionHash}`;
@@ -248,23 +255,19 @@ function HistoryListOuter(props) {
 
             <div className="send">
               <p className="sendRecieve">
-                {type === "deposit" && <span>Deposit</span>}
-                {type === "withdraw" && <span>Withdraw</span>}
-                {type === "swap" && <span>Swap</span>}
-                {type === "cross_chain" && <span>Cross Chain</span>}
-                {type === "dapp" && <span>Smart Contract</span>}
-                {type === "approve" && <span>Approval</span>}
-                {type === "chain_abstraction" && <span>Chain Abstraction</span>}
-                {![
-                  "deposit",
-                  "withdraw",
-                  "swap",
-                  "cross_chain",
-                  "dapp",
-                  "approve",
-                  "chain_abstraction",
-                ].includes(type) && <span>Withdraw</span>}{" "}
-                {type !== "dapp" && valueCurrency}
+                {/* {sendRecieve} */}
+                {type =='deposit' && <span>Deposit</span>}
+                {type =='withdraw' && <span>Withdraw</span>}
+                {type =='swap' && <span>Swap</span>}
+                {type =='cross_chain' && <span>Cross Chain</span>}
+                {type =='dapp' && <span>Smart Contract</span>}
+                {type=='approve' && <span>Approve</span>}
+                {/* Default case added  */}
+                {!['deposit', 'withdraw', 'swap', 'cross_chain', 'dapp', 'approve'].includes(type) && (
+                 <span>Withdraw</span>
+                 )}
+                {' '}
+                {type !='dapp' && valueCurrency}
               </p>
               <div className="histryStatus">
                 <p>{date}</p>

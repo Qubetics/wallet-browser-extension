@@ -207,7 +207,7 @@ function SendConfirm() {
 
       if (chain.isEVM) {
         if (selectChain === 'cosmos') {
-          const { hash, block, transFee, transEstimate } = await broadcastTx({
+          const broadcastResponse = await broadcastTx({
             mnemonicsNew: mnemonics,
             fromAddress: cosmosData?.address,
             toAddress: to,
@@ -215,6 +215,25 @@ function SendConfirm() {
             fee: cosmosData?.stdFee,
             _gasLimit: cosmosData.gasLimit,
           });
+
+          // Check if broadcastTx returned an error
+          if (broadcastResponse?.success === false) {
+            store.dispatch(setLoading(false));
+            const errorMessage = broadcastResponse?.message || broadcastResponse?.error?.message || 'Transaction failed. Please try again.';
+            
+            // Extract user-friendly error message
+            let userMessage = errorMessage;
+            if (errorMessage.includes('insufficient funds') || errorMessage.includes('insufficient fee')) {
+              userMessage = 'Insufficient funds to pay for transaction fees. Please ensure you have enough balance to cover the transaction amount and network fees.';
+            } else if (errorMessage.includes('staking rewards')) {
+              userMessage = 'Insufficient staking rewards to cover transaction fees. Please ensure you have enough balance or claim staking rewards first.';
+            }
+            
+            console.error('🚀 ~ handleTransaction ~ broadcastTx error:', broadcastResponse);
+            return messageApi.error(userMessage);
+          }
+
+          const { hash, block, transFee, transEstimate } = broadcastResponse;
           console.log(
             '🚀 ~ handleTransaction ~ cosmosTxn:',
             hash,
@@ -222,6 +241,12 @@ function SendConfirm() {
             transFee,
             transEstimate
           );
+
+          // Validate that we have required transaction data
+          if (!hash) {
+            store.dispatch(setLoading(false));
+            return messageApi.error('Transaction failed: No transaction hash received.');
+          }
 
           let newData = {
             tx_fee: cosmosData.fee,
@@ -406,7 +431,25 @@ function SendConfirm() {
       store.dispatch(setLoading(false));
       setIsModalOpen1(true);
     } catch (error) {
-      console.log('HANDLE TRANSACTION ERROR: ', error);
+      console.error('HANDLE TRANSACTION ERROR: ', error);
+      store.dispatch(setLoading(false));
+      
+      // Extract user-friendly error message
+      let errorMessage = 'Transaction failed. Please try again.';
+      if (error?.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+      
+      // Check for specific error types
+      if (errorMessage.includes('insufficient funds') || errorMessage.includes('insufficient fee')) {
+        errorMessage = 'Insufficient funds to pay for transaction fees. Please ensure you have enough balance to cover the transaction amount and network fees.';
+      } else if (errorMessage.includes('staking rewards')) {
+        errorMessage = 'Insufficient staking rewards to cover transaction fees. Please ensure you have enough balance or claim staking rewards first.';
+      }
+      
+      messageApi.error(errorMessage);
     }
   };
 
