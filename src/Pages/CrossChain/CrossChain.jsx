@@ -104,7 +104,7 @@ function CrossChain({ state }) {
   const percentages = [25, 50, 75, 100];
   console.log("state", state);
   useEffect(() => {
-    console.log('SWAPDETAILS', swapDetail);
+    console.log('swap detail found in cross chain swap:', swapDetail);
     if (swapDetail) {
       if (swapDetail?.tab == 1) {
         setToken1(swapDetail?.token1);
@@ -1558,49 +1558,43 @@ function CrossChain({ state }) {
                   placeholder="0.000"
                   onWheel={(e) => e.currentTarget.blur()}
                   inputMode="decimal"
-                  onKeyDown={(e) => {
-                    const allowedKeys = [
-                      'Backspace',
-                      'Tab',
-                      'ArrowLeft',
-                      'ArrowRight',
-                      'Delete',
-                      'Home',
-                      'End',
-                    ];
+                  onChange={({ target: { value: amount } }) => {
+                    // Only allow numbers and optional decimal point
+                    const numberRegex = /^\d*\.?\d*$/;
 
-                    // Allow control/navigation keys
-                    if (allowedKeys.includes(e.key)) return;
-
-                    if (!/^[0-9.]$/.test(e.key)) {
-                      e.preventDefault(); // Block everything else (letters, +, -, e, etc.)
+                    if (!numberRegex.test(amount)) {
+                      return; // Block invalid input (alphabets, special chars, etc.)
                     }
-                  }}
-                  onChange={({ target: { value: _amount } }) => {
-                    console.log('_amount', _amount);
-
-                    // const numberRegex = /^\d*\.?\d*$/;
-                    // if (!numberRegex.test(_amount)) return;
 
                     if (percent != null) {
                       setPercent(null);
                     }
 
-                    const [beforeDecimal = '', afterDecimal = ''] =
-                      _amount.split('.');
+                    const afterDecimal = amount.split('.')[1];
                     const maxCharactersBeforeDecimal = 15;
-                    const maxDecimals = token1.decimals;
 
-                    if (beforeDecimal.length > maxCharactersBeforeDecimal)
-                      return;
-                    if (afterDecimal.length > maxDecimals) return;
+                    if (afterDecimal) {
+                      const maxDecimals = token1.decimals;
 
-                    setAount(_amount); // ✅ typo fixed from `setAount`
-                    handleChangeForInput1(_amount);
-                    if (percent != null) {
-                      setPercent(null);
-                      setActiveIndex(null); // <--- unselect the percentage button
+                      if (afterDecimal.toString().length > maxDecimals) {
+                        return;
+                      }
+
+                      const beforeDecimal = amount.split('.')[0];
+                      if (
+                        beforeDecimal.toString().length >
+                        maxCharactersBeforeDecimal
+                      ) {
+                        return;
+                      }
+                    } else {
+                      if (amount.length > maxCharactersBeforeDecimal) {
+                        return;
+                      }
                     }
+
+                    setAmount(amount);
+                    handleChangeForInput1(amount);
                   }}
                   value={amount}
                 />
@@ -2124,6 +2118,10 @@ function CrossChain({ state }) {
                 value={keyword}
                 checkForSymbols={true}
                 getData={(value) => {
+                  const hasEmoji = /[\p{Extended_Pictographic}]/u.test(value);
+                  if (hasEmoji && value.length > 25) {
+                    return false;
+                  }
                   setKeyword(value);
                   if (value.trim().length === 0) {
                     setFilteredTokens(allToken);

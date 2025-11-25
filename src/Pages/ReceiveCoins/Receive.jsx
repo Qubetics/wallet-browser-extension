@@ -16,8 +16,16 @@ import {
 import { server } from '../../server';
 import { store } from '../..';
 import { setTokens } from '../../actions/tokens';
+<<<<<<< Updated upstream
 import { message } from 'antd';
 import { DURATION } from '../../config/message.config';
+=======
+import { QRCode } from 'react-qrcode-logo';
+import { message } from 'antd';
+import { DURATION } from '../../config/message.config';
+import CopyIconBlue from '../../Assets/CopyIconBlue.svg';
+import ModalCustom from '../../Components/ModalCustom/ModalCustom';
+>>>>>>> Stashed changes
 import { setLoading } from '../../actions/loading';
 import { token_type } from '../../helpers/constant';
 
@@ -98,6 +106,12 @@ function ReceiveTokens() {
                 if (hasEmoji) {
                   return false;
                 }
+<<<<<<< Updated upstream
+=======
+                if (value.length > 25) {
+                  return false;
+                }
+>>>>>>> Stashed changes
                 setKeyword(value);
               }}
               addonBefore={

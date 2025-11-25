@@ -1981,6 +1981,7 @@ function Swap() {
                               }
                         }
                         onClick={() => {
+                          console.log('token2', token2, token1);
                           if (token2?.iHave) {
                             setAmount2(0);
                             setAount(0);
@@ -2391,7 +2392,7 @@ function Swap() {
                 }
                 getData={(value) => {
                   const hasEmoji = /[\p{Extended_Pictographic}]/u.test(value);
-                  if (hasEmoji) {
+                  if (hasEmoji && value.length > 25) {
                     return false;
                   }
                   setKeyword(value);

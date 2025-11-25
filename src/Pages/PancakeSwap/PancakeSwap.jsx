@@ -1,59 +1,59 @@
 /*global chrome */
 
-import { Drawer, message, Select } from "antd";
-import React from "react";
-import MenuRestofHeaders from "../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders";
-import { InputField } from "../../Components/InputField/InputFieldSimple";
-import style from "./style.module.scss";
-import BTC from "../../Assets/Coins/BTC.png";
-import DownArrowSuffix from "../../Assets/DownArrowSuffix.svg";
-import ModalCloseIcon from "../../Assets/ModalCloseIcon.svg";
-import Search from "../../Assets/SearchIcon.svg";
-import darkclose from "../../Assets/darkclose.svg";
-import ETH from "../../Assets/Coins/ETH.png";
-import ADA from "../../Assets/Coins/ADA.png";
-import SwapVerticalIcon from "../../Assets/SwapVerticalIcon.svg";
-import ButtonComp from "../../Components/ButtonComp/ButtonComp";
-import { useNavigate } from "react-router-dom";
-import { UniswapHelper } from "../../helpers/uniswap.helper";
-import { useEffect } from "react";
-import { useState } from "react";
-import { Web3Helper } from "../../helpers/web3.helper";
-import { useSelector } from "react-redux";
-import axios from "axios";
-import { FETCH_COINS } from "../../config/uniswap.config";
-import { store } from "../..";
-import { setLoading as externalLoading } from "../../actions/loading";
-import { Loader } from "../../Components/Loader/Loader";
-import { ClipLoader } from "react-spinners";
-import { useRef } from "react";
-import { PancakeHelper } from "../../helpers/pancake.helper";
-import { SLIPPAGE_TOLERANCE } from "../../config/pancake.config";
-import { Percent } from "@pancakeswap-libs/sdk";
-import { ethers } from "ethers";
-import "react-tabs/style/react-tabs.css";
-import { Tabs, TabList, Tab, TabPanel } from "react-tabs";
-import CrossChain from "../CrossChain/CrossChain";
-import { FETCH_IMAGES } from "../../config/api.config";
-import { DURATION } from "../../config/message.config";
-import BigNumber from "bignumber.js";
-import { balanceToFiatConversion } from "../../helpers/conversion.helper";
+import { Drawer, message, Select } from 'antd';
+import React from 'react';
+import MenuRestofHeaders from '../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders';
+import { InputField } from '../../Components/InputField/InputFieldSimple';
+import style from './style.module.scss';
+import BTC from '../../Assets/Coins/BTC.png';
+import DownArrowSuffix from '../../Assets/DownArrowSuffix.svg';
+import ModalCloseIcon from '../../Assets/ModalCloseIcon.svg';
+import Search from '../../Assets/SearchIcon.svg';
+import darkclose from '../../Assets/darkclose.svg';
+import ETH from '../../Assets/Coins/ETH.png';
+import ADA from '../../Assets/Coins/ADA.png';
+import SwapVerticalIcon from '../../Assets/SwapVerticalIcon.svg';
+import ButtonComp from '../../Components/ButtonComp/ButtonComp';
+import { useNavigate } from 'react-router-dom';
+import { UniswapHelper } from '../../helpers/uniswap.helper';
+import { useEffect } from 'react';
+import { useState } from 'react';
+import { Web3Helper } from '../../helpers/web3.helper';
+import { useSelector } from 'react-redux';
+import axios from 'axios';
+import { FETCH_COINS } from '../../config/uniswap.config';
+import { store } from '../..';
+import { setLoading as externalLoading } from '../../actions/loading';
+import { Loader } from '../../Components/Loader/Loader';
+import { ClipLoader } from 'react-spinners';
+import { useRef } from 'react';
+import { PancakeHelper } from '../../helpers/pancake.helper';
+import { SLIPPAGE_TOLERANCE } from '../../config/pancake.config';
+import { Percent } from '@pancakeswap-libs/sdk';
+import { ethers } from 'ethers';
+import 'react-tabs/style/react-tabs.css';
+import { Tabs, TabList, Tab, TabPanel } from 'react-tabs';
+import CrossChain from '../CrossChain/CrossChain';
+import { FETCH_IMAGES } from '../../config/api.config';
+import { DURATION } from '../../config/message.config';
+import BigNumber from 'bignumber.js';
+import { balanceToFiatConversion } from '../../helpers/conversion.helper';
 
 function getFlooredFixed(v, d) {
   return (Math.floor(v * Math.pow(10, d)) / Math.pow(10, d)).toFixed(d);
 }
 
 function addCommasToNumber(number) {
-  var parts = number.toString().split(".");
+  var parts = number.toString().split('.');
   var integerPart = parts[0];
-  var decimalPart = parts[1] || ""; // Handle cases where there is no decimal part
+  var decimalPart = parts[1] || ''; // Handle cases where there is no decimal part
 
   // Add commas to the integer part
-  integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 
   // Combine the integer and decimal parts
-  if (decimalPart !== "") {
-    return integerPart + "." + decimalPart;
+  if (decimalPart !== '') {
+    return integerPart + '.' + decimalPart;
   } else {
     return integerPart;
   }
@@ -105,12 +105,12 @@ function PancakeSwap() {
 
         const address = account.address; // Replace with the user's wallet address
         console.log(
-          "🚀 ~ file: SendCoins.jsx:187 ~ onClick={ ~ address:",
+          '🚀 ~ file: SendCoins.jsx:187 ~ onClick={ ~ address:',
           address
         );
         const balance = await web3Helper.web3.eth.getBalance(address);
         console.log(
-          "🚀 ~ file: SendCoins.jsx:191 ~ onClick={ ~ balance:",
+          '🚀 ~ file: SendCoins.jsx:191 ~ onClick={ ~ balance:',
           balance
         );
 
@@ -119,32 +119,32 @@ function PancakeSwap() {
           .integerValue(BigNumber.ROUND_DOWN)
           .div(100);
         console.log(
-          "🚀 ~ file: SendCoins.jsx:145 ~ amountToSend:",
+          '🚀 ~ file: SendCoins.jsx:145 ~ amountToSend:',
           amountToSend
         );
 
         // Get the current gas price
         const gasPrice = await web3Helper.web3.eth.getGasPrice();
-        console.log("🚀 ~ file: SendCoins.jsx:200 ~ gasPrice:", gasPrice);
+        console.log('🚀 ~ file: SendCoins.jsx:200 ~ gasPrice:', gasPrice);
 
         if (!gasPrice) {
           store.dispatch(externalLoading(false));
-          return messageApi.error("Unable to fetch gas price at the moment.");
+          return messageApi.error('Unable to fetch gas price at the moment.');
         }
 
         // Estimate the gas cost for a sample transaction
         const gasLimit = 21000; // Assuming a standard transaction
-        console.log("🚀 ~ file: SendCoins.jsx:212 ~ gasLimit:", gasLimit);
+        console.log('🚀 ~ file: SendCoins.jsx:212 ~ gasLimit:', gasLimit);
         const gasCost = new BigNumber(gasPrice).times(gasLimit);
         console.log(
-          "🚀 ~ file: SendCoins.jsx:216 ~ gasCost:",
+          '🚀 ~ file: SendCoins.jsx:216 ~ gasCost:',
           gasCost.toString()
         );
 
         // Apply the buffer factor to the gas cost
         const bufferedGasCost = gasCost.times(2.5);
         console.log(
-          "🚀 ~ file: SendCoins.jsx:222 ~ bufferedGasCost:",
+          '🚀 ~ file: SendCoins.jsx:222 ~ bufferedGasCost:',
           bufferedGasCost.toString()
         );
 
@@ -153,26 +153,26 @@ function PancakeSwap() {
           bufferedGasCost
         );
         console.log(
-          "🚀 ~ file: SendCoins.jsx:228 ~ maxBNBAfterGas:",
+          '🚀 ~ file: SendCoins.jsx:228 ~ maxBNBAfterGas:',
           maxBNBAfterGas.toString()
         );
 
         if (maxBNBAfterGas.isNegative()) {
           store.dispatch(externalLoading(false));
-          return messageApi.error("Insufficient balance to cover gas fee.");
+          return messageApi.error('Insufficient balance to cover gas fee.');
         }
 
         console.log(
           `Max BNB after deducting gas fee (with buffer): ${web3Helper.web3.utils.fromWei(
             maxBNBAfterGas.integerValue(BigNumber.ROUND_DOWN).toString(),
-            "ether"
+            'ether'
           )}`
         );
 
         setAount(
           web3Helper.web3.utils.fromWei(
             maxBNBAfterGas.integerValue(BigNumber.ROUND_DOWN).toString(),
-            "ether"
+            'ether'
           )
         );
         store.dispatch(externalLoading(false));
@@ -215,13 +215,13 @@ function PancakeSwap() {
       setAllTokens(tokens);
       setFilteredTokens(tokens);
 
-      let { cakeToken1 } = await chrome.storage.local.get("cakeToken1");
-      let { cakeToken2 } = await chrome.storage.local.get("cakeToken2");
+      let { cakeToken1 } = await chrome.storage.local.get('cakeToken1');
+      let { cakeToken2 } = await chrome.storage.local.get('cakeToken2');
 
       if (!cakeToken1 && !cakeToken2) {
         const myToken1 = tokens.find((token) => !token.tokenAddress);
         const myToken2 = tokens.find(
-          (token) => token.tokenAddress && token.symbol === "EGC"
+          (token) => token.tokenAddress && token.symbol === 'EGC'
         );
 
         const balance = await web3Helper.current.getCoinBalance(
@@ -274,7 +274,7 @@ function PancakeSwap() {
     } catch (error) {
       console.log(error);
       messageApi.error(
-        "Unable to perform swap currently. Please try again later."
+        'Unable to perform swap currently. Please try again later.'
       );
       navigate(-1);
     }
@@ -291,7 +291,7 @@ function PancakeSwap() {
   };
 
   useEffect(() => {
-    console.log(useRef, "useRef");
+    console.log(useRef, 'useRef');
     handleTokensSwapChangePosition();
     if (amount) {
       if (timeOutId.current) {
@@ -307,10 +307,10 @@ function PancakeSwap() {
     return (
       <div className={`scrollableCont`}>
         {contextHolder}
-        <MenuRestofHeaders backTo={"/wallet"} title={"Swap"} />
+        <MenuRestofHeaders backTo={'/wallet'} title={'Swap'} />
         <div className={`flexedContent`}>
           <Loader
-            text={"Please wait while we load your tokens for swapping."}
+            text={'Please wait while we load your tokens for swapping.'}
           />
         </div>
       </div>
@@ -370,19 +370,19 @@ function PancakeSwap() {
         setAount(null);
         setPercent(null);
         updateRef.current = false;
-        console.log(updateRef, "second");
+        console.log(updateRef, 'second');
       }
     }
   };
 
   const handleInputChange = async () => {
-    console.log(updateRef.current, "updateRef.current");
+    console.log(updateRef.current, 'updateRef.current');
     if (updateRef.current) {
       if (amount > 0 && amount && token2) {
-        if (token1.symbol === "BNB" && token2.symbol === "WBNB") {
+        if (token1.symbol === 'BNB' && token2.symbol === 'WBNB') {
           setAmount2(amount);
           return;
-        } else if (token1.symbol === "WBNB" && token2.symbol === "BNB") {
+        } else if (token1.symbol === 'WBNB' && token2.symbol === 'BNB') {
           setAmount2(amount);
           return;
         }
@@ -396,7 +396,7 @@ function PancakeSwap() {
 
         if (!route) {
           setLoading(false);
-          return messageApi.error("Unable to find route to perform the swap.");
+          return messageApi.error('Unable to find route to perform the swap.');
         }
 
         setRoute(route);
@@ -416,14 +416,14 @@ function PancakeSwap() {
   };
 
   const selectAfter = (
-    <div className={"addonAfter"}>
+    <div className={'addonAfter'}>
       <span
         className={style.send__pasteText}
         style={{
-          position: "relative",
-          top: "-1px",
-          left: "-5px",
-          borderLeft: "0px",
+          position: 'relative',
+          top: '-1px',
+          left: '-5px',
+          borderLeft: '0px',
         }}
         onClick={() => {
           calculateAccordingly(100);
@@ -445,11 +445,11 @@ function PancakeSwap() {
               <span className="flexedItemSelect">
                 <img
                   style={{
-                    height: "30px",
-                    width: "30px",
-                    objectFit: "contain",
-                    position: "relative",
-                    borderRadius: "15px"
+                    height: '30px',
+                    width: '30px',
+                    objectFit: 'contain',
+                    position: 'relative',
+                    borderRadius: '15px',
                   }}
                   src={token1?.image}
                 />
@@ -465,10 +465,10 @@ function PancakeSwap() {
               <span className="flexedItemSelect">
                 <img
                   style={{
-                    height: "30px",
-                    width: "30px",
-                    objectFit: "contain",
-                    borderRadius: "15px"
+                    height: '30px',
+                    width: '30px',
+                    objectFit: 'contain',
+                    borderRadius: '15px',
                   }}
                   src={token1?.image}
                 />
@@ -494,11 +494,11 @@ function PancakeSwap() {
                 <span className="flexedItemSelect">
                   <img
                     style={{
-                      height: "20px",
-                      width: "20px",
-                      objectFit: "contain",
-                      marginLeft: "20px",
-                      marginRight: "20px",
+                      height: '20px',
+                      width: '20px',
+                      objectFit: 'contain',
+                      marginLeft: '20px',
+                      marginRight: '20px',
                     }}
                     src={token?.image}
                   />
@@ -511,7 +511,7 @@ function PancakeSwap() {
     </div>
   );
   const selectAfterTo = (
-    <div className={"addonAfter"}>
+    <div className={'addonAfter'}>
       <Select
         suffixIcon={<img src={DownArrowSuffix} />}
         style={{
@@ -529,11 +529,11 @@ function PancakeSwap() {
               <span className="flexedItemSelect">
                 <img
                   style={{
-                    height: "30px",
-                    width: "30px",
-                    objectFit: "contain",
-                    position: "relative",
-                    borderRadius: "15px"
+                    height: '30px',
+                    width: '30px',
+                    objectFit: 'contain',
+                    position: 'relative',
+                    borderRadius: '15px',
                   }}
                   src={token2?.image}
                 />
@@ -549,10 +549,10 @@ function PancakeSwap() {
               <span className="flexedItemSelect">
                 <img
                   style={{
-                    height: "30px",
-                    width: "30px",
-                    objectFit: "contain",
-                    borderRadius: "15px"
+                    height: '30px',
+                    width: '30px',
+                    objectFit: 'contain',
+                    borderRadius: '15px',
                   }}
                   src={token2?.image}
                 />
@@ -574,11 +574,11 @@ function PancakeSwap() {
                 <span className="flexedItemSelect">
                   <img
                     style={{
-                      height: "20px",
-                      width: "20px",
-                      objectFit: "contain",
-                      marginLeft: "20px",
-                      marginRight: "20px",
+                      height: '20px',
+                      width: '20px',
+                      objectFit: 'contain',
+                      marginLeft: '20px',
+                      marginRight: '20px',
                     }}
                     src={token?.image}
                   />
@@ -595,18 +595,18 @@ function PancakeSwap() {
     <div className={`scrollableCont`}>
       {contextHolder}
 
-      <MenuRestofHeaders backTo={"/wallet"} title={"Swap"} />
+      <MenuRestofHeaders backTo={'/wallet'} title={'Swap'} />
       <div className={`flexedContent`}>
         <Tabs>
           <TabList
             style={{
-              border: "none",
-              backgroundColor: "#fff",
-              borderRadius: "30px",
-              padding: "6px",
-              marginBottom: "40px",
-              display: "flex",
-              justifyContent: "space-evenly",
+              border: 'none',
+              backgroundColor: '#fff',
+              borderRadius: '30px',
+              padding: '6px',
+              marginBottom: '40px',
+              display: 'flex',
+              justifyContent: 'space-evenly',
             }}
           >
             <Tab
@@ -614,12 +614,12 @@ function PancakeSwap() {
                 setSel(0);
               }}
               style={{
-                backgroundColor: sel === 0 ? "#4096ff" : "transparent",
-                border: "none",
-                color: sel === 0 ? "aliceblue" : "#222",
-                borderRadius: "30px",
-                padding: "13px 30px",
-                fontSize: "13px",
+                backgroundColor: sel === 0 ? '#4096ff' : 'transparent',
+                border: 'none',
+                color: sel === 0 ? 'aliceblue' : '#222',
+                borderRadius: '30px',
+                padding: '13px 30px',
+                fontSize: '13px',
                 flex: 1,
               }}
             >
@@ -630,20 +630,20 @@ function PancakeSwap() {
               onClick={() => {
                 if (chain.testnet) {
                   return messageApi.error(
-                    "Cross chain swapping is only available in mainnet."
+                    'Cross chain swapping is only available in mainnet.'
                   );
                 }
 
                 setSel(1);
               }}
               style={{
-                backgroundColor: sel === 1 ? "#4096ff" : "transparent",
-                border: "none",
-                color: sel === 1 ? "aliceblue" : "#222",
-                borderRadius: "30px",
-                padding: "13px 30px",
-                marginLeft: "10px",
-                fontSize: "13px",
+                backgroundColor: sel === 1 ? '#4096ff' : 'transparent',
+                border: 'none',
+                color: sel === 1 ? 'aliceblue' : '#222',
+                borderRadius: '30px',
+                padding: '13px 30px',
+                marginLeft: '10px',
+                fontSize: '13px',
                 flex: 1,
               }}
             >
@@ -660,25 +660,25 @@ function PancakeSwap() {
                 }}
                 checkForSymbols={true}
                 inputSelect={true}
-                placeholder={"0.0000"}
+                placeholder={'0.0000'}
                 label="You Pay"
-                type={"number"}
+                type={'number'}
                 value={amount}
                 addonAfter={selectAfter}
               />
               <div className={style.send__infoText}>
                 <span
                   style={{
-                    color: "rgb(0, 174, 239)",
-                    position: "relative",
-                    top: "-6px",
+                    color: 'rgb(0, 174, 239)',
+                    position: 'relative',
+                    top: '-6px',
                   }}
                 >
-                  {" "}
+                  {' '}
                   Available Balance
-                </span>{" "}
-                <br></br>{" "}
-                {addCommasToNumber(parseFloat(getFlooredFixed(balance, 6)))}{" "}
+                </span>{' '}
+                <br></br>{' '}
+                {addCommasToNumber(parseFloat(getFlooredFixed(balance, 6)))}{' '}
                 {token1?.symbol} ~ {currency.symbol}
                 {balanceToFiatConversion(token1.price, balance)}
               </div>
@@ -698,10 +698,10 @@ function PancakeSwap() {
               <InputField
                 mb0={true}
                 inputSelect={true}
-                placeholder={"0.0000"}
+                placeholder={'0.0000'}
                 label="You Receive"
                 readonly={true}
-                type={"number"}
+                type={'number'}
                 value={amount2}
                 checkForSymbols={true}
                 getData={(amount) => {
@@ -712,16 +712,16 @@ function PancakeSwap() {
               <div className={style.send__infoText}>
                 <span
                   style={{
-                    color: "rgb(0, 174, 239)",
-                    position: "relative",
-                    top: "-6px",
+                    color: 'rgb(0, 174, 239)',
+                    position: 'relative',
+                    top: '-6px',
                   }}
                 >
-                  {" "}
-                  Available Balance{" "}
+                  {' '}
+                  Available Balance{' '}
                 </span>
-                <br></br>{" "}
-                {addCommasToNumber(parseFloat(getFlooredFixed(balance2, 6)))}{" "}
+                <br></br>{' '}
+                {addCommasToNumber(parseFloat(getFlooredFixed(balance2, 6)))}{' '}
                 {token2?.symbol} ~ {currency.symbol}
                 {balanceToFiatConversion(token2.price, balance2)}
               </div>
@@ -729,11 +729,11 @@ function PancakeSwap() {
               <div
                 className="periods"
                 style={{
-                  display: "flex",
-                  alignItems: "center",
-                  marginBottom: "15px",
-                  marginTop: "15px",
-                  justifyContent: "space-evenly",
+                  display: 'flex',
+                  alignItems: 'center',
+                  marginBottom: '15px',
+                  marginTop: '15px',
+                  justifyContent: 'space-evenly',
                 }}
               >
                 <div
@@ -775,10 +775,10 @@ function PancakeSwap() {
               </div>
               {loading ? (
                 <div className={style.swap__infoText}>
-                  <ClipLoader size={20} color="#00adee" />{" "}
+                  <ClipLoader size={20} color="#00adee" />{' '}
                   <p
                     style={{
-                      marginLeft: "7px",
+                      marginLeft: '7px',
                     }}
                   >
                     Fetching the best price. Please wait...
@@ -786,7 +786,7 @@ function PancakeSwap() {
                 </div>
               ) : null}
 
-              <div style={{ marginTop: "50px" }}>
+              <div style={{ marginTop: '50px' }}>
                 <ButtonComp
                   onClick={() => {
                     if (
@@ -794,17 +794,17 @@ function PancakeSwap() {
                       isNaN(parseFloat(amount2))
                     ) {
                       return messageApi.error(
-                        "Please enter a valid amount to proceed."
+                        'Please enter a valid amount to proceed.'
                       );
                     }
 
                     if (parseFloat(balance) < parseFloat(amount)) {
                       return messageApi.error(
-                        "Insufficient balance to proceed with the transaction."
+                        'Insufficient balance to proceed with the transaction.'
                       );
                     }
 
-                    navigate("/pancake-swapDetails", {
+                    navigate('/pancake-swapDetails', {
                       state: {
                         route,
                         token1,
@@ -816,13 +816,13 @@ function PancakeSwap() {
                     });
                   }}
                   text={
-                    token1.symbol === "BNB" && token2.symbol === "WBNB"
-                      ? "Wrap"
-                      : token1.symbol === "WBNB" && token2.symbol === "BNB"
-                        ? "Unwrap"
-                        : "Swap"
+                    token1.symbol === 'BNB' && token2.symbol === 'WBNB'
+                      ? 'Wrap'
+                      : token1.symbol === 'WBNB' && token2.symbol === 'BNB'
+                      ? 'Unwrap'
+                      : 'Swap'
                   }
-                  maxWidth={"100%"}
+                  maxWidth={'100%'}
                   disabled={
                     !token1 ||
                     !token2 ||
@@ -852,7 +852,7 @@ function PancakeSwap() {
         open={open}
         // eslint-disable-next-line jsx-a11y/alt-text
         closeIcon={
-          theme == "darkTheme" ? (
+          theme == 'darkTheme' ? (
             <img src={darkclose} />
           ) : (
             <img src={ModalCloseIcon} />
@@ -863,20 +863,24 @@ function PancakeSwap() {
         <div
           className="contain"
           style={{
-            height: "100%",
-            width: "100%",
-            display: "flex",
-            flexDirection: "column",
+            height: '100%',
+            width: '100%',
+            display: 'flex',
+            flexDirection: 'column',
           }}
         >
           {show ? (
-            <div className="search" style={{ marginBottom: "30px" }}>
+            <div className="search" style={{ marginBottom: '30px' }}>
               <InputField
-                placeholder={"Search coin"}
-                coloredBg={"#eef3f9"}
+                placeholder={'Search coin'}
+                coloredBg={'#eef3f9'}
                 value={keyword}
                 checkForSymbols={true}
                 getData={(value) => {
+                  const hasEmoji = /[\p{Extended_Pictographic}]/u.test(value);
+                  if (hasEmoji && value.length > 25) {
+                    return false;
+                  }
                   setKeyword(value);
                   if (value.trim().length === 0) {
                     setFilteredTokens(allToken);
@@ -906,7 +910,7 @@ function PancakeSwap() {
             className="right"
             style={{
               flex: 1,
-              overflow: "scroll",
+              overflow: 'scroll',
             }}
           >
             {filteredTokens.length > 0 ? (
@@ -924,33 +928,33 @@ function PancakeSwap() {
                   <div
                     className={style.design}
                     style={{
-                      width: "100%",
+                      width: '100%',
                     }}
                   >
                     <div
                       className="token"
                       style={{
-                        display: "flex",
-                        justifyContent: "flex-start",
-                        alignItems: "center",
-                        marginBottom: "20px",
-                        padding: "8px",
-                        borderRadius: "30px",
-                        marginLeft: "7px",
-                        fontSize: "11px",
-                        cursor: "pointer",
-                        width: "100%;",
+                        display: 'flex',
+                        justifyContent: 'flex-start',
+                        alignItems: 'center',
+                        marginBottom: '20px',
+                        padding: '8px',
+                        borderRadius: '30px',
+                        marginLeft: '7px',
+                        fontSize: '11px',
+                        cursor: 'pointer',
+                        width: '100%;',
                         backgroundColor:
                           token1.id == token.id || token2.id == token.id
-                            ? "transparent"
-                            : "transparent",
+                            ? 'transparent'
+                            : 'transparent',
                         color:
                           token1.id == token.id || token2.id == token.id
-                            ? "#000"
-                            : "#000",
+                            ? '#000'
+                            : '#000',
                       }}
                       onClick={() => {
-                        console.log("clicking on the token.......");
+                        console.log('clicking on the token.......');
 
                         if (token1.id == token.id || token2.id == token.id) {
                           setOpen(false);
@@ -959,7 +963,7 @@ function PancakeSwap() {
                         if (selected == 1) {
                           if (token2.id == token.id) {
                             return messageApi.error(
-                              "You cannot select the same tokens on both sides. Please select a different token."
+                              'You cannot select the same tokens on both sides. Please select a different token.'
                             );
                           }
                           setToken1(
@@ -971,7 +975,7 @@ function PancakeSwap() {
                         } else {
                           if (token1.id == token.id) {
                             return messageApi.error(
-                              "You cannot select the same tokens on both sides. Please select a different token."
+                              'You cannot select the same tokens on both sides. Please select a different token.'
                             );
                           }
                           setToken2(
@@ -989,24 +993,24 @@ function PancakeSwap() {
                       {!token.image ? (
                         <div
                           style={{
-                            alignItems: "center",
-                            backgroundColor: "rgba(98,126,234,.2)",
-                            borderRadius: "49%",
-                            display: "flex",
-                            height: "29px",
-                            justifyContent: "center",
-                            width: "29px",
-                            marginRight: "15px",
+                            alignItems: 'center',
+                            backgroundColor: 'rgba(98,126,234,.2)',
+                            borderRadius: '49%',
+                            display: 'flex',
+                            height: '29px',
+                            justifyContent: 'center',
+                            width: '29px',
+                            marginRight: '15px',
                           }}
                         >
-                          {" "}
-                          {token.name.split("")[0]}
+                          {' '}
+                          {token.name.split('')[0]}
                         </div>
                       ) : (
                         <img
                           style={{
-                            width: "29px",
-                            marginRight: "15px",
+                            width: '29px',
+                            marginRight: '15px',
                           }}
                           src={token.image}
                           alt=""
@@ -1015,40 +1019,40 @@ function PancakeSwap() {
 
                       <p>
                         <span
-                          style={{ fontSize: "17px" }}
+                          style={{ fontSize: '17px' }}
                           className="noAddress"
                         >
-                          {token.name}{" "}
+                          {token.name}{' '}
                         </span>
                         <span
                           className="noAddress"
                           style={{
-                            fontSize: "11px",
-                            marginLeft: "5px",
+                            fontSize: '11px',
+                            marginLeft: '5px',
                           }}
                         >
                           / BEP20
                         </span>
-                      </p >
-                    </div >
-                  </div >
+                      </p>
+                    </div>
+                  </div>
                 ))
             ) : (
               <p
                 className="noAddress"
                 style={{
-                  marginTop: "50%",
-                  fontWeight: "bold",
-                  fontSize: "15px",
+                  marginTop: '50%',
+                  fontWeight: 'bold',
+                  fontSize: '15px',
                 }}
               >
                 No assets found
               </p>
             )}
-          </div >
-        </div >
-      </Drawer >
-    </div >
+          </div>
+        </div>
+      </Drawer>
+    </div>
   );
 }
 
