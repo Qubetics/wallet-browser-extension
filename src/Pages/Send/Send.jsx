@@ -94,12 +94,9 @@ function Send() {
               if (hasEmoji) {
                 return false;
               }
-<<<<<<< Updated upstream
-=======
               if (value.length > 25) {
                 return false;
               }
->>>>>>> Stashed changes
               setKeyword(value);
             }}
             addonBefore={
