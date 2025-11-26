@@ -154,11 +154,7 @@ function Manage() {
             ref={parentRef}
             onScroll={handleScroll}
             style={{
-<<<<<<< Updated upstream
-              height: height > 600 ? "480px" : "350px",
-=======
               height: height > 600 ? '480px' : '480px',
->>>>>>> Stashed changes
             }}
           >
             {/* {!(

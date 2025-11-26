@@ -149,13 +149,7 @@
     ]
   },
   "devDependencies": {
-<<<<<<< Updated upstream
-    "ajv": "^6.12.6",
-    "ajv-keywords": "^3.5.2",
-    "console-browserify": "^1.2.0",
-=======
     "copy-webpack-plugin": "^13.0.1",
->>>>>>> Stashed changes
     "process": "^0.11.10",
     "webpack-cli": "^5.1.4"
   }

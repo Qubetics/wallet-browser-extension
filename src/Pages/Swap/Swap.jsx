@@ -118,7 +118,7 @@ function Swap() {
   const updateRef = useRef(true);
   const { theme } = useSelector((state) => state);
   const [percent, setPercent] = useState(null);
-  
+
   // let g = { type: "on_chain_swap", is_maintenance: 1 };
   // let b = { type: "cross_chain_swap", is_maintenance: 0 };
   const [onChainSwapM, setOnChainSwapM] = useState({});
@@ -220,15 +220,13 @@ function Swap() {
           new BigNumber(percentage).dividedBy(100)
         );
         const amountString = finalAmountToSend
-        .decimalPlaces(6, BigNumber.ROUND_DOWN)
-        .toString()
-        .replace(/\.?0+$/, '');
+          .decimalPlaces(6, BigNumber.ROUND_DOWN)
+          .toString()
+          .replace(/\.?0+$/, '');
         console.log('FINAL AMOUNT  :', percentage, finalAmountToSend);
-        
+
         setAount(
-          finalAmountToSend == 0
-            ? finalAmountToSend.toString()
-            : amountString
+          finalAmountToSend == 0 ? finalAmountToSend.toString() : amountString
         );
         setBalance(amountToSend);
         console.log(
@@ -252,11 +250,10 @@ function Swap() {
     }
   };
 
-
   // const calculateAccordingly = async (percentage) => {
   //   try {
   //     store.dispatch(overAllLoader(true));
-      
+
   //     // CASE 1: TOKEN (has tokenAddress)
   //     if (token1.tokenAddress) {
   //       const amountToSend = await Web3Helper.getTokenBalance(
@@ -265,66 +262,66 @@ function Swap() {
   //         token1.rpc
   //       );
   //       console.log('Token Balance:', amountToSend);
-        
+
   //       if (amountToSend == 0) {
   //         setAmount2(0);
   //         setInfoData([]);
   //         store.dispatch(overAllLoader(false));
   //         return;
   //       }
-        
+
   //       // Calculate percentage of token balance
   //       const finalAmountToSend = new BigNumber(token1.balance).multipliedBy(
   //         new BigNumber(percentage).dividedBy(100)
   //       );
-        
+
   //       console.log('Token Amount to Send:', percentage, finalAmountToSend);
-        
+
   //       const formattedAmount = finalAmountToSend.isZero()
   //         ? '0'
   //         : finalAmountToSend.toFixed(6).replace(/\.?0+$/, '');
-        
+
   //       setAount(formattedAmount);
   //       setBalance(amountToSend);
-        
+
   //       await handleInputChange(formattedAmount, token1, token2, true);
   //       store.dispatch(overAllLoader(false));
-  //     } 
+  //     }
   //     // CASE 2: COIN (native currency like BNB, ETH)
   //     else {
   //       // For coins, simply calculate percentage of existing balance
   //       // token1.balance should already contain the coin balance
   //       const coinBalance = token1.balance || balance;
   //       console.log('Coin Balance:', coinBalance);
-        
+
   //       if (!coinBalance || coinBalance === '0' || parseFloat(coinBalance) === 0) {
   //         setAmount2(0);
   //         setInfoData([]);
   //         store.dispatch(overAllLoader(false));
   //         return;
   //       }
-        
+
   //       // Calculate percentage of coin balance
   //       const finalAmountToSend = new BigNumber(coinBalance).multipliedBy(
   //         new BigNumber(percentage).dividedBy(100)
   //       );
-        
+
   //       console.log('Coin Amount to Send:', percentage, finalAmountToSend.toString());
-        
+
   //       // Format the amount (remove trailing zeros)
   //       const formattedAmount = finalAmountToSend.isZero()
   //         ? '0'
   //         : finalAmountToSend.toFixed(6).replace(/\.?0+$/, '');
-        
+
   //       setAount(formattedAmount);
   //       setBalance(coinBalance);
-        
+
   //       // Ensure token1 has correct decimals for native coins (18 decimals)
   //       const updatedToken1 = {
   //         ...token1,
   //         decimals: token1.decimals || 18 // Native coins typically have 18 decimals
   //       };
-        
+
   //       await handleInputChange(formattedAmount, updatedToken1, token2, true);
   //       store.dispatch(overAllLoader(false));
   //     }
@@ -1306,10 +1303,11 @@ function Swap() {
           commision.percentage
         );
 
-        if (!route) {
+        if (route?.error) {
           setLoading(false);
           return messageApi.error(
-            'This pair is not available for swap at the moment. Please try again later.'
+            route?.message ||
+              'This pair is not available for swap at the moment. Please try again later.'
           );
         }
         setRoute(route);
@@ -1326,74 +1324,6 @@ function Swap() {
       updateRef.current = true;
     }
   };
-
-  // const handleInputChange = async (amount, token1, token2, second) => {
-  //   try {
-  //     if (amount > 0 && token1.coinFamily == token2.coinFamily) {
-  //       setLoading(true);
-  
-  //       // Ensure decimals is set correctly (native coins have 18 decimals)
-  //       const token1Decimals = token1.decimals || 18;
-  //       const token2Decimals = token2.decimals || 18;
-  
-  //       // For native coins, use the special address
-  //       const srcAddress = token1.tokenAddress || '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
-  //       const dstAddress = token2.tokenAddress || '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
-  
-  //       console.log('Swap Details:', {
-  //         amount,
-  //         token1Decimals,
-  //         srcAddress,
-  //         dstAddress,
-  //         chainId: token1.chain.chainId
-  //       });
-  
-  //       // Convert amount to smallest unit (wei for native coins)
-  //       const amountInSmallestUnit = new BigNumber(amount)
-  //         .multipliedBy(new BigNumber(10).pow(token1Decimals))
-  //         .decimalPlaces(0, BigNumber.ROUND_DOWN)
-  //         .toString();
-  
-  //       console.log('Amount in smallest unit:', amountInSmallestUnit);
-  
-  //       const uniHelper = new UniswapHelper(token1.rpc);
-  //       const route = await uniHelper.getQuoteAndRoute(
-  //         token1.chain.chainId,
-  //         srcAddress,
-  //         dstAddress,
-  //         amountInSmallestUnit,
-  //         commision.percentage
-  //       );
-  
-  //       if (!route) {
-  //         setLoading(false);
-  //         return messageApi.error(
-  //           'This pair is not available for swap at the moment. Please try again later.'
-  //         );
-  //       }
-  
-  //       console.log('Route received:', route);
-  
-  //       setRoute(route);
-        
-  //       // Convert the output amount back to human-readable format
-  //       const outputAmount = new Bignumber(route.toAmount)
-  //         .dividedBy(Math.pow(10, token2Decimals))
-  //         .toFixed();
-  
-  //       console.log('Output amount:', outputAmount);
-  
-  //       setAmount2(outputAmount);
-  //       setLoading(false);
-  //     }
-  //     updateRef.current = true;
-  //   } catch (error) {
-  //     console.error('handleInputChange error:', error);
-  //     setLoading(false);
-  //     updateRef.current = true;
-  //     messageApi.error('Failed to fetch swap route. Please try again.');
-  //   }
-  // };
 
   const handleInputChangeForToToken = async (amount, token2) => {
     try {
@@ -1826,11 +1756,10 @@ function Swap() {
                             if (allowedKeys.includes(e.key)) return;
 
                             if (!/^[0-9.]$/.test(e.key)) {
-                              e.preventDefault(); 
+                              e.preventDefault();
                             }
                           }}
                           onChange={({ target: { value: _amount } }) => {
-
                             if (percent != null) {
                               setPercent(null);
                             }
@@ -2878,7 +2807,12 @@ function Swap() {
 
                   // allow only up to 50 and reasonable length
                   const parsed = parseFloat(value);
-                  if (!isNaN(parsed) && parsed >= 0 && parsed <= 50 && value.toString().length <= 5) {
+                  if (
+                    !isNaN(parsed) &&
+                    parsed >= 0 &&
+                    parsed <= 50 &&
+                    value.toString().length <= 5
+                  ) {
                     setSlippage1(null); // custom selected
                     setCustomSlippage1(value);
                   }
@@ -2899,7 +2833,9 @@ function Swap() {
                 // user chose custom input -> validate it
                 const parsed = parseFloat(customSlippage1);
                 if (isNaN(parsed) || parsed < 0) {
-                  return messageApi.error('Please enter a valid slippage value.');
+                  return messageApi.error(
+                    'Please enter a valid slippage value.'
+                  );
                 }
                 // set values from custom
                 setSlippage(parsed);
@@ -2916,7 +2852,6 @@ function Swap() {
           />
         </div>
       </Drawer>
-
 
       {infoMessage && (
         <ModalCustom
@@ -2963,10 +2898,11 @@ function Swap() {
             />{' '} */}
               <p>
                 Users can import tokens from Uniswap, PancakeSwap, PulseChain
-                and Jupiter on Qubetics Wallet. While we strive for optimal routing
-                and low fees, due to decentralization, we cannot guarantee it.
-                Users must verify token numbers and gas fees before swapping and
-                assume responsibility for charges or losses. Visit our{' '}
+                and Jupiter on Qubetics Wallet. While we strive for optimal
+                routing and low fees, due to decentralization, we cannot
+                guarantee it. Users must verify token numbers and gas fees
+                before swapping and assume responsibility for charges or losses.
+                Visit our{' '}
                 <span
                   style={{
                     color: '#00aeef',

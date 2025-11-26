@@ -82,7 +82,7 @@ function CrossChain({ state }) {
     maxCount: 1,
   });
   const [amount2, setAmount2] = useState(null);
-  const [amount, setAount] = useState(null);
+  const [amount, setAmount] = useState(null);
   const [route, setRoute] = useState(null);
   const [refresh, setRefresh] = useState(false);
   const [filteredTokens, setFilteredTokens] = useState([]);
@@ -109,7 +109,7 @@ function CrossChain({ state }) {
       if (swapDetail?.tab == 1) {
         setToken1(swapDetail?.token1);
         setToken2(swapDetail?.token2);
-        setAount(+swapDetail?.amount);
+        setAmount(+swapDetail?.amount);
         setAmount2(+swapDetail?.amount2);
         setTimeout(() => {
           initialSwapDetail(
@@ -239,7 +239,7 @@ function CrossChain({ state }) {
         const finalAmountToSend = new BigNumber(token1.balance).multipliedBy(
           new BigNumber(percentage).dividedBy(100)
         );
-        setAount(
+        setAmount(
           finalAmountToSend == 0
             ? finalAmountToSend.toString()
             : finalAmountToSend.toFixed(6).replace(/\.?0+$/, '')
@@ -265,7 +265,7 @@ function CrossChain({ state }) {
         const finalAmountToSend = new BigNumber(amountToSend).multipliedBy(
           new BigNumber(percentage).dividedBy(100)
         );
-        setAount(
+        setAmount(
           finalAmountToSend == 0
             ? finalAmountToSend.toString()
             : finalAmountToSend.toFixed(token1.decimals).replace(/\.?0+$/, '')
@@ -1107,14 +1107,14 @@ function CrossChain({ state }) {
     if (updatedToken1.tokenAddress) {
       if (updatedToken1.id != token1.id) {
         setAmount2(null);
-        setAount(null);
+        setAmount(null);
         setPercent(null);
         updateRef.current = false;
       }
     } else {
       if (updatedToken1.id != token1.id) {
         setAmount2(null);
-        setAount(null);
+        setAmount(null);
         setPercent(null);
         updateRef.current = false;
       }
@@ -1144,7 +1144,7 @@ function CrossChain({ state }) {
     if (updatedToken2.tokenAddress) {
       if (updatedToken2.id != token2.id) {
         setAmount2(null);
-        setAount(null);
+        setAmount(null);
         setPercent(null);
         updateRef.current = false;
       }
@@ -1164,7 +1164,7 @@ function CrossChain({ state }) {
     } else {
       if (updatedToken2.id != token2.id) {
         setAmount2(null);
-        setAount(null);
+        setAmount(null);
         setPercent(null);
         updateRef.current = false;
       }
@@ -1275,14 +1275,14 @@ function CrossChain({ state }) {
     // Set a new timeout to execute the action after 2000 milliseconds
     debounceTimeout.current = setTimeout(() => {
       handleInputChange(newAmount);
-      setAount(newAmount);
+      setAmount(newAmount);
     }, 3000);
   }
 
   useEffect(() => {
     init();
     return () => {
-      setAount(0);
+      setAmount(0);
     };
   }, [page]);
 
@@ -1669,7 +1669,7 @@ function CrossChain({ state }) {
                     },
                   ]}
                   onSelect={(value) => {
-                    setAount(null);
+                    setAmount(null);
                     setToken2(availableTokens.find((el) => el.id == value));
                     handleToken1Change(
                       availableTokens.find((el) => el.id == value)
@@ -1731,7 +1731,7 @@ function CrossChain({ state }) {
                     setToken1(token2);
                     setToken2(token1);
                     setAmount2(0);
-                    setAount(0);
+                    setAmount(0);
                     setPercent(0);
                     setInfoData([]);
                   } else {
