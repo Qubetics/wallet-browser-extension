@@ -1048,6 +1048,14 @@ class Background {
         world: 'MAIN',
         allFrames: true,
       },
+      {
+        id: 'qubetics-kepler-contentscript',
+        matches: ['file://*/*', 'http://*/*', 'https://*/*'],
+        js: ['kepler-inpage-bundle.js'],
+        runAt: 'document_start',
+        world: 'MAIN',
+        allFrames: true,
+      },
     ]);
   };
 
@@ -1076,6 +1084,10 @@ class Background {
           });
 
           return true;
+        } else if (message.type === 'KEPLER_JSON-RPC') {
+          // Handle Kepler requests
+          this.handleKeplerRequest(message.payload, sender, sendResponse);
+          return true;
         }
       } else if (message.type === 'OPEN_SIDE_PANEL') {
         chrome.sidePanel
@@ -1087,6 +1099,337 @@ class Background {
           .catch((error) => console.error(error));
       }
     });
+  };
+
+  handleKeplerRequest = async (payload, sender, sendResponse) => {
+    const { method, params, id, origin } = payload;
+    console.log('🔷 [handleKeplerRequest] Handling request:', { method, params, id, origin });
+
+    try {
+      let result = null;
+      let error = null;
+
+      switch (method) {
+        case 'enable':
+          console.log('🔷 [handleKeplerRequest] Routing to enable');
+          result = await this.handleKeplerEnable(params.chainId, origin);
+          break;
+        case 'getKey':
+          console.log('🔷 [handleKeplerRequest] Routing to getKey');
+          result = await this.handleKeplerGetKey(params.chainId);
+          break;
+        case 'signAmino':
+          console.log('🔷 [handleKeplerRequest] Routing to signAmino');
+          result = await this.handleKeplerSignAmino(params.chainId, params.signer, params.signDoc, origin);
+          break;
+        case 'signDirect':
+          console.log('🔷 [handleKeplerRequest] Routing to signDirect');
+          result = await this.handleKeplerSignDirect(params.chainId, params.signer, params.signDoc, origin);
+          break;
+        case 'sendTx':
+          console.log('🔷 [handleKeplerRequest] Routing to sendTx');
+          result = await this.handleKeplerSendTx(params.chainId, params.tx, params.mode);
+          break;
+        case 'suggestToken':
+          console.log('🔷 [handleKeplerRequest] Routing to suggestToken');
+          result = await this.handleKeplerSuggestToken(params.chainId, params.contractAddress);
+          break;
+        case 'getChainInfo':
+          console.log('🔷 [handleKeplerRequest] Routing to getChainInfo');
+          result = await this.handleKeplerGetChainInfo(params.chainId);
+          break;
+        default:
+          error = { code: -32601, message: `Method not found: ${method}` };
+          console.error('❌ [handleKeplerRequest] Unknown method:', method);
+      }
+
+      if (error) {
+        console.log('❌ [handleKeplerRequest] Sending error response:', error);
+      } else {
+        console.log('✅ [handleKeplerRequest] Sending success response:', {
+          hasResult: !!result,
+          resultType: typeof result
+        });
+      }
+
+      sendResponse({
+        type: 'KEPLER_JSON-RPC',
+        payload: {
+          id,
+          result,
+          error
+        }
+      });
+    } catch (err) {
+      console.error('❌ [handleKeplerRequest] Exception caught:', err);
+      console.error('❌ [handleKeplerRequest] Error details:', {
+        name: err?.name,
+        message: err?.message,
+        stack: err?.stack,
+        details: err?.details
+      });
+      
+      // Properly serialize error
+      const errorResponse = {
+        code: -32603,
+        message: err?.message || 'Internal error',
+        data: err?.details || (err?.toString ? err.toString() : String(err))
+      };
+      
+      // Add additional error info if available
+      if (err?.name) {
+        errorResponse.name = err.name;
+      }
+      
+      console.error('❌ [handleKeplerRequest] Sending error response:', errorResponse);
+      
+      sendResponse({
+        type: 'KEPLER_JSON-RPC',
+        payload: {
+          id,
+          result: null,
+          error: errorResponse
+        }
+      });
+    }
+  };
+
+  handleKeplerEnable = async (chainId, origin) => {
+    // Open popup for approval
+    const requestData = encodeURIComponent(JSON.stringify({
+      method: 'kepler_enable',
+      chainId,
+      origin
+    }));
+
+    return new Promise((resolve, reject) => {
+      chrome.windows.create({
+        url: `index.html?method=kepler_enable&data=${requestData}`,
+        type: 'popup',
+        focused: true,
+        width: 439,
+        height: 746,
+      });
+
+      chrome.windows.onRemoved.addListener(async () => {
+        const { isApproved } = await chrome.storage.local.get('isApproved');
+        if (!isApproved) {
+          reject(new Error('User rejected'));
+        } else {
+          await chrome.storage.local.set({ isApproved: false });
+        }
+      });
+
+      chrome.runtime.onMessage.addListener((message) => {
+        if (message.method === 'kepler_enable') {
+          if (message.result) {
+            resolve(message.result);
+          } else {
+            reject(new Error('User rejected'));
+          }
+        }
+      });
+    });
+  };
+
+  handleKeplerGetKey = async (chainId) => {
+    console.log('🔑 [handleKeplerGetKey] Starting - chainId:', chainId);
+    
+    // This will be handled in the popup/UI component
+    // For now, return a promise that will be resolved by the UI
+    const requestData = encodeURIComponent(JSON.stringify({
+      method: 'kepler_getKey',
+      chainId
+    }));
+
+    console.log('🔑 [handleKeplerGetKey] Creating popup window...');
+    
+    return new Promise((resolve, reject) => {
+      chrome.windows.create({
+        url: `index.html?method=kepler_getKey&data=${requestData}`,
+        type: 'popup',
+        focused: true,
+        width: 439,
+        height: 746,
+      }, (window) => {
+        if (chrome.runtime.lastError) {
+          const error = new Error(`Failed to create popup: ${chrome.runtime.lastError.message}`);
+          console.error('❌ [handleKeplerGetKey] Failed to create window:', chrome.runtime.lastError);
+          reject(error);
+          return;
+        }
+        console.log('✅ [handleKeplerGetKey] Popup window created:', window?.id);
+      });
+
+      const messageListener = (message) => {
+        console.log('🔑 [handleKeplerGetKey] Message received:', message);
+        
+        if (message.method === 'kepler_getKey') {
+          console.log('🔑 [handleKeplerGetKey] Processing getKey response...');
+          
+          if (message.result) {
+            console.log('✅ [handleKeplerGetKey] Success - result:', {
+              hasAddress: !!message.result.address,
+              hasPubKey: !!message.result.pubKey
+            });
+            chrome.runtime.onMessage.removeListener(messageListener);
+            resolve(message.result);
+          } else {
+            const errorMsg = message.error?.message || message.error || 'Failed to get key';
+            console.error('❌ [handleKeplerGetKey] Error response:', {
+              error: message.error,
+              errorMessage: errorMsg
+            });
+            chrome.runtime.onMessage.removeListener(messageListener);
+            
+            // Create proper error object
+            const error = new Error(errorMsg);
+            if (message.error && typeof message.error === 'object') {
+              error.details = message.error;
+            }
+            reject(error);
+          }
+        }
+      };
+
+      chrome.runtime.onMessage.addListener(messageListener);
+      
+      // Timeout after 5 minutes
+      setTimeout(() => {
+        chrome.runtime.onMessage.removeListener(messageListener);
+        const timeoutError = new Error('getKey request timeout');
+        console.error('❌ [handleKeplerGetKey] Request timeout');
+        reject(timeoutError);
+      }, 300000);
+    });
+  };
+
+  handleKeplerSignAmino = async (chainId, signer, signDoc, origin) => {
+    // Open popup for signing approval
+    const requestData = encodeURIComponent(JSON.stringify({
+      method: 'kepler_signAmino',
+      chainId,
+      signer,
+      signDoc,
+      origin
+    }));
+
+    return new Promise((resolve, reject) => {
+      chrome.windows.create({
+        url: `index.html?method=kepler_signAmino&data=${requestData}`,
+        type: 'popup',
+        focused: true,
+        width: 439,
+        height: 746,
+      });
+
+      chrome.windows.onRemoved.addListener(async () => {
+        const { isApproved } = await chrome.storage.local.get('isApproved');
+        if (!isApproved) {
+          reject(new Error('User rejected'));
+        } else {
+          await chrome.storage.local.set({ isApproved: false });
+        }
+      });
+
+      chrome.runtime.onMessage.addListener((message) => {
+        if (message.method === 'kepler_signAmino') {
+          if (message.result) {
+            resolve(message.result);
+          } else {
+            reject(new Error('User rejected'));
+          }
+        }
+      });
+    });
+  };
+
+  handleKeplerSignDirect = async (chainId, signer, signDoc, origin) => {
+    // Open popup for signing approval
+    const requestData = encodeURIComponent(JSON.stringify({
+      method: 'kepler_signDirect',
+      chainId,
+      signer,
+      signDoc,
+      origin
+    }));
+
+    return new Promise((resolve, reject) => {
+      chrome.windows.create({
+        url: `index.html?method=kepler_signDirect&data=${requestData}`,
+        type: 'popup',
+        focused: true,
+        width: 439,
+        height: 746,
+      });
+
+      chrome.windows.onRemoved.addListener(async () => {
+        const { isApproved } = await chrome.storage.local.get('isApproved');
+        if (!isApproved) {
+          reject(new Error('User rejected'));
+        } else {
+          await chrome.storage.local.set({ isApproved: false });
+        }
+      });
+
+      chrome.runtime.onMessage.addListener((message) => {
+        if (message.method === 'kepler_signDirect') {
+          if (message.result) {
+            resolve(message.result);
+          } else {
+            reject(new Error('User rejected'));
+          }
+        }
+      });
+    });
+  };
+
+  handleKeplerSendTx = async (chainId, tx, mode) => {
+    // This will be handled in the UI component
+    const requestData = encodeURIComponent(JSON.stringify({
+      method: 'kepler_sendTx',
+      chainId,
+      tx,
+      mode
+    }));
+
+    return new Promise((resolve, reject) => {
+      chrome.windows.create({
+        url: `index.html?method=kepler_sendTx&data=${requestData}`,
+        type: 'popup',
+        focused: true,
+        width: 439,
+        height: 746,
+      });
+
+      chrome.runtime.onMessage.addListener((message) => {
+        if (message.method === 'kepler_sendTx') {
+          if (message.result) {
+            resolve(message.result);
+          } else {
+            reject(new Error(message.error || 'Failed to send transaction'));
+          }
+        }
+      });
+    });
+  };
+
+  handleKeplerSuggestToken = async (chainId, contractAddress) => {
+    // Store suggested token
+    const { suggestedTokens = [] } = await chrome.storage.local.get('suggestedTokens');
+    suggestedTokens.push({ chainId, contractAddress, timestamp: Date.now() });
+    await chrome.storage.local.set({ suggestedTokens });
+    return { success: true };
+  };
+
+  handleKeplerGetChainInfo = async (chainId) => {
+    // Return chain info directly (no UI needed)
+    // Chain registry will be available in the UI component
+    return {
+      chainId,
+      chainName: chainId.includes('qubetics') ? 'Qubetics' : 'Unknown',
+      // More details will be handled in UI component
+    };
   };
 
   storeDefaultNetworks = () => {

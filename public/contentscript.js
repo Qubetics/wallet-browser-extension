@@ -104,6 +104,59 @@ const setupPageStreams = () => {
       console.log('Received from inpage.js:', event.data.data);
     }
   });
+
+  // Handle Kepler messages
+  window.addEventListener('message', async (event) => {
+    if (event.source !== window || !event.data.type) return;
+
+    if (event.data.type === 'KEPLER_REQUEST') {
+      const { method, params, id, origin } = event.data;
+      console.log('Kepler request received:', method, params);
+
+      try {
+        const response = await new Promise((resolve, reject) => {
+          chrome.runtime.sendMessage(
+            {
+              type: 'KEPLER_JSON-RPC',
+              payload: {
+                method,
+                params,
+                id,
+                origin
+              }
+            },
+            (response) => {
+              if (chrome.runtime.lastError) {
+                reject(chrome.runtime.lastError);
+              } else if (response && response.type === 'KEPLER_JSON-RPC') {
+                resolve(response.payload);
+              } else {
+                reject(new Error('Invalid response received'));
+              }
+            }
+          );
+        });
+
+        // Send response back to inpage script
+        window.postMessage({
+          type: 'KEPLER_RESPONSE',
+          id,
+          result: response.result,
+          error: response.error
+        }, '*');
+      } catch (error) {
+        console.error('Error handling Kepler request:', error);
+        window.postMessage({
+          type: 'KEPLER_RESPONSE',
+          id,
+          error: {
+            message: error.message || 'Unknown error',
+            code: -32603
+          }
+        }, '*');
+      }
+    }
+  });
 };
 
 const initStreams = () => {

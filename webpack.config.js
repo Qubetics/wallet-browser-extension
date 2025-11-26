@@ -6,6 +6,7 @@ module.exports = {
     background: "./public/background.js",
     contentscript: "./public/contentscript.js",
     inpage: "./public/inpage.js",
+    "kepler-inpage": "./public/kepler-inpage.js",
   },
   output: {
     path: path.resolve(__dirname, "public"),
