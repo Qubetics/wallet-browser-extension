@@ -16,8 +16,11 @@ import {
 import { server } from '../../server';
 import { store } from '../..';
 import { setTokens } from '../../actions/tokens';
+import { QRCode } from 'react-qrcode-logo';
 import { message } from 'antd';
 import { DURATION } from '../../config/message.config';
+import CopyIconBlue from '../../Assets/CopyIconBlue.svg';
+import ModalCustom from '../../Components/ModalCustom/ModalCustom';
 import { setLoading } from '../../actions/loading';
 import { token_type } from '../../helpers/constant';
 
@@ -96,6 +99,9 @@ function ReceiveTokens() {
               getData={(value) => {
                 const hasEmoji = /[\p{Extended_Pictographic}]/u.test(value);
                 if (hasEmoji) {
+                  return false;
+                }
+                if (value.length > 25) {
                   return false;
                 }
                 setKeyword(value);

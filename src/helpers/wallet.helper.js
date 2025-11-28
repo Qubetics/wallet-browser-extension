@@ -136,15 +136,12 @@ export class WalletHelper {
 
   static getMnemonicsByPassword = async (address, password) => {
     try {
-      console.log('address, password::11', address, password);
-
       const { mnemonics } = await chrome.storage.local.get('mnemonics');
       if (mnemonics) {
         const decryptedMnemonics = await SecurityHelper.decrypt(
           mnemonics,
           password
         );
-        console.log('AFTER DEC::', decryptedMnemonics);
 
         const mnemonicsList = JSON.parse(decryptedMnemonics);
         const matchedMnemonic = mnemonicsList.find(
@@ -826,11 +823,6 @@ export class WalletHelper {
 
       const cosmosAddress = await generateCosmosWalletAddress(newMnemonics);
 
-      console.log(
-        'cosmosAddress===================================>',
-        cosmosAddress.address
-      );
-
       if (!accounts) {
         accounts = [];
       }
@@ -839,10 +831,8 @@ export class WalletHelper {
 
       const { address, privateKey } = ethers.Wallet.fromMnemonic(
         newMnemonics,
-        // `m/44'/60'/0'/0/${accounts.length}`
         `m/44'/60'/0'/0/0`
       );
-      // console.log(`m/44'/60'/0'/0/${accounts.length}`);
 
       if (!mnemonics) {
         mnemonics = [];

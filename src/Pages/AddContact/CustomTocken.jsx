@@ -14,6 +14,7 @@ import { validate } from 'bitcoin-address-validation';
 import { server } from '../../server';
 import { store } from '../..';
 import { setLoading } from '../../actions/loading';
+import { PublicKey } from '@solana/web3.js';
 
 var WAValidator = require('multicoin-address-validator');
 
@@ -73,7 +74,7 @@ function AddContact() {
         ]}
         onChange={(value) => {
           const selectedChain = chains.find((el) => el.coinFamily == value);
-          console.log('selectedChain',selectedChain)
+          console.log('selectedChain', selectedChain);
           setSelectedChain(selectedChain);
         }}
         style={{
@@ -215,94 +216,74 @@ function AddContact() {
             onClick={async (e) => {
               e.preventDefault();
 
-              if (!address) {
-                return messageApi.error('Address for the contact is required.');
-              }
-
+              // Validate name
               if (!name) {
                 return messageApi.error('Name for the contact is required.');
               }
 
-              if (name.trim().length === 0) {
+              const trimmedName = name.trim();
+              if (trimmedName.length < 2) {
                 return messageApi.error(
                   'Name should have a minimum of 2 characters.'
                 );
               }
 
-              if (name.length < 2) {
-                return messageApi.error(
-                  'Name should have a minimum of 2 characters.'
-                );
-              }
-
-              if (name.length > 25) {
+              if (trimmedName.length > 25) {
                 return messageApi.error(
                   'Name should not have more than 25 characters.'
                 );
               }
 
-              // const format = /[!@#$%^`&*()_+\-=\[\]{};':"\\|,.<>\/?]+/;
+              // Validate address
+              if (!address) {
+                return messageApi.error('Address for the contact is required.');
+              }
 
-              // if (format.test(name)) {
-              //   return messageApi.error(
-              //     "Name should not contain any special characters."
-              //   );
-              // }
-
-              if (selectedChain.isEVM) {
-                if (selectedChain?.coinFamily !== 7) {
-                  const valid = ethers.utils.isAddress(address);
-                  if (!valid)
-                    return messageApi.error(
-                      `Please provide a valid ${selectedChain.chainName} address.`
+              // Address validation based on chain type
+              const isValidAddress = () => {
+                if (selectedChain.isEVM) {
+                  // Special case for Qubetics (coinFamily 7)
+                  if (selectedChain.coinFamily === 7) {
+                    return (
+                      address.startsWith('qubetics1') ||
+                      ethers.utils.isAddress(address)
                     );
-                }
-                else{
-                  if(!address.startsWith('qubetics1')){
-                    const valid = ethers.utils.isAddress(address);
-                    if (!valid)
-                      return messageApi.error(
-                        `Please provide a valid ${selectedChain.chainName} address.`
-                      );
                   }
-                  else{
-                    if(!address.startsWith('qubetics1')){
-                      return messageApi.error(
-                        `Please provide a valid ${selectedChain.chainName} address.`
-                      );
+                  return ethers.utils.isAddress(address);
+                }
+
+                // Non-EVM chains
+                switch (selectedChain.currencyName) {
+                  case 'SOL':
+                    try {
+                      // Option 1: If you have @solana/web3.js installed
+                      new PublicKey(address);
+                      return true;
+
+                      // // Option 2: Better regex validation (current approach)
+                      // // This checks for valid base58 characters and length
+                      // const isValidLength =
+                      //   address.length >= 32 && address.length <= 44;
+                      // const hasValidChars = /^[1-9A-HJ-NP-Za-km-z]+$/.test(
+                      //   address
+                      // );
+                      // return isValidLength && hasValidChars;
+                    } catch {
+                      return false;
                     }
-                  }
+                  case 'BTC':
+                    return validate(address);
+                  case 'ADA':
+                    return WAValidator.validate(address, 'ada');
+                  default:
+                    return true;
                 }
-              } else if (
-                !selectedChain.isEVM &&
-                selectedChain.currencyName === 'SOL'
-              ) {
-                const regexPattern = /^([1-9A-HJ-NP-Za-km-z]{32,44})$/;
-                if (!regexPattern.test(address)) {
-                  return messageApi.error(
-                    `Please provide a valid ${selectedChain.chainName} address.`
-                  );
-                }
-              } else if (
-                !selectedChain.isEVM &&
-                selectedChain.currencyName === 'BTC'
-              ) {
-                const valid = validate(address);
-                if (!valid) {
-                  return messageApi.error(
-                    `Please provide a valid ${selectedChain.chainName} address.`
-                  );
-                }
-              } else if (
-                !selectedChain.isEVM &&
-                selectedChain.currencyName === 'ADA'
-              ) {
-                const valid = WAValidator.validate(address, 'ada');
-                if (!valid) {
-                  return messageApi.error(
-                    `Please provide a valid ${selectedChain.chainName} address.`
-                  );
-                }
+              };
+
+              if (!isValidAddress()) {
+                return messageApi.error(
+                  `Please provide a valid ${selectedChain.chainName} address.`
+                );
               }
 
               await handleSubmit();

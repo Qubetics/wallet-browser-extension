@@ -28,6 +28,7 @@ import {
 import { server } from '../../../server';
 import { WalletHelper } from '../../../helpers/wallet.helper';
 import { ChainId } from '@pancakeswap/sdk';
+import { formatNumberInput } from '../../../helpers/common.helper';
 
 function SwapDetails() {
   const { chain, account, currency, theme } = useSelector((state) => state);
@@ -176,15 +177,14 @@ function SwapDetails() {
             'Unable to fetch approval amount. Please try again later.'
           );
         }
-        console.log("approvedAmount>>>", approvedAmount);
+        console.log('approvedAmount>>>', approvedAmount);
         const approvedAmountBig = new BigNumber(approvedAmount._hex);
-        console.log("approvedAmountBig>>>", approvedAmountBig);
+        console.log('approvedAmountBig>>>', approvedAmountBig);
         const amountBig = new BigNumber(amount);
         console.log(amountBig);
 
         if (approvedAmountBig.isGreaterThan(amountBig)) {
-          
-          console.log("Inside Here");
+          console.log('Inside Here');
           setRequireApproval(false);
           setApprovalConfirmed(true);
           setLoading(false);
@@ -259,7 +259,7 @@ function SwapDetails() {
         amtTosend = parseFloat(amount) - parseFloat(networkPrice * 1.5);
       }
 
-      const totalAmtToken = amount
+      const totalAmtToken = amount;
       if (bal < totalAmtToken && token1?.coin?.token_address) {
         return messageApi.error(
           'Insufficient balance to proceed with the transaction.'
@@ -413,18 +413,15 @@ function SwapDetails() {
             </div>
             <div className="swapDetails__valueText swapDetails__valueText-specific ">
               <p className="swapDetails__valueText__text swapDetails__valueText-specific-text">
-                {/* <p style={{ margin: 0 }}>From</p> */}
-                {addCommasToNumber(getFlooredFixed(parseFloat(amount), 8))}{' '}
+                {formatNumberInput(amount, token1?.coin?.decimals)}{' '}
                 {token1.symbol}
               </p>
               <p className="swapDetails__valueText__text swapDetails__valueText-specific-text">
-                {/* <p style={{ margin: 0 }}>To</p> */}
-                {addCommasToNumber(getFlooredFixed(parseFloat(amount2), 6))}{' '}
+                {formatNumberInput(amount2, token2?.coin?.decimals)}{' '}
                 {token2.symbol}
               </p>
             </div>
           </div>
-          {/* <div className="swapDetails__border"></div> */}
           <div style={{ marginTop: '16px' }} className="swapDetails-bg">
             <div className="swapDetails__address">
               <p className="swapDetails__address__key">From</p>
@@ -637,7 +634,7 @@ function SwapDetails() {
             )}
             <div>
               <p>
-                Swap request of {addCommasToNumber(getFlooredFixed(amount, 5))}{' '}
+                Swap request of {formatNumberInput(amount)}{' '}
                 {token1.symbol.toUpperCase()} has been processed successfully.
               </p>
             </div>

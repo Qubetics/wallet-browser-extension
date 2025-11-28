@@ -94,6 +94,9 @@ function Send() {
               if (hasEmoji) {
                 return false;
               }
+              if (value.length > 25) {
+                return false;
+              }
               setKeyword(value);
             }}
             addonBefore={

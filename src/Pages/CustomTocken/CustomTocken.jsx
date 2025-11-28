@@ -1,26 +1,26 @@
 /*global chrome*/
-import React, { useEffect, useState } from "react";
-import { Checkbox, Drawer, message, Select } from "antd";
-import MenuRestofHeaders from "../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders.jsx";
-import style from "./style.module.scss";
-import { InputField } from "../../Components/InputField/InputFieldSimple.jsx";
-import { InputFieldOnly } from "../../Components/InputField/InputFieldSimple.jsx";
-import ButtonComp from "../../Components/ButtonComp/ButtonComp.jsx";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
-import { ethers } from "ethers";
-import { store } from "../../index.js";
-import { setLoading } from "../../actions/loading.js";
-import ModalCloseIcon from "../../Assets/ModalCloseIcon.svg";
-import Copy from "../../Assets/CopyIconBlue.svg";
-import navigateiCON from "../../Assets/topnavigate.svg";
-import darkclose from "../../Assets/darkclose.svg";
-import { DURATION } from "../../config/message.config.js";
-import { server } from "../../server.js";
-import ModalCustom from "../../Components/ModalCustom/ModalCustom.jsx";
-import warning from "../../Assets/PNG/warning.png";
-import info from "../../Assets/Info.svg";
-var WAValidator = require("multicoin-address-validator");
+import React, { useEffect, useState } from 'react';
+import { Checkbox, Drawer, message, Select } from 'antd';
+import MenuRestofHeaders from '../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders.jsx';
+import style from './style.module.scss';
+import { InputField } from '../../Components/InputField/InputFieldSimple.jsx';
+import { InputFieldOnly } from '../../Components/InputField/InputFieldSimple.jsx';
+import ButtonComp from '../../Components/ButtonComp/ButtonComp.jsx';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { ethers } from 'ethers';
+import { store } from '../../index.js';
+import { setLoading } from '../../actions/loading.js';
+import ModalCloseIcon from '../../Assets/ModalCloseIcon.svg';
+import Copy from '../../Assets/CopyIconBlue.svg';
+import navigateiCON from '../../Assets/topnavigate.svg';
+import darkclose from '../../Assets/darkclose.svg';
+import { DURATION } from '../../config/message.config.js';
+import { server } from '../../server.js';
+import ModalCustom from '../../Components/ModalCustom/ModalCustom.jsx';
+import warning from '../../Assets/PNG/warning.png';
+import info from '../../Assets/Info.svg';
+var WAValidator = require('multicoin-address-validator');
 
 function CustomToken() {
   const [disabled, setDisabled] = useState(false);
@@ -51,23 +51,23 @@ function CustomToken() {
   const [assetAddress, setAssetAddress] = useState(null);
 
   const selectURL = (coinFamily) => {
-    let explorer = "";
+    let explorer = '';
 
     switch (coinFamily) {
       case 1:
-        coinFamily = "ETH";
+        coinFamily = 'ETH';
         explorer = `https://etherscan.io/token/${tokenAddress}`;
         break;
       case 3:
-        coinFamily = "BNB";
+        coinFamily = 'BNB';
         explorer = `https://bscscan.com/token/${tokenAddress}`;
         break;
       case 9:
-        coinFamily = "PLS";
+        coinFamily = 'PLS';
         explorer = `https://scan.mypinata.cloud/ipfs/bafybeih3olry3is4e4lzm7rus5l3h6zrphcal5a7ayfkhzm5oivjro2cp4/#/token/${tokenAddress}`;
         break;
       case 4:
-        coinFamily = "SOL";
+        coinFamily = 'SOL';
         explorer = `https://solscan.io/token/${tokenAddress}`;
         break;
       default:
@@ -78,7 +78,7 @@ function CustomToken() {
   };
 
   const selectAfterTo = (
-    <div className={"addonAfter"}>
+    <div className={'addonAfter'}>
       <Select
         placement="bottomRight"
         popupClassName="placementRightPopup"
@@ -90,7 +90,7 @@ function CustomToken() {
               <span
                 className="flexedItemSelect"
                 style={{
-                  textAlign: "center",
+                  textAlign: 'center',
                 }}
               >
                 <img src={myChain.image} className={style.chainImage} alt="" />
@@ -107,7 +107,7 @@ function CustomToken() {
                   <span
                     className="flexedItemSelect"
                     style={{
-                      textAlign: "center",
+                      textAlign: 'center',
                     }}
                   >
                     <img
@@ -134,14 +134,14 @@ function CustomToken() {
           });
         }}
         style={{
-          width: "100",
+          width: '100',
         }}
       />
     </div>
   );
 
   const init = async () => {
-    const { chains } = await chrome.storage.local.get("chains");
+    const { chains } = await chrome.storage.local.get('chains');
 
     setChains(
       chains.filter(
@@ -189,10 +189,10 @@ function CustomToken() {
 
       store.dispatch(setLoading(false));
     } catch (error) {
-      console.log("~ CustomToken.jsx ~ 191 :", error);
+      console.log('~ CustomToken.jsx ~ 191 :', error);
 
       store.dispatch(setLoading(false));
-      return messageApi.error("Please enter a valid address.");
+      return messageApi.error('Please enter a valid address.');
     }
   };
 
@@ -200,8 +200,8 @@ function CustomToken() {
     <div className={`scrollableCont`}>
       {contextHolder}
       <MenuRestofHeaders
-        backTo={state ? (state.swap ? "/swap" : "/wallet") : "/wallet"}
-        title={"Add Custom Token"}
+        backTo={state ? (state.swap ? '/swap' : '/wallet') : '/wallet'}
+        title={'Add Custom Token'}
         // manage={state ? (state.swap ? '/swap' : '/wallet') : '/manage'}
       />
       <div className={`flexedContent tokenHeight`}>
@@ -221,19 +221,18 @@ function CustomToken() {
             addonAfter={selectAfterTo}
           />
           <InputField
-            placeholder={
-              selectedChain.coinFamily == 5
-                ? "Enter Policy Id"
-                : "Contract Address"
-            }
-            label={
-              selectedChain.coinFamily == 5
-                ? "Enter Policy Id"
-                : "Contract Address"
-            }
+            placeholder={'Contract Address'}
+            label={'Contract Address'}
             value={tokenAddress}
             checkForSymbols={true}
             getData={async (address) => {
+              if (address === '') {
+                setTokenInfo({
+                  name: '',
+                  symbol: '',
+                  decimals: '',
+                });
+              }
               setTokenAddress(address);
 
               if (selectedChain.isEVM) {
@@ -241,7 +240,7 @@ function CustomToken() {
                 if (!valid) return;
               } else if (
                 !selectedChain.isEVM &&
-                selectedChain.currencyName === "SOL"
+                selectedChain.currencyName === 'SOL'
               ) {
                 const regexPattern = /^([1-9A-HJ-NP-Za-km-z]{32,44})$/;
                 if (!regexPattern.test(address)) {
@@ -249,7 +248,7 @@ function CustomToken() {
                 }
               } else if (
                 !selectedChain.isEVM &&
-                selectedChain.currencyName === "ADA"
+                selectedChain.currencyName === 'ADA'
               ) {
                 const regexPattern = /^[A-Za-z\d]{56}$/;
                 if (!regexPattern.test(address)) {
@@ -271,26 +270,26 @@ function CustomToken() {
                       const valid = ethers.utils.isAddress(data);
                       if (!valid)
                         return messageApi.error(
-                          "Please enter a valid address."
+                          'Please enter a valid address.'
                         );
                     } else if (
                       !selectedChain.isEVM &&
-                      selectedChain.currencyName === "SOL"
+                      selectedChain.currencyName === 'SOL'
                     ) {
                       const regexPattern = /^([1-9A-HJ-NP-Za-km-z]{32,44})$/;
                       if (!regexPattern.test(data)) {
                         return messageApi.error(
-                          "Please enter a valid address."
+                          'Please enter a valid address.'
                         );
                       }
                     } else if (
                       !selectedChain.isEVM &&
-                      selectedChain.currencyName === "ADA"
+                      selectedChain.currencyName === 'ADA'
                     ) {
                       const regexPattern = /^[A-Za-z\d]{56}$/;
                       if (!regexPattern.test(data)) {
                         return messageApi.error(
-                          "Please enter a valid policy id."
+                          'Please enter a valid policy id.'
                         );
                       }
                     }
@@ -316,7 +315,7 @@ function CustomToken() {
 
           <div
             className={style.token__symbol_dec}
-            style={{ display: "flex", gap: "20px" }}
+            style={{ display: 'flex', gap: '20px' }}
           >
             <InputFieldOnly
               label="Symbol"
@@ -345,42 +344,42 @@ function CustomToken() {
               e.preventDefault();
               try {
                 if (!tokenAddress) {
-                  return messageApi.error("Token address is required.");
+                  return messageApi.error('Token address is required.');
                 }
 
                 if (!tokenInfo.name) {
-                  return messageApi.error("Token name is required");
+                  return messageApi.error('Token name is required');
                 }
 
                 if (!tokenInfo.symbol) {
-                  return messageApi.error("Token symbol is required");
+                  return messageApi.error('Token symbol is required');
                 }
 
                 if (selectedChain.isEVM) {
                   const valid = ethers.utils.isAddress(tokenAddress);
                   if (!valid)
-                    return messageApi.error("Invalid token address provided.");
+                    return messageApi.error('Invalid token address provided.');
                 } else if (
                   !selectedChain.isEVM &&
-                  selectedChain.currencyName === "SOL"
+                  selectedChain.currencyName === 'SOL'
                 ) {
                   const regexPattern = /^([1-9A-HJ-NP-Za-km-z]{32,44})$/;
                   if (!regexPattern.test(tokenAddress)) {
-                    return messageApi.error("Please enter a valid address.");
+                    return messageApi.error('Please enter a valid address.');
                   }
                 } else if (
                   !selectedChain.isEVM &&
-                  selectedChain.currencyName === "ADA"
+                  selectedChain.currencyName === 'ADA'
                 ) {
                   const regexPattern = /^[A-Za-z\d]{56}$/;
                   if (!regexPattern.test(tokenAddress)) {
-                    return messageApi.error("Please enter a valid policy id.");
+                    return messageApi.error('Please enter a valid policy id.');
                   }
                 }
 
                 store.dispatch(setLoading(true));
                 const resp = await server.post(
-                  "/wallet/addtoken",
+                  '/wallet/addtoken',
                   {
                     name: tokenInfo.name,
                     symbol: tokenInfo.symbol,
@@ -407,27 +406,27 @@ function CustomToken() {
                 messageApi.success(resp?.data?.message);
 
                 setTimeout(() => {
-                  navigate("/wallet");
+                  navigate('/wallet');
                 }, 1000);
               } catch (error) {
                 store.dispatch(setLoading(false));
 
                 const errorMessage = error?.response?.data?.message;
 
-                if (typeof errorMessage === "string") {
+                if (typeof errorMessage === 'string') {
                   return messageApi.error(errorMessage);
                 } else {
-                  return messageApi.error("Something went wrong");
+                  return messageApi.error('Something went wrong');
                 }
               }
             }}
           >
-            {" "}
+            {' '}
             <div className="bottomBtn">
               <ButtonComp
                 disabled={disabled}
-                text={"Add Token"}
-                maxWidth={"100%"}
+                text={'Add Token'}
+                maxWidth={'100%'}
               />
             </div>
           </Link>
@@ -441,10 +440,10 @@ function CustomToken() {
           setOpen(false);
         }}
         open={open}
-        height={"200px"}
+        height={'200px'}
         // eslint-disable-next-line jsx-a11y/alt-text
         closeIcon={
-          theme == "darkTheme" ? (
+          theme == 'darkTheme' ? (
             <img src={darkclose} />
           ) : (
             <img src={ModalCloseIcon} />
@@ -494,7 +493,7 @@ function CustomToken() {
         ))}
       </Drawer>
       <ModalCustom
-        title={"Import Tokens"}
+        title={'Import Tokens'}
         isModalOpen={modal}
         customClass="customClassModal importTokenModal"
         handleCancel={() => {
@@ -504,11 +503,11 @@ function CustomToken() {
         <div
           className={`${style.mainWarning} importToken`}
           style={{
-            display: "flex",
+            display: 'flex',
           }}
         >
           <div className="left" style={{ flex: 1 }}>
-            <img src={warning} alt="" style={{ width: "27px" }} />
+            <img src={warning} alt="" style={{ width: '27px' }} />
           </div>
           <div className="right" style={{ flex: 7 }}>
             {/* <p>
@@ -542,20 +541,20 @@ function CustomToken() {
         <div
           className={style.mainWarning}
           style={{
-            display: "flex",
-            flexDirection: "column",
-            marginTop: "8px",
+            display: 'flex',
+            flexDirection: 'column',
+            marginTop: '8px',
           }}
         >
-          <p style={{ cursor: "pointer" }}>
-            {selectURL(selectedChain.coinFamily)}{" "}
+          <p style={{ cursor: 'pointer' }}>
+            {selectURL(selectedChain.coinFamily)}{' '}
             <img
               src={navigateiCON}
               style={{
-                height: "17px",
-                width: "17px",
-                marginRight: "5px",
-                cursor: "pointer",
+                height: '17px',
+                width: '17px',
+                marginRight: '5px',
+                cursor: 'pointer',
               }}
               alt=""
               onClick={() => {
@@ -567,16 +566,16 @@ function CustomToken() {
             <img
               src={Copy}
               style={{
-                height: "17px",
-                width: "17px",
-                cursor: "pointer",
+                height: '17px',
+                width: '17px',
+                cursor: 'pointer',
               }}
               alt=""
               onClick={() => {
                 navigator.clipboard.writeText(
                   selectURL(selectedChain.coinFamily)
                 );
-                messageApi.success("Link Copied.");
+                messageApi.success('Link Copied.');
               }}
             />
           </p>
@@ -610,9 +609,9 @@ function CustomToken() {
             )
           </a> */}
           <div
-            className={"checkboxOuter"}
+            className={'checkboxOuter'}
             style={{
-              marginBottom: "15px",
+              marginBottom: '15px',
             }}
           >
             <Checkbox
@@ -621,22 +620,22 @@ function CustomToken() {
                 setUnderstand(value.target.checked);
               }}
             >
-              <p style={{ marginLeft: "15px" }}>I understand</p>
+              <p style={{ marginLeft: '15px' }}>I understand</p>
             </Checkbox>
           </div>
 
           <ButtonComp
-            text={"Import"}
-            maxWidth={"100%"}
+            text={'Import'}
+            maxWidth={'100%'}
             onClick={async (e) => {
               e.preventDefault();
               try {
                 if (!understand && selectedChain.coinFamily != 1) {
-                  return messageApi.error("Please confirm before proceeding.");
+                  return messageApi.error('Please confirm before proceeding.');
                 }
                 store.dispatch(setLoading(true));
                 await server.post(
-                  "/wallet/token/add",
+                  '/wallet/token/add',
                   {
                     coin_family: selectedChain.coinFamily,
                     token_address: assetAddress ? assetAddress : tokenAddress,
@@ -662,7 +661,7 @@ function CustomToken() {
                 store.dispatch(setLoading(false));
                 if (state) {
                   if (state.swap) {
-                    return navigate("/swap", {
+                    return navigate('/swap', {
                       state: {
                         tokenAddress,
                         fromOrTo: state.selected,
@@ -670,15 +669,15 @@ function CustomToken() {
                     });
                   }
                 }
-                return navigate("/wallet");
+                return navigate('/wallet');
               } catch (error) {
-                console.log("~ CustomToken.jsx ~ error ~ 668 : ", error);
+                console.log('~ CustomToken.jsx ~ error ~ 668 : ', error);
                 store.dispatch(setLoading(false));
                 const errorMessage = error?.response?.data?.message;
-                if (typeof errorMessage === "string") {
+                if (typeof errorMessage === 'string') {
                   return messageApi.error(errorMessage);
                 } else {
-                  return messageApi.error("Something went wrong");
+                  return messageApi.error('Something went wrong');
                 }
               }
             }}
@@ -686,7 +685,7 @@ function CustomToken() {
         </div>
       </ModalCustom>
       <ModalCustom
-        title={"Import Tokens"}
+        title={'Import Tokens'}
         isModalOpen={modalEth}
         customClass="customClassModal importTokenModal"
         handleCancel={() => {
@@ -696,11 +695,11 @@ function CustomToken() {
         <div
           className={style.mainWarning}
           style={{
-            display: "flex",
+            display: 'flex',
           }}
         >
           <div className="left" style={{ flex: 1 }}>
-            <img src={warning} alt="" style={{ width: "27px" }} />
+            <img src={warning} alt="" style={{ width: '27px' }} />
           </div>
           <div className="right" style={{ flex: 7 }}>
             <p style={{ marginBottom: 0 }}>
@@ -725,20 +724,20 @@ function CustomToken() {
         <div
           className={style.mainWarning}
           style={{
-            display: "flex",
-            flexDirection: "column",
-            marginTop: "8px",
+            display: 'flex',
+            flexDirection: 'column',
+            marginTop: '8px',
           }}
         >
-          <p style={{ cursor: "pointer" }}>
-            {selectURL(selectedChain.coinFamily)}{" "}
+          <p style={{ cursor: 'pointer' }}>
+            {selectURL(selectedChain.coinFamily)}{' '}
             <img
               src={navigateiCON}
               style={{
-                height: "17px",
-                width: "17px",
-                marginRight: "5px",
-                cursor: "pointer",
+                height: '17px',
+                width: '17px',
+                marginRight: '5px',
+                cursor: 'pointer',
               }}
               alt=""
               onClick={() => {
@@ -750,25 +749,25 @@ function CustomToken() {
             <img
               src={Copy}
               style={{
-                height: "17px",
-                width: "17px",
-                cursor: "pointer",
+                height: '17px',
+                width: '17px',
+                cursor: 'pointer',
               }}
               alt=""
               onClick={() => {
                 navigator.clipboard.writeText(
                   selectURL(selectedChain.coinFamily)
                 );
-                messageApi.success("Link Copied.");
+                messageApi.success('Link Copied.');
               }}
             />
           </p>
         </div>
         <div className="content-main">
           <div
-            className={"checkboxOuter"}
+            className={'checkboxOuter'}
             style={{
-              marginBottom: "15px",
+              marginBottom: '15px',
             }}
           >
             <Checkbox
@@ -777,21 +776,21 @@ function CustomToken() {
                 setUnderstand(value.target.checked);
               }}
             >
-              <p style={{ marginLeft: "15px" }}>I understand</p>
+              <p style={{ marginLeft: '15px' }}>I understand</p>
             </Checkbox>
           </div>
           <ButtonComp
-            text={"Import"}
-            maxWidth={"100%"}
+            text={'Import'}
+            maxWidth={'100%'}
             onClick={async (e) => {
               e.preventDefault();
               try {
                 if (!understand) {
-                  return messageApi.error("Please confirm before proceeding.");
+                  return messageApi.error('Please confirm before proceeding.');
                 }
                 store.dispatch(setLoading(true));
                 await server.post(
-                  "/wallet/token/add",
+                  '/wallet/token/add',
                   {
                     coin_family: selectedChain.coinFamily,
                     token_address: assetAddress ? assetAddress : tokenAddress,
@@ -817,7 +816,7 @@ function CustomToken() {
                 store.dispatch(setLoading(false));
                 if (state) {
                   if (state.swap) {
-                    return navigate("/swap", {
+                    return navigate('/swap', {
                       state: {
                         tokenAddress,
                         fromOrTo: state.selected,
@@ -825,18 +824,18 @@ function CustomToken() {
                     });
                   }
                 }
-                messageApi.success("Token added successfully.");
-                return navigate("/wallet");
+                messageApi.success('Token added successfully.');
+                return navigate('/wallet');
               } catch (error) {
-                console.log("~ customtoken.jsx ~ 825 ~ error :");
+                console.log('~ customtoken.jsx ~ 825 ~ error :');
                 store.dispatch(setLoading(false));
 
                 const errorMessage = error?.response?.data?.message;
 
-                if (typeof errorMessage === "string") {
+                if (typeof errorMessage === 'string') {
                   return messageApi.error(errorMessage);
                 } else {
-                  return messageApi.error("Something went wrong");
+                  return messageApi.error('Something went wrong');
                 }
               }
             }}

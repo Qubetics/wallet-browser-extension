@@ -39,11 +39,9 @@ function SettingList(props) {
   const [ischecked1, setIschecked1] = useState(false);
   const [ischecked2, setIschecked2] = useState(false);
 
-  const handleOk = async() => {
+  const handleOk = async () => {
     {
-      const isCorrectPassword = await WalletHelper.verifyPassword(
-        password
-      );
+      const isCorrectPassword = await WalletHelper.verifyPassword(password);
       if (!isCorrectPassword) {
         return messageApi.error('Incorrect password provided.');
       }
@@ -81,6 +79,8 @@ function SettingList(props) {
   const handleCancel4 = () => {
     setDrawerOpen(false);
     setPassword(null);
+    setIschecked1(false);
+    setIschecked2(false);
   };
   const { theme } = useSelector((state) => state);
   const [isAutoLock, setIsAutoLock] = useState(false);
@@ -180,8 +180,8 @@ function SettingList(props) {
             e.preventDefault();
 
             if (to === 'https://privacy-policy.qubetics.work/') {
-              window.open('https://privacy-policy.qubetics.work/', '_blank')
-              return ;
+              window.open('https://privacy-policy.qubetics.work/', '_blank');
+              return;
             }
 
             if (to === '/logout') {
@@ -243,7 +243,7 @@ function SettingList(props) {
                 state: {
                   goTo: '/multiShowSecretPhrase',
                   mnemonics: WalletHelper.generateNewMnemonics(),
-                  password:password
+                  password: password,
                 },
               });
             }
@@ -400,7 +400,7 @@ function SettingList(props) {
         <div className={`flexedContent`}>
           <div className="secretMasterKey">
             <Checkbox
-              checked={ischecked1}
+              checked={ischecked1 === true ? true : false}
               onChange={(value) => {
                 setIschecked1(value.target.checked);
               }}
@@ -411,7 +411,7 @@ function SettingList(props) {
               </p>
             </Checkbox>
             <Checkbox
-              checked={ischecked2}
+              checked={ischecked2 === true ? true : false}
               onChange={(value) => {
                 setIschecked2(value.target.checked);
               }}
@@ -425,7 +425,7 @@ function SettingList(props) {
               <div className="cancelBtn">
                 <ButtonComp
                   maxWidth="100%"
-                  onClick={() => setDrawerOpen(false)}
+                  onClick={() => handleCancel4()}
                   text="Cancel"
                 />
               </div>

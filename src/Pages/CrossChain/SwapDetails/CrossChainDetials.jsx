@@ -21,7 +21,8 @@ import { DURATION } from '../../../config/message.config';
 import InputFieldSimple from '../../../Components/InputField/InputFieldSimple';
 import Logo from '../../../Assets/logo.png';
 import { WalletHelper } from '../../../helpers/wallet.helper';
-import QubeticsLogo from "../../../Assets/QubeticsLogo.png";
+import QubeticsLogo from '../../../Assets/QubeticsLogo.png';
+import { formatNumberInput } from '../../../helpers/common.helper';
 
 function getFlooredFixed(v, d) {
   return (Math.floor(v * Math.pow(10, d)) / Math.pow(10, d)).toFixed(d);
@@ -104,7 +105,7 @@ function CrossChainDetails() {
   }, []);
 
   const handleSwap = async () => {
-    console.log('sessionPassword   handleSwap',sessionPassword)
+    console.log('sessionPassword   handleSwap', sessionPassword);
     setSwapModal(true);
     const data = await crossChainHelper.current.sendOrder(
       token1,
@@ -363,7 +364,7 @@ function CrossChainDetails() {
             )}
             <div>
               <p>
-                Swap request of {addCommasToNumber(getFlooredFixed(amount, 5))}{' '}
+                Swap request of {formatNumberInput(amount)}{' '}
                 {token1.symbol.toUpperCase()} has been processed successfully.
               </p>
             </div>
