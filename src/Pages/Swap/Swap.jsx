@@ -248,7 +248,7 @@ function Swap() {
     }
   };
 
-  const init = async () => {
+  const init = async () => {s
     let amountToSend = 0;
     const { chains } = await chrome.storage.local.get('chains');
     try {
