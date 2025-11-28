@@ -667,9 +667,9 @@ function SendCoins() {
           amount: amount,
           coin,
           networkFee: (
-            (myGasPrice?.estimate * Math.max(prc, 1)) /
+            (myGasPrice?.estimate * Math.max(myGasPrice?.fast, 1)) /
             10 ** 9
-          )?.toFixed(5),
+          )?.toFixed(8),
           ENSName,
           contact: findContact?.name,
           redirectTo,
@@ -753,160 +753,153 @@ function SendCoins() {
         },
       });
     } else if (!chain.isEVM && chain.currencyName === 'SOL') {
-      const solanaHelper = new SolanaHelper(chain.rpcUrl);
+      const { PublicKey } = require('@solana/web3.js');
 
-      const gasPrice = solanaHelper.getGasPrice();
-
-      if (amount > parseFloat(myBalance)) {
+      const stopWithError = (msg) => {
         store.dispatch(setLoading(false));
-        return messageApi.error('Please provide a valid amount to proceed.');
-      }
-      store.dispatch(setLoading(false));
-      navigate('/confirmCurrency', {
-        state: {
-          to: address,
-          amount: amount,
-          coin,
-          networkFee: gasPrice,
-          redirectTo,
-          sessionPassword,
-        },
-      });
-    } else if (!chain.isEVM && chain.currencyName === 'BTC') {
-      try {
-        const bitcoin = require('bitcoinjs-lib');
+        return messageApi.error(msg);
+      };
 
+      try {
+        // --- Validate SOL recipient address ---
+        try {
+          new PublicKey(address); // throws error if invalid
+        } catch {
+          return stopWithError('Please provide a valid address to proceed.');
+        }
+
+        const solanaHelper = new SolanaHelper(chain.rpcUrl);
+
+        // --- Get network fee ---
+        const gasPrice = await solanaHelper.getGasPrice();
+
+        // --- Validate amount ---
+        if (amount > parseFloat(myBalance)) {
+          return stopWithError('Please provide a valid amount to proceed.');
+        }
+
+        // --- Proceed to confirmation ---
+        store.dispatch(setLoading(false));
+
+        navigate('/confirmCurrency', {
+          state: {
+            to: address,
+            amount,
+            coin,
+            networkFee: gasPrice,
+            redirectTo,
+            sessionPassword,
+          },
+        });
+      } catch (error) {
+        console.log('SOL Transaction Error:', error);
+        return stopWithError(error.message || 'Transaction failed.');
+      }
+    } else if (!chain.isEVM && chain.currencyName === 'BTC') {
+      const bitcoin = require('bitcoinjs-lib');
+
+      const stopWithError = (msg) => {
+        store.dispatch(setLoading(false));
+        return messageApi.error(msg);
+      };
+
+      try {
+        // --- Validate BTC recipient address ---
+        try {
+          bitcoin.address.toOutputScript(address, bitcoin.networks.bitcoin);
+        } catch {
+          return stopWithError('Please provide a valid address to proceed.');
+        }
+
+        // --- Fetch data ---
         const gasPrice = await BTCHelper.getBTCGasPrice();
         const unspent = await BTCHelper.getUnspent(coin.wallet_address);
 
-        if (!unspent || unspent.length === 0) {
-          store.dispatch(setLoading(false));
-          return messageApi.error(
-            'No UTXOs available or insufficient balance.'
-          );
-        }
+        if (!unspent?.length)
+          return stopWithError('No UTXOs available or insufficient balance.');
 
+        // --- Build UTXO list & compute total ---
         let totalAmountAvailable = 0;
-
-        // Process UTXOs
-        const utxos = unspent.map((utxo) => {
-          const satoshis = Math.floor(Number(utxo.satoshis));
-          totalAmountAvailable += satoshis;
-
-          return {
-            txid: utxo.txid,
-            vout: utxo.vout,
-            value: satoshis,
-          };
+        const utxos = unspent.map((u) => {
+          const sat = Math.floor(Number(u.satoshis));
+          totalAmountAvailable += sat;
+          return { txid: u.txid, vout: u.vout, value: sat };
         });
 
+        // --- Fee + amount ---
         const inputCount = utxos.length;
-        const outputCount = 2;
-        const transactionSize = inputCount * 146 + outputCount * 34 + 10;
+        const transactionSize = inputCount * 146 + 2 * 34 + 10;
         const fee = Math.ceil(transactionSize * gasPrice);
+
         const sendAmount = Math.round(amount * btcTosatoshi);
         const totalFee = (fee * btcTosatoshiMultiplier).toFixed(8);
-        const totalAmount = sendAmount + fee * 1.5;
+        const totalSpend = sendAmount + fee * 1.5;
 
-        if (totalAmountAvailable < totalAmount) {
-          store.dispatch(setLoading(false));
-          return messageApi.error('Insufficient UTXO balance.');
+        // --- DUST CHECK (recipient output must be >= 546 sats) ---
+        if (sendAmount < 546) {
+          return stopWithError('Amount is below dust threshold.');
         }
 
-        // Get private key
-        const btcPrivateKeyStr =
-          await WalletHelper.getBitcoinPrivateKeyWithPassword(sessionPassword);
-        if (!btcPrivateKeyStr) {
-          store.dispatch(setLoading(false));
-          return messageApi.error('Unable to fetch private key.');
-        }
+        if (totalAmountAvailable < totalSpend)
+          return stopWithError('Insufficient UTXO balance.');
 
-        // Convert WIF to key pair
-        const keyPair = bitcoin.ECPair.fromWIF(btcPrivateKeyStr);
+        // --- Fetch private key ---
+        const wifKey = await WalletHelper.getBitcoinPrivateKeyWithPassword(
+          sessionPassword
+        );
+        if (!wifKey) return stopWithError('Unable to fetch private key.');
 
-        // Determine address type and create appropriate payment
-        let payment;
-        if (coin.wallet_address.startsWith('bc1q')) {
-          // P2WPKH (Bech32)
-          payment = bitcoin.payments.p2wpkh({ pubkey: keyPair.publicKey });
-        } else if (coin.wallet_address.startsWith('3')) {
-          // P2SH-P2WPKH (SegWit wrapped in P2SH)
-          const p2wpkh = bitcoin.payments.p2wpkh({ pubkey: keyPair.publicKey });
-          payment = bitcoin.payments.p2sh({ redeem: p2wpkh });
-        } else {
-          // P2PKH (Legacy)
-          payment = bitcoin.payments.p2pkh({ pubkey: keyPair.publicKey });
-        }
+        const keyPair = bitcoin.ECPair.fromWIF(wifKey);
 
-        // Verify address match
+        // --- Detect address type once ---
+        const isBech32 = coin.wallet_address.startsWith('bc1q');
+        const isP2SH = coin.wallet_address.startsWith('3');
+
+        // --- Prepare payment object (3 types simplified) ---
+        const payment = isBech32
+          ? bitcoin.payments.p2wpkh({ pubkey: keyPair.publicKey })
+          : isP2SH
+          ? bitcoin.payments.p2sh({
+              redeem: bitcoin.payments.p2wpkh({ pubkey: keyPair.publicKey }),
+            })
+          : bitcoin.payments.p2pkh({ pubkey: keyPair.publicKey });
+
+        // --- Verify matching address for private key ---
         if (payment.address !== coin.wallet_address) {
-          console.error(
-            'Address mismatch:',
-            payment.address,
-            'vs',
-            coin.wallet_address
-          );
-          store.dispatch(setLoading(false));
-          return messageApi.error('Private key does not match wallet address.');
+          return stopWithError('Private key does not match wallet address.');
         }
 
-        // Create transaction
+        // --- Build transaction ---
         const psbt = new bitcoin.Psbt();
 
-        // Add inputs
-        for (const utxo of utxos) {
-          const inputData = {
-            hash: utxo.txid,
-            index: utxo.vout,
-            // For SegWit inputs, we need to specify the value
-            ...(coin.wallet_address.startsWith('bc1q') && {
-              witnessUtxo: {
-                script: payment.output,
-                value: utxo.value,
-              },
-            }),
-            // For P2SH-P2WPKH
-            ...(coin.wallet_address.startsWith('3') && {
-              witnessUtxo: {
-                script: payment.output,
-                value: utxo.value,
-              },
-              redeemScript: payment.redeem.output,
-            }),
-            // For legacy inputs, you'd need the full previous transaction
-            // This is more complex and requires fetching the full tx
-          };
+        for (const u of utxos) {
+          const baseInput = { hash: u.txid, index: u.vout };
 
-          psbt.addInput(inputData);
+          if (isBech32) {
+            baseInput.witnessUtxo = { script: payment.output, value: u.value };
+          } else if (isP2SH) {
+            baseInput.witnessUtxo = { script: payment.output, value: u.value };
+            baseInput.redeemScript = payment.redeem.output;
+          }
+
+          psbt.addInput(baseInput);
         }
 
-        // Add outputs
+        // Outputs
         const change = totalAmountAvailable - sendAmount - fee;
 
-        // Add recipient output
-        psbt.addOutput({
-          address: address,
-          value: sendAmount,
-        });
+        psbt.addOutput({ address, value: sendAmount });
 
-        // Add change output if above dust threshold
+        // change must also avoid dust — optional but recommended
         if (change > 546) {
-          psbt.addOutput({
-            address: coin.wallet_address,
-            value: change,
-          });
+          psbt.addOutput({ address: coin.wallet_address, value: change });
         }
 
-        // Sign all inputs
-        for (let i = 0; i < utxos.length; i++) {
-          psbt.signInput(i, keyPair);
-        }
-
-        // Validate signatures
+        // Sign
+        utxos.forEach((_, i) => psbt.signInput(i, keyPair));
         psbt.validateSignaturesOfAllInputs();
-
-        // Finalize and extract transaction
         psbt.finalizeAllInputs();
+
         const rawTransaction = psbt.extractTransaction().toHex();
 
         store.dispatch(setLoading(false));
@@ -924,8 +917,9 @@ function SendCoins() {
           },
         });
       } catch (error) {
-        console.error('BTC Transaction Error:', error);
         store.dispatch(setLoading(false));
+        console.log('BTC Transaction Error:', error);
+
         return messageApi.error(
           error.message.includes('Dust amount')
             ? 'Amount is below dust threshold.'
@@ -1171,16 +1165,6 @@ function SendCoins() {
             </div>
           </div>
 
-          {/* <ReactSlider
-          className='horizontal-slider'
-          marks={[myGasPrice.safe, myGasPrice.propose, myGasPrice.fast]}
-          markClassName='example-mark'
-          min={myGasPrice.safe}
-          max={myGasPrice.fast}
-          thumbClassName='example-thumb'
-          trackClassName='example-track'
-          renderThumb={(props, state) => <div {...props}>{state.valueNow}</div>}
-        /> */}
           <div className="transactionFee">
             {selectChain === 'evm' && (
               <h4>
@@ -1209,7 +1193,7 @@ function SendCoins() {
                       !isNaN(myGasPrice.fast)
                         ? parseFloat(
                             (myGasPrice.estimate * myGasPrice.fast) / 10 ** 9
-                          ).toFixed(coin?.coin?.coin_family === 7 ? 15 : 5)
+                          ).toFixed(coin?.coin?.coin_family === 7 ? 15 : 8)
                         : '0.00'
                     }
                     readonly={true}

@@ -563,10 +563,8 @@ function SendConfirm() {
             {/* )} */}
             <div>
               <p style={{ color: 'white' }}>
-                Withdraw request of {parseFloat(amount)}
-                {/* {addCommasToNumber(
-                  getFlooredFixed(amount, Number(coin.coin.decimals) || 6)
-                )}{' '} */}
+                Withdraw request of{' '}
+                {formatNumberInput(amount, coin?.coin?.decimals)}{' '}
                 {coin.coin.coin_symbol.toUpperCase()} has been processed
                 successfully.
               </p>

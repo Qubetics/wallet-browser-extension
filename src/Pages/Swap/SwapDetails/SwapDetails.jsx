@@ -413,20 +413,15 @@ function SwapDetails() {
             </div>
             <div className="swapDetails__valueText swapDetails__valueText-specific ">
               <p className="swapDetails__valueText__text swapDetails__valueText-specific-text">
-                {/* <p style={{ margin: 0 }}>From</p> */}
-                {/* {addCommasToNumber(getFlooredFixed(parseFloat(amount), 8))}{' '} */}
                 {formatNumberInput(amount, token1?.coin?.decimals)}{' '}
                 {token1.symbol}
               </p>
               <p className="swapDetails__valueText__text swapDetails__valueText-specific-text">
-                {/* <p style={{ margin: 0 }}>To</p> */}
-                {/* {addCommasToNumber(getFlooredFixed(parseFloat(amount2), 6))}{' '} */}
-                {formatNumberInput(amount, token2?.coin?.decimals)}{' '}
+                {formatNumberInput(amount2, token2?.coin?.decimals)}{' '}
                 {token2.symbol}
               </p>
             </div>
           </div>
-          {/* <div className="swapDetails__border"></div> */}
           <div style={{ marginTop: '16px' }} className="swapDetails-bg">
             <div className="swapDetails__address">
               <p className="swapDetails__address__key">From</p>
@@ -639,7 +634,7 @@ function SwapDetails() {
             )}
             <div>
               <p>
-                Swap request of {addCommasToNumber(getFlooredFixed(amount, 5))}{' '}
+                Swap request of {formatNumberInput(amount)}{' '}
                 {token1.symbol.toUpperCase()} has been processed successfully.
               </p>
             </div>
