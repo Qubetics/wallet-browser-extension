@@ -1,20 +1,20 @@
-import React, { useState } from "react";
-import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import "./CoinsTable.scss";
-import Edit from "../../Assets/edit.svg";
-import bin from "../../Assets/DeleteIcon.svg";
-import { store } from "../..";
-import { setLoading } from "../../actions/loading";
-import { WalletHelper } from "../../helpers/wallet.helper";
-import ModalCustom from "../ModalCustom/ModalCustom";
-import { capitalize } from "../../helpers/conversion.helper";
-import DummyEle from "./DummyEle";
-import blackStar from "../../Assets/blackStar.svg";
-import blueStar from "../../Assets/blueStar.svg";
-import { token_type } from "../../helpers/constant";
-import ButtonComp from "../ButtonComp/ButtonComp";
-import { Tooltip } from "antd";
+import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import './CoinsTable.scss';
+import Edit from '../../Assets/edit.svg';
+import bin from '../../Assets/DeleteIcon.svg';
+import { store } from '../..';
+import { setLoading } from '../../actions/loading';
+import { WalletHelper } from '../../helpers/wallet.helper';
+import ModalCustom from '../ModalCustom/ModalCustom';
+import { capitalize } from '../../helpers/conversion.helper';
+import DummyEle from './DummyEle';
+import blackStar from '../../Assets/blackStar.svg';
+import blueStar from '../../Assets/blueStar.svg';
+import { token_type } from '../../helpers/constant';
+import ButtonComp from '../ButtonComp/ButtonComp';
+import { Tooltip } from 'antd';
 
 function CoinsTable({ dataArray, showCoinPrice, name }) {
   const navigate = useNavigate();
@@ -28,15 +28,15 @@ function CoinsTable({ dataArray, showCoinPrice, name }) {
 
   const handleClick = (ele) => {
     console.log('crypto element clicked:', ele);
-    
-    let routes = Object.keys(ele).includes("routeTo");
+
+    let routes = Object.keys(ele).includes('routeTo');
 
     if (routes) {
       if (ele.showModal) {
         return ele.showModal(ele.coin);
       }
 
-      if (ele.routeTo === "no-where") {
+      if (ele.routeTo === 'no-where') {
         if (ele.sent === true || ele.sent === false) {
           store.dispatch(setLoading(true));
           setDeleteModal(true);
@@ -48,7 +48,7 @@ function CoinsTable({ dataArray, showCoinPrice, name }) {
         }
       }
 
-      if (ele.routeTo === "enter-price-spritz") {
+      if (ele.routeTo === 'enter-price-spritz') {
         return navigate(`/${ele.routeTo}`, {
           state: {
             coin: ele.coin,
@@ -100,17 +100,17 @@ function CoinsTable({ dataArray, showCoinPrice, name }) {
                 <div
                   className="randb extra borderDarkLight"
                   style={{
-                    height: "30px",
-                    width: "30px",
-                    background: "rgb(202, 201, 201)",
-                    borderRadius: "50%",
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    border: "1px solid",
+                    height: '30px',
+                    width: '30px',
+                    background: 'rgb(202, 201, 201)',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    border: '1px solid',
                   }}
                 >
-                  {ele.coinName.split("")[0]}
+                  {ele.coinName.split('')[0]}
                 </div>
               )}
             </div>
@@ -118,45 +118,46 @@ function CoinsTable({ dataArray, showCoinPrice, name }) {
               <div
                 onClick={() => handleClick(ele)}
                 className="coinsTable1__textTop"
-                style={{ cursor: "pointer" }}
+                style={{ cursor: 'pointer' }}
               >
                 <span className="coinNname">
-                <Tooltip title={`${ele?.coinSubName}`}>
-                  {ele?.coinSubName?.length > 10 &&
+                  <Tooltip title={`${ele?.coinSubName}`}>
+                    {ele?.coinSubName?.length > 10 &&
                     ele?.coin?.coin?.token_address
-                    ? `${ele.coinSubName.substring(0, 15)}`
-                    : `${ele.coinSubName.substring(0, 15)}`}
-                    </Tooltip>
+                      ? `${ele.coinSubName.substring(0, 15)}`
+                      : `${ele.coinSubName.substring(0, 15)}`}
+                  </Tooltip>
                 </span>
                 <span
                   style={{
-                    fontSize: "14px",
-                    color: "#FFFFFF",
-                    marginLeft: "3px",
+                    fontSize: '14px',
+                    color: '#FFFFFF',
+                    marginLeft: '3px',
                   }}
                 >
                   {/* {ele?.coin?.coin_family == 9 ? "PLS" : ele.type} */}
                   {ele?.coin?.coin?.token_address
                     ? `(${token_type(ele?.coin?.coin?.coin_family)})`
-                    : `${ele.type ? '('+ele.type+')' : ''}`}
+                    : `${ele.type ? '(' + ele.type + ')' : ''}`}
                 </span>
-                <div className={`${"coinsTable1__grayText12"} textBold`}></div>
+                <div className={`${'coinsTable1__grayText12'} textBold`}></div>
               </div>
               <div
-                style={{ color: "#98969B" }}
+                style={{ color: '#98969B' }}
                 className="grayText1 test-class"
               >
-                {ele.routeTo === "no-where" ? "" : currency.symbol}
+                {ele.routeTo === 'no-where' ? '' : currency.symbol}
                 <div
                   dangerouslySetInnerHTML={{ __html: ele.coinPrice }}
-                ></div>{" "}
+                ></div>{' '}
                 {/* &nbsp;| */}
                 <div
-                  className={`${"coinsTable1__grayText12"} ${ele.coinStatus <= 0 ? "negitiveText" : "positiveText"
-                    }`}
-                  style={{ marginLeft: "3px" }}
+                  className={`${'coinsTable1__grayText12'} ${
+                    ele.coinStatus <= 0 ? 'negitiveText' : 'positiveText'
+                  }`}
+                  style={{ marginLeft: '3px' }}
                 >
-                  {ele.coinStatus < 0 ? "" : "+"}
+                  {ele.coinStatus < 0 ? '' : '+'}
                   {ele.coinStatus}%
                 </div>
               </div>
@@ -165,7 +166,7 @@ function CoinsTable({ dataArray, showCoinPrice, name }) {
                 <div
                   className="coinsTable1__grayText12"
                   style={{
-                    marginTop: "7px",
+                    marginTop: '7px',
                   }}
                 ></div>
               ) : null}
@@ -177,19 +178,19 @@ function CoinsTable({ dataArray, showCoinPrice, name }) {
               {showCoinPrice ? (
                 <span
                   style={{
-                    color: "#98969B",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "5px",
+                    color: '#98969B',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '5px',
                   }}
                 >
                   {/* <span style={{ color: "#98969B" }}>
                     {currency.symbol}{" "}
                     {ele.currPriceValue ? ele.currPriceValue.toFixed(2) : 0}
                   </span> */}
-                  {name == "portfolio" && (
+                  {name == 'portfolio' && (
                     <img
-                      style={{ marginLeft: 15, cursor:'pointer' }}
+                      style={{ marginLeft: 15, cursor: 'pointer' }}
                       onClick={() => showDeleteModal(ele)}
                       src={bin}
                     />
@@ -197,9 +198,19 @@ function CoinsTable({ dataArray, showCoinPrice, name }) {
                 </span>
               ) : ele.watch ? (
                 ele.isActiveInWatchList ? (
-                  <img onClick={() => ele.watch()} style={{ cursor: 'pointer' }} src={blueStar} alt="star" />
+                  <img
+                    onClick={() => ele.watch()}
+                    style={{ cursor: 'pointer' }}
+                    src={blueStar}
+                    alt="star"
+                  />
                 ) : (
-                  <img onClick={() => ele.watch()} style={{ cursor: 'pointer' }} src={blackStar} alt="star" />
+                  <img
+                    onClick={() => ele.watch()}
+                    style={{ cursor: 'pointer' }}
+                    src={blackStar}
+                    alt="star"
+                  />
                 )
               ) : (
                 <DummyEle ele={ele} />
@@ -208,20 +219,20 @@ function CoinsTable({ dataArray, showCoinPrice, name }) {
               {ele.watch ? null : (
                 <div
                   className="coinsTable1__grayText12"
-                  style={{ justifyContent: "flex-end" }}
+                  style={{ justifyContent: 'flex-end' }}
                 >
-                  {ele.currDollerBal === "ABOVE" ||
-                    ele.currDollerBal === "BELOW" ? (
+                  {ele.currDollerBal === 'ABOVE' ||
+                  ele.currDollerBal === 'BELOW' ? (
                     `Price ${capitalize(ele.currDollerBal)}`
                   ) : (
                     <>
-                      {ele.routeTo === "no-where"
-                        ? ""
+                      {ele.routeTo === 'no-where'
+                        ? ''
                         : balanceIn
-                          ? ele.routeTo === "enter-price-spritz"
-                            ? "$"
-                            : currency.symbol
-                          : ""}
+                        ? ele.routeTo === 'enter-price-spritz'
+                          ? '$'
+                          : currency.symbol
+                        : ''}
                       {ele.currDollerBal}
                     </>
                   )}
@@ -229,10 +240,10 @@ function CoinsTable({ dataArray, showCoinPrice, name }) {
                     <div
                       className="coinsTable1__grayText12"
                       style={{
-                        color: ele.sent ? "#058b56" : "#f6465d",
+                        color: ele.sent ? '#058b56' : '#f6465d',
                       }}
                     >
-                      {ele.sent ? "Completed" : "Pending"}
+                      {ele.sent ? 'Completed' : 'Pending'}
                     </div>
                   ) : null}
                 </div>
@@ -245,7 +256,7 @@ function CoinsTable({ dataArray, showCoinPrice, name }) {
                   src={Edit}
                   onClick={(e) => {
                     e.stopPropagation();
-                    navigate("/add-alert", {
+                    navigate('/add-alert', {
                       state: {
                         type: ele.currDollerBal.toLowerCase(),
                         id: ele.alertId,
@@ -265,7 +276,7 @@ function CoinsTable({ dataArray, showCoinPrice, name }) {
       ))}
 
       <ModalCustom
-        title={"Price Alerts"}
+        title={'Price Alerts'}
         isModalOpen={deleteModal}
         customClass="customClassModal"
         handleCancel={() => {
@@ -276,8 +287,8 @@ function CoinsTable({ dataArray, showCoinPrice, name }) {
           <div className="viewphrases__iInner">
             <p
               style={{
-                fontSize: "20px",
-                color: "white",
+                fontSize: '20px',
+                color: 'white',
               }}
             >
               Are you sure you want to Delete this Alert?
@@ -285,11 +296,11 @@ function CoinsTable({ dataArray, showCoinPrice, name }) {
           </div>
           <div
             style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              marginTop: "30px",
-              gap: "20px"
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginTop: '30px',
+              gap: '20px',
             }}
           >
             <ButtonComp
@@ -353,7 +364,7 @@ function CoinsTable({ dataArray, showCoinPrice, name }) {
       </ModalCustom>
 
       <ModalCustom
-        title={"Confirm Delete"}
+        title={'Confirm Delete'}
         isModalOpen={isModalVisible}
         customClass="customClassModal"
         handleCancel={() => {
@@ -364,8 +375,8 @@ function CoinsTable({ dataArray, showCoinPrice, name }) {
           <div className="viewphrases__iInner">
             <p
               style={{
-                fontSize: "20px",
-                color: "white",
+                fontSize: '20px',
+                color: 'white',
               }}
             >
               Are you sure you want to delete this asset from the watchlist ?
@@ -373,11 +384,11 @@ function CoinsTable({ dataArray, showCoinPrice, name }) {
           </div>
           <div
             style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              marginTop: "30px",
-              gap: "20px"
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginTop: '30px',
+              gap: '20px',
             }}
           >
             <ButtonComp

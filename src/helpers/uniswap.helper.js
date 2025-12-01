@@ -62,8 +62,11 @@ export class UniswapHelper {
       );
       return data.data;
     } catch (error) {
-      console.log(error);
-      return false;
+      console.log('GET QOUTE AND ROUTE ERROR :', error);
+      return {
+        error: true,
+        message: error?.response?.data?.message ?? 'Something went wrong',
+      };
     }
   }
 
@@ -197,7 +200,9 @@ export class UniswapHelper {
 
         console.log('amount', amount); // should be a string
         console.log('typeof amount', typeof amount); // should be "string"
-        console.log('decimals', token1.decimals , 
+        console.log(
+          'decimals',
+          token1.decimals,
 
           new BigNumber(amount)
             .multipliedBy(new BigNumber(10).pow(token1.decimals))
@@ -212,8 +217,8 @@ export class UniswapHelper {
             dst: route.toToken.address,
             fee: 0.5,
             amount: new BigNumber(amount)
-            .multipliedBy(new BigNumber(10).pow(token1.decimals))
-            .toFixed(0),
+              .multipliedBy(new BigNumber(10).pow(token1.decimals))
+              .toFixed(0),
             from: walletAddress,
             slippage: parseInt(slippage),
             referrer: commision.walletAddress,

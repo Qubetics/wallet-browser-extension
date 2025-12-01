@@ -1,5 +1,4 @@
 /*global chrome*/
-
 import './CrossChain.scss';
 import { Drawer, message, Select } from 'antd';
 import React from 'react';
@@ -79,7 +78,7 @@ function CrossChain({ state }) {
     maxCount: 1,
   });
   const [amount2, setAmount2] = useState(null);
-  const [amount, setAount] = useState(null);
+  const [amount, setAmount] = useState(null);
   const [route, setRoute] = useState(null);
   const [refresh, setRefresh] = useState(false);
   const [filteredTokens, setFilteredTokens] = useState([]);
@@ -99,14 +98,14 @@ function CrossChain({ state }) {
   const { theme, swapDetail } = useSelector((state) => state);
   const [activeIndex, setActiveIndex] = useState(null);
   const percentages = [25, 50, 75, 100];
-  console.log("state", state);
+  console.log('state', state);
   useEffect(() => {
-    console.log('SWAPDETAILS', swapDetail);
+    console.log('swap detail found in cross chain swap:', swapDetail);
     if (swapDetail) {
       if (swapDetail?.tab == 1) {
         setToken1(swapDetail?.token1);
         setToken2(swapDetail?.token2);
-        setAount(+swapDetail?.amount);
+        setAmount(+swapDetail?.amount);
         setAmount2(+swapDetail?.amount2);
         setTimeout(() => {
           initialSwapDetail(
@@ -236,7 +235,7 @@ function CrossChain({ state }) {
         const finalAmountToSend = new BigNumber(token1.balance).multipliedBy(
           new BigNumber(percentage).dividedBy(100)
         );
-        setAount(
+        setAmount(
           finalAmountToSend == 0
             ? finalAmountToSend.toString()
             : finalAmountToSend.toFixed(6).replace(/\.?0+$/, '')
@@ -262,7 +261,7 @@ function CrossChain({ state }) {
         const finalAmountToSend = new BigNumber(amountToSend).multipliedBy(
           new BigNumber(percentage).dividedBy(100)
         );
-        setAount(
+        setAmount(
           finalAmountToSend == 0
             ? finalAmountToSend.toString()
             : finalAmountToSend.toFixed(token1.decimals).replace(/\.?0+$/, '')
@@ -294,7 +293,145 @@ function CrossChain({ state }) {
     return result;
   };
 
+  const loadMoreTokens = async (currentPage) => {
+    try {
+      setInnerLoading(true);
+
+      // Fetch inactive tokens for the current page
+      const inActiveTokens = await server.post(
+        '/swftc/queryCoinList',
+        {
+          addresses: Object.values(account.coinFamilyAndAddress).filter(
+            (address) => address
+          ),
+          is_wallet: false,
+          fiat_type: currency.name,
+          per_page: 20,
+          page: currentPage,
+        },
+        {
+          headers: {
+            Authorization: account.jwtToken,
+          },
+        }
+      );
+
+      const { chains } = await chrome.storage.local.get('chains');
+
+      // Map the new tokens to the same format
+      const newTokens = inActiveTokens?.data?.data?.map((token) => {
+        let coinFamilyName = 'ETH';
+        let tokenType = 'ERC20';
+
+        switch (token?.coin_data?.coin_family) {
+          case 1:
+            coinFamilyName = 'BNB';
+            tokenType = 'BEP20';
+            break;
+          case 2:
+            coinFamilyName = 'ETH';
+            tokenType = 'ERC20';
+            break;
+          case 4:
+            coinFamilyName = 'POL';
+            tokenType = 'ERC20';
+            break;
+          case 5:
+            coinFamilyName = 'SOL';
+            tokenType = 'SPL';
+            break;
+          case 7:
+            coinFamilyName = 'TICS';
+            tokenType = 'ERC20';
+            break;
+          default:
+            break;
+        }
+
+        return {
+          id: token.coin_data?.coin_id,
+          symbol: token.coinCode,
+          showName: token.coinCodeShow,
+          coinSymbol: token.coin_data.coin_symbol,
+          active: false,
+          name: token.coinName,
+          tokenAddress: token.coin_data.token_address || null,
+          image: token.coinImageUrl,
+          address: account.coinFamilyAndAddress[token?.coin_data?.coin_family],
+          isToken: token.coin_data.token_address ? true : false,
+          coinFamilyName,
+          coinFamily: token.coin_data?.coin_family,
+          balance: token?.coin_data?.wallet_data
+            ? token.coin_data?.wallet_data.balance
+            : 0,
+          price: token?.coin_data?.fiat_price_data
+            ? token?.coin_data?.fiat_price_data?.value
+              ? token?.coin_data?.fiat_price_data?.value
+              : 0
+            : 0,
+          type: token.coin_data.token_address ? tokenType : null,
+          chain: chains.find(
+            (chain) => chain.coinFamily == token?.coin_data?.coin_family
+          ),
+          native: token.coin_data.fiat_price_data,
+          decimals: parseInt(token.coinDecimal),
+          rpc:
+            token?.coin_data?.coin_family == 1
+              ? process.env.REACT_APP_BNB_RPC
+              : token?.coin_data?.coin_family == 2
+              ? process.env.REACT_APP_ETH_RPC
+              : token?.coin_data?.coin_family == 3
+              ? process.env.REACT_APP_BTC_RPC
+              : token?.coin_data?.coin_family == 4
+              ? process.env.REACT_APP_MATIC_RPC
+              : token?.coin_data?.coin_family == 5
+              ? process.env.REACT_APP_SOL_RPC
+              : token?.coin_data?.coin_family == 7
+              ? process.env.REACT_APP_QUBETIC_RPC
+              : '',
+        };
+      });
+
+      if (!newTokens || newTokens.length === 0) {
+        setInnerLoading(false);
+        return;
+      }
+
+      // Append new tokens to existing list
+      setAllTokens((prev) => {
+        const updated = uniqueList(prev, newTokens);
+
+        // Update filteredTokens - if there's a keyword, re-apply the filter, otherwise show all
+        if (keyword && keyword.trim().length > 0) {
+          const matches = updated.filter(
+            (el) =>
+              el.symbol.toLowerCase().indexOf(keyword.trim().toLowerCase()) >
+                -1 ||
+              el.name.toLowerCase().indexOf(keyword.trim().toLowerCase()) >
+                -1 ||
+              (el.tokenAddress &&
+                el.tokenAddress
+                  .toLowerCase()
+                  .indexOf(keyword.trim().toLowerCase()) > -1)
+          );
+          setFilteredTokens(matches);
+        } else {
+          setFilteredTokens(updated);
+        }
+
+        return updated;
+      });
+
+      setInnerLoading(false);
+    } catch (error) {
+      console.log('error loadMoreTokens:::', error);
+      setInnerLoading(false);
+      messageApi.error('Unable to load more tokens. Please try again later.');
+    }
+  };
+
   const init = async () => {
+    let inActiveTokens = [];
     try {
       const { data } = await server.post(
         '/swftc/queryCoinList',
@@ -314,29 +451,30 @@ function CrossChain({ state }) {
         }
       );
 
-      const inActiveTokens = await server.post(
-        '/swftc/queryCoinList',
-        {
-          addresses: Object.values(account.coinFamilyAndAddress).filter(
-            (address) => address
-          ),
-          is_wallet: false,
-          fiat_type: currency.name,
-          per_page: 20,
-          page,
-        },
-        {
-          headers: {
-            Authorization: account.jwtToken,
+      if (page === 1) {
+        inActiveTokens = await server.post(
+          '/swftc/queryCoinList',
+          {
+            addresses: Object.values(account.coinFamilyAndAddress).filter(
+              (address) => address
+            ),
+            is_wallet: false,
+            fiat_type: currency.name,
+            per_page: 20,
+            page,
           },
-        }
-      );
+          {
+            headers: {
+              Authorization: account.jwtToken,
+            },
+          }
+        );
+      }
 
       setTotal(inActiveTokens?.data?.meta?.total || 0);
       const { chains } = await chrome.storage.local.get('chains');
 
       let tokens = data?.data?.map((token) => {
-        console.log('token', token);
         let coinFamilyName = 'ETH';
         let tokenType = 'ERC20';
         switch (token?.coin_data?.coin_family) {
@@ -391,7 +529,7 @@ function CrossChain({ state }) {
             (chain) => chain?.coinFamily == token?.coin_data?.coin_family
           ),
           native: token?.coin_data?.fiat_price_data,
-          decimals: parseInt(token?.coinDecimal), //?.toString().length) - 1,
+          decimals: parseInt(token?.coinDecimal),
           rpc:
             token?.coin_data?.coin_family == 1
               ? process.env.REACT_APP_BNB_RPC
@@ -409,7 +547,7 @@ function CrossChain({ state }) {
         };
       });
 
-      const tokens2 = inActiveTokens?.data?.data.map((token) => {
+      const tokens2 = inActiveTokens?.data?.data?.map((token) => {
         let coinFamilyName = 'ETH';
         let tokenType = 'ERC20';
 
@@ -484,15 +622,38 @@ function CrossChain({ state }) {
 
       if (tokens.length === 0) {
         setInnerLoading(false);
-
         return;
       }
 
       const activeTokens = tokens;
-      tokens = [...tokens, ...tokens2];
-      let modifiedList = await uniqueList(allToken, tokens);
-      setAllTokens(modifiedList);
-      setFilteredTokens(modifiedList);
+
+      let combinedTokens = [...tokens, ...(tokens2 || [])];
+
+      // Calculate modifiedList by merging with existing tokens
+      let modifiedList = [];
+      setAllTokens((prev) => {
+        modifiedList = uniqueList(prev, combinedTokens);
+
+        // Update filteredTokens - if there's a keyword, re-apply the filter, otherwise show all
+        if (keyword && keyword.trim().length > 0) {
+          const matches = modifiedList.filter(
+            (el) =>
+              el.symbol.toLowerCase().indexOf(keyword.trim().toLowerCase()) >
+                -1 ||
+              el.name.toLowerCase().indexOf(keyword.trim().toLowerCase()) >
+                -1 ||
+              (el.tokenAddress &&
+                el.tokenAddress
+                  .toLowerCase()
+                  .indexOf(keyword.trim().toLowerCase()) > -1)
+          );
+          setFilteredTokens(matches);
+        } else {
+          setFilteredTokens(modifiedList);
+        }
+
+        return modifiedList;
+      });
 
       let { crossToken1 } = await chrome.storage.local.get('crossToken1');
       let { crossToken2 } = await chrome.storage.local.get('crossToken2');
@@ -606,7 +767,7 @@ function CrossChain({ state }) {
               default:
                 break;
             }
-          
+
             return {
               id: token?.id,
               symbol: token?.symbol,
@@ -693,14 +854,14 @@ function CrossChain({ state }) {
     if (updatedToken1.tokenAddress) {
       if (updatedToken1.id != token1.id) {
         setAmount2(null);
-        setAount(null);
+        setAmount(null);
         setPercent(null);
         updateRef.current = false;
       }
     } else {
       if (updatedToken1.id != token1.id) {
         setAmount2(null);
-        setAount(null);
+        setAmount(null);
         setPercent(null);
         updateRef.current = false;
       }
@@ -730,7 +891,7 @@ function CrossChain({ state }) {
     if (updatedToken2.tokenAddress) {
       if (updatedToken2.id != token2.id) {
         setAmount2(null);
-        setAount(null);
+        setAmount(null);
         setPercent(null);
         updateRef.current = false;
       }
@@ -750,7 +911,7 @@ function CrossChain({ state }) {
     } else {
       if (updatedToken2.id != token2.id) {
         setAmount2(null);
-        setAount(null);
+        setAmount(null);
         setPercent(null);
         updateRef.current = false;
       }
@@ -838,14 +999,19 @@ function CrossChain({ state }) {
     clearTimeout(debounceTimeout.current);
     debounceTimeout.current = setTimeout(() => {
       handleInputChange(newAmount);
-      setAount(newAmount);
+      setAmount(newAmount);
     }, 3000);
   }
 
   useEffect(() => {
-    init();
+    if (page === 1) {
+      init();
+    } else {
+      // Load more tokens when page > 1 (pagination)
+      loadMoreTokens(page);
+    }
     return () => {
-      setAount(0);
+      setAmount(0);
     };
   }, [page]);
 
@@ -853,7 +1019,8 @@ function CrossChain({ state }) {
     const { scrollHeight, scrollTop, clientHeight } = parentRef.current;
     const tolerance = 15;
     const isAtBottom = scrollTop + clientHeight >= scrollHeight - tolerance;
-    if (isAtBottom && !loading && page < Math.ceil(total / 10)) {
+    // per_page is 20 for inactive tokens, so calculate pages accordingly
+    if (isAtBottom && !loading && page < Math.ceil(total / 20)) {
       setInnerLoading(true);
       setPage((prevPage) => prevPage + 1);
     }
@@ -1107,42 +1274,43 @@ function CrossChain({ state }) {
                   placeholder="0.000"
                   onWheel={(e) => e.currentTarget.blur()}
                   inputMode="decimal"
-                  onKeyDown={(e) => {
-                    const allowedKeys = [
-                      'Backspace',
-                      'Tab',
-                      'ArrowLeft',
-                      'ArrowRight',
-                      'Delete',
-                      'Home',
-                      'End',
-                    ];
+                  onChange={({ target: { value: amount } }) => {
+                    // Only allow numbers and optional decimal point
+                    const numberRegex = /^\d*\.?\d*$/;
 
-                    if (allowedKeys.includes(e.key)) return;
-                    if (!/^[0-9.]$/.test(e.key)) {
-                      e.preventDefault();
+                    if (!numberRegex.test(amount)) {
+                      return; // Block invalid input (alphabets, special chars, etc.)
                     }
-                  }}
-                  onChange={({ target: { value: _amount } }) => {
+
                     if (percent != null) {
                       setPercent(null);
                     }
 
-                    const [beforeDecimal = '', afterDecimal = ''] =
-                      _amount.split('.');
+                    const afterDecimal = amount.split('.')[1];
                     const maxCharactersBeforeDecimal = 15;
-                    const maxDecimals = token1.decimals;
 
-                    if (beforeDecimal.length > maxCharactersBeforeDecimal)
-                      return;
-                    if (afterDecimal.length > maxDecimals) return;
+                    if (afterDecimal) {
+                      const maxDecimals = token1.decimals;
 
-                    setAount(_amount); // ✅ typo fixed from `setAount`
-                    handleChangeForInput1(_amount);
-                    if (percent != null) {
-                      setPercent(null);
-                      setActiveIndex(null); // <--- unselect the percentage button
+                      if (afterDecimal.toString().length > maxDecimals) {
+                        return;
+                      }
+
+                      const beforeDecimal = amount.split('.')[0];
+                      if (
+                        beforeDecimal.toString().length >
+                        maxCharactersBeforeDecimal
+                      ) {
+                        return;
+                      }
+                    } else {
+                      if (amount.length > maxCharactersBeforeDecimal) {
+                        return;
+                      }
                     }
+
+                    setAmount(amount);
+                    handleChangeForInput1(amount);
                   }}
                   value={amount}
                 />
@@ -1217,7 +1385,7 @@ function CrossChain({ state }) {
                     },
                   ]}
                   onSelect={(value) => {
-                    setAount(null);
+                    setAmount(null);
                     setToken2(availableTokens.find((el) => el.id == value));
                     handleToken1Change(
                       availableTokens.find((el) => el.id == value)
@@ -1279,7 +1447,7 @@ function CrossChain({ state }) {
                     setToken1(token2);
                     setToken2(token1);
                     setAmount2(0);
-                    setAount(0);
+                    setAmount(0);
                     setPercent(0);
                     setInfoData([]);
                   } else {
@@ -1452,31 +1620,30 @@ function CrossChain({ state }) {
 
           if (parseFloat(amount) < parseFloat(route.exchangeData.depositMin)) {
             return messageApi.error(
-              `The minimum deposit amount to swap is ${route.exchangeData.depositMin} ${token1.symbol}`
+              `Minimum swap amount is ${route.exchangeData.depositMin} ${token1.symbol}`
             );
           }
 
           if (parseFloat(amount) > parseFloat(route.exchangeData.depositMax)) {
             return messageApi.error(
-              `The maximum deposit amount to swap is ${route.exchangeData.depositMax} ${token1.symbol}`
+              `Maximum swap amount is ${route.exchangeData.depositMax} ${token1.symbol}`
             );
           }
 
           if (parseFloat(balance) < parseFloat(amount)) {
-            console.log('first insufficient balance case');
             return messageApi.error(
               'Insufficient balance to proceed with the transaction.'
             );
           }
 
-          if (token1.chain.isEVM) {
+          if (token1?.chain?.isEVM) {
             const gasPrice = await Web3Helper.getGasPrice(
-              token1.chain.slug,
-              token1.address,
-              token1.address,
-              token1.isToken,
-              token1.tokenAddress,
-              token1.coinSymbol || token1.symbol
+              token1?.chain.slug,
+              token1?.address,
+              token1?.address,
+              token1?.isToken,
+              token1?.tokenAddress,
+              token1?.coinSymbol || token1?.symbol
             );
 
             if (!gasPrice) {
@@ -1488,7 +1655,7 @@ function CrossChain({ state }) {
             }
 
             const gasInEth =
-              (gasPrice.fast * Math.pow(10, 9) * gasPrice.estimate) /
+              (gasPrice?.fast * Math.pow(10, 9) * gasPrice?.estimate) /
               Math.pow(10, 18);
 
             const nativeCoinBalance = await Web3Helper.getCoinBalance(
@@ -1497,12 +1664,6 @@ function CrossChain({ state }) {
             );
 
             if (token1?.isToken) {
-              console.log(
-                'nativeCoinBalance',
-                nativeCoinBalance,
-                'Number(gasInEth))',
-                Number(gasInEth)
-              );
               if (
                 Number(nativeCoinBalance.toString()) <
                 parseFloat(Number(gasInEth))
@@ -1512,12 +1673,6 @@ function CrossChain({ state }) {
                 );
               }
             } else {
-              console.log(
-                'parseFloat(balance)',
-                parseFloat(balance),
-                parseFloat(Number(amount)),
-                Number(gasInEth)
-              );
               if (
                 parseFloat(balance) <
                 parseFloat(Number(amount) + Number(gasInEth))
@@ -1666,6 +1821,10 @@ function CrossChain({ state }) {
                 value={keyword}
                 checkForSymbols={true}
                 getData={(value) => {
+                  const hasEmoji = /[\p{Extended_Pictographic}]/u.test(value);
+                  if (hasEmoji && value.length > 25) {
+                    return false;
+                  }
                   setKeyword(value);
                   if (value.trim().length === 0) {
                     setFilteredTokens(allToken);

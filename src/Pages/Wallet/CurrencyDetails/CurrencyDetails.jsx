@@ -26,6 +26,7 @@ import { token_type } from '../../../helpers/constant';
 import { getCosmosAddress } from '../../../helpers/cosmos.helper';
 import { setTokens } from '../../../actions/tokens';
 import { setLoading } from '../../../actions/loading';
+import { formatNumberInput } from '../../../helpers/common.helper';
 
 function CurrencyDetails() {
   const { currency, account,tokens, loading } = useSelector((state) => state);
@@ -575,8 +576,7 @@ function CurrencyDetails() {
                         data?.from_adrs?.length - 5,
                         data?.from_adrs?.length
                       )}`}
-                      valueCurrency={`${addCommasToNumber(
-                        getFlooredFixed(data?.amount, 5)
+                      valueCurrency={`${formatNumberInput(data?.amount
                       )} ${data?.coin_data?.coin_symbol?.toUpperCase()}`}
                       dollercurrency={balanceToFiatConversion(
                         price ? price?.value : 0,

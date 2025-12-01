@@ -1,16 +1,16 @@
 /*global chrome */
-import "react-tabs/style/react-tabs.css";
-import style from "./style.module.scss";
-import ModalCloseIcon from "../../Assets/ModalCloseIcon.svg";
-import darkclose from "../../Assets/darkclose.svg";
-import { Drawer, message, Radio, Select } from "antd";
-import React, { useState } from "react";
-import MenuRestofHeaders from "../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders";
-import { InputField } from "../../Components/InputField/InputFieldSimple";
-import DownArrowSuffix from "../../Assets/DownArrowSuffix.svg";
+import 'react-tabs/style/react-tabs.css';
+import style from './style.module.scss';
+import ModalCloseIcon from '../../Assets/ModalCloseIcon.svg';
+import darkclose from '../../Assets/darkclose.svg';
+import { Drawer, message, Radio, Select } from 'antd';
+import React, { useState } from 'react';
+import MenuRestofHeaders from '../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders';
+import { InputField } from '../../Components/InputField/InputFieldSimple';
+import DownArrowSuffix from '../../Assets/DownArrowSuffix.svg';
 
-import ButtonComp from "../../Components/ButtonComp/ButtonComp";
-import { useSelector } from "react-redux";
+import ButtonComp from '../../Components/ButtonComp/ButtonComp';
+import { useSelector } from 'react-redux';
 
 function TransactionFilter() {
   const { account, chain, loading } = useSelector((state) => state);
@@ -18,7 +18,7 @@ function TransactionFilter() {
   const [open, setOpen] = useState(false);
   const [coin, setCoin] = useState({
     id: 0,
-    symbol: "All Coins",
+    symbol: 'All Coins',
   });
   const [status, setStatus] = useState(null);
   const { theme } = useSelector((state) => state);
@@ -31,9 +31,9 @@ function TransactionFilter() {
   const [allToken, setAllTokens] = useState(account.tokens[chain.chainId]);
 
   const selectAfter = (
-    <div className={"addonAfter"}>
+    <div className={'addonAfter'}>
       <Select
-        suffixIcon={<img src={DownArrowSuffix} alt='' />}
+        suffixIcon={<img src={DownArrowSuffix} alt="" />}
         onClick={() => {
           setOpen(true);
         }}
@@ -42,31 +42,31 @@ function TransactionFilter() {
             value: coin?.id,
             label:
               coin?.id != 0 ? (
-                <span className='flexedItemSelect'>
+                <span className="flexedItemSelect">
                   <img
                     style={{
-                      height: "30px",
-                      width: "30px",
-                      objectFit: "contain",
-                      position: "relative",
+                      height: '30px',
+                      width: '30px',
+                      objectFit: 'contain',
+                      position: 'relative',
                     }}
-                    alt=''
+                    alt=""
                     src={coin?.image}
                   />
                   {coin?.symbol}
                 </span>
               ) : (
-                <span className='flexedItemSelect'>
+                <span className="flexedItemSelect">
                   <div
                     style={{
-                      alignItems: "center",
-                      backgroundColor: "rgba(98,126,234,.2)",
-                      borderRadius: "49%",
-                      display: "flex",
-                      height: "29px",
-                      justifyContent: "center",
-                      width: "29px",
-                      marginRight: "15px",
+                      alignItems: 'center',
+                      backgroundColor: 'rgba(98,126,234,.2)',
+                      borderRadius: '49%',
+                      display: 'flex',
+                      height: '29px',
+                      justifyContent: 'center',
+                      width: '29px',
+                      marginRight: '15px',
                     }}
                   >
                     A
@@ -80,17 +80,17 @@ function TransactionFilter() {
           {
             value: 0,
             label: (
-              <span className='flexedItemSelect'>
+              <span className="flexedItemSelect">
                 <div
                   style={{
-                    alignItems: "center",
-                    backgroundColor: "rgba(98,126,234,.2)",
-                    borderRadius: "49%",
-                    display: "flex",
-                    height: "29px",
-                    justifyContent: "center",
-                    width: "29px",
-                    marginRight: "15px",
+                    alignItems: 'center',
+                    backgroundColor: 'rgba(98,126,234,.2)',
+                    borderRadius: '49%',
+                    display: 'flex',
+                    height: '29px',
+                    justifyContent: 'center',
+                    width: '29px',
+                    marginRight: '15px',
                   }}
                 >
                   A
@@ -105,16 +105,16 @@ function TransactionFilter() {
           return {
             value: token?.id,
             label: (
-              <span className='flexedItemSelect'>
+              <span className="flexedItemSelect">
                 <img
                   style={{
-                    height: "20px",
-                    width: "20px",
-                    objectFit: "contain",
-                    marginLeft: "20px",
-                    marginRight: "20px",
+                    height: '20px',
+                    width: '20px',
+                    objectFit: 'contain',
+                    marginLeft: '20px',
+                    marginRight: '20px',
                   }}
-                  alt=''
+                  alt=""
                   src={token?.image}
                 />
                 {token?.symbol}
@@ -130,8 +130,8 @@ function TransactionFilter() {
     <div className={`scrollableCont`}>
       {contextHolder}
       <MenuRestofHeaders
-        backTo={"/history"}
-        title={"Transaction History Filter"}
+        backTo={'/history'}
+        title={'Transaction History Filter'}
       />
       <div className={`flexedContent`}>
         <div className={style.swap}>
@@ -140,27 +140,27 @@ function TransactionFilter() {
             checkForSymbols={true}
             inputSelect={true}
             placeholder={coin.symbol}
-            label='Select Coin'
-            type={"text"}
+            label="Select Coin"
+            type={'text'}
             addonAfter={selectAfter}
           />
 
-          <div style={{ marginTop: "50px" }}>
-            <ButtonComp text={"Apply Filters"} onClick={() => {}} />
+          <div style={{ marginTop: '50px' }}>
+            <ButtonComp text={'Apply Filters'} onClick={() => {}} />
           </div>
         </div>
       </div>
 
       <Drawer
-        title='Select Token'
-        placement='bottom'
+        title="Select Token"
+        placement="bottom"
         onClose={() => {
           setOpen(false);
         }}
         open={open}
         // eslint-disable-next-line jsx-a11y/alt-text
         closeIcon={
-          theme == "darkTheme" ? (
+          theme == 'darkTheme' ? (
             <img src={darkclose} />
           ) : (
             <img src={ModalCloseIcon} />
@@ -169,22 +169,26 @@ function TransactionFilter() {
         height={500}
       >
         <div
-          className='contain'
+          className="contain"
           style={{
-            height: "100%",
-            width: "100%",
-            display: "flex",
-            flexDirection: "column",
+            height: '100%',
+            width: '100%',
+            display: 'flex',
+            flexDirection: 'column',
           }}
         >
           {show ? (
-            <div className='search' style={{ marginBottom: "30px" }}>
+            <div className="search" style={{ marginBottom: '30px' }}>
               <InputField
-                placeholder={"Search coin"}
-                coloredBg={"#eef3f9"}
+                placeholder={'Search coin'}
+                coloredBg={'#eef3f9'}
                 value={keyword}
                 checkForSymbols={true}
                 getData={(value) => {
+                  const hasEmoji = /[\p{Extended_Pictographic}]/u.test(value);
+                  if (hasEmoji && value.length > 25) {
+                    return false;
+                  }
                   setKeyword(value);
                   if (value.trim().length === 0) {
                     setFilteredTokens(allToken);
@@ -207,10 +211,10 @@ function TransactionFilter() {
           ) : null}
 
           <div
-            className='right'
+            className="right"
             style={{
               flex: 1,
-              overflow: "scroll",
+              overflow: 'scroll',
             }}
           >
             {filteredTokens.length > 0 ? (
@@ -218,24 +222,24 @@ function TransactionFilter() {
                 <div
                   className={style.design}
                   style={{
-                    width: "100%",
+                    width: '100%',
                   }}
                 >
                   <div
-                    className='token'
+                    className="token"
                     style={{
-                      display: "flex",
-                      justifyContent: "flex-start",
-                      alignItems: "center",
-                      marginBottom: "20px",
-                      padding: "8px",
-                      borderRadius: "30px",
-                      marginLeft: "7px",
-                      fontSize: "11px",
-                      cursor: "pointer",
-                      width: "100%;",
-                      backgroundColor: "transparent",
-                      color: "#000",
+                      display: 'flex',
+                      justifyContent: 'flex-start',
+                      alignItems: 'center',
+                      marginBottom: '20px',
+                      padding: '8px',
+                      borderRadius: '30px',
+                      marginLeft: '7px',
+                      fontSize: '11px',
+                      cursor: 'pointer',
+                      width: '100%;',
+                      backgroundColor: 'transparent',
+                      color: '#000',
                     }}
                     onClick={() => {
                       setCoin(token);
@@ -247,40 +251,40 @@ function TransactionFilter() {
                     {!token.image ? (
                       <div
                         style={{
-                          alignItems: "center",
-                          backgroundColor: "rgba(98,126,234,.2)",
-                          borderRadius: "49%",
-                          display: "flex",
-                          height: "29px",
-                          justifyContent: "center",
-                          width: "29px",
-                          marginRight: "15px",
+                          alignItems: 'center',
+                          backgroundColor: 'rgba(98,126,234,.2)',
+                          borderRadius: '49%',
+                          display: 'flex',
+                          height: '29px',
+                          justifyContent: 'center',
+                          width: '29px',
+                          marginRight: '15px',
                         }}
                       >
-                        {" "}
-                        {token.name.split("")[0]}
+                        {' '}
+                        {token.name.split('')[0]}
                       </div>
                     ) : (
                       <img
                         style={{
-                          width: "29px",
-                          marginRight: "15px",
+                          width: '29px',
+                          marginRight: '15px',
                         }}
                         src={token.image}
-                        alt=''
+                        alt=""
                       />
                     )}
 
                     <p>
-                      <span style={{ fontSize: "17px" }} className='noAddress'>
-                        {token.name}{" "}
+                      <span style={{ fontSize: '17px' }} className="noAddress">
+                        {token.name}{' '}
                       </span>
                       <span
-                        className='noAddress'
+                        className="noAddress"
                         style={{
-                          fontSize: "11px",
-                          color: "#6e737e",
-                          marginLeft: "5px",
+                          fontSize: '11px',
+                          color: '#6e737e',
+                          marginLeft: '5px',
                         }}
                       ></span>
                     </p>
@@ -289,11 +293,11 @@ function TransactionFilter() {
               ))
             ) : (
               <p
-                className='noAddress'
+                className="noAddress"
                 style={{
-                  marginTop: "50%",
-                  fontWeight: "bold",
-                  fontSize:"15px"
+                  marginTop: '50%',
+                  fontWeight: 'bold',
+                  fontSize: '15px',
                 }}
               >
                 {loading ? 'Loading...' : 'No assets found'}

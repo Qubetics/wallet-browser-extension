@@ -64,7 +64,7 @@ export class Web3Helper {
   ) => {
     const { account } = store.getState();
     try {
-      slug =  slug == 'tics' ? 'qubetics' : slug;
+      slug = slug == 'tics' ? 'qubetics' : slug;
       const { data } = await server.post(
         `/${slug}/${tokenAddress}/gas_estimation`,
         {
@@ -102,18 +102,18 @@ export class Web3Helper {
     symbol
   ) => {
     const { account } = store.getState();
-    console.log("slug", slug);
-    console.log("toAddress", toAddress);
-    console.log("fromAddress", fromAddress);
-    console.log("isToken", isToken);
-    console.log("tokenAddress", tokenAddress);
-    console.log("symbol", symbol);
+    console.log('slug', slug);
+    console.log('toAddress', toAddress);
+    console.log('fromAddress', fromAddress);
+    console.log('isToken', isToken);
+    console.log('tokenAddress', tokenAddress);
+    console.log('symbol', symbol);
     try {
       slug = slug == 'matic' ? 'polygon' : slug == 'tics' ? 'qubetics' : slug;
-      if(slug == 'qubetics') {
-        symbol = 'tics'
+      if (slug == 'qubetics') {
+        symbol = 'tics';
       }
-      const { data } = await server.post( 
+      const { data } = await server.post(
         `/${slug}/${isToken ? tokenAddress : symbol}/gas_estimation`,
         {
           from: fromAddress,
@@ -388,8 +388,8 @@ export class Web3Helper {
         sessionPassword
       );
 
-      console.log('privateKey>>>>', privateKey);
-
+      console.log("privateKey>>>>", privateKey);
+      
       if (!privateKey) {
         console.log('INVALID PRIVATE KEY :');
         return false;
@@ -575,12 +575,7 @@ export class Web3Helper {
       console.log('provider',provider);
       
       const contract = new ethers.Contract(tokenAddress, ABI, provider);
-
-      console.log('contract',contract);
-      
-      const { privateKey } = await WalletHelper.getPrivateKeyEvm(
-        sessionPassword
-      );
+      const { privateKey } = await WalletHelper.getPrivateKeyEvm(sessionPassword);
 
       if (!privateKey) {
         console.log('INVALID PRIVATE KEY');
@@ -851,9 +846,9 @@ export class Web3Helper {
       orderId,
       type,
       tokenId,
-      nftGasData
+      nftGasData,
     });
-    
+
     try {
       const { account } = store.getState();
 
@@ -866,22 +861,22 @@ export class Web3Helper {
       const { privateKey } = await WalletHelper.getPrivateKeyEvm(
         sessionPassword
       );
-      console.log(privateKey,"privateKey");
-      
+      console.log(privateKey, 'privateKey');
+
       if (!privateKey) {
         return false;
       }
 
       const gasPriceRes = nftGasData;
-      console.log("🚀 ~ Web3Helper ~ gasPriceRes:", gasPriceRes)
+      console.log('🚀 ~ Web3Helper ~ gasPriceRes:', gasPriceRes);
       const gaslimits = gasPriceRes.estimate;
-      console.log("🚀 ~ Web3Helper ~ gaslimits:", gaslimits)
+      console.log('🚀 ~ Web3Helper ~ gaslimits:', gaslimits);
       const gasPrice = gasPriceRes.fast * Math.pow(10, 9);
-      console.log("🚀 ~ Web3Helper ~ gasPrice:", gasPrice)
+      console.log('🚀 ~ Web3Helper ~ gasPrice:', gasPrice);
       const nonce = await this.getNonce(slug, 1, tokenAddress, null, from);
-      console.log("🚀 ~ Web3Helper ~ nonce:", nonce)
+      console.log('🚀 ~ Web3Helper ~ nonce:', nonce);
       const gaslimit = (gaslimits * 2).toFixed(0);
-      console.log("🚀 ~ Web3Helper ~ gaslimit:", gaslimit)
+      console.log('🚀 ~ Web3Helper ~ gaslimit:', gaslimit);
 
       const transaction = {
         nonce,
@@ -893,15 +888,14 @@ export class Web3Helper {
         data: contract.methods.transferFrom(from, to, tokenId).encodeABI(),
         chainId,
       };
-      console.log({transaction});
-      
+      console.log({ transaction });
 
       const signedTransaction = await web3.eth.accounts.signTransaction(
         transaction,
         privateKey
       );
-      console.log({signedTransaction});
-      
+      console.log({ signedTransaction });
+
       const myResponse = await server.post(
         `${slug}/${tokenAddress}/send`,
         {
@@ -919,7 +913,7 @@ export class Web3Helper {
           tx_type: type || 'withdraw',
           order_id: orderId || undefined,
           token_id: tokenId,
-          gas_price:gasPrice
+          gas_price: gasPrice,
         },
         {
           headers: {
@@ -928,8 +922,8 @@ export class Web3Helper {
         }
       );
 
-      console.log(myResponse,"myResponsemyResponse");
-      
+      console.log(myResponse, 'myResponsemyResponse');
+
       return myResponse.data.tx_hash;
     } catch (error) {
       console.log(error);

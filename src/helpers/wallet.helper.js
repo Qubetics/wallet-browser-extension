@@ -136,7 +136,6 @@ export class WalletHelper {
 
   static getMnemonicsByPassword = async (address, password) => {
     try {
-
       const { mnemonics } = await chrome.storage.local.get('mnemonics');
       if (mnemonics) {
         const decryptedMnemonics = await SecurityHelper.decrypt(

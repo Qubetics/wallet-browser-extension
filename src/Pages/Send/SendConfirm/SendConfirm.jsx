@@ -24,6 +24,7 @@ import {
 } from '../../../helpers/conversion.helper';
 import { server } from '../../../server';
 import { broadcastTx } from '../../../helpers/cosmos.helper';
+import { formatNumberInput } from '../../../helpers/common.helper';
 
 function SendConfirm() {
   const {
@@ -219,17 +220,28 @@ function SendConfirm() {
           // Check if broadcastTx returned an error
           if (broadcastResponse?.success === false) {
             store.dispatch(setLoading(false));
-            const errorMessage = broadcastResponse?.message || broadcastResponse?.error?.message || 'Transaction failed. Please try again.';
-            
+            const errorMessage =
+              broadcastResponse?.message ||
+              broadcastResponse?.error?.message ||
+              'Transaction failed. Please try again.';
+
             // Extract user-friendly error message
             let userMessage = errorMessage;
-            if (errorMessage.includes('insufficient funds') || errorMessage.includes('insufficient fee')) {
-              userMessage = 'Insufficient funds to pay for transaction fees. Please ensure you have enough balance to cover the transaction amount and network fees.';
+            if (
+              errorMessage.includes('insufficient funds') ||
+              errorMessage.includes('insufficient fee')
+            ) {
+              userMessage =
+                'Insufficient funds to pay for transaction fees. Please ensure you have enough balance to cover the transaction amount and network fees.';
             } else if (errorMessage.includes('staking rewards')) {
-              userMessage = 'Insufficient staking rewards to cover transaction fees. Please ensure you have enough balance or claim staking rewards first.';
+              userMessage =
+                'Insufficient staking rewards to cover transaction fees. Please ensure you have enough balance or claim staking rewards first.';
             }
-            
-            console.error('🚀 ~ handleTransaction ~ broadcastTx error:', broadcastResponse);
+
+            console.error(
+              '🚀 ~ handleTransaction ~ broadcastTx error:',
+              broadcastResponse
+            );
             return messageApi.error(userMessage);
           }
 
@@ -245,7 +257,9 @@ function SendConfirm() {
           // Validate that we have required transaction data
           if (!hash) {
             store.dispatch(setLoading(false));
-            return messageApi.error('Transaction failed: No transaction hash received.');
+            return messageApi.error(
+              'Transaction failed: No transaction hash received.'
+            );
           }
 
           let newData = {
@@ -368,11 +382,9 @@ function SendConfirm() {
               undefined,
               sessionPassword
             );
-          if (!response) {
+          if (!response || response?.error) {
             store.dispatch(setLoading(false));
-            return messageApi.error(
-              'Insufficient funds to perform transaction.'
-            );
+            return messageApi.error(response?.message);
           }
         } else {
           console.log('INCOIN CASSE');
@@ -393,13 +405,10 @@ function SendConfirm() {
               sessionPassword
             );
 
-          if (!response) {
+          if (!response || response?.error) {
             store.dispatch(setLoading(false));
-            return messageApi.error(
-              'Insufficient funds to perform transaction.'
-            );
+            return messageApi.error(response?.message);
           } else {
-            // messageApi.success(response?.message);
             store.dispatch(setLoading(false));
           }
         }
@@ -422,9 +431,9 @@ function SendConfirm() {
             gasPriceType
           );
 
-        if (!response) {
+        if (!response || response?.error) {
           store.dispatch(setLoading(false));
-          return messageApi.error('Insufficient funds to perform transaction.');
+          return messageApi.error(response?.message);
         }
       }
 
@@ -433,7 +442,7 @@ function SendConfirm() {
     } catch (error) {
       console.error('HANDLE TRANSACTION ERROR: ', error);
       store.dispatch(setLoading(false));
-      
+
       // Extract user-friendly error message
       let errorMessage = 'Transaction failed. Please try again.';
       if (error?.response?.data?.message) {
@@ -441,14 +450,19 @@ function SendConfirm() {
       } else if (error?.message) {
         errorMessage = error.message;
       }
-      
+
       // Check for specific error types
-      if (errorMessage.includes('insufficient funds') || errorMessage.includes('insufficient fee')) {
-        errorMessage = 'Insufficient funds to pay for transaction fees. Please ensure you have enough balance to cover the transaction amount and network fees.';
+      if (
+        errorMessage.includes('insufficient funds') ||
+        errorMessage.includes('insufficient fee')
+      ) {
+        errorMessage =
+          'Insufficient funds to pay for transaction fees. Please ensure you have enough balance to cover the transaction amount and network fees.';
       } else if (errorMessage.includes('staking rewards')) {
-        errorMessage = 'Insufficient staking rewards to cover transaction fees. Please ensure you have enough balance or claim staking rewards first.';
+        errorMessage =
+          'Insufficient staking rewards to cover transaction fees. Please ensure you have enough balance or claim staking rewards first.';
       }
-      
+
       messageApi.error(errorMessage);
     }
   };
@@ -501,7 +515,7 @@ function SendConfirm() {
                   {addCommasToNumber(getFlooredFixed(fiatCoin, 2))}
                 </p>
                 <h3 className="confirmCurrency__card__textTop">
-                  {addCommasToNumber(getFlooredFixed(amount, 5))}{' '}
+                  {formatNumberInput(amount, coin?.coin?.decimals)}{' '}
                   {coin?.coin?.coin_symbol.toUpperCase()}
                 </h3>
               </div>
@@ -550,7 +564,7 @@ function SendConfirm() {
             <div>
               <p style={{ color: 'white' }}>
                 Withdraw request of{' '}
-                {addCommasToNumber(getFlooredFixed(amount, 5))}{' '}
+                {formatNumberInput(amount, coin?.coin?.decimals)}{' '}
                 {coin.coin.coin_symbol.toUpperCase()} has been processed
                 successfully.
               </p>

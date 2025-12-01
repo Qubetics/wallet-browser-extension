@@ -1,17 +1,17 @@
-import React, { useEffect, useRef, useState } from "react";
-import MenuRestofHeaders from "../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders.jsx";
-import ManageCustom from "../../Components/ManageCustomtocken/ManageCustom";
-import Search from "../../Assets/SearchIcon.svg";
-import ButtonComp from "../../Components/ButtonComp/ButtonComp.jsx";
-import style from "./style.module.scss";
-import { Link } from "react-router-dom";
-import { useSelector } from "react-redux";
-import { InputField } from "../../Components/InputField/InputFieldSimple.jsx";
-import { server } from "../../server.js";
-import { store } from "../../index.js";
-import { setLoading } from "../../actions/loading.js";
-import useCurrentHeight from "../../CustomHooks/useCurrentHeight.js";
-import { token_type } from "../../helpers/constant.js";
+import React, { useEffect, useRef, useState } from 'react';
+import MenuRestofHeaders from '../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders.jsx';
+import ManageCustom from '../../Components/ManageCustomtocken/ManageCustom';
+import Search from '../../Assets/SearchIcon.svg';
+import ButtonComp from '../../Components/ButtonComp/ButtonComp.jsx';
+import style from './style.module.scss';
+import { Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { InputField } from '../../Components/InputField/InputFieldSimple.jsx';
+import { server } from '../../server.js';
+import { store } from '../../index.js';
+import { setLoading } from '../../actions/loading.js';
+import useCurrentHeight from '../../CustomHooks/useCurrentHeight.js';
+import { token_type } from '../../helpers/constant.js';
 
 function Manage() {
   const { account, currency, loading } = useSelector((state) => state);
@@ -24,11 +24,10 @@ function Manage() {
   const [total, setTotal] = useState(0);
   const height = useCurrentHeight();
 
+  useEffect(() => {
+    console.log('filteredTokens===> ', filteredTokens);
+  }, [JSON.stringify(filteredTokens)]);
 
-  useEffect(()=>{
-    console.log("filteredTokens===> ", filteredTokens); 
-  },[JSON.stringify(filteredTokens)])
-  
   const init = async () => {
     store.dispatch(setLoading(true));
     const coinList = await server.post(
@@ -102,27 +101,27 @@ function Manage() {
       <div className={`scrollableCont`}>
         <div className="searchBarFixed">
           <MenuRestofHeaders
-            backTo={"/wallet"}
-            title={"Manage Assets"}
-          // manageTo={
-          //   true
-          // !(
-          //   filteredTokens.length === 1 &&
-          //   filteredTokens[0]?.coin_symbol === "btc" &&
-          //   account.isWatchOnly
-          // )
-          //   ? "/add-token"
-          //   : false
-          // }
+            backTo={'/wallet'}
+            title={'Manage Assets'}
+            // manageTo={
+            //   true
+            // !(
+            //   filteredTokens.length === 1 &&
+            //   filteredTokens[0]?.coin_symbol === "btc" &&
+            //   account.isWatchOnly
+            // )
+            //   ? "/add-token"
+            //   : false
+            // }
           />
           {!(
             filteredTokens.length === 1 &&
-            filteredTokens[0]?.coin_symbol === "btc" &&
+            filteredTokens[0]?.coin_symbol === 'btc' &&
             account.isWatchOnly
           ) ? (
             <div className="search">
               <InputField
-                placeholder={"Search"}
+                placeholder={'Search'}
                 value={keyword}
                 checkForSymbols={true}
                 addonBefore={
@@ -130,9 +129,9 @@ function Manage() {
                     <img
                       src={Search}
                       style={{
-                        width: "17px",
-                        position: "relative",
-                        top: "2px",
+                        width: '17px',
+                        position: 'relative',
+                        top: '2px',
                       }}
                       alt=""
                     />
@@ -151,11 +150,11 @@ function Manage() {
         </div>
         <div>
           <div
-            className={`${"flexedContent"}`}
+            className={`${'flexedContent'}`}
             ref={parentRef}
             onScroll={handleScroll}
             style={{
-              height: height > 600 ? "480px" : "350px",
+              height: height > 600 ? '480px' : '480px',
             }}
           >
             {/* {!(
@@ -198,7 +197,11 @@ function Manage() {
                     symbol={data.coin_symbol}
                     img={data.coin_image}
                     // valuecurrency={data.coin_family === 1 ? "BEP20" : "ERC20"}
-                    valuecurrency={(data?.token_address !== null ? (token_type(data?.coin_family)) : '')}
+                    valuecurrency={
+                      data?.token_address !== null
+                        ? token_type(data?.coin_family)
+                        : ''
+                    }
                     id={data.id}
                     coinFamily={data.coin_family}
                     walletAddress={
@@ -214,9 +217,9 @@ function Manage() {
                 <p
                   className="noAddress"
                   style={{
-                    fontWeight: "bold",
-                    fontSize: "15px",
-                    marginTop: "18%",
+                    fontWeight: 'bold',
+                    fontSize: '15px',
+                    marginTop: '18%',
                   }}
                 >
                   {loading ? 'Loading...' : 'No assets found'}
@@ -229,11 +232,11 @@ function Manage() {
       <div className="addToken">
         {!(
           filteredTokens.length === 1 &&
-          filteredTokens[0]?.coin_symbol === "btc" &&
+          filteredTokens[0]?.coin_symbol === 'btc' &&
           account.isWatchOnly
         ) ? (
           <Link to="/add-token">
-            <ButtonComp text={"Add Custom Token"} maxWidth={"100%"} />
+            <ButtonComp text={'Add Custom Token'} maxWidth={'100%'} />
           </Link>
         ) : null}
       </div>

@@ -427,6 +427,10 @@ function CreditBillPay() {
               value={keyword}
               checkForSymbols={true}
               getData={(value) => {
+                const hasEmoji = /[\p{Extended_Pictographic}]/u.test(value);
+                if (hasEmoji && value.length > 25) {
+                  return false;
+                }
                 setKeyword(value);
               }}
               addonBefore={

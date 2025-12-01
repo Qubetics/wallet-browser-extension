@@ -5,14 +5,11 @@ import ModalCloseIcon from '../../Assets/ModalCloseIcon.svg';
 import darkclose from '../../Assets/darkclose.svg';
 import { Drawer, message, Select } from 'antd';
 import { InfoCircleOutlined, SettingOutlined } from '@ant-design/icons';
-// import DarkLogo from "../../Assets/skymarvelLogo.png";
-// import Logo from "../../Assets/skymarvelLogo.png";
 import React from 'react';
 import MenuRestofHeaders from '../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders';
 import { InputField } from '../../Components/InputField/InputFieldSimple';
 import DownArrowSuffix from '../../Assets/DownArrowSuffix.svg';
 import Search from '../../Assets/SearchIcon.svg';
-// import Search from "../../Assets/SearchIcon.svg";
 import SwapVerticalIcon from '../../Assets/SwapVerticalIcon.svg';
 import ButtonComp from '../../Components/ButtonComp/ButtonComp';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -40,11 +37,12 @@ import { UNISWAP_NATIVE_WRAPPED_TOKEN_ADDRESSES } from '../../config/uniswap.con
 import { PANCAKE_NATIVE_WRAPPED_TOKEN_ADDRESSES } from '../../config/pancake.config';
 import Bignumber from 'bignumber.js';
 import { generateString } from '../../helpers/common.helper';
-// import useCheckMaintanace from "../../CustomHooks/checkMaintanance";
 import Maintanance from '../../Components/Maintanance/Maintanance';
 import { swapDetailAc } from '../../actions/swap';
 import useCurrentHeight from '../../CustomHooks/useCurrentHeight';
 import { BL_CODE, rpc_chain, token_type } from '../../helpers/constant';
+import { formatNumberInput } from '../../helpers/common.helper';
+
 function getFlooredFixed(v, d) {
   return (Math.floor(v * Math.pow(10, d)) / Math.pow(10, d)).toFixed(d);
 }
@@ -118,7 +116,7 @@ function  Swap() {
   const updateRef = useRef(true);
   const { theme } = useSelector((state) => state);
   const [percent, setPercent] = useState(null);
-  
+
   // let g = { type: "on_chain_swap", is_maintenance: 1 };
   // let b = { type: "cross_chain_swap", is_maintenance: 0 };
   const [onChainSwapM, setOnChainSwapM] = useState({});
@@ -220,15 +218,13 @@ function  Swap() {
           new BigNumber(percentage).dividedBy(100)
         );
         const amountString = finalAmountToSend
-        .decimalPlaces(6, BigNumber.ROUND_DOWN)
-        .toString()
-        .replace(/\.?0+$/, '');
+          .decimalPlaces(6, BigNumber.ROUND_DOWN)
+          .toString()
+          .replace(/\.?0+$/, '');
         console.log('FINAL AMOUNT  :', percentage, finalAmountToSend);
-        
+
         setAount(
-          finalAmountToSend == 0
-            ? finalAmountToSend.toString()
-            : amountString
+          finalAmountToSend == 0 ? finalAmountToSend.toString() : amountString
         );
         setBalance(amountToSend);
         console.log(
@@ -251,89 +247,6 @@ function  Swap() {
       return messageApi.error('Something went wrong.');
     }
   };
-
-
-  // const calculateAccordingly = async (percentage) => {
-  //   try {
-  //     store.dispatch(overAllLoader(true));
-      
-  //     // CASE 1: TOKEN (has tokenAddress)
-  //     if (token1.tokenAddress) {
-  //       const amountToSend = await Web3Helper.getTokenBalance(
-  //         token1.tokenAddress,
-  //         token1.address,
-  //         token1.rpc
-  //       );
-  //       console.log('Token Balance:', amountToSend);
-        
-  //       if (amountToSend == 0) {
-  //         setAmount2(0);
-  //         setInfoData([]);
-  //         store.dispatch(overAllLoader(false));
-  //         return;
-  //       }
-        
-  //       // Calculate percentage of token balance
-  //       const finalAmountToSend = new BigNumber(token1.balance).multipliedBy(
-  //         new BigNumber(percentage).dividedBy(100)
-  //       );
-        
-  //       console.log('Token Amount to Send:', percentage, finalAmountToSend);
-        
-  //       const formattedAmount = finalAmountToSend.isZero()
-  //         ? '0'
-  //         : finalAmountToSend.toFixed(6).replace(/\.?0+$/, '');
-        
-  //       setAount(formattedAmount);
-  //       setBalance(amountToSend);
-        
-  //       await handleInputChange(formattedAmount, token1, token2, true);
-  //       store.dispatch(overAllLoader(false));
-  //     } 
-  //     // CASE 2: COIN (native currency like BNB, ETH)
-  //     else {
-  //       // For coins, simply calculate percentage of existing balance
-  //       // token1.balance should already contain the coin balance
-  //       const coinBalance = token1.balance || balance;
-  //       console.log('Coin Balance:', coinBalance);
-        
-  //       if (!coinBalance || coinBalance === '0' || parseFloat(coinBalance) === 0) {
-  //         setAmount2(0);
-  //         setInfoData([]);
-  //         store.dispatch(overAllLoader(false));
-  //         return;
-  //       }
-        
-  //       // Calculate percentage of coin balance
-  //       const finalAmountToSend = new BigNumber(coinBalance).multipliedBy(
-  //         new BigNumber(percentage).dividedBy(100)
-  //       );
-        
-  //       console.log('Coin Amount to Send:', percentage, finalAmountToSend.toString());
-        
-  //       // Format the amount (remove trailing zeros)
-  //       const formattedAmount = finalAmountToSend.isZero()
-  //         ? '0'
-  //         : finalAmountToSend.toFixed(6).replace(/\.?0+$/, '');
-        
-  //       setAount(formattedAmount);
-  //       setBalance(coinBalance);
-        
-  //       // Ensure token1 has correct decimals for native coins (18 decimals)
-  //       const updatedToken1 = {
-  //         ...token1,
-  //         decimals: token1.decimals || 18 // Native coins typically have 18 decimals
-  //       };
-        
-  //       await handleInputChange(formattedAmount, updatedToken1, token2, true);
-  //       store.dispatch(overAllLoader(false));
-  //     }
-  //   } catch (error) {
-  //     console.error('Calculate Accordingly Error:', error);
-  //     store.dispatch(overAllLoader(false));
-  //     return messageApi.error('Something went wrong while calculating amount.');
-  //   }
-  // };
 
   const init = async () => {
     let amountToSend = 0;
@@ -1306,10 +1219,11 @@ function  Swap() {
           commision.percentage
         );
 
-        if (!route) {
+        if (route?.error) {
           setLoading(false);
           return messageApi.error(
-            'This pair is not available for swap at the moment. Please try again later.'
+            route?.message ||
+              'This pair is not available for swap at the moment. Please try again later.'
           );
         }
         setRoute(route);
@@ -1326,74 +1240,6 @@ function  Swap() {
       updateRef.current = true;
     }
   };
-
-  // const handleInputChange = async (amount, token1, token2, second) => {
-  //   try {
-  //     if (amount > 0 && token1.coinFamily == token2.coinFamily) {
-  //       setLoading(true);
-  
-  //       // Ensure decimals is set correctly (native coins have 18 decimals)
-  //       const token1Decimals = token1.decimals || 18;
-  //       const token2Decimals = token2.decimals || 18;
-  
-  //       // For native coins, use the special address
-  //       const srcAddress = token1.tokenAddress || '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
-  //       const dstAddress = token2.tokenAddress || '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
-  
-  //       console.log('Swap Details:', {
-  //         amount,
-  //         token1Decimals,
-  //         srcAddress,
-  //         dstAddress,
-  //         chainId: token1.chain.chainId
-  //       });
-  
-  //       // Convert amount to smallest unit (wei for native coins)
-  //       const amountInSmallestUnit = new BigNumber(amount)
-  //         .multipliedBy(new BigNumber(10).pow(token1Decimals))
-  //         .decimalPlaces(0, BigNumber.ROUND_DOWN)
-  //         .toString();
-  
-  //       console.log('Amount in smallest unit:', amountInSmallestUnit);
-  
-  //       const uniHelper = new UniswapHelper(token1.rpc);
-  //       const route = await uniHelper.getQuoteAndRoute(
-  //         token1.chain.chainId,
-  //         srcAddress,
-  //         dstAddress,
-  //         amountInSmallestUnit,
-  //         commision.percentage
-  //       );
-  
-  //       if (!route) {
-  //         setLoading(false);
-  //         return messageApi.error(
-  //           'This pair is not available for swap at the moment. Please try again later.'
-  //         );
-  //       }
-  
-  //       console.log('Route received:', route);
-  
-  //       setRoute(route);
-        
-  //       // Convert the output amount back to human-readable format
-  //       const outputAmount = new Bignumber(route.toAmount)
-  //         .dividedBy(Math.pow(10, token2Decimals))
-  //         .toFixed();
-  
-  //       console.log('Output amount:', outputAmount);
-  
-  //       setAmount2(outputAmount);
-  //       setLoading(false);
-  //     }
-  //     updateRef.current = true;
-  //   } catch (error) {
-  //     console.error('handleInputChange error:', error);
-  //     setLoading(false);
-  //     updateRef.current = true;
-  //     messageApi.error('Failed to fetch swap route. Please try again.');
-  //   }
-  // };
 
   const handleInputChangeForToToken = async (amount, token2) => {
     try {
@@ -1809,7 +1655,7 @@ function  Swap() {
                         <input
                           type="number"
                           className="myInput"
-                          placeholder="0.000"
+                          placeholder="0"
                           onWheel={(e) => e.currentTarget.blur()}
                           inputMode="decimal"
                           onKeyDown={(e) => {
@@ -1826,11 +1672,10 @@ function  Swap() {
                             if (allowedKeys.includes(e.key)) return;
 
                             if (!/^[0-9.]$/.test(e.key)) {
-                              e.preventDefault(); 
+                              e.preventDefault();
                             }
                           }}
                           onChange={({ target: { value: _amount } }) => {
-
                             if (percent != null) {
                               setPercent(null);
                             }
@@ -1981,6 +1826,7 @@ function  Swap() {
                               }
                         }
                         onClick={() => {
+                          console.log('token2', token2, token1);
                           if (token2?.iHave) {
                             setAmount2(0);
                             setAount(0);
@@ -2005,7 +1851,7 @@ function  Swap() {
                         <input
                           type="number"
                           className="myInput"
-                          placeholder="0.000"
+                          placeholder="0"
                           value={amount2}
                           readOnly={true}
                           onChange={({ target: { value: amount } }) => {
@@ -2391,7 +2237,7 @@ function  Swap() {
                 }
                 getData={(value) => {
                   const hasEmoji = /[\p{Extended_Pictographic}]/u.test(value);
-                  if (hasEmoji) {
+                  if (hasEmoji && value.length > 25) {
                     return false;
                   }
                   setKeyword(value);
@@ -2657,128 +2503,6 @@ function  Swap() {
           </div>
         </div>
       </Drawer>
-      {/* <Drawer
-        title="Slippage Tolerance"
-        placement="bottom"
-        onClose={() => {
-          if (customSlippage == 0) {
-            return messageApi.error('Please enter a valid slippage value.');
-          }
-          setSlippageDrawer(false);
-        }}
-        open={slippageDrawer}
-        closable={true}
-        // eslint-disable-next-line jsx-a11y/alt-text
-        closeIcon={
-          theme == 'darkTheme' ? (
-            <img src={darkclose} />
-          ) : (
-            <img src={ModalCloseIcon} />
-          )
-        }
-        height={292}
-      >
-        <div
-          className="contain"
-          style={{
-            height: '100%',
-            width: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            // justifyContent: "space-between",
-          }}
-        >
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-evenly',
-              gap: '6px',
-            }}
-          >
-            <div className="myvalues">
-              <p
-                className={slippage1 === 1 ? 'myValuesActive' : ''}
-                onClick={() => {
-                  setSlippage1(1);
-                  setCustomSlippage1(null);
-                }}
-              >
-                1%
-              </p>
-            </div>
-
-            <div className="myvalues">
-              <p
-                className={slippage1 === 2 ? 'myValuesActive' : ''}
-                onClick={() => {
-                  setSlippage1(2);
-                  setCustomSlippage1(null);
-                }}
-              >
-                2%
-              </p>
-            </div>
-            <div className="myvalues">
-              <p
-                className={slippage1 === 3 ? 'myValuesActive' : ''}
-                onClick={() => {
-                  setSlippage1(3);
-                  setCustomSlippage1(null);
-                }}
-              >
-                3%
-              </p>
-            </div>
-            <div className="pthel_input">
-              <InputField
-                coloredBg={'transparent'}
-                placeholder={'Custom'}
-                value={customSlippage1}
-                type="number"
-                addonBefore={
-                  <span>
-                    <img
-                      src={Search}
-                      style={{
-                        width: '17px',
-                        marginTop: '5px',
-                      }}
-                      alt=""
-                    />
-                  </span>
-                }
-                getData={(value) => {
-                  if (!value || value === '') {
-                    setSlippage1(1);
-                    setCustomSlippage1(null);
-                  }
-
-                  if (parseFloat(value) <= 50 && value.toString().length <= 5) {
-                    setSlippage1(null);
-                    setCustomSlippage1(value);
-                  }
-                }}
-              />
-            </div>
-          </div>
-          <ButtonComp
-            text={'Done'}
-            maxWidth={'50%'}
-            marginTop={'40px'}
-            alignSelf="center"
-            onClick={() => {
-              if (customSlippage == 0) {
-                return messageApi.error('Please enter a valid slippage value.');
-              }
-              setSlippage(slippage1);
-              setCustomSlippage(customSlippage1);
-              setSlippageDrawer(false);
-              handleChangeForInput1(amount);
-            }}
-          />
-        </div>
-      </Drawer> */}
       <Drawer
         title="Slippage Tolerance"
         placement="bottom"
@@ -2877,7 +2601,12 @@ function  Swap() {
 
                   // allow only up to 50 and reasonable length
                   const parsed = parseFloat(value);
-                  if (!isNaN(parsed) && parsed >= 0 && parsed <= 50 && value.toString().length <= 5) {
+                  if (
+                    !isNaN(parsed) &&
+                    parsed >= 0 &&
+                    parsed <= 50 &&
+                    value.toString().length <= 5
+                  ) {
                     setSlippage1(null); // custom selected
                     setCustomSlippage1(value);
                   }
@@ -2898,7 +2627,9 @@ function  Swap() {
                 // user chose custom input -> validate it
                 const parsed = parseFloat(customSlippage1);
                 if (isNaN(parsed) || parsed < 0) {
-                  return messageApi.error('Please enter a valid slippage value.');
+                  return messageApi.error(
+                    'Please enter a valid slippage value.'
+                  );
                 }
                 // set values from custom
                 setSlippage(parsed);
@@ -2915,7 +2646,6 @@ function  Swap() {
           />
         </div>
       </Drawer>
-
 
       {infoMessage && (
         <ModalCustom
@@ -2962,10 +2692,11 @@ function  Swap() {
             />{' '} */}
               <p>
                 Users can import tokens from Uniswap, PancakeSwap, PulseChain
-                and Jupiter on Qubetics Wallet. While we strive for optimal routing
-                and low fees, due to decentralization, we cannot guarantee it.
-                Users must verify token numbers and gas fees before swapping and
-                assume responsibility for charges or losses. Visit our{' '}
+                and Jupiter on Qubetics Wallet. While we strive for optimal
+                routing and low fees, due to decentralization, we cannot
+                guarantee it. Users must verify token numbers and gas fees
+                before swapping and assume responsibility for charges or losses.
+                Visit our{' '}
                 <span
                   style={{
                     color: '#00aeef',
@@ -3069,15 +2800,6 @@ function  Swap() {
                 const balanceExtraToAddIfFromIsNativeCoin =
                   feeAmount.plus(amountToAdd);
 
-                // console.log('nativeBalance :: ', parseFloat(nativeBalance));
-                // console.log('feeAmount :: ', parseFloat(feeAmount));
-                // console.log(
-                //   ' amountToAdd ',
-                //   parseFloat(amountToAdd),
-                //   ' balanceExtraToAddIfFromIsNativeCoin ',
-                //   parseFloat(balanceExtraToAddIfFromIsNativeCoin)
-                // );
-
                 if (balanceExtraToAddIfFromIsNativeCoin.gt(nativeBalance)) {
                   store.dispatch(overAllLoader(false));
                   return messageApi.error(
@@ -3105,27 +2827,6 @@ function  Swap() {
                   state: swapDetailed,
                 });
               }}
-              // text={
-              //   new BigNumber(amount).isGreaterThan(
-              //     new BigNumber(balance)
-              //   )
-              //     ? 'Insufficient Balance'
-              //     : token1?.id == token2?.id &&
-              //       token1 != null &&
-              //       token2 != null
-              //     ? 'Please select a different token'
-              //     : 'Swap'
-              // }
-              // maxWidth={'100%'}
-              // disabled={
-              //   !amount ||
-              //   !amount2 ||
-              //   amount <= 0 ||
-              //   amount2 <= 0 ||
-              //   loading ||
-              //   parseFloat(amount) > parseFloat(balance) ||
-              //   token1?.id == token2?.id
-              // }
             />
             <ButtonComp
               maxWidth={'100%'}

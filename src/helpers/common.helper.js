@@ -3,7 +3,7 @@ import TOKEN_ABI from '../Assets/JsonFiles/tokenContract.ABI.json';
 import base58 from 'bs58';
 import BigNumber from 'bignumber.js';
 export function numberWithSpaces(x) {
-  return x?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+  return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
 }
 
 export function modifyString(str) {
@@ -27,9 +27,9 @@ export function generateString(length) {
 }
 
 export const toFixed = (num, fixed) => {
-  num = num?.toString(); //If it's not already a String
-  if (num?.includes('.')) {
-    num = num?.slice(0, num?.indexOf('.') + (fixed + 1));
+  num = num.toString(); //If it's not already a String
+  if (num.includes('.')) {
+    num = num.slice(0, num.indexOf('.') + (fixed + 1));
   }
   return Number(num);
 };
@@ -107,7 +107,7 @@ export const formatNumberUSD = (value) => {
     return value;
   }
 
-  const decimalPlaces = (value?.toString().split('.')[1] || '').length;
+  const decimalPlaces = (value.toString().split('.')[1] || '').length;
 
   const formattedNumber = numberValue.toLocaleString(undefined, {
     maximumFractionDigits: decimalPlaces > 2 ? 2 : decimalPlaces,
@@ -116,7 +116,7 @@ export const formatNumberUSD = (value) => {
   return formattedNumber;
 };
 export const formatNumberFiat = (value) => {
-  const decimalPlaces = (value?.toString().split('.')[1] || '').length;
+  const decimalPlaces = (value.toString().split('.')[1] || '').length;
   const parsedValue = parseFloat(value);
 
   if (decimalPlaces > 8) {
@@ -192,4 +192,55 @@ export function capitalizeWords(input) {
     .split(/\s+/)
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
+}
+
+export function formatNumberInput(value, maxDecimals = 18) {
+  // Handle empty, null, undefined
+  if (value === '' || value === null || value === undefined) {
+    return '';
+  }
+
+  // Convert to string to handle all input types
+  let numStr = String(value);
+
+  // Remove any existing commas
+  numStr = numStr.replace(/,/g, '');
+
+  // Handle exponential notation - convert to fixed decimal
+  if (numStr.includes('e') || numStr.includes('E')) {
+    const num = parseFloat(numStr);
+    if (isNaN(num)) return '';
+
+    // Convert exponential to fixed notation with enough precision
+    numStr = num.toFixed(maxDecimals);
+  }
+
+  // Parse the number
+  const num = parseFloat(numStr);
+  if (isNaN(num)) return '';
+
+  // Split into integer and decimal parts
+  const parts = numStr.split('.');
+  let integerPart = parts[0];
+  let decimalPart = parts[1] || '';
+
+  // Remove trailing zeros from decimal part
+  decimalPart = decimalPart.replace(/0+$/, '');
+
+  // Limit decimal places to maxDecimals
+  if (decimalPart.length > maxDecimals) {
+    decimalPart = decimalPart.substring(0, maxDecimals);
+    // Remove trailing zeros again after truncation
+    decimalPart = decimalPart.replace(/0+$/, '');
+  }
+
+  // Add commas to integer part
+  integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+  // Combine parts
+  if (decimalPart) {
+    return `${integerPart}.${decimalPart}`;
+  }
+
+  return integerPart;
 }

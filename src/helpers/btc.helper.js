@@ -3,7 +3,6 @@ import { store } from '..';
 import { IS_PRODUCTION } from '../config/bitcoin.config';
 import { server } from '../server';
 import { WalletHelper } from './wallet.helper';
-import { validate } from 'bitcoin-address-validation';
 const BIP84 = require('bip84');
 
 let inputCount = 0;
@@ -97,11 +96,18 @@ export class BTCHelper {
   static getUnspent = async (address) => {
     const { account } = store.getState();
     try {
-      const { data } = await server.get(`/bitcoin/unspent/${address}`, {
-        headers: {
-          Authorization: account.jwtToken,
-        },
-      });
+      const { data } = await server.get(
+        // `/btc/unspent_new`,
+        `/bitcoin/unspent/${address}`,
+        // {
+        //   address: address,
+        // },
+        {
+          headers: {
+            Authorization: account.jwtToken,
+          },
+        }
+      );
       console.log('BTC FEESSSS ', data);
 
       return data.data || [];
@@ -130,14 +136,14 @@ export class BTCHelper {
 
       if (!unspent) {
         return {
-          message: "Unable to fetch unspent at the moment.",
+          message: 'Unable to fetch unspent at the moment.',
         };
       }
 
       if (unspent.length === 0) {
         return {
           message:
-            "You have a pending transaction in your account or you do not have enough balance to proceed with the transaction.",
+            'You have a pending transaction in your account or you do not have enough balance to proceed with the transaction.',
         };
       }
 
@@ -171,7 +177,7 @@ export class BTCHelper {
 
       if (utxos.length === 0) {
         return {
-          message: "No valid UTXOs found.",
+          message: 'No valid UTXOs found.',
         };
       }
 
@@ -187,13 +193,13 @@ export class BTCHelper {
       const balance = await this.getCoinBalance(fromAddress);
       if (+totalAmount > +balance) {
         return {
-          message: "Not enough balance to proceed with the transaction.",
+          message: 'Not enough balance to proceed with the transaction.',
         };
       }
 
       if (totalAmountAvailable < sendAmount + fee) {
         return {
-          message: "Insufficient UTXO balance to proceed with the transaction.",
+          message: 'Insufficient UTXO balance to proceed with the transaction.',
         };
       }
 
@@ -202,7 +208,7 @@ export class BTCHelper {
       if (!btcPrivateKeyStr) {
         return {
           message:
-            "Unable to fetch private key at the moment please try again later.",
+            'Unable to fetch private key at the moment please try again later.',
         };
       }
 
@@ -214,23 +220,23 @@ export class BTCHelper {
       if (fromAddress.startsWith("bc1q")) {
         // P2WPKH (Bech32)
         payment = bitcoin.payments.p2wpkh({ pubkey: keyPair.publicKey });
-        console.log("Using P2WPKH (SegWit) address:", payment.address);
-      } else if (fromAddress.startsWith("3")) {
+        console.log('Using P2WPKH (SegWit) address:', payment.address);
+      } else if (fromAddress.startsWith('3')) {
         // P2SH-P2WPKH (SegWit wrapped in P2SH)
         const p2wpkh = bitcoin.payments.p2wpkh({ pubkey: keyPair.publicKey });
         payment = bitcoin.payments.p2sh({ redeem: p2wpkh });
-        console.log("Using P2SH-P2WPKH address:", payment.address);
+        console.log('Using P2SH-P2WPKH address:', payment.address);
       } else {
         // P2PKH (Legacy)
         payment = bitcoin.payments.p2pkh({ pubkey: keyPair.publicKey });
-        console.log("Using P2PKH (Legacy) address:", payment.address);
+        console.log('Using P2PKH (Legacy) address:', payment.address);
       }
 
       // Verify address match
       if (payment.address !== fromAddress) {
-        console.error("Address mismatch:", payment.address, "vs", fromAddress);
+        console.error('Address mismatch:', payment.address, 'vs', fromAddress);
         return {
-          message: "Private key does not match wallet address.",
+          message: 'Private key does not match wallet address.',
         };
       }
 
@@ -298,10 +304,10 @@ export class BTCHelper {
       psbt.finalizeAllInputs();
       const rawTransaction = psbt.extractTransaction().toHex();
 
-      console.log("Transaction created successfully");
+      console.log('Transaction created successfully');
       return rawTransaction;
     } catch (error) {
-      console.error("generateRawTransaction error:", error);
+      console.error('generateRawTransaction error:', error);
       return {
         message: `Transaction generation failed: ${error.message}`,
       };
@@ -386,44 +392,49 @@ export class BTCHelper {
   ) => {
     try {
       console.log(
-        "TO",
+        'TO',
         to,
-        "FROM",
+        'FROM',
         from,
-        "AMOUNT",
+        'AMOUNT',
         amount,
-        "SLUG",
+        'SLUG',
         slug,
-        "RAW",
+        'RAW',
         rawTransaction,
-        "ORDERID",
+        'ORDERID',
         orderId,
-        "TYPE",
+        'TYPE',
         type
       );
       const { account } = store.getState();
-      console.log("ACCOUNT : ", account);
+      console.log('ACCOUNT : ', account);
       let payload = {
         tx_raw: rawTransaction,
         from: from,
         to: to,
         amount: amount,
-        gas_price: "", //gasPriceRes.fast * Math.pow(10, 9),//gasInEth,
-        tx_type: type || "withdraw",
+        gas_price: '', //gasPriceRes.fast * Math.pow(10, 9),//gasInEth,
+        tx_type: type || 'withdraw',
       };
-      payload["order_id"] = orderId;
+      payload['order_id'] = orderId;
       const myResponse = await server.post(`${slug}/send`, payload, {
         headers: {
           Authorization: account.jwtToken,
         },
       });
 
-      console.log("RESPONSE FROM TXN REQUEST  BTC:", myResponse);
+      console.log('RESPONSE FROM TXN REQUEST  BTC:', myResponse);
 
       return myResponse.data;
     } catch (error) {
       console.log(error);
-      return false;
+      return {
+        error: true,
+        message:
+          error?.response?.data?.message ||
+          'Something went wrong. Please try again later.',
+      };
     }
   };
 }
