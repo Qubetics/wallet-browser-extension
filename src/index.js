@@ -14,6 +14,12 @@ import { Buffer } from 'buffer';
 
 window.Buffer = Buffer; 
 
+const noop = () => {};
+console.log = noop;
+console.debug = noop;
+console.info = noop;
+console.warn = noop;
+
 const composeEnhancers =
   (typeof window !== "undefined" &&
     window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__) ||

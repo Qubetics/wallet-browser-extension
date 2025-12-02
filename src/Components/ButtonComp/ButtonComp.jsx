@@ -7,6 +7,7 @@ function ButtonComp({
   onClick,
   onKeyDown,
   deletebordered,
+  height,
   maxWidth,
   marginBottom,
   disabled,
@@ -25,6 +26,7 @@ function ButtonComp({
       disabled={disabled || false}
       style={{
         maxWidth: maxWidth,
+        height: height,
         marginBottom,
         marginTop,
         alignSelf: alignSelf,

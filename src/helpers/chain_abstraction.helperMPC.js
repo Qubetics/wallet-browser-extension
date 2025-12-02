@@ -246,16 +246,19 @@ export class MpcChainAbstractionHelper {
       console.log("Amount with decimals:", amountWithDecimals);
   
       // Prepare message for signature
+      // For same-coin transfers, both chains and tokens are the same
+      const isSameCoin = token1?.coinSymbol?.toLowerCase() === token2?.coinSymbol?.toLowerCase();
+      const sourceChain = token1?.coinSymbol?.toLowerCase() === "tics" ? "qubetics" : "bitcoin";
+      const targetChain = token2?.coinSymbol?.toLowerCase() === "tics" ? "qubetics" : "bitcoin";
+      
       const msg = {
         source_address: mpcFromAddress,
         target_address: toAddress,
-        source_chain:
-          token1?.coinSymbol?.toLowerCase() === "tics" ? "qubetics" : "bitcoin",
-        target_chain:
-          token2?.coinSymbol?.toLowerCase() === "tics" ? "qubetics" : "bitcoin",
+        source_chain: sourceChain,
+        target_chain: isSameCoin ? sourceChain : targetChain, // Same chain for same-coin transfers
         amount: Number(amountWithDecimals),
         source_token: token1?.coinSymbol?.toLowerCase(),
-        target_token: token2?.coinSymbol?.toLowerCase(),
+        target_token: isSameCoin ? token1?.coinSymbol?.toLowerCase() : token2?.coinSymbol?.toLowerCase(),
         timestamp: new Date().getTime(),
       };
   

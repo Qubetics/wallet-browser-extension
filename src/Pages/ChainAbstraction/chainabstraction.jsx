@@ -42,6 +42,7 @@ import {
   getMpcWallets,
 } from "../../helpers/mpc.helper";
 import { MpcChainAbstractionHelper } from "../../helpers/chain_abstraction.helperMPC";
+import PasteIcon from "../../Assets/paste-svgrepo-com.svg";
 import Abstract from "../../Assets/swapI.png";
 
 // Min/Max swap amounts based on coin family
@@ -58,6 +59,15 @@ const MIN_MAX_SWAP_AMOUNT = {
 
 function getFlooredFixed(v, d) {
   return (Math.floor(v * Math.pow(10, d)) / Math.pow(10, d)).toFixed(d);
+}
+
+// Remove trailing zeros from decimal numbers
+function removeTrailingZeros(value) {
+  if (!value && value !== 0) return '0';
+  const num = parseFloat(value);
+  if (isNaN(num)) return '0';
+  // Convert to string and remove trailing zeros
+  return num.toString().replace(/\.?0+$/, '');
 }
 
 function addCommasToNumber(number) {
@@ -205,20 +215,22 @@ function ChainAbstraction({ state }) {
     }
     
     debounceTimeout.current = setTimeout(() => {
-      const fromFiatValue = token1?.price;
-      const toFiatValue = token2?.price;
+      // For same-coin transfers (same chain), received amount equals entered amount (no slippage)
+      if (token1?.id === token2?.id) {
+        const toAmt = parseFloat(val || 0);
+        setReceivedAmount(getFlooredFixed(toAmt, 8));
+      } else {
+        // For chain abstraction (different coins), calculate based on fiat prices
+        const fromFiatValue = token1?.price;
+        const toFiatValue = token2?.price;
 
-      const toValue = new BigNumber(val || 0)
-        .times(new BigNumber(fromFiatValue || 0))
-        .dividedBy(new BigNumber(toFiatValue || 0));
+        const toValue = new BigNumber(val || 0)
+          .times(new BigNumber(fromFiatValue || 0))
+          .dividedBy(new BigNumber(toFiatValue || 0));
 
-      const toAmt = exponential_to_decimal(toValue, 8);
-      const valueAfterSlippage = exponential_to_decimal(
-        bigNumberSafeMath(toAmt, "*", 0.995),
-        6
-      );
-
-      setReceivedAmount(getFlooredFixed(valueAfterSlippage, 8));
+        const toAmt = exponential_to_decimal(toValue, 8);
+        setReceivedAmount(getFlooredFixed(toAmt, 8));
+      }
     }, 800);
   };
 
@@ -322,11 +334,16 @@ function ChainAbstraction({ state }) {
       let mpcWalletData;
       if (Array.isArray(mpcWalletDataArray)) {
         console.log("[DEBUG] Searching array for coin family:", coinFamily);
-        // Find the wallet data for the current coin family
-        mpcWalletData = mpcWalletDataArray.find(
+        // Filter all wallets matching the coin family and get the last one
+        const matchingWallets = mpcWalletDataArray.filter(
           (wallet) => wallet?.coin_family === coinFamily
         );
-        console.log("[DEBUG] Found wallet data:", mpcWalletData);
+        // Get the last entry (most recent) for this coin family
+        mpcWalletData = matchingWallets.length > 0 
+          ? matchingWallets[matchingWallets.length - 1] 
+          : null;
+        console.log("[DEBUG] Found wallet data (last entry):", mpcWalletData);
+        console.log("[DEBUG] Total matching wallets:", matchingWallets.length);
       } else {
         // Single object response
         console.log("[DEBUG] Single object response, coin_family:", mpcWalletDataArray?.coin_family);
@@ -502,7 +519,8 @@ function ChainAbstraction({ state }) {
             (token) => !token.tokenAddress && token.coinFamily == 3
           ) ||
           modifiedList.find((token) => token.id !== myToken1?.id) ||
-          modifiedList[1];
+          modifiedList[1] ||
+          myToken1; // Allow same token if only one available
 
         // Fetch fresh MPC balance for token1
         const mpcAddr1 =
@@ -521,31 +539,45 @@ function ChainAbstraction({ state }) {
         setToken2(myToken2);
         setCompentLoading(true);
 
-        const route = await crossChainHelper.current.getQuoteAndRoute(
-          myToken1?.symbol,
-          myToken2?.symbol,
-          1
-        );
+        // For same-coin transfers (same chain), received amount equals entered amount (no slippage)
+        let route;
+        if (myToken1?.id === myToken2?.id) {
+          route = {
+            pair: [myToken1?.symbol, myToken2?.symbol],
+            outAmount: 1, // Same amount, no slippage
+            exchangeData: {
+              instantRate: 1,
+              receiveCoinFee: 0, // No fee for same-coin transfers
+            },
+          };
+          setRoute(route);
+        } else {
+          route = await crossChainHelper.current.getQuoteAndRoute(
+            myToken1?.symbol,
+            myToken2?.symbol,
+            1
+          );
 
-        if (
-          route?.status &&
-          route?.message &&
-          (route?.status !== "" || route?.message !== "")
-        ) {
-          setCompentLoading(false);
-          return messageApi.error(route?.message);
+          if (
+            route?.status &&
+            route?.message &&
+            (route?.status !== "" || route?.message !== "")
+          ) {
+            setCompentLoading(false);
+            return messageApi.error(route?.message);
+          }
+
+          setRoute(route);
         }
-
-        setRoute(route);
         setCompentLoading(false);
       } else {
         const myToken1 =
           activeTokens.find((el) => el.id == crossToken1.id) || null;
         
-        // Ensure myToken2 is different from myToken1
+        // Allow same token selection
         let myToken2 = modifiedList.find((el) => el.id == crossToken2.id);
-        if (!myToken2 || myToken2.id === myToken1?.id) {
-          myToken2 = modifiedList.find((token) => token.id !== myToken1?.id) || modifiedList[1];
+        if (!myToken2) {
+          myToken2 = modifiedList.find((token) => token.id !== myToken1?.id) || modifiedList[1] || myToken1;
         }
 
         const updatedToken = modifiedList.find((el) => el.id == crossToken1.id);
@@ -571,22 +603,36 @@ function ChainAbstraction({ state }) {
         setAvailableTokens(modifiedList);
 
         if (myToken1) {
-          const route = await crossChainHelper.current.getQuoteAndRoute(
-            myToken1?.symbol,
-            myToken2?.symbol,
-            1
-          );
+          // For same-coin transfers (same chain), received amount equals entered amount (no slippage)
+          let route;
+          if (myToken1?.id === myToken2?.id) {
+            route = {
+              pair: [myToken1?.symbol, myToken2?.symbol],
+              outAmount: 1, // Same amount, no slippage
+              exchangeData: {
+                instantRate: 1,
+                receiveCoinFee: 0, // No fee for same-coin transfers
+              },
+            };
+            setRoute(route);
+          } else {
+            route = await crossChainHelper.current.getQuoteAndRoute(
+              myToken1?.symbol,
+              myToken2?.symbol,
+              1
+            );
 
-          if (
-            route?.status &&
-            route?.message &&
-            (route?.status !== "" || route?.message !== "")
-          ) {
-            setCompentLoading(false);
-            return messageApi.error(route?.message);
+            if (
+              route?.status &&
+              route?.message &&
+              (route?.status !== "" || route?.message !== "")
+            ) {
+              setCompentLoading(false);
+              return messageApi.error(route?.message);
+            }
+
+            setRoute(route);
           }
-
-          setRoute(route);
         }
 
         setCompentLoading(false);
@@ -614,13 +660,9 @@ function ChainAbstraction({ state }) {
             return messageApi.error("Token not available for swap.");
           }
 
-          if (crossToken2?.id !== tokenFromSearch.id) {
-            crossToken1 = tokenFromSearch;
-            await chrome.storage.local.set({ crossToken1: tokenFromSearch });
-            setToken1(crossToken1);
-          } else {
-            messageApi.error("Cannot set the same tokens on both sides.");
-          }
+          crossToken1 = tokenFromSearch;
+          await chrome.storage.local.set({ crossToken1: tokenFromSearch });
+          setToken1(crossToken1);
         }
       }
     } catch (error) {
@@ -724,6 +766,13 @@ function ChainAbstraction({ state }) {
 
   // Set default MPC address for the "To Address" field based on token2
   useEffect(() => {
+    // If same token is selected for both source and destination, leave "To Address" empty
+    if (token1?.id === token2?.id) {
+      console.log("Same token selected for both source and destination, clearing to address");
+      setToAddress("");
+      return;
+    }
+
     const getDefaultToAddress = (token, addresses) => {
       if (!token || !addresses) {
         return "";
@@ -747,7 +796,7 @@ function ChainAbstraction({ state }) {
         setToAddress(defaultAddress);
       }
     }
-  }, [token2, mpcAddresses]);
+  }, [token1, token2, mpcAddresses]);
 
   // Fetch MPC balance when token1 or mpcFromAddress changes
   // useEffect(() => {
@@ -791,19 +840,32 @@ function ChainAbstraction({ state }) {
         if (amount > 0 && amount && tokenTwo) {
           setCompentLoading(true);
 
-          const route = await crossChainHelper?.current.getQuoteAndRoute(
-            tokenOne?.symbol,
-            tokenTwo?.symbol,
-            amount
-          );
+          // For same-coin transfers (same chain), received amount equals entered amount (no slippage)
+          let route;
+          if (tokenOne?.id === tokenTwo?.id) {
+            route = {
+              pair: [tokenOne?.symbol, tokenTwo?.symbol],
+              outAmount: amount, // Same amount, no slippage
+              exchangeData: {
+                instantRate: 1,
+                receiveCoinFee: 0, // No fee for same-coin transfers
+              },
+            };
+          } else {
+            route = await crossChainHelper?.current.getQuoteAndRoute(
+              tokenOne?.symbol,
+              tokenTwo?.symbol,
+              amount
+            );
 
-          if (
-            route?.status &&
-            route?.message &&
-            (route?.status !== "" || route?.message !== "")
-          ) {
-            setCompentLoading(false);
-            return messageApi.error(route?.message);
+            if (
+              route?.status &&
+              route?.message &&
+              (route?.status !== "" || route?.message !== "")
+            ) {
+              setCompentLoading(false);
+              return messageApi.error(route?.message);
+            }
           }
 
           const outAmount = parseFloat(route?.outAmount || 0);
@@ -850,12 +912,6 @@ function ChainAbstraction({ state }) {
   }, [token1, token2]);
 
   const handlePositionChange = async (updatedToken1) => {
-    // Prevent setting the same token for both positions
-    if (updatedToken1?.id === token2?.id) {
-      messageApi.error("Cannot select the same token for both positions.");
-      return;
-    }
-    
     await chrome.storage.local.set({
       crossToken1: updatedToken1,
     });
@@ -881,27 +937,34 @@ function ChainAbstraction({ state }) {
       updateRef.current = false;
     }
   
-    const route = await crossChainHelper.current.getQuoteAndRoute(
-      updatedToken1?.symbol,
-      token2?.symbol,
-      1
-    );
-    if (route?.status && route?.message) {
-      if (route?.status != "" || route?.message != "") {
-        return messageApi.error(route?.message);
+    // For same-coin transfers (same chain), received amount equals entered amount (no slippage)
+    if (updatedToken1?.id === token2?.id) {
+      const sameCoinRoute = {
+        pair: [updatedToken1?.symbol, token2?.symbol],
+        outAmount: 1, // Same amount, no slippage
+        exchangeData: {
+          instantRate: 1,
+          receiveCoinFee: 0, // No fee for same-coin transfers
+        },
+      };
+      setRoute(sameCoinRoute);
+    } else {
+      const route = await crossChainHelper.current.getQuoteAndRoute(
+        updatedToken1?.symbol,
+        token2?.symbol,
+        1
+      );
+      if (route?.status && route?.message) {
+        if (route?.status != "" || route?.message != "") {
+          return messageApi.error(route?.message);
+        }
       }
+      setRoute(route);
     }
-    setRoute(route);
   };
 
 
   const handleToken2Change = async (updatedToken2) => {
-    // Prevent setting the same token for both positions
-    if (updatedToken2?.id === token1?.id) {
-      messageApi.error("Cannot select the same token for both positions.");
-      return;
-    }
-    
     await chrome.storage.local.set({
       crossToken2: updatedToken2,
     });
@@ -915,18 +978,31 @@ function ChainAbstraction({ state }) {
       updateRef.current = false;
     }
 
-    const route = await crossChainHelper.current.getQuoteAndRoute(
-      token1?.symbol,
-      updatedToken2?.symbol,
-      1
-    );
+    // For same-coin transfers (same chain), received amount equals entered amount (no slippage)
+    if (token1?.id === updatedToken2?.id) {
+      const sameCoinRoute = {
+        pair: [token1?.symbol, updatedToken2?.symbol],
+        outAmount: 1, // Same amount, no slippage
+        exchangeData: {
+          instantRate: 1,
+          receiveCoinFee: 0, // No fee for same-coin transfers
+        },
+      };
+      setRoute(sameCoinRoute);
+    } else {
+      const route = await crossChainHelper.current.getQuoteAndRoute(
+        token1?.symbol,
+        updatedToken2?.symbol,
+        1
+      );
 
-    if (route?.status && route?.message) {
-      if (route?.status != "" || route?.message != "") {
-        return messageApi.error(route?.message);
+      if (route?.status && route?.message) {
+        if (route?.status != "" || route?.message != "") {
+          return messageApi.error(route?.message);
+        }
       }
+      setRoute(route);
     }
-    setRoute(route);
   };
 
   function handleSwapInput(withdrawAmount) {
@@ -945,20 +1021,24 @@ function ChainAbstraction({ state }) {
   const handleChainAbstraction = async () => {
     setIsProcessing(true);
     try {
-      // Validate tokens are different
-      if (token1?.id === token2?.id) {
-        setIsProcessing(false);
-        return messageApi.error(
-          "Cannot perform abstraction: source and destination tokens must be different."
-        );
-      }
-      
       if (!mpcFromAddress) {
         setIsProcessing(false);
+        setSessionPassword(null); // Clear password on error
         setShowMpcModel(true);
         return messageApi.error(
           "MPC wallet not set up. Please complete MPC setup."
         );
+      }
+
+      // Validate to address is different from from address when tokens are the same
+      if (token1?.id === token2?.id) {
+        if (toAddress.toLowerCase() === mpcFromAddress.toLowerCase()) {
+          setIsProcessing(false);
+          setSessionPassword(null); // Clear password on error
+          return messageApi.error(
+            "Cannot send to the same address. Please enter a different recipient address."
+          );
+        }
       }
 
       // Fetch fresh MPC balance before transaction
@@ -973,6 +1053,7 @@ function ChainAbstraction({ state }) {
       const throwError = (msg) => {
         messageApi.error(msg);
         setIsProcessing(false);
+        setSessionPassword(null); // Clear password on error
       };
 
       if (isNaN(parsedAmount) || isNaN(parsedReceivedAmount)) {
@@ -1022,6 +1103,7 @@ function ChainAbstraction({ state }) {
       const finalizeSwap = (details) => {
         store.dispatch(swapDetailAc(details));
         store.dispatch(setLoading(false));
+        setSessionPassword(null); // Clear password when opening modal
         setPasswordModal(true);
       };
 
@@ -1037,6 +1119,7 @@ function ChainAbstraction({ state }) {
 
         if (!gasPrice) {
           store.dispatch(setLoading(false));
+          setSessionPassword(null); // Clear password on error
           return throwError("Unable to fetch gas price at the moment.");
         }
 
@@ -1139,20 +1222,24 @@ function ChainAbstraction({ state }) {
     console.log("toAddress", toAddress);
 
     try {
-      // Validate tokens are different
-      if (token1?.id === token2?.id) {
-        setIsProcessing(false);
-        return messageApi.error(
-          "Cannot perform abstraction: source and destination tokens must be different."
-        );
-      }
-      
       if (!mpcFromAddress) {
         setIsProcessing(false);
+        setSessionPassword(null); // Clear password on error
         setShowMpcModel(true);
         return messageApi.error(
           "MPC wallet not set up. Please complete MPC setup."
         );
+      }
+
+      // Validate to address is different from from address when tokens are the same
+      if (token1?.id === token2?.id) {
+        if (toAddress.toLowerCase() === mpcFromAddress.toLowerCase()) {
+          setIsProcessing(false);
+          setSessionPassword(null); // Clear password on error
+          return messageApi.error(
+            "Cannot send to the same address. Please enter a different recipient address."
+          );
+        }
       }
 
       // Import the new MPC helper
@@ -1172,6 +1259,7 @@ function ChainAbstraction({ state }) {
 
         if (!gasPrice) {
           setIsProcessing(false);
+          setSessionPassword(null); // Clear password on error
           return messageApi.error("Unable to fetch gas price at the moment.");
         }
 
@@ -1207,6 +1295,7 @@ function ChainAbstraction({ state }) {
 
       if (!balanceValidation.valid) {
         setIsProcessing(false);
+        setSessionPassword(null); // Clear password on error
         return messageApi.error(balanceValidation.message);
       }
 
@@ -1233,6 +1322,7 @@ function ChainAbstraction({ state }) {
 
       if (!data || !data.hash) {
         setIsProcessing(false);
+        setSessionPassword(null); // Clear password on failure
         return messageApi.error(
           "Unable to process your transaction at the moment. Please try again later."
         );
@@ -1264,6 +1354,8 @@ function ChainAbstraction({ state }) {
       );
     } finally {
       setIsProcessing(false);
+      // Clear password after transaction completes or fails
+      setSessionPassword(null);
     }
   };
 
@@ -1479,16 +1571,10 @@ function ChainAbstraction({ state }) {
                         const selectedToken = availableTokens.find(
                           (el) => el.id == value
                         );
-                        if (selectedToken?.id === token2?.id) {
-                          return messageApi.error(
-                            "Cannot select the same token for both positions."
-                          );
-                        }
                         setToken1(selectedToken);
                         handlePositionChange(selectedToken);
                       }}
                       options={availableTokens
-                        .filter((token) => token.id !== token2?.id)
                         .map((token) => {
                           return {
                             value: token?.id,
@@ -1560,11 +1646,6 @@ function ChainAbstraction({ state }) {
                     }
                     onClick={() => {
                       if (isProcessing) return;
-                      if (token1?.id === token2?.id) {
-                        return messageApi.error(
-                          "Cannot swap: both tokens are the same."
-                        );
-                      }
                       if (token2?.iHave) {
                         setToken1(token2);
                         setToken2(token1);
@@ -1590,7 +1671,7 @@ function ChainAbstraction({ state }) {
                       className="myInput"
                       readOnly={true}
                       placeholder="0.000"
-                      value={receivedAmount || ""}
+                      value={removeTrailingZeros(receivedAmount) || ""}
                     />
                     <p style={{ marginBottom: "8px" }}>
                       {receivedAmount && receivedAmount !== "" && parseFloat(receivedAmount) > 0
@@ -1659,16 +1740,10 @@ function ChainAbstraction({ state }) {
                         const selectedToken = availableTokens.find(
                           (el) => el.id == value
                         );
-                        if (selectedToken?.id === token1?.id) {
-                          return messageApi.error(
-                            "Cannot select the same token for both positions."
-                          );
-                        }
                         setToken2(selectedToken);
                         handleToken2Change(selectedToken);
                       }}
                       options={availableTokens
-                        .filter((token) => token.id !== token1?.id)
                         .map((token) => {
                           return {
                             value: token?.id,
@@ -1701,8 +1776,31 @@ function ChainAbstraction({ state }) {
                   type={"text"}
                   label="To Address"
                   value={toAddress}
-                  showEditIcon={true}
                   disabled={isProcessing}
+                  addonAfter={
+                    <img
+                      src={PasteIcon}
+                      alt="Paste"
+                      style={{
+                        width: '16px',
+                        height: '16px',
+                        cursor: isProcessing ? 'not-allowed' : 'pointer',
+                        opacity: isProcessing ? 0.5 : 0.7
+                      }}
+                      onClick={async () => {
+                        if (isProcessing) return;
+                        try {
+                          const text = await navigator.clipboard.readText();
+                          if (text) {
+                            setToAddress(text);
+                            messageApi.success('Address pasted from clipboard');
+                          }
+                        } catch (error) {
+                          messageApi.error('Failed to paste from clipboard');
+                        }
+                      }}
+                    />
+                  }
                   getData={(address) => {
                     if (isProcessing) return;
                     setToAddress(address);
@@ -1726,6 +1824,8 @@ function ChainAbstraction({ state }) {
                       ? "Enter Recipient Address"
                       : !mpcFromAddress
                       ? "MPC Wallet Not Set"
+                      : (token1?.id === token2?.id && toAddress.toLowerCase() === mpcFromAddress?.toLowerCase())
+                      ? "Enter Different Recipient Address"
                       : "Abstract"
                   }
                   maxWidth={"100%"}
@@ -1739,7 +1839,8 @@ function ChainAbstraction({ state }) {
                     !toAddress ||
                     !mpcFromAddress ||
                     loading ||
-                    isProcessing
+                    isProcessing ||
+                    (token1?.id === token2?.id && toAddress.toLowerCase() === mpcFromAddress?.toLowerCase())
                   }
                 />
               </div>
@@ -1875,32 +1976,21 @@ function ChainAbstraction({ state }) {
                                 : "#000",
                           }}
                           onClick={() => {
-                            if (
-                              token1?.id == token.id ||
-                              token2?.id == token.id
-                            ) {
+                            // Allow selecting the same token for both positions
+                            // Only prevent if selecting the same token in the same position
+                            if (selected == 1 && token1?.id == token.id) {
+                              setTokenDrawer(false);
+                              return;
+                            }
+                            if (selected == 2 && token2?.id == token.id) {
                               setTokenDrawer(false);
                               return;
                             }
 
                             if (selected == 1) {
-                              if (token2?.id == token.id) {
-                                setKeyword(null);
-                                setFilteredTokens(allToken);
-                                return messageApi.error(
-                                  "You cannot select the same tokens on both sides. Please select a different token."
-                                );
-                              }
                               setToken1(token);
                               handlePositionChange(token);
                             } else {
-                              if (token1?.id == token.id) {
-                                setKeyword(null);
-                                setFilteredTokens(allToken);
-                                return messageApi.error(
-                                  "You cannot select the same tokens on both sides. Please select a different token."
-                                );
-                              }
                               setToken2(token);
                               handleToken2Change(token);
                             }
@@ -1998,7 +2088,11 @@ function ChainAbstraction({ state }) {
 
       <ModalCustom
         title={"Verify Password"}
-        handleCancel={() => setPasswordModal(!isPasswordModalOpen)}
+        handleCancel={() => {
+          setPasswordModal(!isPasswordModalOpen);
+          // Clear password when modal is closed/cancelled
+          setSessionPassword(null);
+        }}
         isModalOpen={isPasswordModalOpen}
         customClass="customClassModal"
         closable={!isProcessing}
@@ -2076,28 +2170,36 @@ function ChainAbstraction({ state }) {
           setReceivedAmount("");
           setPercent(null);
           
-          // Reset To Address to default MPC address for token2
+          // Reset To Address to default MPC address for token2 (only if different from token1)
           if (token2 && mpcAddresses) {
-            const getDefaultToAddress = (token, addresses) => {
-              if (!token || !addresses) {
-                return "";
-              }
+            // If same token, leave empty
+            if (token1?.id === token2?.id) {
+              setToAddress("");
+            } else {
+              const getDefaultToAddress = (token, addresses) => {
+                if (!token || !addresses) {
+                  return "";
+                }
+                
+                if (token?.coinFamily === 3 || token?.chain?.currencyName === "BTC") {
+                  return addresses?.btc || "";
+                }
+                // default to EVM (coinFamily 2 or 7)
+                return addresses?.eth || "";
+              };
               
-              if (token?.coinFamily === 3 || token?.chain?.currencyName === "BTC") {
-                return addresses?.btc || "";
+              const defaultAddress = getDefaultToAddress(token2, mpcAddresses);
+              if (defaultAddress) {
+                setToAddress(defaultAddress);
               }
-              // default to EVM (coinFamily 2 or 7)
-              return addresses?.eth || "";
-            };
-            
-            const defaultAddress = getDefaultToAddress(token2, mpcAddresses);
-            if (defaultAddress) {
-              setToAddress(defaultAddress);
             }
           }
 
           // Reset processing state
           setIsProcessing(false);
+          
+          // Clear password after modal closes
+          setSessionPassword(null);
 
           // Optionally refresh the balance
           if (token1 && mpcFromAddress) {

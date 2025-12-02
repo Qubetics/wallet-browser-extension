@@ -3,6 +3,7 @@ import { store } from '..';
 import { IS_PRODUCTION } from '../config/bitcoin.config';
 import { server } from '../server';
 import { WalletHelper } from './wallet.helper';
+import { validate } from 'bitcoin-address-validation';
 const BIP84 = require('bip84');
 
 let inputCount = 0;

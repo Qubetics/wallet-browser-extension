@@ -1,4 +1,5 @@
 import { useSelector } from 'react-redux';
+import { message } from 'antd';
 import './CrossChain.scss';
 import ModalCustom from '../../Components/ModalCustom/ModalCustom';
 import {
@@ -7,6 +8,7 @@ import {
 } from '../../helpers/conversion.helper';
 import { InputField } from '../../Components/InputField/InputFieldSimple';
 import ButtonComp from '../../Components/ButtonComp/ButtonComp';
+import CopyIcon from '../../Assets/CopyIcon.svg';
 
 const ConfirmAbstractModal = ({
   availableTokens,
@@ -23,6 +25,7 @@ const ConfirmAbstractModal = ({
   isProcessing,
 }) => {
   const { currency } = useSelector((state) => state);
+  const [messageApi, contextHolder] = message.useMessage();
 
   const handleCancel = () => {
     if (isProcessing) return;
@@ -35,241 +38,244 @@ const ConfirmAbstractModal = ({
     handleAbstract();
   };
 
+  const truncateAddress = (address) => {
+    if (!address) return 'N/A';
+    if (address.length <= 20) return address;
+    return `${address.substring(0, 10)}...${address.substring(address.length - 8)}`;
+  };
+
+  const copyToClipboard = (text, label) => {
+    if (!text) return;
+    navigator.clipboard.writeText(text);
+    messageApi.success(`${label} copied to clipboard`);
+  };
+
+  // Remove trailing zeros from decimal numbers
+  const removeTrailingZeros = (value) => {
+    if (!value && value !== 0) return '0';
+    const num = parseFloat(value);
+    if (isNaN(num)) return '0';
+    // Convert to string and remove trailing zeros
+    return num.toString().replace(/\.?0+$/, '');
+  };
+
   return (
-    <ModalCustom
-      title={'Confirm Abstraction'}
-      handleCancel={handleCancel}
-      isModalOpen={isOpen}
-      customClass="customClassModal"
-      closable={!isProcessing}
-    >
-      {/* <div>
-        <p>Please review your transaction details</p>
-      </div> */}
+    <>
+      {contextHolder}
+      <ModalCustom
+        title={'Confirm Abstraction'}
+        handleCancel={handleCancel}
+        isModalOpen={isOpen}
+        customClass="customClassModal"
+        closable={!isProcessing}
+      >
+      <div style={{ marginBottom: '16px' }}>
+        <p style={{ fontSize: '14px', color: '#999', margin: 0, textAlign: 'center' }}>
+          Please review your transaction details
+        </p>
+      </div>
       <div>
         <div
           style={{ width: '90%', marginRight: 'auto', marginLeft: 'auto' }}
           className="swap "
         >
-          <div className="swap_onChain ">
-            <div className="swap_onChain_balance">
-              <div>
-                <input
-                  type="number"
-                  className="myInput"
-                  placeholder="0.000"
-                  onWheel={(e) => e.currentTarget.blur()}
-                  value={amount}
-                  inputMode="decimal"
-                  onKeyDown={(e) => {
-                    const allowedKeys = [
-                      'Backspace',
-                      'Tab',
-                      'ArrowLeft',
-                      'ArrowRight',
-                      'Delete',
-                      'Home',
-                      'End',
-                    ];
-
-                    if (allowedKeys.includes(e.key)) return;
-                    if (!/^[0-9.]$/.test(e.key)) {
-                      e.preventDefault();
-                    }
+          {/* From Section */}
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center',
+            padding: '16px',
+            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+            borderRadius: '8px',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            marginBottom: '12px'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
+              {!token1?.image ? (
+                <div style={{
+                  alignItems: 'center',
+                  backgroundColor: 'rgba(98,126,234,.2)',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  height: '40px',
+                  justifyContent: 'center',
+                  width: '40px',
+                  flexShrink: 0,
+                }}>
+                  <span style={{ fontSize: '16px', fontWeight: 500, color: '#fff' }}>{token1?.name?.split('')[0]}</span>
+                </div>
+              ) : (
+                <img
+                  style={{
+                    height: '40px',
+                    width: '40px',
+                    objectFit: 'contain',
+                    borderRadius: '20px',
+                    flexShrink: 0,
                   }}
-                  disabled={true}
+                  alt=""
+                  src={token1?.image}
                 />
-                <p style={{ marginBottom: '8px' }}>
-                  {currency.symbol}
-                  {addCommasToNumber(
-                    getFlooredFixed(
-                      parseFloat(amount ? amount : 0) *
-                        parseFloat(token1 ? token1.price : 0),
-                      2
-                    )
-                  ) !== 'NaN'
-                    ? addCommasToNumber(
-                        getFlooredFixed(
-                          parseFloat(amount ? amount : 0) *
-                            parseFloat(token1 ? token1.price : 0),
-                          2
-                        )
-                      )
-                    : '0.00'}
-                </p>
+              )}
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: '14px', fontWeight: 500, marginBottom: '2px', color: '#fff' }}>
+                  {token1?.name || 'Token'}
+                </div>
+                <div style={{ fontSize: '12px', color: '#999' }}>
+                  {token1?.symbol?.toUpperCase()}
+                </div>
               </div>
-              <div style={{ textAlign: 'right' }}>
-                <div className="flexedItemSelect" style={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'flex-end',
-                  padding: '4px 0'
-                }}>
-                  {!token1?.image ? (
-                    <div
-                      style={{
-                        alignItems: 'center',
-                        backgroundColor: 'rgba(98,126,234,.2)',
-                        borderRadius: '49%',
-                        display: 'flex',
-                        height: '29px',
-                        justifyContent: 'center',
-                        width: '29px',
-                        marginRight: '8px',
-                      }}
-                    >
-                      {token1?.name.split('')[0]}
-                    </div>
-                  ) : (
-                    <img
-                      style={{
-                        height: '30px',
-                        width: '30px',
-                        objectFit: 'contain',
-                        position: 'relative',
-                        borderRadius: '15px',
-                        marginRight: '8px',
-                      }}
-                      alt=""
-                      src={token1?.image}
-                    />
-                  )}
-                  <span style={{ fontWeight: 500 }}>{token1?.symbol?.toUpperCase()}</span>
-                </div>
-                <div className="swap_onChain_pay">
-                  <p style={{ textAlign: 'right' }}>
-                    Balance{' '}
-                    <span>
-                      {addCommasToNumber(
-                        parseFloat(getFlooredFixed(balance || 0, 6))
-                      )}{' '}
-                      {token1?.symbol?.toUpperCase()}{' '}
-                    </span>
-                  </p>
-                </div>
+            </div>
+            <div style={{ textAlign: 'right', flexShrink: 0, marginLeft: '12px' }}>
+              <div style={{ fontSize: '18px', fontWeight: 600, color: '#fff' }}>
+                {addCommasToNumber(removeTrailingZeros(getFlooredFixed(parseFloat(amount || 0), 8)))}
               </div>
             </div>
           </div>
 
-          <div style={{ marginTop: '10px', width: '100%' }}>
-            <InputField
-              placeholder={'From Address'}
-              type={'text'}
-              label="From Address"
-              value={fromAddress}
-            />
+          {/* Downward Arrow Separator */}
+          <div style={{ display: 'flex', justifyContent: 'center', padding: '4px 0' }}>
+            <span style={{ fontSize: '20px', color: '#999' }}>↓</span>
           </div>
 
-          {/* <div className="swap__icon">
-            {availableTokens?.length !== 0 && (
-              <img
-                src={SwapVerticalIcon}
-                width={44}
-                alt=""
-                height={44}
-                style={
-                  loading
-                    ? { pointerEvents: 'none' }
-                    : { pointerEvents: 'auto' }
-                }
-              />
-            )}
-          </div> */}
-          <div className="swap_onChain">
-            <div className="swap_onChain_balance">
-              <div>
-                <input
-                  type="number"
-                  className="myInput"
-                  readOnly={true}
-                  placeholder="0.000"
-                  value={receivedAmount}
-                />
-                <p style={{ marginBottom: '8px' }}>
-                  {currency.symbol}
-                  {addCommasToNumber(
-                    getFlooredFixed(
-                      parseFloat(receivedAmount ? receivedAmount : 0) *
-                        parseFloat(token2 ? token2.price : 0),
-                      2
-                    )
-                  )}
-                </p>
-              </div>
-              <div style={{ textAlign: 'right' }}>
-                <div className="flexedItemSelect" style={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'flex-end',
-                  padding: '4px 0'
+          {/* To Section */}
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center',
+            padding: '16px',
+            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+            borderRadius: '8px',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            marginTop: '12px'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
+              {!token2?.image ? (
+                <div style={{
+                  alignItems: 'center',
+                  backgroundColor: 'rgba(98,126,234,.2)',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  height: '40px',
+                  justifyContent: 'center',
+                  width: '40px',
+                  flexShrink: 0,
                 }}>
-                  {!token2?.image ? (
-                    <div
-                      style={{
-                        alignItems: 'center',
-                        backgroundColor: 'rgba(98,126,234,.2)',
-                        borderRadius: '49%',
-                        display: 'flex',
-                        height: '29px',
-                        justifyContent: 'center',
-                        width: '29px',
-                        marginRight: '8px',
-                      }}
-                    >
-                      {token2?.name.split('')[0]}
-                    </div>
-                  ) : (
-                    <img
-                      style={{
-                        height: '30px',
-                        width: '30px',
-                        objectFit: 'contain',
-                        position: 'relative',
-                        borderRadius: '15px',
-                        marginRight: '8px',
-                      }}
-                      alt=""
-                      src={token2?.image}
-                    />
-                  )}
-                  <span style={{ fontWeight: 500 }}>{token2?.symbol?.toUpperCase()}</span>
+                  <span style={{ fontSize: '16px', fontWeight: 500, color: '#fff' }}>{token2?.name?.split('')[0]}</span>
+                </div>
+              ) : (
+                <img
+                  style={{
+                    height: '40px',
+                    width: '40px',
+                    objectFit: 'contain',
+                    borderRadius: '20px',
+                    flexShrink: 0,
+                  }}
+                  alt=""
+                  src={token2?.image}
+                />
+              )}
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: '14px', fontWeight: 500, marginBottom: '2px', color: '#fff' }}>
+                  {token2?.name || 'Token'}
+                </div>
+                <div style={{ fontSize: '12px', color: '#999' }}>
+                  {token2?.symbol?.toUpperCase()}
                 </div>
               </div>
             </div>
+            <div style={{ textAlign: 'right', flexShrink: 0, marginLeft: '12px' }}>
+              <div style={{ fontSize: '18px', fontWeight: 600, color: '#fff' }}>
+                {addCommasToNumber(removeTrailingZeros(getFlooredFixed(parseFloat(receivedAmount || 0), 8)))}
+              </div>
+            </div>
           </div>
-          <div style={{ marginTop: '10px', width: '100%' }}>
-            <InputField
-              placeholder={'To Address'}
-              type={'text'}
-              label="To Address"
-              value={toAddress}
-            />
+
+          {/* Fees Section */}
+          <div style={{ 
+            marginTop: '20px', 
+            padding: '16px',
+            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+            borderRadius: '8px',
+            border: '1px solid rgba(255, 255, 255, 0.1)'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+              <span style={{ fontSize: '13px', color: '#999' }}>Platform Fee (5%)</span>
+              <span style={{ fontSize: '13px', fontWeight: 500 , color: '#fff'}}>
+                {addCommasToNumber(removeTrailingZeros(getFlooredFixed(parseFloat(amount || 0) * 0.05, 8)))} {token1?.symbol?.toUpperCase()}
+              </span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+              <span style={{ fontSize: '13px', color: '#999' }}>Solver Fee (5%)</span>
+              <span style={{ fontSize: '13px', fontWeight: 500 , color: '#fff'}}>
+                {addCommasToNumber(removeTrailingZeros(getFlooredFixed(parseFloat(amount || 0) * 0.05, 8)))} {token1?.symbol?.toUpperCase()}
+              </span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: '13px', color: '#999' }}>Transaction Fee</span>
+              <span style={{ fontSize: '13px', fontWeight: 500 , color: '#fff'}}>
+                {addCommasToNumber(removeTrailingZeros(getFlooredFixed(0, 8)))} {token1?.symbol?.toUpperCase()}{' '}
+                <span style={{ color: '#999', fontSize: '12px' }}>
+                  (~{currency.symbol}0.00)
+                </span>
+              </span>
+            </div>
           </div>
+          
           <div
             style={{
-              marginTop: '10px',
+              marginTop: '20px',
+              display: 'flex',
+              gap: '12px',
             }}
           >
-            <ButtonComp
-              onClick={() => {
-                handleProceed();
-              }}
-              text={
-                isProcessing
-                  ? 'Processing...'
-                  : amount === null || amount === 0
-                  ? 'Enter Amount'
-                  : toAddress === '' || !toAddress
-                  ? 'Enter Recipient Address'
-                  : 'Abstract'
-              }
-              maxWidth={'100%'}
-              disabled={isProcessing}
-            />
+            <div style={{ flex: 1 }}>
+              <button
+                onClick={handleCancel}
+                disabled={isProcessing}
+                style={{
+                  width: '100%',
+                  height: '44px',
+                  padding: '0',
+                  borderRadius: '8px',
+                  border: 'none',
+                  backgroundColor: '#666',
+                  color: '#fff',
+                  fontSize: '16px',
+                  fontWeight: 500,
+                  cursor: isProcessing ? 'not-allowed' : 'pointer',
+                  opacity: isProcessing ? 0.5 : 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={{ height: '44px' }}>
+                <ButtonComp
+                  onClick={() => {
+                    handleProceed();
+                  }}
+                  text={
+                    isProcessing
+                      ? 'Processing...'
+                      : 'Confirm'
+                  }
+                  maxWidth={'100%'}
+                  height={'44px'}
+                  disabled={isProcessing}
+                />
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </ModalCustom>
+    </>
   );
 };
 

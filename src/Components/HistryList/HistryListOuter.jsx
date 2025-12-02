@@ -11,6 +11,7 @@ import dAppIcon from "../../Assets/datatransfer.svg";
 import { MpcChainAbstractionHelper } from "../../helpers/chain_abstraction.helperMPC";
 import AbstractProcessingModel from "../CustomModelAbstraction/Model";
 import { server } from "../../server";
+import { getExplorerUrl } from "../../helpers/explorer.helper";
 
 function HistoryListOuter(props) {
   const [transactionResult, setTransactionResult] = useState({
@@ -157,48 +158,37 @@ function HistoryListOuter(props) {
     }
 
     // Handle regular blockchain transactions
+    // Use helper function to get explorer URL based on environment
+    explorer = getExplorerUrl(allData?.coin_family, transactionHash);
+    
+    // Set coinFamily for display purposes
     switch (allData?.coin_family) {
       case 1:
         coinFamily = "BNB";
-        explorer = `https://bscscan.com/tx/${transactionHash}`;
         break;
       case 2:
         coinFamily = "ETH";
-        explorer = `https://etherscan.io/tx/${transactionHash}`;
         break;
       case 3:
         coinFamily = "BTC";
-        explorer = `https://www.blockchain.com/explorer/transactions/btc/${transactionHash}`;
         break;
       case 4:
         coinFamily = "POL";
-        explorer = `https://polygonscan.com/tx/${transactionHash}`;
         break;
       case 5:
         coinFamily = "SOL";
-        explorer = `https://explorer.solana.com/tx/${transactionHash}`;
         break;
       case 6:
         coinFamily = "ADA";
-        explorer = `https://cardanoscan.io/transaction/${transactionHash}`;
         break;
       case 7:
-          coinFamily = 'TICS';
-          if (transactionHash.startsWith('0x')) {
-            // Convert everything after '0x' to uppercase
-            const formattedHash = '0x' + transactionHash.slice(2).toUpperCase();
-            explorer = `https://ticsscan.com/tx/${formattedHash}`;
-          } else {
-            explorer = `https://ticsscan.com/tx/${transactionHash}`;
-          }
-          break;
+        coinFamily = 'TICS';
+        break;
       case 8:
         coinFamily = "CRO";
-        explorer = `https://cronoscan.com/tx/${transactionHash}`;
         break;
       case 9:
         coinFamily = "PLS";
-        explorer = `https://scan.mypinata.cloud/ipfs/bafybeih3olry3is4e4lzm7rus5l3h6zrphcal5a7ayfkhzm5oivjro2cp4/#/tx/${transactionHash}`;
         break;
       default:
         break;

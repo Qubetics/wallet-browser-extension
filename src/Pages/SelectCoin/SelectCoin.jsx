@@ -221,7 +221,8 @@ function SelectCoin() {
                 image: selectedCoin.image,
               },
               backAddress: mpcAddress, // Recipient address (where to send TO)
-              redirectTo: "/select-coin"
+              redirectTo: "/select-coin",
+              fromChainAbstraction: true // Flag to indicate coming from chain abstraction
             }
           });
         } else {

@@ -71,6 +71,7 @@ function SendCoins() {
       backAmount,
       backFromConfirm,
       chainSelected,
+      fromChainAbstraction,
     },
   } = useLocation();
   const navigate = useNavigate();
@@ -167,7 +168,13 @@ function SendCoins() {
 
   useEffect(() => {
     console.log('backFromConfirm', backFromConfirm);
-    if (loading !== null && coin?.coin?.coin_family === 7 && !backFromConfirm) {
+    // Only skip chain selection modal when coming from chain abstraction
+    if (loading !== null && coin?.coin?.coin_family === 7 && !backFromConfirm && fromChainAbstraction) {
+      setSessionPassword('');
+      setSelectChain('evm'); // Always set to evm for TICS when from chain abstraction
+      // Skip the modal - directly proceed with evm chain
+    } else if (loading !== null && coin?.coin?.coin_family === 7 && !backFromConfirm) {
+      // Show modal for other cases
       setSessionPassword('');
       setSelectChainModal(!selectChainModal);
     }
@@ -175,7 +182,7 @@ function SendCoins() {
       setSelectChain(chainSelected);
       fetchCosmosGasFee();
     }
-  }, [loading, backFromConfirm, chainSelected]);
+  }, [loading, backFromConfirm, chainSelected, fromChainAbstraction]);
 
   useEffect(() => {
     if (loading !== null && selectChain === 'cosmos' && !backFromConfirm) {

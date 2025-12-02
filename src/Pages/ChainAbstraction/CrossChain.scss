@@ -50,6 +50,19 @@ randb {
   align-items: center;
 }
 
+.customClassModal {
+  .ant-modal-title {
+    text-align: center !important;
+    width: 100%;
+  }
+  
+  .ant-modal-header {
+    .ant-modal-title {
+      text-align: center !important;
+    }
+  }
+}
+
 .design {
   position: relative;
 }

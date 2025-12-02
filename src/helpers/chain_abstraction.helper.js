@@ -13,7 +13,7 @@ import { log } from "loglevel";
 const { ethers } = require("ethers");
 const { ABI_ABSTRACTION, ABI } = require("../config/abi");
 
-const QUBETICS_RPC = "https://rpc-testnet.qubetics.work";
+const QUBETICS_RPC = process.env.REACT_APP_QUBETIC_RPC;
 
 export class ChainAbstractionHelper {
   axiosInstance;
