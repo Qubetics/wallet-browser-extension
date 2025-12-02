@@ -167,7 +167,7 @@ function SendConfirm() {
           },
           {
             text: 'Network Fee',
-            textVal: `${parseFloat(getFlooredFixed(+networkFee, 8))} ${
+            textVal: `${formatNumberInput(networkFee, 6)} ${
               parentCoin ? parentCoin.currencySymbol.toUpperCase() : ''
             }/ ${currency.symbol}${addCommasToNumber(
               getFlooredFixed(fiatGasFee, 2)

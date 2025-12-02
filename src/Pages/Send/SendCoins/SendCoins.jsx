@@ -741,7 +741,7 @@ function SendCoins() {
           to: address,
           amount: amount,
           coin,
-          networkFee: 'ss',
+          networkFee: null,
           ENSName,
           contact: findContact?.name,
           redirectTo,
@@ -1193,7 +1193,7 @@ function SendCoins() {
                       !isNaN(myGasPrice.fast)
                         ? parseFloat(
                             (myGasPrice.estimate * myGasPrice.fast) / 10 ** 9
-                          ).toFixed(coin?.coin?.coin_family === 7 ? 15 : 8)
+                          ).toFixed(coin?.coin?.coin_family === 7 ? 15 : 6)
                         : '0.00'
                     }
                     readonly={true}
