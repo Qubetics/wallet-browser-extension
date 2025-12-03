@@ -131,6 +131,39 @@ const AbstractProcessingModel = ({
   }
 
   if (showSuccess) {
+    // Check if this is a failure with no valid hash (simpler failure modal)
+    const isFailureWithNoHash = transactionResult?.status == 0 && 
+                                 (!transactionResult?.hash || 
+                                  transactionResult?.hash === "N/A" || 
+                                  transactionResult?.hash === "");
+
+    // Show simpler failure modal for failed transactions without hash
+    if (isFailureWithNoHash) {
+      return (
+        <ModalCustom
+          title={''}
+          handleCancel={handleModalClose}
+          isModalOpen={showSuccess}
+          customClass="customClassModal"
+          closable={true}
+        >
+          <div className="model-content failure">
+            <div className="failure-icon">✕</div>
+            <h2>Transaction Failed</h2>
+            <p>
+              Your transaction could not be processed. Please try again later.
+            </p>
+            <ButtonComp
+              text={'Close'}
+              maxWidth={'100%'}
+              onClick={handleModalClose}
+            />
+          </div>
+        </ModalCustom>
+      );
+    }
+
+    // Show normal success/pending modal with transaction details
     return (
       <ModalCustom
         title={''}

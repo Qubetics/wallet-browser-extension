@@ -1302,42 +1302,69 @@ function ChainAbstraction({ state }) {
       console.log("Sending MPC transaction...");
 
       // Use the new MPC transaction flow
-      const data = await mpcHelper.SendMpcTransaction(
-        token1,
-        token2,
-        amount,
-        receivedAmount,
-        mpcFromAddress,
-        token1?.chain,
-        networkFee,
-        newBalanceToFiatConversion(token1?.price, amount),
-        token1?.native,
-        token1?.rpc,
-        token1?.coinSymbol,
-        sessionPassword,
-        toAddress
-      );
-
-      console.log("MPC Transaction result:", data);
-
-      if (!data || !data.hash) {
-        setIsProcessing(false);
-        setSessionPassword(null); // Clear password on failure
-        return messageApi.error(
-          "Unable to process your transaction at the moment. Please try again later."
+      let data;
+      try {
+        data = await mpcHelper.SendMpcTransaction(
+          token1,
+          token2,
+          amount,
+          receivedAmount,
+          mpcFromAddress,
+          token1?.chain,
+          networkFee,
+          newBalanceToFiatConversion(token1?.price, amount),
+          token1?.native,
+          token1?.rpc,
+          token1?.coinSymbol,
+          sessionPassword,
+          toAddress
         );
-      }
 
-      setIsOpen(false);
-      setTransactionResult((prev) => ({
-        ...prev,
-        hash: data?.hash,
-        fee: networkFee,
-        status: data?.status || "pending",
-        solver: data?.solver || "N/A",
-        source_address: data?.source_address || "N/A",
-      }));
-      setIsProcessModal(true);
+        console.log("MPC Transaction result:", data);
+
+        if (!data || !data.hash) {
+          setIsProcessing(false);
+          setSessionPassword(null); // Clear password on failure
+          return messageApi.error(
+            "Unable to process your transaction at the moment. Please try again later."
+          );
+        }
+
+        setIsOpen(false);
+        setTransactionResult((prev) => ({
+          ...prev,
+          hash: data?.hash,
+          fee: networkFee,
+          status: data?.status || "pending",
+          solver: data?.solver || "N/A",
+          source_address: data?.source_address || "N/A",
+        }));
+        setIsProcessModal(true);
+      } catch (error) {
+        console.error("Transaction failed:", error);
+        setIsProcessing(false);
+        setSessionPassword(null); // Clear password on error
+        
+        // Check if error is from intent API (500 error)
+        const errorMessage = "Transaction failed. Please try again.";
+        
+        // Show failure modal with error status
+        setIsOpen(false);
+        setTransactionResult((prev) => ({
+          ...prev,
+          hash: "N/A", // No hash if transaction failed
+          fee: networkFee,
+          status: 0, // Status 0 = Failed
+          solver: "N/A",
+          source_address: mpcFromAddress || "N/A",
+        }));
+        setIsProcessModal(false); // Close processing modal
+        setShowSuccess(true); // Show final result modal with failure status
+        
+        // Also show error message
+        messageApi.error(errorMessage);
+        return;
+      }
 
       // Refresh MPC balance after transaction
       if (token1 && mpcFromAddress) {

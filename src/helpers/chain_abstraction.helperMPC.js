@@ -102,11 +102,14 @@ export class MpcChainAbstractionHelper {
 
   /**
    * Poll intent status until completion
+   * Retries up to 5 times even for HTTP 500 errors
    */
   async pollIntentStatus(intentHash) {
     const url = `https://stage-chain-abstraction-api.qubetics.work/api/routes/intent-status?intent-hash=${intentHash}`;
     const MAX_RETRIES = 10;
+    const MAX_500_RETRIES = 5; // Retry 5 times even for 500 errors
     let attempts = 0;
+    let error500Attempts = 0;
   
     return new Promise((resolve) => {
       async function poll() {
@@ -114,6 +117,30 @@ export class MpcChainAbstractionHelper {
         try {
           const response = await axios.get(url);
           const { error, data } = response.data;
+  
+          // Check for HTTP 500 error - retry up to 5 times
+          if (response.status === 500 || (error && response.status >= 500)) {
+            error500Attempts++;
+            console.error(`Intent API returned 500 error (Attempt ${error500Attempts}/${MAX_500_RETRIES}):`, response.data);
+            
+            if (error500Attempts < MAX_500_RETRIES) {
+              console.log(`Retrying after 500 error in 2 seconds... (500 Error Attempt ${error500Attempts})`);
+              setTimeout(poll, 2000);
+              return;
+            } else {
+              console.error("Max 500 error retries reached. Transaction failed.");
+              resolve({ 
+                error: true, 
+                message: "Transaction failed - intent API error",
+                statusCode: 500,
+                data: response.data 
+              });
+              return;
+            }
+          }
+  
+          // Reset 500 error counter on successful response
+          error500Attempts = 0;
   
           if (!error && data) {
             console.log("Final Success Response:", response?.data);
@@ -126,6 +153,27 @@ export class MpcChainAbstractionHelper {
             resolve({ error: true, message: "Max retries reached" });
           }
         } catch (error) {
+          // Check if it's an HTTP 500 error
+          if (error.response && error.response.status === 500) {
+            error500Attempts++;
+            console.error(`Intent API returned 500 error (Attempt ${error500Attempts}/${MAX_500_RETRIES}):`, error.response.data);
+            
+            if (error500Attempts < MAX_500_RETRIES) {
+              console.log(`Retrying after 500 error in 2 seconds... (500 Error Attempt ${error500Attempts})`);
+              setTimeout(poll, 2000);
+              return;
+            } else {
+              console.error("Max 500 error retries reached. Transaction failed.");
+              resolve({ 
+                error: true, 
+                message: "Transaction failed - intent API error",
+                statusCode: 500,
+                data: error.response?.data 
+              });
+              return;
+            }
+          }
+          
           console.error(
             `Error fetching intent status (Attempt ${attempts}), retrying in 2 seconds:`,
             error
@@ -323,6 +371,25 @@ export class MpcChainAbstractionHelper {
   
       console.log("From address:", fromAddress);
   
+      // ============================================
+      // NEW FLOW: Poll intent status FIRST before saving transaction
+      // ============================================
+      console.log("Polling intent status before saving transaction...");
+      const transactionResult = await this.pollIntentStatus(txId);
+  
+      console.log("Intent status poll result:", transactionResult);
+  
+      // Check if intent API returned an error (500 or other error)
+      if (transactionResult?.error || transactionResult?.statusCode === 500) {
+        console.error("Intent API returned error - transaction failed:", transactionResult);
+        // Return error result - don't save transaction
+        throw new Error(transactionResult?.message || "Transaction failed - intent API error");
+      }
+  
+      // If we reach here, intent API returned success
+      // Now prepare and save transaction data
+      console.log("Intent API returned success - saving transaction...");
+      
       // Prepare save data
       const saveData = {
         amount: Number(amount),
@@ -340,16 +407,12 @@ export class MpcChainAbstractionHelper {
         saveData.gas_estimate = "30000";
       }
   
-      // Save intent hash
+      // Save intent hash only after intent API confirms success
       await this.saveIntentHash(saveData);
-  
-      // Poll for transaction status
-      const transactionResult = await this.pollIntentStatus(txId);
-  
-      console.log("Final transaction result:", transactionResult);
+      console.log("Transaction saved successfully after intent API confirmation");
   
       // ============================================
-      // NEW: Update transaction status on backend
+      // Update transaction status on backend
       // ============================================
       if (transactionResult?.data) {
         const intentHash = transactionResult.data.intent_hash;
