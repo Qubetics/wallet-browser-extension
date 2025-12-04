@@ -46,7 +46,12 @@ export class MpcChainAbstractionHelper {
     try {
       const response = await axios.post(
         "http://124.243.185.174:8083/user_mpc_deposit",
-        data
+        data,
+        {
+          headers: {
+            "X-API-KEY": "REDACTED",
+          },
+        }
       );
 
       console.log("this is  data ", response.data);

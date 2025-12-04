@@ -24,6 +24,7 @@ export const registerUser = async (ethereumAddress) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "X-API-KEY": "REDACTED",
       },
       body: JSON.stringify(data),
     });
