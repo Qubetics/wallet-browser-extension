@@ -36,7 +36,7 @@ function Manage() {
         addrsListKeys: account.addressLists,
         coinFamilyKeys: account.coinFamilies,
         page: currentPage,
-        limit: 25,
+        limit: 2000,
         currency_code: currency.name,
         search: keyword?.trim(),
       },
@@ -47,15 +47,7 @@ function Manage() {
       }
     );
 
-    if (keyword) {
-      setFilteredTokens(coinList.data.data);
-    } else {
-      if (currentPage == 1) {
-        setFilteredTokens(coinList.data.data);
-      } else {
-        setFilteredTokens([...filteredTokens, ...coinList.data.data]);
-      }
-    }
+    setFilteredTokens(coinList.data.data);
     setTotal(coinList.data.meta.total);
     setIsFetchingData(false);
     store.dispatch(setLoading(false));
@@ -81,39 +73,26 @@ function Manage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [keyword, currentPage]);
 
-  const handleScroll = () => {
-    // Get the parent container's height and scroll position
-    const { scrollHeight, scrollTop, clientHeight } = parentRef.current;
+  // const handleScroll = () => {
+  //   // Get the parent container's height and scroll position
+  //   const { scrollHeight, scrollTop, clientHeight } = parentRef.current;
 
-    const tolerance = 15; // Adjust this value as needed
-    const isAtBottom = scrollTop + clientHeight >= scrollHeight - tolerance;
+  //   const tolerance = 15; // Adjust this value as needed
+  //   const isAtBottom = scrollTop + clientHeight >= scrollHeight - tolerance;
 
-    if (isAtBottom && !isFetchingData && currentPage < Math.ceil(total / 25)) {
-      // Prevent loading more data if already refreshing or reached the last page
-      setIsFetchingData(true);
-      // Increment the currentPage state to load the next page
-      setCurrentPage((prevPage) => prevPage + 1);
-    }
-  };
+  //   if (isAtBottom && !isFetchingData && currentPage < Math.ceil(total / 25)) {
+  //     // Prevent loading more data if already refreshing or reached the last page
+  //     setIsFetchingData(true);
+  //     // Increment the currentPage state to load the next page
+  //     setCurrentPage((prevPage) => prevPage + 1);
+  //   }
+  // };
 
   return (
     <div>
       <div className={`scrollableCont`}>
         <div className="searchBarFixed">
-          <MenuRestofHeaders
-            backTo={'/wallet'}
-            title={'Manage Assets'}
-            // manageTo={
-            //   true
-            // !(
-            //   filteredTokens.length === 1 &&
-            //   filteredTokens[0]?.coin_symbol === "btc" &&
-            //   account.isWatchOnly
-            // )
-            //   ? "/add-token"
-            //   : false
-            // }
-          />
+          <MenuRestofHeaders backTo={'/wallet'} title={'Manage Assets'} />
           {!(
             filteredTokens.length === 1 &&
             filteredTokens[0]?.coin_symbol === 'btc' &&
@@ -152,7 +131,7 @@ function Manage() {
           <div
             className={`${'flexedContent'}`}
             ref={parentRef}
-            onScroll={handleScroll}
+            // onScroll={handleScroll}
             style={{
               height: height > 600 ? '480px' : '480px',
             }}
@@ -192,6 +171,7 @@ function Manage() {
               {filteredTokens.length > 0 ? (
                 filteredTokens.map((data) => (
                   <ManageCustom
+                    key={data.coin_id}
                     currency={data.coin_symbol.toUpperCase()}
                     name={data.coin_name}
                     symbol={data.coin_symbol}
@@ -202,7 +182,7 @@ function Manage() {
                         ? token_type(data?.coin_family)
                         : ''
                     }
-                    id={data.id}
+                    id={data.coin_id}
                     coinFamily={data.coin_family}
                     walletAddress={
                       account.coinFamilyAndAddress[data.coin_family]
@@ -210,7 +190,10 @@ function Manage() {
                     status={data.wallet_data?.status || false}
                     coin={data}
                     curr={currency}
-                    init={init}
+                    init={() => {
+                      setCurrentPage(1);
+                      init();
+                    }}
                   />
                 ))
               ) : !loading ? (
