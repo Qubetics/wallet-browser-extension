@@ -32,7 +32,10 @@ import {
   getFlooredFixed,
 } from '../../../helpers/conversion.helper';
 import { server } from '../../../server';
-import { formatNumberFiat } from '../../../helpers/common.helper';
+import {
+  formatNumberFiat,
+  formatNumberInput,
+} from '../../../helpers/common.helper';
 import AddressTableSend from '../../../Components/AddressTable/AddressTableSend';
 import { BL_CODE } from '../../../helpers/constant';
 import { calculateFee, GasPrice } from '@cosmjss/stargate';
@@ -249,14 +252,8 @@ function SendCoins() {
           });
           transactionSize =
             inputCount * 146 + outputCount * 34 + 10 - inputCount;
-
-          const totalFee = (
-            transactionSize *
-            gasPrice *
-            btcTosatoshiMultiplier
-          ).toFixed(8);
-
-          setSelectedGasPriceSol(Number(totalFee * 1.5).toFixed(8));
+          const totalFee = transactionSize * gasPrice * btcTosatoshiMultiplier;
+          setSelectedGasPriceSol(formatNumberInput(totalFee * 1.5, 5));
         } catch (error) {
           store.dispatch(setLoading(false));
         }
@@ -392,9 +389,7 @@ function SendCoins() {
           return messageApi.error('Unable to fetch gas price at the moment.');
         }
 
-        // Estimate the gas cost for a sample transaction
-        // const gasLimit = gasPrice.estimate * 2; // Assuming a standard transaction
-        const gasLimit = gasPrice.estimate; // Assuming a standard transaction
+        const gasLimit = gasPrice.estimate;
         const gasCost = new BigNumber(
           new BigNumber(gasPrice.fast).times(1000000000)
         ).times(gasLimit);
@@ -594,7 +589,7 @@ function SendCoins() {
         );
         if (!checkForENS.status) {
           store.dispatch(setLoading(false));
-          return messageApi.error('Invalid domain name provided.');
+          return messageApi.error('Please enter valid address.');
         } else {
           ENSName = address;
           address = checkForENS.address;
@@ -748,7 +743,7 @@ function SendCoins() {
           to: address,
           amount: amount,
           coin,
-          networkFee: 'ss',
+          networkFee: null,
           ENSName,
           contact: findContact?.name,
           redirectTo,
@@ -839,7 +834,7 @@ function SendCoins() {
         const fee = Math.ceil(transactionSize * gasPrice);
 
         const sendAmount = Math.round(amount * btcTosatoshi);
-        const totalFee = (fee * btcTosatoshiMultiplier).toFixed(8);
+        const totalFee = formatNumberInput(fee * btcTosatoshiMultiplier, 6);
         const totalSpend = sendAmount + fee * 1.5;
 
         // --- DUST CHECK (recipient output must be >= 546 sats) ---
@@ -1198,9 +1193,12 @@ function SendCoins() {
                       myGasPrice?.fast &&
                       !isNaN(myGasPrice.estimate) &&
                       !isNaN(myGasPrice.fast)
-                        ? parseFloat(
-                            (myGasPrice.estimate * myGasPrice.fast) / 10 ** 9
-                          ).toFixed(coin?.coin?.coin_family === 7 ? 15 : 8)
+                        ? formatNumberInput(
+                            (myGasPrice?.estimate *
+                              Math.max(myGasPrice?.fast, 1)) /
+                              10 ** 9,
+                            5
+                          )
                         : '0.00'
                     }
                     readonly={true}

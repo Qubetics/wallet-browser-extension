@@ -250,6 +250,7 @@ const AllocationChart = () => {
                     <div
                       className="randb extra borderDarkLight"
                       style={{
+                        color: 'black',
                         height: '30px',
                         width: '30px',
                         background: 'rgb(202, 201, 201)',
@@ -258,6 +259,7 @@ const AllocationChart = () => {
                         justifyContent: 'center',
                         alignItems: 'center',
                         border: '1px solid',
+                        fontWeight: 'bold',
                       }}
                     >
                       {itm?.coin?.coin_symbol.split('')[0].toUpperCase()}
@@ -276,11 +278,6 @@ const AllocationChart = () => {
                         whiteSpace: 'nowrap',
                       }}
                     >
-                      {console.log(
-                        'coin type',
-                        itm?.coin?.is_token,
-                        token_type(itm?.coin?.coin_family)
-                      )}
                       {itm?.coin?.coin_symbol?.toUpperCase()}{' '}
                       <span>
                         {token_type(itm?.coin?.coin_family)
