@@ -61,13 +61,15 @@ function getFlooredFixed(v, d) {
   return (Math.floor(v * Math.pow(10, d)) / Math.pow(10, d)).toFixed(d);
 }
 
-// Remove trailing zeros from decimal numbers
+// Remove trailing zeros from decimal numbers (only after decimal point)
 function removeTrailingZeros(value) {
-  if (!value && value !== 0) return '0';
-  const num = parseFloat(value);
-  if (isNaN(num)) return '0';
-  // Convert to string and remove trailing zeros
-  return num.toString().replace(/\.?0+$/, '');
+  if (value === null || value === undefined || value === '') return '';
+  const str = String(value);
+  // Only remove trailing zeros after the decimal point, preserve integer part
+  if (str.includes('.')) {
+    return str.replace(/\.?0+$/, '');
+  }
+  return str;
 }
 
 function addCommasToNumber(number) {
@@ -1698,7 +1700,7 @@ function ChainAbstraction({ state }) {
                       className="myInput"
                       readOnly={true}
                       placeholder="0.000"
-                      value={removeTrailingZeros(receivedAmount) || ""}
+                      value={receivedAmount && receivedAmount !== "" ? removeTrailingZeros(receivedAmount) : ""}
                     />
                     <p style={{ marginBottom: "8px" }}>
                       {receivedAmount && receivedAmount !== "" && parseFloat(receivedAmount) > 0

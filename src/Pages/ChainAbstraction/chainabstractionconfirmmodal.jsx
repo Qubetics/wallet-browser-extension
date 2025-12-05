@@ -50,13 +50,15 @@ const ConfirmAbstractModal = ({
     messageApi.success(`${label} copied to clipboard`);
   };
 
-  // Remove trailing zeros from decimal numbers
+  // Remove trailing zeros from decimal numbers (only after decimal point)
   const removeTrailingZeros = (value) => {
-    if (!value && value !== 0) return '0';
-    const num = parseFloat(value);
-    if (isNaN(num)) return '0';
-    // Convert to string and remove trailing zeros
-    return num.toString().replace(/\.?0+$/, '');
+    if (value === null || value === undefined || value === '') return '';
+    const str = String(value);
+    // Only remove trailing zeros after the decimal point, preserve integer part
+    if (str.includes('.')) {
+      return str.replace(/\.?0+$/, '');
+    }
+    return str;
   };
 
   return (

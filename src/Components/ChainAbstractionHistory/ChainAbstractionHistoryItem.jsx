@@ -348,7 +348,7 @@ function ChainAbstractionHistoryItem(props) {
             <div className="send">
               <p className="sendRecieve">
                 Chain Abstraction {valueCurrency}
-              </p>
+              </p>x
               <div className="histryStatus">
                 <p>{date}</p>
               </div>
