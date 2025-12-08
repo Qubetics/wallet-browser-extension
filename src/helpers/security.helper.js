@@ -30,7 +30,6 @@ export class SecurityHelper {
     const result = Buffer.concat([salt, iv, encrypted, authTag]);
     return result.toString('base64');
   }
-
   /**
    * Decrypts data encrypted with AES-256-GCM
    * @param {string} payload - Base64-encoded encrypted data
