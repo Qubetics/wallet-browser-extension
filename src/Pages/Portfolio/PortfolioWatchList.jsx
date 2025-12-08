@@ -22,7 +22,9 @@ import { token_type } from '../../helpers/constant';
 import NoRecord from '../../Assets/no-record.svg';
 
 function PortfolioWatchList() {
-  const { account, currency, balanceIn, loading } = useSelector((state) => state);
+  const { account, currency, balanceIn, loading } = useSelector(
+    (state) => state
+  );
   const navigate = useNavigate();
   const [keyword, setKeyword] = useState(null);
   const [messageApi, contextHolder] = message.useMessage({
@@ -134,8 +136,10 @@ function PortfolioWatchList() {
           </div>
         </div> */}
         <>
-          {(state?.nft ? list : tokens.filter((token) => token.watchlist_data) || loading)
-            .length > 0 ? (
+          {(state?.nft
+            ? list
+            : tokens.filter((token) => token.watchlist_data) || loading
+          ).length > 0 ? (
             <CoinsTable
               name="portfolio"
               // delete={DeleteIcon}
@@ -157,10 +161,10 @@ function PortfolioWatchList() {
                     coinName: token.coin_symbol.toUpperCase(),
                     coinSubName: token.coin_name,
                     coinPrice: myPrice.toNumber()
-                      ? `$${formatSmallNumber(
+                      ? `${currency.symbol}${formatSmallNumber(
                           exponential_to_decimal(myPrice.toNumber())
                         )}`
-                      : '$0.00',
+                      : `${currency.symbol}0.00`,
                     coinStatus: getFlooredFixed(
                       price
                         ? parseFloat(
@@ -194,7 +198,10 @@ function PortfolioWatchList() {
                           {
                             data: [
                               {
-                                address: token.coin_id === 3 || token.coin_id === 5 ? token?.wallets[0]?.wallet_address : account.address,
+                                address:
+                                  token.coin_id === 3 || token.coin_id === 5
+                                    ? token?.wallets[0]?.wallet_address
+                                    : account.address,
                                 coin_id: token.coin_id,
                                 status: token.watchlist_data ? 0 : 1,
                               },
