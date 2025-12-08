@@ -1,5 +1,4 @@
 /*global chrome*/
-
 import { Route, Routes, Navigate, useNavigate, useLocation } from "react-router-dom";
 import "./App.scss";
 import FixWidthLayout from "./Layout/FixWidthLayout";
