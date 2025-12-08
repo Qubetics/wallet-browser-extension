@@ -405,38 +405,6 @@ function CoinsTable({ dataArray, showCoinPrice, name }) {
                 text="No"
               />
             </div>
-            {/* <div
-              className="green"
-              style={{
-                padding: "12px 53px",
-                backgroundColor: "rgb(56 101 109)",
-                color: "white",
-                fontSize: "18px",
-                borderRadius: "7px",
-                marginRight: "20px",
-                cursor: "pointer",
-              }}
-              onClick={handleConfirmDelete}
-            >
-              Yes
-            </div> */}
-            {/* <div
-              className="red"
-              style={{
-                padding: "12px 53px",
-                backgroundColor: "red",
-                color: "white",
-                fontSize: "18px",
-                borderRadius: "7px",
-                marginLeft: "20px",
-                cursor: "pointer",
-              }}
-              onClick={() => {
-                setIsModalVisible(false);
-              }}
-            >
-              No
-            </div> */}
           </div>
         </div>
       </ModalCustom>
