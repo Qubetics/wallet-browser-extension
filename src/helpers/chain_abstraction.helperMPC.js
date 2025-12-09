@@ -8,7 +8,7 @@ import { store } from "..";
 import BigNumber from "bignumber.js";
 const { ethers } = require("ethers");
 
-const QUBETICS_RPC = "https://rpc-testnet.qubetics.work";
+const QUBETICS_RPC = process.env.REACT_APP_QUBETIC_RPC;
 
 /**
  * MPC Chain Abstraction Helper
@@ -45,7 +45,7 @@ export class MpcChainAbstractionHelper {
   createMpcSwapOrder = async (data) => {
     try {
       const response = await axios.post(
-        "http://124.243.185.174:8083/user_mpc_deposit",
+        `${process.env.REACT_APP_CHAIN_ABSTRACTION_API_URL}/user_mpc_deposit`,
         data,
         {
           headers: {
@@ -110,7 +110,7 @@ export class MpcChainAbstractionHelper {
    * Retries up to 5 times even for HTTP 500 errors
    */
   async pollIntentStatus(intentHash) {
-    const url = `https://stage-chain-abstraction-api.qubetics.work/api/routes/intent-status?intent-hash=${intentHash}`;
+    const url = `${process.env.REACT_APP_CHAIN_ABSTRACTION_STAGE_API_URL}/api/routes/intent-status?intent-hash=${intentHash}`;
     const MAX_RETRIES = 10;
     const MAX_500_RETRIES = 5; // Retry 5 times even for 500 errors
     let attempts = 0;

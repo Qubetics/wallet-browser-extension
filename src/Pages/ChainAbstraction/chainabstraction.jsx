@@ -366,79 +366,6 @@ function ChainAbstraction({ state }) {
       
       return parseFloat(balance) || 0;
 
-      /* COMMENTED OUT - OLD BALANCE FETCHING CODE
-      if (!token || !mpcAddresses) {
-        console.warn("Missing token or MPC addresses for balance fetch");
-        return 0;
-      }
-  
-      // Determine correct MPC address based on token's coin family
-      let mpcAddress;
-      if (token?.coinFamily === 3 || token?.chain?.currencyName === "BTC") {
-        mpcAddress = mpcAddresses?.btc || mpcAddresses;
-        console.log(`Using BTC MPC address for ${token.symbol}:`, mpcAddress);
-      } else if (token?.chain?.isEVM || token?.coinFamily === 2 || token?.coinFamily === 7) {
-        mpcAddress = mpcAddresses?.eth || mpcAddresses;
-        console.log(`Using ETH MPC address for ${token.symbol}:`, mpcAddress);
-      } else {
-        console.warn("Unknown chain type for token:", token);
-        return 0;
-      }
-  
-      if (!mpcAddress) {
-        console.warn("No MPC address available for this token type");
-        return 0;
-      }
-  
-      console.log(`Fetching MPC balance for ${token.symbol} at ${mpcAddress}`);
-      console.log("Token RPC:", token.rpc);
-      console.log("Token coinFamily:", token.coinFamily);
-  
-      if (token?.chain?.isEVM) {
-        let balance;
-  
-        if (token.isToken && token.tokenAddress) {
-          // ERC20 token balance
-          balance = await Web3Helper.getTokenBalance(
-            mpcAddress,
-            token.tokenAddress,
-            token.rpc,
-            token.decimals
-          );
-          console.log(`MPC EVM token balance for ${token.symbol}:`, balance);
-          return parseFloat(balance) || 0;
-        } else {
-          // Native coin balance (ETH, TICS, etc.)
-          balance = await Web3Helper.getCoinBalance(
-            mpcAddress,
-            token.rpc
-          );
-          console.log(`MPC EVM native balance for ${token.symbol}:`, balance);
-  
-          if (balance === false || !balance) {
-            return 0;
-          }
-  
-          const balanceNum =
-            typeof balance === "object" && balance.toNumber
-              ? balance.toNumber()
-              : parseFloat(balance.toString());
-  
-          return balanceNum || 0;
-        }
-      } else if (
-        token?.chain?.currencyName === "BTC" ||
-        token.coinFamily === 3
-      ) {
-        // Fetch BTC balance - ONLY call this with BTC address
-        console.log("Fetching BTC balance for address:", mpcAddress);
-        const balance = await BTCHelper.getBTCBalance(mpcAddress);
-        console.log(`MPC BTC balance:`, balance);
-        return parseFloat(balance) || 0;
-      }
-  
-      return 0;
-      */
     } catch (error) {
       console.error("Error fetching MPC balance:", error);
       return 0;
@@ -697,12 +624,6 @@ function ChainAbstraction({ state }) {
           // Try to get stored MPC addresses
           const stored = await getStoredMpcAddresses();
 
-          // For testing - remove these hardcoded values in production
-          // const stored = {
-          //   eth: "0x75965181713d44192d40166a14faf7363392e01b",
-          //   btc: "n4qqJ3zZRgUdsa6cKgw8McUckE8DPTmgjU"
-          // };
-
           if (stored?.eth && stored?.btc) {
             console.log("[MPC:UI] Both addresses present, hiding modal");
             setMpcAddresses(stored);
@@ -799,22 +720,6 @@ function ChainAbstraction({ state }) {
       }
     }
   }, [token1, token2, mpcAddresses]);
-
-  // Fetch MPC balance when token1 or mpcFromAddress changes
-  // useEffect(() => {
-  //   if (token1 && mpcFromAddress) {
-  //     console.log(
-  //       "Fetching balance for token:",
-  //       token1.symbol,
-  //       "at address:",
-  //       mpcFromAddress
-  //     );
-  //     fetchMpcBalance(token1, mpcFromAddress).then((balance) => {
-  //       console.log("Updated MPC balance:", balance);
-  //       setBalance(balance);
-  //     });
-  //   }
-  // }, [token1, mpcFromAddress]);
 
   useEffect(() => {
     if (token1 && mpcAddresses) {

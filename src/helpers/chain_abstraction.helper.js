@@ -487,7 +487,7 @@ export class ChainAbstractionHelper {
   };
 
   async pollIntentStatus(intentHash) {
-    const url = `https://stage-chain-abstraction-api.qubetics.work/api/routes/intent-status?intent-hash=${intentHash}`;
+    const url = `${process.env.REACT_APP_CHAIN_ABSTRACTION_STAGE_API_URL}/api/routes/intent-status?intent-hash=${intentHash}`;
     return new Promise((resolve) => {
       async function poll() {
         try {

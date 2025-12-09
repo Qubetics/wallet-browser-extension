@@ -1,14 +1,13 @@
 import { useSelector } from 'react-redux';
 import { message } from 'antd';
+import { useState, useEffect } from 'react';
 import './CrossChain.scss';
 import ModalCustom from '../../Components/ModalCustom/ModalCustom';
 import {
   addCommasToNumber,
   getFlooredFixed,
 } from '../../helpers/conversion.helper';
-import { InputField } from '../../Components/InputField/InputFieldSimple';
 import ButtonComp from '../../Components/ButtonComp/ButtonComp';
-import CopyIcon from '../../Assets/CopyIcon.svg';
 
 const ConfirmAbstractModal = ({
   availableTokens,
@@ -26,6 +25,34 @@ const ConfirmAbstractModal = ({
 }) => {
   const { currency } = useSelector((state) => state);
   const [messageApi, contextHolder] = message.useMessage();
+  const [platformFee, setPlatformFee] = useState(1.5); // Default to 1.5% if API fails
+  const [solverFee, setSolverFee] = useState(1.5); // Default to 1.5% if API fails
+  const [feesLoading, setFeesLoading] = useState(false);
+
+  // Fetch fees from API when modal opens
+  useEffect(() => {
+    const fetchFees = async () => {
+      if (!isOpen) return; // Only fetch when modal is open
+      
+      setFeesLoading(true);
+      try {
+        const response = await fetch('https://stage-onboarding-api.qubetics.work/fees');
+        const data = await response.json();
+        
+        if (data?.error === false && data?.data) {
+          setPlatformFee(data?.data?.platform || 1.5);
+          setSolverFee(data?.data?.solver || 1.5);
+        }
+      } catch (error) {
+        console.error('Error fetching fees:', error);
+        // Keep default values if API fails
+      } finally {
+        setFeesLoading(false);
+      }
+    };
+
+    fetchFees();
+  }, [isOpen]);
 
   const handleCancel = () => {
     if (isProcessing) return;
@@ -37,19 +64,6 @@ const ConfirmAbstractModal = ({
     setIsOpen(!isOpen);
     handleAbstract();
   };
-
-  const truncateAddress = (address) => {
-    if (!address) return 'N/A';
-    if (address.length <= 20) return address;
-    return `${address.substring(0, 10)}...${address.substring(address.length - 8)}`;
-  };
-
-  const copyToClipboard = (text, label) => {
-    if (!text) return;
-    navigator.clipboard.writeText(text);
-    messageApi.success(`${label} copied to clipboard`);
-  };
-
   // Remove trailing zeros from decimal numbers (only after decimal point)
   const removeTrailingZeros = (value) => {
     if (value === null || value === undefined || value === '') return '';
@@ -203,15 +217,15 @@ const ConfirmAbstractModal = ({
             border: '1px solid rgba(255, 255, 255, 0.1)'
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-              <span style={{ fontSize: '13px', color: '#999' }}>Platform Fee (5%)</span>
+              <span style={{ fontSize: '13px', color: '#999' }}>Platform Fee ({platformFee}%)</span>
               <span style={{ fontSize: '13px', fontWeight: 500 , color: '#fff'}}>
-                {addCommasToNumber(removeTrailingZeros(getFlooredFixed(parseFloat(amount || 0) * 0.05, 8)))} {token1?.symbol?.toUpperCase()}
+                {addCommasToNumber(removeTrailingZeros(getFlooredFixed(parseFloat(amount || 0) * (platformFee / 100), 8)))} {token1?.symbol?.toUpperCase()}
               </span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-              <span style={{ fontSize: '13px', color: '#999' }}>Solver Fee (5%)</span>
+              <span style={{ fontSize: '13px', color: '#999' }}>Solver Fee ({solverFee}%)</span>
               <span style={{ fontSize: '13px', fontWeight: 500 , color: '#fff'}}>
-                {addCommasToNumber(removeTrailingZeros(getFlooredFixed(parseFloat(amount || 0) * 0.05, 8)))} {token1?.symbol?.toUpperCase()}
+                {addCommasToNumber(removeTrailingZeros(getFlooredFixed(parseFloat(amount || 0) * (solverFee / 100), 8)))} {token1?.symbol?.toUpperCase()}
               </span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
