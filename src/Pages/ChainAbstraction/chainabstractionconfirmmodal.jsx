@@ -23,6 +23,8 @@ const ConfirmAbstractModal = ({
   fromAddress,
   handleAbstract,
   isProcessing,
+  platformFee = 1.5,
+  solverFee = 1.5,
 }) => {
   const { currency } = useSelector((state) => state);
   const [messageApi, contextHolder] = message.useMessage();
@@ -203,15 +205,15 @@ const ConfirmAbstractModal = ({
             border: '1px solid rgba(255, 255, 255, 0.1)'
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-              <span style={{ fontSize: '13px', color: '#999' }}>Platform Fee (5%)</span>
+              <span style={{ fontSize: '13px', color: '#999' }}>Platform Fee ({platformFee}%)</span>
               <span style={{ fontSize: '13px', fontWeight: 500 , color: '#fff'}}>
-                {addCommasToNumber(removeTrailingZeros(getFlooredFixed(parseFloat(amount || 0) * 0.05, 8)))} {token1?.symbol?.toUpperCase()}
+                {addCommasToNumber(removeTrailingZeros(getFlooredFixed(parseFloat(amount || 0) * (platformFee / 100), 8)))} {token1?.symbol?.toUpperCase()}
               </span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-              <span style={{ fontSize: '13px', color: '#999' }}>Solver Fee (5%)</span>
+              <span style={{ fontSize: '13px', color: '#999' }}>Solver Fee ({solverFee}%)</span>
               <span style={{ fontSize: '13px', fontWeight: 500 , color: '#fff'}}>
-                {addCommasToNumber(removeTrailingZeros(getFlooredFixed(parseFloat(amount || 0) * 0.05, 8)))} {token1?.symbol?.toUpperCase()}
+                {addCommasToNumber(removeTrailingZeros(getFlooredFixed(parseFloat(amount || 0) * (solverFee / 100), 8)))} {token1?.symbol?.toUpperCase()}
               </span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

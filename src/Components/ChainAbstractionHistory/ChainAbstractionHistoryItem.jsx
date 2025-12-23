@@ -408,7 +408,7 @@ function ChainAbstractionHistoryItem(props) {
             </div>
           </div>
           <div className="outer-list">
-            <p className="toFrom">DESTINATION</p>
+            <p className="toFrom">DESTINATION RECIPIENT ADDRESS</p>
             {/* <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "4px" }}>
               {destinationCoinImage ? (
                 <img 

@@ -44,6 +44,7 @@ import {
 import { MpcChainAbstractionHelper } from "../../helpers/chain_abstraction.helperMPC";
 import PasteIcon from "../../Assets/paste-svgrepo-com.svg";
 import Abstract from "../../Assets/swapI.png";
+import axios from "axios";
 
 // Min/Max swap amounts based on coin family
 const MIN_MAX_SWAP_AMOUNT = {
@@ -203,6 +204,8 @@ function ChainAbstraction({ state }) {
   const [mpcAddresses, setMpcAddresses] = useState(null);
   const [mpcFromAddress, setMpcFromAddress] = useState(null);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [platformFee, setPlatformFee] = useState(1.5); // Default to 1.5% from API
+  const [solverFee, setSolverFee] = useState(1.5); // Default to 1.5% from API
 
   const onChangeFromValue = (val) => {
     setWithdrawAmount(val);
@@ -445,8 +448,29 @@ function ChainAbstraction({ state }) {
     }
   };
 
+  // Fetch fees from API
+  const fetchFees = async () => {
+    try {
+      const response = await axios.get('https://stage-onboarding-api.qubetics.work/fees');
+      if (response?.data?.error === false && response?.data?.data) {
+        setPlatformFee(response.data.data.platform || 1.5);
+        setSolverFee(response.data.data.solver || 1.5);
+        console.log("Fees fetched:", {
+          platform: response.data.data.platform,
+          solver: response.data.data.solver
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching fees:", error);
+      // Keep default values (1.5%)
+    }
+  };
+
   const init = async () => {
     try {
+      // Fetch fees on component initialization
+      await fetchFees();
+      
       console.log("account.coinFamilyAndAddress", account.coinFamilyAndAddress);
 
       // Get MPC addresses first
@@ -2113,6 +2137,8 @@ function ChainAbstraction({ state }) {
         toAddress={toAddress}
         handleAbstract={handleAbstraction}
         isProcessing={isProcessing}
+        platformFee={platformFee}
+        solverFee={solverFee}
       />
 
       <ModalCustom
