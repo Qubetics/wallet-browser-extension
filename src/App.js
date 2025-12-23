@@ -58,6 +58,7 @@ import WatchPassword from "./Pages/WelcomeScreens/WatchPassword";
 import NewAddress from "./Pages/NewAddress/NewAddress";
 import OnlyCrossChain from "./Pages/OnlyCrossChain/PancakeSwap";
 import { ExternalConnection } from "./Pages/ExternalConnections/ExternalConnections";
+import { KeplerConnections } from "./Pages/ExternalConnections/KeplerConnections";
 import WatchOnlyList from "./Pages/WatchOnlyList/NetworkPreference";
 import NewAddressWatchOnly from "./Pages/NewAddressWatchOnly/NewAddress";
 import TransactionFilter from "./Pages/TransactionFilter/TransactionFilter";
@@ -489,6 +490,7 @@ function App() {
       </Routes>
 
       <ExternalConnection />
+      <KeplerConnections />
     </div>
   );
 }

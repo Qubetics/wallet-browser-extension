@@ -3,3 +3,5 @@ build
 *.zip
 .env
 .example.env
+# Local Netlify folder
+.netlify
