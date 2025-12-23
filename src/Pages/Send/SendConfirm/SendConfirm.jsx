@@ -46,6 +46,19 @@ function SendConfirm() {
     },
   } = useLocation();
 
+  console.log('NETWORK FEE', networkFee);
+  console.log('COIN', coin);
+  console.log('TO', to);
+  console.log('AMOUNT', amount);
+  console.log('ENS NAME', ENSName);
+  console.log('CONTACT', contact);
+  console.log('THEME', theme);
+  console.log('REDIRECT TO', redirectTo);
+  console.log('GAS PRICE TYPE', gasPriceType);
+  console.log('SELECT CHAIN', selectChain);
+  console.log('MNEMONICS', mnemonics);
+  console.log('COSMOS DATA', cosmosData);
+
   const { account, currency } = useSelector((state) => state);
   const [isModalOpen1, setIsModalOpen1] = useState(false);
   const [fiatGasFee, setFiatGasFee] = useState(0);
@@ -167,7 +180,7 @@ function SendConfirm() {
           },
           {
             text: 'Network Fee',
-            textVal: `${parseFloat(getFlooredFixed(+networkFee, 8))} ${
+            textVal: `${formatNumberInput(networkFee, 6)} ${
               parentCoin ? parentCoin.currencySymbol.toUpperCase() : ''
             }/ ${currency.symbol}${addCommasToNumber(
               getFlooredFixed(fiatGasFee, 2)
