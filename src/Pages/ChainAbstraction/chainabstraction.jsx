@@ -1719,13 +1719,12 @@ function ChainAbstraction({ state }) {
               <div className="swap_onChain">
                 <div className="swap_onChain_balance">
                   <div>
-                    <input
-                      type="number"
+                    <div
                       className="myInput"
-                      readOnly={true}
-                      placeholder="0.000"
-                      value={receivedAmount && receivedAmount !== "" ? removeTrailingZeros(receivedAmount) : ""}
-                    />
+                      style={{ cursor: 'default' }}
+                    >
+                      {receivedAmount && receivedAmount !== "" ? removeTrailingZeros(receivedAmount) : "0.000"}
+                    </div>
                     <p style={{ marginBottom: "8px" }}>
                       {receivedAmount && receivedAmount !== "" && parseFloat(receivedAmount) > 0
                         ? `${currency.symbol}${addCommasToNumber(
