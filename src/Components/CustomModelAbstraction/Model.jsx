@@ -176,7 +176,7 @@ const AbstractProcessingModel = ({
           <h2>{getStatusText(transactionResult?.status)}</h2>
           <div className="transaction-details">
             <div className="transaction-hash">
-              <p>Transaction Hash</p>
+              <p>Intent Transaction Hash</p>
               <div className="hash-container">
                 <span>{transactionResult?.hash}</span>
               </div>
