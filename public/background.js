@@ -487,9 +487,9 @@ class Background {
                   connectedDapps: [
                     ...(connectedDapps || []),
                     {
-                      url: req.url,
-                      image: req.image,
-                      title: req.title,
+                      url: req.url || 'https://delegator.qubetics.com/',
+                      image: req.image || 'https://prod-qubetics-wallet.obs.ap-southeast-4.myhuaweicloud.com/tics_logo.png',
+                      title: req.title || 'Qubetics Delegator',
                       time: new Date(),
                     },
                   ],
