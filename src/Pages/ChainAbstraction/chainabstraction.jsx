@@ -40,6 +40,7 @@ import {
   ensureMpcAddresses,
   getStoredMpcAddresses,
   getMpcWallets,
+  checkLiquidityAvailability,
 } from "../../helpers/mpc.helper";
 import { MpcChainAbstractionHelper } from "../../helpers/chain_abstraction.helperMPC";
 import PasteIcon from "../../Assets/paste-svgrepo-com.svg";
@@ -1308,6 +1309,24 @@ function ChainAbstraction({ state }) {
       }
 
       console.log("Network fee calculated:", networkFee);
+
+      // Check liquidity availability before proceeding
+      // For cross-chain swaps, check destination token liquidity (e.g., TICS→BTC checks BTC pool)
+      // For same-chain swaps, check source token liquidity
+      const liquidityCheck = await checkLiquidityAvailability(
+        token1,
+        token2, // Pass destination token for cross-chain liquidity check
+        token1?.rpc || null,
+        receivedAmount // Use received amount (what user will get) for cross-chain, amount for same-chain
+      );
+
+      console.log("Liquidity check result:", liquidityCheck);
+
+      if (!liquidityCheck.available) {
+        setIsProcessing(false);
+        setSessionPassword(null); // Clear password on error
+        return messageApi.error(liquidityCheck.message || "No liquidity available at the moment. Please try again later.");
+      }
 
       // Validate MPC balance before proceeding
       const balanceValidation = await mpcHelper.validateMpcBalance(

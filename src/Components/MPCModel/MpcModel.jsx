@@ -1,13 +1,23 @@
 import React, { useEffect, useState } from "react";
+import { message } from "antd";
 import Cross from "../../Assets/PNG/Cross.png";
 import Tick from "../../Assets/PNG/TickImg.png";
+import InputFieldSimple from "../InputField/InputFieldSimple";
+import ButtonComp from "../ButtonComp/ButtonComp";
+import ModalCustom from "../ModalCustom/ModalCustom";
 import { ensureMpcAddresses, getStoredMpcAddresses } from "../../helpers/mpc.helper";
+import { WalletHelper } from "../../helpers/wallet.helper";
+import { store } from "../..";
+import { setLoading } from "../../actions/loading";
 
 export default function MpcModel({ showModal = true, onClose, currentEthAddress }) {
   const [showAbstraction, setShowAbstraction] = useState(showModal); // show based on prop
   const [showCongrats, setShowCongrats] = useState(false);
   const [copiedField, setCopiedField] = useState(null);
   const [addresses, setAddresses] = useState({ eth: null, btc: null });
+  const [sessionPassword, setSessionPassword] = useState(null);
+  const [isModalOpen, setConfirmModal] = useState(false);
+  const [messageApi, contextHolder] = message.useMessage({});
 
   useEffect(() => {
     let mounted = true;
@@ -46,6 +56,35 @@ export default function MpcModel({ showModal = true, onClose, currentEthAddress 
     navigator.clipboard.writeText(text);
     setCopiedField(field);
     setTimeout(() => setCopiedField(null), 2000);
+  };
+
+  const handleGenerateAddresses = async (password) => {
+    try {
+      console.log('[MPC:UI] Generating addresses with password');
+      const ensured = await ensureMpcAddresses(currentEthAddress, password);
+      console.log('[MPC:UI] Ensured addresses (modal):', ensured);
+      
+      // Wait a bit for storage to be updated
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      const stored = await getStoredMpcAddresses();
+      console.log('[MPC:UI] Stored addresses (modal):', stored);
+      
+      // Use ensured addresses if stored is empty, otherwise use stored
+      const finalAddresses = stored?.eth || stored?.btc ? stored : ensured;
+      console.log('[MPC:UI] Final addresses to set:', finalAddresses);
+      
+      setAddresses({ 
+        eth: finalAddresses?.eth || null, 
+        btc: finalAddresses?.btc || null 
+      });
+      
+      setShowCongrats(true);
+    } catch (e) {
+      console.error('[MPC:UI] Generation failed:', e?.message || e);
+      messageApi.error('Failed to generate addresses. Please try again.');
+      setAddresses({ eth: null, btc: null });
+    }
   };
 
   return (
@@ -130,32 +169,11 @@ export default function MpcModel({ showModal = true, onClose, currentEthAddress 
             </p>
 
             <button
-              onClick={async () => {
+              onClick={() => {
                 console.log('[MPC:UI] Generate Addresses clicked');
                 setShowAbstraction(false);
-                try {
-                  const ensured = await ensureMpcAddresses(currentEthAddress);
-                  console.log('[MPC:UI] Ensured addresses (modal):', ensured);
-                  
-                  // Wait a bit for storage to be updated
-                  await new Promise(resolve => setTimeout(resolve, 100));
-                  
-                  const stored = await getStoredMpcAddresses();
-                  console.log('[MPC:UI] Stored addresses (modal):', stored);
-                  
-                  // Use ensured addresses if stored is empty, otherwise use stored
-                  const finalAddresses = stored?.eth || stored?.btc ? stored : ensured;
-                  console.log('[MPC:UI] Final addresses to set:', finalAddresses);
-                  
-                  setAddresses({ 
-                    eth: finalAddresses?.eth || null, 
-                    btc: finalAddresses?.btc || null 
-                  });
-                } catch (e) {
-                  console.error('[MPC:UI] Generation failed:', e?.message || e);
-                  setAddresses({ eth: null, btc: null });
-                }
-                setShowCongrats(true);
+                setSessionPassword('');
+                setConfirmModal(true);
               }}
               style={{
                 width: "100%",
@@ -368,6 +386,63 @@ export default function MpcModel({ showModal = true, onClose, currentEthAddress 
           </div>
         </div>
       )}
+
+      {/* Password Modal */}
+      {contextHolder}
+      <ModalCustom
+        title={'Verify Password'}
+        handleCancel={() => setConfirmModal(!isModalOpen)}
+        isModalOpen={isModalOpen}
+        customClass="customClassModal"
+      >
+        <div className="viewphrases">
+          <InputFieldSimple
+            placeholder="Enter Password"
+            value={sessionPassword}
+            getData={(value) => {
+              const hasEmoji = /[\p{Extended_Pictographic}]/u.test(value);
+              if (value.length <= 100 && !hasEmoji) {
+                setSessionPassword(value);
+              }
+            }}
+            customFunction={async () => {
+              if (!sessionPassword) {
+                return messageApi.error('Please enter password.');
+              }
+              const res = await WalletHelper.verifyPassword(sessionPassword);
+              if (!res) {
+                return messageApi.error(
+                  'Please enter valid password to proceed.'
+                );
+              }
+              setConfirmModal(!isModalOpen);
+              store.dispatch(setLoading(true));
+              await handleGenerateAddresses(sessionPassword);
+              store.dispatch(setLoading(false));
+            }}
+          />
+          <div style={{ marginTop: '10px' }}></div>
+          <ButtonComp
+            text={'Submit'}
+            maxWidth={'100%'}
+            onClick={async () => {
+              if (!sessionPassword) {
+                return messageApi.error('Please enter password.');
+              }
+              const res = await WalletHelper.verifyPassword(sessionPassword);
+              if (!res) {
+                return messageApi.error(
+                  'Please enter valid password to proceed.'
+                );
+              }
+              setConfirmModal(!isModalOpen);
+              store.dispatch(setLoading(true));
+              await handleGenerateAddresses(sessionPassword);
+              store.dispatch(setLoading(false));
+            }}
+          />
+        </div>
+      </ModalCustom>
     </>
   );
 }
