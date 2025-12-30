@@ -34,7 +34,7 @@ const AbstractProcessingModel = ({
   const handleExplorer = () => {
     if (transactionResult?.hash) {
       window.open(
-        `https://stage.qubetics.work/chain-abstraction/${transactionResult.hash}`,
+        `https://prod-explorer.qubetics.work/chain-abstraction/${transactionResult.hash}`,
         '_blank',
         'noopener,noreferrer'
       );

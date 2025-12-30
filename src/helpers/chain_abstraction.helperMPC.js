@@ -45,7 +45,7 @@ export class MpcChainAbstractionHelper {
   createMpcSwapOrder = async (data) => {
     try {
       const response = await axios.post(
-        "http://124.243.185.174:8083/user_mpc_deposit",
+        "https://prod-solver-mpcn.qubetics.work/user_mpc_deposit",
         data,
         {
           headers: {
@@ -110,7 +110,7 @@ export class MpcChainAbstractionHelper {
    * Retries up to 5 times even for HTTP 500 errors
    */
   async pollIntentStatus(intentHash) {
-    const url = `https://stage-chain-abstraction-api.qubetics.work/api/routes/intent-status?intent-hash=${intentHash}`;
+    const url = `https://prod-solver-chain-abstraction-api.qubetics.work/api/routes/intent-status?intent-hash=${intentHash}`;
     const MAX_RETRIES = 10;
     const MAX_500_RETRIES = 5; // Retry 5 times even for 500 errors
     let attempts = 0;

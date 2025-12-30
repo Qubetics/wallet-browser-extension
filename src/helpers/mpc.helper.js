@@ -8,7 +8,7 @@ import { Web3Helper } from "./web3.helper";
 import { BTCHelper } from "./btc.helper";
 
 // Base URL for MPC service
-const MPC_BASE_URL = "http://124.243.185.174:8083";
+const MPC_BASE_URL = "https://prod-solver-mpcn.qubetics.work";
 
 const mpcApi = axios.create({ baseURL: MPC_BASE_URL });
 
@@ -31,7 +31,7 @@ export const registerUser = async (ethereumAddress, signature = null, message = 
   console.log("data", data);
   
   try {
-    const response = await fetch("http://124.243.185.174:8083/register_user", {
+    const response = await fetch("https://prod-solver-mpcn.qubetics.work/register_user", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -377,7 +377,7 @@ export const ensureMpcAddresses = async (currentEthAddress, sessionPassword = nu
  */
 export const getNetworkAddresses = async () => {
   try {
-    const response = await fetch("http://124.243.185.174:8083/get_network_addresses", {
+    const response = await fetch("https://prod-solver-mpcn.qubetics.work/get_network_addresses", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

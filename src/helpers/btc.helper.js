@@ -56,7 +56,7 @@ export class BTCHelper {
       try {
         const mempoolUrl = IS_PRODUCTION
           ? `https://mempool.space/api/address/${address}`
-          : `https://mempool.space/testnet/api/address/${address}`;
+          : `https://mempool.space/testnet4/api/address/${address}`;
 
         const { data: mempoolData } = await axios.get(mempoolUrl);
         
@@ -77,7 +77,7 @@ export class BTCHelper {
         // Fallback to blockstream.info API
         const apiUrl = IS_PRODUCTION
           ? `https://blockstream.info/api/address/${address}/utxo`
-          : `https://blockstream.info/testnet/api/address/${address}/utxo`;
+          : `https://blockstream.info/testnet4/api/address/${address}/utxo`;
 
         const { data } = await axios.get(apiUrl);
 
