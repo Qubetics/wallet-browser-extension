@@ -37,7 +37,6 @@ import BigNumber from "bignumber.js";
 import AbstractProcessingModal from "../../Components/CustomModelAbstraction/Model";
 import MpcModel from "../../Components/MPCModel/MpcModel";
 import {
-  ensureMpcAddresses,
   getStoredMpcAddresses,
   getMpcWallets,
   checkLiquidityAvailability,
@@ -51,11 +50,11 @@ import axios from "axios";
 const MIN_MAX_SWAP_AMOUNT = {
   7: {
     min: 25,
-    max: 50,
+    max: 1000,
   },
   3: {
-    min: 0.000008,
-    max: 0.1,
+    min: 0.000005,
+    max: 0.001,
   }
 };
 
@@ -207,6 +206,8 @@ function ChainAbstraction({ state }) {
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [platformFee, setPlatformFee] = useState(1.5); // Default to 1.5% from API
   const [solverFee, setSolverFee] = useState(1.5); // Default to 1.5% from API
+  const [networkFee, setNetworkFee] = useState(0); // Store calculated network fee
+  const networkFeeRef = useRef(0); // Use ref to persist network fee across renders
 
   const onChangeFromValue = (val) => {
     setWithdrawAmount(val);
@@ -961,6 +962,8 @@ function ChainAbstraction({ state }) {
       setReceivedAmount(null);
       setWithdrawAmount(null);
       setPercent(null);
+      networkFeeRef.current = 0;
+      setNetworkFee(0); // Reset network fee when token changes
       updateRef.current = false;
     }
   
@@ -1002,6 +1005,8 @@ function ChainAbstraction({ state }) {
       setReceivedAmount(null);
       setWithdrawAmount(null);
       setPercent(null);
+      networkFeeRef.current = 0;
+      setNetworkFee(0); // Reset network fee when token changes
       updateRef.current = false;
     }
 
@@ -1150,17 +1155,35 @@ function ChainAbstraction({ state }) {
           return throwError("Unable to fetch gas price at the moment.");
         }
 
-        const gasInEth = (gasPrice.fast * 1e9 * gasPrice.estimate) / 1e18;
+        let gasEstimate = gasPrice?.estimate || 23000;
+        const mediumGasPrice = gasPrice?.fast || 0.000000007;
+        const gasInEth = parseFloat(((mediumGasPrice * (gasEstimate * 2) / 10 ** 3)).toFixed(8)); //TESTNET
+        
+        console.log("=== NETWORK FEE CALCULATION ===");
+        console.log("Token1:", token1?.symbol, "Chain:", token1?.chain?.slug);
+        console.log("Gas Price object:", gasPrice);
+        console.log("Gas Price Fast (gwei):", gasPrice.fast);
+        console.log("Gas Price Estimate (gas limit):", gasPrice.estimate);
+        console.log("Calculated Network Fee:", gasInEth);
+        
+        if (gasInEth <= 0 || isNaN(gasInEth) || !isFinite(gasInEth)) {
+          console.error("Invalid network fee calculated:", gasInEth);
+          console.error("This might indicate an issue with gas price API response");
+        }
+        
+        networkFeeRef.current = gasInEth;
+        setNetworkFee(gasInEth);
+        console.log("Network fee calculated value:", gasInEth);
+        console.log("Network fee stored in ref:", networkFeeRef.current);
+        console.log("Note: State will update on next render, ref is available immediately");
 
-        // Check MPC native balance for gas - getCoinBalance returns BigNumber
         const nativeCoinBalanceRaw = await Web3Helper.getCoinBalance(
           mpcFromAddress,
-          token1?.rpc // Use token1.rpc for native balance check
+          token1?.rpc
         );
 
         console.log("MPC nativeCoinBalance (raw):", nativeCoinBalanceRaw);
 
-        // Convert BigNumber to number
         let nativeCoinBalance = 0;
         if (nativeCoinBalanceRaw && nativeCoinBalanceRaw !== false) {
           nativeCoinBalance =
@@ -1172,14 +1195,23 @@ function ChainAbstraction({ state }) {
 
         console.log("MPC nativeCoinBalance (converted):", nativeCoinBalance);
 
+        const gasFee = parseFloat(gasInEth) || 0;
+        
+        const balanceNum = parseFloat(mpcBalance) || 0;
+        const amountNum = parseFloat(parsedAmount) || 0;
+        const feeNum = parseFloat(gasFee) || 0;
+        
         const hasEnoughNative = token1?.isToken
-          ? nativeCoinBalance >= gasInEth
-          : mpcBalance >= parsedAmount + gasInEth;
+          ? nativeCoinBalance >= feeNum
+          : balanceNum >= (amountNum + feeNum);
 
-        console.log("mpcBalance", mpcBalance);
-        console.log("parsedAmount", parsedAmount);
-        console.log("gasInEth", gasInEth);
-        console.log("hasEnoughNative", hasEnoughNative);
+        console.log("=== BALANCE CHECK ===");
+        console.log("mpcBalance (number):", balanceNum);
+        console.log("parsedAmount (number):", amountNum);
+        console.log("gasFee (number):", feeNum);
+        console.log("Total required (amount + fee):", amountNum + feeNum);
+        console.log("Comparison: ", balanceNum, ">=", amountNum + feeNum, "?", balanceNum >= (amountNum + feeNum));
+        console.log("hasEnoughNative:", hasEnoughNative);
 
         if (!hasEnoughNative) {
           return throwError(
@@ -1189,9 +1221,7 @@ function ChainAbstraction({ state }) {
           );
         }
 
-        // Validate MPC balance
         if (token1?.isToken) {
-          // For tokens, check token balance separately
           if (mpcBalance < parsedAmount) {
             return throwError(
               `Insufficient Balance`
@@ -1211,23 +1241,66 @@ function ChainAbstraction({ state }) {
         );
 
         const swapDetails = buildSwapDetails(
-          gasInEth,
+          gasFee,
           parentCoinData?.fiatCoinPrice?.value
         );
         finalizeSwap(swapDetails);
       } else if (token1?.chain?.currencyName === "BTC") {
-        const gasPrice = Math.max(await BTCHelper.getBTCGasPrice(), 10);
-        const networkFee = gasPrice / 1e8;
+        const gasPriceResponse = await BTCHelper.getBTCGasPrice();
+        if (!gasPriceResponse) {
+          return throwError("Unable to fetch BTC gas price at the moment.");
+        }
+        
+        let gasPrice;
+        if (typeof gasPriceResponse === 'object' && gasPriceResponse !== null) {
+          gasPrice = gasPriceResponse.priority || gasPriceResponse.regular || 1;
+        } else {
+          gasPrice = Math.max(gasPriceResponse || 1, 1);
+        }
+        
+        console.log("BTC Gas Price API Response:", gasPriceResponse);
+        console.log("BTC Gas Price (sat/vB):", gasPrice);
+        
+        const estimatedInputCount = 1;
+        const estimatedOutputCount = 2;
+        const estimatedSize = estimatedInputCount * 146 + estimatedOutputCount * 34 + 10;
+        
+        const feeInSatoshis = Math.ceil(estimatedSize * gasPrice);
+        
+        const calculatedNetworkFee = parseFloat((feeInSatoshis / 1e8).toFixed(8));
+        
+        console.log("=== BTC TRANSACTION FEE CALCULATION ===");
+        console.log("Input count:", estimatedInputCount);
+        console.log("Output count:", estimatedOutputCount);
+        console.log("Estimated transaction size (bytes):", estimatedSize);
+        console.log("Gas price (sat/vB):", gasPrice);
+        console.log("Fee calculation:", estimatedSize, "bytes ×", gasPrice, "sat/vB =", feeInSatoshis, "satoshis");
+        console.log("Fee in satoshis:", feeInSatoshis);
+        console.log("Fee conversion:", feeInSatoshis, "satoshis ÷ 1e8 =", calculatedNetworkFee, "BTC");
+        console.log("Network fee in BTC:", calculatedNetworkFee);
+        
+        if (calculatedNetworkFee > 0.00001) {
+          console.warn("⚠️ WARNING: Network fee seems too high!");
+          console.warn("Expected: ~0.00000226 BTC (226 satoshis)");
+          console.warn("Got:", calculatedNetworkFee, "BTC (", feeInSatoshis, "satoshis)");
+        }
+        
+        networkFeeRef.current = calculatedNetworkFee;
+        setNetworkFee(calculatedNetworkFee);
+        console.log("Network fee stored in ref:", networkFeeRef.current);
 
-        // Validate MPC BTC balance
-        if (mpcBalance < parsedAmount + networkFee) {
+        if (mpcBalance < parsedAmount + calculatedNetworkFee) {
           return throwError(
             `Insufficient balance`
           );
         }
 
-        const swapDetails = buildSwapDetails(networkFee);
+        const swapDetails = buildSwapDetails(calculatedNetworkFee);
         finalizeSwap(swapDetails);
+      } else {
+        console.warn("Unknown chain type for token1:", token1);
+        setNetworkFee(0);
+        return throwError("Unsupported chain type for transaction.");
       }
     } catch (error) {
       console.error("Error in handleChainAbstraction:", error);
@@ -2157,6 +2230,7 @@ function ChainAbstraction({ state }) {
         isProcessing={isProcessing}
         platformFee={platformFee}
         solverFee={solverFee}
+        networkFee={networkFee || networkFeeRef.current}
       />
 
       <ModalCustom
@@ -2165,6 +2239,9 @@ function ChainAbstraction({ state }) {
           setPasswordModal(!isPasswordModalOpen);
           // Clear password when modal is closed/cancelled
           setSessionPassword(null);
+          // Reset network fee when cancelling
+          networkFeeRef.current = 0;
+          setNetworkFee(0);
         }}
         isModalOpen={isPasswordModalOpen}
         customClass="customClassModal"
@@ -2220,68 +2297,72 @@ function ChainAbstraction({ state }) {
         setSuccessModal={setShowSuccess}
         transactionResult={transactionresult}
         loader={true}
-        onClose={() => {
-          console.log("Modal was closed!");
+        // onClose={() => {
+        //   console.log("Modal was closed!");
 
-          // Reset transaction result to initial state (not null)
-          setTransactionResult({
-            hash: "",
-            fee: "",
-            link: "",
-            status: "",
-            symbol: "",
-            solver: "",
-            source_address: "",
-          });
+        //   // Reset transaction result to initial state (not null)
+        //   setTransactionResult({
+        //     hash: "",
+        //     fee: "",
+        //     link: "",
+        //     status: "",
+        //     symbol: "",
+        //     solver: "",
+        //     source_address: "",
+        //   });
 
-          // Reset modal states
-          setIsProcessModal(false);
-          setShowSuccess(false);
+        //   // Reset modal states
+        //   setIsProcessModal(false);
+        //   setShowSuccess(false);
 
-          // Reset input fields
-          setWithdrawAmount("");
-          setReceivedAmount("");
-          setPercent(null);
+        //   // Reset input fields
+        //   setWithdrawAmount("");
+        //   setReceivedAmount("");
+        //   setPercent(null);
           
-          // Reset To Address to default MPC address for token2 (only if different from token1)
-          if (token2 && mpcAddresses) {
-            // If same token, leave empty
-            if (token1?.id === token2?.id) {
-              setToAddress("");
-            } else {
-              const getDefaultToAddress = (token, addresses) => {
-                if (!token || !addresses) {
-                  return "";
-                }
+        //   // Reset network fee
+        //   networkFeeRef.current = 0;
+        //   setNetworkFee(0);
+          
+        //   // Reset To Address to default MPC address for token2 (only if different from token1)
+        //   if (token2 && mpcAddresses) {
+        //     // If same token, leave empty
+        //     if (token1?.id === token2?.id) {
+        //       setToAddress("");
+        //     } else {
+        //       const getDefaultToAddress = (token, addresses) => {
+        //         if (!token || !addresses) {
+        //           return "";
+        //         }
                 
-                if (token?.coinFamily === 3 || token?.chain?.currencyName === "BTC") {
-                  return addresses?.btc || "";
-                }
-                // default to EVM (coinFamily 2 or 7)
-                return addresses?.eth || "";
-              };
+        //         if (token?.coinFamily === 3 || token?.chain?.currencyName === "BTC") {
+        //           return addresses?.btc || "";
+        //         }
+        //         // default to EVM (coinFamily 2 or 7)
+        //         return addresses?.eth || "";
+        //       };
               
-              const defaultAddress = getDefaultToAddress(token2, mpcAddresses);
-              if (defaultAddress) {
-                setToAddress(defaultAddress);
-              }
-            }
-          }
+        //       const defaultAddress = getDefaultToAddress(token2, mpcAddresses);
+        //       if (defaultAddress) {
+        //         setToAddress(defaultAddress);
+        //       }
+        //     }
+        //   }
 
-          // Reset processing state
-          setIsProcessing(false);
+        //   // Reset processing state
+        //   setIsProcessing(false);
           
-          // Clear password after modal closes
-          setSessionPassword(null);
+        //   // Clear password after modal closes
+        //   setSessionPassword(null);
 
-          // Optionally refresh the balance
-          if (token1 && mpcFromAddress) {
-            fetchMpcBalance(token1, mpcFromAddress).then((balance) => {
-              console.log("Refreshed balance after modal close:", balance);
-              setBalance(balance);
-            });
-          }
-        }}
+        //   // Optionally refresh the balance
+        //   if (token1 && mpcFromAddress) {
+        //     fetchMpcBalance(token1, mpcFromAddress).then((balance) => {
+        //       console.log("Refreshed balance after modal close:", balance);
+        //       setBalance(balance);
+        //     });
+        //   }
+        // }}
       />
 
       {showMpcModel && (

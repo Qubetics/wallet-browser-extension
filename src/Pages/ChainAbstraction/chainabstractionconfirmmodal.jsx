@@ -6,9 +6,7 @@ import {
   addCommasToNumber,
   getFlooredFixed,
 } from '../../helpers/conversion.helper';
-import { InputField } from '../../Components/InputField/InputFieldSimple';
 import ButtonComp from '../../Components/ButtonComp/ButtonComp';
-import CopyIcon from '../../Assets/CopyIcon.svg';
 
 const ConfirmAbstractModal = ({
   availableTokens,
@@ -25,6 +23,7 @@ const ConfirmAbstractModal = ({
   isProcessing,
   platformFee = 1.5,
   solverFee = 1.5,
+  networkFee = 0,
 }) => {
   const { currency } = useSelector((state) => state);
   const [messageApi, contextHolder] = message.useMessage();
@@ -219,10 +218,25 @@ const ConfirmAbstractModal = ({
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontSize: '13px', color: '#999' }}>Transaction Fee</span>
               <span style={{ fontSize: '13px', fontWeight: 500 , color: '#fff'}}>
-                {addCommasToNumber(removeTrailingZeros(getFlooredFixed(0, 8)))} {token1?.symbol?.toUpperCase()}{' '}
-                <span style={{ color: '#999', fontSize: '12px' }}>
-                  (~{currency.symbol}0.00)
-                </span>
+                {(() => {
+                  const fee = parseFloat(networkFee || 0);
+                  const formattedFee = fee > 0 
+                    ? addCommasToNumber(removeTrailingZeros(getFlooredFixed(fee, 8)))
+                    : '0';
+                  const fiatValue = fee > 0 && token1?.price
+                    ? fee * parseFloat(token1.price)
+                    : 0;
+                  return (
+                    <>
+                      {formattedFee} {token1?.symbol?.toUpperCase()}{' '}
+                      {fiatValue > 0 && (
+                        <span style={{ color: '#999', fontSize: '12px' }}>
+                          (~{currency.symbol}{addCommasToNumber(getFlooredFixed(fiatValue, 2))})
+                        </span>
+                      )}
+                    </>
+                  );
+                })()}
               </span>
             </div>
           </div>

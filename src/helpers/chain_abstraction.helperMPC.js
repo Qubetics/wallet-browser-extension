@@ -1,3 +1,4 @@
+/* global BigInt */
 import axios from "axios";
 import { BTCHelper } from "./btc.helper";
 import { Web3Helper } from "./web3.helper";
@@ -24,7 +25,7 @@ export class MpcChainAbstractionHelper {
   /**
    * Get chain identifier for intent
    */
-    getIntentChainId = (coinFamily) => {
+  getIntentChainId = (coinFamily) => {
     switch (coinFamily) {
       case 7:
         return "TICS";
@@ -49,7 +50,8 @@ export class MpcChainAbstractionHelper {
         data,
         {
           headers: {
-            "X-API-KEY": "REDACTED",
+            "X-API-KEY":
+              "REDACTED",
           },
         }
       );
@@ -71,7 +73,7 @@ export class MpcChainAbstractionHelper {
   saveIntentHash = async (data) => {
     try {
       const { account } = store.getState();
-      
+
       // Determine the chain path based on coin symbol or family
       let chainPath = "qubetics/";
       if (data.coin_family === 3 || data.coin_symbol === "btc") {
@@ -79,23 +81,19 @@ export class MpcChainAbstractionHelper {
       }
       // Determine coin symbol (lowercase)
       const coinSymbol = data?.coin_symbol || "tics";
-      
+
       // Build the endpoint
       const endpoint = `${chainPath}${coinSymbol}/saveTransaction`;
-      
+
       console.log("Saving transaction with endpoint:", endpoint);
       console.log("Transaction data:", data);
-      
-      const response = await server.post(
-        endpoint,
-        data,
-        {
-          headers: {
-            Authorization: account.jwtToken,
-          },
-        }
-      );
-      
+
+      const response = await server.post(endpoint, data, {
+        headers: {
+          Authorization: account.jwtToken,
+        },
+      });
+
       console.log("Save transaction response:", response);
       return response;
     } catch (error) {
@@ -103,7 +101,6 @@ export class MpcChainAbstractionHelper {
       return false;
     }
   };
-
 
   /**
    * Poll intent status until completion
@@ -115,38 +112,45 @@ export class MpcChainAbstractionHelper {
     const MAX_500_RETRIES = 5; // Retry 5 times even for 500 errors
     let attempts = 0;
     let error500Attempts = 0;
-  
+
     return new Promise((resolve) => {
       async function poll() {
         attempts++;
         try {
           const response = await axios.get(url);
           const { error, data } = response.data;
-  
+
           // Check for HTTP 500 error - retry up to 5 times
           if (response.status === 500 || (error && response.status >= 500)) {
             error500Attempts++;
-            console.error(`Intent API returned 500 error (Attempt ${error500Attempts}/${MAX_500_RETRIES}):`, response.data);
-            
+            console.error(
+              `Intent API returned 500 error (Attempt ${error500Attempts}/${MAX_500_RETRIES}):`,
+              response.data
+            );
+
             if (error500Attempts < MAX_500_RETRIES) {
-              console.log(`Retrying after 500 error in 2 seconds... (500 Error Attempt ${error500Attempts})`);
+              console.log(
+                `Retrying after 500 error in 2 seconds... (500 Error Attempt ${error500Attempts})`
+              );
               setTimeout(poll, 2000);
               return;
             } else {
-              console.error("Max 500 error retries reached. Transaction failed.");
-              resolve({ 
-                error: true, 
+              console.error(
+                "Max 500 error retries reached. Transaction failed."
+              );
+              resolve({
+                error: true,
                 message: "Transaction failed - intent API error",
                 statusCode: 500,
-                data: response.data 
+                data: response.data,
               });
               return;
             }
           }
-  
+
           // Reset 500 error counter on successful response
           error500Attempts = 0;
-  
+
           if (!error && data) {
             console.log("Final Success Response:", response?.data);
             resolve(response?.data);
@@ -161,24 +165,31 @@ export class MpcChainAbstractionHelper {
           // Check if it's an HTTP 500 error
           if (error.response && error.response.status === 500) {
             error500Attempts++;
-            console.error(`Intent API returned 500 error (Attempt ${error500Attempts}/${MAX_500_RETRIES}):`, error.response.data);
-            
+            console.error(
+              `Intent API returned 500 error (Attempt ${error500Attempts}/${MAX_500_RETRIES}):`,
+              error.response.data
+            );
+
             if (error500Attempts < MAX_500_RETRIES) {
-              console.log(`Retrying after 500 error in 2 seconds... (500 Error Attempt ${error500Attempts})`);
+              console.log(
+                `Retrying after 500 error in 2 seconds... (500 Error Attempt ${error500Attempts})`
+              );
               setTimeout(poll, 2000);
               return;
             } else {
-              console.error("Max 500 error retries reached. Transaction failed.");
-              resolve({ 
-                error: true, 
+              console.error(
+                "Max 500 error retries reached. Transaction failed."
+              );
+              resolve({
+                error: true,
                 message: "Transaction failed - intent API error",
                 statusCode: 500,
-                data: error.response?.data 
+                data: error.response?.data,
               });
               return;
             }
           }
-          
+
           console.error(
             `Error fetching intent status (Attempt ${attempts}), retrying in 2 seconds:`,
             error
@@ -187,15 +198,18 @@ export class MpcChainAbstractionHelper {
             setTimeout(poll, 2000);
           } else {
             console.warn("Max retries reached after errors. Stopping polling.");
-            resolve({ error: true, message: "Max retries reached after errors" });
+            resolve({
+              error: true,
+              message: "Max retries reached after errors",
+            });
           }
         }
       }
-  
+
       poll();
     });
   }
-  
+
   /**
    * Exponential to decimal conversion
    */
@@ -242,11 +256,6 @@ export class MpcChainAbstractionHelper {
     receivedAmount,
     mpcFromAddress,
     chain,
-    fee,
-    fiatValue,
-    parentCoin,
-    rpc,
-    symbol,
     sessionPassword,
     toAddress
   ) => {
@@ -262,23 +271,23 @@ export class MpcChainAbstractionHelper {
         chainId: chain?.chainId,
         coinFamily: token1?.coinFamily,
       });
-  
+
       // Get account and private key
       const { account } = store.getState();
-  
+
       // Get the appropriate private key based on coin family
       const keyData = await WalletHelper.getPrivateKeyWithPassword(
         account,
         sessionPassword
       );
       const privateKey = keyData?.privateKey;
-  
+
       if (!privateKey) {
         throw new Error("Unable to fetch private key");
       }
-  
+
       console.log("token1?.decimals", token1?.decimals);
-  
+
       // ============================================
       // FIX: Correct decimal calculation for Bitcoin (8 decimals)
       // ============================================
@@ -288,62 +297,73 @@ export class MpcChainAbstractionHelper {
       } else {
         decimals = token1?.chain?.currencyDecimals || 18;
       }
-  
+
       console.log(`Using ${decimals} decimals for ${token1?.coinSymbol}`);
-  
+
       let amountWithDecimals = amount * Math.pow(10, decimals);
       amountWithDecimals = this.exponentialToDecimal(
         Number(amountWithDecimals).toFixed(0)
       );
-  
+
+      // const amountWithDecimals =
+      //   BigInt(amount) * BigInt(10) ** BigInt(decimals);
+
+      console.log("Amount with decimals:", amountWithDecimals.toString());
+
       console.log("Amount with decimals:", amountWithDecimals);
-  
+
       // Prepare message for signature
       // For same-coin transfers, both chains and tokens are the same
-      const isSameCoin = token1?.coinSymbol?.toLowerCase() === token2?.coinSymbol?.toLowerCase();
-      const sourceChain = token1?.coinSymbol?.toLowerCase() === "tics" ? "qubetics" : "bitcoin";
-      const targetChain = token2?.coinSymbol?.toLowerCase() === "tics" ? "qubetics" : "bitcoin";
-      
+      const isSameCoin =
+        token1?.coinSymbol?.toLowerCase() === token2?.coinSymbol?.toLowerCase();
+      const sourceChain =
+        token1?.coinSymbol?.toLowerCase() === "tics" ? "qubetics" : "bitcoin";
+      const targetChain =
+        token2?.coinSymbol?.toLowerCase() === "tics" ? "qubetics" : "bitcoin";
+
       const msg = {
         source_address: mpcFromAddress,
         target_address: toAddress,
         source_chain: sourceChain,
         target_chain: isSameCoin ? sourceChain : targetChain, // Same chain for same-coin transfers
+        // amount: amountWithDecimals.toString(),
         amount: Number(amountWithDecimals),
         source_token: token1?.coinSymbol?.toLowerCase(),
-        target_token: isSameCoin ? token1?.coinSymbol?.toLowerCase() : token2?.coinSymbol?.toLowerCase(),
+        target_token: isSameCoin
+          ? token1?.coinSymbol?.toLowerCase()
+          : token2?.coinSymbol?.toLowerCase(),
         timestamp: new Date().getTime(),
       };
-  
+
       console.log("Message to sign:", msg);
-  
+
       const payloadStr = JSON.stringify(msg);
-  
+
       // Sign the message
       const provider = new ethers.providers.JsonRpcProvider(
         token1?.rpc || QUBETICS_RPC
       );
       const wallet = new ethers.Wallet(privateKey).connect(provider);
       const signature = await wallet.signMessage(payloadStr);
-  
+
       console.log("Signature:", signature);
-  
+
       // Create swap order
       const swapData = {
         signature: signature,
         msg: msg,
       };
-  
+
       const response = await this.createMpcSwapOrder(swapData);
       console.log("MPC swap order response:", response);
-  
+
       if (!response || response.error) {
         throw new Error(response?.message || "Failed to create MPC swap order");
       }
-  
+
       // Get transaction hash
       let txId = response?.user_to_network_tx_id;
-  
+
       // Handle timeout case
       if (response?.status === "timeout" && response?.error_message) {
         const parts = response.error_message.split("Intent hash: ");
@@ -352,13 +372,13 @@ export class MpcChainAbstractionHelper {
           txId = "0x" + hash;
         }
       }
-  
+
       console.log("Transaction ID:", txId);
-  
+
       if (!txId) {
         throw new Error("No transaction ID received");
       }
-  
+
       // Get gas price
       const gasprice = await this.getGasPrice(
         token1?.coinSymbol?.toLowerCase() === "tics" ? "qubetics" : "bitcoin",
@@ -368,33 +388,38 @@ export class MpcChainAbstractionHelper {
         "",
         token1?.coinSymbol
       );
-  
+
       console.log("Gas price:", gasprice);
-  
+
       const coinFamily2 = token1?.coinFamily;
       const fromAddress = account?.coinFamilyAndAddress?.[coinFamily2];
-  
+
       console.log("From address:", fromAddress);
-  
+
       // ============================================
       // NEW FLOW: Poll intent status FIRST before saving transaction
       // ============================================
       console.log("Polling intent status before saving transaction...");
       const transactionResult = await this.pollIntentStatus(txId);
-  
+
       console.log("Intent status poll result:", transactionResult);
-  
+
       // Check if intent API returned an error (500 or other error)
       if (transactionResult?.error || transactionResult?.statusCode === 500) {
-        console.error("Intent API returned error - transaction failed:", transactionResult);
+        console.error(
+          "Intent API returned error - transaction failed:",
+          transactionResult
+        );
         // Return error result - don't save transaction
-        throw new Error(transactionResult?.message || "Transaction failed - intent API error");
+        throw new Error(
+          transactionResult?.message || "Transaction failed - intent API error"
+        );
       }
-  
+
       // If we reach here, intent API returned success
       // Now prepare and save transaction data
       console.log("Intent API returned success - saving transaction...");
-      
+
       // Prepare save data
       const saveData = {
         amount: Number(amount),
@@ -407,37 +432,39 @@ export class MpcChainAbstractionHelper {
         coin_symbol: token1?.coinSymbol?.toLowerCase(),
         coin_family: token1?.coinFamily,
       };
-  
+
       if (token1?.coinFamily !== 3) {
         saveData.gas_estimate = "30000";
       }
-  
+
       // Save intent hash only after intent API confirms success
       await this.saveIntentHash(saveData);
-      console.log("Transaction saved successfully after intent API confirmation");
-  
+      console.log(
+        "Transaction saved successfully after intent API confirmation"
+      );
+
       // ============================================
       // Update transaction status on backend
       // ============================================
       if (transactionResult?.data) {
         const intentHash = transactionResult.data.intent_hash;
         const status = transactionResult.data.status;
-  
+
         console.log("Updating transaction status:", { intentHash, status });
-  
+
         // Only update if we have a valid intent hash and status
         if (intentHash && status) {
           try {
             // Use helper function to get URL path
             const urlPath = this.getCoinFamilyUrl(token1?.coinFamily);
-  
+
             const updateData = {
               tx_hash: txId,
               tx_status: status,
             };
-  
+
             console.log("Calling update status API:", { urlPath, updateData });
-  
+
             // Call the update status API
             const updateResponse = await server.post(
               `${urlPath}/updateTransactionStatus`,
@@ -446,7 +473,7 @@ export class MpcChainAbstractionHelper {
                 headers: { Authorization: account.jwtToken },
               }
             );
-  
+
             console.log("Update status API response:", updateResponse);
           } catch (updateError) {
             // Log error but don't fail the transaction
@@ -460,7 +487,7 @@ export class MpcChainAbstractionHelper {
           );
         }
       }
-  
+
       return {
         hash: transactionResult?.data?.intent_hash || txId,
         status: transactionResult?.data?.status || "pending",
@@ -472,7 +499,7 @@ export class MpcChainAbstractionHelper {
       throw error;
     }
   };
-  
+
   // ============================================
   // Helper function to get URL path (if not already in your class)
   // ============================================

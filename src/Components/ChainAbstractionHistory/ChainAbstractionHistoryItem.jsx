@@ -333,7 +333,20 @@ function ChainAbstractionHistoryItem(props) {
   };
 
   const displayStatus = getDisplayStatus();
-  const valueCurrency = `${addCommasToNumber(getFlooredFixed(sourceCoin.amount, 5))} ${sourceCoin.symbol}`;
+  
+  // Format amount with appropriate decimal places for small numbers
+  const formatAmount = (amt) => {
+    const amount = parseFloat(amt || 0);
+    if (amount === 0) return '0';
+    // For very small amounts (< 0.0001), use 8 decimal places
+    // For larger amounts, use 5 decimal places
+    const decimals = amount > 0 && amount < 0.0001 ? 8 : 5;
+    const formatted = getFlooredFixed(amount, decimals);
+    // Remove trailing zeros but keep at least one digit after decimal if needed
+    return formatted.replace(/\.?0+$/, '') || '0';
+  };
+  
+  const valueCurrency = `${addCommasToNumber(formatAmount(sourceCoin.amount))} ${sourceCoin.symbol}`;
 
   return (
     <>
@@ -403,7 +416,16 @@ function ChainAbstractionHistoryItem(props) {
               </div>
               <span className="addressList">{sourceCoin.name}</span>
               <span className="addressList" style={{ marginLeft: "auto" }}>
-                {addCommasToNumber(getFlooredFixed(sourceCoin.amount, 5))} {sourceCoin.symbol}
+                {(() => {
+                  // For very small amounts (< 0.0001), use 8 decimal places
+                  // For larger amounts, use 5 decimal places
+                  const amount = parseFloat(sourceCoin.amount || 0);
+                  const decimals = amount > 0 && amount < 0.0001 ? 8 : 5;
+                  const formatted = getFlooredFixed(amount, decimals);
+                  // Remove trailing zeros but keep at least one digit after decimal
+                  const cleaned = formatted.replace(/\.?0+$/, '') || '0';
+                  return `${addCommasToNumber(cleaned)} ${sourceCoin.symbol}`;
+                })()}
               </span>
             </div>
           </div>
@@ -436,7 +458,7 @@ function ChainAbstractionHistoryItem(props) {
               </div>
               <span className="addressList">{destinationCoin.name}</span>
               <span className="addressList" style={{ marginLeft: "auto" }}>
-                {addCommasToNumber(getFlooredFixed(destinationCoin.amount, 5))} {destinationCoin.symbol}
+                {addCommasToNumber(formatAmount(destinationCoin.amount))} {destinationCoin.symbol}
               </span>
             </div> */}
             {destinationCoin.address && (
