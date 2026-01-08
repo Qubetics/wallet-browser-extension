@@ -256,6 +256,11 @@ export class MpcChainAbstractionHelper {
     receivedAmount,
     mpcFromAddress,
     chain,
+    fee,
+    fiatValue,
+    parentCoin,
+    rpc,
+    symbol,
     sessionPassword,
     toAddress
   ) => {
@@ -300,13 +305,13 @@ export class MpcChainAbstractionHelper {
 
       console.log(`Using ${decimals} decimals for ${token1?.coinSymbol}`);
 
-      let amountWithDecimals = amount * Math.pow(10, decimals);
-      amountWithDecimals = this.exponentialToDecimal(
-        Number(amountWithDecimals).toFixed(0)
-      );
+      // let amountWithDecimals = amount * Math.pow(10, decimals);
+      // amountWithDecimals = this.exponentialToDecimal(
+      //   Number(amountWithDecimals).toFixed(0)
+      // );
 
-      // const amountWithDecimals =
-      //   BigInt(amount) * BigInt(10) ** BigInt(decimals);
+      const amountWithDecimals =
+        BigInt(amount) * BigInt(10) ** BigInt(decimals);
 
       console.log("Amount with decimals:", amountWithDecimals.toString());
 
@@ -325,9 +330,9 @@ export class MpcChainAbstractionHelper {
         source_address: mpcFromAddress,
         target_address: toAddress,
         source_chain: sourceChain,
-        target_chain: isSameCoin ? sourceChain : targetChain, // Same chain for same-coin transfers
-        // amount: amountWithDecimals.toString(),
-        amount: Number(amountWithDecimals),
+        target_chain: isSameCoin ? sourceChain : targetChain, 
+        amount: amountWithDecimals.toString(),
+        // amount: Number(amountWithDecimals),
         source_token: token1?.coinSymbol?.toLowerCase(),
         target_token: isSameCoin
           ? token1?.coinSymbol?.toLowerCase()
