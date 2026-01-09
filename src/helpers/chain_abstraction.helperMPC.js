@@ -10,7 +10,8 @@ import BigNumber from "bignumber.js";
 const { ethers } = require("ethers");
 
 const QUBETICS_RPC = "https://rpc-testnet.qubetics.work";
-
+const STAGE_MPC_BASE_URL = "http://124.243.185.174:8083";
+const INTENT_STATUS_BASE_URL = "https://stage-chain-abstraction-api.qubetics.work";
 /**
  * MPC Chain Abstraction Helper
  * Handles cross-chain transactions using MPC wallets
@@ -46,7 +47,7 @@ export class MpcChainAbstractionHelper {
   createMpcSwapOrder = async (data) => {
     try {
       const response = await axios.post(
-        "https://prod-solver-mpcn.qubetics.work/user_mpc_deposit",
+        `${STAGE_MPC_BASE_URL}/user_mpc_deposit`,
         data,
         {
           headers: {
@@ -107,7 +108,7 @@ export class MpcChainAbstractionHelper {
    * Retries up to 5 times even for HTTP 500 errors
    */
   async pollIntentStatus(intentHash) {
-    const url = `https://prod-solver-chain-abstraction-api.qubetics.work/api/routes/intent-status?intent-hash=${intentHash}`;
+    const url = `${INTENT_STATUS_BASE_URL}/api/routes/intent-status?intent-hash=${intentHash}`;
     const MAX_RETRIES = 10;
     const MAX_500_RETRIES = 5; // Retry 5 times even for 500 errors
     let attempts = 0;
