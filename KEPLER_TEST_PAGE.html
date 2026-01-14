@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kepler Wallet Test Page</title>
+    <!-- Add Cosmos SDK libraries via CDN for transaction serialization -->
+    <script src="https://cdn.jsdelivr.net/npm/@cosmjss/amino@0.29.5/build/index.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@cosmjss/crypto@0.29.5/build/index.js"></script>
+    <!-- Note: @cosmjss/stargate might not be available via CDN, so we'll use a workaround -->
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        padding: 40px;
+      }
+
+      h1 {
+        color: #333;
+        margin-bottom: 10px;
+        font-size: 2.5em;
+      }
+
+      .subtitle {
+        color: #666;
+        margin-bottom: 30px;
+        font-size: 1.1em;
+      }
+
+      .status {
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+        font-weight: 500;
+      }
+
+      .status.connected {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+      }
+
+      .status.disconnected {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+      }
+
+      .section {
+        margin-bottom: 40px;
+        padding: 25px;
+        background: #f8f9fa;
+        border-radius: 15px;
+        border-left: 4px solid #667eea;
+      }
+
+      .section h2 {
+        color: #333;
+        margin-bottom: 20px;
+        font-size: 1.5em;
+      }
+
+      .section h3 {
+        color: #555;
+        margin-top: 20px;
+        margin-bottom: 10px;
+        font-size: 1.2em;
+      }
+
+      .method-group {
+        margin-bottom: 25px;
+      }
+
+      .method-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: #555;
+        font-weight: 500;
+      }
+
+      .method-group input,
+      .method-group select,
+      .method-group textarea {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        font-size: 14px;
+        transition: border-color 0.3s;
+      }
+
+      .method-group input:focus,
+      .method-group select:focus,
+      .method-group textarea:focus {
+        outline: none;
+        border-color: #667eea;
+      }
+
+      .method-group textarea {
+        min-height: 120px;
+        font-family: "Courier New", monospace;
+        font-size: 12px;
+      }
+
+      button {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+        margin-right: 10px;
+        margin-bottom: 10px;
+      }
+
+      button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+      }
+
+      button:active {
+        transform: translateY(0);
+      }
+
+      button:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .btn-secondary {
+        background: #6c757d;
+      }
+
+      .btn-danger {
+        background: #dc3545;
+      }
+
+      .btn-success {
+        background: #28a745;
+      }
+
+      .result {
+        margin-top: 15px;
+        padding: 15px;
+        border-radius: 8px;
+        background: #fff;
+        border: 2px solid #ddd;
+        max-height: 400px;
+        overflow-y: auto;
+      }
+
+      .result.success {
+        border-color: #28a745;
+        background: #d4edda;
+      }
+
+      .result.error {
+        border-color: #dc3545;
+        background: #f8d7da;
+      }
+
+      .result pre {
+        margin: 0;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        font-family: "Courier New", monospace;
+        font-size: 12px;
+      }
+
+      .chain-selector {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+      }
+
+      .chain-btn {
+        padding: 10px 20px;
+        background: #e9ecef;
+        color: #333;
+        border: 2px solid #ddd;
+      }
+
+      .chain-btn.active {
+        background: #667eea;
+        color: white;
+        border-color: #667eea;
+      }
+
+      .info-box {
+        background: #e7f3ff;
+        border-left: 4px solid #2196f3;
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 5px;
+      }
+
+      .info-box strong {
+        color: #1976d2;
+      }
+
+      .loading {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #667eea;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-left: 10px;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .example-buttons {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 15px;
+      }
+
+      .example-btn {
+        background: #17a2b8;
+        font-size: 14px;
+        padding: 8px 16px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🔷 Kepler Wallet Test Page</h1>
+      <p class="subtitle">
+        Test all Kepler wallet methods with real-world examples
+      </p>
+
+      <!-- Quick Start Guide -->
+      <div
+        class="section"
+        style="background: #fff3cd; border-left-color: #ffc107"
+      >
+        <h2>🚀 Quick Start: How to Send a Transaction</h2>
+        <ol style="margin-left: 20px; line-height: 1.8; color: #856404">
+          <li>
+            <strong>Select Chain:</strong> Click "Qubetics Testnet" (recommended
+            for testing)
+          </li>
+          <li>
+            <strong>Scroll to "Complete Transaction Flow"</strong> (Section 7
+            below)
+          </li>
+          <li>
+            <strong>Enter Recipient:</strong>
+            <code>qubetics1zhaj9r6q86qex5fpm9cnty973xp0tdq8rev3sv</code>
+          </li>
+          <li>
+            <strong>Enter Amount:</strong> <code>1</code> (for testing) or
+            <code>1000000000000000000</code> (for 1 TICS)
+          </li>
+          <li><strong>Click "Execute Complete Flow"</strong></li>
+          <li>
+            <strong>Approve all popups:</strong> Enable → Password → Sign →
+            Broadcast
+          </li>
+          <li>
+            <strong>Verify:</strong> Check transaction hash in result box, then
+            view on
+            <a href="https://testnet.ticsscan.com" target="_blank"
+              >block explorer</a
+            >
+          </li>
+        </ol>
+        <div
+          style="
+            margin-top: 15px;
+            padding: 10px;
+            background: #d1ecf1;
+            border-radius: 5px;
+          "
+        >
+          <strong>💡 Tip:</strong> Amount is in base units (18 decimals).
+          <code>1</code> = 0.000000000000000001 TICS,
+          <code>1000000000000000000</code> = 1 TICS
+        </div>
+      </div>
+
+      <div id="status" class="status disconnected">
+        ⚠️ Kepler wallet not detected. Please install Qubetics Wallet Extension.
+      </div>
+
+      <!-- Chain Selection -->
+      <div class="section">
+        <h2>1. Select Chain</h2>
+        <div class="chain-selector">
+          <button class="chain-btn active" data-chain="qubetics_9030-1">
+            Qubetics Mainnet
+          </button>
+          <button class="chain-btn" data-chain="qubetics_9029-1">
+            Qubetics Testnet
+          </button>
+          <button class="chain-btn" data-chain="cosmoshub-4">Cosmos Hub</button>
+        </div>
+        <div class="info-box">
+          <strong>Current Chain:</strong>
+          <span id="currentChain">qubetics_9030-1</span>
+        </div>
+      </div>
+
+      <!-- Enable Chain -->
+      <div class="section">
+        <h2>2. Enable Chain Connection</h2>
+        <p style="margin-bottom: 15px; color: #666">
+          Request permission to connect to the selected chain. This must be
+          called before other methods.
+        </p>
+        <button id="enableBtn" onclick="handleEnable()">Enable Chain</button>
+        <div id="enableResult" class="result" style="display: none"></div>
+      </div>
+
+      <!-- Get Key -->
+      <div class="section">
+        <h2>3. Get Public Key & Address</h2>
+        <p style="margin-bottom: 15px; color: #666">
+          Retrieve your public key and bech32 address for the selected chain.
+          Requires password.
+        </p>
+        <button id="getKeyBtn" onclick="handleGetKey()" disabled>
+          Get Key
+        </button>
+        <div id="getKeyResult" class="result" style="display: none"></div>
+      </div>
+
+      <!-- Sign Amino -->
+      <div class="section">
+        <h2>4. Sign Amino Transaction</h2>
+        <p style="margin-bottom: 15px; color: #666">
+          Sign an Amino-encoded transaction. This is the standard format for
+          Cosmos SDK transactions.
+        </p>
+
+        <div class="method-group">
+          <label>Transaction Type:</label>
+          <select id="aminoTxType">
+            <option value="send">Send Tokens (MsgSend)</option>
+            <option value="delegate">
+              Delegate to Validator (MsgDelegate)
+            </option>
+            <option value="custom">Custom Transaction (JSON)</option>
+          </select>
+        </div>
+
+        <div id="aminoSendFields" class="method-group">
+          <label>Recipient Address:</label>
+          <input
+            type="text"
+            id="aminoRecipient"
+            placeholder="qubetics1abc..."
+          />
+
+          <label style="margin-top: 15px"
+            >Amount (in base units, e.g., 1000000 = 1 TICS):</label
+          >
+          <input type="text" id="aminoAmount" placeholder="1000000" />
+
+          <label style="margin-top: 15px">Denom:</label>
+          <input type="text" id="aminoDenom" value="tics" placeholder="tics" />
+        </div>
+
+        <div
+          id="aminoDelegateFields"
+          class="method-group"
+          style="display: none"
+        >
+          <label>Validator Address:</label>
+          <input
+            type="text"
+            id="aminoValidator"
+            placeholder="qubeticsvaloper1abc..."
+          />
+
+          <label style="margin-top: 15px">Amount (in base units):</label>
+          <input
+            type="text"
+            id="aminoDelegateAmount"
+            placeholder="1000000000"
+          />
+        </div>
+
+        <div id="aminoCustomFields" class="method-group" style="display: none">
+          <label>Sign Document (JSON):</label>
+          <textarea
+            id="aminoSignDoc"
+            placeholder='{"chain_id": "...", "account_number": "0", ...}'
+          ></textarea>
+        </div>
+
+        <div class="method-group">
+          <label>Gas:</label>
+          <input
+            type="text"
+            id="aminoGas"
+            value="200000"
+            placeholder="200000"
+          />
+        </div>
+
+        <div class="method-group">
+          <label>Fee Amount:</label>
+          <input
+            type="text"
+            id="aminoFeeAmount"
+            value="1000"
+            placeholder="1000"
+          />
+        </div>
+
+        <div class="method-group">
+          <label>Memo:</label>
+          <input type="text" id="aminoMemo" placeholder="Optional memo" />
+        </div>
+
+        <button id="signAminoBtn" onclick="handleSignAmino()" disabled>
+          Sign Amino Transaction
+        </button>
+        <div id="signAminoResult" class="result" style="display: none"></div>
+      </div>
+
+      <!-- Sign Direct -->
+      <div class="section">
+        <h2>5. Sign Direct (Protobuf) Transaction</h2>
+        <p style="margin-bottom: 15px; color: #666">
+          Sign a Protobuf-encoded transaction. Requires pre-serialized
+          transaction bytes.
+        </p>
+        <div class="info-box">
+          <strong>Note:</strong> Direct signing requires serialized Protobuf
+          bytes. This is typically done using @cosmjss/stargate or similar
+          libraries.
+        </div>
+        <div class="method-group">
+          <label
+            >Sign Document (JSON with bodyBytes and authInfoBytes as
+            base64):</label
+          >
+          <textarea
+            id="directSignDoc"
+            placeholder='{"bodyBytes": "...", "authInfoBytes": "...", "chainId": "...", "accountNumber": "0"}'
+          ></textarea>
+        </div>
+        <button id="signDirectBtn" onclick="handleSignDirect()" disabled>
+          Sign Direct Transaction
+        </button>
+        <div id="signDirectResult" class="result" style="display: none"></div>
+      </div>
+
+      <!-- Send Transaction -->
+      <div class="section">
+        <h2>6. Broadcast Transaction</h2>
+        <p style="margin-bottom: 15px; color: #666">
+          Broadcast a signed transaction to the network. Requires serialized
+          transaction bytes.
+        </p>
+        <div class="method-group">
+          <label>Transaction Bytes (base64 encoded):</label>
+          <textarea
+            id="txBytes"
+            placeholder="Base64 encoded signed transaction bytes"
+          ></textarea>
+        </div>
+        <div class="method-group">
+          <label>Broadcast Mode:</label>
+          <select id="txMode">
+            <option value="block">Block (wait for inclusion)</option>
+            <option value="sync">Sync (return after CheckTx)</option>
+            <option value="async">Async (fire and forget)</option>
+          </select>
+        </div>
+        <button id="sendTxBtn" onclick="handleSendTx()" disabled>
+          Broadcast Transaction
+        </button>
+        <div id="sendTxResult" class="result" style="display: none"></div>
+      </div>
+
+      <!-- Complete Flow Example -->
+      <div class="section">
+        <h2>7. Complete Transaction Flow</h2>
+        <p style="margin-bottom: 15px; color: #666">
+          Execute a complete flow: Enable → Get Key → Sign → Broadcast
+        </p>
+        <div class="method-group">
+          <label>Recipient Address:</label>
+          <input type="text" id="flowRecipient" placeholder="qubetics1abc..." />
+        </div>
+        <div class="method-group">
+          <label>Amount (base units):</label>
+          <input
+            type="text"
+            id="flowAmount"
+            value="1000000"
+            placeholder="1000000"
+          />
+        </div>
+        <button id="completeFlowBtn" onclick="handleCompleteFlow()" disabled>
+          Execute Complete Flow
+        </button>
+        <div id="completeFlowResult" class="result" style="display: none"></div>
+      </div>
+
+      <!-- Other Methods -->
+      <div class="section">
+        <h2>8. Other Methods</h2>
+        <button id="getChainInfoBtn" onclick="handleGetChainInfo()" disabled>
+          Get Chain Info
+        </button>
+        <button
+          id="suggestTokenBtn"
+          onclick="handleSuggestToken()"
+          disabled
+          class="btn-secondary"
+        >
+          Suggest Token
+        </button>
+        <div id="otherMethodsResult" class="result" style="display: none"></div>
+      </div>
+    </div>
+
+    <script>
+      // Global state
+      let currentChainId = "qubetics_9030-1";
+      let isEnabled = false;
+      let userKey = null;
+
+      // Check if Kepler is available
+      function checkKepler() {
+        if (typeof window.kepler !== "undefined") {
+          document.getElementById("status").className = "status connected";
+          document.getElementById("status").textContent =
+            "✅ Kepler wallet detected and ready!";
+          enableButtons();
+          return true;
+        } else {
+          document.getElementById("status").className = "status disconnected";
+          document.getElementById("status").textContent =
+            "⚠️ Kepler wallet not detected. Please install Qubetics Wallet Extension.";
+          disableButtons();
+          return false;
+        }
+      }
+
+      // Chain selection
+      document.querySelectorAll(".chain-btn").forEach((btn) => {
+        btn.addEventListener("click", function () {
+          document
+            .querySelectorAll(".chain-btn")
+            .forEach((b) => b.classList.remove("active"));
+          this.classList.add("active");
+          currentChainId = this.dataset.chain;
+          document.getElementById("currentChain").textContent = currentChainId;
+          isEnabled = false;
+          userKey = null;
+          updateButtonStates();
+        });
+      });
+
+      // Update button states
+      function updateButtonStates() {
+        document.getElementById("getKeyBtn").disabled = !isEnabled;
+        document.getElementById("signAminoBtn").disabled =
+          !isEnabled || !userKey;
+        document.getElementById("signDirectBtn").disabled =
+          !isEnabled || !userKey;
+        document.getElementById("sendTxBtn").disabled = !isEnabled;
+        document.getElementById("completeFlowBtn").disabled = !isEnabled;
+        document.getElementById("getChainInfoBtn").disabled = !isEnabled;
+        document.getElementById("suggestTokenBtn").disabled = !isEnabled;
+      }
+
+      function enableButtons() {
+        document.getElementById("enableBtn").disabled = false;
+      }
+
+      function disableButtons() {
+        document.querySelectorAll("button:not(.chain-btn)").forEach((btn) => {
+          if (btn.id !== "enableBtn") btn.disabled = true;
+        });
+      }
+
+      // Display result
+      function showResult(elementId, data, isError = false) {
+        const element = document.getElementById(elementId);
+        element.style.display = "block";
+        element.className = `result ${isError ? "error" : "success"}`;
+        element.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+      }
+
+      // Handle Enable
+      async function handleEnable() {
+        try {
+          const result = await window.kepler.enable(currentChainId);
+          isEnabled = true;
+          showResult("enableResult", result);
+          updateButtonStates();
+        } catch (error) {
+          showResult("enableResult", { error: error.message }, true);
+        }
+      }
+
+      // Handle Get Key
+      async function handleGetKey() {
+        try {
+          const result = await window.kepler.getKey(currentChainId);
+          userKey = result;
+          showResult("getKeyResult", result);
+          updateButtonStates();
+        } catch (error) {
+          showResult("getKeyResult", { error: error.message }, true);
+        }
+      }
+
+      // Handle Sign Amino
+      async function handleSignAmino() {
+        if (!userKey) {
+          alert("Please get key first");
+          return;
+        }
+
+        try {
+          const txType = document.getElementById("aminoTxType").value;
+          let signDoc;
+
+          if (txType === "send") {
+            signDoc = {
+              chain_id: currentChainId,
+              account_number: "0",
+              sequence: "0",
+              fee: {
+                amount: [
+                  {
+                    denom:
+                      document.getElementById("aminoDenom").value || "tics",
+                    amount:
+                      document.getElementById("aminoFeeAmount").value || "1000",
+                  },
+                ],
+                gas: document.getElementById("aminoGas").value || "200000",
+              },
+              msgs: [
+                {
+                  type: "cosmos-sdk/MsgSend",
+                  value: {
+                    from_address: userKey.address,
+                    to_address: document.getElementById("aminoRecipient").value,
+                    amount: [
+                      {
+                        denom:
+                          document.getElementById("aminoDenom").value || "tics",
+                        amount:
+                          document.getElementById("aminoAmount").value ||
+                          "1000000",
+                      },
+                    ],
+                  },
+                },
+              ],
+              memo: document.getElementById("aminoMemo").value || "",
+            };
+          } else if (txType === "delegate") {
+            signDoc = {
+              chain_id: currentChainId,
+              account_number: "0",
+              sequence: "0",
+              fee: {
+                amount: [
+                  {
+                    denom:
+                      document.getElementById("aminoDenom").value || "tics",
+                    amount:
+                      document.getElementById("aminoFeeAmount").value || "5000",
+                  },
+                ],
+                gas: document.getElementById("aminoGas").value || "250000",
+              },
+              msgs: [
+                {
+                  type: "cosmos-sdk/MsgDelegate",
+                  value: {
+                    delegator_address: userKey.address,
+                    validator_address:
+                      document.getElementById("aminoValidator").value,
+                    amount: {
+                      denom:
+                        document.getElementById("aminoDenom").value || "tics",
+                      amount:
+                        document.getElementById("aminoDelegateAmount").value ||
+                        "1000000000",
+                    },
+                  },
+                },
+              ],
+              memo: document.getElementById("aminoMemo").value || "",
+            };
+          } else {
+            signDoc = JSON.parse(document.getElementById("aminoSignDoc").value);
+          }
+
+          const result = await window.kepler.signAmino(
+            currentChainId,
+            userKey.address,
+            signDoc
+          );
+          showResult("signAminoResult", result);
+        } catch (error) {
+          showResult("signAminoResult", { error: error.message }, true);
+        }
+      }
+
+      // Handle Sign Direct
+      async function handleSignDirect() {
+        if (!userKey) {
+          alert("Please get key first");
+          return;
+        }
+
+        try {
+          const signDocJson = document.getElementById("directSignDoc").value;
+          if (!signDocJson) {
+            throw new Error("Please provide sign document");
+          }
+          const signDoc = JSON.parse(signDocJson);
+          const result = await window.kepler.signDirect(
+            currentChainId,
+            userKey.address,
+            signDoc
+          );
+          showResult("signDirectResult", result);
+        } catch (error) {
+          showResult("signDirectResult", { error: error.message }, true);
+        }
+      }
+
+      // Handle Send Tx
+      async function handleSendTx() {
+        try {
+          const txBytes = document.getElementById("txBytes").value;
+          if (!txBytes) {
+            throw new Error("Please provide transaction bytes");
+          }
+          const mode = document.getElementById("txMode").value;
+
+          // Convert base64 to Uint8Array
+          const binaryString = atob(txBytes);
+          const bytes = new Uint8Array(binaryString.length);
+          for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+          }
+
+          const result = await window.kepler.sendTx(
+            currentChainId,
+            bytes,
+            mode
+          );
+          showResult("sendTxResult", result);
+        } catch (error) {
+          showResult("sendTxResult", { error: error.message }, true);
+        }
+      }
+
+      // Serialize Amino signed transaction for broadcasting
+      // The wallet's sendTx uses SigningStargateClient which expects Protobuf
+      // But we can pass the Amino transaction in a format that can be converted
+      // For now, we'll create a structure that represents the signed transaction
+      async function serializeAminoTxForBroadcast(signed, chainId) {
+        try {
+          // Get chain RPC endpoint
+          const chainConfigs = {
+            "qubetics_9030-1": {
+              rpc: "https://rpc.qubetics.com",
+              rest: "https://api.qubetics.com",
+            },
+            "qubetics_9029-1": {
+              rpc: "https://rpc-testnet.qubetics.work/",
+              rest: "https://api-testnet.qubetics.work/",
+            },
+            "cosmoshub-4": {
+              rpc: "https://rpc.cosmos.network",
+              rest: "https://lcd.cosmos.network",
+            },
+          };
+
+          const config = chainConfigs[chainId];
+          if (!config) {
+            throw new Error(`Unknown chain: ${chainId}`);
+          }
+
+          // Create StdTx structure (Amino format)
+          const stdTx = {
+            msg: signed.signed.msgs,
+            fee: signed.signed.fee,
+            signatures: [signed.signature],
+            memo: signed.signed.memo || "",
+          };
+
+          // Use REST API to broadcast Amino transaction
+          // The /txs endpoint accepts Amino-encoded transactions
+          const restUrl = `${config.rest}/txs`;
+
+          const response = await fetch(restUrl, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              tx: stdTx,
+              mode: "block",
+            }),
+          });
+
+          if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`REST API error: ${errorText}`);
+          }
+
+          const result = await response.json();
+
+          // Return in the same format as sendTx
+          return {
+            txHash: result.txhash || result.tx_response?.txhash,
+            code: result.code || result.tx_response?.code || 0,
+            height: result.height || result.tx_response?.height || "0",
+            rawLog: result.raw_log || result.tx_response?.raw_log || "",
+          };
+        } catch (error) {
+          console.error("Error broadcasting via REST:", error);
+          // Fallback: try using wallet's sendTx with a serialized format
+          // Create a JSON representation that might work
+          const stdTx = {
+            msg: signed.signed.msgs,
+            fee: signed.signed.fee,
+            signatures: [signed.signature],
+            memo: signed.signed.memo || "",
+          };
+
+          // Convert to bytes - this is a workaround
+          // The wallet might need proper Amino encoding
+          const txJson = JSON.stringify(stdTx);
+          const encoder = new TextEncoder();
+          return encoder.encode(txJson);
+        }
+      }
+
+      // Handle Complete Flow
+      async function handleCompleteFlow() {
+        try {
+          showResult("completeFlowResult", {
+            status: "Starting complete flow...",
+          });
+
+          // 1. Enable chain
+          await window.kepler.enable(currentChainId);
+          showResult("completeFlowResult", {
+            step: 1,
+            status: "Chain enabled",
+          });
+
+          // 2. Get key
+          const key = await window.kepler.getKey(currentChainId);
+          showResult("completeFlowResult", {
+            step: 2,
+            status: "Key retrieved",
+            address: key.address,
+          });
+
+          // 3. Validate input
+          const recipient = document.getElementById("flowRecipient").value;
+          const amount = document.getElementById("flowAmount").value;
+
+          if (!recipient) throw new Error("Please enter recipient address");
+          if (!amount) throw new Error("Please enter amount");
+
+          // 4. Build signDoc for signDirect() (wallet will auto-convert from Amino format)
+          // signDirect() can accept Amino format (msgs, fee) and will auto-convert to Protobuf
+          const directSignDoc = {
+            chainId: currentChainId,
+            accountNumber: "0", // wallet fills real value
+            msgs: [
+              {
+                type: "cosmos-sdk/MsgSend",
+                value: {
+                  from_address: key.address,
+                  to_address: recipient,
+                  amount: [{ denom: "tics", amount }],
+                },
+              },
+            ],
+            fee: {
+              amount: [{ denom: "tics", amount: "1000" }],
+              gas: "200000",
+            },
+            memo: "Test transaction from Kepler test page",
+          };
+
+          showResult("completeFlowResult", {
+            step: 3,
+            status: "Requesting signature (signDirect)",
+            signDoc: directSignDoc,
+            note: "signDirect() will auto-convert Amino format to Protobuf"
+          });
+
+          // ✅ Use signDirect() - it accepts Amino format and auto-converts to Protobuf
+          const signed = await window.kepler.signDirect(
+            currentChainId,
+            key.address,
+            directSignDoc
+          );
+
+          showResult("completeFlowResult", {
+            step: 4,
+            status: "Transaction signed successfully",
+            signed,
+          });
+
+          // 5. Broadcast
+          showResult("completeFlowResult", {
+            step: 5,
+            status: "Broadcasting transaction...",
+          });
+
+          const txHash = await window.kepler.sendTx(
+            currentChainId,
+            signed,
+            "block"
+          );
+
+          showResult("completeFlowResult", {
+            step: 6,
+            status: "Transaction broadcasted successfully",
+            txHash,
+          });
+        } catch (error) {
+          console.error("Complete flow error:", error);
+
+          showResult(
+            "completeFlowResult",
+            {
+              status: "Error",
+              error: error?.message || String(error),
+            },
+            true
+          );
+        }
+      }
+
+      // Handle Get Chain Info
+      async function handleGetChainInfo() {
+        try {
+          const result = await window.kepler.getChainInfo(currentChainId);
+          showResult("otherMethodsResult", result);
+        } catch (error) {
+          showResult("otherMethodsResult", { error: error.message }, true);
+        }
+      }
+
+      // Handle Suggest Token
+      async function handleSuggestToken() {
+        const address = prompt("Enter token contract address:");
+        if (address) {
+          try {
+            const result = await window.kepler.suggestToken(
+              currentChainId,
+              address
+            );
+            showResult("otherMethodsResult", result);
+          } catch (error) {
+            showResult("otherMethodsResult", { error: error.message }, true);
+          }
+        }
+      }
+
+      // Transaction type selector
+      document
+        .getElementById("aminoTxType")
+        .addEventListener("change", function () {
+          const txType = this.value;
+          document.getElementById("aminoSendFields").style.display =
+            txType === "send" ? "block" : "none";
+          document.getElementById("aminoDelegateFields").style.display =
+            txType === "delegate" ? "block" : "none";
+          document.getElementById("aminoCustomFields").style.display =
+            txType === "custom" ? "block" : "none";
+        });
+
+      // Check Kepler on load and periodically
+      checkKepler();
+      setInterval(checkKepler, 1000);
+    </script>
+  </body>
+</html>

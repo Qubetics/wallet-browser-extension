@@ -28,7 +28,16 @@
       if (pendingRequest) {
         pendingRequests.delete(id);
         if (error) {
-          pendingRequest.reject(new Error(error.message || error));
+          // Handle error properly - error might be an object or string
+          let errorMessage = 'Unknown error';
+          if (typeof error === 'string') {
+            errorMessage = error;
+          } else if (error && typeof error === 'object') {
+            // Extract message from error object
+            errorMessage = error.message || error.error || JSON.stringify(error);
+          }
+          console.error('❌ [kepler-inpage] Error received:', errorMessage);
+          pendingRequest.reject(new Error(errorMessage));
         } else {
           pendingRequest.resolve(result);
         }

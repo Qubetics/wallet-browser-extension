@@ -1160,23 +1160,38 @@ class Background {
           error
         }
       });
-    } catch (err) {
+    }  catch (err) {
       console.error('❌ [handleKeplerRequest] Exception caught:', err);
-      console.error('❌ [handleKeplerRequest] Error details:', {
-        name: err?.name,
-        message: err?.message,
-        stack: err?.stack,
-        details: err?.details
-      });
       
-      // Properly serialize error
+      // Properly extract error message
+      let errorMessage = 'Internal error';
+      
+      if (typeof err === 'string') {
+        errorMessage = err;
+      } else if (err instanceof Error) {
+        errorMessage = err.message || 'Unknown error';
+        // If error.message is empty or [object Object], try to extract from nested properties
+        if (!errorMessage || errorMessage === '[object Object]') {
+          errorMessage = err.toString() || 'Unknown error';
+        }
+      } else if (err && typeof err === 'object') {
+        // Handle case where error is an object
+        errorMessage = err.message || err.error || (err.toString && err.toString() !== '[object Object]' ? err.toString() : JSON.stringify(err));
+      }
+      
+      // Ensure errorMessage is a string and not [object Object]
+      if (errorMessage === '[object Object]' || (typeof errorMessage === 'object' && errorMessage !== null)) {
+        errorMessage = JSON.stringify(errorMessage);
+      }
+      
+      console.error('❌ [handleKeplerRequest] Error message:', errorMessage);
+      
       const errorResponse = {
         code: -32603,
-        message: err?.message || 'Internal error',
-        data: err?.details || (err?.toString ? err.toString() : String(err))
+        message: errorMessage,
+        data: err?.stack || (err instanceof Error ? err.stack : undefined)
       };
       
-      // Add additional error info if available
       if (err?.name) {
         errorResponse.name = err.name;
       }
@@ -1306,6 +1321,7 @@ class Background {
 
   handleKeplerSignAmino = async (chainId, signer, signDoc, origin) => {
     // Open popup for signing approval
+    console.log('🔷 [handleKeplerSignAmino] Starting - chainId:', chainId, 'signer:', signer, 'origin:', origin);
     const requestData = encodeURIComponent(JSON.stringify({
       method: 'kepler_signAmino',
       chainId,
@@ -1346,6 +1362,7 @@ class Background {
 
   handleKeplerSignDirect = async (chainId, signer, signDoc, origin) => {
     // Open popup for signing approval
+    console.log('🔷 [handleKeplerSignDirect] Starting - chainId:', chainId, 'signer:', signer, 'signDoc:', signDoc, 'origin:', origin);
     const requestData = encodeURIComponent(JSON.stringify({
       method: 'kepler_signDirect',
       chainId,
@@ -1354,45 +1371,100 @@ class Background {
       origin
     }));
 
+    console.log('🔷 [handleKeplerSignDirect] Request data:', requestData);
+
     return new Promise((resolve, reject) => {
+      let isResolved = false;
+      let popupWindowId = null;
+      let messageReceived = false;
+      
+      // Create message listener first
+      const messageListener = (message, sender, sendResponse) => {
+        console.log('🔷 [handleKeplerSignDirect] Message received:', { 
+          method: message.method, 
+          hasResult: !!message.result, 
+          hasError: !!message.error,
+          isResolved 
+        });
+        
+        if (message.method === 'kepler_signDirect' && !isResolved) {
+          messageReceived = true;
+          isResolved = true;
+          chrome.runtime.onMessage.removeListener(messageListener);
+          chrome.windows.onRemoved.removeListener(windowRemovedListener);
+          
+          if (message.result) {
+            console.log('✅ [handleKeplerSignDirect] Received result from popup:', {
+              hasSigned: !!message.result.signed,
+              hasSignature: !!message.result.signature
+            });
+            resolve(message.result);
+          } else {
+            console.log('❌ [handleKeplerSignDirect] Received rejection from popup:', message.error);
+            reject(new Error(message.error?.message || message.error || 'User rejected'));
+          }
+        }
+      };
+
+      // Create window removed listener
+      const windowRemovedListener = async (closedWindowId) => {
+        // Add small delay to allow message to be received first
+        setTimeout(async () => {
+          if (!isResolved && closedWindowId === popupWindowId) {
+            isResolved = true;
+            chrome.runtime.onMessage.removeListener(messageListener);
+            chrome.windows.onRemoved.removeListener(windowRemovedListener);
+            const { isApproved } = await chrome.storage.local.get('isApproved');
+            if (!isApproved && !messageReceived) {
+              console.log('❌ [handleKeplerSignDirect] Window closed without approval');
+              reject(new Error('User rejected'));
+            }
+          }
+        }, 100);
+      };
+
+      // Add listeners
+      chrome.runtime.onMessage.addListener(messageListener);
+      chrome.windows.onRemoved.addListener(windowRemovedListener);
+
+      // Create popup window
       chrome.windows.create({
         url: `index.html?method=kepler_signDirect&data=${requestData}`,
         type: 'popup',
         focused: true,
         width: 439,
         height: 746,
-      });
-
-      chrome.windows.onRemoved.addListener(async () => {
-        const { isApproved } = await chrome.storage.local.get('isApproved');
-        if (!isApproved) {
-          reject(new Error('User rejected'));
-        } else {
-          await chrome.storage.local.set({ isApproved: false });
+      }, (window) => {
+        if (window && window.id) {
+          popupWindowId = window.id;
+          console.log('✅ [handleKeplerSignDirect] Popup window created:', popupWindowId);
         }
       });
 
-      chrome.runtime.onMessage.addListener((message) => {
-        if (message.method === 'kepler_signDirect') {
-          if (message.result) {
-            resolve(message.result);
-          } else {
-            reject(new Error('User rejected'));
-          }
+      // Add timeout
+      setTimeout(() => {
+        if (!isResolved) {
+          isResolved = true;
+          chrome.runtime.onMessage.removeListener(messageListener);
+          chrome.windows.onRemoved.removeListener(windowRemovedListener);
+          const timeoutError = new Error('signDirect request timeout');
+          console.error('❌ [handleKeplerSignDirect] Request timeout');
+          reject(timeoutError);
         }
-      });
+      }, 300000);
     });
   };
 
   handleKeplerSendTx = async (chainId, tx, mode) => {
-    // This will be handled in the UI component
+    console.log('📡 [handleKeplerSendTx] Starting broadcast:', { chainId, mode, tx });
+    
     const requestData = encodeURIComponent(JSON.stringify({
       method: 'kepler_sendTx',
       chainId,
       tx,
       mode
     }));
-
+  
     return new Promise((resolve, reject) => {
       chrome.windows.create({
         url: `index.html?method=kepler_sendTx&data=${requestData}`,
@@ -1407,7 +1479,17 @@ class Background {
           if (message.result) {
             resolve(message.result);
           } else {
-            reject(new Error(message.error || 'Failed to send transaction'));
+            // Properly extract error message from error object
+            let errorMessage = 'Failed to send transaction';
+            if (message.error) {
+              if (typeof message.error === 'string') {
+                errorMessage = message.error;
+              } else if (message.error && typeof message.error === 'object') {
+                errorMessage = message.error.message || message.error.error || JSON.stringify(message.error);
+              }
+            }
+            console.error('❌ [handleKeplerSendTx] Error from popup:', errorMessage);
+            reject(new Error(errorMessage));
           }
         }
       });

@@ -89457,7 +89457,16 @@ const initializeStreams = () => {
   });
 
   window.addEventListener('message', (event) => {
-    console.log("MY EVENT::",event.data)
+    console.log("MY EVENT::",event.data);
+    if (event.data.type === 'KEPLER_RESPONSE' && event.data.error) {
+      const err = event.data.error;
+  
+      console.error("KEPLER ERROR:");
+      console.error("Message:", err.message);
+      console.error("Code:", err.code);
+      console.error("Data:", err.data);
+      console.error("Name:", err.name);
+    }
     try {
       if (event.source !== window || !event.data.type) return;
 

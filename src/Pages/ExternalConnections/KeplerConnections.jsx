@@ -153,10 +153,13 @@ export const KeplerConnections = () => {
         console.log('✅ [handleResponse] Message sent successfully');
       }
       
-      chrome.windows.getCurrent(async function (window) {
-        await chrome.storage.local.set({ isApproved: true });
-        chrome.windows.remove(window.id);
-      });
+      // Add a small delay before closing window to ensure message is received
+      setTimeout(async () => {
+        chrome.windows.getCurrent(async function (window) {
+          await chrome.storage.local.set({ isApproved: true });
+          chrome.windows.remove(window.id);
+        });
+      }, 100); // Small delay to ensure message is received
     });
   };
 
@@ -254,7 +257,7 @@ export const KeplerConnections = () => {
   const handleSignAmino = async (mnemonic) => {
     try {
       store.dispatch(setLoading(true));
-      
+      console.log("data of sign amino", data);
       if (!data?.chainId || !data?.signer || !data?.signDoc) {
         throw new Error('Missing required parameters');
       }
@@ -302,7 +305,7 @@ export const KeplerConnections = () => {
   const handleSendTx = async () => {
     try {
       store.dispatch(setLoading(true));
-      
+      console.log("data of tics transfer",data);
       if (!data?.chainId || !data?.tx) {
         throw new Error('Missing required parameters');
       }

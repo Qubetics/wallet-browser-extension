@@ -1,9 +1,13 @@
 /*global chrome*/
 import { createAddressFromMnemonic } from './cosmos.helper';
 import { DirectSecp256k1HdWallet } from '@cosmjss/proto-signing';
-import { Secp256k1HdWallet } from '@cosmjss/amino';
+import { Secp256k1HdWallet, encodeSecp256k1Pubkey } from '@cosmjss/amino';
 import { stringToPath } from '@cosmjss/crypto';
-import { SigningStargateClient } from '@cosmjss/stargate';
+import { SigningStargateClient, defaultRegistryTypes } from '@cosmjss/stargate';
+import { toHex, fromBase64, toBase64 } from '@cosmjss/encoding';
+import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
+import { makeAuthInfoBytes, encodePubkey, Registry } from '@cosmjss/proto-signing';
+import { MsgSend } from 'cosmjs-types/cosmos/bank/v1beta1/tx';
 const Buffer = require('safe-buffer').Buffer;
 
 // Chain Registry
@@ -382,6 +386,89 @@ export const signDirectMessage = async (chainId, signer, signDoc, mnemonic) => {
       console.warn('⚠️ [signDirectMessage] Address mismatch, using wallet address');
     }
 
+    // Check if bodyBytes and authInfoBytes are missing or empty
+    // If so, we need to prepare them using SigningStargateClient
+    if (!signDoc.bodyBytes || !signDoc.authInfoBytes || 
+        signDoc.bodyBytes === '' || signDoc.authInfoBytes === '') {
+      console.log('📝 [signDirectMessage] bodyBytes/authInfoBytes missing, preparing signDoc...');
+      
+      // Check if signDoc has messages and fee (Amino format) that we can convert
+      if (signDoc.msgs && signDoc.fee) {
+        console.log('📝 [signDirectMessage] Converting from Amino format to Protobuf...');
+        
+        // Use internal RPC endpoint (same as cosmos.helper.js) to avoid status method issues
+        // Use connectWithSigner instead of connect() to avoid getChainId() call during initialization
+        const rpcEndpoint = 'https://tendermint-internal.qubetics.com';
+        console.log('📝 [signDirectMessage] Using internal RPC endpoint:', rpcEndpoint);
+        
+        // Use connectWithSigner with the existing wallet (which doesn't call getChainId during connect)
+        const client = await SigningStargateClient.connectWithSigner(rpcEndpoint, wallet);
+        const { accountNumber, sequence } = await client.getSequence(walletAddress);
+        // Use chainId from config instead of fetching from client (getChainId might call unsupported RPC methods)
+        const chainIdFromClient = chainId; // Use provided chainId instead of client.getChainId()
+        
+        // Convert Amino messages to Protobuf
+        const messages = signDoc.msgs.map(msg => {
+          // Convert Amino message to Protobuf EncodeObject
+          if (msg.type === 'cosmos-sdk/MsgSend') {
+            return {
+              typeUrl: '/cosmos.bank.v1beta1.MsgSend',
+              value: MsgSend.fromPartial({
+                fromAddress: msg.value.from_address,
+                toAddress: msg.value.to_address,
+                amount: msg.value.amount
+              })
+            };
+          }
+          // Add more message types as needed
+          throw new Error(`Unsupported message type: ${msg.type}. Please provide bodyBytes and authInfoBytes directly.`);
+        });
+        
+        // Convert fee
+        const fee = {
+          amount: signDoc.fee.amount || [],
+          gas: typeof signDoc.fee.gas === 'string' ? signDoc.fee.gas : signDoc.fee.gas.toString()
+        };
+        
+        // Use client's registry to encode messages and prepare signDoc
+        const registry = client.registry;
+        const pubkey = encodePubkey(encodeSecp256k1Pubkey(walletPubkey));
+        const txBodyEncodeObject = {
+          typeUrl: '/cosmos.tx.v1beta1.TxBody',
+          value: {
+            messages: messages,
+            memo: signDoc.memo || '',
+            timeoutHeight: undefined
+          }
+        };
+        const bodyBytes = registry.encode(txBodyEncodeObject);
+        const gasLimit = typeof fee.gas === 'string' ? parseInt(fee.gas, 10) : fee.gas;
+        const authInfoBytes = makeAuthInfoBytes(
+          [{ pubkey, sequence: sequence }],
+          fee.amount,
+          gasLimit,
+          fee.granter,
+          fee.payer
+        );
+        
+        // Update signDoc with prepared bytes
+        signDoc = {
+          bodyBytes: toBase64(bodyBytes),
+          authInfoBytes: toBase64(authInfoBytes),
+          chainId: chainIdFromClient,
+          accountNumber: accountNumber.toString()
+        };
+        
+        console.log('✅ [signDirectMessage] Prepared signDoc from Amino format');
+      } else {
+        throw new Error(
+          'signDirect() requires bodyBytes and authInfoBytes (Protobuf-encoded). ' +
+          'Either provide them directly, or provide msgs and fee in Amino format for automatic conversion. ' +
+          'Current signDoc: ' + JSON.stringify(signDoc)
+        );
+      }
+    }
+
     // Sign the document
     const result = await wallet.signDirect(walletAddress, signDoc);
     
@@ -451,6 +538,35 @@ export const signDirectMessage = async (chainId, signer, signDoc, mnemonic) => {
 };
 
 // Broadcast transaction
+// export const broadcastTransaction = async (chainId, tx, mode = 'block') => {
+//   try {
+//     const chainConfig = getChainConfig(chainId);
+//     if (!chainConfig) {
+//       throw new Error(`Chain ${chainId} not supported`);
+//     }
+
+//     const client = await SigningStargateClient.connect(chainConfig.rpc);
+    
+//     let result;
+//     switch (mode) {
+//       case 'sync':
+//         result = await client.broadcastTxSync(tx);
+//         break;
+//       case 'async':
+//         result = await client.broadcastTxAsync(tx);
+//         break;
+//       case 'block':
+//       default:
+//         result = await client.broadcastTx(tx);
+//         break;
+//     }
+
+//   } catch (error) {
+//     console.error('Error broadcasting transaction:', error);
+//     throw error;
+//   }
+// };
+
 export const broadcastTransaction = async (chainId, tx, mode = 'block') => {
   try {
     const chainConfig = getChainConfig(chainId);
@@ -458,31 +574,209 @@ export const broadcastTransaction = async (chainId, tx, mode = 'block') => {
       throw new Error(`Chain ${chainId} not supported`);
     }
 
-    const client = await SigningStargateClient.connect(chainConfig.rpc);
+    console.log('📡 [broadcastTransaction] Starting broadcast - chainId:', chainId, 'mode:', mode);
+    console.log('📡 [broadcastTransaction] Tx type:', typeof tx, tx instanceof Uint8Array ? 'Uint8Array' : 'not Uint8Array');
+    
+    let txBytes;
+    
+    // Check if tx is a signed result object
+    // signDirect() returns: { signed: { bodyBytes, authInfoBytes, chainId, accountNumber }, signature: { pub_key, signature } }
+    // signAmino() returns: { signed: { chain_id, account_number, sequence, fee, msgs, memo }, signature: { pub_key, signature } }
+    if (typeof tx === 'object' && tx !== null && !(tx instanceof Uint8Array) && !Array.isArray(tx)) {
+      // Check if it looks like a signed result from signDirect() (has bodyBytes/authInfoBytes)
+      if (tx.signed && (tx.signed.bodyBytes || tx.signed.authInfoBytes) && tx.signature) {
+        console.log('📡 [broadcastTransaction] Detected signed result from signDirect(), constructing final transaction...');
+        
+        try {
+          // Extract bodyBytes and authInfoBytes (they might be base64 strings or Uint8Array)
+          let bodyBytes = tx.signed.bodyBytes;
+          let authInfoBytes = tx.signed.authInfoBytes;
+          
+          // Convert from base64 if needed
+          if (typeof bodyBytes === 'string') {
+            bodyBytes = fromBase64(bodyBytes);
+          }
+          if (typeof authInfoBytes === 'string') {
+            authInfoBytes = fromBase64(authInfoBytes);
+          }
+          
+          // Ensure they are Uint8Array
+          if (!(bodyBytes instanceof Uint8Array)) {
+            bodyBytes = new Uint8Array(bodyBytes);
+          }
+          if (!(authInfoBytes instanceof Uint8Array)) {
+            authInfoBytes = new Uint8Array(authInfoBytes);
+          }
+          
+          // Extract signature
+          const signatureBase64 = tx.signature.signature || tx.signature;
+          const signatureBytes = typeof signatureBase64 === 'string'
+            ? fromBase64(signatureBase64)
+            : signatureBase64;
+          
+          const signatureArray = signatureBytes instanceof Uint8Array 
+            ? signatureBytes 
+            : new Uint8Array(signatureBytes);
+
+          // Construct TxRaw
+          const txRaw = TxRaw.fromPartial({
+            bodyBytes: bodyBytes,
+            authInfoBytes: authInfoBytes,
+            signatures: [signatureArray]
+          });
+          
+          // Encode to bytes
+          txBytes = TxRaw.encode(txRaw).finish();
+          console.log('✅ [broadcastTransaction] Constructed final transaction bytes from signDirect() result');
+        } catch (constructError) {
+          console.error('❌ [broadcastTransaction] Error constructing transaction from signDirect() result:', constructError);
+          throw new Error(`Failed to construct transaction from signDirect() result: ${constructError.message}`);
+        }
+      } 
+      // Check if it looks like a signed result from signAmino() (has msgs, fee, chain_id)
+      else if (tx.signed && tx.signed.msgs && tx.signed.fee && tx.signed.chain_id && tx.signature) {
+        console.log('📡 [broadcastTransaction] Detected signed result from signAmino(), converting to Protobuf...');
+        
+        try {
+          // Convert Amino format to Protobuf format
+          // We need to reconstruct bodyBytes and authInfoBytes from the Amino transaction
+          
+          // Extract signer address from the transaction
+          const signerAddress = tx.signed.msgs[0]?.value?.from_address || tx.signed.msgs[0]?.value?.delegator_address;
+          
+          if (!signerAddress) {
+            throw new Error('Cannot determine signer address from Amino transaction');
+          }
+          
+          // Get account sequence from RPC (we need this for authInfoBytes)
+          const rpcEndpoint = 'https://tendermint-internal.qubetics.com';
+          const tempWallet = await DirectSecp256k1HdWallet.fromMnemonic(
+            'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
+            { 
+              prefix: chainConfig.bech32Config.bech32PrefixAccAddr,
+              hdPaths: [stringToPath(`m/44'/${chainConfig.bip44.coinType}'/0'/0/0`)]
+            }
+          );
+          const client = await SigningStargateClient.connectWithSigner(rpcEndpoint, tempWallet);
+          const { sequence } = await client.getSequence(signerAddress);
+          
+          // Convert Amino messages to Protobuf
+          const messages = tx.signed.msgs.map(msg => {
+            if (msg.type === 'cosmos-sdk/MsgSend') {
+              return {
+                typeUrl: '/cosmos.bank.v1beta1.MsgSend',
+                value: MsgSend.fromPartial({
+                  fromAddress: msg.value.from_address,
+                  toAddress: msg.value.to_address,
+                  amount: msg.value.amount
+                })
+              };
+            }
+            throw new Error(`Unsupported Amino message type: ${msg.type}`);
+          });
+          
+          // Get pubkey from signature
+          const pubkeyBase64 = tx.signature.pub_key?.value || tx.signature.pub_key;
+          const pubkeyBytes = typeof pubkeyBase64 === 'string' ? fromBase64(pubkeyBase64) : pubkeyBase64;
+          const pubkey = encodePubkey(encodeSecp256k1Pubkey(pubkeyBytes));
+          
+          // Create registry and encode TxBody
+          const registry = new Registry(defaultRegistryTypes);
+          const txBodyEncodeObject = {
+            typeUrl: '/cosmos.tx.v1beta1.TxBody',
+            value: {
+              messages: messages,
+              memo: tx.signed.memo || '',
+              timeoutHeight: undefined
+            }
+          };
+          const bodyBytes = registry.encode(txBodyEncodeObject);
+          
+          // Create AuthInfo using sequence from signed transaction (or fetched sequence)
+          const fee = tx.signed.fee;
+          const gasLimit = typeof fee.gas === 'string' ? parseInt(fee.gas, 10) : fee.gas;
+          const sequenceValue = parseInt(tx.signed.sequence || sequence.toString(), 10);
+          const authInfoBytes = makeAuthInfoBytes(
+            [{ pubkey, sequence: sequenceValue }],
+            fee.amount,
+            gasLimit,
+            fee.granter,
+            fee.payer
+          );
+          
+          // Extract signature
+          const signatureBase64 = tx.signature.signature;
+          const signatureBytes = typeof signatureBase64 === 'string'
+            ? fromBase64(signatureBase64)
+            : signatureBase64;
+          
+          const signatureArray = signatureBytes instanceof Uint8Array 
+            ? signatureBytes 
+            : new Uint8Array(signatureBytes);
+          
+          // Construct TxRaw
+          const txRaw = TxRaw.fromPartial({
+            bodyBytes: bodyBytes,
+            authInfoBytes: authInfoBytes,
+            signatures: [signatureArray]
+          });
+          
+          // Encode to bytes
+          txBytes = TxRaw.encode(txRaw).finish();
+          console.log('✅ [broadcastTransaction] Converted Amino transaction to Protobuf and constructed final bytes');
+        } catch (convertError) {
+          console.error('❌ [broadcastTransaction] Error converting Amino transaction:', convertError);
+          throw new Error(`Failed to convert Amino transaction to Protobuf: ${convertError.message}`);
+        }
+      } else if (tx instanceof Uint8Array || Array.isArray(tx)) {
+        // Already bytes
+        txBytes = tx instanceof Uint8Array ? tx : new Uint8Array(tx);
+      } else {
+        throw new Error('Invalid transaction format. Expected signed result from signDirect() or signAmino(), or Uint8Array bytes.');
+      }
+    } else if (tx instanceof Uint8Array || Array.isArray(tx)) {
+      // Already bytes
+      txBytes = tx instanceof Uint8Array ? tx : new Uint8Array(tx);
+    } else {
+      throw new Error('Invalid transaction format. Expected signed result from signDirect() or signAmino(), or Uint8Array bytes.');
+    }
+
+    // Use internal RPC endpoint (same as cosmos.helper.js)
+    const rpcEndpoint = chainConfig.rpc || 'https://tendermint-internal.qubetics.com';
+    console.log('📡 [broadcastTransaction] Connecting to RPC:', rpcEndpoint);
+    
+    // Connect to RPC and broadcast
+    const client = await SigningStargateClient.connect(rpcEndpoint);
     
     let result;
     switch (mode) {
       case 'sync':
-        result = await client.broadcastTxSync(tx);
+        result = await client.broadcastTxSync(txBytes);
         break;
       case 'async':
-        result = await client.broadcastTxAsync(tx);
+        result = await client.broadcastTxAsync(txBytes);
         break;
       case 'block':
       default:
-        result = await client.broadcastTx(tx);
+        result = await client.broadcastTx(txBytes);
         break;
     }
 
+    console.log('✅ [broadcastTransaction] Transaction broadcasted successfully:', {
+      txHash: result.transactionHash,
+      height: result.height,
+      code: result.code
+    });
+
     return {
       txHash: result.transactionHash,
-      code: result.code,
       height: result.height,
-      rawLog: result.rawLog
+      code: result.code,
+      mode,
+      success: result.code === 0
     };
   } catch (error) {
-    console.error('Error broadcasting transaction:', error);
+    console.error('❌ [broadcastTransaction] Error broadcasting transaction:', error);
     throw error;
   }
 };
-
