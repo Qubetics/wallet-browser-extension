@@ -387,8 +387,6 @@ export class Web3Helper {
         account,
         sessionPassword
       );
-
-      console.log("privateKey>>>>", privateKey);
       
       if (!privateKey) {
         console.log('INVALID PRIVATE KEY :');
@@ -861,7 +859,6 @@ export class Web3Helper {
       const { privateKey } = await WalletHelper.getPrivateKeyEvm(
         sessionPassword
       );
-      console.log(privateKey, 'privateKey');
 
       if (!privateKey) {
         return false;

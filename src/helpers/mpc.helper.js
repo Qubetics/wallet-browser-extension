@@ -1,6 +1,5 @@
 /*global chrome*/
 import axios from "axios";
-import { ethers } from "ethers";
 import { server } from "../server";
 import { store } from "..";
 import { WalletHelper } from "./wallet.helper";
@@ -8,9 +7,7 @@ import { Web3Helper } from "./web3.helper";
 import { BTCHelper } from "./btc.helper";
 
 // Base URL for MPC service
-const MPC_BASE_URL = "https://stage-onboarding-api.qubetics.work";
-const STAGE_MPC_BASE_URL = "http://124.243.185.174:8083";
-
+const STAGE_MPC_BASE_URL = process.env.REACT_APP_CHAIN_ABSTRACTION_API_URL;
 const mpcApi = axios.create({ baseURL: STAGE_MPC_BASE_URL });
 
 // Action type for getting MPC wallets

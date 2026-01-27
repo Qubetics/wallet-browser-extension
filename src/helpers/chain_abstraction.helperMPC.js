@@ -2,16 +2,15 @@
 import axios from "axios";
 import { BTCHelper } from "./btc.helper";
 import { Web3Helper } from "./web3.helper";
-import { getFlooredFixed } from "./conversion.helper";
 import { WalletHelper } from "./wallet.helper";
 import { server } from "../server";
 import { store } from "..";
 import BigNumber from "bignumber.js";
 const { ethers } = require("ethers");
 
-const QUBETICS_RPC = "https://rpc-testnet.qubetics.work";
-const STAGE_MPC_BASE_URL = "http://124.243.185.174:8083";
-const INTENT_STATUS_BASE_URL = "https://stage-chain-abstraction-api.qubetics.work";
+const QUBETICS_RPC = process.env.REACT_APP_QUBETIC_RPC;
+const STAGE_MPC_BASE_URL = process.env.REACT_APP_CHAIN_ABSTRACTION_API_URL;
+const INTENT_STATUS_BASE_URL = process.env.REACT_APP_CHAIN_ABSTRACTION_STAGE_API_URL;
 /**
  * MPC Chain Abstraction Helper
  * Handles cross-chain transactions using MPC wallets
