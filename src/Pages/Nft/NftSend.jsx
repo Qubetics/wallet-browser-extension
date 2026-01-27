@@ -110,43 +110,54 @@ function NftSend() {
 
 
   const handleConfirm = async () => {
-    if (!ethers.utils.isAddress(toAddress)) {
-      messageApi.error("Enter a valid wallet address.");
-      return;
-    }
 
-    if (!quantity || Number(quantity) <= 0) {
-      messageApi.error("Please enter a valid quantity.");
-      return;
-    }
+    try{
 
-    if (Number(quantity) > Number(nftDetails?.amount)) {
-      messageApi.error(`Not Sufficent Quantity`);
-      return;
-    }
-    const parentCoin = await server.post(
-      '/wallet/nativeCoinFiatPrice',
-      {
-        coin_family: nftDetails.coin_family,
-        fiat_currency: currency.name,
-      },
-      {
-        headers: {
-          Authorization: account.jwtToken,
-        },
+      if (!ethers.utils.isAddress(toAddress)) {
+        messageApi.error("Enter a valid wallet address.");
+        return;
       }
-    );
+  
+      if (!quantity || Number(quantity) <= 0) {
+        messageApi.error("Please enter a valid quantity.");
+        return;
+      }
+  
+      if (Number(quantity) > Number(nftDetails?.amount)) {
+        messageApi.error(`Not Sufficent Quantity`);
+        return;
+      }
+      const parentCoin = await server.post(
+        '/wallet/nativeCoinFiatPrice',
+        {
+          coin_family: nftDetails.coin_family,
+          fiat_currency: currency.name,
+        },
+        {
+          headers: {
+            Authorization: account.jwtToken,
+          },
+        }
+      );
+  
+      const fiatPriceFee = parentCoin.data.data.fiatCoinPrice.value * Number(networkFee);
+      setTotalFeeFiat(fiatPriceFee)
+      console.log("account", account);
+      // const data = { account: "0x1234" };
+      setDrawer(true);
+      setSelectedAccount(account);
+    }catch(error){
+      console.log("error", error);
+      messageApi.error(error.message);
+      store.dispatch(setLoading(false));
+      return;
+    }
 
-    const fiatPriceFee = parentCoin.data.data.fiatCoinPrice.value * Number(networkFee);
-    setTotalFeeFiat(fiatPriceFee)
-
-    const data = { account: "0x1234" };
-    setDrawer(true);
-    setSelectedAccount(data);
   };
 
 
   const handleTransaction = async () => {
+    console.log("handleTransaction");
     store.dispatch(setLoading(true));
     const { data } = await server.post(
       '/wallet/nativeCoinBalance',
@@ -507,7 +518,7 @@ function NftSend() {
                 return messageApi.error('Incorrect password provided.');
               }
               setOpenmodal(false);
-              setPassword(null);
+              // setPassword(null);
               handleTransaction()
             }}
           />

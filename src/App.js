@@ -100,7 +100,6 @@ import MyWallets from "./Components/BalanceDetails/MyWallets";
 import ChainAbstraction from "./Pages/ChainAbstraction/chainabstraction";
 import SelectCoin from "./Pages/SelectCoin/SelectCoin";
 import ExternalReceive from "./Pages/SelectCoin/ExternalReceive";
-// import ChainAbstractionDetail from "./Pages/ChainAbstraction/chainabstractiondetail";
 
 function App() {
   const [state, setState] = useState("Active");
