@@ -2120,7 +2120,7 @@ function SecretPhrasePaste({ children, termsCheck, getMnemonics, type }) {
       setVisibleWordCount(10);
       textAreaRef.current.focus();
     } catch (err) {
-      console.log("Select Mnemonics Word :", err);
+      // console.log("Select Mnemonics Word :", err);
     }
   };
 

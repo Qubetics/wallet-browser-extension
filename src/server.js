@@ -19,7 +19,7 @@ export let server = null;
     },
     async (error) => {
       // This handles errors in request configuration, not HTTP responses
-      console.log('Request configuration error:', error);
+      // console.log('Request configuration error:', error);
       return Promise.reject(error);
     }
   );
@@ -32,7 +32,7 @@ export let server = null;
     },
     async function (error) {
       // Handle response errors (this is where your logic should be)
-      console.log('Response error:', error, error.response);
+      // console.log('Response error:', error, error.response);
       
       // Check if error.response exists (network errors won't have response)
       if (error.response) {
@@ -52,7 +52,7 @@ export let server = null;
         }
       } else {
         // Handle network errors, timeouts, etc.
-        console.log('Network or other error:', error.message);
+        // console.log('Network or other error:', error.message);
       }
       
       return Promise.reject(error);

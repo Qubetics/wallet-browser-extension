@@ -94,7 +94,7 @@ export const getTokenBalance = async (tokenAddress, address, blockChain) => {
     // console.log("chk result::::::", result);
     return result;
   } catch (error) {
-    console.log('Error XXXXXX==>> :', error);
+    // console.log('Error XXXXXX==>> :', error);
     return error;
   }
 };
@@ -178,10 +178,10 @@ export function toPrecisionMultiply(num) {
 }
 
 export function capitalizeWords(input) {
-  console.log('input', input);
+  // console.log('input', input);
   if (typeof input !== 'string') return '';
 
-  console.log('input 2', input);
+  // console.log('input 2', input);
 
   // Trim and check if there's at least one word (non-space character)
   const trimmed = input.trim();

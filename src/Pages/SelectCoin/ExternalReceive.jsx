@@ -64,7 +64,7 @@ function ExternalReceive() {
         setMpcAddress(addressToUse);
         setLoading(false);
       } catch (error) {
-        console.error('Error initializing external receive:', error);
+        // console.error('Error initializing external receive:', error);
         messageApi.error('Failed to load receive screen');
         navigate('/select-coin');
       }

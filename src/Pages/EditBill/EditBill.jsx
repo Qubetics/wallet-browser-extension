@@ -13,7 +13,7 @@ import './BankAccount.scss';
 
 function EditBill() {
   const { state } = useLocation();
-  console.log('🚀 ~ EditBill ~ state:', state);
+  // console.log('🚀 ~ EditBill ~ state:', state);
 
   const [accountName, setAccountName] = useState(state.bill.name);
 

@@ -166,7 +166,7 @@ export class AdaHelper {
       // console.log("GET FEEEEE ", fee);
       return fee / Math.pow(10, 6);
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       return false;
     }
   };

@@ -7,7 +7,7 @@ import { PREFIX } from './constant';
 export const getUserAddress = async (mnemonics,nodeUrl) => {
     
   try {
-    console.log("MNEMO:::",mnemonics);
+    // console.log("MNEMO:::",mnemonics);
     const wallet = await DirectSecp256k1HdWallet.fromMnemonic(mnemonics, {
       hdPaths: [stringToPath("m/44'/60'/0'/0/0")],
       prefix: PREFIX,

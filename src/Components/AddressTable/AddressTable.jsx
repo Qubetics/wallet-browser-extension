@@ -5,7 +5,7 @@ import Person from "../../Assets/address-book-svgrepo-com.svg";
 import "./AddressTable.scss";
 
 function AddressTable({ dataArray, setAddress, setContact }) {
-  console.log("AddressTable ", dataArray);
+  // console.log("AddressTable ", dataArray);
   return (
     <>
       {dataArray.map((ele, index) => (

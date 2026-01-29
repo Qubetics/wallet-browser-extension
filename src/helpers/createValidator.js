@@ -19,12 +19,12 @@ export default async function createValidator(
   feeCalculate
 ) {
   // let publicKey = localStorage.getItem('publicKey') || '';
-console.log("PAYLOAD CREATE_VALIDATOR::",{mnemonics,
-  primaryValues,
-  secondaryValues,
-  nodeUrl,
-  valoperAddress,
-  publicKey});
+// console.log("PAYLOAD CREATE_VALIDATOR::",{mnemonics,
+//   primaryValues,
+//   secondaryValues,
+//   nodeUrl,
+//   valoperAddress,
+//   publicKey});
   try {
     const coins = {
       denom: DENOM,
@@ -110,7 +110,7 @@ console.log("PAYLOAD CREATE_VALIDATOR::",{mnemonics,
 
     return txResult;
   } catch (err) {
-    console.error("Error in createValidator::",err);
+    // console.error("Error in createValidator::",err);
     // toast.error("Could not validate check your keys & values");
     return 'Could not validate check your keys & values';
   }

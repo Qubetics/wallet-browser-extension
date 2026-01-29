@@ -41,12 +41,12 @@ export default function MpcModel({ showModal = true, onClose, currentEthAddress 
     (async () => {
       try {
         const stored = await getStoredMpcAddresses();
-        console.log('[MPC:UI] useEffect - stored addresses:', stored);
+        // console.log('[MPC:UI] useEffect - stored addresses:', stored);
         if (stored?.eth || stored?.btc) {
           setAddresses({ eth: stored.eth || null, btc: stored.btc || null });
         }
       } catch (e) {
-        console.error('[MPC:UI] useEffect error:', e);
+        // console.error('[MPC:UI] useEffect error:', e);
         // ignore; will be populated after generation
       }
     })();
@@ -60,19 +60,19 @@ export default function MpcModel({ showModal = true, onClose, currentEthAddress 
 
   const handleGenerateAddresses = async (password) => {
     try {
-      console.log('[MPC:UI] Generating addresses with password');
+      // console.log('[MPC:UI] Generating addresses with password');
       const ensured = await ensureMpcAddresses(currentEthAddress, password);
-      console.log('[MPC:UI] Ensured addresses (modal):', ensured);
+      // console.log('[MPC:UI] Ensured addresses (modal):', ensured);
       
       // Wait a bit for storage to be updated
       await new Promise(resolve => setTimeout(resolve, 100));
       
       const stored = await getStoredMpcAddresses();
-      console.log('[MPC:UI] Stored addresses (modal):', stored);
+      // console.log('[MPC:UI] Stored addresses (modal):', stored);
       
       // Use ensured addresses if stored is empty, otherwise use stored
       const finalAddresses = stored?.eth || stored?.btc ? stored : ensured;
-      console.log('[MPC:UI] Final addresses to set:', finalAddresses);
+      // console.log('[MPC:UI] Final addresses to set:', finalAddresses);
       
       setAddresses({ 
         eth: finalAddresses?.eth || null, 
@@ -81,7 +81,7 @@ export default function MpcModel({ showModal = true, onClose, currentEthAddress 
       
       setShowCongrats(true);
     } catch (e) {
-      console.error('[MPC:UI] Generation failed:', e?.message || e);
+      // console.error('[MPC:UI] Generation failed:', e?.message || e);
       messageApi.error('Failed to generate addresses. Please try again.');
       setAddresses({ eth: null, btc: null });
     }
@@ -170,7 +170,7 @@ export default function MpcModel({ showModal = true, onClose, currentEthAddress 
 
             <button
               onClick={() => {
-                console.log('[MPC:UI] Generate Addresses clicked');
+                // console.log('[MPC:UI] Generate Addresses clicked');
                 setShowAbstraction(false);
                 setSessionPassword('');
                 setConfirmModal(true);
@@ -376,7 +376,7 @@ export default function MpcModel({ showModal = true, onClose, currentEthAddress 
                 boxShadow: "0 4px 20px rgba(79, 172, 254, 0.4)",
               }}
               onClick={() => {
-                console.log('[MPC:UI] Continue clicked, closing modal');
+                // console.log('[MPC:UI] Continue clicked, closing modal');
                 setShowCongrats(false);
                 if (onClose) onClose();
               }}

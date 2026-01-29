@@ -23,7 +23,7 @@ function BillAddToken() {
       setBillList(billList);
       store.dispatch(setLoading(false));
     } catch (error) {
-      console.log("error::", error);
+      // console.log("error::", error);
       store.dispatch(setLoading(false));
     }
   };
@@ -42,7 +42,7 @@ function BillAddToken() {
       store.dispatch(setLoading(false));
     } catch (error) {
       store.dispatch(setLoading(false));
-      console.log("error::", error);
+      // console.log("error::", error);
     }
   };
 

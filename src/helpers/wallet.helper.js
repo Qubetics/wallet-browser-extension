@@ -51,26 +51,26 @@ export class WalletHelper {
   };
 
   static unlockWallet = async (password) => {
-    console.log('UNLOCK WALLET');
+    // console.log('UNLOCK WALLET');
     try {
       const { accounts } = await chrome.storage.local.get('accounts');
       const { chains } = await chrome.storage.local.get('chains');
       const { currency } = await chrome.storage.local.get('currency');
 
       const isVerified = await this.verifyPassword(password);
-      console.log(
-        '🚀 ~ WalletHelper ~ staticunlockWal ~ isVerified:',
-        isVerified
-      );
+      // console.log(
+      //   '🚀 ~ WalletHelper ~ staticunlockWal ~ isVerified:',
+      //   isVerified
+      // );
 
       if (!isVerified) {
         return false;
       }
       const defaultAccount = accounts.find((el) => el.default);
-      console.log(
-        '🚀 ~ WalletHelper ~ staticunlockWal ~ defaultAccount:',
-        defaultAccount
-      );
+      // console.log(
+      //   '🚀 ~ WalletHelper ~ staticunlockWal ~ defaultAccount:',
+      //   defaultAccount
+      // );
 
       await chrome.storage.session.set({
         accounts: accounts,
@@ -89,7 +89,7 @@ export class WalletHelper {
       await this.generateAndSetWalletToRefreshToken();
       return true;
     } catch (error) {
-      console.log('Error unlocking wallet :', error);
+      // console.log('Error unlocking wallet :', error);
       return false;
     }
   };
@@ -188,7 +188,7 @@ export class WalletHelper {
         }
       });
       const result = ethers.Wallet.fromMnemonic(phrase);
-      console.log('🚀 ~ WalletHelper ~ getPrivateKeyEvm= ~ result:', result);
+      // console.log('🚀 ~ WalletHelper ~ getPrivateKeyEvm= ~ result:', result);
       return result;
     } catch (error) {
       return false;
@@ -279,12 +279,12 @@ export class WalletHelper {
       );
       var child0 = root.deriveAccount(0);
       var account0 = new BIP84.fromZPrv(child0);
-      console.log(
-        '🚀 ~ WalletHelper ~ getBitcoinPrivateKeyWithPassword= ~ account0:',
-        account0,
-        account0.getAddress(0),
-        account0.getAccountPrivateKey(0)
-      );
+      // console.log(
+      //   '🚀 ~ WalletHelper ~ getBitcoinPrivateKeyWithPassword= ~ account0:',
+      //   account0,
+      //   account0.getAddress(0),
+      //   account0.getAccountPrivateKey(0)
+      // );
       return account0.getPrivateKey(0);
     } catch (error) {
       return false;
@@ -499,7 +499,7 @@ export class WalletHelper {
       store.dispatch(setAuth());
       return true;
     } catch (error) {
-      console.log('Error while generating watch only wallet :', error);
+      // console.log('Error while generating watch only wallet :', error);
       return false;
     }
   };
@@ -663,7 +663,7 @@ export class WalletHelper {
       store.dispatch(setAuth());
       return true;
     } catch (error) {
-      console.log('Error while generating watch only wallet :', error);
+      // console.log('Error while generating watch only wallet :', error);
       return false;
     }
   };
@@ -807,13 +807,13 @@ export class WalletHelper {
       store.dispatch(setAuth());
       return id;
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       return false;
     }
   };
 
   static generateAndSetWallet = async (newMnemonics, name, type, password) => {
-    console.log("🚀 ~ WalletHelper ~ type:", type)
+    // console.log("🚀 ~ WalletHelper ~ type:", type)
     let bitcoinAddress = '';
     try {
       let { accounts } = await chrome.storage.session.get('accounts');
@@ -986,10 +986,10 @@ export class WalletHelper {
       store.dispatch(setAuth());
       return id;
     } catch (error) {
-      console.log(
-        '🚀 ~ WalletHelper ~ staticgenerateAndSetWal ~ error:',
-        error
-      );
+      // console.log(
+      //   '🚀 ~ WalletHelper ~ staticgenerateAndSetWal ~ error:',
+      //   error
+      // );
       throw error?.response?.data?.message || 'Something went wrong.';
     }
   };
@@ -1025,10 +1025,10 @@ export class WalletHelper {
           return el;
         }
       });
-      console.log(
-        '🚀 ~ WalletHelper ~ updateAccounts ~ updateAccounts:',
-        updateAccounts
-      );
+      // console.log(
+      //   '🚀 ~ WalletHelper ~ updateAccounts ~ updateAccounts:',
+      //   updateAccounts
+      // );
 
       await chrome.storage.local.set({
         accounts: updateAccounts,
@@ -1054,7 +1054,7 @@ export class WalletHelper {
       // }
       return true;
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       store.dispatch(setLoading(false));
       return false;
     }
@@ -1085,7 +1085,7 @@ export class WalletHelper {
       store.dispatch(setAccount(updateAccounts.find((el) => el.default)));
       return true;
     } catch (error) {
-      console.log('error', error);
+      // console.log('error', error);
       return false;
     }
   };
@@ -1271,7 +1271,7 @@ export class WalletHelper {
       await this.generateAndSetWalletToRefreshToken();
       return true;
     } catch (error) {
-      console.log('error', error);
+      // console.log('error', error);
       return false;
     }
   };
@@ -1404,7 +1404,7 @@ export class WalletHelper {
 
       store.dispatch(setAlerts(alerts));
     } catch (error) {
-      console.log(error);
+      // console.log(error);
     }
   };
 
@@ -1425,7 +1425,7 @@ export class WalletHelper {
 
       store.dispatch(setAlerts(alerts));
     } catch (error) {
-      console.log(error);
+      // console.log(error);
     }
   };
 }

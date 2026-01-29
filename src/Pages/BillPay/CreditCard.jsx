@@ -16,7 +16,7 @@ function CreditCard() {
     maxCount: 1,
   });
   const { state } = useLocation();
-  console.log("🚀 ~ CreditCard ~ state:", state);
+  // console.log("🚀 ~ CreditCard ~ state:", state);
   const [cardNumber, setCardNumber] = useState(null);
 
   const handleCreditCard = async () => {

@@ -98,9 +98,9 @@ function CrossChain({ state }) {
   const { theme, swapDetail } = useSelector((state) => state);
   const [activeIndex, setActiveIndex] = useState(null);
   const percentages = [25, 50, 75, 100];
-  console.log('state', state);
+  // console.log('state', state);
   useEffect(() => {
-    console.log('swap detail found in cross chain swap:', swapDetail);
+    // console.log('swap detail found in cross chain swap:', swapDetail);
     if (swapDetail) {
       if (swapDetail?.tab == 1) {
         setToken1(swapDetail?.token1);
@@ -207,7 +207,7 @@ function CrossChain({ state }) {
 
       updateRef.current = true;
     } catch (error) {
-      console.log('ERR ', error);
+      // console.log('ERR ', error);
       setInnerLoading(false);
       return messageApi.error('Pair not available for swap.');
     }
@@ -424,7 +424,7 @@ function CrossChain({ state }) {
 
       setInnerLoading(false);
     } catch (error) {
-      console.log('error loadMoreTokens:::', error);
+      // console.log('error loadMoreTokens:::', error);
       setInnerLoading(false);
       messageApi.error('Unable to load more tokens. Please try again later.');
     }
@@ -810,7 +810,7 @@ function CrossChain({ state }) {
         }
       }
     } catch (error) {
-      console.log('error CrossChain:::', error);
+      // console.log('error CrossChain:::', error);
       setInnerLoading(false);
       messageApi.error(
         'Unable to perform swap currently. Please try again later.'
@@ -1677,7 +1677,7 @@ function CrossChain({ state }) {
                 parseFloat(balance) <
                 parseFloat(Number(amount) + Number(gasInEth))
               ) {
-                console.log('first insufficient balance case');
+                // console.log('first insufficient balance case');
                 return messageApi.error(
                   'Insufficient balance to proceed with the transaction.'
                 );
@@ -1721,7 +1721,7 @@ function CrossChain({ state }) {
               state: swapDetailed,
             });
           } else if (token1.chain.currencyName == 'SOL') {
-            console.log('Cross Chain swap for Solana');
+            // console.log('Cross Chain swap for Solana');
 
             const solanaHelper = new SolanaHelper(token1?.chain?.rpcUrl);
             const gasPrice = solanaHelper.getGasPrice();

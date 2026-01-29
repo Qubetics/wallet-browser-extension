@@ -54,7 +54,7 @@ function PancakeSwapDetails() {
     duration: DURATION,
   });
 
-  console.log({ route, token1, token2, amount, amount2, feeAmount });
+  // console.log({ route, token1, token2, amount, amount2, feeAmount });
 
   const [requireApproval, setRequireApproval] = useState(true);
   const web3Helper = useRef(new Web3Helper(chain.rpcUrl));
@@ -80,10 +80,10 @@ function PancakeSwapDetails() {
 
   const init = async () => {
     const gasPrice = await web3Helper.current.getGasPrice();
-    console.log(
-      "🚀 ~ file: PancakeSwapDetails.jsx:67 ~ init ~ gasPrice:",
-      gasPrice
-    );
+    // console.log(
+    //   "🚀 ~ file: PancakeSwapDetails.jsx:67 ~ init ~ gasPrice:",
+    //   gasPrice
+    // );
     setGasPrice(gasPrice);
 
     let functionCall = null;
@@ -116,16 +116,16 @@ function PancakeSwapDetails() {
       feeAmount
     );
 
-    console.log(
-      "🚀 ~ file: PancakeSwapDetails.jsx:99 ~ init ~ myGasEstimate:",
-      myGasEstimate
-    );
+    // console.log(
+    //   "🚀 ~ file: PancakeSwapDetails.jsx:99 ~ init ~ myGasEstimate:",
+    //   myGasEstimate
+    // );
 
     if (myGasEstimate.status) {
-      console.log("here");
+      // console.log("here");
       setGasEstimate(150000);
     } else {
-      console.log("here2");
+      // console.log("here2");
       setGasEstimate(myGasEstimate);
     }
 

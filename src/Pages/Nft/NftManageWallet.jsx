@@ -11,7 +11,7 @@ function NftManageWallet() {
   const [nftDetails, setNftDetails] = useState();
   const { account } = useSelector((state) => state);
   
-  console.log("🚀 ~ NftManageWallet ~ account:", account)
+  // console.log("🚀 ~ NftManageWallet ~ account:", account)
 
 
   useEffect(() => {

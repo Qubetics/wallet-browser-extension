@@ -91,10 +91,10 @@ function BuyCoins() {
     setMyTokens(rtk);
     setFilteredTokens(
       walletsList.data.data.filter((el) => {
-        console.log(
-          filterOutTheCoins(el, "BUY"),
-          filterOutTheCoins(el, "SELL")
-        );
+        // console.log(
+        //   filterOutTheCoins(el, "BUY"),
+        //   filterOutTheCoins(el, "SELL")
+        // );
         if (filterOutTheCoins(el, "BUY") || filterOutTheCoins(el, "SELL")) {
           return el;
         }
@@ -708,7 +708,7 @@ function BuyCoins() {
             }}
             onClick={async () => {
               const myNew = await checkIfAvailableAndSendIt("BUY");
-              console.log("myNewmyNewmyNewmyNewmyNewmyNewmyNew ", myNew);
+              // console.log("myNewmyNewmyNewmyNewmyNewmyNewmyNew ", myNew);
 
               if (myNew.provider.length === 0) {
                 return messageApi.error(

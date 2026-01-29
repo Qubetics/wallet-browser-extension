@@ -23,10 +23,10 @@ function TransactionHistory() {
   const { currency, account } = useSelector((state) => state);
   const [image, setCoinImage] = useState(null);
   const [gasPrice, setGasPrice] = useState(allData.tx_fee);
-  console.log(
-    '🚀 ~ file: TransactionHistory.jsx:20 ~ TransactionHistory ~ gasPrice:',
-    gasPrice
-  );
+  // console.log(
+  //   '🚀 ~ file: TransactionHistory.jsx:20 ~ TransactionHistory ~ gasPrice:',
+  //   gasPrice
+  // );
   const [fiatGasPrice, setFiatGasPrice] = useState(0);
   const [name, setName] = useState(
     `${allData.to_adrs.substring(0, 7)}.....${allData.to_adrs.substring(

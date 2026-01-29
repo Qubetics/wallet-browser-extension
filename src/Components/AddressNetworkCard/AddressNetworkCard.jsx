@@ -151,7 +151,7 @@ function AddressNetworkCard(props) {
 
     } catch (error) {
 
-      console.log("error ", error);
+      // console.log("error ", error);
 
       store.dispatch(setLoading(false));
 
@@ -207,7 +207,7 @@ function AddressNetworkCard(props) {
 
     } catch (error) {
 
-      console.log("Error ", error);
+      // console.log("Error ", error);
 
       setDeleteModal(false);
 

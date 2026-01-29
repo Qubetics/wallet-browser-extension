@@ -46,18 +46,18 @@ function SendConfirm() {
     },
   } = useLocation();
 
-  console.log('NETWORK FEE', networkFee);
-  console.log('COIN', coin);
-  console.log('TO', to);
-  console.log('AMOUNT', amount);
-  console.log('ENS NAME', ENSName);
-  console.log('CONTACT', contact);
-  console.log('THEME', theme);
-  console.log('REDIRECT TO', redirectTo);
-  console.log('GAS PRICE TYPE', gasPriceType);
-  console.log('SELECT CHAIN', selectChain);
-  console.log('MNEMONICS', mnemonics);
-  console.log('COSMOS DATA', cosmosData);
+  // console.log('NETWORK FEE', networkFee);
+  // console.log('COIN', coin);
+  // console.log('TO', to);
+  // console.log('AMOUNT', amount);
+  // console.log('ENS NAME', ENSName);
+  // console.log('CONTACT', contact);
+  // console.log('THEME', theme);
+  // console.log('REDIRECT TO', redirectTo);
+  // console.log('GAS PRICE TYPE', gasPriceType);
+  // console.log('SELECT CHAIN', selectChain);
+  // console.log('MNEMONICS', mnemonics);
+  // console.log('COSMOS DATA', cosmosData);
 
   const { account, currency } = useSelector((state) => state);
   const [isModalOpen1, setIsModalOpen1] = useState(false);
@@ -251,21 +251,21 @@ function SendConfirm() {
                 'Insufficient staking rewards to cover transaction fees. Please ensure you have enough balance or claim staking rewards first.';
             }
 
-            console.error(
-              '🚀 ~ handleTransaction ~ broadcastTx error:',
-              broadcastResponse
-            );
+            // console.error(
+            //   '🚀 ~ handleTransaction ~ broadcastTx error:',
+            //   broadcastResponse
+            // );
             return messageApi.error(userMessage);
           }
 
           const { hash, block, transFee, transEstimate } = broadcastResponse;
-          console.log(
-            '🚀 ~ handleTransaction ~ cosmosTxn:',
-            hash,
-            block,
-            transFee,
-            transEstimate
-          );
+          // console.log(
+          //   '🚀 ~ handleTransaction ~ cosmosTxn:',
+          //   hash,
+          //   block,
+          //   transFee,
+          //   transEstimate
+          // );
 
           // Validate that we have required transaction data
           if (!hash) {
@@ -333,7 +333,7 @@ function SendConfirm() {
               );
             }
           } else {
-            console.log('IS EVM COIN CASE ');
+            // console.log('IS EVM COIN CASE ');
             const response =
               await Web3Helper.generateRawTransactionForCoinAndBroadcast(
                 to,
@@ -359,10 +359,10 @@ function SendConfirm() {
                 undefined,
                 sessionPassword
               );
-            console.log(
-              'RESPONSE FROM FUNCTION MAKING RAW TRANSACTION :',
-              response
-            );
+            // console.log(
+            //   'RESPONSE FROM FUNCTION MAKING RAW TRANSACTION :',
+            //   response
+            // );
             if (!response) {
               store.dispatch(setLoading(false));
               return messageApi.error(
@@ -400,7 +400,7 @@ function SendConfirm() {
             return messageApi.error(response?.message);
           }
         } else {
-          console.log('INCOIN CASSE');
+          // console.log('INCOIN CASSE');
           const response =
             await solanaHelper.generateRawTransactionForCoinAndBroadcast(
               to,
@@ -453,7 +453,7 @@ function SendConfirm() {
       store.dispatch(setLoading(false));
       setIsModalOpen1(true);
     } catch (error) {
-      console.error('HANDLE TRANSACTION ERROR: ', error);
+      // console.error('HANDLE TRANSACTION ERROR: ', error);
       store.dispatch(setLoading(false));
 
       // Extract user-friendly error message

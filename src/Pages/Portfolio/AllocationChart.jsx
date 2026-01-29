@@ -175,7 +175,7 @@ const AllocationChart = () => {
 
       store.dispatch(setLoading(false));
     } catch (error) {
-      console.error('Portfolio fetch error:', error);
+      // console.error('Portfolio fetch error:', error);
       store.dispatch(setLoading(false));
     }
   };

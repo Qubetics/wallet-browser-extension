@@ -52,8 +52,8 @@ const AbstractProcessingModel = ({
   };
 
   useEffect(() => {
-    console.log('showProcessing', showProcessing);
-    console.log('loader', loader);
+    // console.log('showProcessing', showProcessing);
+    // console.log('loader', loader);
     // Only auto-transition if loader is true (showing processing state)
     // If loader is false, we're showing final result directly - no auto-transition
     if (showProcessing && loader) {

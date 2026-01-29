@@ -189,7 +189,7 @@ function CustomToken() {
 
       store.dispatch(setLoading(false));
     } catch (error) {
-      console.log('~ CustomToken.jsx ~ 191 :', error);
+      // console.log('~ CustomToken.jsx ~ 191 :', error);
 
       store.dispatch(setLoading(false));
       return messageApi.error('Please enter a valid address.');
@@ -671,7 +671,7 @@ function CustomToken() {
                 }
                 return navigate('/wallet');
               } catch (error) {
-                console.log('~ CustomToken.jsx ~ error ~ 668 : ', error);
+                // console.log('~ CustomToken.jsx ~ error ~ 668 : ', error);
                 store.dispatch(setLoading(false));
                 const errorMessage = error?.response?.data?.message;
                 if (typeof errorMessage === 'string') {
@@ -827,7 +827,7 @@ function CustomToken() {
                 messageApi.success('Token added successfully.');
                 return navigate('/wallet');
               } catch (error) {
-                console.log('~ customtoken.jsx ~ 825 ~ error :');
+                // console.log('~ customtoken.jsx ~ 825 ~ error :');
                 store.dispatch(setLoading(false));
 
                 const errorMessage = error?.response?.data?.message;

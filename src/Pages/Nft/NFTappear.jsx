@@ -16,12 +16,12 @@ import { setNfts } from '../../actions/nfts';
 function NFTappear() {
   const { account } = useSelector((state) => state);
   const { nfts } = useSelector((state) => state);
-  console.log(
-    'account.coinFamilyAndAddress[1]::',
-    account.coinFamilyAndAddress[1],
-    'account.coinFamilyAndAddress[3]::',
-    account.coinFamilyAndAddress[3]
-  );
+  // console.log(
+  //   'account.coinFamilyAndAddress[1]::',
+  //   account.coinFamilyAndAddress[1],
+  //   'account.coinFamilyAndAddress[3]::',
+  //   account.coinFamilyAndAddress[3]
+  // );
   const init = async (refresh) => {
     const walletsList = await server.post(
       `/wallet/nft/from_moalis`,
@@ -45,7 +45,7 @@ function NFTappear() {
         },
       }
     );
-    console.log('GET NFT API RESPONSE:::', walletsList);
+    // console.log('GET NFT API RESPONSE:::', walletsList);
     store.dispatch(setNfts(walletsList.data.data));
   };
 

@@ -66,13 +66,13 @@ function NftSend() {
       nftDetails?.token_type,
       quantity
     );
-    console.log("🚀 ~ getNetwrokFee ~ gasData:", gasData)
+    // console.log("🚀 ~ getNetwrokFee ~ gasData:", gasData)
 
     setNftGasData(gasData)
 
     if (!ethers.utils.isAddress(toAddress)) {
       store.dispatch(setLoading(false));
-      return console.error("Please provide a valid address to proceed.");
+      return // console.error("Please provide a valid address to proceed.");
     }
 
     let gasEstimate = gasData.estimate;
@@ -80,14 +80,14 @@ function NftSend() {
 
     if (!gasPrice) {
       store.dispatch(setLoading(false));
-      return console.error("Unable to fetch gas price at the moment.");
+      return // console.error("Unable to fetch gas price at the moment.");
     }
 
     const gasInEth = gasPrice.times(gasEstimate).div(Math.pow(10, 18));
 
     // Convert gasInEth to a floating-point number using parseFloat
     const gasInEthFloat = parseFloat(gasInEth.toString());  // Convert BigNumber to string first
-    console.log("gasInEth as Float: ", gasInEthFloat);
+    // console.log("gasInEth as Float: ", gasInEthFloat);
 
 
     // networkFee: gasInEth.toFixed(5),
@@ -142,12 +142,12 @@ function NftSend() {
   
       const fiatPriceFee = parentCoin.data.data.fiatCoinPrice.value * Number(networkFee);
       setTotalFeeFiat(fiatPriceFee)
-      console.log("account", account);
+      // console.log("account", account);
       // const data = { account: "0x1234" };
       setDrawer(true);
       setSelectedAccount(account);
     }catch(error){
-      console.log("error", error);
+      // console.log("error", error);
       messageApi.error(error.message);
       store.dispatch(setLoading(false));
       return;
@@ -157,7 +157,7 @@ function NftSend() {
 
 
   const handleTransaction = async () => {
-    console.log("handleTransaction");
+    // console.log("handleTransaction");
     store.dispatch(setLoading(true));
     const { data } = await server.post(
       '/wallet/nativeCoinBalance',
@@ -184,7 +184,7 @@ function NftSend() {
     }
 
     if (nftDetails.token_type == 'ERC721') {
-      console.log("nftDetails.token_type == 'ERC721'");
+      // console.log("nftDetails.token_type == 'ERC721'");
       const response =
         await Web3Helper.generateRawTransactionForNFTAndBroadcast(
           sessionPassword,
@@ -204,7 +204,7 @@ function NftSend() {
           nftDetails?.token_id,
           nftGasData
         );
-      console.log({ response });
+      // console.log({ response });
 
       if (!response) {
         store.dispatch(setLoading(false));
@@ -213,7 +213,7 @@ function NftSend() {
         );
       }
     } else {
-      console.log("generateRawTransactionFor1155AndBroadcast");
+      // console.log("generateRawTransactionFor1155AndBroadcast");
       const response =
         await Web3Helper.generateRawTransactionFor1155AndBroadcast(
           sessionPassword,

@@ -102,7 +102,7 @@ function ChainAbstractionHistoryItem(props) {
           setDestinationCoinImage(destCoinFamily == 3 ? BTCImage : QubeticsImage);
         }
       } catch (error) {
-        console.error("Error fetching coin images:", error);
+        // console.error("Error fetching coin images:", error);
         // Fallback to default images
         const sourceCoinFamily = allData?.coin_family;
         if (sourceCoinFamily == 3) {
@@ -182,7 +182,7 @@ function ChainAbstractionHistoryItem(props) {
       
       return response;
     } catch (error) {
-      console.error("Error updating intent status:", error);
+      // console.error("Error updating intent status:", error);
       throw error?.message || "Failed to update transaction status";
     }
   };
@@ -269,12 +269,12 @@ function ChainAbstractionHistoryItem(props) {
           // Mark that status was updated - will refresh list when modal closes
           setWasStatusUpdated(true);
         } catch (updateError) {
-          console.error("Error updating backend status:", updateError);
+          // console.error("Error updating backend status:", updateError);
         }
       }
 
     } catch (error) {
-      console.error("Error fetching transaction status:", error);
+      // console.error("Error fetching transaction status:", error);
       messageApi.error("Failed to fetch transaction status");
     } finally {
       setIsUpdating(false);
@@ -496,7 +496,7 @@ function ChainAbstractionHistoryItem(props) {
         setTransactionResult={setTransactionResult}
         loader={false}
         onClose={() => {
-          console.log("Modal was closed!");
+          // console.log("Modal was closed!");
           setIsProcessModal(false);
           setTransactionResult({
             hash: "",

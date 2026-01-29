@@ -10,7 +10,7 @@ try {
   const [{ address: valoperaddress }] = await wallet.getAccounts();
   return valoperaddress;
 } catch (error) {
-  console.log("Error in fetchValoperAddress:::::::",error);
+  // console.log("Error in fetchValoperAddress:::::::",error);
   
 }
 };

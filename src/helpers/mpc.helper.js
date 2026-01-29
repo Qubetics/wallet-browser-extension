@@ -26,7 +26,7 @@ export const registerUser = async (ethereumAddress, signature = null, message = 
     data.message = message;
   }
   
-  console.log("data", data);
+  // console.log("data", data);
   
   try {
     const response = await fetch(`${STAGE_MPC_BASE_URL}/register_user`, {
@@ -38,7 +38,7 @@ export const registerUser = async (ethereumAddress, signature = null, message = 
       body: JSON.stringify(data),
     });
 
-    console.log("response", response);
+    // console.log("response", response);
 
     if (!response.ok) {
       throw new Error(`Register failed: ${response.status} ${response.statusText}`);
@@ -46,11 +46,11 @@ export const registerUser = async (ethereumAddress, signature = null, message = 
 
     // ✅ Use global JSON.parse, not response.JSON
     const result = await response.json();
-    console.log("result", result);
+    // console.log("result", result);
 
     return result;
   } catch (err) {
-    console.error("[MPC] registerUser error:", err);
+    // console.error("[MPC] registerUser error:", err);
     throw err;
   }
 };
@@ -69,17 +69,17 @@ export const getUserInfo = async (ethereumAddress) => {
 export const getStoredMpcAddresses = async () => {
   const data = await chrome.storage.local.get("accounts");
   const accounts = data.accounts || [];
-  console.log("accounts",accounts);
+  // console.log("accounts",accounts);
   // Find the default account
   const defaultAccount = accounts.find(account => account?.default);
-  console.log("defaultAccount",defaultAccount);
+  // console.log("defaultAccount",defaultAccount);
 
   if (!defaultAccount) {
-    console.log("[MPC] No default account found");
+    // console.log("[MPC] No default account found");
     return null;
   }
 
-  console.log("[MPC] Default account MPC addresses ->", defaultAccount?.mpcAddresses);
+  // console.log("[MPC] Default account MPC addresses ->", defaultAccount?.mpcAddresses);
   return defaultAccount?.mpcAddresses || null;
 };
 
@@ -117,7 +117,7 @@ export const setStoredMpcAddresses = async (addresses) => {
 
   // Save back the updated accounts array
   await chrome.storage.local.set({ accounts: updatedAccounts });
-  console.log("[MPC] Updated default account with mpcAddresses <-", addresses);
+  // console.log("[MPC] Updated default account with mpcAddresses <-", addresses);
 
   return updatedAccounts;
 };
@@ -143,7 +143,7 @@ export const getMpcWallets = async (walletAddress, coinFamily = 1) => {
       coin_family: 1,
     };
 
-    console.log("[MPC] Getting MPC wallets from backend:", payload);
+    // console.log("[MPC] Getting MPC wallets from backend:", payload);
 
     const response = await server.post(
       "/mpc/getMpcWallets",
@@ -155,13 +155,13 @@ export const getMpcWallets = async (walletAddress, coinFamily = 1) => {
       }
     );
 
-    console.log("[MPC] Get MPC wallets response:", response);
+    // console.log("[MPC] Get MPC wallets response:", response);
     // Response structure: response.data.data.data is the array of wallet objects
     const walletData = response?.data?.data?.data || response?.data?.data || null;
-    console.log("[MPC] Extracted wallet data:", walletData);
+    // console.log("[MPC] Extracted wallet data:", walletData);
     return walletData;
   } catch (error) {
-    console.error("[MPC] Error getting MPC wallets:", error);
+    // console.error("[MPC] Error getting MPC wallets:", error);
     return null;
   }
 };
@@ -186,7 +186,7 @@ export const saveMpcWallets = async (ethereumAddress, derivedAddresses) => {
       tics_wallet_address: derivedAddresses?.derived_eth_address || derivedAddresses?.eth || null,
     };
 
-    console.log("[MPC] Saving MPC wallets to backend:", payload);
+    // console.log("[MPC] Saving MPC wallets to backend:", payload);
 
     const response = await server.post(
       "mpc/saveMpcWallets",
@@ -198,17 +198,17 @@ export const saveMpcWallets = async (ethereumAddress, derivedAddresses) => {
       }
     );
 
-    console.log("[MPC] Save MPC wallets response:", response);
+    // console.log("[MPC] Save MPC wallets response:", response);
     return response;
   } catch (error) {
-    console.error("[MPC] Error saving MPC wallets:", error);
+    // console.error("[MPC] Error saving MPC wallets:", error);
     // Don't throw - this is not critical for the flow
     return null;
   }
 };
 
 export const ensureMpcAddresses = async (currentEthAddress, sessionPassword = null) => {
-    console.log("[MPC] ensureMpcAddresses start for ETH addr:", currentEthAddress);
+    // console.log("[MPC] ensureMpcAddresses start for ETH addr:", currentEthAddress);
   
     // Get password from chrome storage session if not provided
     if (!sessionPassword) {
@@ -216,40 +216,40 @@ export const ensureMpcAddresses = async (currentEthAddress, sessionPassword = nu
         const { password } = await chrome.storage.session.get('password');
         if (password) {
           sessionPassword = password;
-          console.log("[MPC] Retrieved password from chrome storage session");
+          // console.log("[MPC] Retrieved password from chrome storage session");
         }
       } catch (err) {
-        console.warn("[MPC] Could not retrieve password from storage:", err?.message || err);
+        // console.warn("[MPC] Could not retrieve password from storage:", err?.message || err);
       }
     }
   
     // 1) Check storage first
     const existing = await getStoredMpcAddresses();
     if (existing?.eth && existing?.btc) {
-      console.log("[MPC] Found existing addresses in storage:", existing);
+      // console.log("[MPC] Found existing addresses in storage:", existing);
       return existing;
     }
   
     // 2) Try user_info first
     try {
-      console.log("[MPC] calling user_info");
+      // console.log("[MPC] calling user_info");
       const info = await getUserInfo(currentEthAddress);
-      console.log("info", info);
+      // console.log("info", info);
       
       // If user_info returned an error indicating user not found
       if (info?.status === "error" && info?.error?.error_code === "USER_NOT_FOUND") {
-        console.warn("[MPC] User not found, proceeding to register");
+        // console.warn("[MPC] User not found, proceeding to register");
         const registered = await registerAndFetchAddresses(currentEthAddress, sessionPassword);
         if (registered) return registered;
       }
   
       const eth = info?.derived_eth_address;
       const btc = info?.derived_btc_address;
-      console.log("[MPC] user_info response:", { eth, btc });
+      // console.log("[MPC] user_info response:", { eth, btc });
   
       if (eth || btc) {
         const stored = await setStoredMpcAddresses({ eth, btc });
-        console.log("[MPC] Stored addresses from user_info:", stored);
+        //  console.log("[MPC] Stored addresses from user_info:", stored);
         
         // Save MPC wallets to backend API
         await saveMpcWallets(currentEthAddress, {
@@ -260,27 +260,27 @@ export const ensureMpcAddresses = async (currentEthAddress, sessionPassword = nu
         return { eth, btc };
       }
     } catch (err) {
-      console.warn("[MPC] user_info failed, proceeding to register:", err?.message || err);
+      // console.warn("[MPC] user_info failed, proceeding to register:", err?.message || err); 
     }
     
     // 3) If user_info didn't work, try to register
-    console.log("[MPC] Proceeding to register user");
+    // console.log("[MPC] Proceeding to register user");
     const registered = await registerAndFetchAddresses(currentEthAddress, sessionPassword);
     if (registered) {
-      console.log("[MPC] Registration successful, returning addresses:", registered);
+      // console.log("[MPC] Registration successful, returning addresses:", registered);
       return registered;
     }
   
     // 4) Final fallback - check storage again
     const finalCheck = await getStoredMpcAddresses();
-    console.log("[MPC] Final storage check:", finalCheck);
+    // console.log("[MPC] Final storage check:", finalCheck);
     return finalCheck;
   };
   
   // Helper to register user and fetch addresses
   export const registerAndFetchAddresses = async (ethAddress, sessionPassword = null) => {
     try {
-      console.log("[MPC] calling register_user");
+      // console.log("[MPC] calling register_user");
       
       // Get password from chrome storage session if not provided
       if (!sessionPassword) {
@@ -288,10 +288,10 @@ export const ensureMpcAddresses = async (currentEthAddress, sessionPassword = nu
           const { password } = await chrome.storage.session.get('password');
           if (password) {
             sessionPassword = password;
-            console.log("[MPC] Retrieved password from chrome storage session for registration");
+            // console.log("[MPC] Retrieved password from chrome storage session for registration");
           }
         } catch (err) {
-          console.warn("[MPC] Could not retrieve password from storage:", err?.message || err);
+          // console.warn("[MPC] Could not retrieve password from storage:", err?.message || err);
         }
       }
       
@@ -308,33 +308,33 @@ export const ensureMpcAddresses = async (currentEthAddress, sessionPassword = nu
           const wallet = await WalletHelper.getPrivateKeyEvm(sessionPassword);
           if (wallet && wallet !== false && typeof wallet.signMessage === 'function') {
             signature = await wallet.signMessage(message);
-            console.log("[MPC] Generated signature for registration:", signature);
-            console.log("[MPC] Message:", message);
+            // console.log("[MPC] Generated signature for registration:", signature);
+            // console.log("[MPC] Message:", message);
           } else {
-            console.warn("[MPC] Could not get valid wallet (returned:", wallet, "), registering without signature");
+            // console.warn("[MPC] Could not get valid wallet (returned:", wallet, "), registering without signature");
           }
         } catch (signError) {
-          console.error("[MPC] Failed to generate signature:", signError?.message || signError);
+          // console.error("[MPC] Failed to generate signature:", signError?.message || signError);
         }
       } else {
-        console.warn("[MPC] No session password provided, registering without signature");
+        // console.warn("[MPC] No session password provided, registering without signature");
       }
       
       const registerResponse = await registerUser(ethAddress, signature, message);
-      console.log("registerResponse", registerResponse);
+      //  console.log("registerResponse", registerResponse);
       if (registerResponse?.status === "error") {
-        console.error("[MPC] register_user failed:", registerResponse?.error?.error_message);
+        // console.error("[MPC] register_user failed:", registerResponse?.error?.error_message);
         return null;
       }
       
       // Get addresses from the register response
       const eth = registerResponse?.derived_eth_address;
       const btc = registerResponse?.derived_btc_address;
-      console.log("[MPC] addresses from register response:", { eth, btc });
+      // console.log("[MPC] addresses from register response:", { eth, btc });
       
       if (eth || btc) {
         const stored = await setStoredMpcAddresses({ eth, btc });
-        console.log("[MPC] stored addresses:", stored);
+        // console.log("[MPC] stored addresses:", stored); 
         
         // Save MPC wallets to backend API
         await saveMpcWallets(ethAddress, {
@@ -346,11 +346,11 @@ export const ensureMpcAddresses = async (currentEthAddress, sessionPassword = nu
       }
       
       // Fallback: try user_info if register response doesn't have addresses
-      console.log("[MPC] register_user done, re-calling user_info");
+      // console.log("[MPC] register_user done, re-calling user_info");
       const info = await getUserInfo(ethAddress);
       const ethFromInfo = info?.derived_eth_address;
       const btcFromInfo = info?.derived_btc_address;
-      console.log("[MPC] user_info after register:", { ethFromInfo, btcFromInfo });
+      // console.log("[MPC] user_info after register:", { ethFromInfo, btcFromInfo });
       if (ethFromInfo || btcFromInfo) {
         await setStoredMpcAddresses({ eth: ethFromInfo, btc: btcFromInfo });
         
@@ -363,7 +363,7 @@ export const ensureMpcAddresses = async (currentEthAddress, sessionPassword = nu
         return { eth: ethFromInfo, btc: btcFromInfo };
       }
     } catch (err) {
-      console.error("[MPC] register flow failed:", err?.message || err);
+      // console.error("[MPC] register flow failed:", err?.message || err);
       await setStoredMpcAddresses({ eth: null, btc: null });
     }
     return null;
@@ -387,7 +387,7 @@ export const getNetworkAddresses = async () => {
     }
 
     const result = await response.json();
-    console.log("[MPC] Network addresses:", result);
+    // console.log("[MPC] Network addresses:", result);
     
     if (result?.status === "success" && result?.network_addresses) {
       return result.network_addresses;
@@ -395,7 +395,7 @@ export const getNetworkAddresses = async () => {
     
     throw new Error("Invalid response format from network addresses API");
   } catch (err) {
-    console.error("[MPC] Error fetching network addresses:", err);
+    // console.error("[MPC] Error fetching network addresses:", err);
     throw err;
   }
 };
@@ -417,13 +417,13 @@ export const checkLiquidityAvailability = async (token1, token2 = null, rpcUrl =
     const tokenToCheck = isCrossChain ? token2 : token1;
     const tokenSymbol = tokenToCheck?.coinSymbol || token1?.coinSymbol;
     
-    console.log("[MPC] Checking liquidity availability");
-    console.log("[MPC] Source Token:", token1?.coinSymbol, "| Destination Token:", token2?.coinSymbol);
-    console.log("[MPC] Is Cross-Chain:", isCrossChain);
-    console.log("[MPC] Checking liquidity for:", tokenSymbol, "(destination token for cross-chain)");
+    // console.log("[MPC] Checking liquidity availability");
+    // console.log("[MPC] Source Token:", token1?.coinSymbol, "| Destination Token:", token2?.coinSymbol);
+    // console.log("[MPC] Is Cross-Chain:", isCrossChain);
+    // console.log("[MPC] Checking liquidity for:", tokenSymbol, "(destination token for cross-chain)");
     
     if (requiredAmount) {
-      console.log("[MPC] Required liquidity amount:", requiredAmount, tokenSymbol);
+      // console.log("[MPC] Required liquidity amount:", requiredAmount, tokenSymbol);
     }
     
     // Get network addresses
@@ -444,14 +444,14 @@ export const checkLiquidityAvailability = async (token1, token2 = null, rpcUrl =
       // Check BTC network address balance
       const btcAddress = networkAddresses?.btc_address;
       if (!btcAddress) {
-        console.warn("[MPC] BTC network address not found");
+        // console.warn("[MPC] BTC network address not found");
         return {
           available: false,
           message: "Network address not available. Please try again later.",
         };
       }
       
-      console.log("[MPC] Checking BTC liquidity for address:", btcAddress);
+      // console.log("[MPC] Checking BTC liquidity for address:", btcAddress);
       balance = await BTCHelper.getBTCBalance(btcAddress);
       balance = parseFloat(balance) || 0;
       
@@ -459,16 +459,16 @@ export const checkLiquidityAvailability = async (token1, token2 = null, rpcUrl =
       const required = requiredAmount ? parseFloat(requiredAmount) : minimumThreshold;
       
       // Log liquidity details
-      console.log("[MPC] ===== BTC Liquidity Check =====");
-      console.log("[MPC] Swap Type:", isCrossChain ? `Cross-Chain (${token1?.coinSymbol} → BTC)` : "Same-Chain");
-      console.log("[MPC] Available Liquidity:", balance, "BTC");
-      console.log("[MPC] Required Liquidity:", required, "BTC");
-      console.log("[MPC] Minimum Threshold:", minimumThreshold, "BTC");
-      console.log("[MPC] Liquidity Status:", balance >= required ? "SUFFICIENT" : "INSUFFICIENT");
+      // console.log("[MPC] ===== BTC Liquidity Check =====");
+      // console.log("[MPC] Swap Type:", isCrossChain ? `Cross-Chain (${token1?.coinSymbol} → BTC)` : "Same-Chain");
+      // console.log("[MPC] Available Liquidity:", balance, "BTC");
+      // console.log("[MPC] Required Liquidity:", required, "BTC");
+      // console.log("[MPC] Minimum Threshold:", minimumThreshold, "BTC");
+      // console.log("[MPC] Liquidity Status:", balance >= required ? "SUFFICIENT" : "INSUFFICIENT");
       if (balance < required) {
-        console.log("[MPC] Shortfall:", (required - balance), "BTC");
+        // console.log("[MPC] Shortfall:", (required - balance), "BTC");
       }
-      console.log("[MPC] ===============================");
+      // console.log("[MPC] ===============================");
       
       // Consider liquidity available if balance >= required amount
       hasLiquidity = balance >= required;
@@ -477,14 +477,14 @@ export const checkLiquidityAvailability = async (token1, token2 = null, rpcUrl =
       // Check ETH/TICS network address balance
       const ethAddress = networkAddresses?.eth_address;
       if (!ethAddress) {
-        console.warn("[MPC] ETH network address not found");
+        // console.warn("[MPC] ETH network address not found");
         return {
           available: false,
           message: "Network address not available. Please try again later.",
         };
       }
       
-      console.log("[MPC] Checking EVM liquidity for address:", ethAddress);
+      // console.log("[MPC] Checking EVM liquidity for address:", ethAddress);
       
       if (tokenToCheck?.isToken && tokenToCheck?.tokenAddress) {
         // Check token balance
@@ -508,23 +508,23 @@ export const checkLiquidityAvailability = async (token1, token2 = null, rpcUrl =
       const required = requiredAmount ? parseFloat(requiredAmount) : minimumThreshold;
       
       // Log liquidity details
-      console.log("[MPC] ===== EVM Liquidity Check =====");
-      console.log("[MPC] Swap Type:", isCrossChain ? `Cross-Chain (${token1?.coinSymbol} → ${tokenSymbol})` : "Same-Chain");
-      console.log("[MPC] Token Symbol:", tokenSymbol);
-      console.log("[MPC] Available Liquidity:", balance, tokenSymbol);
-      console.log("[MPC] Required Liquidity:", required, tokenSymbol);
-      console.log("[MPC] Minimum Threshold:", minimumThreshold, tokenSymbol);
-      console.log("[MPC] Liquidity Status:", balance >= required ? "SUFFICIENT" : "INSUFFICIENT");
+      // console.log("[MPC] ===== EVM Liquidity Check =====");
+      // console.log("[MPC] Swap Type:", isCrossChain ? `Cross-Chain (${token1?.coinSymbol} → ${tokenSymbol})` : "Same-Chain");
+      // console.log("[MPC] Token Symbol:", tokenSymbol);
+      // console.log("[MPC] Available Liquidity:", balance, tokenSymbol);
+      // console.log("[MPC] Required Liquidity:", required, tokenSymbol);
+      // console.log("[MPC] Minimum Threshold:", minimumThreshold, tokenSymbol);
+      // console.log("[MPC] Liquidity Status:", balance >= required ? "SUFFICIENT" : "INSUFFICIENT");
       if (balance < required) {
-        console.log("[MPC] Shortfall:", (required - balance), tokenSymbol);
+        // console.log("[MPC] Shortfall:", (required - balance), tokenSymbol);
       }
-      console.log("[MPC] ===============================");
+      // console.log("[MPC] ===============================");
       
       // Consider liquidity available if balance >= required amount
       hasLiquidity = balance >= required;
       
     } else {
-      console.warn("[MPC] Unsupported chain type for liquidity check");
+      // console.warn("[MPC] Unsupported chain type for liquidity check");
       // For unsupported chains, assume liquidity is available
       return {
         available: true,
@@ -534,8 +534,8 @@ export const checkLiquidityAvailability = async (token1, token2 = null, rpcUrl =
     
     if (!hasLiquidity) {
       const required = requiredAmount ? parseFloat(requiredAmount) : minimumThreshold;
-      console.error("[MPC] ❌ INSUFFICIENT LIQUIDITY");
-      console.error("[MPC] Available:", balance, "| Required:", required, "| Shortfall:", (required - balance));
+      // console.error("[MPC] ❌ INSUFFICIENT LIQUIDITY");
+      // console.error("[MPC] Available:", balance, "| Required:", required, "| Shortfall:", (required - balance));
       
       return {
         available: false,
@@ -546,7 +546,7 @@ export const checkLiquidityAvailability = async (token1, token2 = null, rpcUrl =
       };
     }
     
-    console.log("[MPC] ✅ SUFFICIENT LIQUIDITY - Proceeding with transaction");
+    // console.log("[MPC] ✅ SUFFICIENT LIQUIDITY - Proceeding with transaction");
     return {
       available: true,
       message: "Liquidity available",
@@ -554,7 +554,7 @@ export const checkLiquidityAvailability = async (token1, token2 = null, rpcUrl =
       required: requiredAmount ? parseFloat(requiredAmount) : minimumThreshold,
     };
   } catch (error) {
-    console.error("[MPC] Error checking liquidity:", error?.message || error);
+    // console.error("[MPC] Error checking liquidity:", error?.message || error);
     // On error, don't block the transaction - assume liquidity is available
     return {
       available: true,

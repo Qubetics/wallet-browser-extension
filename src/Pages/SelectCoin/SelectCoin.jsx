@@ -62,7 +62,7 @@ function SelectCoin() {
       );
       return response?.data?.data?.fiatCoinPrice?.value || 0;
     } catch (error) {
-      console.error(`Error fetching price for coin family ${coinFamily}:`, error);
+      // console.error(`Error fetching price for coin family ${coinFamily}:`, error);
       return 0;
     }
   };
@@ -71,7 +71,7 @@ function SelectCoin() {
   const fetchMpcBalance = async (coin, mpcAddresses) => {
     try {
       if (!coin || !mpcAddresses) {
-        console.warn("Missing coin or MPC addresses for balance fetch");
+        // console.warn("Missing coin or MPC addresses for balance fetch");
         return 0;
       }
   
@@ -79,23 +79,23 @@ function SelectCoin() {
       let mpcAddress;
       if (coin?.coinFamily === 3) {
         mpcAddress = mpcAddresses?.btc;
-        console.log(`Using BTC MPC address for ${coin.symbol}:`, mpcAddress);
+        // console.log(`Using BTC MPC address for ${coin.symbol}:`, mpcAddress);
       } else if (coin?.coinFamily === 7) {
         mpcAddress = mpcAddresses?.eth;
-        console.log(`Using TICS MPC address for ${coin.symbol}:`, mpcAddress);
+        // console.log(`Using TICS MPC address for ${coin.symbol}:`, mpcAddress);
       } else {
-        console.warn("Unknown coin family for coin:", coin);
+        // console.warn("Unknown coin family for coin:", coin);
         return 0;
       }
   
       if (!mpcAddress) {
-        console.warn("No MPC address available for this coin type");
+        // console.warn("No MPC address available for this coin type");
         return 0;
       }
   
-      console.log(`Fetching MPC balance for ${coin.symbol} at ${mpcAddress}`);
-      console.log("Coin RPC:", coin.rpc);
-      console.log("Coin coinFamily:", coin.coinFamily);
+      // console.log(`Fetching MPC balance for ${coin.symbol} at ${mpcAddress}`);
+      // console.log("Coin RPC:", coin.rpc);
+      // console.log("Coin coinFamily:", coin.coinFamily);
   
       if (coin?.coinFamily === 7) {
         // EVM chain (TICS)
@@ -103,7 +103,7 @@ function SelectCoin() {
           mpcAddress,
           coin.rpc
         );
-        console.log(`MPC EVM native balance for ${coin.symbol}:`, balance);
+        // console.log(`MPC EVM native balance for ${coin.symbol}:`, balance);
   
         if (balance === false || !balance) {
           return 0;
@@ -117,15 +117,15 @@ function SelectCoin() {
         return balanceNum || 0;
       } else if (coin?.coinFamily === 3) {
         // Fetch BTC balance
-        console.log("Fetching BTC balance for address:", mpcAddress);
+        // console.log("Fetching BTC balance for address:", mpcAddress);
         const balance = await BTCHelper.getBTCBalance(mpcAddress);
-        console.log(`MPC BTC balance:`, balance);
+        // console.log(`MPC BTC balance:`, balance);
         return parseFloat(balance) || 0;
       }
   
       return 0;
     } catch (error) {
-      console.error("Error fetching MPC balance:", error);
+      // console.error("Error fetching MPC balance:", error);
       return 0;
     }
   };
@@ -146,7 +146,7 @@ function SelectCoin() {
       }
       return null;
     } catch (error) {
-      console.error("Error fetching MPC address:", error);
+      // console.error("Error fetching MPC address:", error);
       return null;
     }
   };
@@ -186,7 +186,7 @@ function SelectCoin() {
               mainAccountAddress,
               selectedCoin.rpc
             );
-            console.log(`Main account EVM balance for ${selectedCoin.symbol}:`, balance);
+            // console.log(`Main account EVM balance for ${selectedCoin.symbol}:`, balance);
             
             if (balance && balance !== false) {
               const balanceNum =
@@ -198,11 +198,11 @@ function SelectCoin() {
           } else if (selectedCoin.coinFamily === 3) {
             // BTC - fetch from main account
             const balance = await BTCHelper.getBTCBalance(mainAccountAddress);
-            console.log(`Main account BTC balance:`, balance);
+            // console.log(`Main account BTC balance:`, balance);
             actualBalance = parseFloat(balance).toFixed(8);
           }
           
-          console.log('Actual balance from main account:', actualBalance);
+          //  console.log('Actual balance from main account:', actualBalance);
           
           navigate("/sendCurrency", {
             state: {
@@ -226,14 +226,14 @@ function SelectCoin() {
             }
           });
         } else {
-          console.error("Addresses not found:", {
-            mpcAddress,
-            mainAccountAddress,
-            coinFamily: selectedCoin.coinFamily
-          });
+          // console.error("Addresses not found:", {
+          //   mpcAddress,
+          //   mainAccountAddress,
+          //   coinFamily: selectedCoin.coinFamily
+          // });
         }
       } catch (error) {
-        console.error("Error getting addresses:", error);
+        // console.error("Error getting addresses:", error);
       }
     } else if (type === "external") {
       // If External is selected, redirect to external receive screen
@@ -253,11 +253,11 @@ function SelectCoin() {
         
         // Get MPC addresses
         const storedMpc = await getStoredMpcAddresses();
-        console.log("Stored MPC addresses:", storedMpc);
+        // console.log("Stored MPC addresses:", storedMpc);
         setMpcAddresses(storedMpc);
 
         if (!storedMpc?.eth || !storedMpc?.btc) {
-          console.warn("MPC addresses not available");
+          // console.warn("MPC addresses not available");
           setLoading(false);
           return;
         }
@@ -271,8 +271,8 @@ function SelectCoin() {
                 fetchCoinPrice(coin.coinFamily)
               ]);
               
-              console.log(`Fetched balance for ${coin.symbol}:`, balance);
-              console.log(`Fetched price for ${coin.symbol}:`, price);
+              // console.log(`Fetched balance for ${coin.symbol}:`, balance);
+              // console.log(`Fetched price for ${coin.symbol}:`, price);
               
               // Calculate USD value using real price
               const usdValue = balance * price;
@@ -283,7 +283,7 @@ function SelectCoin() {
                 usdValue: `$${usdValue.toFixed(2)}`
               };
             } catch (error) {
-              console.error(`Error fetching balance for ${coin.symbol}:`, error);
+              // console.error(`Error fetching balance for ${coin.symbol}:`, error);
               return coin; // Return original coin data if balance fetch fails
             }
           })
@@ -293,7 +293,7 @@ function SelectCoin() {
         setSelectedCoin(updatedCoins[0]); // Update selected coin with real data
         setLoading(false);
       } catch (error) {
-        console.error("Error fetching real balances:", error);
+        // console.error("Error fetching real balances:", error);
         setLoading(false);
       }
     };

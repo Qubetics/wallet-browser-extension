@@ -380,7 +380,7 @@ export const ExternalConnection = () => {
     );
   };
   const handleResponse = async (result, error) => {
-    console.log('HANDLE RESPOSNE');
+    // console.log('HANDLE RESPOSNE');
     // await chrome.storage.session.set({ isApproved: true });
     const { isApproved } = await chrome.storage.local.get('isApproved');
     // console.log(
@@ -398,7 +398,7 @@ export const ExternalConnection = () => {
   };
 
   const handleTransaction = async (defaultAddressPhrase) => {
-    console.log('HANDLE TRANSACTION', defaultAddressPhrase);
+    // console.log('HANDLE TRANSACTION', defaultAddressPhrase);
     try {
       store.dispatch(setLoading(true));
       if (data.network === 'solana') {
@@ -493,7 +493,7 @@ export const ExternalConnection = () => {
             data.nodeUrl
           );
           if (response) {
-            console.log('RESPO: delegatorBondMoreFunds::', response);
+            // console.log('RESPO: delegatorBondMoreFunds::', response);
             handleResponse({ type: 'success', data: response });
             store.dispatch(setLoading(false));
             return;
@@ -578,13 +578,13 @@ export const ExternalConnection = () => {
             handleResponse(res);
           })
           .catch((error) => {
-            console.log('ERRRRRRRRRRR ', error);
+            // console.log('ERRRRRRRRRRR ', error);
             messageApi.error('Something went wrong');
             return;
           });
       } else {
         const gasLimit = Web3.utils.toDecimal(data.gas);
-        console.log('gasLimit TRX ', gasLimit);
+        // console.log('gasLimit TRX ', gasLimit);
         const { chains } = await chrome.storage.local.get('chains');
         const myDefaultChain = chains.find((el) => el.default);
         const symbol =
@@ -618,13 +618,13 @@ export const ExternalConnection = () => {
             sessionPassword
           );
 
-        console.log(
-          '🚀 ~ file: ExternalConnections.jsx:105 ~ handleTransaction ~ hash:',
-          hash
-        );
+        // console.log(
+        //   '🚀 ~ file: ExternalConnections.jsx:105 ~ handleTransaction ~ hash:',
+        //   hash
+        // );
 
         if (hash.error) {
-          console.log('error', hash.error);
+          // console.log('error', hash.error);
           store.dispatch(setLoading(false));
           return message.error(hash.error);
         }
@@ -632,7 +632,7 @@ export const ExternalConnection = () => {
         handleResponse(hash);
       }
     } catch (error) {
-      console.log('error while doing transaction ', error);
+      // console.log('error while doing transaction ', error);
     }
   };
 
@@ -653,7 +653,7 @@ export const ExternalConnection = () => {
         handleResponse(true);
       }
     } catch (error) {
-      console.log('Error BB ', error);
+      // console.log('Error BB ', error);
     }
   };
   useEffect(() => {
@@ -918,7 +918,7 @@ export const ExternalConnection = () => {
                       <ButtonComp
                         maxWidth="100%"
                         onClick={async () => {
-                          console.log('REJECTED 1');
+                          // console.log('REJECTED 1');
                           handleResponse(null);
                         }}
                         text="Reject"

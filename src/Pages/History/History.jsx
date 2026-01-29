@@ -138,7 +138,7 @@ function History() {
         }
       }
     } catch (error) {
-      console.error('Error fetching transaction list:', error);
+      // console.error('Error fetching transaction list:', error);
       
       // Stop skeleton loader immediately on error
       if (type === 'chain_abstraction') {

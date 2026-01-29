@@ -59,7 +59,7 @@ function HistoryListOuter(props) {
   const updateIntentStatus = async (coinFamily, intentHash, status) => {
     try {
       const urlPath = getCoinFamilyUrl(coinFamily);
-      console.log("Updating intent status:", { urlPath, intentHash, status });
+      // console.log("Updating intent status:", { urlPath, intentHash, status });
 
       const data = {
         tx_hash: intentHash,
@@ -74,16 +74,16 @@ function HistoryListOuter(props) {
         }
       );
       
-      console.log("Update intent status response:", response);
+      // console.log("Update intent status response:", response);
       return response;
     } catch (error) {
-      console.error("Error updating intent status:", error);
+      // console.error("Error updating intent status:", error);
       throw error?.message || "Failed to update transaction status";
     }
   };
 
   const updateExp = async (e) => {
-    console.log("Transaction data:", allData);
+    // console.log("Transaction data:", allData);
     e.preventDefault();
 
     // Prevent multiple simultaneous updates
@@ -111,7 +111,7 @@ function HistoryListOuter(props) {
           transactionHash
         );
         
-        console.log("Poll intent status response:", response?.data);
+        // console.log("Poll intent status response:", response?.data);
 
         if (!response?.data) {
           return messageApi.error("Unable to fetch transaction status");
@@ -140,7 +140,7 @@ function HistoryListOuter(props) {
             );
             // messageApi.success("Transaction status updated");
           } catch (updateError) {
-            console.error("Error updating backend status:", updateError);
+            // console.error("Error updating backend status:", updateError);
             // Don't block showing modal if update fails
           }
         }
@@ -148,7 +148,7 @@ function HistoryListOuter(props) {
         // Show the processing modal
         setIsProcessModal(true);
       } catch (error) {
-        console.error("Error fetching transaction status:", error);
+        // console.error("Error fetching transaction status:", error);
         messageApi.error("Failed to fetch transaction status");
       } finally {
         setIsUpdating(false);
@@ -304,7 +304,7 @@ function HistoryListOuter(props) {
         setTransactionResult={setTransactionResult}
         loader={false}
         onClose={() => {
-          console.log("Modal was closed!");
+          // console.log("Modal was closed!");
           setTransactionResult({
             hash: "",
             fee: "",

@@ -32,10 +32,10 @@ function AddPriceAlert() {
   const [open, setOpen] = useState(false);
   const [keyword, setKeyword] = useState(null);
   const { state } = useLocation();
-  console.log(
-    '🚀 ~ file: AddPriceAlert.jsx:34 ~ AddPriceAlert ~ state:',
-    state
-  );
+    // console.log(
+    //   '🚀 ~ file: AddPriceAlert.jsx:34 ~ AddPriceAlert ~ state:',
+    //   state
+    // );
 
   const [tokens, setTokens] = useState([]);
   const [selectedToken, setSelectedToken] = useState(null);
@@ -127,7 +127,7 @@ function AddPriceAlert() {
     } catch (error) {
       store.dispatch(setLoading(false));
 
-      console.log(error);
+      // console.log(error);
     }
   };
 

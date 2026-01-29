@@ -45,7 +45,7 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
   const fetchAccounts = async () => {
     const { accounts } = await chrome.storage.session.get("accounts");
 
-    console.log("ACCOUNT DEFAULT :", accounts);
+    // console.log("ACCOUNT DEFAULT :", accounts);
 
     const items = accounts.flatMap((account, index) => {
       const accountItem = {
@@ -71,7 +71,7 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
       return [accountItem];
     });
 
-    console.log("ACCOUNT SET IN WALLET :", items);
+    // console.log("ACCOUNT SET IN WALLET :", items);
     setAccounts(items);
   };
 
@@ -96,7 +96,7 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
       }
     });
 
-    console.log("total", total);
+    // console.log("total", total);
     setTotal(total);
   };
 
@@ -217,7 +217,7 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
         const formattedResult = getFlooredFixed(result.toString(), 2);
         setFiatValue(formattedResult);
       } catch (error) {
-        console.log(error, "error");
+        // console.log(error, "error");
       }
     }
   }, []);

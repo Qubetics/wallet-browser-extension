@@ -177,14 +177,14 @@ function SwapDetails() {
             'Unable to fetch approval amount. Please try again later.'
           );
         }
-        console.log('approvedAmount>>>', approvedAmount);
+        // console.log('approvedAmount>>>', approvedAmount);
         const approvedAmountBig = new BigNumber(approvedAmount._hex);
-        console.log('approvedAmountBig>>>', approvedAmountBig);
+        // console.log('approvedAmountBig>>>', approvedAmountBig);
         const amountBig = new BigNumber(amount);
-        console.log(amountBig);
+        // console.log(amountBig);
 
         if (approvedAmountBig.isGreaterThan(amountBig)) {
-          console.log('Inside Here');
+          // console.log('Inside Here');
           setRequireApproval(false);
           setApprovalConfirmed(true);
           setLoading(false);
@@ -198,7 +198,7 @@ function SwapDetails() {
       // console.log("END OF FUNCTION");
       setLoading(false);
     } catch (error) {
-      console.log('Swap error : ', error);
+      // console.log('Swap error : ', error);
       setLoading(false);
       return messageApi.error('Something went wrong');
     }
@@ -337,7 +337,7 @@ function SwapDetails() {
         setIsModalOpen1(true);
       }
     } catch (error) {
-      console.log('Confirm transaction error : ', error);
+      // console.log('Confirm transaction error : ', error);
     }
   };
 

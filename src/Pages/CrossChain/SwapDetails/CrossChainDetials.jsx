@@ -105,7 +105,7 @@ function CrossChainDetails() {
   }, []);
 
   const handleSwap = async () => {
-    console.log('sessionPassword   handleSwap', sessionPassword);
+    // console.log('sessionPassword   handleSwap', sessionPassword);
     setSwapModal(true);
     const data = await crossChainHelper.current.sendOrder(
       token1,

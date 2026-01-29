@@ -42,7 +42,7 @@ function ConfirmMultiShowSecretPhrase() {
     setBlankArray(data);
   };
 
-  console.log("here here here");
+  // console.log("here here here");
 
   return (
     <>

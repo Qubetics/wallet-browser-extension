@@ -27,7 +27,7 @@ function CoinsTable({ dataArray, showCoinPrice, name }) {
   const [selectedCoin, setSelectedCoin] = useState(null);
 
   const handleClick = (ele) => {
-    console.log('crypto element clicked:', ele);
+    // console.log('crypto element clicked:', ele);
 
     let routes = Object.keys(ele).includes('routeTo');
 

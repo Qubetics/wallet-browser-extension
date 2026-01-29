@@ -133,12 +133,12 @@ function SendCoins() {
     let gasLimit = Math.round(result?.data?.data?.buffered_gas_estimate * 3.2);
     let stdFee = calculateFee(gasLimit, gasPriceLocal);
 
-    console.log(
-      'buffered gasLimit, gasEstimate, gasPriceLocal, stdFee',
-      gasLimit,
-      gasPriceLocal,
-      stdFee
-    );
+    // console.log(
+    //   'buffered gasLimit, gasEstimate, gasPriceLocal, stdFee',
+    //   gasLimit,
+    //   gasPriceLocal,
+    //   stdFee
+    // );
 
     const numerator = BigInt(stdFee['amount'][0]['amount']);
     const denominator = BigInt('1000000000000000000');
@@ -170,7 +170,7 @@ function SendCoins() {
   }, []);
 
   useEffect(() => {
-    console.log('backFromConfirm', backFromConfirm);
+    // console.log('backFromConfirm', backFromConfirm);
     // Only skip chain selection modal when coming from chain abstraction
     if (loading !== null && coin?.coin?.coin_family === 7 && !backFromConfirm && fromChainAbstraction) {
       setSessionPassword('');
@@ -794,7 +794,7 @@ function SendCoins() {
           },
         });
       } catch (error) {
-        console.log('SOL Transaction Error:', error);
+        // console.log('SOL Transaction Error:', error);
         return stopWithError(error.message || 'Transaction failed.');
       }
     } else if (!chain.isEVM && chain.currencyName === 'BTC') {
@@ -920,7 +920,7 @@ function SendCoins() {
         });
       } catch (error) {
         store.dispatch(setLoading(false));
-        console.log('BTC Transaction Error:', error);
+        // console.log('BTC Transaction Error:', error);
 
         return messageApi.error(
           error.message.includes('Dust amount')
@@ -998,7 +998,7 @@ function SendCoins() {
           });
         }
       } catch (error) {
-        console.log('~ sendcoin.jsx ~ handleSend ~ 848 error ~:', error);
+        // console.log('~ sendcoin.jsx ~ handleSend ~ 848 error ~:', error);
       }
     }
   };
@@ -1337,7 +1337,7 @@ function SendCoins() {
         <div>
           <ButtonComp
             onClick={() => {
-              console.log('coin', coin);
+              // console.log('coin', coin);
               if (!address) {
                 return messageApi.error('Please enter a valid address.');
               }
@@ -1509,7 +1509,7 @@ function SendCoins() {
               ]}
               value={selectChain}
               onChange={(value) => {
-                console.log('selected chain value', value);
+                // console.log('selected chain value', value);
                 setSelectChain(value);
               }}
               popupClassName="filterHistoryDropdown"

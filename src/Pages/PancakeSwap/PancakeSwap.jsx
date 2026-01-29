@@ -104,28 +104,28 @@ function PancakeSwap() {
         const web3Helper = new Web3Helper(chain.rpcUrl);
 
         const address = account.address; // Replace with the user's wallet address
-        console.log(
-          '🚀 ~ file: SendCoins.jsx:187 ~ onClick={ ~ address:',
-          address
-        );
+        // console.log(
+        //   '🚀 ~ file: SendCoins.jsx:187 ~ onClick={ ~ address:',
+        //   address
+        // );
         const balance = await web3Helper.web3.eth.getBalance(address);
-        console.log(
-          '🚀 ~ file: SendCoins.jsx:191 ~ onClick={ ~ balance:',
-          balance
-        );
+        // console.log(
+        //   '🚀 ~ file: SendCoins.jsx:191 ~ onClick={ ~ balance:',
+        //   balance
+        // );
 
         const amountToSend = new BigNumber(balance)
           .times(percentage)
           .integerValue(BigNumber.ROUND_DOWN)
           .div(100);
-        console.log(
-          '🚀 ~ file: SendCoins.jsx:145 ~ amountToSend:',
-          amountToSend
-        );
+        // console.log(
+        //   '🚀 ~ file: SendCoins.jsx:145 ~ amountToSend:',
+        //   amountToSend
+        // );
 
         // Get the current gas price
         const gasPrice = await web3Helper.web3.eth.getGasPrice();
-        console.log('🚀 ~ file: SendCoins.jsx:200 ~ gasPrice:', gasPrice);
+        // console.log('🚀 ~ file: SendCoins.jsx:200 ~ gasPrice:', gasPrice);
 
         if (!gasPrice) {
           store.dispatch(externalLoading(false));
@@ -134,40 +134,40 @@ function PancakeSwap() {
 
         // Estimate the gas cost for a sample transaction
         const gasLimit = 21000; // Assuming a standard transaction
-        console.log('🚀 ~ file: SendCoins.jsx:212 ~ gasLimit:', gasLimit);
+        // console.log('🚀 ~ file: SendCoins.jsx:212 ~ gasLimit:', gasLimit);
         const gasCost = new BigNumber(gasPrice).times(gasLimit);
-        console.log(
-          '🚀 ~ file: SendCoins.jsx:216 ~ gasCost:',
-          gasCost.toString()
-        );
+        // console.log(
+        //   '🚀 ~ file: SendCoins.jsx:216 ~ gasCost:',
+        //   gasCost.toString()
+        // );
 
         // Apply the buffer factor to the gas cost
         const bufferedGasCost = gasCost.times(2.5);
-        console.log(
-          '🚀 ~ file: SendCoins.jsx:222 ~ bufferedGasCost:',
-          bufferedGasCost.toString()
-        );
+        // console.log(
+        //   '🚀 ~ file: SendCoins.jsx:222 ~ bufferedGasCost:',
+        //   bufferedGasCost.toString()
+        // );
 
         // Subtract the buffered gas cost from the maximum BNB
         const maxBNBAfterGas = new BigNumber(amountToSend).minus(
           bufferedGasCost
         );
-        console.log(
-          '🚀 ~ file: SendCoins.jsx:228 ~ maxBNBAfterGas:',
-          maxBNBAfterGas.toString()
-        );
+        // console.log(
+        //   '🚀 ~ file: SendCoins.jsx:228 ~ maxBNBAfterGas:',
+        //   maxBNBAfterGas.toString()
+        // );
 
         if (maxBNBAfterGas.isNegative()) {
           store.dispatch(externalLoading(false));
           return messageApi.error('Insufficient balance to cover gas fee.');
         }
 
-        console.log(
-          `Max BNB after deducting gas fee (with buffer): ${web3Helper.web3.utils.fromWei(
-            maxBNBAfterGas.integerValue(BigNumber.ROUND_DOWN).toString(),
-            'ether'
-          )}`
-        );
+        // console.log(
+        //   `Max BNB after deducting gas fee (with buffer): ${web3Helper.web3.utils.fromWei(
+        //     maxBNBAfterGas.integerValue(BigNumber.ROUND_DOWN).toString(),
+        //     'ether'
+        //   )}`
+        // );
 
         setAount(
           web3Helper.web3.utils.fromWei(
@@ -272,7 +272,7 @@ function PancakeSwap() {
         setToken2(cakeToken2);
       }
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       messageApi.error(
         'Unable to perform swap currently. Please try again later.'
       );
@@ -291,7 +291,7 @@ function PancakeSwap() {
   };
 
   useEffect(() => {
-    console.log(useRef, 'useRef');
+    // console.log(useRef, 'useRef');
     handleTokensSwapChangePosition();
     if (amount) {
       if (timeOutId.current) {
@@ -370,13 +370,13 @@ function PancakeSwap() {
         setAount(null);
         setPercent(null);
         updateRef.current = false;
-        console.log(updateRef, 'second');
+        // console.log(updateRef, 'second');
       }
     }
   };
 
   const handleInputChange = async () => {
-    console.log(updateRef.current, 'updateRef.current');
+    // console.log(updateRef.current, 'updateRef.current');
     if (updateRef.current) {
       if (amount > 0 && amount && token2) {
         if (token1.symbol === 'BNB' && token2.symbol === 'WBNB') {
@@ -954,7 +954,7 @@ function PancakeSwap() {
                             : '#000',
                       }}
                       onClick={() => {
-                        console.log('clicking on the token.......');
+                        // console.log('clicking on the token.......');
 
                         if (token1.id == token.id || token2.id == token.id) {
                           setOpen(false);

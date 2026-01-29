@@ -20,7 +20,7 @@ export class Web3Helper {
       }
       return ethers.utils.isAddress(address);
     } catch (error) {
-      console.error('ETH address validation error:', error);
+      // console.error('ETH address validation error:', error);
       return false;
     }
   };
@@ -102,12 +102,12 @@ export class Web3Helper {
     symbol
   ) => {
     const { account } = store.getState();
-    console.log('slug', slug);
-    console.log('toAddress', toAddress);
-    console.log('fromAddress', fromAddress);
-    console.log('isToken', isToken);
-    console.log('tokenAddress', tokenAddress);
-    console.log('symbol', symbol);
+    // console.log('slug', slug);
+    // console.log('toAddress', toAddress);
+    // console.log('fromAddress', fromAddress);
+    // console.log('isToken', isToken);
+    // console.log('tokenAddress', tokenAddress);
+    // console.log('symbol', symbol);
     try {
       slug = slug == 'matic' ? 'polygon' : slug == 'tics' ? 'qubetics' : slug;
       if (slug == 'qubetics') {
@@ -174,7 +174,7 @@ export class Web3Helper {
       const provider = new ethers.providers.JsonRpcProvider(rpc);
       const contract = new ethers.Contract(tokenAddress, ABI, provider);
       const approvedAmount = await contract.allowance(owner, spender);
-      console.log('approvedAmount', approvedAmount);
+      // console.log('approvedAmount', approvedAmount);
       return approvedAmount;
     } catch (error) {
       return false;
@@ -322,10 +322,10 @@ export class Web3Helper {
       const inputAmount = bigNumber
         .dividedBy(new BigNumber(10).pow(decimals))
         .toString();
-      console.log(
-        '🚀 ~ Web3Helper ~ getTokenBalance= ~ inputAmount:',
-        inputAmount
-      );
+      // console.log(
+      //   '🚀 ~ Web3Helper ~ getTokenBalance= ~ inputAmount:',
+      //   inputAmount
+      // );
 
       return inputAmount;
     } catch (error) {
@@ -362,24 +362,24 @@ export class Web3Helper {
     orderId,
     sessionPassword
   ) => {
-    console.log('RAW TRANSACTION COIN CASE :', {
-      to,
-      from,
-      amount,
-      coinId,
-      fiatPrice,
-      networkFeeInFiat,
-      fiatType,
-      contact,
-      slug,
-      chainId,
-      symbol,
-      rpc,
-      type,
-      gasPriceType,
-      orderId,
-      sessionPassword,
-    });
+    // console.log('RAW TRANSACTION COIN CASE :', {
+    //   to,
+    //   from,
+    //   amount,
+    //   coinId,
+    //   fiatPrice,
+    //   networkFeeInFiat,
+    //   fiatType,
+    //   contact,
+    //   slug,
+    //   chainId,
+    //   symbol,
+    //   rpc,
+    //   type,
+    //   gasPriceType,
+    //   orderId,
+    //   sessionPassword,
+    // });
 
     try {
       const { account } = store.getState();
@@ -389,7 +389,7 @@ export class Web3Helper {
       );
       
       if (!privateKey) {
-        console.log('INVALID PRIVATE KEY :');
+        // console.log('INVALID PRIVATE KEY :');
         return false;
       }
 
@@ -402,7 +402,7 @@ export class Web3Helper {
         symbol
       );
       const nonce = await this.getNonce(slug, false, null, symbol, from);
-      console.log('gasPriceRes.estimate', gasPriceRes.estimate);
+      // console.log('gasPriceRes.estimate', gasPriceRes.estimate);
 
       const gaslimit = Number(gasPriceRes.estimate) + 10000;
 
@@ -414,7 +414,7 @@ export class Web3Helper {
           : gasPriceRes.fast;
 
       const gasInEth = (gsFee * Math.pow(10, 9) * gaslimit) / Math.pow(10, 18);
-      console.log('🚀 ~ Web3Helper ~ gasInEth:', gasInEth);
+      // console.log('🚀 ~ Web3Helper ~ gasInEth:', gasInEth);
       const gasPrice =
         symbol == 'eth'
           ? Math.max(1.5 * gsFee * Math.pow(10, 9), 1e9)
@@ -445,18 +445,18 @@ export class Web3Helper {
         chainId: Number(chainId),
       };
 
-      console.log('TRANSACTION OBJECT : ', tx);
+      // console.log('TRANSACTION OBJECT : ', tx);
 
       const signedTransaction = await wallet.signTransaction(tx);
 
-      console.log('signedTransaction', signedTransaction);
+      // console.log('signedTransaction', signedTransaction);
 
       const gasPriceInWei = Math.max(gsFee, 1) * 1e9;
       const stringWithout0x = signedTransaction.startsWith('0x')
         ? signedTransaction.slice(2)
         : signedTransaction;
 
-      console.log('gaslimit', gaslimit);
+      // console.log('gaslimit', gaslimit);
 
       let payload = {
         nonce: nonce,
@@ -477,10 +477,10 @@ export class Web3Helper {
           Authorization: account.jwtToken,
         },
       });
-      console.log('🚀 ~ Web3Helper ~ response:', response);
+      // console.log('🚀 ~ Web3Helper ~ response:', response);
       return response.data.tx_hash;
     } catch (error) {
-      console.log('error occure----> ', error);
+      // console.log('error occure----> ', error);
       return false;
     }
   };
@@ -512,14 +512,14 @@ export class Web3Helper {
       value: web3s.utils.toWei('0', 'ether'),
       data: web3s.utils.toHex(data),
     };
-    console.log('transaction  gas estimation',transaction);
+    // console.log('transaction  gas estimation',transaction);
     return await web3s.eth
       .estimateGas(transaction)
       .then((gasEstimate) => {
         return gasEstimate * 3;
       })
       .catch((error) => {
-        console.error('Error estimating gas:', error);
+        // console.error('Error estimating gas:', error);
         return 21000 * 3;
       });
   };
@@ -544,39 +544,39 @@ export class Web3Helper {
     orderId,
     sessionPassword
   ) => {
-    console.log('RAW TXN FOR TOKEN:', {
-      to,
-      from,
-      amount,
-      coinId,
-      fiatPrice,
-      networkFeeInFiat,
-      fiatType,
-      contact,
-      slug,
-      chainId,
-      tokenAddress,
-      decimals,
-      symbol,
-      type,
-      coinFamily,
-      gasPriceType,
-      orderId,
-    });
+    // console.log('RAW TXN FOR TOKEN:', {
+    //   to,
+    //   from,
+    //   amount,
+    //   coinId,
+    //   fiatPrice,
+    //   networkFeeInFiat,
+    //   fiatType,
+    //   contact,
+    //   slug,
+    //   chainId,
+    //   tokenAddress,
+    //   decimals,
+    //   symbol,
+    //   type,
+    //   coinFamily,
+    //   gasPriceType,
+    //   orderId,
+    // });
     try {
       const { account } = store.getState();
-      console.log(' rpc_chain(coinFamily)', rpc_chain(coinFamily),coinFamily);
+      // console.log(' rpc_chain(coinFamily)', rpc_chain(coinFamily),coinFamily);
       
       const provider = new ethers.providers.JsonRpcProvider(
         rpc_chain(coinFamily)
       );
-      console.log('provider',provider);
+      // console.log('provider',provider);
       
       const contract = new ethers.Contract(tokenAddress, ABI, provider);
       const { privateKey } = await WalletHelper.getPrivateKeyEvm(sessionPassword);
 
       if (!privateKey) {
-        console.log('INVALID PRIVATE KEY');
+        // console.log('INVALID PRIVATE KEY');
         return false;
       }
 
@@ -589,19 +589,19 @@ export class Web3Helper {
         symbol
       );
 
-      console.log('gasPriceRes',gasPriceRes);
+      // console.log('gasPriceRes',gasPriceRes);
       
 
       const nonce = await this.getNonce(slug, true, tokenAddress, symbol, from);
 
-      console.log('nonce',nonce);
+      // console.log('nonce',nonce);
       
       const data = contract.interface.encodeFunctionData('transfer', [
         to,
         new BigNumber(amount).multipliedBy(new BigNumber(decimals)).toFixed(0),
       ]);
 
-      console.log('data',data);
+      // console.log('data',data);
       
 
       const gsFee =
@@ -638,15 +638,15 @@ export class Web3Helper {
         chainId: Number(chainId),
       };
 
-      console.log('transaction',transaction);
+      // console.log('transaction',transaction);
       
 
       const wallet = new ethers.Wallet(privateKey, provider);
-      console.log('wallet',wallet);
+      // console.log('wallet',wallet);
       
       const signedTransaction = await wallet.signTransaction(transaction);
 
-      console.log('signedTransaction',signedTransaction);
+      // console.log('signedTransaction',signedTransaction);
       
       const gasPriceInWei = ethers.utils.parseUnits(
         gasPriceRes.fast.toString(),
@@ -681,10 +681,10 @@ export class Web3Helper {
       );
       return response.data.tx_hash;
     } catch (error) {
-      console.log(
-        'ethers helper error generateRawTransaction For TokenAndBroadcast ',
-        error
-      );
+      // console.log(
+      //   'ethers helper error generateRawTransaction For TokenAndBroadcast ',
+      //   error
+      // );
       return false;
     }
   };
@@ -712,29 +712,29 @@ export class Web3Helper {
   ) => {
     try {
       slug = slug == 'matic' ? 'polygon' : slug;
-      console.log(
-        'web3helper ~ SWAP PANCAKE ~ 1374 ~ row transaction for swap ',
-        {
-          to,
-          from,
-          amount,
-          coinId,
-          fiatPrice,
-          networkFeeInFiat,
-          fiatType,
-          contact,
-          slug,
-          chainId,
-          tokenAddress,
-          decimals,
-          tokenType,
-          data,
-          gasLimit,
-          coinFamily,
-          symbol,
-          sessionPassword,
-        }
-      );
+      // console.log(
+      //   'web3helper ~ SWAP PANCAKE ~ 1374 ~ row transaction for swap ',
+      //   {
+      //     to,
+      //     from,
+      //     amount,
+      //     coinId,
+      //     fiatPrice,
+      //     networkFeeInFiat,
+      //     fiatType,
+      //     contact,
+      //     slug,
+      //     chainId,
+      //     tokenAddress,
+      //     decimals,
+      //     tokenType,
+      //     data,
+      //     gasLimit,
+      //     coinFamily,
+      //     symbol,
+      //     sessionPassword,
+      //   }
+      // );
       const { account } = store.getState();
       const rpc =
         coinFamily == 1
@@ -751,7 +751,7 @@ export class Web3Helper {
       );
 
       if (!privateKey) {
-        console.log('INVALID PRIVATE KEY');
+        // console.log('INVALID PRIVATE KEY');
         return false;
       }
 
@@ -828,24 +828,24 @@ export class Web3Helper {
     tokenId,
     nftGasData
   ) => {
-    console.log({
-      sessionPassword,
-      to,
-      from,
-      amount,
-      coinId,
-      fiatPrice,
-      fiatType,
-      contact,
-      slug,
-      chainId,
-      tokenAddress,
-      tokenType,
-      orderId,
-      type,
-      tokenId,
-      nftGasData,
-    });
+    // console.log({
+    //   sessionPassword,
+    //   to,
+    //   from,
+    //   amount,
+    //   coinId,
+    //   fiatPrice,
+    //   fiatType,
+    //   contact,
+    //   slug,
+    //   chainId,
+    //   tokenAddress,
+    //   tokenType,
+    //   orderId,
+    //   type,
+    //   tokenId,
+    //   nftGasData,
+    // });
 
     try {
       const { account } = store.getState();
@@ -865,15 +865,15 @@ export class Web3Helper {
       }
 
       const gasPriceRes = nftGasData;
-      console.log('🚀 ~ Web3Helper ~ gasPriceRes:', gasPriceRes);
+      // console.log('🚀 ~ Web3Helper ~ gasPriceRes:', gasPriceRes);
       const gaslimits = gasPriceRes.estimate;
-      console.log('🚀 ~ Web3Helper ~ gaslimits:', gaslimits);
+      // console.log('🚀 ~ Web3Helper ~ gaslimits:', gaslimits);
       const gasPrice = gasPriceRes.fast * Math.pow(10, 9);
-      console.log('🚀 ~ Web3Helper ~ gasPrice:', gasPrice);
+      // console.log('🚀 ~ Web3Helper ~ gasPrice:', gasPrice);
       const nonce = await this.getNonce(slug, 1, tokenAddress, null, from);
-      console.log('🚀 ~ Web3Helper ~ nonce:', nonce);
+      // console.log('🚀 ~ Web3Helper ~ nonce:', nonce);
       const gaslimit = (gaslimits * 2).toFixed(0);
-      console.log('🚀 ~ Web3Helper ~ gaslimit:', gaslimit);
+      // console.log('🚀 ~ Web3Helper ~ gaslimit:', gaslimit);
 
       const transaction = {
         nonce,
@@ -885,13 +885,13 @@ export class Web3Helper {
         data: contract.methods.transferFrom(from, to, tokenId).encodeABI(),
         chainId,
       };
-      console.log({ transaction });
+      // console.log({ transaction });
 
       const signedTransaction = await web3.eth.accounts.signTransaction(
         transaction,
         privateKey
       );
-      console.log({ signedTransaction });
+      // console.log({ signedTransaction });
 
       const myResponse = await server.post(
         `${slug}/${tokenAddress}/send`,
@@ -919,11 +919,11 @@ export class Web3Helper {
         }
       );
 
-      console.log(myResponse, 'myResponsemyResponse');
+      //  console.log(myResponse, 'myResponsemyResponse');
 
       return myResponse.data.tx_hash;
     } catch (error) {
-      console.log(error);
+      // console.log(error);  
       return false;
     }
   };

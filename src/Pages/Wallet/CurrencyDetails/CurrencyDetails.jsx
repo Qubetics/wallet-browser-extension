@@ -54,14 +54,14 @@ function CurrencyDetails() {
   );
   
   // Debug logging to understand which path is taken
-  console.log('CurrencyDetails Debug:', {
-    hasCoinDetail: !!coinDetail,
-    hasCoin: !!coin,
-    hasFullCoinData: !!fullCoinData,
-    coinStructure: coin,
-    fullCoinDataStructure: fullCoinData,
-    tokensLength: tokens.length
-  });
+  // console.log('CurrencyDetails Debug:', {
+  //   hasCoinDetail: !!coinDetail,
+  //   hasCoin: !!coin,
+  //   hasFullCoinData: !!fullCoinData,
+  //   coinStructure: coin,
+  //   fullCoinDataStructure: fullCoinData,
+  //   tokensLength: tokens.length
+  // });
   const [isStared, setIsStared] = useState(
     coin?.coin?.watchlist_data && coin.coin.watchlist_data.status === '1'
       ? true
@@ -90,21 +90,21 @@ function CurrencyDetails() {
 
     // Validate required coin data before making API calls
     if (!coin?.wallet_address) {
-      console.error('Missing required coin data for API calls:', { coin });
+      // console.error('Missing required coin data for API calls:', { coin });
       messageApi.error('Missing coin data. Please try again.');
       return;
     }
 
     try {
       if (!fullCoinData) {
-        console.error('Could not find full coin data:', { coin, fullCoinData, tokens });
+        // console.error('Could not find full coin data:', { coin, fullCoinData, tokens });  
         messageApi.error('Coin data not found. Please try again.');
         return;
       }
 
       // Ensure we have the required fields for API calls
       if (!fullCoinData.coin?.coin_id) {
-        console.error('Missing coin_id in fullCoinData:', { fullCoinData });
+        // console.error('Missing coin_id in fullCoinData:', { fullCoinData });
         messageApi.error('Missing coin ID. Please try again.');
         return;
       }
@@ -124,11 +124,11 @@ function CurrencyDetails() {
         }
       );
 
-      console.log('coinDetail', coinDetail);
+      // console.log('coinDetail', coinDetail);
       setCrossChainDetail(coinDetail?.data?.data?.coin?.cross_chain_data);
       setIsGraphExist(coinDetail?.data?.graph?.length > 0 ? true : false);
     } catch (error) {
-      console.error('Error fetching coin details:', error);
+      // console.error('Error fetching coin details:', error);
       messageApi.error('Failed to load currency details. Please try again.');
       return;
     }
@@ -147,7 +147,7 @@ function CurrencyDetails() {
     }
 
 
-    console.log('cosmosAddress',cosmosAddress);
+    // console.log('cosmosAddress',cosmosAddress);
     
     const transactionList = await server.post(
       `/wallet/transaction/list`,
@@ -193,7 +193,7 @@ function CurrencyDetails() {
   // Re-run init when tokens are loaded (for direct navigation scenario)
   useEffect(() => {
     if (tokens.length > 0 && !fullCoinData && coin) {
-      console.log('Tokens loaded, re-running init...');
+      // console.log('Tokens loaded, re-running init...');
       init();
     }
   }, [tokens]);
@@ -220,7 +220,7 @@ function CurrencyDetails() {
       store.dispatch(setTokens([]));
       store.dispatch(setTokens(walletsList.data.data));
     } catch (error) {
-      console.log(error);
+      // console.log(error);
     } finally {
       store.dispatch(setLoading(false));
     }
@@ -239,7 +239,7 @@ function CurrencyDetails() {
 
   // If tokens array is empty, try to fetch it first
   if (tokens.length === 0) {
-    console.log('Tokens array is empty, fetching portfolio...');
+    // console.log('Tokens array is empty, fetching portfolio...');
     fetchPortfolio();
   }
 
@@ -316,7 +316,7 @@ function CurrencyDetails() {
           coin?.coin?.graph_pair || isGraphExist || coin?.coin?.graph_source
         }
         stared={async () => {
-          console.log('coin?.coin', coin, account);
+          // console.log('coin?.coin', coin, account);
           try {
             await server.post(
               'wallet/updateWatchlist',
@@ -457,7 +457,7 @@ function CurrencyDetails() {
                   value={selectedOption}
                   popupClassName="filterHistoryDropdown"
                   onChange={(value) => {
-                    console.log('value', value);
+                    // console.log('value', value);
                     setSelectedOption(value);
                   }}
                   options={options.map((option) => ({
