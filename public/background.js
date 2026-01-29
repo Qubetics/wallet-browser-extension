@@ -268,7 +268,6 @@ const networks = [
   //   slug: 'tics', 
   //   status: true, // ✅ Enable it if needed in app
   // }
-  
 ];
 
 const currency = {
