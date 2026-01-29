@@ -4,6 +4,7 @@ import { WindowPostMessageStream } from '@metamask/post-message-stream';
 const CONTENT_SCRIPT = 'qubetics-contentscript';
 const INPAGE = 'qubetics-inpage';
 
+
 // const injectScript = () => {
 //   try {
 //     if (window.top !== window) {
