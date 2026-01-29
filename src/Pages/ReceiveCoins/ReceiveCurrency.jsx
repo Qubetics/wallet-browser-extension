@@ -23,10 +23,10 @@ function ReceiveCurrency() {
   const [messageApi, contextHolder] = message.useMessage();
   const location = useLocation();
 
-  console.log(
-    'location state in receive currency detail:',
-    location?.state?.coin?.coin?.coin_family
-  );
+  // console.log(
+  //   'location state in receive currency detail:',
+  //   location?.state?.coin?.coin?.coin_family
+  // );
 
   useEffect(() => {
     const coin = {
@@ -43,8 +43,8 @@ function ReceiveCurrency() {
     if (location?.state?.coin?.coin?.coin_family === 7) {
       getCosmosAddress()
         .then((data) => {
-          console.log('log', data);
-          console.log('🚀 ~ useEffect ~ cosmos_address:', data);
+          // console.log('log', data);
+          // console.log('🚀 ~ useEffect ~ cosmos_address:', data);
           setOptions((prev) => [
             ...prev,
             {
@@ -56,7 +56,7 @@ function ReceiveCurrency() {
           setSelectedOption(location?.state?.coin?.wallet_address);
         })
         .catch((error) => {
-          console.log('error');
+          // console.log('error');
         });
     }
   }, []);
@@ -120,7 +120,7 @@ function ReceiveCurrency() {
                 value={selectedOption}
                 popupClassName="filterHistoryDropdown"
                 onChange={(value) => {
-                  console.log('value', value);
+                  // console.log('value', value);
                   setSelectedOption(value);
                 }}
                 options={options.map((option) => ({

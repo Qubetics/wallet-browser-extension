@@ -56,7 +56,7 @@ export class TranskHelper {
       };
     }
 
-    console.log(this.settings);
+    // console.log(this.settings);
     this.chainId = chainId;
   }
 
@@ -133,15 +133,15 @@ export class TranskHelper {
     account
   ) => {
     try {
-      console.log(
-        symbol,
-        type,
-        fiatAmount,
-        fiatType,
-        coin,
-        walletAddress,
-        account
-      );
+      // console.log(
+      //   symbol,
+      //   type,
+      //   fiatAmount,
+      //   fiatType,
+      //   coin,
+      //   walletAddress,
+      //   account
+      // );
 
       
       let payload = {
@@ -163,7 +163,7 @@ export class TranskHelper {
         client_ip: '1.2.3.4',
         coin_family: coin.coin_family,
       };
-      console.log('🚀 ~ TranskHelper ~ payload:', payload);
+      // console.log('🚀 ~ TranskHelper ~ payload:', payload);
       for (let key in payload) {
         if (payload[key] == null || payload[key] == '') {
           delete payload[key]; // Delete the key from the payload object
@@ -182,7 +182,7 @@ export class TranskHelper {
 
       return data?.data;
     } catch (error) {
-      console.log(error, 'alchemy');
+      // console.log(error, 'alchemy');
       return {
         status: 'error',
         message:

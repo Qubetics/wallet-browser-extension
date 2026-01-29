@@ -72,7 +72,7 @@ function ManageWallet() {
     setData(accounts);
     if (state?.from == 'myWallet') {
       let ids = [];
-      console.log('ACCCCCCCCCCCCCCCCCCCCC ', accounts);
+      // console.log('ACCCCCCCCCCCCCCCCCCCCC ', accounts);
       accounts.map((itm) => {
         ids.push(itm.userId);
       });
@@ -136,7 +136,7 @@ function ManageWallet() {
         }
         return el;
       });
-      console.log("🚀 ~ updatesMnemonics ~ updatesMnemonics:", updatesMnemonics)
+      // console.log("🚀 ~ updatesMnemonics ~ updatesMnemonics:", updatesMnemonics)
       const encryptedMnemonics = await SecurityHelper.encrypt(
         updatesMnemonics,
         sessionPassword
@@ -168,7 +168,7 @@ function ManageWallet() {
   };
 
   const handleShowPrivateKey = async (password) => {
-    console.log('PASSWORD ENTER TO SHOW PRIVATE KEY :',password)
+    // console.log('PASSWORD ENTER TO SHOW PRIVATE KEY :',password)
     const res = await WalletHelper.verifyPassword(password);
     if (!res) {
       return messageApi.error('Invalid Password');
@@ -203,7 +203,7 @@ function ManageWallet() {
     });
   };
 
-  console.log('delete modal', deleteModal);
+  // console.log('delete modal', deleteModal);
   return (
     <>
       {contextHolder}
@@ -536,7 +536,7 @@ function ManageWallet() {
                 state?.id ? state.id : selectedAccount.id
               );
 
-              console.log('updating', updating);
+              // console.log('updating', updating);
 
               if (!updating) {
                 return messageApi.error('Unable to update name at the moment.');
@@ -554,7 +554,7 @@ function ManageWallet() {
           <ButtonComp
             deletebordered
             onClick={async () => {
-              console.log(account, selectedAccount, 'OPEN DELETE POPUP');
+              // console.log(account, selectedAccount, 'OPEN DELETE POPUP');
               if (account.id === selectedAccount.id) {
                 return messageApi.error('Unable to delete default wallet.');
               }
@@ -799,7 +799,7 @@ function ManageWallet() {
                     selectedAccount.id,
                     account.address
                   );
-                  console.log("🚀 ~ customFunction={ ~ result:", result)
+                  // console.log("🚀 ~ customFunction={ ~ result:", result)
 
                   await WalletHelper.removeMnemonic(
                     selectedAccount.address,
@@ -808,9 +808,9 @@ function ManageWallet() {
                   setDrawer(false);
                   init();
                 } catch (e) {
-                  console.error('Error deleting wallet:', e);
+                  // console.error('Error deleting wallet:', e);
                 } finally {
-                  console.log('AFTER ALL ');
+                  // console.log('AFTER ALL ');
                   setSessionPassword(null);
                   setIsDeletePassModal(false);
                   setDeleteModal(false);
@@ -847,9 +847,9 @@ function ManageWallet() {
                   setDrawer(false);
                   init();
                 } catch (e) {
-                  console.error('Error deleting wallet:', e);
+                  // console.error('Error deleting wallet:', e);
                 } finally {
-                  console.log('AFTER ALL ');
+                  //  console.log('AFTER ALL ');
                   setSessionPassword(null);
                   setIsDeletePassModal(false);
                   setDeleteModal(false);

@@ -91,7 +91,7 @@ export class PancakeHelper {
       );
       return data.data
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       return false;
     }
   }
@@ -168,7 +168,7 @@ export class PancakeHelper {
 
       return response.data.tx_hash;
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       return false;
     }
   }
@@ -280,7 +280,7 @@ export class PancakeHelper {
 
       return response.data.tx_hash;
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       return false;
     }
   }
@@ -386,13 +386,13 @@ export class PancakeHelper {
 
       return response.data.tx_hash;
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       return false;
     }
   }
 
   async getGasEstimate(route, walletAddress, slippage) {
-    console.log("🚀 ~ PancakeHelper ~ getGasEstimate ~ slippage:", slippage)
+    // console.log("🚀 ~ PancakeHelper ~ getGasEstimate ~ slippage:", slippage)
     try {
       let trade = route;
       const routerAddress = SMART_ROUTER_ADDRESSES[ChainId.BSC];
@@ -411,7 +411,7 @@ export class PancakeHelper {
 
       return BigNumber(gasEstimate.toString());
     } catch (error) {
-      console.log(error);
+      //  console.log(error);
       let err = error.message.split("\n\n");
       let errMsg = err[0] ? err[0] : error.message ? error.message : error;
       let message = errMsg.includes("Execution reverted with reason: STF.")

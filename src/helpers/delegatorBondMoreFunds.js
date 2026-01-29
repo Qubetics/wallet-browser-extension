@@ -61,11 +61,11 @@ export default async function delagteAndBondMore(
       "make delegator"
     );
 
-    console.log("REEEEEEEEEEEEEEE", txResult);
+    // console.log("REEEEEEEEEEEEEEE", txResult);
 
     return txResult;
   } catch (error) {
-    console.log("Error in delagteAndBondMore::: ", error);
+    // console.log("Error in delagteAndBondMore::: ", error);
 
   }
 }

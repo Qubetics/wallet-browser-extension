@@ -116,7 +116,7 @@ function BillPay() {
       store.dispatch(setLoading(false));
     } catch (error) {
       store.dispatch(setLoading(false));
-      console.log('error:::', error);
+      // console.log('error:::', error);
     }
   };
 
@@ -670,7 +670,7 @@ function BillPay() {
               width: '100%;',
             }}
             onClick={async () => {
-              console.log('selectedLinkBill', selectedLinkBill);
+              // console.log('selectedLinkBill', selectedLinkBill);
               await spritzHelper.deleteBill(selectedLinkBill.id);
               getBillListFn();
               setOpenLinkBill(false);

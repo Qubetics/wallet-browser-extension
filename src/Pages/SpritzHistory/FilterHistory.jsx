@@ -14,7 +14,7 @@ function FilterHistorySpritz() {
   const navigate = useNavigate();
   const { state } = useLocation();
   useEffect(() => {
-    console.log("statestatestatestate ", state, spritzFilter);
+    // console.log("statestatestatestate ", state, spritzFilter);
     if (spritzFilter) {
       setFilterValue(spritzFilter);
     }

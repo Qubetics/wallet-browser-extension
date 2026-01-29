@@ -13,7 +13,7 @@ function MyBills() {
     setActiveKey(keys);
   };
   const onChange1 = (e) => {
-    console.log(`checked = ${e.target.checked}`);
+    // console.log(`checked = ${e.target.checked}`);
   };
   const { Panel } = Collapse;
 

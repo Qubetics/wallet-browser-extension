@@ -60,7 +60,7 @@ export default function TokenDrawer({
     store.dispatch(setLoading(true));
     await spritzHelper.setApiKey(key);
     const user = await spritzHelper.getUser();
-    console.log('🚀 ~ file: ApiKey.jsx:36 ~ handleVerify ~ user:', user);
+    // console.log('🚀 ~ file: ApiKey.jsx:36 ~ handleVerify ~ user:', user);
 
     if (!user) {
       store.dispatch(setLoading(false));

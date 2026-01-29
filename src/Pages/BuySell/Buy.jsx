@@ -56,7 +56,7 @@ const Buy = ({ coins = [], fiats = [] }) => {
       setConversionDetail(res?.data);
       store.dispatch(setLoading(false));
     } catch (error) {
-      console.log("Error : ", error);
+      // console.log("Error : ", error);
       setConversionDetail(null);
       messageApi.error(error?.message || "Something went wrong.")
       store.dispatch(setLoading(false));
@@ -221,7 +221,7 @@ const Buy = ({ coins = [], fiats = [] }) => {
         messageApi.error("No URL received from the API.");
       }
     } catch (error) {
-      console.error("Error initiating transaction:", error);
+      // console.error("Error initiating transaction:", error);
       messageApi.error("Failed to initiate transaction. Please try again.");
     }
   };
@@ -481,7 +481,7 @@ const Buy = ({ coins = [], fiats = [] }) => {
       //   // setIsLoading(false);
       // }, 800);
     } catch (error) {
-      console.log("error =======", error);
+      // console.log("error =======", error);
       messageApi.error("Something went wrong.")
       // setIsLoading(false);
 

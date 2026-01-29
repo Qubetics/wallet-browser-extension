@@ -25,7 +25,7 @@ export class BTCHelper {
       }
       return validate(address);
     } catch (error) {
-      console.error('BTC address validation error:', error);
+      // console.error('BTC address validation error:', error);
       return false;
     }
   };
@@ -41,12 +41,7 @@ export class BTCHelper {
     var root = new BIP84.fromSeed(mnemonics, '', !IS_PRODUCTION);
     var child0 = root.deriveAccount(0);
     var account0 = new BIP84.fromZPrv(child0);
-    console.log(
-      '🚀 ~ BTCHelper ~ generateBitcoinAddressTestnet= ~ account0:',
-      account0,
-      account0.getAddress(0),
-      account0.getAccountPrivateKey(0)
-    );
+    // console.log(
     return account0.getAddress(0);
   };
 
@@ -69,10 +64,10 @@ export class BTCHelper {
         const totalSatoshis = (chainBalance - chainSpent) + (mempoolBalance - mempoolSpent);
         const totalBTC = totalSatoshis / 100000000;
         
-        console.log("BTC balance from mempool.space:", totalBTC.toFixed(8));
+        // console.log("BTC balance from mempool.space:", totalBTC.toFixed(8));
         return totalBTC.toFixed(8);
       } catch (mempoolError) {
-        console.warn("Mempool.space API failed, trying blockstream.info:", mempoolError.message);
+        // console.warn("Mempool.space API failed, trying blockstream.info:", mempoolError.message);
         
         // Fallback to blockstream.info API
         const apiUrl = IS_PRODUCTION
@@ -85,11 +80,11 @@ export class BTCHelper {
         const totalSatoshis = data.reduce((sum, utxo) => sum + utxo.value, 0);
         const totalBTC = totalSatoshis / 100000000;
 
-        console.log("BTC balance from blockstream.info:", totalBTC.toFixed(8));
+        // console.log("BTC balance from blockstream.info:", totalBTC.toFixed(8));
         return totalBTC.toFixed(8);
       }
     } catch (error) {
-      console.error("Error fetching BTC balance from all APIs:", error);
+      // console.error("Error fetching BTC balance from all APIs:", error);
       return 0;
     }
   }
@@ -109,11 +104,11 @@ export class BTCHelper {
           },
         }
       );
-      console.log('BTC FEESSSS ', data);
+      // console.log('BTC FEESSSS ', data);
 
       return data.data || [];
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       return false;
     }
   };
@@ -121,7 +116,7 @@ export class BTCHelper {
   static async getBTCGasPrice() {
     try {
       const data = await axios.get('https://api.blockchain.info/mempool/fees');
-      console.log(data);
+      // console.log(data);
       return data.data.priority || 3;
     } catch (error) {
       return false;
@@ -163,7 +158,7 @@ export class BTCHelper {
             : element.vout;
 
         if (!txid || vout === undefined || !satoshis) {
-          console.error("Invalid UTXO:", element);
+          // console.error("Invalid UTXO:", element);
           continue;
         }
 
@@ -221,21 +216,21 @@ export class BTCHelper {
       if (fromAddress.startsWith("bc1q")) {
         // P2WPKH (Bech32)
         payment = bitcoin.payments.p2wpkh({ pubkey: keyPair.publicKey });
-        console.log('Using P2WPKH (SegWit) address:', payment.address);
+        //  console.log('Using P2WPKH (SegWit) address:', payment.address);
       } else if (fromAddress.startsWith('3')) {
         // P2SH-P2WPKH (SegWit wrapped in P2SH)
         const p2wpkh = bitcoin.payments.p2wpkh({ pubkey: keyPair.publicKey });
         payment = bitcoin.payments.p2sh({ redeem: p2wpkh });
-        console.log('Using P2SH-P2WPKH address:', payment.address);
+        // console.log('Using P2SH-P2WPKH address:', payment.address);
       } else {
         // P2PKH (Legacy)
         payment = bitcoin.payments.p2pkh({ pubkey: keyPair.publicKey });
-        console.log('Using P2PKH (Legacy) address:', payment.address);
+        // console.log('Using P2PKH (Legacy) address:', payment.address);
       }
 
       // Verify address match
       if (payment.address !== fromAddress) {
-        console.error('Address mismatch:', payment.address, 'vs', fromAddress);
+        // console.error('Address mismatch:', payment.address, 'vs', fromAddress);
         return {
           message: 'Private key does not match wallet address.',
         };
@@ -305,10 +300,10 @@ export class BTCHelper {
       psbt.finalizeAllInputs();
       const rawTransaction = psbt.extractTransaction().toHex();
 
-      console.log('Transaction created successfully');
+      // console.log('Transaction created successfully');
       return rawTransaction;
     } catch (error) {
-      console.error('generateRawTransaction error:', error);
+      // console.error('generateRawTransaction error:', error);
       return {
         message: `Transaction generation failed: ${error.message}`,
       };
@@ -331,11 +326,6 @@ export class BTCHelper {
         ? bitcoin.networks.bitcoin
         : bitcoin.networks.testnet;
 
-      console.log(
-        "Using Bitcoin network:",
-        IS_PRODUCTION ? "mainnet" : "testnet"
-      );
-
       // Import the private key from WIF
       const keyPair = bitcoin.ECPair.fromWIF(wif, network);
       const privateKey = keyPair.privateKey;
@@ -345,7 +335,7 @@ export class BTCHelper {
         pubkey: keyPair.publicKey,
         network,
       });
-      console.log("Signing with Bitcoin address:", address);
+      // console.log("Signing with Bitcoin address:", address);
 
       // Sign the message using Bitcoin message signing
       const signature = bitcoinMessage.sign(
@@ -357,7 +347,7 @@ export class BTCHelper {
 
       // Convert signature to base64 string
       const signatureBase64 = signature.toString("base64");
-      console.log("Bitcoin message signature (base64):", signatureBase64);
+      // console.log("Bitcoin message signature (base64):", signatureBase64);
 
       // Verify the signature (optional, for debugging)
       const verified = bitcoinMessage.verify(
@@ -366,11 +356,11 @@ export class BTCHelper {
         signatureBase64,
         network.messagePrefix
       );
-      console.log("Signature verification:", verified);
+      // console.log("Signature verification:", verified);
 
       return signatureBase64;
     } catch (error) {
-      console.error("Error signing Bitcoin message:", error);
+      // console.error("Error signing Bitcoin message:", error);
       throw new Error("Failed to sign Bitcoin message: " + error.message);
     }
   };
@@ -392,24 +382,24 @@ export class BTCHelper {
     type
   ) => {
     try {
-      console.log(
-        'TO',
-        to,
-        'FROM',
-        from,
-        'AMOUNT',
-        amount,
-        'SLUG',
-        slug,
-        'RAW',
-        rawTransaction,
-        'ORDERID',
-        orderId,
-        'TYPE',
-        type
-      );
+      // console.log(
+      //   'TO',
+      //   to,
+      //   'FROM',
+      //   from,
+      //   'AMOUNT',
+      //   amount,
+      //   'SLUG',
+      //   slug,
+      //   'RAW',
+      //   rawTransaction,
+      //   'ORDERID',
+      //   orderId,
+      //   'TYPE',
+      //   type
+      // );
       const { account } = store.getState();
-      console.log('ACCOUNT : ', account);
+      // console.log('ACCOUNT : ', account);
       let payload = {
         tx_raw: rawTransaction,
         from: from,
@@ -425,11 +415,11 @@ export class BTCHelper {
         },
       });
 
-      console.log('RESPONSE FROM TXN REQUEST  BTC:', myResponse);
+      // console.log('RESPONSE FROM TXN REQUEST  BTC:', myResponse);
 
       return myResponse.data;
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       return {
         error: true,
         message:

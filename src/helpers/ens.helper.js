@@ -27,7 +27,7 @@ export class ENSHelper {
 
 
   static findAddress = async (ensName) => {
-    console.log('FIND ADDRESS BY ENS NAME')
+    // console.log('FIND ADDRESS BY ENS NAME')
     try {
       const { chains } = await chrome.storage.local.get("chains");
   

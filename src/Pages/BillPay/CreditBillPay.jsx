@@ -83,13 +83,13 @@ function CreditBillPay() {
 
       setAllTokens(walletsList.data.data);
       const { billPaytoken } = await chrome.storage.local.get("billPaytoken");
-      console.log(billPaytoken, "billPaytoken");
+      // console.log(billPaytoken, "billPaytoken");    
 
       if (billPaytoken) {
         const findToken = walletsList.data.data.find(
           (el) => el.id == billPaytoken.id
         );
-        console.log("findToken", findToken);
+        // console.log("findToken", findToken);
         await chrome.storage.local.set({
           billPaytoken: findToken ? findToken : walletsList.data.data[0],
         });
@@ -104,7 +104,7 @@ function CreditBillPay() {
       store.dispatch(setLoading(false));
     } catch (error) {
       store.dispatch(setLoading(false));
-      console.log("error:::", error);
+      // console.log("error:::", error);
     }
   };
 
@@ -140,7 +140,7 @@ function CreditBillPay() {
   // console.log("token::", token);
 
   const doPayment = async () => {
-    console.log("amount::", amount);
+    // console.log("amount::", amount);
     const { chains } = await chrome.storage.local.get("chains");
     const chain = chains.find(
       (chain) => chain.coinFamily == token?.coin_family

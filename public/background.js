@@ -226,49 +226,49 @@ const networks = [
   //   slug: 'pls',
   //   status: true,
   // },
-  // {
-  //   id: uuidv4(),
-  //   chainName: 'Qubetics Mainnet',
-  //   chainId: 9030,
-  //   currencyName: 'qubetics',
-  //   currencySymbol: 'TICS',
-  //   currencyDecimals: 18,//-----
-  //   rpcUrl: 'https://rpc.qubetics.com',
-  //   rpcApiKey: null,
-  //   blockUrl: 'https://ticsscan.com',
-  //   default: false,
-  //   image: 'https://stage-qubetics-wallet.obs.ap-southeast-4.myhuaweicloud.com/tics.png',
-  //   tokenType: 'ERC20',
-  //   testnet: false,
-  //   swap: false,
-  //   isEVM: true,
-  //   supportTokens: true,
-  //   coinFamily: 7,
-  //   slug: 'tics',
-  //   status: true,
-  // },
   {
     id: uuidv4(),
-    chainName: 'Qubetics Testnet',
-    chainId: 9029, // ✅ Updated Chain ID
-    currencyName: 'qubetics Testnet',
+    chainName: 'Qubetics Mainnet',
+    chainId: 9030,
+    currencyName: 'qubetics',
     currencySymbol: 'TICS',
-    currencyDecimals: 18, // ✅ Same as mainnet
-    rpcUrl: 'https://rpc-testnet.qubetics.work/', // ✅ Updated testnet RPC
-    rpcApiKey: null, // ✅ No change
-    blockUrl: 'https://testnet.qubetics.work/tx/', // ✅ Updated explorer
+    currencyDecimals: 18,//-----
+    rpcUrl: 'https://rpc.qubetics.com',
+    rpcApiKey: null,
+    blockUrl: 'https://ticsscan.com',
     default: false,
-    image: 'https://prod-qubetics-wallet.obs.ap-southeast-4.myhuaweicloud.com/tics_logo.png',
+    image: 'https://stage-qubetics-wallet.obs.ap-southeast-4.myhuaweicloud.com/tics.png',
     tokenType: 'ERC20',
-    testnet: true, // ✅ Marked as testnet
+    testnet: false,
     swap: false,
     isEVM: true,
     supportTokens: true,
     coinFamily: 7,
-    slug: 'tics', 
-    status: true, // ✅ Enable it if needed in app
-  }
+    slug: 'tics',
+    status: true,
+  },
   
+  // {
+  //   id: uuidv4(),
+  //   chainName: 'Qubetics Testnet',
+  //   chainId: 9029, // ✅ Updated Chain ID
+  //   currencyName: 'qubetics Testnet',
+  //   currencySymbol: 'TICS',
+  //   currencyDecimals: 18, // ✅ Same as mainnet
+  //   rpcUrl: 'https://rpc-testnet.qubetics.work/', // ✅ Updated testnet RPC
+  //   rpcApiKey: null, // ✅ No change
+  //   blockUrl: 'https://testnet.qubetics.work/tx/', // ✅ Updated explorer
+  //   default: false,
+  //   image: 'https://prod-qubetics-wallet.obs.ap-southeast-4.myhuaweicloud.com/tics_logo.png',
+  //   tokenType: 'ERC20',
+  //   testnet: true, // ✅ Marked as testnet
+  //   swap: false,
+  //   isEVM: true,
+  //   supportTokens: true,
+  //   coinFamily: 7,
+  //   slug: 'tics', 
+  //   status: true, // ✅ Enable it if needed in app
+  // }
 ];
 
 const currency = {

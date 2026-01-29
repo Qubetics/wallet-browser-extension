@@ -267,7 +267,7 @@ function App() {
 
   useEffect(() => {
     init();
-    console.log('location',location?.pathname)
+    // console.log('location',location?.pathname)
   }, [location]);
 
   //

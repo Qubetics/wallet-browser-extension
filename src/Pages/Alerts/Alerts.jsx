@@ -41,7 +41,7 @@ function getFlooredFixed(number, precision) {
 
 function Alerts() {
   const { currency, alerts, account } = useSelector((state) => state);
-  console.log("🚀 ~ file: Alerts.jsx:20 ~ Alerts ~ alerts:", alerts);
+  // console.log("🚀 ~ file: Alerts.jsx:20 ~ Alerts ~ alerts:", alerts);
 
   const [myAlerts, setAlerts] = useState([]);
   const [filteredTokens, setFilteredTokens] = useState([]);

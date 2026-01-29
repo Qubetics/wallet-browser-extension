@@ -175,7 +175,7 @@ function AddWatchList() {
                 status: true,
                 coin: token,
                 watch: async () => {
-                  console.log('coin?.coin', token, account);
+                  // console.log('coin?.coin', token, account);
                   try {
                     await server.post(
                       'wallet/updateWatchlist',

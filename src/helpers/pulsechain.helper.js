@@ -78,20 +78,20 @@ export class PulseChainHelper {
 
         return resolve(pairs);
       } catch (err) {
-        console.log('v2RouteForBsc_Err:::', err);
+        // console.log('v2RouteForBsc_Err:::', err);
         return reject(err);
       }
     });
   }
 
   async getQuoteAndRoute(from, to, amount, address, reverse, slippage) {
-    console.log('reverse::::', reverse);
-    console.log('from::::', from);
-    console.log('to::::', to);
-    console.log('amount::::', amount);
+    // console.log('reverse::::', reverse);
+    // console.log('from::::', from);
+    // console.log('to::::', to);
+    // console.log('amount::::', amount);
     try {
       const trade = await this.fetchPair(from, to, amount, address, slippage);
-      console.log('trade::', trade);
+      // console.log('trade::', trade);
       const privateKey = await WalletHelper.getPrivateKey();
       const wallet = new ethers.Wallet(privateKey);
       const connectedWallet = wallet.connect(this.web3Provider);
@@ -107,7 +107,7 @@ export class PulseChainHelper {
         reverse ? to.decimals : from.decimals
       );
 
-      console.log('inputAmount::', inputAmount);
+      // console.log('inputAmount::', inputAmount);
       let data = null;
 
       if (reverse) {
@@ -116,7 +116,7 @@ export class PulseChainHelper {
         data = await pancakeswap.getAmountsOut(inputAmount, trade.routePath);
       }
 
-      console.log('data:::', data);
+      // console.log('data:::', data);
       if (!data) return false;
 
       return {
@@ -130,7 +130,7 @@ export class PulseChainHelper {
         reverse,
       };
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       return false;
     }
   }
@@ -175,7 +175,7 @@ export class PulseChainHelper {
       approveTx.chainId = 369;
       approveTx.nonce = gasPrice.nonce;
 
-      console.log(approveTx);
+      // console.log(approveTx);
 
       // Sign the transaction with the wallet's private key
       const wallet = new ethers.Wallet(WALLET_SECRET, this.web3Provider);
@@ -208,7 +208,7 @@ export class PulseChainHelper {
 
       return response.data.tx_hash;
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       return false;
     }
   }
@@ -232,10 +232,10 @@ export class PulseChainHelper {
           walletAddress,
           0
         );
-        console.log(
-          '🚀 ~ file: pancake.helper.js:255 ~ PancakeHelper ~ gasPrice:',
-          gasPrice
-        );
+        // console.log(
+        //   '🚀 ~ file: pancake.helper.js:255 ~ PancakeHelper ~ gasPrice:',
+        //   gasPrice
+        // );
 
         const getGasEstimate = await this.getGasEstimate(
           route,
@@ -245,10 +245,10 @@ export class PulseChainHelper {
           functionCall
         );
 
-        console.log(
-          '🚀 ~ file: pancake.helper.js:264 ~ PancakeHelper ~ getGasEstimate:',
-          getGasEstimate
-        );
+        // console.log(
+        //   '🚀 ~ file: pancake.helper.js:264 ~ PancakeHelper ~ getGasEstimate:',
+        //   getGasEstimate
+        // );
 
         if (getGasEstimate.status) {
           return getGasEstimate;
@@ -263,14 +263,14 @@ export class PulseChainHelper {
           new BigNumber(10).pow(token1.decimals)
         );
         const inputAmount = amountString.toFixed(0);
-        console.log('🚀 ~ PulseChainHelper ~ inputAmount:', inputAmount);
+        // console.log('🚀 ~ PulseChainHelper ~ inputAmount:', inputAmount);
 
         const amountToSend2 = BigNumber(route.minAmountConvertQuote);
         const amountString2 = amountToSend2.multipliedBy(
           new BigNumber(10).pow(route.toToken.decimals)
         );
         const amountOutMin = amountString2.toFixed(0);
-        console.log('🚀 ~ PulseChainHelper ~ amountOutMin:', amountOutMin);
+        //  console.log('🚀 ~ PulseChainHelper ~ amountOutMin:', amountOutMin);
 
         const path = route.routePath;
 
@@ -382,7 +382,7 @@ export class PulseChainHelper {
         return response.data.tx_hash;
       }
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       return false;
     }
   }
@@ -396,14 +396,14 @@ export class PulseChainHelper {
     reverse
   ) {
     try {
-      console.log(
-        route,
-        walletAddress,
-        amount,
-        token1Decimals,
-        functionCall,
-        reverse
-      );
+      // console.log(
+      //   route,
+      //   walletAddress,
+      //   amount,
+      //   token1Decimals,
+      //   functionCall,
+      //   reverse
+      // );
 
       if (route) {
         const WALLET_SECRET = await WalletHelper.getPrivateKey();
@@ -415,7 +415,7 @@ export class PulseChainHelper {
           new BigNumber(10).pow(token1Decimals)
         );
         const inputAmount = amountString.toFixed(0);
-        console.log('🚀 ~ PulseChainHelper ~ inputAmount:', inputAmount);
+        // console.log('🚀 ~ PulseChainHelper ~ inputAmount:', inputAmount);
 
         const amountToSend2 = BigNumber(
           reverse ? route.baseConvertRequest : route.minAmountConvertQuote
@@ -424,7 +424,7 @@ export class PulseChainHelper {
           new BigNumber(10).pow(route.toToken.decimals)
         );
         const amountOutMin = amountString2.toFixed(0);
-        console.log('🚀 ~ PulseChainHelper ~ amountOutMin:', amountOutMin);
+        // console.log('🚀 ~ PulseChainHelper ~ amountOutMin:', amountOutMin);
 
         const path = route.routePath;
 
@@ -482,13 +482,13 @@ export class PulseChainHelper {
         }
       }
     } catch (error) {
-      console.log(
-        error.message.includes(
-          'TransferHelper::transferFrom: transferFrom failed'
-        ) || error.message.includes('TRANSFER_FROM_FAILED')
-      );
-      console.log(error.message.includes('INSUFFICIENT_OUTPUT_AMOUNT'));
-      console.log(error);
+      // console.log(
+      //   error.message.includes(
+      //     'TransferHelper::transferFrom: transferFrom failed'
+      //   ) || error.message.includes('TRANSFER_FROM_FAILED')
+      // );
+      // console.log(error.message.includes('INSUFFICIENT_OUTPUT_AMOUNT'));
+      // console.log(error);
       return {
         status: 'error',
         message:

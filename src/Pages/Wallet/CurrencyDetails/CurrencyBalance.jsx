@@ -69,7 +69,7 @@ function CurrencyBalanceDetails({
           <Link
             to="/"
             onClick={async (e) => {
-              console.log('PASSWORD CURRENCY BALANCE :', state);
+              // console.log('PASSWORD CURRENCY BALANCE :', state);
               e.preventDefault();
               await WalletHelper.setWalletPreference(account.id);
             }}
@@ -208,11 +208,11 @@ function CurrencyBalanceDetails({
     const isSidePanelOpen = await chrome.storage.local.get('openSidePanel');
     getCosmosAddress()
       .then((data) => {
-        console.log('🚀 ~ useEffect ~ cosmos_address:', data);
+        // console.log('🚀 ~ useEffect ~ cosmos_address:', data);
         setCosmosAddress(data);
       })
       .catch((error) => {
-        console.log('error');
+        // console.log('error');
       });
     setIsSidePanelOpen(isSidePanelOpen.openSidePanel);
     setChainItems(myItems);
@@ -230,7 +230,7 @@ function CurrencyBalanceDetails({
         const formattedResult = getFlooredFixed(result.toString(), 2);
         setFiatValue(formattedResult);
       } catch (error) {
-        console.log('Error in currency balance', error);
+        // console.log('Error in currency balance', error);
       }
     }
   }, [tokens]);
@@ -566,7 +566,7 @@ function CurrencyBalanceDetails({
                 ]}
                 value={selectChain}
                 onChange={(value) => {
-                  console.log('selected chain value', value);
+                  // console.log('selected chain value', value);
                   setSelectChain(value);
                 }}
                 popupClassName="filterHistoryDropdown"

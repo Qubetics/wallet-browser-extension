@@ -9,7 +9,7 @@ import { capitalizeWords } from "../../helpers/common.helper";
 function AddressTableSend({ dataArray, setAddress, setContact }) {
   const [viewAddress, setViewAddress] = useState(false);
   const [bookName, setBookName] = useState(null);
-  console.log("AddressTable ", dataArray);
+  // console.log("AddressTable ", dataArray);
   return (
     <>
       {dataArray.map((ele, index) => (

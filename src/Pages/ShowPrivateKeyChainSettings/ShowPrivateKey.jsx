@@ -25,7 +25,7 @@ function ShowPrivateKey() {
 
   const init = async () => {
 
-    console.log('account, password',account, password)
+    // console.log('account, password',account, password)
     const { privateKey } = await WalletHelper.getPrivateKeyWithPassword(account,password);
     setAddress(privateKey || '');
   };
@@ -71,7 +71,7 @@ function ShowPrivateKey() {
       dispatch(setLoading(false))
     } else {
       dispatch(setLoading(false))
-      console.error('coinFamilyAndAddress data is missing');
+      // console.error('coinFamilyAndAddress data is missing');
     }
   };
 

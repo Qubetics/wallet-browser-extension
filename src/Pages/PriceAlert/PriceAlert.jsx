@@ -32,7 +32,7 @@ function PriceAlerts() {
 
   const [messageApi, contextHolder] = message.useMessage();
   const navigate = useNavigate();
-  console.log(alerts);
+  // console.log(alerts);
   return (
     <div className={`scrollableCont`}>
       {contextHolder}

@@ -124,7 +124,7 @@ function AddNewWallet() {
                     });
                     store.dispatch(setLoading(false));
                   } catch (error) {
-                    console.error("Error occurred:", error);
+                    // console.error("Error occurred:", error);
                     messageApi.error("An error occurred. Please try again.");
                     store.dispatch(setLoading(false));
                   }

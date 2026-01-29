@@ -127,7 +127,7 @@ function NewName() {
                     name,
                   });
 
-                  console.log(goTo);
+                  // console.log(goTo);
                   // console.log(mnemonics);
 
                   navigate(goTo, {

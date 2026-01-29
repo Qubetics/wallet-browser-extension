@@ -62,7 +62,7 @@ export class UniswapHelper {
       );
       return data.data;
     } catch (error) {
-      console.log('GET QOUTE AND ROUTE ERROR :', error);
+      // console.log('GET QOUTE AND ROUTE ERROR :', error);
       return {
         error: true,
         message: error?.response?.data?.message ?? 'Something went wrong',
@@ -94,10 +94,10 @@ export class UniswapHelper {
 
       // Unlimited allowance value (2^256 - 1)
       const unlimitedAllowance = ethers.constants.MaxUint256;
-      console.log(
-        '🚀 ~ file: pancake.helper.js:138 ~ PancakeHelper ~ sendForApproval ~ unlimitedAllowance:',
-        unlimitedAllowance
-      );
+      // console.log(
+      //   '🚀 ~ file: pancake.helper.js:138 ~ PancakeHelper ~ sendForApproval ~ unlimitedAllowance:',
+      //   unlimitedAllowance
+      // );
 
       // Generate the approve transaction
       const approveTx = await contract.populateTransaction.approve(
@@ -140,19 +140,19 @@ export class UniswapHelper {
       approveTx.chainId = chainId;
       approveTx.nonce = nonce;
 
-      console.log(approveTx);
+      // console.log(approveTx);
 
       // Sign the transaction with the wallet's private key
       const wallet = new ethers.Wallet(privateKey, this.ethProvider);
-      console.log(
-        '🚀 ~ file: pancake.helper.js:149 ~ PancakeHelper ~ sendForApproval ~ wallet:',
-        wallet
-      );
+      // console.log(
+      //   '🚀 ~ file: pancake.helper.js:149 ~ PancakeHelper ~ sendForApproval ~ wallet:',
+      //   wallet
+      // );
       const signedTransaction = await wallet.signTransaction(approveTx);
-      console.log(
-        '🚀 ~ file: pancake.helper.js:151 ~ PancakeHelper ~ sendForApproval ~ signedTransaction:',
-        signedTransaction
-      );
+      // console.log(
+      //   '🚀 ~ file: pancake.helper.js:151 ~ PancakeHelper ~ sendForApproval ~ signedTransaction:',
+      //   signedTransaction
+      // );
 
       const response = await server.post(
         `${slug}/${symbol}/send`,
@@ -176,7 +176,7 @@ export class UniswapHelper {
       );
       return response.data.tx_hash;
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       return false;
     }
   }
@@ -198,16 +198,16 @@ export class UniswapHelper {
       if (route) {
         const { account } = store.getState();
 
-        console.log('amount', amount); // should be a string
-        console.log('typeof amount', typeof amount); // should be "string"
-        console.log(
-          'decimals',
-          token1.decimals,
+        // console.log('amount', amount); // should be a string
+        // console.log('typeof amount', typeof amount); // should be "string"
+        // console.log(
+        //   'decimals',
+        //   token1.decimals,
 
-          new BigNumber(amount)
-            .multipliedBy(new BigNumber(10).pow(token1.decimals))
-            .toFixed(0)
-        ); // should be 18
+        //   new BigNumber(amount)
+        //     .multipliedBy(new BigNumber(10).pow(token1.decimals))
+        //     .toFixed(0)
+        // ); // should be 18
 
         const { data } = await server.post(
           '/on-chain/swap',
@@ -266,17 +266,17 @@ export class UniswapHelper {
           nonce: nonce,
           chainId: parseInt(token1.chain.chainId),
         };
-        console.log('🚀 ~ UniswapHelper ~ transaction:', transaction);
+        // console.log('🚀 ~ UniswapHelper ~ transaction:', transaction);
 
         const wallet = new ethers.Wallet(privateKey, this.ethProvider);
 
-        console.log('walllet address', wallet.address);
+        // console.log('walllet address', wallet.address);
 
         const signedTransaction = await wallet.signTransaction(transaction);
-        console.log(
-          '🚀 ~ UniswapHelper ~ signedTransaction:',
-          signedTransaction
-        );
+        // console.log(
+        //   '🚀 ~ UniswapHelper ~ signedTransaction:',
+        //   signedTransaction
+        // );
 
         const response = await server.post(
           `${slug}/${isToken ? token1.tokenAddress : symbol}/send`,
@@ -296,12 +296,12 @@ export class UniswapHelper {
             },
           }
         );
-        console.log('🚀 ~ UniswapHelper ~ response:', response);
+        // console.log('🚀 ~ UniswapHelper ~ response:', response);
 
         return response.data.tx_hash;
       }
     } catch (error) {
-      console.log('SWAP ERROR : ', error);
+      // console.log('SWAP ERROR : ', error);
       return error?.response?.data?.message ? error?.response?.data : false;
     }
   }
@@ -403,7 +403,7 @@ export class UniswapHelper {
 
       return response.data.tx_hash;
     } catch (error) {
-      console.log('Send Wrap Transaction :', error);
+      // console.log('Send Wrap Transaction :', error);
       return false;
     }
   }

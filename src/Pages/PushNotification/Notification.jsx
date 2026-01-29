@@ -6,7 +6,7 @@ import sendhistry from "../../Assets/sendhistry.svg";
 import ReceiveIcon from "../../Assets/ReceiveIcon.svg"
 function Notification() {
   const onChange = (checked) => {
-    console.log(`switch to ${checked}`);
+    // console.log(`switch to ${checked}`);
   };
   const notifications = [
     {

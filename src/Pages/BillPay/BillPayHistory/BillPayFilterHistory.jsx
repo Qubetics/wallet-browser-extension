@@ -14,7 +14,7 @@ function BillPayFilterHistorySpritz() {
   const navigate = useNavigate();
   const { state } = useLocation();
   useEffect(() => {
-    console.log("statestatestatestate ", state, billPayFilter);
+    // console.log("statestatestatestate ", state, billPayFilter);
     if (billPayFilter) {
       setFilterValue(billPayFilter);
     }

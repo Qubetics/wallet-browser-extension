@@ -383,7 +383,7 @@ function SettingList(props) {
             text={'Proceed'}
             maxWidth={'100%'}
             onClick={async () => {
-              console.log('CONTINUE TO VERIFY PASSWORD');
+              // console.log('CONTINUE TO VERIFY PASSWORD');
               setOpenmodal(true);
               setPassword(null);
             }}

@@ -56,13 +56,13 @@ export class MpcChainAbstractionHelper {
         }
       );
 
-      console.log("this is  data ", response.data);
+      // console.log("this is  data ", response.data);
 
       const result = await response?.data;
-      console.log("result", result);
+      // console.log("result", result);
       return result;
     } catch (err) {
-      console.error("[MPC] registerUser error:", err);
+      // console.error("[MPC] registerUser error:", err);
       throw err;
     }
   };
@@ -85,8 +85,8 @@ export class MpcChainAbstractionHelper {
       // Build the endpoint
       const endpoint = `${chainPath}${coinSymbol}/saveTransaction`;
 
-      console.log("Saving transaction with endpoint:", endpoint);
-      console.log("Transaction data:", data);
+      // console.log("Saving transaction with endpoint:", endpoint);
+      // console.log("Transaction data:", data);
 
       const response = await server.post(endpoint, data, {
         headers: {
@@ -94,10 +94,10 @@ export class MpcChainAbstractionHelper {
         },
       });
 
-      console.log("Save transaction response:", response);
+      // console.log("Save transaction response:", response);
       return response;
     } catch (error) {
-      console.error("Error saving intent hash:", error);
+      // console.error("Error saving intent hash:", error);
       return false;
     }
   };
@@ -123,21 +123,21 @@ export class MpcChainAbstractionHelper {
           // Check for HTTP 500 error - retry up to 5 times
           if (response.status === 500 || (error && response.status >= 500)) {
             error500Attempts++;
-            console.error(
-              `Intent API returned 500 error (Attempt ${error500Attempts}/${MAX_500_RETRIES}):`,
-              response.data
-            );
+            // console.error(
+            //   `Intent API returned 500 error (Attempt ${error500Attempts}/${MAX_500_RETRIES}):`,
+            //   response.data
+            // );
 
             if (error500Attempts < MAX_500_RETRIES) {
-              console.log(
-                `Retrying after 500 error in 2 seconds... (500 Error Attempt ${error500Attempts})`
-              );
+              // console.log(
+              //   `Retrying after 500 error in 2 seconds... (500 Error Attempt ${error500Attempts})`
+              // );
               setTimeout(poll, 2000);
               return;
             } else {
-              console.error(
-                "Max 500 error retries reached. Transaction failed."
-              );
+                // console.error(
+                //   "Max 500 error retries reached. Transaction failed."
+                // );
               resolve({
                 error: true,
                 message: "Transaction failed - intent API error",
@@ -152,34 +152,34 @@ export class MpcChainAbstractionHelper {
           error500Attempts = 0;
 
           if (!error && data) {
-            console.log("Final Success Response:", response?.data);
+            // console.log("Final Success Response:", response?.data);
             resolve(response?.data);
           } else if (attempts < MAX_RETRIES) {
-            console.log(`Polling again in 2 seconds... (Attempt ${attempts})`);
+            // console.log(`Polling again in 2 seconds... (Attempt ${attempts})`);
             setTimeout(poll, 2000);
           } else {
-            console.warn("Max retries reached. Stopping polling.");
+            // console.warn("Max retries reached. Stopping polling.");
             resolve({ error: true, message: "Max retries reached" });
           }
         } catch (error) {
           // Check if it's an HTTP 500 error
           if (error.response && error.response.status === 500) {
             error500Attempts++;
-            console.error(
-              `Intent API returned 500 error (Attempt ${error500Attempts}/${MAX_500_RETRIES}):`,
-              error.response.data
-            );
+            // console.error(
+            //   `Intent API returned 500 error (Attempt ${error500Attempts}/${MAX_500_RETRIES}):`,
+            //   error.response.data
+            // );
 
             if (error500Attempts < MAX_500_RETRIES) {
-              console.log(
-                `Retrying after 500 error in 2 seconds... (500 Error Attempt ${error500Attempts})`
-              );
+              // console.log(
+              //   `Retrying after 500 error in 2 seconds... (500 Error Attempt ${error500Attempts})`
+              // );
               setTimeout(poll, 2000);
               return;
             } else {
-              console.error(
-                "Max 500 error retries reached. Transaction failed."
-              );
+              // console.error(
+              //   // "Max 500 error retries reached. Transaction failed."
+              // );
               resolve({
                 error: true,
                 message: "Transaction failed - intent API error",
@@ -190,14 +190,14 @@ export class MpcChainAbstractionHelper {
             }
           }
 
-          console.error(
-            `Error fetching intent status (Attempt ${attempts}), retrying in 2 seconds:`,
-            error
-          );
+          // console.error(
+          //   `Error fetching intent status (Attempt ${attempts}), retrying in 2 seconds:`,
+          //   error
+          // );
           if (attempts < MAX_RETRIES) {
             setTimeout(poll, 2000);
           } else {
-            console.warn("Max retries reached after errors. Stopping polling.");
+            // console.warn("Max retries reached after errors. Stopping polling.");
             resolve({
               error: true,
               message: "Max retries reached after errors",
@@ -265,17 +265,17 @@ export class MpcChainAbstractionHelper {
     toAddress
   ) => {
     try {
-      console.log("=== MPC Transaction Start ===");
-      console.log("Transaction parameters:", {
-        token1,
-        token2: token2?.symbol,
-        amount,
-        receivedAmount,
-        mpcFromAddress,
-        toAddress,
-        chainId: chain?.chainId,
-        coinFamily: token1?.coinFamily,
-      });
+      // console.log("=== MPC Transaction Start ===");
+      // console.log("Transaction parameters:", {
+      //   token1,
+      //   token2: token2?.symbol,
+      //   amount,
+      //   receivedAmount,
+      //   mpcFromAddress,
+      //   toAddress,
+      //   chainId: chain?.chainId,
+      //   coinFamily: token1?.coinFamily,
+      // });
 
       // Get account and private key
       const { account } = store.getState();
@@ -291,7 +291,7 @@ export class MpcChainAbstractionHelper {
         throw new Error("Unable to fetch private key");
       }
 
-      console.log("token1?.decimals", token1?.decimals);
+      // console.log("token1?.decimals", token1?.decimals);
 
       // ============================================
       // FIX: Correct decimal calculation for Bitcoin (8 decimals)
@@ -303,7 +303,7 @@ export class MpcChainAbstractionHelper {
         decimals = token1?.chain?.currencyDecimals || 18;
       }
 
-      console.log(`Using ${decimals} decimals for ${token1?.coinSymbol}`);
+      // console.log(`Using ${decimals} decimals for ${token1?.coinSymbol}`);
 
       // let amountWithDecimals = amount * Math.pow(10, decimals);
       // amountWithDecimals = this.exponentialToDecimal(
@@ -313,9 +313,9 @@ export class MpcChainAbstractionHelper {
       const amountWithDecimals =
         BigInt(amount) * BigInt(10) ** BigInt(decimals);
 
-      console.log("Amount with decimals:", amountWithDecimals.toString());
+      // console.log("Amount with decimals:", amountWithDecimals.toString());
 
-      console.log("Amount with decimals:", amountWithDecimals);
+      // console.log("Amount with decimals:", amountWithDecimals);
 
       // Prepare message for signature
       // For same-coin transfers, both chains and tokens are the same
@@ -340,7 +340,7 @@ export class MpcChainAbstractionHelper {
         timestamp: new Date().getTime(),
       };
 
-      console.log("Message to sign:", msg);
+      // console.log("Message to sign:", msg);
 
       const payloadStr = JSON.stringify(msg);
 
@@ -351,7 +351,7 @@ export class MpcChainAbstractionHelper {
       const wallet = new ethers.Wallet(privateKey).connect(provider);
       const signature = await wallet.signMessage(payloadStr);
 
-      console.log("Signature:", signature);
+      // console.log("Signature:", signature);
 
       // Create swap order
       const swapData = {
@@ -360,7 +360,7 @@ export class MpcChainAbstractionHelper {
       };
 
       const response = await this.createMpcSwapOrder(swapData);
-      console.log("MPC swap order response:", response);
+      // console.log("MPC swap order response:", response);
 
       if (!response || response.error) {
         throw new Error(response?.message || "Failed to create MPC swap order");
@@ -378,7 +378,7 @@ export class MpcChainAbstractionHelper {
         }
       }
 
-      console.log("Transaction ID:", txId);
+      // console.log("Transaction ID:", txId);
 
       if (!txId) {
         throw new Error("No transaction ID received");
@@ -394,27 +394,27 @@ export class MpcChainAbstractionHelper {
         token1?.coinSymbol
       );
 
-      console.log("Gas price:", gasprice);
+      // console.log("Gas price:", gasprice);
 
       const coinFamily2 = token1?.coinFamily;
       const fromAddress = account?.coinFamilyAndAddress?.[coinFamily2];
 
-      console.log("From address:", fromAddress);
+      // console.log("From address:", fromAddress);
 
       // ============================================
       // NEW FLOW: Poll intent status FIRST before saving transaction
       // ============================================
-      console.log("Polling intent status before saving transaction...");
+      // console.log("Polling intent status before saving transaction...");
       const transactionResult = await this.pollIntentStatus(txId);
 
-      console.log("Intent status poll result:", transactionResult);
+      // console.log("Intent status poll result:", transactionResult);
 
       // Check if intent API returned an error (500 or other error)
       if (transactionResult?.error || transactionResult?.statusCode === 500) {
-        console.error(
-          "Intent API returned error - transaction failed:",
-          transactionResult
-        );
+        // console.error(
+        //   "Intent API returned error - transaction failed:",
+        //   transactionResult
+        // );
         // Return error result - don't save transaction
         throw new Error(
           transactionResult?.message || "Transaction failed - intent API error"
@@ -423,7 +423,7 @@ export class MpcChainAbstractionHelper {
 
       // If we reach here, intent API returned success
       // Now prepare and save transaction data
-      console.log("Intent API returned success - saving transaction...");
+      // console.log("Intent API returned success - saving transaction...");
 
       // Prepare save data
       const saveData = {
@@ -444,9 +444,9 @@ export class MpcChainAbstractionHelper {
 
       // Save intent hash only after intent API confirms success
       await this.saveIntentHash(saveData);
-      console.log(
-        "Transaction saved successfully after intent API confirmation"
-      );
+      // console.log(
+      //   "Transaction saved successfully after intent API confirmation"
+      // );
 
       // ============================================
       // Update transaction status on backend
@@ -455,7 +455,7 @@ export class MpcChainAbstractionHelper {
         const intentHash = transactionResult.data.intent_hash;
         const status = transactionResult.data.status;
 
-        console.log("Updating transaction status:", { intentHash, status });
+        // console.log("Updating transaction status:", { intentHash, status });
 
         // Only update if we have a valid intent hash and status
         if (intentHash && status) {
@@ -468,7 +468,7 @@ export class MpcChainAbstractionHelper {
               tx_status: status,
             };
 
-            console.log("Calling update status API:", { urlPath, updateData });
+            // console.log("Calling update status API:", { urlPath, updateData });
 
             // Call the update status API
             const updateResponse = await server.post(
@@ -479,17 +479,17 @@ export class MpcChainAbstractionHelper {
               }
             );
 
-            console.log("Update status API response:", updateResponse);
+            // console.log("Update status API response:", updateResponse);
           } catch (updateError) {
             // Log error but don't fail the transaction
-            console.error("Error updating transaction status:", updateError);
+            // console.error("Error updating transaction status:", updateError);
             // Don't throw - we still want to return the transaction result
           }
         } else {
-          console.warn(
-            "Skipping status update - missing intent hash or status:",
-            { intentHash, status }
-          );
+          // console.warn(
+          //   "Skipping status update - missing intent hash or status:",
+          //   { intentHash, status }
+          // );
         }
       }
 
@@ -500,7 +500,7 @@ export class MpcChainAbstractionHelper {
         source_address: transactionResult?.data?.source_address || "N/A",
       };
     } catch (error) {
-      console.error("Error in SendMpcTransaction:", error);
+      // console.error("Error in SendMpcTransaction:", error);
       throw error;
     }
   };
@@ -526,7 +526,7 @@ export class MpcChainAbstractionHelper {
       const balanceInEth = ethers.utils.formatUnits(balance, 18);
       return new BigNumber(balanceInEth).toNumber();
     } catch (error) {
-      console.error("Error fetching MPC balance:", error);
+      // console.error("Error fetching MPC balance:", error);
       return 0;
     }
   }
@@ -544,7 +544,7 @@ export class MpcChainAbstractionHelper {
       );
       return parseFloat(balance) || 0;
     } catch (error) {
-      console.error("Error fetching MPC token balance:", error);
+      // console.error("Error fetching MPC token balance:", error);
       return 0;
     }
   }
@@ -605,7 +605,7 @@ export class MpcChainAbstractionHelper {
         balance,
       };
     } catch (error) {
-      console.error("Error validating MPC balance:", error);
+      // console.error("Error validating MPC balance:", error);
       return {
         valid: false,
         message: "Error checking balance",

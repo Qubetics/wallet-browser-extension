@@ -200,7 +200,6 @@ function EnterPrice() {
                       coin.coinName
                     );
 
-                    console.log(coin, "=============coin=================")
 
                     const getAllBlk = await data.getMercuryoPrice(
                       coin.coinName.toUpperCase(),
@@ -401,7 +400,6 @@ function EnterPrice() {
                     }
 
 
-                    console.log(tempDrawerData, "==================tempDrawerData=====================")
 
                     setDrawerData(
                       tempDrawerData.sort((a, b) => {
@@ -422,7 +420,7 @@ function EnterPrice() {
                     setOpen(true);
                     store.dispatch(setLoading(false));
                   } catch (error) {
-                    console.log(error);
+                    // console.log(error);
                     store.dispatch(setLoading(false));
                     setOpen(false);
                     return messageApi.error(

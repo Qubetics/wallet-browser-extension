@@ -55,7 +55,7 @@ function ReceiveTokens() {
         },
       }
     );
-    console.log('all tokens in receive screen:',walletsList);
+    // console.log('all tokens in receive screen:',walletsList);
     store.dispatch(setTokens(walletsList.data.data));
     store.dispatch(setLoading(false));
   };

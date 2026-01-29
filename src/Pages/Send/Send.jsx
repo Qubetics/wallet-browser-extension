@@ -50,7 +50,7 @@ function Send() {
 
       store.dispatch(setTokens(walletsList.data.data));
     } catch (error) {
-      console.log(error);
+      // console.log(error);
     } finally {
       store.dispatch(setLoading(false));
     }

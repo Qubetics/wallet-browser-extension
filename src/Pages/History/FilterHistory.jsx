@@ -135,7 +135,7 @@ function FilterHistory() {
                     width: 120,
                   }}
                   onChange={(value, label) => {
-                    console.log(value, label);
+                    // console.log(value, label);
                     setFilterValue({
                       ...filterValue,
                       coinId: label,

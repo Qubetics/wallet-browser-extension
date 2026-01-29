@@ -160,7 +160,7 @@ function WalletListing() {
       setData(finalData);
       store.dispatch(setLoading(false));
     } catch (error) {
-      console.log('Wallet Listing Error : ', error);
+      // console.log('Wallet Listing Error : ', error);
       store.dispatch(setLoading(false));
     }
   };

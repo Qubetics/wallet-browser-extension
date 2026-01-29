@@ -79,7 +79,7 @@ const BuySell = () => {
       setFiatsPayMethod(fiat_payment_methods);
       store.dispatch(setLoading(false));
     } catch (error) {
-      console.log("Error := ", error);
+      // console.log("Error := ", error);
       messageApi.error(error?.message || "Something went wrong.");
       store.dispatch(setLoading(false));
     }

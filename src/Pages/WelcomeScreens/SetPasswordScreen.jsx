@@ -191,7 +191,7 @@ function SetPasswordScreen() {
         popError('Please check the phrase order and try again.');
       }
     } catch (error) {
-      console.error('Confirm Secret Phrase Error:', error);
+      // console.error('Confirm Secret Phrase Error:', error);
     } finally {
       store.dispatch(setLoading(false));
     }

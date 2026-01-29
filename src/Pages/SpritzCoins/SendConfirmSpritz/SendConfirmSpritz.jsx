@@ -466,10 +466,10 @@ function SendConfirmSpritz() {
               const isCorrectPassword = await WalletHelper.verifyPassword(
                 sessionPassword
               );
-              console.log(
-                'isCorrectPassword on Enter in send confirm',
-                isCorrectPassword
-              );
+              // console.log(
+              //   'isCorrectPassword on Enter in send confirm',
+              //   isCorrectPassword
+              // );
 
               if (sessionPassword != null) {
                 if (!isCorrectPassword) {

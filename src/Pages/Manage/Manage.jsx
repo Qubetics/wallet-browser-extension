@@ -25,7 +25,7 @@ function Manage() {
   const height = useCurrentHeight();
 
   useEffect(() => {
-    console.log('filteredTokens===> ', filteredTokens);
+    // console.log('filteredTokens===> ', filteredTokens);
   }, [JSON.stringify(filteredTokens)]);
 
   const init = async () => {
