@@ -86,7 +86,7 @@ export class CrossChainHelper {
 
       const { account } = store.getState();
       const btcPrivateKeyStr =
-      await WalletHelper.getBitcoinPrivateKeyWithPassword(walletAddress, sessionPassword);
+        await WalletHelper.getBitcoinPrivateKeyWithPassword(walletAddress, sessionPassword);
       if (!btcPrivateKeyStr) {
         return console.error('Unable to fetch private key.');
       }
@@ -174,7 +174,7 @@ export class CrossChainHelper {
         } else if (walletAddress.startsWith('tb')) {
           payment = bitcoin.payments.p2wpkh({
             pubkey: keyPair.publicKey,
-            network: bitcoin.networks.testnet,
+            network: IS_PRODUCTION ? bitcoin.networks.bitcoin : bitcoin.networks.testnet,
           });
         } else {
           payment = bitcoin.payments.p2pkh({ pubkey: keyPair.publicKey });
@@ -310,7 +310,7 @@ export class CrossChainHelper {
           sessionPassword
         );
       } else if (fromCoin?.coinFamily != 5 && fromCoin.tokenAddress) {
-        console.log('IN TOKEN CROSS SWAP EVM');
+        //console.log('IN TOKEN CROSS SWAP EVM');
         hash = await Web3Helper.generateRawTransactionForTokenAndBroadcast(
           orderData?.platformAddr,
           walletAddress,
@@ -363,7 +363,7 @@ export class CrossChainHelper {
 
       return true;
     } catch (error) {
-      console.log(error);
+      //console.log(error);
       return false;
     }
   };

@@ -52,10 +52,11 @@ const setupPageStreams = () => {
 
     if (data.name) {
       if (lastId == data.id) {
-        return console.log('Request already under process.');
+        return;
+        //console.log('Request already under process.');
       }
       lastId = data.id;
-      console.log('Please wait starting to resolve.');
+      //console.log('Please wait starting to resolve.');
       const finalResponse = await new Promise((resolve, reject) => {
         chrome.runtime.sendMessage(
           { type: 'JSON-RPC', payload: { ...data, method: data.name } },

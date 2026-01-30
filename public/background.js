@@ -179,7 +179,7 @@ const networks = [
   //   slug: 'btc-test',
   //   status: true, // If you want to enable it for testing
   // }
-// ,  
+  // ,  
   // {
   //   id: uuidv4(),
   //   chainName: 'Cardano',
@@ -286,7 +286,7 @@ class Background {
           // message.id = tabs[0].id;
           chrome.tabs.sendMessage(tabs[0].id, message);
         } else {
-          console.log('No active tab found.');
+          //console.log('No active tab found.');
         }
       });
     }
@@ -432,7 +432,7 @@ class Background {
 
               // console.log('RESPONSE ON CONNECT DAPP:',response)
 
-              if (response && response.length > 0 ) {
+              if (response && response.length > 0) {
                 res.result = response;
                 res.method = req.method;
                 res.network = req.network;
@@ -665,7 +665,7 @@ class Background {
             const defaultAccount = accounts.find((el) => el.default);
 
             // console.log("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX", defaultChain);
-            
+
             res.result = null;
             res.method = req.method;
             // res.chainId = defaultChain.chainId;
@@ -744,7 +744,7 @@ class Background {
               const { isApproved } = await chrome.storage.local.get(
                 'isApproved'
               );
-              console.log('isApproved:::', isApproved);
+              // console.log('isApproved:::', isApproved);
               if (!isApproved)
                 sendMessageToContentScript({
                   method: 'user_rejected',
@@ -763,7 +763,7 @@ class Background {
               }
             );
           });
-          console.log('RESPONSE BACK::', response);
+          // console.log('RESPONSE BACK::', response);
 
           if (response) {
             res.result = response;
@@ -791,7 +791,7 @@ class Background {
               const { isApproved } = await chrome.storage.local.get(
                 'isApproved'
               );
-              console.log('isApproved:::', isApproved);
+              // console.log('isApproved:::', isApproved);
               if (!isApproved)
                 sendMessageToContentScript({
                   method: 'user_rejected',
@@ -837,7 +837,7 @@ class Background {
               const { isApproved } = await chrome.storage.local.get(
                 'isApproved'
               );
-              console.log('isApproved:::', isApproved);
+              // console.log('isApproved:::', isApproved);
               if (!isApproved)
                 sendMessageToContentScript({
                   method: 'user_rejected',
@@ -883,7 +883,7 @@ class Background {
               const { isApproved } = await chrome.storage.local.get(
                 'isApproved'
               );
-              console.log('isApproved:::', isApproved);
+              // console.log('isApproved:::', isApproved);
               if (!isApproved)
                 sendMessageToContentScript({
                   method: 'user_rejected',
@@ -929,7 +929,7 @@ class Background {
               const { isApproved } = await chrome.storage.local.get(
                 'isApproved'
               );
-              console.log('isApproved:::', isApproved);
+              // console.log('isApproved:::', isApproved);
               if (!isApproved)
                 sendMessageToContentScript({
                   method: 'user_rejected',
@@ -975,7 +975,7 @@ class Background {
               const { isApproved } = await chrome.storage.local.get(
                 'isApproved'
               );
-              console.log('isApproved:::', isApproved);
+              // console.log('isApproved:::', isApproved);
               if (!isApproved)
                 sendMessageToContentScript({
                   method: 'user_rejected',
@@ -1021,7 +1021,7 @@ class Background {
               const { isApproved } = await chrome.storage.local.get(
                 'isApproved'
               );
-              console.log('isApproved:::', isApproved);
+              // console.log('isApproved:::', isApproved);
               if (!isApproved)
                 sendMessageToContentScript({
                   method: 'user_rejected',
@@ -1109,7 +1109,7 @@ class Background {
           engine.handle(message.payload, (err, result) => {
             // console.log(err, result, "result");
             if (err) {
-              console.error('Error handling JSON-RPC message:', err);
+              //console.error('Error handling JSON-RPC message:', err);
             } else {
               sendResponse({ type: 'JSON-RPC', payload: result });
             }
@@ -1120,11 +1120,15 @@ class Background {
       } else if (message.type === 'OPEN_SIDE_PANEL') {
         chrome.sidePanel
           .setPanelBehavior({ openPanelOnActionClick: true })
-          .catch((error) => console.error(error));
+          .catch((error) => {
+            //console.error(error)
+          });
       } else if (message.type === 'CLOSE_SIDE_PANEL') {
         chrome.sidePanel
           .setPanelBehavior({ openPanelOnActionClick: false })
-          .catch((error) => console.error(error));
+          .catch((error) => {
+            //console.error(error)
+          });
       }
     });
   };
