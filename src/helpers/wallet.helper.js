@@ -260,7 +260,7 @@ export class WalletHelper {
     }
   };
 
-  static getBitcoinPrivateKeyWithPassword = async (password) => {
+  static getBitcoinPrivateKeyWithPassword = async (address, password) => {
     try {
       const { mnemonics } = await chrome.storage.local.get('mnemonics');
 
@@ -269,13 +269,25 @@ export class WalletHelper {
         password
       );
 
-      const defaultMnemonics = JSON.parse(decryptedMnemonics).find(
+      const mnemonicsList = JSON.parse(decryptedMnemonics);
+      // Find the mnemonic matching the provided address
+      const matchedMnemonic = mnemonicsList.find(
+        (mnemonic) => mnemonic.address.toLowerCase() === address.toLowerCase()
+      );
+
+      // If no match found, fall back to default mnemonic
+      const targetMnemonics = matchedMnemonic || mnemonicsList.find(
         (el) => el.default
       );
+
+      if (!targetMnemonics) {
+        return false;
+      }
+
       var root = new BIP84.fromSeed(
-        defaultMnemonics.phrase,
+        targetMnemonics.phrase,
         "",
-        true
+        !IS_PRODUCTION
       );
       var child0 = root.deriveAccount(0);
       var account0 = new BIP84.fromZPrv(child0);
@@ -968,6 +980,8 @@ export class WalletHelper {
         mnemonics: encryptedMnemonics,
         registered: true,
       });
+
+     
 
       await chrome.storage.session.set({ accounts: finalAccounts });
 

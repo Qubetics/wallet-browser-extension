@@ -41,14 +41,14 @@ const setupPageStreams = () => {
   let lastId = null;
 
   const chainId = localStorage.getItem('qubetics_chain_id');
-  console.log(
-    '🚀 ~ file: contentscript.js:16 ~ setupPageStreams ~ chainId:',
-    chainId
-  );
+  // console.log(
+  //   '🚀 ~ file: contentscript.js:16 ~ setupPageStreams ~ chainId:',
+  //   chainId
+  // );
   chrome.runtime.sendMessage({ type: 'SWITCH_CHAIN', payload: { chainId } });
 
   pageStream.on('data', async (data) => {
-    console.log('🚀 ~ file: contentscript.js:50 ~ pageStream.on ~ data:', data);
+    // console.log('🚀 ~ file: contentscript.js:50 ~ pageStream.on ~ data:', data);
 
     if (data.name) {
       if (lastId == data.id) {
@@ -60,18 +60,18 @@ const setupPageStreams = () => {
         chrome.runtime.sendMessage(
           { type: 'JSON-RPC', payload: { ...data, method: data.name } },
           (response) => {
-            console.log(
-              '🚀 ~ file: contentscript.js:50 ~ pageStream.on ~ response',
-              response
-            );
+            // console.log(
+            //   '🚀 ~ file: contentscript.js:50 ~ pageStream.on ~ response',
+            //   response
+            // );
             if (chrome.runtime.lastError) {
               reject(chrome.runtime.lastError);
             } else if (response && response.type === 'JSON-RPC') {
               resolve(response.payload);
-              console.log(
-                '🚀 ~ file: contentscript.js:50 ~ pageStream.on ~ data:',
-                data
-              );
+              // console.log(
+              //   '🚀 ~ file: contentscript.js:50 ~ pageStream.on ~ data:',
+              //   data
+              // );
             } else {
               reject(new Error('Invalid response received'));
             }
@@ -84,7 +84,7 @@ const setupPageStreams = () => {
           ...finalResponse,
         };
 
-        console.log(finalResponse, 'OUTGOING_RESPONSE');
+        // console.log(finalResponse, 'OUTGOING_RESPONSE');
 
         pageStream.write(responseToSend);
         lastId = null;
@@ -93,7 +93,7 @@ const setupPageStreams = () => {
   });
   // content.js
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    console.log('Message: ', message);
+    // console.log('Message: ', message);
     window.postMessage({ type: message.method, data: message }, '*');
   });
 
@@ -102,7 +102,7 @@ const setupPageStreams = () => {
     if (event.source !== window || !event.data.type) return;
 
     if (event.data.type === 'FROM_INPAGE') {
-      console.log('Received from inpage.js:', event.data.data);
+      // console.log('Received from inpage.js:', event.data.data);
     }
   });
 };

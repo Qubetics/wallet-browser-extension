@@ -7,6 +7,7 @@ import { WalletHelper } from './wallet.helper';
 import { Web3Helper } from './web3.helper';
 import { server } from '../server';
 import { store } from '..';
+import { IS_PRODUCTION } from '../config/bitcoin.config';
 
 export class CrossChainHelper {
   axiosInstance;
@@ -85,7 +86,7 @@ export class CrossChainHelper {
 
       const { account } = store.getState();
       const btcPrivateKeyStr =
-        await WalletHelper.getBitcoinPrivateKeyWithPassword(sessionPassword);
+      await WalletHelper.getBitcoinPrivateKeyWithPassword(walletAddress, sessionPassword);
       if (!btcPrivateKeyStr) {
         return console.error('Unable to fetch private key.');
       }
@@ -97,7 +98,7 @@ export class CrossChainHelper {
           receiveCoinCode: toCoin.symbol,
           depositCoinAmt: getFlooredFixed(depositAmount, 8),
           receiveCoinAmt: receiveAmount,
-          destinationAddr: 'tb1qe6hf4x7qark8cg0kcm9z7rhdgmtkwwppst006v', //toCoin.address,
+          destinationAddr: toCoin.address,
           refundAddr: walletAddress,
           equipmentNo: '123456568',
           sourceType: 'iOS',
@@ -160,7 +161,7 @@ export class CrossChainHelper {
 
         const keyPair = bitcoin.ECPair.fromWIF(
           btcPrivateKeyStr,
-          bitcoin.networks.testnet
+          IS_PRODUCTION ? bitcoin.networks.bitcoin : bitcoin.networks.testnet
         );
         // console.log('🚀 ~ CrossChainHelper ~ keyPair:', keyPair);
         let payment;
@@ -184,7 +185,7 @@ export class CrossChainHelper {
           return console.error('Private key does not match wallet address.');
         }
 
-        const psbt = new bitcoin.Psbt({ network: bitcoin.networks.testnet });
+        const psbt = new bitcoin.Psbt({ network: IS_PRODUCTION ? bitcoin.networks.bitcoin : bitcoin.networks.testnet });
 
         for (const utxo of utxos) {
           const input = {
@@ -222,7 +223,7 @@ export class CrossChainHelper {
         // console.log('orderData', orderData, 'sendAmount', sendAmount);
 
         psbt.addOutput({
-          address: 'tb1qe6hf4x7qark8cg0kcm9z7rhdgmtkwwppst006v', //orderData?.platformAddr,
+          address: orderData?.platformAddr,
           value: sendAmount,
         });
 
@@ -252,7 +253,7 @@ export class CrossChainHelper {
         // console.log('RAW TRANSACTION:', rawTransaction);
 
         hash = await BTCHelper.generateRawTransactionForCoinAndBroadcast(
-          'tb1qe6hf4x7qark8cg0kcm9z7rhdgmtkwwppst006v', //orderData?.platformAddr
+          orderData?.platformAddr,
           walletAddress,
           depositAmount,
           fromCoin.id,

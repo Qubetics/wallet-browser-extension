@@ -15,10 +15,10 @@ import { Buffer } from 'buffer';
 window.Buffer = Buffer; 
 
 const noop = () => {};
-// console.log = noop;
-// console.debug = noop;
-// console.info = noop;
-// console.warn = noop;
+console.log = noop;
+console.debug = noop;
+console.info = noop;
+console.warn = noop;
 
 const composeEnhancers =
   (typeof window !== "undefined" &&
