@@ -51,7 +51,7 @@ export class BTCHelper {
       try {
         const mempoolUrl = IS_PRODUCTION
           ? `https://mempool.space/api/address/${address}`
-          : `https://mempool.space/testnet4/api/address/${address}`;
+          : `https://mempool.space/testnet/api/address/${address}`;
 
         const { data: mempoolData } = await axios.get(mempoolUrl);
         
@@ -72,7 +72,7 @@ export class BTCHelper {
         // Fallback to blockstream.info API
         const apiUrl = IS_PRODUCTION
           ? `https://blockstream.info/api/address/${address}/utxo`
-          : `https://blockstream.info/testnet4/api/address/${address}/utxo`;
+          : `https://blockstream.info/testnet/api/address/${address}/utxo`;
 
         const { data } = await axios.get(apiUrl);
 
@@ -88,6 +88,29 @@ export class BTCHelper {
       return 0;
     }
   }
+
+  static getMempoolBTC = async (address) => {
+    const { account } = store.getState();
+    try {
+      const { data } = await server.get(
+        // `/btc/unspent_new`,
+        `mpc/fetchMempoolBalance/${address}`,
+        // {
+        //   address: address,
+        // },
+        {
+          headers: {
+            Authorization: account.jwtToken,
+          },
+        }
+      );
+     return data?.data.toFixed(8) || '0';
+
+    } catch (error) {
+      // console.log(error);
+      return false;
+    }
+  };
 
   static getUnspent = async (address) => {
     const { account } = store.getState();
@@ -117,7 +140,7 @@ export class BTCHelper {
     try {
       const data = await axios.get('https://api.blockchain.info/mempool/fees');
       // console.log(data);
-      return data.data.priority || 3;
+      return data?.data?.priority || 3;
     } catch (error) {
       return false;
     }

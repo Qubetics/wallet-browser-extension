@@ -198,34 +198,33 @@ function ChainAbstractionHistoryItem(props) {
 
     try {
       setIsUpdating(true);
-      
-      const response = await ChainAbstractionInstance.current.pollIntentStatus(
-        transactionHash
-      );
-      
-      if (!response || (!response.data && !response.status)) {
+
+      const intentId = (allData?.intent_hash || transactionHash || "").replace(/^0x/, "");
+      if (!intentId) {
+        messageApi.error("Intent hash not available");
+        setIsUpdating(false);
+        return;
+      }
+
+      const details = await ChainAbstractionInstance.current.getIntentDetails(intentId);
+      if (!details || details?.status === "not_found") {
         messageApi.error("Unable to fetch transaction status");
         setIsUpdating(false);
         return;
       }
 
-      const intentHash = response.data.intent_hash;
-      const currentStatus = response.data.status;
-
+      const intentStatus = String(details?.intent_status || "Pending").toLowerCase();
       let statusValue = 2;
-      if (currentStatus === 1 || currentStatus === true || currentStatus === "confirmed" || currentStatus === "completed") {
-        statusValue = 1; // Confirmed
-      } else if (currentStatus === 0 || currentStatus === false || currentStatus === "failed") {
-        statusValue = 0; // Failed
-      }
+      if (intentStatus === "completed") statusValue = 1;
+      if (intentStatus === "failed") statusValue = 0;
 
       setTransactionResult({
-        hash: intentHash || transactionHash,
+        hash: details?.intent_hash || details?.user_to_network_tx_id || transactionHash,
         status: statusValue,
-        solver: response.data.solver_id || "N/A",
-        fee: response.data.fees || allData?.intent_data?.fees || allData?.tx_fee || "0",
+        solver: details?.final_solver_id || "N/A",
+        fee: allData?.intent_data?.fees || allData?.tx_fee || "0",
         symbol: sourceCoin.symbol || "",
-        source_address: response.data.source_address || allData?.from_adrs || "",
+        source_address: details?.source_address || allData?.from_adrs || "",
         trx_id: allData?.tx_id,
       });
       
@@ -246,15 +245,10 @@ function ChainAbstractionHistoryItem(props) {
         normalizedListStatus = String(listStatusRaw).toLowerCase();
       }
       
-      // Normalize intent status for comparison
-      let normalizedIntentStatus = "pending";
-      if (currentStatus === 1 || currentStatus === true || currentStatus === "confirmed" || currentStatus === "completed") {
-        normalizedIntentStatus = "confirmed";
-      } else if (currentStatus === 0 || currentStatus === false || currentStatus === "failed" || currentStatus === "rejected") {
-        normalizedIntentStatus = "failed";
-      }
+      const normalizedIntentStatus =
+        intentStatus === "completed" ? "confirmed" : intentStatus === "failed" ? "failed" : "pending";
 
-      const shouldUpdate = intentHash && 
+      const shouldUpdate = (details?.intent_hash || transactionHash) && 
                            normalizedListStatus === "pending" && 
                            (normalizedIntentStatus === "confirmed" || normalizedIntentStatus === "failed") &&
                            normalizedListStatus !== normalizedIntentStatus;

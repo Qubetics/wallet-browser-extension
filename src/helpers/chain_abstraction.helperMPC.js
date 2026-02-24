@@ -9,8 +9,10 @@ import BigNumber from "bignumber.js";
 const { ethers } = require("ethers");
 
 const QUBETICS_RPC = process.env.REACT_APP_QUBETIC_RPC;
-const STAGE_MPC_BASE_URL = process.env.REACT_APP_CHAIN_ABSTRACTION_API_URL;
-const INTENT_STATUS_BASE_URL = process.env.REACT_APP_CHAIN_ABSTRACTION_STAGE_API_URL;
+const STAGE_MPC_BASE_URL = process.env.REACT_APP_CHAIN_ABSTRACTION_API_URL_PROD;
+const RESOLVE_API_BASE_URL = process.env.REACT_APP_CHAIN_ABSTRACTION_PROD_API_URL;
+const INTENT_DETAILS_BASE_URL = process.env.REACT_APP_CHAIN_ABSTRACTION_API_URL_PROD;
+
 /**
  * MPC Chain Abstraction Helper
  * Handles cross-chain transactions using MPC wallets
@@ -103,111 +105,129 @@ export class MpcChainAbstractionHelper {
   };
 
   /**
-   * Poll intent status until completion
-   * Retries up to 5 times even for HTTP 500 errors
+   * Call intent resolve API (after we have intent_hash from user_mpc_deposit)
+   * @param {string} intentId - intent_hash without 0x prefix
    */
-  async pollIntentStatus(intentHash) {
-    const url = `${INTENT_STATUS_BASE_URL}/api/routes/intent-status?intent-hash=${intentHash}`;
-    const MAX_RETRIES = 10;
-    const MAX_500_RETRIES = 5; // Retry 5 times even for 500 errors
-    let attempts = 0;
-    let error500Attempts = 0;
+  callResolveIntent = async (intentId) => {
+    try {
+      const url = `${RESOLVE_API_BASE_URL}/api/routes/intent/resolve`;
+      await axios.post(url, { intent_id: intentId }, { headers: { "Content-Type": "application/json" } });
+    } catch (err) {
+      // console.error("[MPC] callResolveIntent error:", err);
+      throw err;
+    }
+  };
 
-    return new Promise((resolve) => {
+  /**
+   * Fetch intent_details once (GET intent_details/{intentId})
+   * @param {string} intentId - intent_hash (no 0x)
+   * @returns {Promise<Object>} intent_details API response (status, intent_hash, intent_status, source_address, etc.)
+   */
+  getIntentDetails = async (intentId) => {
+    try {
+    const url = `${INTENT_DETAILS_BASE_URL}/intent_details/${intentId}`;
+      const response = await axios.get(url);
+      return response?.data;
+    } catch (err) {
+      // console.error("[MPC] getIntentDetails error:", err);
+      throw err;
+    }
+  };
+
+  /**
+   * Poll intent_details until user_to_network_tx_id is present OR intent_status is Completed/Failed (or timeout)
+   * @param {string} intentId - intent_hash (no 0x)
+   * @param {Object} options - { pollIntervalMs, maxAttempts, resolveOnTxId, resolveOnFinalStatus }
+   * @returns {Promise<Object>} intent_details response when condition is met
+   */
+  async pollIntentDetailsUntilTxId(intentId, options = {}) {
+    const pollIntervalMs = options.pollIntervalMs || 3000;
+    const maxAttempts = options.maxAttempts || 60; // 3 min at 3s
+    const resolveOnTxId = options.resolveOnTxId !== false; // default true
+    const resolveOnFinalStatus = options.resolveOnFinalStatus !== false; // default true
+    let attempts = 0;
+
+    const url = `${INTENT_DETAILS_BASE_URL}/intent_details/${intentId}`;
+
+    return new Promise((resolve, reject) => {
       async function poll() {
         attempts++;
         try {
           const response = await axios.get(url);
-          const { error, data } = response.data;
+          const data = response?.data;
+          const userToNetworkTxId = data?.user_to_network_tx_id;
+          const intentStatus = (data?.intent_status || "").toLowerCase();
 
-          // Check for HTTP 500 error - retry up to 5 times
-          if (response.status === 500 || (error && response.status >= 500)) {
-            error500Attempts++;
-            // console.error(
-            //   `Intent API returned 500 error (Attempt ${error500Attempts}/${MAX_500_RETRIES}):`,
-            //   response.data
-            // );
-
-            if (error500Attempts < MAX_500_RETRIES) {
-              // console.log(
-              //   `Retrying after 500 error in 2 seconds... (500 Error Attempt ${error500Attempts})`
-              // );
-              setTimeout(poll, 2000);
-              return;
-            } else {
-                // console.error(
-                //   "Max 500 error retries reached. Transaction failed."
-                // );
-              resolve({
-                error: true,
-                message: "Transaction failed - intent API error",
-                statusCode: 500,
-                data: response.data,
-              });
-              return;
-            }
+          // If status reaches a terminal state, resolve with the full payload
+          if (
+            resolveOnFinalStatus &&
+            (intentStatus === "Solved" || intentStatus === "failed")
+          ) {
+            resolve(data);
+            return;
           }
 
-          // Reset 500 error counter on successful response
-          error500Attempts = 0;
-
-          if (!error && data) {
-            // console.log("Final Success Response:", response?.data);
-            resolve(response?.data);
-          } else if (attempts < MAX_RETRIES) {
-            // console.log(`Polling again in 2 seconds... (Attempt ${attempts})`);
-            setTimeout(poll, 2000);
-          } else {
-            // console.warn("Max retries reached. Stopping polling.");
-            resolve({ error: true, message: "Max retries reached" });
-          }
-        } catch (error) {
-          // Check if it's an HTTP 500 error
-          if (error.response && error.response.status === 500) {
-            error500Attempts++;
-            // console.error(
-            //   `Intent API returned 500 error (Attempt ${error500Attempts}/${MAX_500_RETRIES}):`,
-            //   error.response.data
-            // );
-
-            if (error500Attempts < MAX_500_RETRIES) {
-              // console.log(
-              //   `Retrying after 500 error in 2 seconds... (500 Error Attempt ${error500Attempts})`
-              // );
-              setTimeout(poll, 2000);
-              return;
-            } else {
-              // console.error(
-              //   // "Max 500 error retries reached. Transaction failed."
-              // );
-              resolve({
-                error: true,
-                message: "Transaction failed - intent API error",
-                statusCode: 500,
-                data: error.response?.data,
-              });
-              return;
-            }
+          // If tx id is available, resolve with the full payload
+          if (
+            resolveOnTxId &&
+            userToNetworkTxId != null &&
+            userToNetworkTxId !== ""
+          ) {
+            resolve(data);
+            return;
           }
 
-          // console.error(
-          //   `Error fetching intent status (Attempt ${attempts}), retrying in 2 seconds:`,
-          //   error
-          // );
-          if (attempts < MAX_RETRIES) {
-            setTimeout(poll, 2000);
-          } else {
-            // console.warn("Max retries reached after errors. Stopping polling.");
-            resolve({
-              error: true,
-              message: "Max retries reached after errors",
-            });
+          if (attempts >= maxAttempts) {
+            reject(new Error("Timeout waiting for intent details"));
+            return;
           }
+
+          setTimeout(poll, pollIntervalMs);
+        } catch (err) {
+          if (attempts >= maxAttempts) {
+            reject(err?.response?.data ? new Error(err.response.data.error_message || "Intent details failed") : err);
+            return;
+          }
+          setTimeout(poll, pollIntervalMs);
         }
       }
-
       poll();
     });
+  }
+
+  /**
+   * Legacy helper kept for UI/components that still call pollIntentStatus.
+   * Uses intent_details API and normalizes the response into the old shape:
+   * { data: { intent_hash, status, solver_id, source_address, fees, ... } }
+   */
+  async pollIntentStatus(intentHash) {
+    try {
+      const intentId = String(intentHash || "").replace(/^0x/, "");
+      const details = await this.getIntentDetails(intentId);
+
+      if (!details || details?.status === "not_found") {
+        return { data: null };
+      }
+
+      const intentStatus = String(details?.intent_status || "Pending").toLowerCase();
+      let status = 2; // pending
+      if (intentStatus === "Solved") status = 1;
+      if (intentStatus === "failed") status = 0;
+
+      return {
+        data: {
+          intent_hash: details?.intent_hash || intentId,
+          status,
+          solver_id: details?.final_solver_id || "N/A",
+          source_address: details?.source_address || "N/A",
+          fees: details?.fees,
+          user_to_network_tx_id: details?.user_to_network_tx_id,
+          network_to_target_tx_id: details?.network_to_target_tx_id,
+        },
+      };
+    } catch (err) {
+      return { data: null, error: true, message: err?.message || "Failed to fetch intent details" };
+    }
   }
 
   /**
@@ -247,6 +267,7 @@ export class MpcChainAbstractionHelper {
    * @param {string} symbol - Token symbol
    * @param {string} sessionPassword - User password
    * @param {string} toAddress - Recipient address
+   * @param {Object} [options] - { onIntentCreated(intentHash) } called when intent_hash is received (before resolve/poll) so UI can show loading
    * @returns {Promise<Object>} Transaction result
    */
   SendMpcTransaction = async (
@@ -262,7 +283,8 @@ export class MpcChainAbstractionHelper {
     rpc,
     symbol,
     sessionPassword,
-    toAddress
+    toAddress,
+    options = {}
   ) => {
     try {
       // console.log("=== MPC Transaction Start ===");
@@ -362,145 +384,83 @@ export class MpcChainAbstractionHelper {
       const response = await this.createMpcSwapOrder(swapData);
       // console.log("MPC swap order response:", response);
 
-      if (!response || response.error) {
-        throw new Error(response?.message || "Failed to create MPC swap order");
+      if (!response) {
+        throw new Error("Failed to create MPC swap order");
       }
 
-      // Get transaction hash
-      let txId = response?.user_to_network_tx_id;
+      // Extract intent_hash (new API can return status "error" with intent_hash)
+      let intentHash = response?.intent_hash;
 
-      // Handle timeout case
-      if (response?.status === "timeout" && response?.error_message) {
+      const intentData = await this.getIntentDetails(intentHash);
+      
+      if (!intentHash && response?.status === "timeout" && response?.error_message) {
         const parts = response.error_message.split("Intent hash: ");
         if (parts.length > 1) {
           const hash = parts[1].split(".")[0];
-          txId = "0x" + hash;
+          intentHash = hash.startsWith("0x") ? hash : "0x" + hash;
         }
       }
+      const intentId = intentHash && typeof intentHash === "string"
+        ? (intentHash.startsWith("0x") ? intentHash.slice(2) : intentHash)
+        : null;
 
-      // console.log("Transaction ID:", txId);
-
-      if (!txId) {
-        throw new Error("No transaction ID received");
-      }
-
-      // Get gas price
-      const gasprice = await this.getGasPrice(
-        token1?.coinSymbol?.toLowerCase() === "tics" ? "qubetics" : "bitcoin",
-        toAddress,
-        mpcFromAddress,
-        false,
-        "",
-        token1?.coinSymbol
-      );
-
-      // console.log("Gas price:", gasprice);
+      let intentStatus = intentData?.intent_status || "Pending";
 
       const coinFamily2 = token1?.coinFamily;
       const fromAddress = account?.coinFamilyAndAddress?.[coinFamily2];
 
-      // console.log("From address:", fromAddress);
-
-      // ============================================
-      // NEW FLOW: Poll intent status FIRST before saving transaction
-      // ============================================
-      // console.log("Polling intent status before saving transaction...");
-      const transactionResult = await this.pollIntentStatus(txId);
-
-      // console.log("Intent status poll result:", transactionResult);
-
-      // Check if intent API returned an error (500 or other error)
-      if (transactionResult?.error || transactionResult?.statusCode === 500) {
-        // console.error(
-        //   "Intent API returned error - transaction failed:",
-        //   transactionResult
-        // );
-        // Return error result - don't save transaction
-        throw new Error(
-          transactionResult?.message || "Transaction failed - intent API error"
-        );
-      }
-
-      // If we reach here, intent API returned success
-      // Now prepare and save transaction data
-      // console.log("Intent API returned success - saving transaction...");
-
-      // Prepare save data
-      const saveData = {
-        amount: Number(amount),
-        gas_price: gasprice?.gas_price || "0",
-        from: fromAddress,
-        tx_hash: txId,
-        to: toAddress,
-        tx_type: "chain_abstraction",
-        tx_status: "pending",
-        coin_symbol: token1?.coinSymbol?.toLowerCase(),
-        coin_family: token1?.coinFamily,
-      };
-
-      if (token1?.coinFamily !== 3) {
-        saveData.gas_estimate = "30000";
-      }
-
-      // Save intent hash only after intent API confirms success
-      await this.saveIntentHash(saveData);
-      // console.log(
-      //   "Transaction saved successfully after intent API confirmation"
-      // );
-
-      // ============================================
-      // Update transaction status on backend
-      // ============================================
-      if (transactionResult?.data) {
-        const intentHash = transactionResult.data.intent_hash;
-        const status = transactionResult.data.status;
-
-        // console.log("Updating transaction status:", { intentHash, status });
-
-        // Only update if we have a valid intent hash and status
-        if (intentHash && status) {
-          try {
-            // Use helper function to get URL path
-            const urlPath = this.getCoinFamilyUrl(token1?.coinFamily);
-
-            const updateData = {
-              tx_hash: txId,
-              tx_status: status,
-            };
-
-            // console.log("Calling update status API:", { urlPath, updateData });
-
-            // Call the update status API
-            const updateResponse = await server.post(
-              `${urlPath}/updateTransactionStatus`,
-              updateData,
-              {
-                headers: { Authorization: account.jwtToken },
-              }
-            );
-
-            // console.log("Update status API response:", updateResponse);
-          } catch (updateError) {
-            // Log error but don't fail the transaction
-            // console.error("Error updating transaction status:", updateError);
-            // Don't throw - we still want to return the transaction result
-          }
-        } else {
-          // console.warn(
-          //   "Skipping status update - missing intent hash or status:",
-          //   { intentHash, status }
-          // );
+      if (intentId && intentStatus == "Pending" || intentStatus == "Solved") {
+        if (options?.onIntentCreated) {
+          options.onIntentCreated(intentHash || intentId);
         }
+
+        // Fire resolve in background so we don't block the UI
+        this.callResolveIntent(intentId).catch(() => {});
+
+
+        let gasprice = { gas_price: "0" };
+        try {
+          gasprice = await this.getGasPrice(
+            token1?.coinSymbol?.toLowerCase() === "tics" ? "qubetics" : "bitcoin",
+            toAddress,
+            mpcFromAddress,
+            false,
+            "",
+            token1?.coinSymbol
+          ) || gasprice;
+        } catch (e) {
+          // use default
+        }
+
+        const saveData = {
+          amount: Number(amount),
+          gas_price: gasprice?.gas_price || "0",
+          from: fromAddress,
+          tx_hash: intentId,
+          intent_hash: intentId,
+          to: toAddress,
+          tx_type: "chain_abstraction",
+          tx_status: "pending",
+          coin_symbol: token1?.coinSymbol?.toLowerCase(),
+          coin_family: token1?.coinFamily,
+        };
+        if (token1?.coinFamily !== 3) {
+          saveData.gas_estimate = "30000";
+        }
+
+          await this.saveIntentHash(saveData);
+     
+
+        // Return immediately so UI shows success modal with intent hash and View on Explorer
+        return {
+          hash: intentId,
+          status: intentStatus == "Solved" ? 1 : intentStatus == "Failed" ? 0 : 2, // pending
+          solver: "N/A",
+          source_address: mpcFromAddress || "N/A",
+        };
       }
 
-      return {
-        hash: transactionResult?.data?.intent_hash || txId,
-        status: transactionResult?.data?.status || "pending",
-        solver: transactionResult?.data?.solver_id || "N/A",
-        source_address: transactionResult?.data?.source_address || "N/A",
-      };
     } catch (error) {
-      // console.error("Error in SendMpcTransaction:", error);
       throw error;
     }
   };

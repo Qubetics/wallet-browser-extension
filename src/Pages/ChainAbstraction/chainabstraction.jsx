@@ -46,14 +46,16 @@ import PasteIcon from "../../Assets/paste-svgrepo-com.svg";
 import Abstract from "../../Assets/swapI.png";
 import axios from "axios";
 
-// Min/Max swap amounts based on coin family
-const MIN_MAX_SWAP_AMOUNT = {
+const CHAIN_ABSTRACTION_PRICE_URL = `${process.env.REACT_APP_CHAIN_ABSTRACTION_MIN_API_URL}/api/v1/cryptos/prices?symbols=BTC,TICS`;
+const SATOSHI_600_IN_BTC = 0.000006; // 600 sats
+
+const INITIAL_MIN_MAX_SWAP_AMOUNT = {
   7: {
     min: 25,
     max: 1000,
   },
   3: {
-    min: 0.000005,
+    min: 0.000006, // 600 sats
     max: 0.001,
   }
 };
@@ -85,41 +87,41 @@ function addCommasToNumber(number) {
   }
 }
 
-// Validate swap amount based on coin family
-function validateSwapAmount(amount, coinFamily) {
-  const limits = MIN_MAX_SWAP_AMOUNT[coinFamily];
+// Validate swap amount based on coin family (limits can be dynamic from state)
+function validateSwapAmount(amount, coinFamily, limitsMap = null) {
+  const limits = (limitsMap || INITIAL_MIN_MAX_SWAP_AMOUNT)[coinFamily];
   if (!limits) {
     return { valid: true, message: "" };
   }
-  
+
   const numAmount = parseFloat(amount);
   if (isNaN(numAmount)) {
     return { valid: false, message: "Please enter a valid amount" };
   }
-  
+
   if (numAmount < limits.min) {
-    return { 
-      valid: false, 
-      message: `Minimum amount is ${limits.min} ${coinFamily === 7 ? 'TICS' : 'BTC'}` 
+    return {
+      valid: false,
+      message: `Minimum amount is ${limits.min} ${coinFamily === 7 ? "TICS" : "BTC"}`,
     };
   }
-  
+
   if (numAmount > limits.max) {
-    return { 
-      valid: false, 
-      message: `Maximum amount is ${limits.max} ${coinFamily === 7 ? 'TICS' : 'BTC'}` 
+    return {
+      valid: false,
+      message: `Maximum amount is ${limits.max} ${coinFamily === 7 ? "TICS" : "BTC"}`,
     };
   }
-  
+
   return { valid: true, message: "" };
 }
 
-// Get limits text for display
-function getLimitsText(coinFamily) {
-  const limits = MIN_MAX_SWAP_AMOUNT[coinFamily];
+// Get limits text for display (limits can be dynamic from state)
+function getLimitsText(coinFamily, limitsMap = null) {
+  const limits = (limitsMap || INITIAL_MIN_MAX_SWAP_AMOUNT)[coinFamily];
   if (!limits) return "";
-  
-  const symbol = coinFamily === 7 ? 'TICS' : 'BTC';
+
+  const symbol = coinFamily === 7 ? "TICS" : "BTC";
   return `Min: ${limits.min} ${symbol}, Max: ${limits.max} ${symbol}`;
 }
 
@@ -190,6 +192,7 @@ function ChainAbstraction({ state }) {
   // );
   const mpcHelper = new MpcChainAbstractionHelper(chain.chainId);
   const [isProcessModalOpen, setIsProcessModal] = useState(false);
+  const [isWaitingForIntentDetails, setIsWaitingForIntentDetails] = useState(false);
   const [transactionresult, setTransactionResult] = useState({
     hash: "",
     fee: "",
@@ -208,6 +211,33 @@ function ChainAbstraction({ state }) {
   const [solverFee, setSolverFee] = useState(1.5); // Default to 1.5% from API
   const [networkFee, setNetworkFee] = useState(0); // Store calculated network fee
   const networkFeeRef = useRef(0); // Use ref to persist network fee across renders
+  const [minMaxSwapAmount, setMinMaxSwapAmount] = useState(INITIAL_MIN_MAX_SWAP_AMOUNT);
+  const [mpcWalletsData, setMpcWalletsData] = useState(null); // Cache MPC wallets data
+  const baseInfoCacheRef = useRef(new Map()); // Cache for getBaseInfo responses by token pair
+
+  const getFiatValueForCoin = async () => {
+    try {
+      const response = await fetch(CHAIN_ABSTRACTION_PRICE_URL);
+      const data = await response.json();
+      const prices = data?.data;
+      if (prices?.BTC != null && prices?.TICS != null && Number(prices.TICS) > 0) {
+        const btcPrice = Number(prices.BTC);
+        const ticsPrice = Number(prices.TICS);
+        const ticsEquivalentTo600Satoshi = (SATOSHI_600_IN_BTC * btcPrice) / ticsPrice;
+        const minTics = Math.ceil(Number(Number(ticsEquivalentTo600Satoshi).toFixed(8)) || 25);
+        setMinMaxSwapAmount((prev) => ({
+          ...prev,
+          7: { ...prev[7], min: Math.max(minTics, 1) },
+        }));
+      }
+    } catch (e) {
+      // keep initial TICS min on error
+    }
+  };
+
+  useEffect(() => {
+    getFiatValueForCoin();
+  }, []);
 
   const onChangeFromValue = (val) => {
     setWithdrawAmount(val);
@@ -302,77 +332,50 @@ function ChainAbstraction({ state }) {
     };
   };
 
-  // Fetch MPC balance for a token
-  const fetchMpcBalance = async (token, mpcAddresses) => {
-    // console.log("btc",mpcAddresses?.btc)
-    // console.log("btc",mpcAddresses)
-
+  // Fetch MPC balance for a token (uses cached mpcWalletsData)
+  const fetchMpcBalance = (token, mpcAddresses) => {
     try {
       if (!token || !account) {
-        // console.warn("Missing token or account for balance fetch");
         return 0;
       }
 
-      // Always use the main ETH wallet address (not coin-family specific)
       const coinFamily = token?.coinFamily || token?.coin_family;
-      // console.log("[DEBUG fetchMpcBalance] Token:", token?.symbol, "CoinFamily:", coinFamily);
       
-      // Always use account.address (ETH address) to query MPC wallets
-      const walletAddress = account?.address;
-      // console.log("[DEBUG fetchMpcBalance] Using main ETH wallet address:", walletAddress);
-      
-      if (!walletAddress) {
-        // console.warn("No wallet address available");
-        return 0;
-      }
-
-      // Call API to get MPC wallet balance (sends coin_family: 1 to get balance)
-      const mpcWalletDataArray = await getMpcWallets(walletAddress, coinFamily);
-      
-      // console.log("[DEBUG] getMpcWallets response:", mpcWalletDataArray);
-      // console.log("[DEBUG] Is array?", Array.isArray(mpcWalletDataArray));
-      
-      if (!mpcWalletDataArray) {
-        // console.warn("Failed to get MPC wallet data from API - null response");
+      // Use cached MPC wallets data instead of calling API
+      if (!mpcWalletsData) {
+        // If cache is not available, return 0 (will be updated when cache is ready)
         return 0;
       }
 
       // Handle both array and single object responses
       let mpcWalletData;
-      if (Array.isArray(mpcWalletDataArray)) {
-        // console.log("[DEBUG] Searching array for coin family:", coinFamily);
+      if (Array.isArray(mpcWalletsData)) {
         // Filter all wallets matching the coin family and get the last one
-        const matchingWallets = mpcWalletDataArray.filter(
+        const matchingWallets = mpcWalletsData.filter(
           (wallet) => wallet?.coin_family === coinFamily
         );
         // Get the last entry (most recent) for this coin family
         mpcWalletData = matchingWallets.length > 0 
           ? matchingWallets[matchingWallets.length - 1] 
           : null;
-        // console.log("[DEBUG] Found wallet data (last entry):", mpcWalletData);
-        // console.log("[DEBUG] Total matching wallets:", matchingWallets.length);
       } else {
         // Single object response
-        // console.log("[DEBUG] Single object response, coin_family:", mpcWalletDataArray?.coin_family);
-        if (mpcWalletDataArray?.coin_family === coinFamily) {
-          mpcWalletData = mpcWalletDataArray;
+        if (mpcWalletsData?.coin_family === coinFamily) {
+          mpcWalletData = mpcWalletsData;
         }
       }
       
       if (!mpcWalletData) {
-        // console.warn(`No balance data found for coin family ${coinFamily}`);
-        // console.warn("Available data:", mpcWalletDataArray);
         return 0;
       }
 
-      // Extract balance from API response
+      // Extract balance from cached data
       const balance = mpcWalletData?.balance || 0;
-      // console.log(`✅ MPC balance from API for ${token.symbol} (coin family ${coinFamily}):`, balance);
       
       return parseFloat(balance) || 0;
 
     } catch (error) {
-      // console.error("Error fetching MPC balance:", error);
+      console.error("Error fetching MPC balance from cache:", error);
       return 0;
     }
   };
@@ -395,33 +398,126 @@ function ChainAbstraction({ state }) {
     }
   };
 
+  // Cached version of getQuoteAndRoute to avoid multiple getBaseInfo calls
+  const getCachedQuoteAndRoute = async (fromCoinId, toCoinId, amount) => {
+    const cacheKey = `${fromCoinId}_${toCoinId}`;
+    
+    // Check cache first
+    if (baseInfoCacheRef.current.has(cacheKey)) {
+      const cachedData = baseInfoCacheRef.current.get(cacheKey);
+      const exchangeRate = cachedData;
+      
+      if (exchangeRate?.instantRate == 0) {
+        return false;
+      }
+      
+      let instantRate = exchangeRate?.instantRate;
+      let receiveCoinFee = exchangeRate?.receiveCoinFee;
+      let convertedAmount = amount * instantRate;
+      convertedAmount = (convertedAmount * 99.7) / 100;
+      convertedAmount = convertedAmount - receiveCoinFee;
+      convertedAmount = convertedAmount <= 0 ? 0 : convertedAmount;
+      
+      return {
+        pair: [fromCoinId, toCoinId],
+        outAmount: convertedAmount,
+        exchangeData: exchangeRate,
+      };
+    }
+    
+    // If not in cache, call the API and cache the result
+    try {
+      const { account } = store.getState();
+      const response = await server.post(
+        '/swftc/getBaseInfo',
+        {
+          depositCoinCode: fromCoinId,
+          receiveCoinCode: toCoinId,
+        },
+        {
+          headers: {
+            Authorization: account.jwtToken,
+          },
+        }
+      );
+      
+      const exchangeRate = response?.data?.data?.data;
+      
+      // Cache the response
+      if (exchangeRate) {
+        baseInfoCacheRef.current.set(cacheKey, exchangeRate);
+      }
+      
+      if (exchangeRate?.instantRate == 0) {
+        return false;
+      }
+      
+      let instantRate = exchangeRate?.instantRate;
+      let receiveCoinFee = exchangeRate?.receiveCoinFee;
+      let convertedAmount = amount * instantRate;
+      convertedAmount = (convertedAmount * 99.7) / 100;
+      convertedAmount = convertedAmount - receiveCoinFee;
+      convertedAmount = convertedAmount <= 0 ? 0 : convertedAmount;
+      
+      return {
+        pair: [fromCoinId, toCoinId],
+        outAmount: convertedAmount,
+        exchangeData: exchangeRate,
+      };
+    } catch (error) {
+      return false;
+    }
+  };
+
   const init = async () => {
     try {
-      // Fetch fees on component initialization
+      // Check if account exists
+      if (!account) {
+        setCompentLoading(false);
+        setIsInitialLoading(false);
+        return;
+      }
+
       await fetchFees();
       
-      // console.log("account.coinFamilyAndAddress", account.coinFamilyAndAddress);
-
-      // Get MPC addresses first
       const storedMpc = await getStoredMpcAddresses();
-      // console.log("Stored MPC addresses:", storedMpc);
       setMpcAddresses(storedMpc);
 
-      // Build address list including both original and MPC addresses
+      // Fetch MPC wallets data once on page load and cache it
+      if (account?.address && account?.jwtToken) {
+        try {
+          const walletData = await getMpcWallets(account.address, 1);
+          setMpcWalletsData(walletData);
+        } catch (error) {
+          console.log("Error fetching MPC wallets data:", error);
+          // Continue even if this fails
+        }
+      }
+
       const addressList = [];
 
-      // Add original addresses
-      Object.values(account.coinFamilyAndAddress)
-        .filter(Boolean)
-        .forEach((addr) => {
-          addressList.push(addr);
-        });
+      if (account?.coinFamilyAndAddress && typeof account.coinFamilyAndAddress === 'object') {
+        Object.values(account.coinFamilyAndAddress)
+          .filter(Boolean)
+          .forEach((addr) => {
+            addressList.push(addr);
+          });
+      }
 
-      // Add MPC addresses if they exist
       if (storedMpc?.eth) addressList.push(storedMpc.eth);
       if (storedMpc?.btc) addressList.push(storedMpc.btc);
 
-      // console.log("Fetching balances for addresses:", addressList);
+      if (addressList.length === 0) {
+        setCompentLoading(false);
+        setIsInitialLoading(false);
+        return;
+      }
+
+      if (!account?.jwtToken) {
+        setCompentLoading(false);
+        setIsInitialLoading(false);
+        return;
+      }
 
       const data = await server.post(
         "/chainAbstraction/getCoinList",
@@ -434,26 +530,28 @@ function ChainAbstraction({ state }) {
         }
       );
 
-      // console.log("🚀 ~ init ~ data:", data);
       setTotal(data?.data?.data?.length || 0);
 
       const { chains } = await chrome.storage.local.get("chains");
 
-      // Pass mpcAddresses to buildTokenObject
-      let tokens = data?.data?.data?.map((token) =>
-        buildTokenObject(token, chains, account, storedMpc)
-      );
+      if (!data?.data?.data || !Array.isArray(data.data.data)) {
+        setCompentLoading(false);
+        setIsInitialLoading(false);
+        return;
+      }
 
-      // console.log("tokens with MPC addresses:", tokens);
+      let tokens = data.data.data.map((token) =>
+        buildTokenObject(token, chains || [], account, storedMpc)
+      );
 
       if (tokens.length === 0) {
         setCompentLoading(false);
+        setIsInitialLoading(false);
         return;
       }
 
       const activeTokens = tokens;
       let modifiedList = await uniqueList(allToken, tokens);
-      // console.log("🚀 ~ init ~ modifiedList:", modifiedList);
 
       setAllTokens(modifiedList);
       setFilteredTokens(modifiedList);
@@ -475,18 +573,12 @@ function ChainAbstraction({ state }) {
           ) ||
           modifiedList.find((token) => token.id !== myToken1?.id) ||
           modifiedList[1] ||
-          myToken1; // Allow same token if only one available
+          myToken1;
 
-        // Fetch fresh MPC balance for token1
-        const mpcAddr1 =
-          myToken1.coinFamily === 3 ? storedMpc?.btc : storedMpc?.eth;
-        if (mpcAddr1) {
-          const mpcBal = await fetchMpcBalance(myToken1, mpcAddr1);
-          myToken1.balance = mpcBal;
-          setBalance(mpcBal);
-        } else {
-          setBalance(myToken1.balance);
-        }
+        // Fetch MPC balance for token1 (using cached data)
+        const mpcBal = fetchMpcBalance(myToken1, storedMpc);
+        myToken1.balance = mpcBal;
+        setBalance(mpcBal);
 
         setReceivedBalance(0);
         setAvailableTokens(modifiedList);
@@ -494,7 +586,6 @@ function ChainAbstraction({ state }) {
         setToken2(myToken2);
         setCompentLoading(true);
 
-        // For same-coin transfers (same chain), received amount equals entered amount (no slippage)
         let route;
         if (myToken1?.id === myToken2?.id) {
           route = {
@@ -506,30 +597,46 @@ function ChainAbstraction({ state }) {
             },
           };
           setRoute(route);
-        } else {
-          route = await crossChainHelper.current.getQuoteAndRoute(
-            myToken1?.symbol,
-            myToken2?.symbol,
-            1
-          );
+          } else {
+            try {
+              route = await getCachedQuoteAndRoute(
+                myToken1?.symbol,
+                myToken2?.symbol,
+                1
+              );
 
-          if (
-            route?.status &&
-            route?.message &&
-            (route?.status !== "" || route?.message !== "")
-          ) {
-            setCompentLoading(false);
-            return messageApi.error(route?.message);
+            if (
+              route?.status &&
+              route?.message &&
+              (route?.status !== "" || route?.message !== "")
+            ) {
+              setCompentLoading(false);
+              setIsInitialLoading(false);
+              return messageApi.error(route?.message);
+            }
+
+            setRoute(route);
+          } catch (error) {
+            console.log("Error fetching route:", error);
+            // Set a default route to prevent UI errors
+            setRoute({
+              pair: [myToken1?.symbol, myToken2?.symbol],
+              outAmount: 1,
+              exchangeData: {
+                instantRate: 1,
+                receiveCoinFee: 0,
+              },
+            });
           }
-
-          setRoute(route);
         }
         setCompentLoading(false);
+        setTimeout(() => {
+          setIsInitialLoading(false);
+        }, 1000);
       } else {
         const myToken1 =
           activeTokens.find((el) => el.id == crossToken1.id) || null;
         
-        // Allow same token selection
         let myToken2 = modifiedList.find((el) => el.id == crossToken2.id);
         if (!myToken2) {
           myToken2 = modifiedList.find((token) => token.id !== myToken1?.id) || modifiedList[1] || myToken1;
@@ -541,16 +648,10 @@ function ChainAbstraction({ state }) {
         setToken1(myToken1);
         setToken2(myToken2);
 
-        // Fetch fresh MPC balance
+        // Fetch MPC balance (using cached data)
         if (myToken1 && storedMpc) {
-          const mpcAddr =
-            myToken1.coinFamily === 3 ? storedMpc?.btc : storedMpc?.eth;
-          if (mpcAddr) {
-            const mpcBal = await fetchMpcBalance(myToken1, mpcAddr);
-            setBalance(mpcBal);
-          } else {
-            setBalance(updatedToken?.balance || 0);
-          }
+          const mpcBal = fetchMpcBalance(myToken1, storedMpc);
+          setBalance(mpcBal);
         } else {
           setBalance(updatedToken?.balance || 0);
         }
@@ -558,7 +659,6 @@ function ChainAbstraction({ state }) {
         setAvailableTokens(modifiedList);
 
         if (myToken1) {
-          // For same-coin transfers (same chain), received amount equals entered amount (no slippage)
           let route;
           if (myToken1?.id === myToken2?.id) {
             route = {
@@ -571,27 +671,39 @@ function ChainAbstraction({ state }) {
             };
             setRoute(route);
           } else {
-            route = await crossChainHelper.current.getQuoteAndRoute(
-              myToken1?.symbol,
-              myToken2?.symbol,
-              1
-            );
+            try {
+              route = await getCachedQuoteAndRoute(
+                myToken1?.symbol,
+                myToken2?.symbol,
+                1
+              );
 
-            if (
-              route?.status &&
-              route?.message &&
-              (route?.status !== "" || route?.message !== "")
-            ) {
-              setCompentLoading(false);
-              return messageApi.error(route?.message);
+              if (
+                route?.status &&
+                route?.message &&
+                (route?.status !== "" || route?.message !== "")
+              ) {
+                setCompentLoading(false);
+                setIsInitialLoading(false);
+                return messageApi.error(route?.message);
+              }
+
+              setRoute(route);
+            } catch (error) {
+              console.log("Error fetching route:", error);
+              setRoute({
+                pair: [myToken1?.symbol, myToken2?.symbol],
+                outAmount: 1,
+                exchangeData: {
+                  instantRate: 1,
+                  receiveCoinFee: 0,
+                },
+              });
             }
-
-            setRoute(route);
           }
         }
 
         setCompentLoading(false);
-        // Add a small delay to ensure skeleton loader is visible
         setTimeout(() => {
           setIsInitialLoading(false);
         }, 1000);
@@ -621,15 +733,33 @@ function ChainAbstraction({ state }) {
         }
       }
     } catch (error) {
-      // console.log("error in the init function:", error);
+      console.log("error in the init function:", error);
       setCompentLoading(false);
-      // Add a small delay to ensure skeleton loader is visible even on error
       setTimeout(() => {
         setIsInitialLoading(false);
       }, 1000);
-      messageApi.error(
-        "Unable to perform swap currently. Please try again later."
-      );
+
+      if (error?.response?.status === 401 || error?.response?.status === 403) {
+        return;
+      }
+      
+      const isNetworkError = 
+        error?.response?.status >= 500 || 
+        error?.code === 'NETWORK_ERROR' ||
+        error?.message?.includes('Network Error') ||
+        error?.message?.includes('timeout');
+      
+      const isDataError = 
+        error?.message?.includes('undefined') ||
+        error?.message?.includes('Cannot read') ||
+        error?.message?.includes('null');
+      
+      if (isNetworkError && !isDataError) {
+        messageApi.error(
+          error?.response?.data?.message || 
+          "Unable to perform swap currently. Please try again later."
+        );
+      }
     }
   };
 
@@ -721,7 +851,6 @@ function ChainAbstraction({ state }) {
 
   // Set default MPC address for the "To Address" field based on token2
   useEffect(() => {
-    // If same token is selected for both source and destination, leave "To Address" empty
     if (token1?.id === token2?.id) {
       // console.log("Same token selected for both source and destination, clearing to address");
       setToAddress("");
@@ -754,19 +883,12 @@ function ChainAbstraction({ state }) {
   }, [token1, token2, mpcAddresses]);
 
   useEffect(() => {
-    if (token1 && mpcAddresses) {
-      // console.log("=== Fetching balance for token change ===");
-      // console.log("Token:", token1.symbol);
-      // console.log("CoinFamily:", token1.coinFamily);
-      // console.log("MPC Addresses:", mpcAddresses);
-      
-      // Pass the entire mpcAddresses object to let fetchMpcBalance choose the right one
-      fetchMpcBalance(token1, mpcAddresses).then((balance) => {
-        // console.log("Updated MPC balance:", balance);
-        setBalance(balance);
-      });
+    if (token1 && mpcAddresses && mpcWalletsData) {
+      // Use cached MPC wallets data to get balance
+      const balance = fetchMpcBalance(token1, mpcAddresses);
+      setBalance(balance);
     }
-  }, [token1, mpcAddresses]);
+  }, [token1, mpcAddresses, mpcWalletsData]);
 
   const initialSwapDetail = async (
     amount,
@@ -791,7 +913,7 @@ function ChainAbstraction({ state }) {
               },
             };
           } else {
-            route = await crossChainHelper?.current.getQuoteAndRoute(
+            route = await getCachedQuoteAndRoute(
               tokenOne?.symbol,
               tokenTwo?.symbol,
               amount
@@ -859,13 +981,11 @@ function ChainAbstraction({ state }) {
     // console.log("New token:", updatedToken1.symbol);
     // console.log("CoinFamily:", updatedToken1.coinFamily);
   
-    // Fetch fresh MPC balance with correct address selection
-    if (mpcAddresses) {
-      const mpcBal = await fetchMpcBalance(updatedToken1, mpcAddresses);
-      // console.log("New balance:", mpcBal);
+    // Fetch MPC balance using cached data
+    if (mpcAddresses && mpcWalletsData) {
+      const mpcBal = fetchMpcBalance(updatedToken1, mpcAddresses);
       setBalance(mpcBal);
     } else {
-      // console.warn("No MPC addresses available");
       setBalance(updatedToken1?.balance || 0);
     }
   
@@ -890,7 +1010,7 @@ function ChainAbstraction({ state }) {
       };
       setRoute(sameCoinRoute);
     } else {
-      const route = await crossChainHelper.current.getQuoteAndRoute(
+      const route = await getCachedQuoteAndRoute(
         updatedToken1?.symbol,
         token2?.symbol,
         1
@@ -933,7 +1053,7 @@ function ChainAbstraction({ state }) {
       };
       setRoute(sameCoinRoute);
     } else {
-      const route = await crossChainHelper.current.getQuoteAndRoute(
+      const route = await getCachedQuoteAndRoute(
         token1?.symbol,
         updatedToken2?.symbol,
         1
@@ -984,14 +1104,10 @@ function ChainAbstraction({ state }) {
         }
       }
 
-      // Fetch fresh MPC balance before transaction
-      const mpcBalance = await fetchMpcBalance(token1, mpcFromAddress);
-      // console.log("Current MPC balance:", mpcBalance);
-
+      // Get MPC balance from cache
+      const mpcBalance = fetchMpcBalance(token1, mpcAddresses);
       const parsedAmount = parseFloat(amount);
       const parsedReceivedAmount = parseFloat(receivedAmount);
-      const depositMin = parseFloat(route?.exchangeData?.depositMin);
-      const depositMax = parseFloat(route?.exchangeData?.depositMax);
 
       const throwError = (msg) => {
         messageApi.error(msg);
@@ -1003,9 +1119,9 @@ function ChainAbstraction({ state }) {
         return throwError("Please enter a valid amount to proceed.");
       }
 
-      // Validate amount against min/max limits
+      // Validate amount against min/max limits (dynamic from API)
       if (token1?.coinFamily) {
-        const validation = validateSwapAmount(amount, token1.coinFamily);
+        const validation = validateSwapAmount(amount, token1.coinFamily, minMaxSwapAmount);
         if (!validation.valid) {
           return throwError(validation.message);
         }
@@ -1068,25 +1184,25 @@ function ChainAbstraction({ state }) {
 
         let gasEstimate = gasPrice?.estimate || 23000;
         const mediumGasPrice = gasPrice?.fast || 0.000000007;
-        const gasInEth = parseFloat(((mediumGasPrice * (gasEstimate * 2) / 10 ** 3)).toFixed(8)); //TESTNET
         
-        // console.log("=== NETWORK FEE CALCULATION ===");
-        // console.log("Token1:", token1?.symbol, "Chain:", token1?.chain?.slug);
-        // console.log("Gas Price object:", gasPrice);
-        // console.log("Gas Price Fast (gwei):", gasPrice.fast);
-        // console.log("Gas Price Estimate (gas limit):", gasPrice.estimate);
-        // console.log("Calculated Network Fee:", gasInEth);
+        // For TICS (qubetics), gas_price is in a small unit (similar to gwei)
+        // Convert: (gas_price * gas_estimate * buffer) / 10^9 = fee in TICS
+        const isTicsChain = token1?.chain?.slug === 'tics' || token1?.chain?.slug === 'qubetics';
+        let gasInEth;
         
-        if (gasInEth <= 0 || isNaN(gasInEth) || !isFinite(gasInEth)) {
-          // console.error("Invalid network fee calculated:", gasInEth);
-          // console.error("This might indicate an issue with gas price API response");
+        if (isTicsChain) {
+          // For TICS: gas_price is in a small unit (like gwei), convert to TICS
+          // Formula: (gas_price * gas_estimate * 2) / 10^9
+          // Example: (5.355 * 20000 * 2) / 10^9 = 214200 / 10^9 = 0.0002142 TICS
+          const totalGasUnits = mediumGasPrice * gasEstimate * 2;
+          gasInEth = parseFloat((totalGasUnits / Math.pow(10, 9)).toFixed(8));
+        } else {
+
+          gasInEth = parseFloat(((mediumGasPrice * gasEstimate * 2) / Math.pow(10, 9)).toFixed(8));
         }
         
         networkFeeRef.current = gasInEth;
         setNetworkFee(gasInEth);
-        // console.log("Network fee calculated value:", gasInEth);
-        // console.log("Network fee stored in ref:", networkFeeRef.current);
-        // console.log("Note: State will update on next render, ref is available immediately");
 
         const nativeCoinBalanceRaw = await Web3Helper.getCoinBalance(
           mpcFromAddress,
@@ -1112,31 +1228,44 @@ function ChainAbstraction({ state }) {
         const amountNum = parseFloat(parsedAmount) || 0;
         const feeNum = parseFloat(gasFee) || 0;
         
-        const hasEnoughNative = token1?.isToken
-          ? nativeCoinBalance >= feeNum
-          : balanceNum >= (amountNum + feeNum);
-
-        // console.log("=== BALANCE CHECK ===");
-        // console.log("mpcBalance (number):", balanceNum);
-        // console.log("parsedAmount (number):", amountNum);
-        // console.log("gasFee (number):", feeNum);
-        // console.log("Total required (amount + fee):", amountNum + feeNum);
-        // console.log("Comparison: ", balanceNum, ">=", amountNum + feeNum, "?", balanceNum >= (amountNum + feeNum));
-        // console.log("hasEnoughNative:", hasEnoughNative);
-
-        if (!hasEnoughNative) {
-          return throwError(
-            token1?.isToken
-              ? "Insufficient Balance"
-              : "Insufficient Balance"
-          );
+        console.log("=== EVM BALANCE CHECK ===");
+        console.log("balanceNum:", balanceNum);
+        console.log("amountNum:", amountNum);
+        console.log("feeNum (gasFee):", feeNum);
+        console.log("nativeCoinBalance:", nativeCoinBalance);
+        console.log("token1.isToken:", token1?.isToken);
+        console.log("Total required (amount + fee):", amountNum + feeNum);
+        console.log("Balance check:", balanceNum, ">=", amountNum + feeNum, "?", balanceNum >= (amountNum + feeNum));
+        
+        // For native coins (not tokens), check if balance covers amount + gas fee
+        // For tokens, check if token balance covers amount AND native balance covers gas fee
+        let hasEnoughBalance = false;
+        
+        if (token1?.isToken) {
+          // Token transaction: need token balance for amount AND native balance for gas
+          const hasEnoughToken = balanceNum >= amountNum;
+          const hasEnoughNativeForGas = nativeCoinBalance >= feeNum;
+          hasEnoughBalance = hasEnoughToken && hasEnoughNativeForGas;
+          console.log("Token check - hasEnoughToken:", hasEnoughToken, "hasEnoughNativeForGas:", hasEnoughNativeForGas);
+        } else {
+          // Native coin transaction: need balance to cover amount + gas fee
+          hasEnoughBalance = balanceNum >= (amountNum + feeNum);
+          console.log("Native coin check - hasEnoughBalance:", hasEnoughBalance);
         }
 
+        if (!hasEnoughBalance) {
+          const errorMsg = token1?.isToken
+            ? `Insufficient Balance. Token: ${balanceNum.toFixed(6)} ${token1?.symbol}, Required: ${amountNum.toFixed(6)} ${token1?.symbol}. Native: ${nativeCoinBalance.toFixed(6)}, Gas Fee: ${feeNum.toFixed(6)}`
+            : `Insufficient Balance. Available: ${balanceNum.toFixed(6)} ${token1?.symbol}, Required: ${(amountNum + feeNum).toFixed(6)} ${token1?.symbol} (Amount: ${amountNum.toFixed(6)} + Gas: ${feeNum.toFixed(6)})`;
+          console.error("Balance check failed:", errorMsg);
+          return throwError("Insufficient Balance");
+        }
+
+        // Additional check for tokens (redundant but kept for safety)
         if (token1?.isToken) {
-          if (mpcBalance < parsedAmount) {
-            return throwError(
-              `Insufficient Balance`
-            );
+          if (balanceNum < amountNum) {
+            console.error("Token balance insufficient:", balanceNum, "<", amountNum);
+            return throwError(`Insufficient Balance`);
           }
         }
 
@@ -1180,22 +1309,8 @@ function ChainAbstraction({ state }) {
         
         const calculatedNetworkFee = parseFloat((feeInSatoshis / 1e8).toFixed(8));
         
-        //  console.log("=== BTC TRANSACTION FEE CALCULATION ===");
-        // console.log("Input count:", estimatedInputCount);
-        // console.log("Output count:", estimatedOutputCount);
-        // console.log("Estimated transaction size (bytes):", estimatedSize);
-        // console.log("Gas price (sat/vB):", gasPrice);
-        // console.log("Fee calculation:", estimatedSize, "bytes ×", gasPrice, "sat/vB =", feeInSatoshis, "satoshis");
-        // console.log("Fee in satoshis:", feeInSatoshis);
-        // console.log("Fee conversion:", feeInSatoshis, "satoshis ÷ 1e8 =", calculatedNetworkFee, "BTC");
-        // console.log("Network fee in BTC:", calculatedNetworkFee);
-        
-        if (calculatedNetworkFee > 0.00001) {
-          // console.warn("⚠️ WARNING: Network fee seems too high!");
-          // console.warn("Expected: ~0.00000226 BTC (226 satoshis)");
-          // console.warn("Got:", calculatedNetworkFee, "BTC (", feeInSatoshis, "satoshis)");
-        }
-        
+        // const CHAIN_ABSTRACTION_BTC_FEE_SATS = 600;
+        // const calculatedNetworkFee = parseFloat((CHAIN_ABSTRACTION_BTC_FEE_SATS / 1e8).toFixed(8));
         networkFeeRef.current = calculatedNetworkFee;
         setNetworkFee(calculatedNetworkFee);
         // console.log("Network fee stored in ref:", networkFeeRef.current);
@@ -1223,14 +1338,6 @@ function ChainAbstraction({ state }) {
 
   const handleAbstraction = async () => {
     setIsProcessing(true);
-    // console.log("=== Starting MPC Abstraction ===");
-    // console.log("token1", token1);
-    // console.log("token2", token2);
-    // console.log("mpcFromAddress", mpcFromAddress);
-    // console.log("amount", amount);
-    // console.log("receivedAmount", receivedAmount);
-    // console.log("sessionPassword", sessionPassword);
-    // console.log("toAddress", toAddress);
 
     try {
       if (!mpcFromAddress) {
@@ -1283,8 +1390,20 @@ function ChainAbstraction({ state }) {
           symbol: token1?.coinSymbol.toUpperCase(),
         }));
       } else if (token1?.chain?.currencyName === "BTC") {
-        const gasPrice = Math.max(await BTCHelper.getBTCGasPrice(), 10);
-        networkFee = gasPrice / 1e8;
+        // const gasPrice = Math.max(await BTCHelper.getBTCGasPrice(), 10);
+        // networkFee = gasPrice / 1e8;
+        const gasPriceResponse = await BTCHelper.getBTCGasPrice();
+        let gasPrice = 10;
+        if (gasPriceResponse) {
+          if (typeof gasPriceResponse === "object" && gasPriceResponse !== null) {
+            gasPrice = gasPriceResponse.priority || gasPriceResponse.regular || 10;
+          } else {
+            gasPrice = Math.max(Number(gasPriceResponse) || 10, 10);
+          }
+        }
+        const estimatedSize = 1 * 146 + 2 * 34 + 10; // vBytes
+        const feeInSatoshis = Math.ceil(estimatedSize * gasPrice);
+        networkFee = parseFloat((feeInSatoshis / 1e8).toFixed(8));
 
         setTransactionResult((prev) => ({
           ...prev,
@@ -1364,7 +1483,7 @@ function ChainAbstraction({ state }) {
           ...prev,
           hash: data?.hash,
           fee: networkFee,
-          status: data?.status || "pending",
+          status: data?.status ?? "pending",
           solver: data?.solver || "N/A",
           source_address: data?.source_address || "N/A",
         }));
@@ -1389,18 +1508,22 @@ function ChainAbstraction({ state }) {
         }));
         setIsProcessModal(false); // Close processing modal
         setShowSuccess(true); // Show final result modal with failure status
-        
+
         // Also show error message
         messageApi.error(errorMessage);
         return;
       }
 
-      // Refresh MPC balance after transaction
-      if (token1 && mpcFromAddress) {
+      // Refresh MPC balance after transaction by re-fetching wallets data
+      if (token1 && account?.address && account?.jwtToken) {
         setTimeout(async () => {
-          const newBalance = await fetchMpcBalance(token1, mpcFromAddress);
-          // console.log("Refreshed MPC balance:", newBalance);
-          setBalance(newBalance);
+          try {
+            const walletData = await getMpcWallets(account.address, 1);
+            setMpcWalletsData(walletData);
+            // Balance will update automatically via useEffect when mpcWalletsData changes
+          } catch (error) {
+            console.log("Error refreshing MPC wallets data:", error);
+          }
         }, 3000);
       }
     } catch (error) {
@@ -1567,7 +1690,7 @@ function ChainAbstraction({ state }) {
                         marginTop: "4px",
                         marginBottom: "8px"
                       }}>
-                        {getLimitsText(token1.coinFamily)}
+                        {getLimitsText(token1.coinFamily, minMaxSwapAmount)}
                       </p>
                     )}
                   </div>

@@ -106,42 +106,44 @@ function HistoryListOuter(props) {
       try {
         setIsUpdating(true);
         
-        // Poll for the latest status
-        const response = await ChainAbstractionInstance.current.pollIntentStatus(
-          transactionHash
-        );
-        
-        // console.log("Poll intent status response:", response?.data);
+        const intentId = (allData?.intent_hash || transactionHash || "").replace(/^0x/, "");
+        if (!intentId) {
+          return messageApi.error("Intent hash not available");
+        }
 
-        if (!response?.data) {
+        const details = await ChainAbstractionInstance.current.getIntentDetails(intentId);
+        if (!details || details?.status === "not_found") {
           return messageApi.error("Unable to fetch transaction status");
         }
 
-        const intentHash = response.data.intent_hash;
-        const currentStatus = response.data.status;
+        const intentStatus = String(details?.intent_status || "Pending").toLowerCase();
+        let statusValue = 2;
+        if (intentStatus === "completed") statusValue = 1;
+        if (intentStatus === "failed") statusValue = 0;
 
-        // Set transaction result for modal
         setTransactionResult({
-          hash: intentHash || transactionHash,
-          status: currentStatus || "pending",
-          solver: response.data.solver_id || "N/A",
-          fee: intentData?.fees || response.data.fees || "0",
+          hash: details?.intent_hash || details?.user_to_network_tx_id || transactionHash,
+          status: statusValue,
+          solver: details?.final_solver_id || "N/A",
+          fee: intentData?.fees || "0",
           symbol: allData?.coin_data?.coin_symbol?.toUpperCase() || "",
-          source_address: response.data.source_address || address,
+          source_address: details?.source_address || address,
         });
 
-        // If status is pending and we got an intent_hash, update backend status
-        if (intentHash && (status?.status === "pending" || currentStatus == true || currentStatus == false ) ) {
+        // If backend list is still pending, update it when we reach a terminal intent_status
+        const listStatusRaw = status?.status || status?.blockchain_status || "pending";
+        const normalizedListStatus = String(listStatusRaw).toLowerCase();
+        const normalizedIntentStatus =
+          intentStatus === "completed" ? "confirmed" : intentStatus === "failed" ? "failed" : "pending";
+
+        if (
+          normalizedListStatus === "pending" &&
+          (normalizedIntentStatus === "confirmed" || normalizedIntentStatus === "failed")
+        ) {
           try {
-            await updateIntentStatus(
-              allData?.coin_family,
-              transactionHash,
-              currentStatus == 1 ? "confirmed" : "failed"
-            );
-            // messageApi.success("Transaction status updated");
+            await updateIntentStatus(allData?.coin_family, transactionHash, normalizedIntentStatus);
           } catch (updateError) {
-            // console.error("Error updating backend status:", updateError);
-            // Don't block showing modal if update fails
+            // ignore
           }
         }
 
