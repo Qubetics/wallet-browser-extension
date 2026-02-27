@@ -6,18 +6,11 @@ import { WalletHelper } from './wallet.helper';
 import { validate } from 'bitcoin-address-validation';
 const BIP84 = require('bip84');
 
-let inputCount = 0;
-let transactionSize = 0;
-let outputCount = 2;
 let btcTosatoshi = 100000000;
 let btcTosatoshiMultiplier = 0.00000001;
 
 export class BTCHelper {
-  /**
-   * Validates a Bitcoin address
-   * @param {string} address - The Bitcoin address to validate
-   * @returns {boolean} - True if valid, false otherwise
-   */
+
   static validateBTCAddress = (address) => {
     try {
       if (!address || typeof address !== 'string') {
@@ -333,12 +326,6 @@ export class BTCHelper {
     }
   }
 
-  /**
-   * Signs a message with Bitcoin private key
-   * @param {string} wif - Bitcoin private key in WIF format
-   * @param {string} message - Message to sign
-   * @returns {string} - Base64 encoded signature
-   */
   static signBitcoinMessage = async (wif, message) => {
     try {
       const bitcoin = require("bitcoinjs-lib");

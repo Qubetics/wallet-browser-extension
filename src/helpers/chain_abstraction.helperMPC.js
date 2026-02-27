@@ -13,20 +13,12 @@ const STAGE_MPC_BASE_URL = process.env.REACT_APP_CHAIN_ABSTRACTION_API_URL_PROD;
 const RESOLVE_API_BASE_URL = process.env.REACT_APP_CHAIN_ABSTRACTION_PROD_API_URL;
 const INTENT_DETAILS_BASE_URL = process.env.REACT_APP_CHAIN_ABSTRACTION_API_URL_PROD;
 
-/**
- * MPC Chain Abstraction Helper
- * Handles cross-chain transactions using MPC wallets
- */
 export class MpcChainAbstractionHelper {
   chainId;
 
   constructor(chainId) {
     this.chainId = chainId;
   }
-
-  /**
-   * Get chain identifier for intent
-   */
   getIntentChainId = (coinFamily) => {
     switch (coinFamily) {
       case 7:
@@ -40,11 +32,6 @@ export class MpcChainAbstractionHelper {
     }
   };
 
-  /**
-   * Create MPC swap order via API
-   * @param {Object} swapData - Contains signature and message
-   * @returns {Promise<Object>} API response
-   */
   createMpcSwapOrder = async (data) => {
     try {
       const response = await axios.post(
@@ -69,9 +56,7 @@ export class MpcChainAbstractionHelper {
     }
   };
 
-  /**
-   * Submit intent hash to backend
-   */
+
   saveIntentHash = async (data) => {
     try {
       const { account } = store.getState();
@@ -104,10 +89,6 @@ export class MpcChainAbstractionHelper {
     }
   };
 
-  /**
-   * Call intent resolve API (after we have intent_hash from user_mpc_deposit)
-   * @param {string} intentId - intent_hash without 0x prefix
-   */
   callResolveIntent = async (intentId) => {
     try {
       const url = `${RESOLVE_API_BASE_URL}/api/routes/intent/resolve`;
@@ -118,11 +99,7 @@ export class MpcChainAbstractionHelper {
     }
   };
 
-  /**
-   * Fetch intent_details once (GET intent_details/{intentId})
-   * @param {string} intentId - intent_hash (no 0x)
-   * @returns {Promise<Object>} intent_details API response (status, intent_hash, intent_status, source_address, etc.)
-   */
+
   getIntentDetails = async (intentId) => {
     try {
     const url = `${INTENT_DETAILS_BASE_URL}/intent_details/${intentId}`;
@@ -134,12 +111,7 @@ export class MpcChainAbstractionHelper {
     }
   };
 
-  /**
-   * Poll intent_details until user_to_network_tx_id is present OR intent_status is Completed/Failed (or timeout)
-   * @param {string} intentId - intent_hash (no 0x)
-   * @param {Object} options - { pollIntervalMs, maxAttempts, resolveOnTxId, resolveOnFinalStatus }
-   * @returns {Promise<Object>} intent_details response when condition is met
-   */
+
   async pollIntentDetailsUntilTxId(intentId, options = {}) {
     const pollIntervalMs = options.pollIntervalMs || 3000;
     const maxAttempts = options.maxAttempts || 60; // 3 min at 3s
@@ -195,11 +167,6 @@ export class MpcChainAbstractionHelper {
     });
   }
 
-  /**
-   * Legacy helper kept for UI/components that still call pollIntentStatus.
-   * Uses intent_details API and normalizes the response into the old shape:
-   * { data: { intent_hash, status, solver_id, source_address, fees, ... } }
-   */
   async pollIntentStatus(intentHash) {
     try {
       const intentId = String(intentHash || "").replace(/^0x/, "");
@@ -229,10 +196,6 @@ export class MpcChainAbstractionHelper {
       return { data: null, error: true, message: err?.message || "Failed to fetch intent details" };
     }
   }
-
-  /**
-   * Exponential to decimal conversion
-   */
   exponentialToDecimal(num) {
     const data = String(num).split(/[eE]/);
     if (data.length === 1) return data[0];
@@ -252,24 +215,7 @@ export class MpcChainAbstractionHelper {
     return str + z;
   }
 
-  /**
-   * Main MPC Send Transaction function
-   * @param {Object} token1 - Source token
-   * @param {Object} token2 - Destination token
-   * @param {number} amount - Amount to send
-   * @param {number} receivedAmount - Amount to receive
-   * @param {string} mpcFromAddress - MPC wallet address
-   * @param {Object} chain - Chain configuration
-   * @param {number} fee - Network fee
-   * @param {number} fiatValue - Fiat value
-   * @param {Object} parentCoin - Parent coin data
-   * @param {string} rpc - RPC endpoint
-   * @param {string} symbol - Token symbol
-   * @param {string} sessionPassword - User password
-   * @param {string} toAddress - Recipient address
-   * @param {Object} [options] - { onIntentCreated(intentHash) } called when intent_hash is received (before resolve/poll) so UI can show loading
-   * @returns {Promise<Object>} Transaction result
-   */
+
   SendMpcTransaction = async (
     token1,
     token2,
@@ -465,9 +411,7 @@ export class MpcChainAbstractionHelper {
     }
   };
 
-  // ============================================
-  // Helper function to get URL path (if not already in your class)
-  // ============================================
+
   getCoinFamilyUrl = (coinFamily) => {
     const urlMap = {
       3: "bitcoin/btc", // Bitcoin
@@ -476,9 +420,6 @@ export class MpcChainAbstractionHelper {
     return urlMap[coinFamily] || "bitcoin/btc"; // Default to bitcoin
   };
 
-  /**
-   * Get coin balance from MPC wallet
-   */
   async getMpcCoinBalance(address, rpc) {
     try {
       const provider = new ethers.providers.JsonRpcProvider(rpc);
@@ -491,9 +432,7 @@ export class MpcChainAbstractionHelper {
     }
   }
 
-  /**
-   * Get token balance from MPC wallet
-   */
+
   async getMpcTokenBalance(mpcAddress, tokenAddress, rpc, decimals = 18) {
     try {
       const balance = await Web3Helper.getTokenBalance(

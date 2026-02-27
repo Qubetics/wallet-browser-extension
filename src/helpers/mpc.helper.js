@@ -10,16 +10,6 @@ import { BTCHelper } from "./btc.helper";
 const STAGE_MPC_BASE_URL = process.env.REACT_APP_CHAIN_ABSTRACTION_API_URL_PROD;
 const mpcApi = axios.create({ baseURL: STAGE_MPC_BASE_URL });
 
-// Set to true to skip liquidity check (get_network_addresses + balance checks)
-const BYPASS_LIQUIDITY_CHECK = true;
-
-// Action type for getting MPC wallets
-
-// export const registerUser = async (ethereumAddress) => {
-//   const data = { ethereum_address: ethereumAddress };
-//   const res = await mpcApi.post("/register_user", data);
-//   return res?.data;
-// };
 export const registerUser = async (ethereumAddress, signature = null, message = null) => {
   const data = { tics_address: ethereumAddress };
   
@@ -68,11 +58,6 @@ export const getUserInfo = async (ethereumAddress) => {
   }
 };
 
-// export const getStoredMpcAddresses = async () => {
-//   const result = await chrome.storage.local.get("mpcAddresses");
-//   console.log("[MPC] getStoredMpcAddresses ->", result?.mpcAddresses);
-//   return result?.mpcAddresses || null;
-// };
 
 export const getStoredMpcAddresses = async () => {
   const data = await chrome.storage.local.get("accounts");
@@ -117,12 +102,6 @@ export const setStoredMpcAddresses = async (addresses) => {
   return updatedAccounts;
 };
 
-/**
- * Get MPC wallets from backend API
- * @param {string} walletAddress - Original wallet address
- * @param {number} coinFamily - Coin family (not used, always sends 1 to get balance)
- * @returns {Promise<Array>} Array of MPC wallet data with balances
- */
 export const getMpcWallets = async (walletAddress, coinFamily = 1) => {
   try {
     const { account } = store.getState();
@@ -161,11 +140,7 @@ export const getMpcWallets = async (walletAddress, coinFamily = 1) => {
   }
 };
 
-/**
- * Save MPC wallets to backend API
- * @param {string} ethereumAddress - Original Ethereum address
- * @param {Object} derivedAddresses - Object with derived_btc_address and derived_eth_address
- */
+
 export const saveMpcWallets = async (ethereumAddress, derivedAddresses) => {
   try {
     const { account } = store.getState();
@@ -365,10 +340,7 @@ export const ensureMpcAddresses = async (currentEthAddress, sessionPassword = nu
     return null;
   };
 
-/**
- * Get network addresses from MPC API
- * @returns {Promise<Object>} Network addresses (eth_address and btc_address)
- */
+
 export const getNetworkAddresses = async () => {
   try {
     const response = await fetch(`${STAGE_MPC_BASE_URL}/get_network_addresses`, {
@@ -386,7 +358,8 @@ export const getNetworkAddresses = async () => {
     console.log("[MPC] Network addresses:", result?.network_addresses);
     
     if (result?.status === "success" && result?.network_addresses) {
-      return result.network_addresses;
+      const result = {btc_address: result?.network_addresses?.btc_address, eth_address: result?.vault_address };
+      return result;
     }
     
     throw new Error("Invalid response format from network addresses API");
@@ -396,20 +369,9 @@ export const getNetworkAddresses = async () => {
   }
 };
 
-/**
- * Check liquidity availability by checking network address balances
- * For cross-chain swaps, checks the destination token's liquidity pool
- * @param {Object} token1 - Source token
- * @param {Object} token2 - Destination token (for cross-chain swaps)
- * @param {string} rpcUrl - RPC URL for EVM chains (optional)
- * @param {number} requiredAmount - Required amount for the transaction (optional)
- * @returns {Promise<Object>} Liquidity check result
- */
+
 export const checkLiquidityAvailability = async (token1, token2 = null, rpcUrl = null, requiredAmount = null) => {
   try {
-    // if (BYPASS_LIQUIDITY_CHECK) {
-    //   return { available: true, message: "Liquidity check bypassed" };
-    // }
 
     const isCrossChain = token2 && token1?.id !== token2?.id;
     const tokenToCheck = isCrossChain ? token2 : token1;

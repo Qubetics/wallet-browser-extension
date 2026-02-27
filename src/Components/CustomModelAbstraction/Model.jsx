@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import './Model.scss';
-import { exponential_to_decimal } from '../../helpers/conversion.helper';
 import ButtonComp from '../ButtonComp/ButtonComp';
 import ModalCustom from '../ModalCustom/ModalCustom';
 
@@ -34,28 +33,23 @@ const AbstractProcessingModel = ({
   const handleExplorer = () => {
     if (transactionResult?.hash) {
       window.open(
-        `https://stage.qubetics.work/chain-abstraction/${transactionResult.hash}`,
+        `https://prod-explorer.qubetics.work/chain-abstraction/${transactionResult.hash}`,
         '_blank',
         'noopener,noreferrer'
       );
     }
   };
 
-  // Handle modal close - cleanup states and trigger callback
   const handleModalClose = () => {
     setShowProcess(false);
     setSuccessModal(false);
-    // Small delay to ensure modal animation completes before cleanup
     setTimeout(() => {
-      onClose?.(); // Trigger the callback in parent component
+      onClose?.();
     }, 100);
   };
 
   useEffect(() => {
-    // console.log('showProcessing', showProcessing);
-    // console.log('loader', loader);
-    // Only auto-transition if loader is true (showing processing state)
-    // If loader is false, we're showing final result directly - no auto-transition
+
     if (showProcessing && loader) {
       const timer = setTimeout(() => {
         setShowProcess(false);
