@@ -19384,11 +19384,11 @@
                                                     _this45._rpcWebSocket.close();
                                                   } catch (err) {
                                                     if (err instanceof Error) {
-                                                      console.log(
-                                                        "Error when closing socket connection: ".concat(
-                                                          err.message
-                                                        )
-                                                      );
+                                                      // console.log(
+                                                      //   "Error when closing socket connection: ".concat(
+                                                      //     err.message
+                                                      //   )
+                                                      // );
                                                     }
                                                   }
                                                 }, 500);
@@ -46340,15 +46340,15 @@
                   value: function _request(method, payload) {
                     var _this5 = this;
                     if (this.isDebug) {
-                      console.log(
-                        "==> _request method: "
-                          .concat(method, ", payload ")
-                          .concat(JSON.stringify(payload))
-                      );
+                      // console.log(
+                      //   "==> _request method: "
+                      //     .concat(method, ", payload ")
+                      //     .concat(JSON.stringify(payload))
+                      // );
                     }
                     return new Promise(function (resolve, reject) {
                       var id = _utils["default"].genId();
-                      console.log("==> setting id ".concat(id));
+                      //  console.log("==> setting id ".concat(id));
                       _this5.callbacks.set(id, function (error, data) {
                         if (error) {
                           reject(error);
@@ -46555,24 +46555,24 @@
               value: function sendResponse(id, result) {
                 var callback = this.callbacks.get(id);
                 if (this.isDebug) {
-                  console.log(
-                    "<== sendResponse id: "
-                      .concat(id, ", result: ")
-                      .concat(JSON.stringify(result))
-                  );
+                  // console.log(
+                  //   "<== sendResponse id: "
+                  //     .concat(id, ", result: ")
+                  //     .concat(JSON.stringify(result))
+                  // );
                 }
                 if (callback) {
                   callback(null, result);
                   this.callbacks["delete"](id);
                 } else {
-                  console.log("callback id: ".concat(id, " not found"));
+                  //console.log("callback id: ".concat(id, " not found"));
                 }
               },
             },
             {
               key: "sendError",
               value: function sendError(id, error) {
-                console.log("<== ".concat(id, " sendError ").concat(error));
+                //console.log("<== ".concat(id, " sendError ").concat(error));
                 var callback = this.callbacks.get(id);
                 if (callback) {
                   callback(
@@ -47026,13 +47026,13 @@
             {
               key: "enable",
               value: function enable(chainIds) {
-                console.log("==> enabled for ".concat(chainIds));
+                //console.log("==> enabled for ".concat(chainIds));
               },
             },
             {
               key: "experimentalSuggestChain",
               value: function experimentalSuggestChain(chainInfo) {
-                console.log("==> experimentalSuggestChain isn't implemented");
+                //console.log("==> experimentalSuggestChain isn't implemented");
               },
             },
             {
@@ -47136,15 +47136,15 @@
               value: function _request(method, payload) {
                 var _this2 = this;
                 if (this.isDebug) {
-                  console.log(
-                    "==> _request method: "
-                      .concat(method, ", payload ")
-                      .concat(JSON.stringify(payload))
-                  );
+                    // console.log(
+                    //   "==> _request method: "
+                    //     .concat(method, ", payload ")
+                    //     .concat(JSON.stringify(payload))
+                    // );
                 }
                 return new Promise(function (resolve, reject) {
                   var id = _utils["default"].genId();
-                  console.log("==> setting id ".concat(id));
+                    //console.log("==> setting id ".concat(id));
                   _this2.callbacks.set(id, function (error, data) {
                     if (error) {
                       reject(error);
@@ -47642,7 +47642,7 @@
                     }
                   }
                 } catch (error) {
-                  console.log(error);
+                  // console.log(error);
                 }
               },
             },
@@ -47676,9 +47676,9 @@
             {
               key: "enable",
               value: function enable() {
-                console.log(
-                  "enable() is deprecated, please use window.ethereum.request({method: 'eth_requestAccounts'}) instead."
-                );
+                // console.log(
+                //   "enable() is deprecated, please use window.ethereum.request({method: 'eth_requestAccounts'}) instead."
+                // );
                 return this.request({
                   method: "eth_requestAccounts",
                   params: [],
@@ -47689,9 +47689,9 @@
               key: "send",
               value: function send(payload) {
                 if (this.isDebug) {
-                  console.log(
-                    "==> send payload ".concat(JSON.stringify(payload))
-                  );
+                  // console.log(
+                  //   "==> send payload ".concat(JSON.stringify(payload))
+                  // );
                 }
                 var response = { jsonrpc: "2.0", id: payload.id };
                 switch (payload.method) {
@@ -47724,9 +47724,9 @@
             {
               key: "sendAsync",
               value: function sendAsync(payload, callback) {
-                console.log(
-                  "sendAsync(data, callback) is deprecated, please use window.ethereum.request(data) instead."
-                );
+                // console.log(
+                //   "sendAsync(data, callback) is deprecated, please use window.ethereum.request(data) instead."
+                // );
                 var that = this;
                 if (!(this instanceof TrustWeb3Provider)) {
                   that = window.ethereum;
@@ -47765,9 +47765,9 @@
                     : true;
                 this.idMapping.tryIntifyId(payload);
                 if (this.isDebug) {
-                  console.log(
-                    "==> _request payload ".concat(JSON.stringify(payload))
-                  );
+                  // console.log(
+                  //   "==> _request payload ".concat(JSON.stringify(payload))
+                  // );
                 }
                 this.fillJsonRpcVersion(payload);
                 return new Promise(function (resolve, reject) {
@@ -47849,11 +47849,11 @@
                         .call(payload)
                         .then(function (response) {
                           if (_this2.isDebug) {
-                            console.log(
-                              "<== rpc response ".concat(
-                                JSON.stringify(response)
-                              )
-                            );
+                            // console.log(
+                            //   "<== rpc response ".concat(
+                            //     JSON.stringify(response)
+                            //   )
+                            // );
                           }
                           wrapResult
                             ? resolve(response)
@@ -48104,18 +48104,18 @@
                   data.result = result;
                 }
                 if (this.isDebug) {
-                  console.log(
-                    "<== sendResponse id: "
-                      .concat(id, ", result: ")
-                      .concat(JSON.stringify(result), ", data: ")
-                      .concat(JSON.stringify(data))
-                  );
+                  // console.log(
+                  //   "<== sendResponse id: "
+                  //     .concat(id, ", result: ")
+                  //     .concat(JSON.stringify(result), ", data: ")
+                  //     .concat(JSON.stringify(data))
+                  // );
                 }
                 if (callback) {
                   wrapResult ? callback(null, data) : callback(null, result);
                   this.callbacks["delete"](id);
                 } else {
-                  console.log("callback id: ".concat(id, " not found"));
+                  //console.log("callback id: ".concat(id, " not found"));
                   for (var i = 0; i < window.frames.length; i++) {
                     var frame = window.frames[i];
                     try {
@@ -48123,9 +48123,9 @@
                         frame.ethereum.sendResponse(id, result);
                       }
                     } catch (error) {
-                      console.log(
-                        "send response to frame error: ".concat(error)
-                      );
+                      // console.log(
+                      //   "send response to frame error: ".concat(error)
+                      // );
                     }
                   }
                 }
@@ -56163,7 +56163,7 @@
             if (_logLevel > LogLevels[level]) {
               return;
             }
-            console.log.apply(console, args);
+            // console.log.apply(console, args);
           }
           debug(...args) {
             this._log(Logger.levels.DEBUG, args);
@@ -59081,9 +59081,9 @@
                   if (too_many_requests_retries === 0) {
                     break;
                   }
-                  console.log(
-                    `Server responded with ${res.status} ${res.statusText}.  Retrying after ${waitTime}ms delay...`
-                  );
+                  // console.log(
+                  //   `Server responded with ${res.status} ${res.statusText}.  Retrying after ${waitTime}ms delay...`
+                  // );
                   await sleep(waitTime);
                   waitTime *= 2;
                 }
@@ -61395,9 +61395,9 @@
                     this._rpcWebSocket.close();
                   } catch (err) {
                     if (err instanceof Error) {
-                      console.log(
-                        `Error when closing socket connection: ${err.message}`
-                      );
+                      // console.log(
+                      //   `Error when closing socket connection: ${err.message}`
+                      // );
                     }
                   }
                 }, 500);
@@ -64248,11 +64248,11 @@
               return [d.getDate(), months[d.getMonth()], time].join(" ");
             }
             exports.log = function () {
-              console.log(
-                "%s - %s",
-                timestamp(),
-                exports.format.apply(exports, arguments)
-              );
+              // console.log(
+              //   "%s - %s",
+              //   timestamp(),
+              //   exports.format.apply(exports, arguments)
+              // );
             };
             exports.inherits = require("inherits");
             exports._extend = function (origin, add) {
@@ -88568,7 +88568,7 @@
                   })
                   .then(function (json) {
                     if (!json.result && json.error) {
-                      console.log("<== rpc error", json.error);
+                      //console.log("<== rpc error", json.error);
                       throw new Error(json.error.message || "rpc error");
                     }
                     return json;
@@ -88833,7 +88833,7 @@
               _inherits(TrustSolanaWeb3Provider, _BaseProvider);
               var _super = _createSuper(TrustSolanaWeb3Provider);
               function TrustSolanaWeb3Provider(config) {
-                console.log("🚀 ~ TrustSolanaWeb3Provider ~ config:", config)
+                //console.log("🚀 ~ TrustSolanaWeb3Provider ~ config:", config)
                 var _this;
                 _classCallCheck(this, TrustSolanaWeb3Provider);
                 _this = _super.call(this, config);
@@ -88891,11 +88891,11 @@
                   value: function signMessage(message) {
                     var hex = _utils["default"].bufferToHex(message);
                     if (this.isDebug) {
-                      console.log(
-                        "==> signMessage "
-                          .concat(message, ", hex: ")
-                          .concat(hex)
-                      );
+                      // console.log(
+                      //   "==> signMessage "
+                      //     .concat(message, ", hex: ")
+                      //     .concat(hex)
+                      // );
                     }
                     return this._request("signMessage", { data: hex }).then(
                       function (data) {
@@ -88914,9 +88914,9 @@
                     var signature = _bs["default"].decode(signatureEncoded);
                     tx.addSignature(this.publicKey, signature);
                     if (this.isDebug) {
-                      console.log(
-                        "==> signed single ".concat(JSON.stringify(tx))
-                      );
+                      // console.log(
+                      //   "==> signed single ".concat(JSON.stringify(tx))
+                      // );
                     }
                     return tx;
                   },
@@ -88949,7 +88949,7 @@
                         );
                       })
                       ["catch"](function (error) {
-                        console.log("<== Error: ".concat(error));
+                       // console.log("<== Error: ".concat(error));
                       });
                   },
                 },
@@ -88995,7 +88995,7 @@
                         });
                       })
                       ["catch"](function (error) {
-                        console.log("<== Error: ".concat(error));
+                        //console.log("<== Error: ".concat(error));
                       });
                   },
                 },
@@ -89004,11 +89004,11 @@
                   value: function signAndSendTransaction(tx, options) {
                     var _this7 = this;
                     if (this.isDebug) {
-                      console.log(
-                        "==> signAndSendTransaction "
-                          .concat(JSON.stringify(tx), ", options: ")
-                          .concat(options)
-                      );
+                      // console.log(
+                      //   "==> signAndSendTransaction "
+                      //     .concat(JSON.stringify(tx), ", options: ")
+                      //     .concat(options)
+                      // );
                     }
                     return this.signTransaction(tx).then(
                       (function () {
@@ -89052,15 +89052,15 @@
                   value: function _request(method, payload) {
                     var _this8 = this;
                     if (this.isDebug) {
-                      console.log(
-                        "==> _request method: "
-                          .concat(method, ", payload ")
-                          .concat(JSON.stringify(payload))
-                      );
+                      // console.log(
+                      //   "==> _request method: "
+                      //     .concat(method, ", payload ")
+                      //     .concat(JSON.stringify(payload))
+                      // );
                     }
                     return new Promise(function (resolve, reject) {
                       var id = _utils["default"].genId();
-                      console.log("==> setting id ".concat(id));
+                      //console.log("==> setting id ".concat(id));
                       _this8.callbacks.set(id, function (error, data) {
                         if (error) {
                           reject(error);
@@ -89241,7 +89241,7 @@
                     buffer = _buffer.Buffer.from(message);
                   }
                 } catch (err) {
-                  console.log("messageToBuffer error: ".concat(err));
+                  // console.log("messageToBuffer error: ".concat(err));
                 }
                 return buffer;
               },

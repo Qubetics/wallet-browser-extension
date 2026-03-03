@@ -3,4 +3,5 @@ build
 *.zip
 .env
 .example.env
-public
+
+public/background-bundle.js

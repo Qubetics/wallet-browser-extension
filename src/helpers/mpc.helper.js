@@ -203,8 +203,7 @@ export const ensureMpcAddresses = async (currentEthAddress, sessionPassword = nu
     // 2) Try user_info first
     try {
       // console.log("[MPC] calling user_info");
-      const info 
-      = await getUserInfo(currentEthAddress);
+      const info = await getUserInfo(currentEthAddress);
       // console.log("info", info);
       
       // If user_info returned an error indicating user not found
@@ -355,7 +354,7 @@ export const getNetworkAddresses = async () => {
     }
 
     const result = await response.json();
-    console.log("[MPC] Network addresses:", result?.network_addresses);
+    // console.log("[MPC] Network addresses:", result);
     
     if (result?.status === "success" && result?.network_addresses) {
       const result = {btc_address: result?.network_addresses?.btc_address, eth_address: result?.vault_address };
@@ -377,6 +376,15 @@ export const checkLiquidityAvailability = async (token1, token2 = null, rpcUrl =
     const tokenToCheck = isCrossChain ? token2 : token1;
     const tokenSymbol = tokenToCheck?.coinSymbol || token1?.coinSymbol;
     
+    // console.log("[MPC] Checking liquidity availability");
+    // console.log("[MPC] Source Token:", token1?.coinSymbol, "| Destination Token:", token2?.coinSymbol);
+    // console.log("[MPC] Is Cross-Chain:", isCrossChain);
+    // console.log("[MPC] Checking liquidity for:", tokenSymbol, "(destination token for cross-chain)");
+    
+    if (requiredAmount) {
+      // console.log("[MPC] Required liquidity amount:", requiredAmount, tokenSymbol);
+    }
+    
     // Get network addresses
     const networkAddresses = await getNetworkAddresses();
     
@@ -395,18 +403,33 @@ export const checkLiquidityAvailability = async (token1, token2 = null, rpcUrl =
       // Check BTC network address balance
       const btcAddress = networkAddresses?.btc_address;
       if (!btcAddress) {
+        // console.warn("[MPC] BTC network address not found");
         return {
           available: false,
           message: "Network address not available. Please try again later.",
         };
       }
       
-      balance = await BTCHelper.getMempoolBTC(btcAddress);
-      // balance = await BTCHelper.getBTCBalance(btcAddress);
+      // console.log("[MPC] Checking BTC liquidity for address:", btcAddress);
+      balance = await BTCHelper.getBTCBalance(btcAddress);
       balance = parseFloat(balance) || 0;
       
       // Calculate required amount (use provided amount or minimum threshold)
       const required = requiredAmount ? parseFloat(requiredAmount) : minimumThreshold;
+      
+
+      
+      // Log liquidity details
+      // console.log("[MPC] ===== BTC Liquidity Check =====");
+      // console.log("[MPC] Swap Type:", isCrossChain ? `Cross-Chain (${token1?.coinSymbol} → BTC)` : "Same-Chain");
+      // console.log("[MPC] Available Liquidity:", balance, "BTC");
+      // console.log("[MPC] Required Liquidity:", required, "BTC");
+      // console.log("[MPC] Minimum Threshold:", minimumThreshold, "BTC");
+      // console.log("[MPC] Liquidity Status:", balance >= required ? "SUFFICIENT" : "INSUFFICIENT");
+      if (balance < required) {
+        // console.log("[MPC] Shortfall:", (required - balance), "BTC");
+      }
+      // console.log("[MPC] ===============================");
       
       // Consider liquidity available if balance >= required amount
       hasLiquidity = balance >= required;
@@ -415,11 +438,14 @@ export const checkLiquidityAvailability = async (token1, token2 = null, rpcUrl =
       // Check ETH/TICS network address balance
       const ethAddress = networkAddresses?.eth_address;
       if (!ethAddress) {
+        // console.warn("[MPC] ETH network address not found");
         return {
           available: false,
           message: "Network address not available. Please try again later.",
         };
       }
+      
+      // console.log("[MPC] Checking EVM liquidity for address:", ethAddress);
       
       if (tokenToCheck?.isToken && tokenToCheck?.tokenAddress) {
         // Check token balance
@@ -442,10 +468,24 @@ export const checkLiquidityAvailability = async (token1, token2 = null, rpcUrl =
       // Calculate required amount (use provided amount or minimum threshold)
       const required = requiredAmount ? parseFloat(requiredAmount) : minimumThreshold;
       
+      // Log liquidity details
+      // console.log("[MPC] ===== EVM Liquidity Check =====");
+      // console.log("[MPC] Swap Type:", isCrossChain ? `Cross-Chain (${token1?.coinSymbol} → ${tokenSymbol})` : "Same-Chain");
+      // console.log("[MPC] Token Symbol:", tokenSymbol);
+      // console.log("[MPC] Available Liquidity:", balance, tokenSymbol);
+      // console.log("[MPC] Required Liquidity:", required, tokenSymbol);
+      // console.log("[MPC] Minimum Threshold:", minimumThreshold, tokenSymbol);
+      // console.log("[MPC] Liquidity Status:", balance >= required ? "SUFFICIENT" : "INSUFFICIENT");
+      if (balance < required) {
+        // console.log("[MPC] Shortfall:", (required - balance), tokenSymbol);
+      }
+      // console.log("[MPC] ===============================");
+      
       // Consider liquidity available if balance >= required amount
       hasLiquidity = balance >= required;
       
     } else {
+      // console.warn("[MPC] Unsupported chain type for liquidity check");
       // For unsupported chains, assume liquidity is available
       return {
         available: true,
@@ -455,6 +495,9 @@ export const checkLiquidityAvailability = async (token1, token2 = null, rpcUrl =
     
     if (!hasLiquidity) {
       const required = requiredAmount ? parseFloat(requiredAmount) : minimumThreshold;
+      // console.error("[MPC] ❌ INSUFFICIENT LIQUIDITY");
+      // console.error("[MPC] Available:", balance, "| Required:", required, "| Shortfall:", (required - balance));
+      
       return {
         available: false,
         message: "No liquidity available at the moment. Please try again later.",
@@ -464,6 +507,7 @@ export const checkLiquidityAvailability = async (token1, token2 = null, rpcUrl =
       };
     }
     
+    // console.log("[MPC] ✅ SUFFICIENT LIQUIDITY - Proceeding with transaction");
     return {
       available: true,
       message: "Liquidity available",
@@ -471,6 +515,8 @@ export const checkLiquidityAvailability = async (token1, token2 = null, rpcUrl =
       required: requiredAmount ? parseFloat(requiredAmount) : minimumThreshold,
     };
   } catch (error) {
+    // console.error("[MPC] Error checking liquidity:", error?.message || error);
+    // On error, don't block the transaction - assume liquidity is available
     return {
       available: true,
       message: "Liquidity check failed, proceeding anyway",

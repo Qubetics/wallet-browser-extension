@@ -110,6 +110,12 @@ function HistoryListOuter(props) {
         if (!intentId) {
           return messageApi.error("Intent hash not available");
         }
+        // Poll for the latest status
+        const response = await ChainAbstractionInstance.current.pollIntentStatus(
+          transactionHash
+        );
+        
+        // console.log("Poll intent status response:", response?.data);
 
         const details = await ChainAbstractionInstance.current.getIntentDetails(intentId);
         if (!details || details?.status === "not_found") {
@@ -144,6 +150,8 @@ function HistoryListOuter(props) {
             await updateIntentStatus(allData?.coin_family, transactionHash, normalizedIntentStatus);
           } catch (updateError) {
             // ignore
+            // console.error("Error updating backend status:", updateError);
+            // Don't block showing modal if update fails
           }
         }
 

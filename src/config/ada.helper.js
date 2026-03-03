@@ -1,4 +1,4 @@
-export const IS_PRODUCTION = true;
+export const IS_PRODUCTION = process.env.REACT_APP_IS_PRODUCTION;
 
 // export const FETCH_ADA_BALANCE = !IS_PRODUCTION
 //   ? "https://REDACTED/stage/api/v1/extension/get_ada_balance"

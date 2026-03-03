@@ -847,6 +847,7 @@ function SendCoins() {
 
         // --- Fetch private key ---
         const wifKey = await WalletHelper.getBitcoinPrivateKeyWithPassword(
+          coin.wallet_address,
           sessionPassword
         );
         if (!wifKey) return stopWithError('Unable to fetch private key.');

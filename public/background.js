@@ -16,7 +16,7 @@ const networks = [
     currencyName: 'ETH',
     currencySymbol: 'ETH',
     currencyDecimals: 18,
-    rpcUrl: 'https://mainnet.infura.io/v3/REDACTED',
+    rpcUrl: process.env.REACT_APP_ETH_RPC,
     rpcApiKey: null,
     blockUrl: 'https://etherscan.io',
     default: true,
@@ -37,8 +37,7 @@ const networks = [
     currencyName: 'BNB',
     currencySymbol: 'BNB',
     currencyDecimals: 18,
-    rpcUrl:
-      'https://bsc.fastnode.cc/FNoItXAqEKsNFDjbsHetTyFjSMrwFGykPKOjQKzlocPGvuqOYkjhxkfFsIXRWtnI/',
+    rpcUrl: process.env.REACT_APP_BNB_RPC,
     rpcApiKey: null,
     blockUrl: 'https://bscscan.com',
     default: false,
@@ -61,7 +60,7 @@ const networks = [
   //   currencyName: 'AVAX',
   //   currencySymbol: 'AVAX',
   //   currencyDecimals: 18,
-  //   rpcUrl: 'https://api.avax.network/ext/bc/C/rpc',
+  //   rpcUrl: '',
   //   rpcApiKey: null,
   //   blockUrl: 'https://snowtrace.io/',
   //   default: false,
@@ -82,7 +81,7 @@ const networks = [
     currencyName: 'POL',
     currencySymbol: 'POL',
     currencyDecimals: 18,
-    rpcUrl: 'https://polygon-rpc.com/',
+    rpcUrl: process.env.REACT_APP_MATIC_RPC,
     rpcApiKey: null,
     blockUrl: 'https://polygonscan.com',
     default: false,
@@ -103,7 +102,7 @@ const networks = [
   //   currencyName: 'CRO',
   //   currencySymbol: 'CRO',
   //   currencyDecimals: 18,
-  //   rpcUrl: 'https://evm.cronos.org',
+  //   rpcUrl: '',
   //   rpcApiKey: null,
   //   blockUrl: 'https://cronoscan.com/',
   //   default: false,
@@ -124,9 +123,7 @@ const networks = [
     currencyName: 'SOL',
     currencySymbol: 'SOL',
     currencyDecimals: 6,
-    rpcUrl:
-      // 'https://sol.fastnode.cc/FNoItXAqEKsNFDjbsHetTyFjSMrwFGykPKOjQKzlocPGvuqOYkjhxkfFsIXRWtnI/',
-      'https://mainnet.helius-rpc.com/?api-key=REDACTED',
+    rpcUrl: process.env.REACT_APP_SOL_RPC,
     rpcApiKey: null,
     blockUrl: 'https://solscan.io/',
     default: false,
@@ -147,9 +144,8 @@ const networks = [
     currencyName: 'BTC',
     currencySymbol: 'BTC',
     currencyDecimals: 3,
-    rpcUrl:
-      'https://btc.nodes.fastnode.io/mainnet/fn-dedic-4479-ad5f-3e2787e055ca/blockbook/api/',
-    rpcApiKey: 'REDACTED',
+    rpcUrl: process.env.REACT_APP_BTC_RPC,
+    rpcApiKey: null,
     blockUrl: 'https://www.blockchain.com/explorer/transactions/',
     default: false,
     image: 'https://prod-qubetics-wallet.obs.ap-southeast-4.myhuaweicloud.com/BTC.png',
@@ -169,7 +165,7 @@ const networks = [
   //   currencyName: 'BTC Testnet',
   //   currencySymbol: 'tBTC',
   //   currencyDecimals: 8, // Usually testnets use standard 8 decimals
-  //   rpcUrl: 'https://bitcoin-testnet.drpc.org', // 🔁 Use a valid testnet RPC
+  //   rpcUrl: '', // 🔁 Use a valid testnet RPC
   //   rpcApiKey: 'YOUR_TESTNET_API_KEY', // 🔁 Replace with testnet key if needed
   //   blockUrl: 'https://mempool.space/testnet/tx/', // 🔁 Testnet block explorer
   //   default: false,
@@ -183,7 +179,7 @@ const networks = [
   //   slug: 'btc-test',
   //   status: true, // If you want to enable it for testing
   // }
-// ,  
+  // ,  
   // {
   //   id: uuidv4(),
   //   chainName: 'Cardano',
@@ -192,7 +188,7 @@ const networks = [
   //   currencySymbol: 'ADA',
   //   currencyDecimals: 6,
   //   rpcUrl: 'https://ada.nownodes.io/v2',
-  //   rpcApiKey: 'REDACTED',
+  //   rpcApiKey: '',
   //   blockUrl: 'https://explorer.cardano-testnet.iohkdev.io/',
   //   default: false,
   //   image: 'https://REDACTED/ada.png',
@@ -233,7 +229,7 @@ const networks = [
     currencyName: 'qubetics',
     currencySymbol: 'TICS',
     currencyDecimals: 18,//-----
-    rpcUrl: 'https://rpc.qubetics.com',
+    rpcUrl: process.env.REACT_APP_QUBETIC_RPC,
     rpcApiKey: null,
     blockUrl: 'https://ticsscan.com',
     default: false,
@@ -254,7 +250,7 @@ const networks = [
   //   currencyName: 'qubetics Testnet',
   //   currencySymbol: 'TICS',
   //   currencyDecimals: 18, // ✅ Same as mainnet
-  //   rpcUrl: 'https://rpc-testnet.qubetics.work/', // ✅ Updated testnet RPC
+  //   rpcUrl: process.env.REACT_APP_QUBETIC_TESTNET_RPC, // ✅ Updated testnet RPC
   //   rpcApiKey: null, // ✅ No change
   //   blockUrl: 'https://testnet.qubetics.work/tx/', // ✅ Updated explorer
   //   default: false,
@@ -289,7 +285,7 @@ class Background {
           // message.id = tabs[0].id;
           chrome.tabs.sendMessage(tabs[0].id, message);
         } else {
-          console.log('No active tab found.');
+          //console.log('No active tab found.');
         }
       });
     }
@@ -373,15 +369,15 @@ class Background {
 
     engine.push(
       createAsyncMiddleware(async (req, res, next, end) => {
-        console.log(
-          '🚀 ~ file: background.js:204 ~ Background ~ createAsyncMiddleware ~ req:',
-          req
-        );
+        // console.log(
+        //   '🚀 ~ file: background.js:204 ~ Background ~ createAsyncMiddleware ~ req:',
+        //   req
+        // );
         if (req.method === 'requestAccounts') {
           try {
             const { accounts } = await chrome.storage.session.get('accounts');
             if (accounts) {
-              console.log('ACCOUNTS',accounts);
+              // console.log('ACCOUNTS',accounts);
               const defaultAccount = accounts.find((el) => el.default === true);
               const account =
                 req.network === 'solana'
@@ -413,7 +409,7 @@ class Background {
                 });
               }
             } else {
-              console.log('No Account');
+              // console.log('No Account');
               const response = await new Promise(async (resolve, reject) => {
                 const requestData = encodeURIComponent(JSON.stringify(req));
                 chrome.windows.create({
@@ -433,9 +429,9 @@ class Background {
                 );
               });
 
-              console.log('RESPONSE ON CONNECT DAPP:',response)
+              // console.log('RESPONSE ON CONNECT DAPP:',response)
 
-              if (response && response.length > 0 ) {
+              if (response && response.length > 0) {
                 res.result = response;
                 res.method = req.method;
                 res.network = req.network;
@@ -467,7 +463,7 @@ class Background {
               }
             }
           } catch (err) {
-            console.log('ERRor:::', err);
+            // console.log('ERRor:::', err);
             res.error = {
               code: err.code || -1,
               message: err.message || 'Unknown error occurred',
@@ -545,7 +541,7 @@ class Background {
             }
             // }
           } catch (err) {
-            console.log('ERRor:::', err);
+            // console.log('ERRor:::', err);
             res.error = {
               code: err.code || -1,
               message: err.message || 'Unknown error occurred',
@@ -667,8 +663,8 @@ class Background {
             const defaultChain = chains.find((el) => el.default);
             const defaultAccount = accounts.find((el) => el.default);
 
-            console.log("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX", defaultChain);
-            
+            // console.log("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX", defaultChain);
+
             res.result = null;
             res.method = req.method;
             // res.chainId = defaultChain.chainId;
@@ -747,7 +743,7 @@ class Background {
               const { isApproved } = await chrome.storage.local.get(
                 'isApproved'
               );
-              console.log('isApproved:::', isApproved);
+              // console.log('isApproved:::', isApproved);
               if (!isApproved)
                 sendMessageToContentScript({
                   method: 'user_rejected',
@@ -766,7 +762,7 @@ class Background {
               }
             );
           });
-          console.log('RESPONSE BACK::', response);
+          // console.log('RESPONSE BACK::', response);
 
           if (response) {
             res.result = response;
@@ -794,7 +790,7 @@ class Background {
               const { isApproved } = await chrome.storage.local.get(
                 'isApproved'
               );
-              console.log('isApproved:::', isApproved);
+              // console.log('isApproved:::', isApproved);
               if (!isApproved)
                 sendMessageToContentScript({
                   method: 'user_rejected',
@@ -840,7 +836,7 @@ class Background {
               const { isApproved } = await chrome.storage.local.get(
                 'isApproved'
               );
-              console.log('isApproved:::', isApproved);
+              // console.log('isApproved:::', isApproved);
               if (!isApproved)
                 sendMessageToContentScript({
                   method: 'user_rejected',
@@ -886,7 +882,7 @@ class Background {
               const { isApproved } = await chrome.storage.local.get(
                 'isApproved'
               );
-              console.log('isApproved:::', isApproved);
+              // console.log('isApproved:::', isApproved);
               if (!isApproved)
                 sendMessageToContentScript({
                   method: 'user_rejected',
@@ -932,7 +928,7 @@ class Background {
               const { isApproved } = await chrome.storage.local.get(
                 'isApproved'
               );
-              console.log('isApproved:::', isApproved);
+              // console.log('isApproved:::', isApproved);
               if (!isApproved)
                 sendMessageToContentScript({
                   method: 'user_rejected',
@@ -978,7 +974,7 @@ class Background {
               const { isApproved } = await chrome.storage.local.get(
                 'isApproved'
               );
-              console.log('isApproved:::', isApproved);
+              // console.log('isApproved:::', isApproved);
               if (!isApproved)
                 sendMessageToContentScript({
                   method: 'user_rejected',
@@ -1024,7 +1020,7 @@ class Background {
               const { isApproved } = await chrome.storage.local.get(
                 'isApproved'
               );
-              console.log('isApproved:::', isApproved);
+              // console.log('isApproved:::', isApproved);
               if (!isApproved)
                 sendMessageToContentScript({
                   method: 'user_rejected',
@@ -1112,7 +1108,7 @@ class Background {
           engine.handle(message.payload, (err, result) => {
             // console.log(err, result, "result");
             if (err) {
-              console.error('Error handling JSON-RPC message:', err);
+              //console.error('Error handling JSON-RPC message:', err);
             } else {
               sendResponse({ type: 'JSON-RPC', payload: result });
             }
@@ -1123,11 +1119,15 @@ class Background {
       } else if (message.type === 'OPEN_SIDE_PANEL') {
         chrome.sidePanel
           .setPanelBehavior({ openPanelOnActionClick: true })
-          .catch((error) => console.error(error));
+          .catch((error) => {
+            //console.error(error)
+          });
       } else if (message.type === 'CLOSE_SIDE_PANEL') {
         chrome.sidePanel
           .setPanelBehavior({ openPanelOnActionClick: false })
-          .catch((error) => console.error(error));
+          .catch((error) => {
+            //console.error(error)
+          });
       }
     });
   };

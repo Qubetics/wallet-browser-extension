@@ -297,15 +297,25 @@ function ChainAbstraction({ state }) {
     let addressToUse;
     if (token?.coin_family === 3) {
       // Bitcoin - use MPC BTC address
+      // Check both numeric and string keys
       addressToUse =
-        mpcAddresses?.btc || account?.coinFamilyAndAddress[token?.coin_family];
+        mpcAddresses?.btc || 
+        account?.coinFamilyAndAddress?.[token?.coin_family] || 
+        account?.coinFamilyAndAddress?.["3"];
     } else if (token?.coin_family === 2 || token?.coin_family === 7) {
       // EVM chains - use MPC ETH address
+      // Check both numeric and string keys
+      const coinFamilyKey = token?.coin_family;
       addressToUse =
-        mpcAddresses?.eth || account?.coinFamilyAndAddress[token?.coin_family];
+        mpcAddresses?.eth || 
+        account?.coinFamilyAndAddress?.[coinFamilyKey] || 
+        account?.coinFamilyAndAddress?.[String(coinFamilyKey)];
     } else {
-      // Fallback to original address
-      addressToUse = account?.coinFamilyAndAddress[token?.coin_family];
+      // Fallback to original address - check both numeric and string keys
+      const coinFamilyKey = token?.coin_family;
+      addressToUse = 
+        account?.coinFamilyAndAddress?.[coinFamilyKey] || 
+        account?.coinFamilyAndAddress?.[String(coinFamilyKey)];
     }
 
     return {
@@ -504,8 +514,29 @@ function ChainAbstraction({ state }) {
           });
       }
 
-      if (storedMpc?.eth) addressList.push(storedMpc.eth);
-      if (storedMpc?.btc) addressList.push(storedMpc.btc);
+      // Always add MPC addresses if they exist
+      if (storedMpc?.eth) {
+        addressList.push(storedMpc.eth);
+      }
+      if (storedMpc?.btc) {
+        addressList.push(storedMpc.btc);
+      }
+
+      // Fallback: Ensure BTC address is included even if MPC BTC address is missing
+      // This ensures the API returns BTC tokens
+      // Check both numeric and string keys for BTC address (coinFamily 3)
+      if (!storedMpc?.btc) {
+        const btcAddress = account?.coinFamilyAndAddress?.[3] || account?.coinFamilyAndAddress?.["3"];
+        if (btcAddress && !addressList.includes(btcAddress)) {
+          addressList.push(btcAddress);
+          console.log("[ChainAbstraction] Added fallback BTC address from account:", btcAddress);
+        }
+      }
+
+      // Debug: Log addresses being sent to API
+      console.log("[ChainAbstraction] Address list for API:", addressList);
+      console.log("[ChainAbstraction] Stored MPC addresses:", storedMpc);
+      console.log("[ChainAbstraction] Account coinFamilyAndAddress:", account?.coinFamilyAndAddress);
 
       if (addressList.length === 0) {
         setCompentLoading(false);
@@ -544,6 +575,12 @@ function ChainAbstraction({ state }) {
         buildTokenObject(token, chains || [], account, storedMpc)
       );
 
+      // Debug: Log tokens returned from API
+      console.log("[ChainAbstraction] Tokens returned from API:", tokens);
+      console.log("[ChainAbstraction] BTC tokens:", tokens.filter(t => t.coinFamily === 3));
+      console.log("[ChainAbstraction] TICS tokens:", tokens.filter(t => t.coinFamily === 7));
+      console.log("[ChainAbstraction] Total tokens count:", tokens.length);
+
       if (tokens.length === 0) {
         setCompentLoading(false);
         setIsInitialLoading(false);
@@ -553,8 +590,49 @@ function ChainAbstraction({ state }) {
       const activeTokens = tokens;
       let modifiedList = await uniqueList(allToken, tokens);
 
+      // Ensure BTC token is present if we have a BTC address
+      const hasBtcToken = modifiedList.some(t => t.coinFamily === 3);
+      const hasBtcAddress = storedMpc?.btc || account?.coinFamilyAndAddress?.[3];
+      
+      if (!hasBtcToken && hasBtcAddress && chains) {
+        console.warn("[ChainAbstraction] BTC token missing from API response, but BTC address exists. API may not have returned BTC token.");
+        // Try to find BTC chain info
+        const btcChain = chains.find((chain) => chain?.coinFamily == 3);
+        if (btcChain) {
+          // Create a minimal BTC token object if API didn't return it
+          const btcToken = {
+            id: 'BTC',
+            symbol: 'BTC',
+            showName: 'Bitcoin',
+            coinSymbol: 'BTC',
+            active: true,
+            iHave: false, // Will be updated when balance is fetched
+            name: 'Bitcoin',
+            tokenAddress: null,
+            image: btcChain?.image || null,
+            address: storedMpc?.btc || account?.coinFamilyAndAddress?.[3],
+            isToken: false,
+            coinFamilyName: 'BTC',
+            coinFamily: 3,
+            balance: 0,
+            price: 0,
+            type: null,
+            chain: btcChain,
+            native: null,
+            decimals: 8,
+            rpc: process.env.REACT_APP_BTC_RPC,
+          };
+          modifiedList.push(btcToken);
+          console.log("[ChainAbstraction] Added fallback BTC token:", btcToken);
+        }
+      }
+
       setAllTokens(modifiedList);
       setFilteredTokens(modifiedList);
+      
+      // Debug: Log the modified list that will be set to availableTokens
+      console.log("[ChainAbstraction] Modified list (availableTokens):", modifiedList);
+      console.log("[ChainAbstraction] BTC in modifiedList:", modifiedList.filter(t => t.coinFamily === 3));
 
       let { crossToken1 } = await chrome.storage.local.get("crossToken1");
       let { crossToken2 } = await chrome.storage.local.get("crossToken2");
@@ -581,6 +659,8 @@ function ChainAbstraction({ state }) {
         setBalance(mpcBal);
 
         setReceivedBalance(0);
+        console.log("[ChainAbstraction] Setting availableTokens with:", modifiedList);
+        console.log("[ChainAbstraction] BTC in availableTokens:", modifiedList.filter(t => t.coinFamily === 3));
         setAvailableTokens(modifiedList);
         setToken1(myToken1);
         setToken2(myToken2);
@@ -1703,6 +1783,8 @@ function ChainAbstraction({ state }) {
                       disabled={!token1 || !token2 || isProcessing}
                       onClick={() => {
                         if (!token1 || !token2 || isProcessing) return;
+                        console.log("[ChainAbstraction] Opening token1 drawer, availableTokens:", availableTokens);
+                        console.log("[ChainAbstraction] BTC in availableTokens:", availableTokens.filter(t => t.coinFamily === 3));
                         setSelected(1);
                         setTokenDrawer(true);
                       }}
@@ -1754,6 +1836,7 @@ function ChainAbstraction({ state }) {
                         handlePositionChange(selectedToken);
                       }}
                       options={availableTokens
+                        .filter((token) => token && token.active !== false) // Ensure only active tokens are shown
                         .map((token) => {
                           return {
                             value: token?.id,
@@ -1872,6 +1955,14 @@ function ChainAbstraction({ state }) {
                       disabled={!token1 || !token2 || isProcessing}
                       onClick={() => {
                         if (!token1 || !token2 || isProcessing) return;
+                        console.log("[ChainAbstraction] Opening token2 drawer, availableTokens:", availableTokens);
+                        console.log("[ChainAbstraction] BTC in availableTokens:", availableTokens.filter(t => t.coinFamily === 3));
+                        console.log("[ChainAbstraction] allToken:", allToken);
+                        console.log("[ChainAbstraction] BTC in allToken:", allToken.filter(t => t.coinFamily === 3));
+                        // Ensure filteredTokens is set to allToken when opening drawer
+                        if (allToken.length > 0) {
+                          setFilteredTokens(allToken);
+                        }
                         setSelected(2);
                         setTokenDrawer(true);
                       }}
@@ -2034,6 +2125,12 @@ function ChainAbstraction({ state }) {
               setFilteredTokens(allToken);
             }}
             open={selectDrawer}
+            onOpen={() => {
+              console.log("[ChainAbstraction] Drawer opened, filteredTokens:", filteredTokens);
+              console.log("[ChainAbstraction] allToken:", allToken);
+              console.log("[ChainAbstraction] BTC in filteredTokens:", filteredTokens.filter(t => t.coinFamily === 3));
+              console.log("[ChainAbstraction] BTC in allToken:", allToken.filter(t => t.coinFamily === 3));
+            }}
             closeIcon={
               theme == "darkTheme" ? (
                 <img src={darkclose} alt="" />

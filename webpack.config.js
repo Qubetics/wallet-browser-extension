@@ -1,6 +1,17 @@
 const path = require("path");
 const webpack = require("webpack");
 
+// Load environment variables from .env file
+require("dotenv").config();
+
+// Create an object with all REACT_APP_* environment variables
+const envVars = {};
+Object.keys(process.env).forEach((key) => {
+  if (key.startsWith("REACT_APP_")) {
+    envVars[`process.env.${key}`] = JSON.stringify(process.env[key]);
+  }
+});
+
 module.exports = {
   entry: {
     background: "./public/background.js",
@@ -16,6 +27,7 @@ module.exports = {
       process: "process/browser",
       Buffer: ["buffer", "Buffer"],
     }),
+    new webpack.DefinePlugin(envVars),
   ],
   resolve: {
     fallback: {
