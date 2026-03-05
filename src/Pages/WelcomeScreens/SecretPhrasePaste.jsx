@@ -2146,7 +2146,7 @@ function SecretPhrasePaste({ children, termsCheck, getMnemonics, type }) {
               label={"Wallet Name"}
             />
           </div> */}
-          <div className="setPassword__secretPharse__fieldSBgInner textArea">
+          <div className="setPassword__secretPharse__fieldSBgInner textArea secretPhrasePasteArea">
             <TextArea
               value={mnemonics}
               onChange={(e) => {
@@ -2159,9 +2159,9 @@ function SecretPhrasePaste({ children, termsCheck, getMnemonics, type }) {
               placeholder={"Enter Your Secret Phrase Here"}
               rows={7}
             />
-            <div className="token__selectStyle">
+            <div className="token__selectStyle secretPhrasePasteArea__pasteWrap">
               <span
-                className={`${"token__pasteText"}`}
+                className={`${"token__pasteText"} secretPhrasePasteArea__pasteBtn`}
                 onClick={async () => {
                   const data = await navigator.clipboard.readText();
                   getMnemonics(data);

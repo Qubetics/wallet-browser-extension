@@ -299,7 +299,7 @@ export default function MpcModel({ showModal = true, onClose, currentEthAddress 
                     display: "block",
                   }}
                 >
-                  {key.toUpperCase()} Address
+                  {key.toUpperCase() === "ETH" ?  "TICS" : "BTC"} Address
                 </label>
                 <div
                   style={{

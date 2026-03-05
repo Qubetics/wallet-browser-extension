@@ -33,7 +33,7 @@ const AbstractProcessingModel = ({
   const handleExplorer = () => {
     if (transactionResult?.hash) {
       window.open(
-        `https://prod-explorer.qubetics.work/chain-abstraction/${transactionResult.hash}`,
+        `https://ticsscan.com/chain-abstraction/${transactionResult.hash}`,
         '_blank',
         'noopener,noreferrer'
       );

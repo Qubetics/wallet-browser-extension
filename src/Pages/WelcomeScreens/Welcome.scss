@@ -246,7 +246,7 @@
         position: relative;
         align-items: center;
         gap: 14px;
-        justify-content: center;
+        justify-content: flex-end;
         flex-wrap: wrap;
 
         .InnerFild {
@@ -447,6 +447,26 @@
         }
       }
     }
+  }
+}
+
+.secretPhrasePasteArea {
+  position: relative;
+
+  .ant-input {
+    padding-right: 25px !important;
+    padding-bottom: 44px !important;
+  }
+
+  &__pasteWrap {
+    // position: absolute;
+    right: 18px;
+    bottom: 14px;
+    z-index: 2;
+  }
+
+  &__pasteBtn {
+    position: static !important;
   }
 }
 

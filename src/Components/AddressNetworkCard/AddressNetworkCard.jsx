@@ -23,6 +23,7 @@ const crypto = {
   4: "POL",
   5: "SOL",
   6: "TRX",
+  7: "TICS",
 };
 
 function AddressNetworkCard(props) {

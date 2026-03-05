@@ -128,12 +128,12 @@ export class MpcChainAbstractionHelper {
           const response = await axios.get(url);
           const data = response?.data;
           const userToNetworkTxId = data?.user_to_network_tx_id;
-          const intentStatus = (data?.intent_status || "").toLowerCase();
+          const intentStatus = String(data?.intent_status || "").toLowerCase();
 
           // If status reaches a terminal state, resolve with the full payload
           if (
             resolveOnFinalStatus &&
-            (intentStatus === "Solved" || intentStatus === "failed")
+            (intentStatus === "solved" || intentStatus === "failed" || intentStatus === "rejected")
           ) {
             resolve(data);
             return;
@@ -178,8 +178,8 @@ export class MpcChainAbstractionHelper {
 
       const intentStatus = String(details?.intent_status || "Pending").toLowerCase();
       let status = 2; // pending
-      if (intentStatus === "Solved") status = 1;
-      if (intentStatus === "failed") status = 0;
+      if (intentStatus === "solved") status = 1;
+      if (intentStatus === "failed" || intentStatus === "rejected") status = 0;
 
       return {
         data: {
@@ -350,12 +350,20 @@ export class MpcChainAbstractionHelper {
         ? (intentHash.startsWith("0x") ? intentHash.slice(2) : intentHash)
         : null;
 
-      let intentStatus = intentData?.intent_status || "Pending";
+      const intentStatus = String(intentData?.intent_status || "Pending").toLowerCase();
 
       const coinFamily2 = token1?.coinFamily;
-      const fromAddress = account?.coinFamilyAndAddress?.[coinFamily2];
+      const fallbackFromAddress = mpcFromAddress || account?.coinFamilyAndAddress?.[coinFamily2];
+      const resolvedFromAddress = intentData?.source_address || fallbackFromAddress;
+      const resolvedToAddress = intentData?.target_address || toAddress;
 
-      if (intentId && intentStatus == "Pending" || intentStatus == "Solved") {
+      if (
+        intentId &&
+        (intentStatus === "pending" ||
+          intentStatus === "solved" ||
+          intentStatus === "failed" ||
+          intentStatus === "rejected")
+      ) {
         if (options?.onIntentCreated) {
           options.onIntentCreated(intentHash || intentId);
         }
@@ -378,15 +386,22 @@ export class MpcChainAbstractionHelper {
           // use default
         }
 
+        const txStatusForSave =
+          intentStatus === "solved"
+            ? "confirmed"
+            : intentStatus === "failed" || intentStatus === "rejected"
+            ? "failed"
+            : "pending";
+
         const saveData = {
           amount: Number(amount),
           gas_price: gasprice?.gas_price || "0",
-          from: fromAddress,
+          from: resolvedFromAddress,
           tx_hash: intentId,
           intent_hash: intentId,
-          to: toAddress,
+          to: resolvedToAddress,
           tx_type: "chain_abstraction",
-          tx_status: "pending",
+          tx_status: txStatusForSave,
           coin_symbol: token1?.coinSymbol?.toLowerCase(),
           coin_family: token1?.coinFamily,
         };
@@ -400,7 +415,12 @@ export class MpcChainAbstractionHelper {
         // Return immediately so UI shows success modal with intent hash and View on Explorer
         return {
           hash: intentId,
-          status: intentStatus == "Solved" ? 1 : intentStatus == "Failed" ? 0 : 2, // pending
+          status:
+            intentStatus === "solved"
+              ? 1
+              : intentStatus === "failed" || intentStatus === "rejected"
+              ? 0
+              : 2, // pending
           solver: "N/A",
           source_address: mpcFromAddress || "N/A",
         };
@@ -457,7 +477,7 @@ export class MpcChainAbstractionHelper {
 
       if (token?.coinFamily === 3) {
         // BTC balance
-        balance = await BTCHelper.getBTCBalance(mpcAddress);
+        balance = await BTCHelper.getMempoolBTC(mpcAddress);
         balance = parseFloat(balance) || 0;
       } else if (token?.isToken) {
         // ERC20 token

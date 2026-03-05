@@ -43,7 +43,7 @@ function AddresBook() {
           },
         }
       );
-      setList(data.data);
+      setList(data?.data);
       store.dispatch(setLoading(false));
     } catch (error) {
       messageApi.error(error.message);
@@ -118,11 +118,11 @@ function AddresBook() {
               heading={el?.name}
               address={el?.address}
               wallet_address={el?.address}
-              currency={`${el?.wallet_data?.coin_family} (${el.wallet_data.name})`}
+              currency={`${el?.wallet_data?.coin_family} (${el?.wallet_data?.name})`}
               index={index}
               id={el?.id}
               refresh={refresh}
-              wallet_data={el.wallet_data}
+              wallet_data={el?.wallet_data}
               editModal={editModal}
               setEditModal={setEditModal}
               editModalMain={editModalMain}

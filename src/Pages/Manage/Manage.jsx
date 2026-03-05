@@ -202,7 +202,7 @@ function Manage() {
                   style={{
                     fontWeight: 'bold',
                     fontSize: '15px',
-                    marginTop: '18%',
+                    marginTop: '65%',
                   }}
                 >
                   {loading ? 'Loading...' : 'No assets found'}

@@ -4,7 +4,6 @@ import { useSelector } from 'react-redux';
 import { store } from '../..';
 import { setLoading } from '../../actions/loading';
 import { server } from '../../server';
-import { token_type } from '../../helpers/constant';
 
 const stringToColour = function (name) {
   let hash = 0;
@@ -278,12 +277,7 @@ const AllocationChart = () => {
                         whiteSpace: 'nowrap',
                       }}
                     >
-                      {itm?.coin?.coin_symbol?.toUpperCase()}{' '}
-                      <span>
-                        {token_type(itm?.coin?.coin_family)
-                          ? `(${token_type(itm?.coin?.coin_family)})`
-                          : ''}
-                      </span>
+                      {itm?.coin?.coin_symbol?.toUpperCase()}
                     </span>
                   </div>
 

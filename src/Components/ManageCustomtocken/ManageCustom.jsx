@@ -30,6 +30,9 @@ function ManageCustom(props) {
   } = props;
 
   const [newStatus, setStatus] = useState(null);
+  const tokenTitle = `${currency}${
+    coin?.token_address ? ` (${token_type(coin?.coin_family)})` : ''
+  }`;
 
   let network = '';
 
@@ -139,31 +142,8 @@ function ManageCustom(props) {
               textAlign: 'left',
             }}
           >
-            <p
-              style={{
-                // width: "100px",
-                // textOverflow: "ellipsis",
-                // overflow: "hidden",
-                display: 'flex',
-                alignItems: 'center',
-              }}
-            >
-              {currency}
-              {valuecurrency ? (
-                <p
-                  style={{
-                    marginLeft: '5px',
-                    fontWeight: '500',
-                  }}
-                >
-                  {/* ({valuecurrency}) */}
-                  {coin?.token_address
-                    ? `(${token_type(coin?.coin_family)})`
-                    : ''}
-                </p>
-              ) : (
-                ''
-              )}
+            <p className="manageList__tokenTitle" title={tokenTitle}>
+              {tokenTitle}
             </p>
             <span className="coinNname" style={{}}>
               {/* {name} */}

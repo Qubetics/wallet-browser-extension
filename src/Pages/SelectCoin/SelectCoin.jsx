@@ -118,7 +118,7 @@ function SelectCoin() {
       } else if (coin?.coinFamily === 3) {
         // Fetch BTC balance
         // console.log("Fetching BTC balance for address:", mpcAddress);
-        const balance = await BTCHelper.getBTCBalance(mpcAddress);
+        const balance = await BTCHelper.getMempoolBTC(mpcAddress);
         // console.log(`MPC BTC balance:`, balance);
         return parseFloat(balance) || 0;
       }
@@ -197,7 +197,7 @@ function SelectCoin() {
             }
           } else if (selectedCoin.coinFamily === 3) {
             // BTC - fetch from main account
-            const balance = await BTCHelper.getBTCBalance(mainAccountAddress);
+            const balance = await BTCHelper.getMempoolBTC(mainAccountAddress);
             // console.log(`Main account BTC balance:`, balance);
             actualBalance = parseFloat(balance).toFixed(8);
           }

@@ -2007,7 +2007,7 @@ function CrossChain({ state }) {
                 <p
                   className="noAddress"
                   style={{
-                    marginTop: '4%',
+                    marginTop: '47%',
                     marginBottom: '15px',
                     fontWeight: 'bold',
                     fontSize: '15px',

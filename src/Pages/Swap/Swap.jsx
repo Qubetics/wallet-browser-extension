@@ -2449,16 +2449,7 @@ function  Swap() {
                           style={{ fontSize: '17px' }}
                           className="noAddress"
                         >
-                          {token.name}{' '}
-                        </span>
-                        <span
-                          className="noAddress"
-                          style={{
-                            fontSize: '11px',
-                            marginLeft: '5px',
-                          }}
-                        >
-                          {token.type ? `/ ${token.type}` : null}
+                          {token.name}
                         </span>
                       </p>
                     </div>
@@ -2473,7 +2464,7 @@ function  Swap() {
                 <p
                   className="noAddress"
                   style={{
-                    marginTop: '4%',
+                    marginTop: '47%',
                     marginBottom: '15px',
                     fontWeight: 'bold',
                     fontSize: '15px',
@@ -2481,7 +2472,7 @@ function  Swap() {
                 >
                   Asset not found
                 </p>
-                <ButtonComp
+                {/* <ButtonComp
                   text={'Add Tokens'}
                   onClick={() => {
                     if (!token1) {
@@ -2497,7 +2488,7 @@ function  Swap() {
                     });
                   }}
                   maxWidth={'50%'}
-                />
+                /> */}
               </div>
             )}
           </div>

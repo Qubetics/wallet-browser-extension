@@ -48,6 +48,11 @@ import axios from "axios";
 
 const CHAIN_ABSTRACTION_PRICE_URL = `${process.env.REACT_APP_CHAIN_ABSTRACTION_MIN_API_URL}/api/v1/cryptos/prices?symbols=BTC,TICS`;
 const SATOSHI_600_IN_BTC = 0.000006; // 600 sats
+const CHAIN_ABSTRACTION_SWAP_SOURCE = "chain_abstraction";
+const CHAIN_ABSTRACTION_TOKEN_KEYS = {
+  from: "chainAbstractionToken1",
+  to: "chainAbstractionToken2",
+};
 
 const INITIAL_MIN_MAX_SWAP_AMOUNT = {
   7: {
@@ -214,6 +219,8 @@ function ChainAbstraction({ state }) {
   const [minMaxSwapAmount, setMinMaxSwapAmount] = useState(INITIAL_MIN_MAX_SWAP_AMOUNT);
   const [mpcWalletsData, setMpcWalletsData] = useState(null); // Cache MPC wallets data
   const baseInfoCacheRef = useRef(new Map()); // Cache for getBaseInfo responses by token pair
+  const chainAbstractionSwapDetail =
+    swapDetail?.source === CHAIN_ABSTRACTION_SWAP_SOURCE ? swapDetail : null;
 
   const getFiatValueForCoin = async () => {
     try {
@@ -393,7 +400,7 @@ function ChainAbstraction({ state }) {
   // Fetch fees from API
   const fetchFees = async () => {
     try {
-      const response = await axios.get('https://stage-onboarding-api.qubetics.work/fees');
+      const response = await axios.get('https://prod-onboarding-api.qubetics.work/fees');
       if (response?.data?.error === false && response?.data?.data) {
         setPlatformFee(response.data.data.platform || 1.5);
         setSolverFee(response.data.data.solver || 1.5);
@@ -634,8 +641,10 @@ function ChainAbstraction({ state }) {
       console.log("[ChainAbstraction] Modified list (availableTokens):", modifiedList);
       console.log("[ChainAbstraction] BTC in modifiedList:", modifiedList.filter(t => t.coinFamily === 3));
 
-      let { crossToken1 } = await chrome.storage.local.get("crossToken1");
-      let { crossToken2 } = await chrome.storage.local.get("crossToken2");
+      let { [CHAIN_ABSTRACTION_TOKEN_KEYS.from]: crossToken1 } =
+        await chrome.storage.local.get(CHAIN_ABSTRACTION_TOKEN_KEYS.from);
+      let { [CHAIN_ABSTRACTION_TOKEN_KEYS.to]: crossToken2 } =
+        await chrome.storage.local.get(CHAIN_ABSTRACTION_TOKEN_KEYS.to);
 
       if (!crossToken1 && !crossToken2) {
         let myToken1 =
@@ -808,7 +817,9 @@ function ChainAbstraction({ state }) {
           }
 
           crossToken1 = tokenFromSearch;
-          await chrome.storage.local.set({ crossToken1: tokenFromSearch });
+          await chrome.storage.local.set({
+            [CHAIN_ABSTRACTION_TOKEN_KEYS.from]: tokenFromSearch,
+          });
           setToken1(crossToken1);
         }
       }
@@ -887,18 +898,18 @@ function ChainAbstraction({ state }) {
       }
     })();
 
-    if (swapDetail) {
-      if (swapDetail?.tab == 1) {
-        setToken1(swapDetail?.token1);
-        setToken2(swapDetail?.token2);
-        setWithdrawAmount(+swapDetail?.amount);
-        setReceivedAmount(+swapDetail?.receivedAmount);
+    if (chainAbstractionSwapDetail) {
+      if (chainAbstractionSwapDetail?.tab == 1) {
+        setToken1(chainAbstractionSwapDetail?.token1);
+        setToken2(chainAbstractionSwapDetail?.token2);
+        setWithdrawAmount(+chainAbstractionSwapDetail?.amount);
+        setReceivedAmount(+chainAbstractionSwapDetail?.receivedAmount);
         setTimeout(() => {
           initialSwapDetail(
-            +swapDetail?.amount,
-            swapDetail?.receivedAmount,
-            swapDetail?.token1,
-            swapDetail?.token2
+            +chainAbstractionSwapDetail?.amount,
+            chainAbstractionSwapDetail?.receivedAmount,
+            chainAbstractionSwapDetail?.token1,
+            chainAbstractionSwapDetail?.token2
           );
         }, 2000);
       }
@@ -977,7 +988,7 @@ function ChainAbstraction({ state }) {
     tokenTwo
   ) => {
     try {
-      if (updateRef?.current || swapDetail?.tab) {
+      if (updateRef?.current || chainAbstractionSwapDetail?.tab) {
         if (amount > 0 && amount && tokenTwo) {
           setCompentLoading(true);
 
@@ -1054,7 +1065,7 @@ function ChainAbstraction({ state }) {
 
   const handlePositionChange = async (updatedToken1) => {
     await chrome.storage.local.set({
-      crossToken1: updatedToken1,
+      [CHAIN_ABSTRACTION_TOKEN_KEYS.from]: updatedToken1,
     });
   
     // console.log("=== Token Position Changed ===");
@@ -1107,7 +1118,7 @@ function ChainAbstraction({ state }) {
 
   const handleToken2Change = async (updatedToken2) => {
     await chrome.storage.local.set({
-      crossToken2: updatedToken2,
+      [CHAIN_ABSTRACTION_TOKEN_KEYS.to]: updatedToken2,
     });
 
     setReceivedBalance(updatedToken2.balance);
@@ -1235,6 +1246,7 @@ function ChainAbstraction({ state }) {
         token1Price: newBalanceToFiatConversion(token1?.price, amount),
         parentCoin: { value: parentCoinValue },
         tab: 1,
+        source: CHAIN_ABSTRACTION_SWAP_SOURCE,
         rpc: token1.rpc,
         coinSymbol: token1.coinSymbol,
       });
@@ -1492,15 +1504,13 @@ function ChainAbstraction({ state }) {
       }
 
       // console.log("Network fee calculated:", networkFee);
-
       // Check liquidity availability before proceeding
-      // For cross-chain swaps, check destination token liquidity (e.g., TICS→BTC checks BTC pool)
-      // For same-chain swaps, check source token liquidity
+      // Always check destination token (token2) liquidity
       const liquidityCheck = await checkLiquidityAvailability(
         token1,
-        token2, // Pass destination token for cross-chain liquidity check
+        token2, // Pass destination token - always check token2 liquidity
         token1?.rpc || null,
-        receivedAmount // Use received amount (what user will get) for cross-chain, amount for same-chain
+        receivedAmount // Use received amount (what user will get)
       );
 
       // console.log("Liquidity check result:", liquidityCheck);
@@ -1929,10 +1939,17 @@ function ChainAbstraction({ state }) {
                 <div className="swap_onChain_balance">
                   <div>
                     <div
-                      className="myInput"
-                      style={{ cursor: 'default' }}
+                      className="myInput chainAbstractionToAmount"
+                      style={{ cursor: "default" }}
+                      title={
+                        receivedAmount && receivedAmount !== ""
+                          ? removeTrailingZeros(receivedAmount)
+                          : "0.000"
+                      }
                     >
-                      {receivedAmount && receivedAmount !== "" ? removeTrailingZeros(receivedAmount) : "0.000"}
+                      {receivedAmount && receivedAmount !== ""
+                        ? removeTrailingZeros(receivedAmount)
+                        : "0.000"}
                     </div>
                     <p style={{ marginBottom: "8px" }}>
                       {receivedAmount && receivedAmount !== "" && parseFloat(receivedAmount) > 0

@@ -255,6 +255,15 @@ randb {
   }
 }
 
+.chainAbstractionToAmount {
+  display: block;
+  width: 100%;
+  max-width: 171px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 @keyframes skeletonPulse {
   0% {
     opacity: 1;

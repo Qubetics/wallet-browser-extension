@@ -155,7 +155,7 @@ export class BTCHelper {
       if (unspent.length === 0) {
         return {
           message:
-            'You have a pending transaction in your account or you do not have enough balance to proceed with the transaction.',
+            'You do not have enough balance to proceed with the transaction.',
         };
       }
 

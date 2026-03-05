@@ -233,7 +233,7 @@ function SendCoins() {
             store.dispatch(setLoading(false));
 
             return messageApi.error(
-              'You have a pending transaction in your account or you do not have enough balance to proceed with the transaction.'
+              'You do not have enough balance to proceed with the transaction.'
             );
           }
 
@@ -456,7 +456,7 @@ function SendCoins() {
             store.dispatch(setLoading(false));
 
             return messageApi.error(
-              'You have a pending transaction in your account or you do not have enough balance to proceed with the transaction.'
+              'You do not have enough balance to proceed with the transaction.'
             );
           }
 

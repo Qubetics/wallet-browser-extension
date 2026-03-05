@@ -357,8 +357,11 @@ export const getNetworkAddresses = async () => {
     // console.log("[MPC] Network addresses:", result);
     
     if (result?.status === "success" && result?.network_addresses) {
-      const result = {btc_address: result?.network_addresses?.btc_address, eth_address: result?.vault_address };
-      return result;
+      const networkAddresses = {
+        btc_address: result?.network_addresses?.btc_address, 
+        eth_address: result?.vault_address 
+      };
+      return networkAddresses;
     }
     
     throw new Error("Invalid response format from network addresses API");
@@ -371,19 +374,10 @@ export const getNetworkAddresses = async () => {
 
 export const checkLiquidityAvailability = async (token1, token2 = null, rpcUrl = null, requiredAmount = null) => {
   try {
-
     const isCrossChain = token2 && token1?.id !== token2?.id;
-    const tokenToCheck = isCrossChain ? token2 : token1;
+    // Always check the destination token (token2) liquidity if provided
+    const tokenToCheck = token2 || token1;
     const tokenSymbol = tokenToCheck?.coinSymbol || token1?.coinSymbol;
-    
-    // console.log("[MPC] Checking liquidity availability");
-    // console.log("[MPC] Source Token:", token1?.coinSymbol, "| Destination Token:", token2?.coinSymbol);
-    // console.log("[MPC] Is Cross-Chain:", isCrossChain);
-    // console.log("[MPC] Checking liquidity for:", tokenSymbol, "(destination token for cross-chain)");
-    
-    if (requiredAmount) {
-      // console.log("[MPC] Required liquidity amount:", requiredAmount, tokenSymbol);
-    }
     
     // Get network addresses
     const networkAddresses = await getNetworkAddresses();
@@ -394,7 +388,6 @@ export const checkLiquidityAvailability = async (token1, token2 = null, rpcUrl =
     
     // For cross-chain, use destination token's RPC if available
     const rpcToUse = isCrossChain && token2?.rpc ? token2.rpc : rpcUrl;
-    
     let balance = 0;
     let hasLiquidity = false;
     const minimumThreshold = 0.001; // Minimum liquidity threshold
@@ -403,22 +396,20 @@ export const checkLiquidityAvailability = async (token1, token2 = null, rpcUrl =
       // Check BTC network address balance
       const btcAddress = networkAddresses?.btc_address;
       if (!btcAddress) {
-        // console.warn("[MPC] BTC network address not found");
         return {
           available: false,
           message: "Network address not available. Please try again later.",
         };
       }
       
-      // console.log("[MPC] Checking BTC liquidity for address:", btcAddress);
-      balance = await BTCHelper.getBTCBalance(btcAddress);
+      balance = await BTCHelper.getMempoolBTC(btcAddress);
       balance = parseFloat(balance) || 0;
       
       // Calculate required amount (use provided amount or minimum threshold)
       const required = requiredAmount ? parseFloat(requiredAmount) : minimumThreshold;
       
 
-      
+
       // Log liquidity details
       // console.log("[MPC] ===== BTC Liquidity Check =====");
       // console.log("[MPC] Swap Type:", isCrossChain ? `Cross-Chain (${token1?.coinSymbol} → BTC)` : "Same-Chain");

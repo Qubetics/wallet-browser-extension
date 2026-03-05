@@ -215,8 +215,8 @@ function ChainAbstractionHistoryItem(props) {
 
       const intentStatus = String(details?.intent_status || "Pending").toLowerCase();
       let statusValue = 2;
-      if (intentStatus === "completed") statusValue = 1;
-      if (intentStatus === "failed") statusValue = 0;
+      if (intentStatus === "completed" || intentStatus === "solved") statusValue = 1;
+      if (intentStatus === "failed" || intentStatus === "rejected") statusValue = 0;
 
       setTransactionResult({
         hash: details?.intent_hash || details?.user_to_network_tx_id || transactionHash,
@@ -246,7 +246,11 @@ function ChainAbstractionHistoryItem(props) {
       }
       
       const normalizedIntentStatus =
-        intentStatus === "completed" ? "confirmed" : intentStatus === "failed" ? "failed" : "pending";
+        intentStatus === "completed" || intentStatus === "solved"
+          ? "confirmed"
+          : intentStatus === "failed" || intentStatus === "rejected"
+          ? "failed"
+          : "pending";
 
       const shouldUpdate = (details?.intent_hash || transactionHash) && 
                            normalizedListStatus === "pending" && 
