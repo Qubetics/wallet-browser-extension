@@ -213,6 +213,9 @@ function SelectCoin() {
                   coin_name: selectedCoin.name,
                   coin_image: selectedCoin.image,
                   decimals: selectedCoin.coinFamily == 3 ? 8 : 18, // BTC uses 8 decimals, TICS uses 18
+                  fiat_price_data: {
+                    value: selectedCoin?.fiatPrice || 0,
+                  },
                 },
                 balance: actualBalance, // Use actual balance from main account
                 wallet_address: mainAccountAddress, // Source address (where to send FROM)
@@ -280,7 +283,8 @@ function SelectCoin() {
               return {
                 ...coin,
                 balance: balance.toFixed(8),
-                usdValue: `$${usdValue.toFixed(2)}`
+                usdValue: `$${usdValue.toFixed(2)}`,
+                fiatPrice: price || 0,
               };
             } catch (error) {
               // console.error(`Error fetching balance for ${coin.symbol}:`, error);

@@ -278,8 +278,13 @@ export class MpcChainAbstractionHelper {
       //   Number(amountWithDecimals).toFixed(0)
       // );
 
-      const amountWithDecimals =
-        BigInt(amount) * BigInt(10) ** BigInt(decimals);
+      const amountWithDecimals = new BigNumber(amount || 0)
+        .multipliedBy(new BigNumber(10).pow(decimals))
+        .integerValue(BigNumber.ROUND_DOWN);
+
+      if (!amountWithDecimals.isFinite() || amountWithDecimals.lte(0)) {
+        throw new Error("Invalid amount for chain abstraction transaction.");
+      }
 
       // console.log("Amount with decimals:", amountWithDecimals.toString());
 
@@ -299,7 +304,7 @@ export class MpcChainAbstractionHelper {
         target_address: toAddress,
         source_chain: sourceChain,
         target_chain: isSameCoin ? sourceChain : targetChain, 
-        amount: amountWithDecimals.toString(),
+        amount: amountWithDecimals.toFixed(0),
         // amount: Number(amountWithDecimals),
         source_token: token1?.coinSymbol?.toLowerCase(),
         target_token: isSameCoin
@@ -411,8 +416,6 @@ export class MpcChainAbstractionHelper {
 
           await this.saveIntentHash(saveData);
      
-
-        // Return immediately so UI shows success modal with intent hash and View on Explorer
         return {
           hash: intentId,
           status:
@@ -447,7 +450,6 @@ export class MpcChainAbstractionHelper {
       const balanceInEth = ethers.utils.formatUnits(balance, 18);
       return new BigNumber(balanceInEth).toNumber();
     } catch (error) {
-      // console.error("Error fetching MPC balance:", error);
       return 0;
     }
   }
@@ -463,7 +465,6 @@ export class MpcChainAbstractionHelper {
       );
       return parseFloat(balance) || 0;
     } catch (error) {
-      // console.error("Error fetching MPC token balance:", error);
       return 0;
     }
   }
@@ -524,7 +525,6 @@ export class MpcChainAbstractionHelper {
         balance,
       };
     } catch (error) {
-      // console.error("Error validating MPC balance:", error);
       return {
         valid: false,
         message: "Error checking balance",

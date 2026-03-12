@@ -218,6 +218,10 @@ function ChainAbstraction({ state }) {
   const networkFeeRef = useRef(0); // Use ref to persist network fee across renders
   const [minMaxSwapAmount, setMinMaxSwapAmount] = useState(INITIAL_MIN_MAX_SWAP_AMOUNT);
   const [mpcWalletsData, setMpcWalletsData] = useState(null); // Cache MPC wallets data
+  const [chainAbstractionFiatPrices, setChainAbstractionFiatPrices] = useState({
+    BTC: 0,
+    TICS: 0,
+  });
   const baseInfoCacheRef = useRef(new Map()); // Cache for getBaseInfo responses by token pair
   const chainAbstractionSwapDetail =
     swapDetail?.source === CHAIN_ABSTRACTION_SWAP_SOURCE ? swapDetail : null;
@@ -230,6 +234,10 @@ function ChainAbstraction({ state }) {
       if (prices?.BTC != null && prices?.TICS != null && Number(prices.TICS) > 0) {
         const btcPrice = Number(prices.BTC);
         const ticsPrice = Number(prices.TICS);
+        setChainAbstractionFiatPrices({
+          BTC: btcPrice,
+          TICS: ticsPrice,
+        });
         const ticsEquivalentTo600Satoshi = (SATOSHI_600_IN_BTC * btcPrice) / ticsPrice;
         const minTics = Math.ceil(Number(Number(ticsEquivalentTo600Satoshi).toFixed(8)) || 25);
         setMinMaxSwapAmount((prev) => ({
@@ -299,6 +307,12 @@ function ChainAbstraction({ state }) {
 
   const buildTokenObject = (token, chains, account, mpcAddresses) => {
     const { coinFamilyName, tokenType, rpc } = getTokenMeta(token?.coin_family);
+    const fallbackFiatPrice =
+      token?.coin_family === 3
+        ? chainAbstractionFiatPrices.BTC
+        : token?.coin_family === 7
+        ? chainAbstractionFiatPrices.TICS
+        : 0;
 
     // Determine which address to use based on coin family
     let addressToUse;
@@ -340,7 +354,7 @@ function ChainAbstraction({ state }) {
       coinFamilyName,
       coinFamily: token?.coin_family,
       balance: token?.wallet_data?.balance || 0,
-      price: token?.fiat_price_data?.value || 0,
+      price: token?.fiat_price_data?.value || fallbackFiatPrice || 0,
       type: token?.token_address ? tokenType : null,
       chain: chains.find((chain) => chain?.coinFamily == token?.coin_family),
       native: token?.fiat_price_data,
@@ -400,7 +414,7 @@ function ChainAbstraction({ state }) {
   // Fetch fees from API
   const fetchFees = async () => {
     try {
-      const response = await axios.get('https://prod-onboarding-api.qubetics.work/fees');
+      const response = await axios.get('https://onboarding-api.ticssolver.com/fees');
       if (response?.data?.error === false && response?.data?.data) {
         setPlatformFee(response.data.data.platform || 1.5);
         setSolverFee(response.data.data.solver || 1.5);
@@ -622,7 +636,7 @@ function ChainAbstraction({ state }) {
             coinFamilyName: 'BTC',
             coinFamily: 3,
             balance: 0,
-            price: 0,
+            price: chainAbstractionFiatPrices.BTC || 0,
             type: null,
             chain: btcChain,
             native: null,
@@ -1172,6 +1186,41 @@ function ChainAbstraction({ state }) {
     };
   }, [page]);
 
+  const normalizedToAddress = (toAddress || "").trim();
+  const normalizedMpcFromAddress = (mpcFromAddress || "").trim();
+  const isSameRecipientAddress =
+    token1?.id === token2?.id &&
+    normalizedToAddress &&
+    normalizedMpcFromAddress &&
+    normalizedToAddress.toLowerCase() === normalizedMpcFromAddress.toLowerCase();
+  const recipientAddressForSubmit =
+    token2?.chain?.isEVM === true
+      ? normalizedToAddress.toLowerCase()
+      : normalizedToAddress;
+
+  const calculateBtcNetworkFee = async () => {
+    const gasPriceResponse = await BTCHelper.getBTCGasPrice();
+
+    let gasPrice = 1;
+    if (gasPriceResponse) {
+      if (typeof gasPriceResponse === "object" && gasPriceResponse !== null) {
+        gasPrice = Math.max(
+          Number(gasPriceResponse.priority || gasPriceResponse.regular || 1),
+          1
+        );
+      } else {
+        gasPrice = Math.max(Number(gasPriceResponse) || 1, 1);
+      }
+    }
+
+    const estimatedInputCount = 1;
+    const estimatedOutputCount = 2;
+    const estimatedSize =
+      estimatedInputCount * 146 + estimatedOutputCount * 34 + 10;
+    const feeInSatoshis = Math.ceil(estimatedSize * gasPrice);
+    return parseFloat((feeInSatoshis / 1e8).toFixed(8));
+  };
+
   const handleChainAbstraction = async () => {
     setIsProcessing(true);
     try {
@@ -1186,7 +1235,7 @@ function ChainAbstraction({ state }) {
 
       // Validate to address is different from from address when tokens are the same
       if (token1?.id === token2?.id) {
-        if (toAddress.toLowerCase() === mpcFromAddress.toLowerCase()) {
+        if (isSameRecipientAddress) {
           setIsProcessing(false);
           setSessionPassword(null); // Clear password on error
           return messageApi.error(
@@ -1220,12 +1269,16 @@ function ChainAbstraction({ state }) {
 
       // Validate to address
       if (token2?.coinFamily === 3) {
-        const isValidBTCAddress = BTCHelper.validateBTCAddress(toAddress);
+        const isValidBTCAddress = BTCHelper.validateBTCAddress(
+          recipientAddressForSubmit
+        );
         if (!isValidBTCAddress) {
           return throwError("Please enter a valid Bitcoin address.");
         }
       } else if (token2?.chain?.isEVM == true) {
-        const isValidEVMAddress = Web3Helper.validateETHAddress(toAddress);
+        const isValidEVMAddress = Web3Helper.validateETHAddress(
+          recipientAddressForSubmit
+        );
         if (!isValidEVMAddress) {
           return throwError("Please enter a valid address.");
         }
@@ -1347,10 +1400,10 @@ function ChainAbstraction({ state }) {
 
         if (!hasEnoughBalance) {
           const errorMsg = token1?.isToken
-            ? `Insufficient Balance. Token: ${balanceNum.toFixed(6)} ${token1?.symbol}, Required: ${amountNum.toFixed(6)} ${token1?.symbol}. Native: ${nativeCoinBalance.toFixed(6)}, Gas Fee: ${feeNum.toFixed(6)}`
-            : `Insufficient Balance. Available: ${balanceNum.toFixed(6)} ${token1?.symbol}, Required: ${(amountNum + feeNum).toFixed(6)} ${token1?.symbol} (Amount: ${amountNum.toFixed(6)} + Gas: ${feeNum.toFixed(6)})`;
+            ? `Insufficient balance. Required: ${amountNum.toFixed(6)} ${token1?.symbol} + ${feeNum.toFixed(6)} native gas, Available: ${balanceNum.toFixed(6)} ${token1?.symbol}, Native: ${nativeCoinBalance.toFixed(6)}`
+            : `Insufficient balance. Required: ${(amountNum + feeNum).toFixed(8)} ${token1?.symbol} (Amount: ${amountNum.toFixed(8)} + Fee: ${feeNum.toFixed(8)}), Available: ${balanceNum.toFixed(8)} ${token1?.symbol}`;
           console.error("Balance check failed:", errorMsg);
-          return throwError("Insufficient Balance");
+          return throwError(errorMsg);
         }
 
         // Additional check for tokens (redundant but kept for safety)
@@ -1360,7 +1413,7 @@ function ChainAbstraction({ state }) {
             return throwError(`Insufficient Balance`);
           }
         }
-
+        console.log("hasEnoughBalance:", hasEnoughBalance);
         const { data: parentCoinData } = await server.post(
           "/wallet/nativeCoinFiatPrice",
           {
@@ -1371,45 +1424,22 @@ function ChainAbstraction({ state }) {
             headers: { Authorization: account.jwtToken },
           }
         );
-
+        console.log("data of parentCoinData:", parentCoinData);
         const swapDetails = buildSwapDetails(
           gasFee,
           parentCoinData?.fiatCoinPrice?.value
         );
         finalizeSwap(swapDetails);
       } else if (token1?.chain?.currencyName === "BTC") {
-        const gasPriceResponse = await BTCHelper.getBTCGasPrice();
-        if (!gasPriceResponse) {
-          return throwError("Unable to fetch BTC gas price at the moment.");
-        }
-        
-        let gasPrice;
-        if (typeof gasPriceResponse === 'object' && gasPriceResponse !== null) {
-          gasPrice = gasPriceResponse.priority || gasPriceResponse.regular || 1;
-        } else {
-          gasPrice = Math.max(gasPriceResponse || 1, 1);
-        }
-        
-        // console.log("BTC Gas Price API Response:", gasPriceResponse);
-        // console.log("BTC Gas Price (sat/vB):", gasPrice);
-        
-        const estimatedInputCount = 1;
-        const estimatedOutputCount = 2;
-        const estimatedSize = estimatedInputCount * 146 + estimatedOutputCount * 34 + 10;
-        
-        const feeInSatoshis = Math.ceil(estimatedSize * gasPrice);
-        
-        const calculatedNetworkFee = parseFloat((feeInSatoshis / 1e8).toFixed(8));
-        
-        // const CHAIN_ABSTRACTION_BTC_FEE_SATS = 600;
-        // const calculatedNetworkFee = parseFloat((CHAIN_ABSTRACTION_BTC_FEE_SATS / 1e8).toFixed(8));
+        const calculatedNetworkFee = await calculateBtcNetworkFee();
         networkFeeRef.current = calculatedNetworkFee;
         setNetworkFee(calculatedNetworkFee);
         // console.log("Network fee stored in ref:", networkFeeRef.current);
 
         if (mpcBalance < parsedAmount + calculatedNetworkFee) {
+          const totalRequired = parsedAmount + calculatedNetworkFee;
           return throwError(
-            `Insufficient balance`
+            `Insufficient balance. Required: ${totalRequired.toFixed(8)} BTC (Amount: ${parsedAmount.toFixed(8)} + Fee: ${calculatedNetworkFee.toFixed(8)}), Available: ${(parseFloat(mpcBalance) || 0).toFixed(8)} BTC`
           );
         }
 
@@ -1443,7 +1473,7 @@ function ChainAbstraction({ state }) {
 
       // Validate to address is different from from address when tokens are the same
       if (token1?.id === token2?.id) {
-        if (toAddress.toLowerCase() === mpcFromAddress.toLowerCase()) {
+        if (isSameRecipientAddress) {
           setIsProcessing(false);
           setSessionPassword(null); // Clear password on error
           return messageApi.error(
@@ -1482,20 +1512,7 @@ function ChainAbstraction({ state }) {
           symbol: token1?.coinSymbol.toUpperCase(),
         }));
       } else if (token1?.chain?.currencyName === "BTC") {
-        // const gasPrice = Math.max(await BTCHelper.getBTCGasPrice(), 10);
-        // networkFee = gasPrice / 1e8;
-        const gasPriceResponse = await BTCHelper.getBTCGasPrice();
-        let gasPrice = 10;
-        if (gasPriceResponse) {
-          if (typeof gasPriceResponse === "object" && gasPriceResponse !== null) {
-            gasPrice = gasPriceResponse.priority || gasPriceResponse.regular || 10;
-          } else {
-            gasPrice = Math.max(Number(gasPriceResponse) || 10, 10);
-          }
-        }
-        const estimatedSize = 1 * 146 + 2 * 34 + 10; // vBytes
-        const feeInSatoshis = Math.ceil(estimatedSize * gasPrice);
-        networkFee = parseFloat((feeInSatoshis / 1e8).toFixed(8));
+        networkFee = await calculateBtcNetworkFee();
 
         setTransactionResult((prev) => ({
           ...prev,
@@ -1555,7 +1572,7 @@ function ChainAbstraction({ state }) {
           token1?.rpc,
           token1?.coinSymbol,
           sessionPassword,
-          toAddress
+          recipientAddressForSubmit
         );
 
         // console.log("MPC Transaction result:", data);
@@ -1877,6 +1894,13 @@ function ChainAbstraction({ state }) {
                             parseFloat(getFlooredFixed(balance || 0, 6))
                           )}{" "}
                           {token1?.symbol?.toUpperCase()}{" "}
+                          {`~ ${currency?.symbol}${addCommasToNumber(
+                            getFlooredFixed(
+                              parseFloat(balance || 0) *
+                                parseFloat(token1?.price || 0),
+                              2
+                            )
+                          )}`}
                         </span>
                       </p>
                     </div>
@@ -1897,7 +1921,7 @@ function ChainAbstraction({ state }) {
               <div 
                 className="swap__icon"
                 style={{
-                  cursor: isProcessing ? "not-allowed" : "pointer"
+                  cursor: (isProcessing || token1?.id === token2?.id) ? "not-allowed" : "pointer"
                 }}
               >
                 {availableTokens?.length !== 0 && (
@@ -1907,7 +1931,7 @@ function ChainAbstraction({ state }) {
                     alt=""
                     height={44}
                     style={
-                        isProcessing
+                        (isProcessing || token1?.id === token2?.id)
                           ? { 
                               pointerEvents: "none", 
                               opacity: 0.5 
@@ -1917,7 +1941,7 @@ function ChainAbstraction({ state }) {
                           }
                     }
                     onClick={() => {
-                      if (isProcessing) return;
+                      if (isProcessing || token1?.id === token2?.id) return;
                       if (token2?.iHave) {
                         setToken1(token2);
                         setToken2(token1);
@@ -2106,11 +2130,11 @@ function ChainAbstraction({ state }) {
                       ? "Processing..."
                       : amount === null || amount === 0
                       ? "Enter Amount"
-                      : toAddress === "" || !toAddress
+                      : normalizedToAddress === ""
                       ? "Enter Recipient Address"
                       : !mpcFromAddress
                       ? "MPC Wallet Not Set"
-                      : (token1?.id === token2?.id && toAddress.toLowerCase() === mpcFromAddress?.toLowerCase())
+                      : isSameRecipientAddress
                       ? "Enter Different Recipient Address"
                       : "Abstract"
                   }
@@ -2122,11 +2146,11 @@ function ChainAbstraction({ state }) {
                     !receivedAmount ||
                     amount <= 0 ||
                     receivedAmount <= 0 ||
-                    !toAddress ||
+                    !normalizedToAddress ||
                     !mpcFromAddress ||
                     loading ||
                     isProcessing ||
-                    (token1?.id === token2?.id && toAddress.toLowerCase() === mpcFromAddress?.toLowerCase())
+                    isSameRecipientAddress
                   }
                 />
               </div>

@@ -350,55 +350,42 @@ function ChainAbstractionHistoryItem(props) {
     <>
       {contextHolder}
       <div 
-        className="histryList"
+        className="histryList chain-abstraction-item"
         style={{ cursor: "default" }}
       >
         <div className="statusCurrency">
           <div className="Status">
+            <div className="swap-icon-bg">
             <img src={swapIcon} alt="chain-abstraction" />
+            </div>
             <div className="send">
-              <p className="sendRecieve">
-                Chain Abstraction {valueCurrency}
-              </p>x
+              <p className="sendRecieve">{date}</p>
               <div className="histryStatus">
-                <p>{date}</p>
+                <p style={{ color: displayStatus.color }}>{displayStatus.text}</p>
               </div>
             </div>
           </div>
           <div className="Currency">
-            <p
-              className="curncyStatus"
-              style={{
-                color: displayStatus.color,
-              }}
-            >
-              {displayStatus.text}
-            </p>
             <button
               className="viewButton"
               onClick={handleClick}
               disabled={isUpdating}
               style={{ cursor: isUpdating ? "wait" : "pointer" }}
             >
-              View
+              {isUpdating ? "..." : "View"}
             </button>
           </div>
         </div>
         <div>
           <div className="outer-list">
-            <p className="toFrom">SOURCE</p>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "4px" }}>
+            <p className="toFrom">Source</p>
+            <div className="source-row">
+              <div className="source-row__left">
               {sourceCoinImage ? (
                 <img 
                   src={sourceCoinImage} 
                   alt={sourceCoin.name}
-                  style={{
-                    width: "24px",
-                    height: "24px",
-                    borderRadius: "50%",
-                    objectFit: "cover",
-                    flexShrink: 0,
-                  }}
+                    className="source-coin-img"
                   onError={(e) => {
                     e.target.style.display = "none";
                     const placeholder = e.target.nextElementSibling;
@@ -412,53 +399,22 @@ function ChainAbstractionHistoryItem(props) {
               >
                 {sourceCoin.name.charAt(0)}
               </div>
-              <span className="addressList">{sourceCoin.name}</span>
-              <span className="addressList" style={{ marginLeft: "auto" }}>
+                <span className="source-name">{sourceCoin.name}</span>
+              </div>
+              <span className="source-amount">
                 {(() => {
-                  // For very small amounts (< 0.0001), use 8 decimal places
-                  // For larger amounts, use 5 decimal places
                   const amount = parseFloat(sourceCoin.amount || 0);
                   const decimals = amount > 0 && amount < 0.0001 ? 8 : 5;
                   const formatted = getFlooredFixed(amount, decimals);
-                  // Remove trailing zeros but keep at least one digit after decimal
                   const cleaned = formatted.replace(/\.?0+$/, '') || '0';
                   return `${addCommasToNumber(cleaned)} ${sourceCoin.symbol}`;
                 })()}
               </span>
             </div>
           </div>
+          <div className="source-destination-divider" />
           <div className="outer-list">
-            <p className="toFrom">DESTINATION RECIPIENT ADDRESS</p>
-            {/* <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "4px" }}>
-              {destinationCoinImage ? (
-                <img 
-                  src={destinationCoinImage} 
-                  alt={destinationCoin.name}
-                  style={{
-                    width: "24px",
-                    height: "24px",
-                    borderRadius: "50%",
-                    objectFit: "cover",
-                    flexShrink: 0,
-                  }}
-                  onError={(e) => {
-                    e.target.style.display = "none";
-                    const placeholder = e.target.nextElementSibling;
-                    if (placeholder) placeholder.style.display = "flex";
-                  }}
-                />
-              ) : null}
-              <div 
-                className="coin-icon-placeholder-small"
-                style={{ display: destinationCoinImage ? "none" : "flex" }}
-              >
-                {destinationCoin.name.charAt(0)}
-              </div>
-              <span className="addressList">{destinationCoin.name}</span>
-              <span className="addressList" style={{ marginLeft: "auto" }}>
-                {addCommasToNumber(formatAmount(destinationCoin.amount))} {destinationCoin.symbol}
-              </span>
-            </div> */}
+            <p className="toFrom">Destination Recipient Address</p>
             {destinationCoin.address && (
               <div style={{ marginTop: "8px", display: "flex", alignItems: "center", gap: "8px" }}>
                 <span className="addressList" style={{ color: "white", fontFamily: "monospace", fontSize: "13px" }}>

@@ -41,6 +41,7 @@ function HistoryListOuter(props) {
     allData,
     type,
   } = props;
+  const normalizedType = String(type || "").toLowerCase();
   // console.log("props",props);
   const [messageApi, contextHolder] = message.useMessage({
     duration: DURATION,
@@ -219,7 +220,7 @@ function HistoryListOuter(props) {
 
   // Determine which status to display
   const getDisplayStatus = () => {
-    if (type === "chain_abstraction") {
+    if (normalizedType === "chain_abstraction") {
       // For chain abstraction, use status field
       return status?.status || "pending";
     } else {
@@ -240,13 +241,13 @@ function HistoryListOuter(props) {
       >
         <div className="statusCurrency">
           <div className="Status">
-            {type === "deposit" && <img src={recieveIcon} alt="deposit" />}
-            {type === "withdraw" && <img src={TickIcon} alt="withdraw" />}
-            {type === "swap" && <img src={swapIcon} alt="swap" />}
-            {type === "cross_chain" && <img src={swapIcon} alt="cross-chain" />}
-            {type === "dapp" && <img src={dAppIcon} alt="dapp" />}
-            {type === "approve" && <img src={swapIcon} alt="approve" />}
-            {type === "chain_abstraction" && <img src={swapIcon} alt="chain-abstraction" />}
+            {normalizedType === "deposit" && <img src={recieveIcon} alt="deposit" />}
+            {normalizedType === "withdraw" && <img src={TickIcon} alt="withdraw" />}
+            {normalizedType === "swap" && <img src={swapIcon} alt="swap" />}
+            {normalizedType === "cross_chain" && <img src={swapIcon} alt="cross-chain" />}
+            {normalizedType === "dapp" && <img src={dAppIcon} alt="dapp" />}
+            {normalizedType === "approve" && <img src={swapIcon} alt="approve" />}
+            {normalizedType === "chain_abstraction" && <img src={swapIcon} alt="chain-abstraction" />}
             {![
               "deposit",
               "withdraw",
@@ -255,23 +256,23 @@ function HistoryListOuter(props) {
               "dapp",
               "approve",
               "chain_abstraction",
-            ].includes(type) && <img src={TickIcon} alt="default" />}
+            ].includes(normalizedType) && <img src={TickIcon} alt="default" />}
 
             <div className="send">
               <p className="sendRecieve">
                 {/* {sendRecieve} */}
-                {type =='deposit' && <span>Deposit</span>}
-                {type =='withdraw' && <span>Withdraw</span>}
-                {type =='swap' && <span>Swap</span>}
-                {type =='cross_chain' && <span>Cross Chain</span>}
-                {type =='dapp' && <span>Smart Contract</span>}
-                {type=='approve' && <span>Approve</span>}
+                {normalizedType === 'deposit' && <span>Deposit</span>}
+                {normalizedType === 'withdraw' && <span>Withdraw</span>}
+                {normalizedType === 'swap' && <span>Swap</span>}
+                {normalizedType === 'cross_chain' && <span>Cross Chain</span>}
+                {normalizedType === 'dapp' && <span>Smart Contract</span>}
+                {normalizedType === 'approve' && <span>Approve</span>}
                 {/* Default case added  */}
-                {!['deposit', 'withdraw', 'swap', 'cross_chain', 'dapp', 'approve'].includes(type) && (
+                {!['deposit', 'withdraw', 'swap', 'cross_chain', 'dapp', 'approve'].includes(normalizedType) && (
                  <span>Withdraw</span>
                  )}
                 {' '}
-                {type !='dapp' && valueCurrency}
+                {normalizedType !== 'dapp' && valueCurrency}
               </p>
               <div className="histryStatus">
                 <p>{date}</p>

@@ -20,6 +20,21 @@ const stringToColour = function (name) {
   )}${('00' + b.toString(16)).slice(-2)}`;
 };
 
+const getTokenTypeLabel = (coinFamily) => {
+  switch (coinFamily) {
+    case 1:
+      return 'BEP20';
+    case 5:
+      return 'SPL';
+    case 2:
+    case 4:
+    case 7:
+      return 'ERC20';
+    default:
+      return '';
+  }
+};
+
 const AllocationChart = () => {
   const [portfolio, setPortfolio] = useState([]);
   const [portfolioBalance, setPortfolioBalance] = useState(0);
@@ -277,7 +292,11 @@ const AllocationChart = () => {
                         whiteSpace: 'nowrap',
                       }}
                     >
-                      {itm?.coin?.coin_symbol?.toUpperCase()}
+                      {`${itm?.coin?.coin_name || itm?.coin?.coin_symbol?.toUpperCase() || 'Unknown'}${
+                        itm?.coin?.token_address
+                          ? ` /${getTokenTypeLabel(itm?.coin?.coin_family)}`
+                          : ''
+                      }`}
                     </span>
                   </div>
 

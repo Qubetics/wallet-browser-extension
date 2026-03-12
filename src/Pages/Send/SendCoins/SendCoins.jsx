@@ -105,6 +105,31 @@ function SendCoins() {
   const [loading, setComponentLoading] = useState(null);
   const [cosmosFee, setCosmosFee] = useState(0);
 
+  const getDecimalPrecision = () => {
+    const rawDecimals = Number(coin?.coin?.decimals);
+    if (!Number.isFinite(rawDecimals) || rawDecimals <= 0) {
+      return 18;
+    }
+    // Handles both formats:
+    // - precision format: 18
+    // - base unit format: 1000000000000000000
+    if (rawDecimals <= 30) {
+      return Math.floor(rawDecimals);
+    }
+    return Math.max(String(Math.trunc(rawDecimals)).length - 1, 0);
+  };
+
+  const getBaseUnitDivisor = () => {
+    const rawDecimals = Number(coin?.coin?.decimals);
+    if (!Number.isFinite(rawDecimals) || rawDecimals <= 0) {
+      return new BigNumber(10).pow(18);
+    }
+    if (rawDecimals > 30) {
+      return new BigNumber(rawDecimals);
+    }
+    return new BigNumber(10).pow(Math.floor(rawDecimals));
+  };
+
   const fetchNativePrice = async () => {
     const parentCoin = await server.post(
       '/wallet/nativeCoinFiatPrice',
@@ -407,10 +432,11 @@ function SendCoins() {
           return messageApi.error('Insufficient balance to cover gas fee.');
         }
 
+        const baseUnitDivisor = getBaseUnitDivisor();
         let amt = formatNumberFiat(
           maxBNBAfterGas
             .integerValue(BigNumber.ROUND_DOWN)
-            .dividedBy(coin.coin.decimals)
+            .dividedBy(baseUnitDivisor)
             .toString()
         );
         setAmount(amt);
@@ -1106,7 +1132,7 @@ function SendCoins() {
 
               if (afterDecimal) {
                 // Get the maximum allowed decimals for the cryptocurrency (e.g., Bitcoin has 8 decimals)
-                const maxDecimals = coin.coin.decimals.toString().length - 1;
+                const maxDecimals = getDecimalPrecision();
                 // Check if the entered decimal part is longer than the maximum allowed
                 if (afterDecimal.toString().length > maxDecimals) {
                   return; // Return if decimal part is too long

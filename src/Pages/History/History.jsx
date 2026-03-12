@@ -8,7 +8,7 @@ import {
   getFlooredFixed,
 } from '../../helpers/conversion.helper';
 import { server } from '../../server';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { store } from '../..';
 import { setFilter } from '../../actions/filter';
 import styles from './style.module.scss';
@@ -16,9 +16,11 @@ import moment from 'moment';
 import HistoryListOuter from '../../Components/HistryList/HistryListOuter';
 import ChainAbstractionHistoryItem from '../../Components/ChainAbstractionHistory/ChainAbstractionHistoryItem';
 import { getCosmosAddress } from '../../helpers/cosmos.helper';
+import { getStoredMpcAddresses } from '../../helpers/mpc.helper';
 
 function History() {
   const { account, currency, filter, loading } = useSelector((state) => state);
+  const navigate = useNavigate();
 
   const [history, setHistory] = useState([]);
   const [chainAbstractionHistory, setChainAbstractionHistory] = useState([]);
@@ -28,7 +30,10 @@ function History() {
   const [isFetchingChainAbstraction, setIsFetchingChainAbstraction] = useState(false);
   const [total, setTotal] = useState(0);
   const [chainAbstractionTotal, setChainAbstractionTotal] = useState(0);
-  const [activeTab, setActiveTab] = useState(0);
+  const [activeTab, setActiveTab] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return parseInt(params.get('tab') || '0');
+  });
   const [showSkeleton, setShowSkeleton] = useState(true);
   const [showChainAbstractionSkeleton, setShowChainAbstractionSkeleton] = useState(true);
   const { pathname, state } = useLocation();
@@ -54,20 +59,55 @@ function History() {
       let trnxType = undefined;
       if (type === 'chain_abstraction') {
         trnxType = 'chain_abstraction';
+      } else if (state?.type && state.type !== 'all') {
+        trnxType = state.type;
       }
-      // For transactions tab, trnxType remains undefined to get all transactions
+      // For transactions tab with no specific type filter, trnxType remains undefined
+
+      // For chain abstraction tab, ignore all state filters (coin, status, dates)
+      const isChainAbstraction = type === 'chain_abstraction';
+      const storedMpcAddresses = isChainAbstraction
+        ? account?.mpcAddresses || (await getStoredMpcAddresses())
+        : null;
+
+      // For chain abstraction, use MPC BTC/TICS addresses in payload when available.
+      // Falls back to normal wallet addresses if MPC addresses are not present.
+      const chainAbstractionAddressList = isChainAbstraction
+        ? (account?.coinFamilies || [])
+            .map((coinFamily) => {
+              const family = Number(coinFamily);
+              const familyAddress =
+                account?.coinFamilyAndAddress?.[family] ??
+                account?.coinFamilyAndAddress?.[String(family)];
+
+              if (family === 3) {
+                return storedMpcAddresses?.btc || familyAddress;
+              }
+
+              if (family === 7) {
+                return storedMpcAddresses?.eth || familyAddress;
+              }
+
+              return familyAddress;
+            })
+            .filter(Boolean)
+        : addressListArr;
 
       const transactionList = await server.post(
         `/wallet/transaction/list`,
         {
-          coin_family: state
+          coin_family: isChainAbstraction
+            ? account.coinFamilies
+            : state
             ? state.coinId
               ? state.coinId == 'all'
                 ? account.coinFamilies
                 : [state?.coinId]
               : account.coinFamilies
             : account.coinFamilies,
-          addrsListKeys: state
+          addrsListKeys: isChainAbstraction
+            ? chainAbstractionAddressList
+            : state
             ? state.coinId
               ? state.coinId == 'all'
                 ? addressListArr
@@ -78,17 +118,23 @@ function History() {
             : addressListArr,
           page: page,
           limit: 100,
-          status: state
+          status: isChainAbstraction
+            ? undefined
+            : state
             ? state.status === 'all'
               ? undefined
               : state.status
             : undefined,
-          date_from: state
+          date_from: isChainAbstraction
+            ? undefined
+            : state
             ? state.fromDate
               ? moment(state.fromDate).format('YYYY-MM-DD')
               : undefined
             : undefined,
-          date_to: state
+          date_to: isChainAbstraction
+            ? undefined
+            : state
             ? state.toDate
               ? moment(state.toDate).format('YYYY-MM-DD')
               : undefined
@@ -233,6 +279,8 @@ function History() {
     }
     
     setActiveTab(index);
+    // Encode active tab in URL so FixWidthLayout can show/hide filter icon
+    navigate(`/history?tab=${index}`, { state, replace: true });
     // Reset pages and skeleton state when switching tabs
     if (index === 0) {
       setCurrentPage(1);

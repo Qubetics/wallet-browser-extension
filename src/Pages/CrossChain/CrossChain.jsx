@@ -293,6 +293,14 @@ function CrossChain({ state }) {
     return result;
   };
 
+  const getTokenDisplayName = (token) => {
+    const rawName = String(token?.name || '').trim();
+    if (token?.coinFamily === 4 && rawName.toLowerCase() === 'matic network') {
+      return 'Polygon';
+    }
+    return rawName;
+  };
+
   const loadMoreTokens = async (currentPage) => {
     try {
       setInnerLoading(true);
@@ -1889,7 +1897,9 @@ function CrossChain({ state }) {
                     return el;
                   }
                 })
-                .map((token) => (
+                .map((token) => {
+                  const tokenDisplayName = getTokenDisplayName(token);
+                  return (
                   <div
                     className="design"
                     style={{
@@ -1965,7 +1975,7 @@ function CrossChain({ state }) {
                           }}
                         >
                           {' '}
-                          {token.name.split('')[0]}
+                          {tokenDisplayName.split('')[0]}
                         </div>
                       ) : (
                         <img
@@ -1983,7 +1993,7 @@ function CrossChain({ state }) {
                           style={{ fontSize: '17px' }}
                           className="noAddress"
                         >
-                          {token.name}{' '}
+                          {tokenDisplayName}{' '}
                         </span>
                         <span
                           className="noAddress"
@@ -1997,7 +2007,7 @@ function CrossChain({ state }) {
                       </p>
                     </div>
                   </div>
-                ))
+                )})
             ) : (
               <div
                 style={{

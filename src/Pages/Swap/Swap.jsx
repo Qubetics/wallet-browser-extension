@@ -117,16 +117,21 @@ function  Swap() {
   const { theme } = useSelector((state) => state);
   const [percent, setPercent] = useState(null);
 
-  // let g = { type: "on_chain_swap", is_maintenance: 1 };
-  // let b = { type: "cross_chain_swap", is_maintenance: 0 };
   const [onChainSwapM, setOnChainSwapM] = useState({});
   const [crossChainM, setCrossChainM] = useState({});
   const [activeIndex, setActiveIndex] = useState(null);
   const { state } = useLocation();
 
+  const resetOnChainSelectionState = () => {
+    setAount(null);
+    setAmount2(null);
+    setPercent(null);
+    setActiveIndex(null);
+    setInfoData([]);
+  };
+
   useEffect(() => {
     if (swapDetail) {
-      // console.log('swapDetail?.amount', swapDetail?.amount);
       setSel(swapDetail?.tab);
       if (swapDetail?.tab == 0) {
         setAount(swapDetail?.amount.toString());
@@ -1149,6 +1154,7 @@ function  Swap() {
         setAmount2(null);
         setAount(null);
         setPercent(null);
+        setActiveIndex(null);
         setReverse(false);
         setInfoData([]);
         updateRef.current = false;
@@ -1161,6 +1167,7 @@ function  Swap() {
         setAmount2(null);
         setAount(null);
         setPercent(null);
+        setActiveIndex(null);
         setReverse(false);
         setInfoData([]);
         updateRef.current = false;
@@ -1181,6 +1188,7 @@ function  Swap() {
         setAmount2(null);
         //setAount(null);
         setPercent(null);
+        setActiveIndex(null);
         setReverse(false);
         setInfoData([]);
         updateRef.current = false;
@@ -1193,6 +1201,7 @@ function  Swap() {
         setAmount2(null);
         //setAount(null);
         setPercent(null);
+        setActiveIndex(null);
         setReverse(false);
         setInfoData([]);
         updateRef.current = false;
@@ -1615,7 +1624,7 @@ function  Swap() {
                   store.dispatch(swapDetailAc(null));
                 }
                 setSel(0);
-                setAount(null);
+                resetOnChainSelectionState();
               }}
             >
               On-Chain
@@ -1632,6 +1641,7 @@ function  Swap() {
                 if (swapDetail) {
                   store.dispatch(swapDetailAc(null));
                 }
+                resetOnChainSelectionState();
                 setSel(1);
               }}
             >
@@ -2011,24 +2021,6 @@ function  Swap() {
                       ))}
                     </div>
                   )}
-
-                  {/* <div className="swap_percentage">
-                    {percentages.map((percentage, index) => (
-                      <p
-                        style={{ cursor: 'pointer' }}
-                        key={index}
-                        className={activeIndex === index ? 'active' : ''}
-                        onClick={() => {
-                          setActiveIndex(index);
-                          setPercent(percentage);
-                          calculateAccordingly(percentage);
-                        }}
-                      >
-                        {percentage}%
-                      </p>
-                    ))}
-                  </div> */}
-
                   <div className="swap__infoText">
                     {loading ? (
                       <>
@@ -2450,6 +2442,15 @@ function  Swap() {
                           className="noAddress"
                         >
                           {token.name}
+                        </span>
+                        <span
+                          className="noAddress"
+                          style={{
+                            fontSize: '11px',
+                            marginLeft: '5px',
+                          }}
+                        >
+                          {token?.isToken && token?.type ? ` /${token.type}` : null}
                         </span>
                       </p>
                     </div>

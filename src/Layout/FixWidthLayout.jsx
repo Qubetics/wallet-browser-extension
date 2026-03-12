@@ -30,6 +30,7 @@ function FixWidthLayout() {
   const { state } = useLocation();
 
   const path = getLocation.pathname.replace('/', '');
+  const historyTabParam = parseInt(new URLSearchParams(getLocation.search).get('tab') || '0');
   const navigate = useNavigate();
   const height = useCurrentHeight();
 
@@ -82,7 +83,7 @@ function FixWidthLayout() {
               getLocation?.state?.path === '/wallet' ? '/wallet' : '/setting'
             }
             title={'History'}
-            FilterIcon={'/filter-history'}
+            FilterIcon={historyTabParam === 0 ? '/filter-history' : undefined}
             path={state?.path ?? ''}
           />
         )}
