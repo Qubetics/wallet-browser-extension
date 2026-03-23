@@ -1,0 +1,321 @@
+@import "../../styles/__vars.scss";
+@import "../../styles/__mixins.scss";
+
+.remove-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.history-tabs-container {
+  width: 100%;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  // position: sticky;
+  top: 0;
+  z-index: 9;
+  // background-image: url("../../Assets/main-bg.png");
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+}
+
+.history-tabs {
+  display: flex;
+  align-items: flex-end;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  position: relative;
+  width: 100%;
+  border-bottom: 1px solid rgba(139, 141, 151, 0.3);
+}
+
+.history-tab {
+  padding: 12px 20px;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  color: #8b8d97;
+  font-size: 16px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  position: relative;
+  margin: 0;
+  user-select: none;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.5;
+  white-space: nowrap;
+  flex: 1 1 50%;
+  width: 50%;
+
+  &:hover {
+    opacity: 0.8;
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: none;
+  }
+
+  &:focus-visible {
+    outline: none;
+  }
+}
+
+.history-tab-active {
+  color: transparent;
+  background: linear-gradient(90deg, #00E5E5 0%, #8B5CF6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 500;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #00E5E5 0%, #8B5CF6 100%);
+    z-index: 1;
+  }
+}
+
+// Skeleton loader styles
+.history-skeleton-card {
+  background-color: #18171f;
+  padding: 15px;
+  border-radius: 14px;
+  margin-bottom: 10px;
+  animation: skeletonPulse 4s ease-in-out infinite;
+
+  .skeleton-header {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(220, 226, 245, 0.3);
+    padding-bottom: 20px;
+    margin-bottom: 10px;
+
+    .skeleton-left {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+
+      .skeleton-icon {
+        width: 40px;
+        height: 41px;
+        border-radius: 8px;
+        background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
+        background-size: 200% 100%;
+        animation: skeletonShimmer 1.5s infinite;
+      }
+
+      .skeleton-text-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+
+        .skeleton-text {
+          background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
+          background-size: 200% 100%;
+          animation: skeletonShimmer 1.5s infinite;
+          border-radius: 4px;
+          height: 14px;
+
+          &.skeleton-title {
+            width: 180px;
+          }
+
+          &.skeleton-date {
+            width: 140px;
+            height: 12px;
+          }
+        }
+      }
+    }
+
+    .skeleton-status {
+      width: 70px;
+      height: 14px;
+      background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
+      background-size: 200% 100%;
+      animation: skeletonShimmer 1.5s infinite;
+      border-radius: 4px;
+    }
+  }
+
+  .skeleton-address-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+
+    .skeleton-address-item {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+
+      .skeleton-label {
+        width: 50px;
+        height: 14px;
+        background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
+        background-size: 200% 100%;
+        animation: skeletonShimmer 1.5s infinite;
+        border-radius: 4px;
+      }
+
+      .skeleton-address {
+        width: 200px;
+        height: 14px;
+        background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
+        background-size: 200% 100%;
+        animation: skeletonShimmer 1.5s infinite;
+        border-radius: 4px;
+      }
+    }
+  }
+}
+
+// Chain abstraction skeleton specific styles
+.history-skeleton-card-chain {
+  .skeleton-header {
+    .skeleton-left {
+      .skeleton-text-group {
+        .skeleton-title {
+          width: 200px;
+        }
+      }
+    }
+  }
+
+  .skeleton-address-group {
+    .skeleton-address-item {
+      .skeleton-source-dest {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 4px;
+
+        .skeleton-coin-icon {
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
+          background-size: 200% 100%;
+          animation: skeletonShimmer 1.5s infinite;
+          flex-shrink: 0;
+        }
+
+        .skeleton-coin-name {
+          width: 80px;
+          height: 14px;
+          background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
+          background-size: 200% 100%;
+          animation: skeletonShimmer 1.5s infinite;
+          border-radius: 4px;
+        }
+
+        .skeleton-coin-amount {
+          width: 100px;
+          height: 14px;
+          background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
+          background-size: 200% 100%;
+          animation: skeletonShimmer 1.5s infinite;
+          border-radius: 4px;
+          margin-left: auto;
+        }
+      }
+
+      .skeleton-tx-hash {
+        width: 250px;
+        height: 14px;
+        background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
+        background-size: 200% 100%;
+        animation: skeletonShimmer 1.5s infinite;
+        border-radius: 4px;
+        margin-top: 8px;
+      }
+    }
+  }
+}
+
+@keyframes skeletonPulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes skeletonShimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+// Dark theme skeleton adjustments
+@include theme() {
+  .history-skeleton-card {
+    .skeleton-header {
+      .skeleton-left {
+        .skeleton-icon {
+          background: linear-gradient(90deg, #1a1a1a 25%, #2a2a2a 50%, #1a1a1a 75%);
+          background-size: 200% 100%;
+        }
+
+        .skeleton-text-group {
+          .skeleton-text {
+            background: linear-gradient(90deg, #1a1a1a 25%, #2a2a2a 50%, #1a1a1a 75%);
+            background-size: 200% 100%;
+          }
+        }
+      }
+
+      .skeleton-status {
+        background: linear-gradient(90deg, #1a1a1a 25%, #2a2a2a 50%, #1a1a1a 75%);
+        background-size: 200% 100%;
+      }
+    }
+
+    .skeleton-address-group {
+      .skeleton-address-item {
+        .skeleton-label,
+        .skeleton-address {
+          background: linear-gradient(90deg, #1a1a1a 25%, #2a2a2a 50%, #1a1a1a 75%);
+          background-size: 200% 100%;
+        }
+      }
+    }
+  }
+
+  .history-skeleton-card-chain {
+    .skeleton-address-group {
+      .skeleton-address-item {
+        .skeleton-source-dest {
+          .skeleton-coin-icon,
+          .skeleton-coin-name,
+          .skeleton-coin-amount {
+            background: linear-gradient(90deg, #1a1a1a 25%, #2a2a2a 50%, #1a1a1a 75%);
+            background-size: 200% 100%;
+          }
+        }
+
+        .skeleton-tx-hash {
+          background: linear-gradient(90deg, #1a1a1a 25%, #2a2a2a 50%, #1a1a1a 75%);
+          background-size: 200% 100%;
+        }
+      }
+    }
+  }
+}

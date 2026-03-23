@@ -1,0 +1,64 @@
+@import "../../styles/__vars.scss";
+@import "../../styles/__mixins.scss";
+.manageList {
+  background-color: #18171f;
+  padding: 13px;
+  border-radius: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+  .networkNameNew {
+    font-size: 12px;
+    @include theme() {
+      color: theme-get("whiteblack");
+    }
+  }
+
+  &__imgcurrency {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex: 1;
+    min-width: 0;
+    // margin-top: 20px;
+
+    p {
+      font-size: 16px;
+      font-weight: 600;
+      color: #ffffff;
+      text-align: left;
+    }
+    span {
+      font-size: 12px;
+      color: #98969b;
+    }
+    img {
+      height: 30px;
+      width: 30px;
+      border-radius: 15px;
+    }
+  }
+
+  &__imgcurrency_Name {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__tokenTitle {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+
+  button {
+    margin: 0px !important;
+  }
+  .manageListSwitch {
+    .ant-switch {
+      background: #313038;
+    }
+  }
+}

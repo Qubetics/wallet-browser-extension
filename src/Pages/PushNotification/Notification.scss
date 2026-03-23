@@ -1,0 +1,62 @@
+@import "../../styles/__vars.scss";
+@import "../../styles/__mixins.scss";
+
+.pushNotification {
+  &__notificationSec {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    text-align: left;
+    border-bottom: 1px solid;
+    padding: 15px 0;
+    @include theme() {
+      border-color: theme-get("cardBorder");
+    }
+    &:last-child {
+      border-bottom: 0;
+    }
+  }
+
+  &__innerNotificationSec {
+    h3 {
+      @include theme() {
+        color: theme-get("baseText");
+      }
+      font-size: 16px;
+      font-weight: bold;
+    }
+    p {
+      @include theme() {
+        color: theme-get("whiteblack");
+      }
+      font-size: 12px;
+    }
+  }
+}
+.notifications {
+  &_card {
+    background-color: #18171f;
+    padding: 16px;
+    border-radius: 14px;
+    margin-bottom: 10px;
+    text-align: left !important;
+    h4 {
+      font-size: 16px !important;
+      font-weight: 600 !important;
+      color: #fff !important;
+    }
+    p {
+      color: #98969b;
+      font-size: 14px;
+      font-weight: 500;
+      margin-top: 8px;
+    }
+    &_inner {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+
+    }
+
+  }
+}

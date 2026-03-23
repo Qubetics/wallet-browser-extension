@@ -1,0 +1,94 @@
+@import "../../../styles/__vars.scss";
+@import "../../../styles/__mixins.scss";
+
+.confirmCurrency {
+  // &__card {
+  //   background-image: url("https://i.ibb.co/GxQCFsm/transaction-detail-bg.png");
+  //   background-repeat: no-repeat;
+  //   border-radius: 16px;
+  //   padding: 24px;
+  //   margin-bottom: 24px;
+  //   text-align: left;
+  //   background-size: cover;
+  //   background-position: center;
+  //   &__textTop {
+  //     font-size: 24px;
+  //     font-weight: 900;
+  //     color: #fff;
+  //     margin-bottom: 8px;
+  //     word-break: break-all;
+  //   }
+  //   &__textBtm {
+  //     font-size: 14px;
+  //     font-weight: 400;
+  //     color: #fff;
+  //   }
+  // }
+  // &__keyValues {
+  //   display: flex;
+  //   align-items: center;
+  //   justify-content: space-between;
+  //   gap: 15px;
+  //   margin-bottom: 20px;
+    
+  //   &__key {
+  //     font-size: 14px;
+  //     font-weight: 500;
+  //     @include theme() {
+  //       color: theme-get("whiteblack") ;
+  //      }
+  //   }
+  //   &__value {
+  //     font-size: 14px;
+  //     font-weight: bold;
+  //     @include theme() {
+  //       color: theme-get("baseText") ;
+  //      }
+  //   }
+  // }
+}
+
+.viewphrases {
+  &__iInner {
+    display: flex;
+    gap: 10px;
+    background-color: $red-bglight;
+    padding: 18px;
+    margin: 10px 0px 36px 0;
+    border-radius: 28px;
+    p {
+      color: $red;
+      &:first-child {
+        margin-bottom: 1px;
+      }
+    }
+  }
+  button {
+    margin-bottom: 18px;
+  }
+  // img {
+  //   height: 20px;
+  //   width: 20px;
+  // }
+}
+
+.confirmationsModal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  p {
+    @include theme() {
+      color: theme-get("whiteblack");
+    }
+  }
+  .iInner {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    gap: 20px;
+  }
+}

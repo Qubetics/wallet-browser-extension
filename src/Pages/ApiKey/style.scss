@@ -1,0 +1,32 @@
+@import "../../styles/__vars.scss";
+
+.send {
+  // &__pasteText {
+  //   color: $baseText-00AEEF;
+  //   font-size: 13px;
+  //   font-weight: bold;
+  //   text-decoration: underline;
+  //   cursor: pointer;
+  //   transition: 0.3s;
+  //   padding-left: 10px;
+  //   &:hover {
+  //     opacity: 0.7;
+  //   }
+  // }
+  &__infoText {
+    color: $gray;
+    font-size: 13px;
+    font-weight: bold;
+    text-align: right;
+    margin-top: 12px;
+    // margin-bottom: 36px;
+  }
+}
+.create_acc {
+  margin-top: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: right;
+  color: #00aeef;
+}

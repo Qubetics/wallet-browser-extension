@@ -1,0 +1,166 @@
+@import "../../styles/__vars.scss";
+
+.setPhrase {
+  &__tabs {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 24px;
+    &__itself {
+      border-radius: 30px;
+      background-color: $inputBg;
+      height: 4px;
+      width: 33.33%;
+      &_active {
+        background-color: $baseText-00AEEF;
+      }
+    }
+  }
+  &__title {
+    color: $baseColor-Text;
+    font-size: 20px;
+    font-weight: 900;
+    margin-bottom: 24px;
+    letter-spacing: 0px;
+    @media (max-width: 767px) {
+      font-size: 16px;
+    }
+  }
+  // &__validations {
+  //   text-align: left;
+  //   margin-top: 16px;
+  //   margin-bottom: 16px;
+  //   p {
+  //     margin-bottom: 13px;
+
+  //     display: flex;
+  //     align-items: center;
+  //     color: $baseColor-Text;
+  //     font-size: 12px;
+  //     font-weight: normal;
+  //     &:last-child {
+  //       margin-bottom: 0;
+  //     }
+  //   }
+  //   img {
+  //     margin-right: 7px;
+  //   }
+  // }
+  &__footerbuttons {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    // margin: 36px 0 10px;
+  }
+  &__secretPharse {
+    &__title {
+      font-size: 20px;
+      color: $baseColor-Text;
+      margin-bottom: 16px;
+      font-weight: bold;
+    }
+    // &__grayText {
+    //   font-size: 16px;
+    //   color: $gray;
+    //   font-weight: normal;
+    //   text-align: center;
+    //   max-width: 341px;
+    //   margin: 0 auto;
+    // }
+    &__fieldSBg {
+      // background-color: $inputBg;
+      // border-radius: 28px;
+      // padding: 20px 16px 16px 20px;
+      margin: 24px 0 36px;
+    }
+    // &__fieldSBgInner {
+    //   display: flex;
+    //   align-items: center;
+    //   gap: 16px;
+    //   justify-content: flex-start;
+    //   margin-bottom: 6px;
+    //   flex-wrap: wrap;
+    //   span {
+    //     font-size: 13px;
+    //     text-transform: capitalize;
+    //     font-weight: 500;
+    //     line-height: 16px;
+    //     color: $baseColor-Text;
+    //     width: calc(33% - 40px);
+    //     background-color: $gray-D7E0EB-light;
+    //     border-radius: 14px;
+    //     padding: 6px 15px;
+    //   }
+    // }
+    // &__copyField {
+    //   max-width: 119px;
+    //   height: 36px;
+    //   border-radius: 30px;
+    //   display: flex;
+    //   align-items: center;
+    //   justify-content: center;
+    //   background: transparent
+    //     linear-gradient(180deg, #00aeef1a 0%, #367cc71a 100%) 0% 0% no-repeat
+    //     padding-box;
+    //   border: 1px solid $baseText-00AEEF;
+    //   margin: 0 auto;
+    //   cursor: pointer;
+    //   transition: 0.3s all;
+    //   margin-bottom: 48px;
+    //   span {
+    //     font-size: 12px;
+    //     font-weight: bold;
+    //     line-height: 24px;
+    //     color: $baseText-00AEEF;
+    //     margin-left: 10px;
+    //   }
+    //   &:hover {
+    //     border: 1px solid $baseText-00AEEF;
+    //   }
+    // }
+    // &__confirmFieldSBg {
+    //   background-color: $inputBg;
+    //   border-radius: 28px;
+    //   padding: 20px 16px 16px 20px;
+    //   margin: 20px 0px;
+    // }
+    // &__confirmFieldSBgInner {
+    //   display: flex;
+    //   align-items: center;
+    //   justify-content: center;
+    //   gap: 16px 12px;
+    //   margin-bottom: 6px;
+
+    //   flex-wrap: wrap;
+    //   span {
+    //     font-size: 13px;
+    //     width: calc(33% - 43px);
+    //     font-weight: 500;
+    //     color: $baseColor-Text;
+    //     padding: 5px 18px;
+    //     background-color: $white;
+    //     display: flex;
+    //     align-items: center;
+    //     border-radius: 17px;
+    //     cursor: pointer;
+    //     text-transform: capitalize;
+    //     img {
+    //       margin-left: 5px;
+    //     }
+    //   }
+    //   &__bordered {
+    //     justify-content: space-between;
+    //     cursor: pointer;
+    //     span {
+    //       border: 1px dashed #999ca5;
+    //       border-radius: 17px;
+    //       color: #999ca5;
+    //       width: calc(33% - 60px);
+    //       justify-content: center;
+    //     }
+    //   }
+    // }
+  }
+}

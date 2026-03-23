@@ -1,0 +1,93 @@
+@import '../../../../styles/__vars.scss';
+@import "../../../../styles/__mixins.scss";
+.transactionHistoryAnother {
+    margin-top: 33px;
+    &_banner {
+        // background-color: $baseText-00AEEF;
+        border-radius: 20px;
+        margin-bottom: 31px;
+        padding: 27px 20px;
+        text-align: left;
+        background: url('../../../../Assets/PNG/BannerTransaction.png');
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-position: center;
+        &_value {
+            color: $white;
+            font-size: 26px;
+            font-weight: 900;
+            margin-bottom: 5px;
+        }
+        &_subValue {
+            color: $white;
+            font-size: 18px;
+            font-weight: 400;
+            margin-bottom: 0px;
+        }
+    }
+    &_keyValue {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        &_data {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            &:last-child {
+                padding-top: 18px;
+                border-top: 1px solid;
+                margin-top: 10px;
+                @include theme() {
+                    border-color: theme-get("cardBorder");
+                  }
+                p {
+                    font-size: 16px !important;
+                }
+            }
+        }
+        &_key {
+           font-size: 14px;
+           @include theme() {
+            color: theme-get("gray1");
+          }
+           font-weight: 500;
+           margin-bottom: 0;
+        }
+        &_value {
+            font-size: 14px;
+            @include theme() {
+                color: theme-get("baseText");
+              }
+            font-weight: 700;
+            margin-bottom: 0;   
+        }
+        &_status {
+            font-size: 14px;
+            color: $green;
+            font-weight: 500;
+            margin-bottom: 0;
+            padding: 6px 21px;
+            border-radius: 28px;
+            background-color: #0ecb8310;
+        }
+        &_status_fail {
+            font-size: 14px;
+            color: $red;
+            font-weight: 500;
+            margin-bottom: 0;
+            padding: 6px 21px;
+            border-radius: 28px;
+            background-color: #0ecb8310;
+        }
+    }
+    &_link {
+        margin-top: 163px;
+        a {
+            color: $baseText-00AEEF;
+            font-size: 18px;
+            font-weight: 800;
+            text-decoration: none;
+        }
+    }
+}

@@ -1,0 +1,50 @@
+{
+  "name": "Qubetics Wallet",
+  "description": "Connect yourself to the Ethereum Dapp to realize the power of blockchain.",
+  "version": "1.3",
+  "manifest_version": 3,
+  "permissions": [
+    "storage",
+    "tabs",
+    "clipboardRead",
+    "unlimitedStorage",
+    "activeTab",
+    "alarms",
+    "scripting"
+  ],
+  "side_panel": {
+    "default_path": "index.html"
+  },
+  "action": {
+    "default_popup": "index.html",
+    "default_title": "Qubetics Wallet"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*/*"
+      ],
+      "js": [
+        "contentscript-bundle.js"
+      ],
+      "run_at": "document_end",
+      "all_frames": true
+    }
+  ],
+  "host_permissions": [
+    "https://*/*",
+    "http://*/*"
+  ],
+  "background": {
+    "service_worker": "background-bundle.js"
+  },
+  "icons": {
+    "16": "logo.png",
+    "32": "logo.png",
+    "48": "logo.png",
+    "128": "logo.png"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';"
+  }
+}

@@ -1,0 +1,68 @@
+@import "../../styles/__vars.scss";
+@import "../../styles/__mixins.scss";
+
+.detailIcon {
+  height: 34px !important;
+  width: 34px !important;
+  object-fit: contain;
+  border-radius: 50%;
+}
+
+.coinsTable {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 15px;
+  padding: 16px 0;
+  border-bottom: 1px solid #d7e0eb !important;
+  &:first-child {
+    padding-top: 0;
+  }
+  &:last-child {
+    padding-bottom: 0;
+    border-bottom: 0 !important;
+  }
+  &__left {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: left;
+    &__textSec {
+      margin-left: 9px;
+    }
+    &__icon {
+      display: flex;
+
+      align-items: center;
+      justify-content: center;
+    }
+  }
+  &__right {
+    text-align: right;
+  }
+  &__textTop {
+    font-size: 16px;
+    color: $white;
+    font-weight: bold;
+    margin-bottom: 3px;
+    display: flex;
+    align-items: center;
+    word-break: break-all;
+  }
+  &__grayText12 {
+    font-size: 14px;
+    color: $gray-6E737E;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+  }
+}
+.leftSecBottom{
+  display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: left;
+    .address{
+      color: $white;
+    }
+}

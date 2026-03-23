@@ -1,0 +1,119 @@
+@import "../../styles/__mixins.scss";
+@import "../../styles/__vars.scss";
+
+.filterHistory {
+  padding: 24px;
+  padding-top: 0;
+  min-height: calc(-316px + 100vh) !important;
+
+  .flexedItemSelect {
+    margin-top: 10px !important;
+  }
+
+  &__selctHis {
+    width: 100%;
+    padding-top: 24px;
+
+    &:first-child {
+      padding-top: 0;
+    }
+
+    .ant-select {
+      width: 100% !important;
+
+      .ant-select-selector {
+        border-radius: 14px !important;
+        height: 50px !important;
+        background-color: #110f15 !important;
+        border: 1px solid #76747b !important;
+      }
+
+      .ant-select-arrow {
+        color: #98969b;
+      }
+    }
+
+    .label {
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: bold;
+      padding-bottom: 10px;
+      text-align: left;
+      display: flex;
+    }
+
+    .ant-picker {
+      background-color: #110f15 !important;
+      color: #98969b !important;
+      border-radius: 14px !important;
+      height: 50px !important;
+      width: 100%;
+      border: 1px solid #76747B !important;
+
+      &::placeholder {
+        color: #98969b !important;
+      }
+
+      input {
+        color: #98969b !important;
+
+        &::placeholder {
+          color: #98969b !important;
+        }
+      }
+    }
+
+    .ant-picker-separator {
+      @include theme() {
+        color: theme-get("whiteblack") !important;
+      }
+    }
+
+    .ant-select .ant-select-arrow {
+      margin-top: -4px;
+      right: 20px;
+    }
+
+    .ant-select .ant-select-selector {
+      padding: 0 11px !important;
+    }
+  }
+
+  .dateFlex {
+    display: flex;
+    gap: 20px;
+
+    .ant-space-item {
+      width: 100%;
+    }
+
+    .ant-picker .ant-picker-suffix {
+      color: #98969b;
+    }
+  }
+}
+
+.chainImage {
+  margin-right: 4px;
+  object-fit: contain;
+  width: 26px;
+  border-radius: 13px;
+}
+
+.borderDarkLight {
+  @include theme() {
+    border-color: theme-get("cardBorder") !important;
+  }
+}
+
+.filterHistoryDropdown,
+.ant-select-item-option-selected {
+  background-color: #040205 !important;
+  border: 1px solid #242429 !important;
+
+  .ant-select-item-option-active {
+    background-color: #1a191f !important;
+    border-radius: 10px !important;
+    border: none !important;
+  }
+}

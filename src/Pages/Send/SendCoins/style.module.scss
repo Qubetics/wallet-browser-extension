@@ -1,0 +1,57 @@
+@import "../../../styles/__vars.scss";
+.send {
+  // &__pasteText {
+  //   color: $baseText-00AEEF;
+  //   font-size: 13px;
+  //   font-weight: bold;
+  //   text-decoration: underline;
+  //   cursor: pointer;
+  //   transition: 0.3s;
+  //   padding-left: 10px;
+  //   border-left: 1px solid #80838e;
+  //   &:hover {
+  //     opacity: 0.7;
+  //   }
+  // }
+  &__infoText {
+    color: $white !important;
+    font-size: 14px;
+    font-weight: 500;
+    text-align: right;
+    margin-top: 12px;
+    // margin-bottom: 36px;
+  }
+}
+
+.boxActive {
+  border: 1px solid $baseText-00AEEF;
+  background-color: rgba(0, 174, 239, 0.1);
+  border-radius: 40px;
+  margin-bottom: 24px;
+  padding: 7px 22px;
+  cursor: pointer;
+  color: $baseText-00AEEF;
+}
+
+.box {
+  background-color: transparent;
+  border-radius: 40px;
+  color: $gray;
+  margin-bottom: 24px;
+  padding: 7px 22px;
+  cursor: pointer;
+  border: 1px solid #80838e;
+}
+
+.do {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.send-select{
+  width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}

@@ -1,0 +1,46 @@
+@import "../../styles/__vars.scss";
+@import "../../styles/__mixins.scss";
+
+.menuItems {
+  padding: 16px 25px;
+  position: sticky;
+  box-shadow: 0px 3px 8px #223f7017;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  background-color: #121117;
+  border: 1px solid #1d1b1e;
+  border-bottom-right-radius: 10px;
+  border-bottom-left-radius: 10px;
+
+  &__items {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    cursor: pointer;
+    font-size: 10px;
+    font-weight: bold;
+    color: $gray;
+    text-decoration: none;
+    transition: 0.3s all;
+  }
+}
+
+.itemsActive {
+  .img {
+    svg {
+      path {
+        fill: #fff;
+      }
+    }
+  }
+  .strokeFill{
+    path{
+      stroke: #fff;
+      fill: transparent !important;
+    }
+  }
+}

@@ -1,0 +1,42 @@
+@import "../../styles/__vars.scss";
+.ButtonStyle {
+  border: none;
+  background: linear-gradient(
+    90deg,
+    #73c9e2 0%,
+    #6c8dc5 33.83%,
+    #6456b2 67.66%,
+    #6145ea 101.48%
+  );
+
+  border-radius: 14px;
+  color: $white;
+  font-size: 16px;
+  font-weight: 600;
+  // max-width: 165px;
+  width: 100%;
+  height: 54px;
+  transition: 0.3s all;
+  cursor: pointer;
+  &:hover {
+    // border: 1px solid $border-00ADEE;
+    opacity: 0.6;
+  }
+  &__deletebordered{
+    border: 1px solid $red;
+    background: transparent;
+    color: $red;
+    margin-bottom: 10px !important;
+    &:hover {
+      opacity: 0.6;
+    }
+  }
+  &__bordered {
+    border: 1px solid $border-00ADEE;
+    background: transparent;
+    color: $border-00ADEE;
+    &:hover {
+      opacity: 0.6;
+    }
+  }
+}

@@ -1,0 +1,44 @@
+@import "../../styles/__vars.scss";
+@import "../../styles/__mixins.scss";
+.listItems {
+  .Currencyname {
+    color: #ffffff;
+    font-size: 16px;
+  }
+  ul {
+    li {
+      cursor: pointer;
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      justify-content: space-between;
+      div {
+        list-style: none;
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        img {
+          height: 20px;
+          width: 20px;
+        }
+        .walletName {
+          font-size: 18px;
+          font-weight: 600;
+          color: #fff;
+          margin: 0px;
+        }
+        .walletAdd {
+          font-size: 14px;
+          font-weight: 400;
+          color: #98969b;
+          margin: 0px;
+        }
+      }
+      p {
+        color: #00aeef;
+        margin-bottom: 0;
+      }
+    }
+  }
+}

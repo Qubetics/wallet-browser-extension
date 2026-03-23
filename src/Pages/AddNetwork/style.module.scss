@@ -1,0 +1,48 @@
+@import "../../styles/__vars.scss";
+
+.chainImage {
+  margin-right: 4px;
+  object-fit: contain;
+  width: 26px;
+  border-radius: 13px;
+}
+
+
+
+input:focus {
+  box-shadow: none !important;
+}
+
+.ant-input:focus {
+  box-shadow: none !important;
+}
+
+.token {
+  &__symbol_dec {
+    display: flex;
+    gap: 20px;
+  }
+  // &__pasteText {
+  //   color: $baseText-00AEEF;
+  //   font-size: 13px;
+  //   font-weight: bold;
+  //   text-decoration: underline;
+  //   cursor: pointer;
+  //   transition: 0.3s;
+  //   padding-left: 10px;
+  //   border-left: 1px solid #80838e;
+  //   &:hover {
+  //     opacity: 0.7;
+  //   }
+  // }scrollableCont
+  &__selectStyle {
+    display: flex;
+    align-items: center;
+    &__img {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding-right: 10px;
+    }
+  }
+}

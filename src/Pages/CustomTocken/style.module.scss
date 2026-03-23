@@ -1,0 +1,91 @@
+@import "../../styles/__vars.scss";
+
+.chainImage {
+  margin-right: 4px;
+  object-fit: contain;
+  width: 26px;
+  border-radius: 13px;
+}
+
+
+input:focus {
+  box-shadow: none !important;
+}
+
+.ant-input:focus {
+  box-shadow: none !important;
+}
+
+.token {
+  &__symbol_dec {
+   margin-bottom: 20px;
+  }
+  &__pasteText {
+    color: $baseText-00AEEF;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+    padding-left: 10px;
+    // border-left: 1px solid #80838e;
+    &:hover {
+      opacity: 0.7;
+    }
+  }
+  &__selectStyle {
+    display: flex;
+    align-items: center;
+    &__img {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding-right: 10px;
+    }
+  }
+}
+
+
+@import "../../styles/__vars.scss";
+.swapDrawer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 47px;
+  cursor: pointer;
+  &:last-child {
+    margin-bottom: 0;
+  }
+  &__left {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    &__textsTop {
+      color: $baseColor-Text;
+      font-size: 14px;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+    &__textsBottom {
+      color: $gray-6E737E;
+      font-size: 12px;
+      font-weight: 500;
+    }
+  }
+}
+
+
+.mainWarning {
+  display: flex;
+  border: 1px solid $baseText-00AEEF !important;
+  background-color: rgba(0, 174, 239, 0.1) !important;
+  border-radius: 10px !important;
+  padding: 13px;
+  margin-bottom: 22px;
+}
+
+.mainWarning2 {
+  display: flex;
+  padding: 13px;
+  margin-bottom: 22px;
+}

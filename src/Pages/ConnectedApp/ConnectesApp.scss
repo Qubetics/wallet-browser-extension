@@ -1,0 +1,86 @@
+@import "../../styles/__mixins.scss";
+@import "../../styles/__vars.scss";
+
+.connectesApp {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  padding-top: 20px;
+  p {
+    font-size: 13px;
+    @include theme() {
+      color: theme-get("whiteblack");
+    }
+  }
+  .left {
+    display: flex;
+    gap: 10px;
+    .textSec {
+      display: flex;
+      flex-direction: column;
+      align-items: baseline;
+      h3 {
+        color: #fff;
+        font-size: 16px;
+        font-weight: 600;
+        text-align: left;
+      }
+    }
+  }
+}
+
+.exchangePancake {
+  .topConatct {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    border-bottom: 1px solid #d7e0eb;
+    padding-bottom: 16px;
+    h2 {
+      font-size: 27px;
+      font-weight: 700;
+      color: #fff;
+    }
+    p {
+      font-size: 14px;
+      font-weight: 600;
+      color: $gray-6E737E;
+    }
+  }
+}
+.dApp {
+  h3 {
+    color: #fff;
+    font-size: 18px;
+    text-align: left;
+    margin-bottom: 10px;
+  }
+  .financeCard {
+    display: flex;
+    align-items: center;
+    flex-flow: wrap;
+    gap: 12px;
+    background-color: #18171f;
+    padding: 16px;
+    border-radius: 14px;
+    h5 {
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 4px;
+      text-align: left;
+    }
+    p {
+      color: #98969b;
+      font-size: 12px;
+      text-align: left;
+    }
+    &_jupiter {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+  }
+}

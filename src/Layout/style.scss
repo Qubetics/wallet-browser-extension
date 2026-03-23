@@ -1,0 +1,158 @@
+@import "../styles/__vars.scss";
+@import "../styles/__mixins.scss";
+
+.fixedLayout {
+  min-height: 100vh;
+  background-color: #040205;
+  display: flex;
+  justify-content: center;
+
+  &__inner {
+    max-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    box-shadow: 0px -3px 8px #223f7017;
+    background-image: url("../Assets/main-bg.png");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    border: 1px solid #1d1b1e;
+    position: relative;
+    border-radius: 10px;
+
+    .menuItems {
+      position: sticky;
+      bottom: 0;
+      z-index: 1;
+    }
+
+    &__walletLayout {
+      position: sticky;
+    }
+  }
+
+  &__heightExt {
+    max-height: 600px;
+
+    .balanceDetails__decoratedSec {
+      // padding: 10px 38px;
+      // margin-bottom: 6px;
+    }
+
+    // .balanceDetails {
+    //   margin-bottom: 10px;
+    // }
+    .menuItems {
+      padding: 10px 28px;
+      position: sticky;
+    }
+
+    .tokenTab {
+      padding: 12px 30px;
+    }
+
+    .wallet {
+
+      &__heading {
+        margin-bottom: 0px;
+      }
+    }
+  }
+
+  &__innerBgChange {
+    background-color: $inputBg;
+  }
+
+  &__content {
+    // padding: 20px 24px;
+    overflow: auto;
+    flex: 1 1 0%;
+
+    &__paddingX {
+      padding-left: 0;
+      padding-right: 0;
+      // @include theme() {
+      //   background-color: theme-get("whiteblackBase");
+      // }
+    }
+  }
+}
+
+.walletListing {
+  &__listingHeader {
+    background: transparent linear-gradient(73deg, #00aeef 0%, #367cc7 100%) 0% 0% no-repeat padding-box;
+    border-radius: 0px 0px 30px 30px;
+    opacity: 1;
+    padding: 38px;
+
+    h2 {
+      color: #eef3f9;
+      font-size: 30px;
+    }
+  }
+
+  &__addWallet {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 18px;
+    padding: 0 9px;
+    padding-bottom: 16px;
+
+    button {
+      background-color: #e5f7fd;
+      border-radius: 30px;
+      color: #00aeef;
+      font-size: 12px;
+      border: 0;
+      padding: 12px 23px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      cursor: pointer;
+    }
+  }
+
+  &__walletPrice {
+    h3 {
+      display: inline-block;
+      // max-width: 131px;
+      overflow-wrap: break-word;
+      white-space: nowrap;
+      /* width: 206px; */
+      font-size: 26px;
+      color: #00aeef;
+    }
+  }
+}
+
+.walletListingMain {
+  @include theme() {
+    background-color: theme-get("modalBg");
+  }
+
+  border-radius: 0px 0px 30px 30px;
+  opacity: 1;
+}
+
+.nftImgFixed {
+  position: relative;
+  background-color: #8b8d97;
+
+  .nftImg {
+    // width: 100%;
+    height: 249px;
+  }
+
+  .backImg {
+    left: 25px;
+    position: absolute;
+    top: 20px;
+    cursor: pointer;
+  }
+}
+
+.payWithdraw {
+  padding: 0;
+}

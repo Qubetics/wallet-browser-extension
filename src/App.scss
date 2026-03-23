@@ -1,0 +1,1054 @@
+@import "./styles/__vars.scss";
+@import "./styles/__mixins.scss";
+
+::-webkit-scrollbar-corner {
+  @include theme() {
+    background-color: theme-get("whiteblackBase") !important;
+  }
+}
+
+body::-webkit-scrollbar {
+  width: 0px;
+  /* width of the entire scrollbar */
+
+  display: flex;
+  background-color: $inputBg;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.loader-main {
+  height: 100vh;
+  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.App {
+  text-align: center;
+  min-height: 600px;
+}
+
+.WelcomeLayout {
+  // background-color: #1e1e1e;
+  background-image: url("./Assets/mainBg.png");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  color: $white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100vh;
+  width: 100%;
+
+  &__container {
+    // max-width: 360px;
+    max-width: 400px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  &__header {
+    text-align: left;
+  }
+
+  &__back-button {
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+    margin-bottom: 16px;
+    cursor: pointer;
+  }
+
+  &__heading {
+    font-size: 18px;
+    font-weight: 600;
+    color: $white;
+    line-height: 32px;
+  }
+}
+
+//stickyheader//
+.scrollableCont {
+  height: 100%;
+
+  // overflow: hidden;
+  .stickyHeader {
+    position: sticky;
+    top: 0;
+    // @include theme() {
+    //   background-color: theme-get("whiteblackBase");
+    // }
+    background-image: url("./Assets/main-bg.png");
+    background-repeat: no-repeat;
+    z-index: 9;
+  }
+
+  .flexedContent {
+    padding: 20px 24px 0;
+    overflow-y: auto;
+
+    :where(.css-acm2ia).ant-checkbox-wrapper:not(.ant-checkbox-wrapper-disabled):hover .ant-checkbox-checked:not(.ant-checkbox-disabled):after {
+      border-color: #4096ff;
+      border-radius: 18px;
+    }
+
+    .checkboxInner {
+      :where(.css-acm2ia).ant-checkbox .ant-checkbox-inner {
+        border-radius: 18px;
+
+        &:hover {
+          border-radius: 18px;
+        }
+
+        &::after {
+          border-radius: 18px;
+        }
+      }
+
+      :where(.css-acm2ia).ant-checkbox-wrapper:not(.ant-checkbox-wrapper-disabled):hover .ant-checkbox-checked:not(.ant-checkbox-disabled):after {
+        border-radius: 18px !important;
+        border-color: #4096ff;
+      }
+    }
+
+    .checkboxRopstem {
+      display: flex;
+
+      .randb {
+        background-color: rgba(98, 126, 234, 0.2);
+        border-radius: 49%;
+        width: 40px;
+        display: flex;
+        height: 40px;
+        justify-content: center;
+        align-items: center;
+      }
+    }
+
+    .testNetworkData {
+      margin-bottom: 30px;
+
+      li {
+        display: block;
+        text-align: left;
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        h4 {
+          font-size: 14px;
+          color: #000;
+          margin-top: 20px;
+        }
+
+        .balances {
+          font-size: 14px;
+          color: #000;
+          margin-top: 0px;
+          margin-bottom: 20px;
+        }
+
+        p {
+          font-size: 14px;
+          color: #000;
+          font-weight: 400;
+        }
+      }
+    }
+
+    .support {
+      text-align: left;
+      margin-bottom: 24px;
+      font-size: 14px;
+      color: #000;
+      padding-left: 20px;
+    }
+
+    h4 {
+      font-size: 14px;
+
+      @include theme() {
+        color: theme-get("whiteblack");
+      }
+
+      text-align: left;
+      margin-bottom: 8px;
+    }
+
+    .malicious {
+      font-size: 14px;
+      color: #000;
+      text-align: left;
+      margin-bottom: 34px;
+    }
+  }
+}
+
+// CommonText//
+.textBold {
+  font-weight: bold !important;
+}
+
+.positiveText {
+  color: #017245 !important;
+}
+
+.negitiveText {
+  color: #f30323 !important;
+}
+
+// Input Field css//
+.inputFieldOnly .placeholderBaseColor.ant-input.css-dev-only-do-not-override-acm2ia {
+  &::placeholder {
+    @include theme() {
+      color: theme-get("gray1") !important;
+    }
+  }
+}
+
+.inputField .placeholderBaseColor .ant-input.css-dev-only-do-not-override-acm2ia {
+  &::placeholder {
+    @include theme() {
+      color: theme-get("gray1") !important;
+    }
+  }
+}
+
+.inputField {
+  .ant-input.css-dev-only-do-not-override-acm2ia {
+    background-color: transparent;
+    font-size: 14px;
+    font-weight: normal;
+    color: $white;
+    border: 0 !important;
+    padding: 0 10px 0 0;
+
+    &:focus {
+      box-shadow: none;
+      outline: none;
+    }
+
+    &::placeholder {
+      color: #98969b !important;
+    }
+  }
+
+  .ant-input-group-addon {
+    border: 0 !important;
+    background-color: transparent !important;
+    padding-right: 0;
+    padding-left: 0;
+    line-height: 0;
+  }
+}
+
+.inputFieldOnly {
+  width: 100%;
+
+  input {
+    background-color: transparent !important;
+    border-radius: 14px;
+    padding: 14px 16px;
+    border: 1px solid #76747b !important;
+    height: 50px;
+    color: $white !important;
+  }
+}
+
+.ant-input-group-wrapper {
+  &:focus {
+    // border-color: #4096ff;
+    box-shadow: 0 0 0 2px rgba(5, 145, 255, 0.1);
+    border-inline-end-width: 1px;
+    outline: 0;
+  }
+}
+
+//Modal Css Full width //
+:where(.css-dev-only-do-not-override-acm2ia).ant-modal-root .ant-modal-mask {
+  backdrop-filter: blur(13px);
+  -webkit-backdrop-filter: blur(13px);
+  background-color: unset;
+}
+
+.ant-modal.css-dev-only-do-not-override-acm2ia {
+  height: 100%;
+
+  .ant-modal-content {
+    height: 100%;
+    width: 100%;
+    border-radius: 0;
+    background-color: transparent;
+    box-shadow: none;
+  }
+}
+
+.modalCustom {
+  max-width: 400px;
+  width: 100% !important;
+  border-radius: 8px;
+}
+
+.modalCustom.ant-modal .ant-modal-content {
+  padding-top: 0px !important;
+
+  @include theme() {
+    background-color: theme-get("modalBg");
+  }
+
+  opacity: 1;
+  backdrop-filter: blur(14px);
+  box-shadow: none;
+
+  .ant-modal-header {
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+    // border-bottom: 1px solid #d7e0eb;
+    color: $baseColor-Text;
+    font-size: 16px;
+    font-weight: bold;
+    background: transparent;
+  }
+}
+
+.ant-modal-title {
+  color: #fff !important;
+}
+
+.customClassModal.modalCustom {
+  &.ant-modal {
+    &.css-dev-only-do-not-override-acm2ia {
+      height: auto;
+      background-color: #101010;
+      border-radius: 30px;
+    }
+
+    .ant-modal-content {
+      padding-top: 20px !important;
+      background-color: #101010 !important;
+    }
+  }
+}
+
+.ant-modal-mask {
+  backdrop-filter: blur(5px);
+}
+
+//Drawer Style//
+.ant-drawer-mask {
+  backdrop-filter: blur(13px);
+  -webkit-backdrop-filter: blur(13px);
+  background-color: unset;
+}
+
+.ant-drawer {
+  &-body {
+    padding: 20px 0 !important;
+  }
+
+  &-wrapper-body {
+    padding: 23px 28px !important;
+
+    @include theme() {
+      background-color: theme-get("whiteblackBase");
+    }
+  }
+
+  &-content {
+    border-radius: 30px 30px 0px 0px;
+  }
+
+  &-header {
+    padding: 0 0 21px 0 !important;
+    border-bottom: 1px solid #d7e0eb;
+
+    &-title {
+      display: flex;
+      flex-direction: row-reverse;
+    }
+  }
+
+  &-title {
+    @include theme() {
+      color: theme-get("baseText") !important;
+    }
+
+    font-size: 16px !important;
+    font-weight: bold !important;
+  }
+}
+
+//select Css//
+.ant-select {
+  width: max-content !important;
+
+  .ant-select-selector {
+    background-color: #18171f !important;
+    color: #ffffff !important;
+    border-radius: 10px !important;
+    height: 40px !important;
+    padding: 0 5px !important;
+
+    span {
+      color: #ffffff !important;
+    }
+  }
+
+  .ant-select-arrow {
+    @include theme() {
+      color: theme-get("whiteblack");
+    }
+
+    margin-top: -4px;
+    right: 6px;
+  }
+
+  &:focus,
+  &:hover {
+    .ant-select-selector {
+      outline: none !important;
+      box-shadow: unset !important;
+      // border: 1px solid transparent !important;
+    }
+  }
+}
+
+.inputField {
+  .ant-input {
+    padding: 14px;
+    border-width: 0px;
+  }
+}
+
+.flexedItemSelect {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 5px;
+  font-size: 12px;
+  font-weight: bold;
+  color: $white !important;
+
+  @media (max-height:600px) {
+    margin-top: 5px !important;
+  }
+}
+
+.ant-select-dropdown {
+  width: 150px !important;
+  border: 1px solid;
+  background-color: #18171f;
+
+  border: 1px solid #18171f;
+
+  .ant-select-item-option-selected:not(.ant-select-item-option-disabled) {}
+
+  .ant-select-item-option {
+    border-bottom: 1px solid;
+    border-radius: 0;
+
+    @include theme() {
+      border-color: theme-get("cardBorder");
+    }
+
+    &:last-child {
+      border-bottom: 0;
+    }
+  }
+
+  .ant-select-item-option-active {
+    .ant-select-item-option-content {
+      color: #00aeef;
+    }
+  }
+}
+
+:where(.css-dev-only-do-not-override-acm2ia).ant-select-dropdown .ant-select-item {
+  border-radius: 0;
+  border-bottom: 1px solid $white;
+  padding: 5px 8px;
+}
+
+.addonAfter {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+
+  .ant-select-arrow {
+    img {
+      display: none;
+    }
+  }
+}
+
+//checkbox css//
+
+.checkboxOuter {
+  margin-top: 20px;
+
+  span {
+    color: #fff;
+  }
+
+  .ant-checkbox-wrapper {
+    p {
+      color: #fff;
+      font-size: 14px;
+      font-weight: 400;
+      margin-left: 10px;
+
+      a {
+        color: #7db0ff;
+        font-weight: 400;
+      }
+    }
+  }
+
+  .ant-checkbox {
+    top: 0.2em;
+    position: relative;
+  }
+
+  .ant-checkbox-inner {
+    border-radius: 100% !important;
+    background-color: transparent !important;
+  }
+
+  .ant-checkbox-checked {
+    padding: 0 !important;
+
+    span {
+      padding: 0 !important;
+    }
+
+    &::after {
+      border-radius: 100% !important;
+    }
+  }
+}
+
+:where(.css-dev-only-do-not-override-acm2ia).ant-checkbox-wrapper {
+  color: $gray;
+  font-size: 12px;
+  font-weight: normal;
+  line-height: 15px;
+  text-align: left;
+}
+
+.ant-checkbox-checked .ant-checkbox-inner {
+  border-color: $baseText-00AEEF;
+  background-color: $baseText-00AEEF !important;
+}
+
+//Dropdown Css//
+:where(.css-dev-only-do-not-override-acm2ia).ant-dropdown .ant-dropdown-menu {
+  border-radius: 15px;
+}
+
+.ant-dropdown-menu-title-content {
+  color: $baseColor-Text;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 5px eef3f9;
+  border-radius: 10px;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: rgb(202, 201, 201);
+  border-radius: 10px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #4096ff;
+}
+
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0 !important;
+}
+
+/* Firefox */
+input[type="number"] {
+  -moz-appearance: textfield !important;
+}
+
+// switch csss----------
+
+.ant-switch.ant-switch-checked {
+  background: #7db0ff !important;
+}
+
+.noAddress {
+  color: $white !important;
+}
+
+// TextArea-----------
+.textArea {
+  margin-top: 20px;
+
+  .ant-input {
+    background-color: transparent;
+    border-radius: 14px;
+    border: 1px solid #76747b !important;
+    padding: 16px 20px;
+    color: #fff;
+
+    &::placeholder {
+      color: #98969b;
+    }
+  }
+}
+
+.design:not(:last-child)::after {
+  @include theme() {
+    background-color: theme-get("cardBorder") !important;
+  }
+}
+
+.ant-message {
+  width: 280px !important;
+  margin: 0 auto;
+}
+
+::-webkit-scrollbar-corner {
+  @include theme() {
+    background-color: theme-get("whiteblackBase") !important;
+  }
+}
+
+.tokenTab {
+  padding: 16px 30px;
+}
+
+.selctCmn {
+  width: 100% !important;
+  text-align: left;
+
+  .ant-select-selector {
+    @include theme() {
+      background-color: theme-get("inputBg") !important;
+    }
+
+    border-radius: 28px !important;
+    height: 50px !important;
+    padding: 10px 16px !important;
+    border: 0 !important;
+  }
+
+  .ant-select-selection-item {
+    @include theme() {
+      color: theme-get("whiteblack");
+    }
+  }
+}
+
+.ant-select-item-option-content {
+  @include theme() {
+    color: theme-get("whiteblack");
+  }
+}
+
+.spritzBankingModal {
+  .ant-modal-content .ant-modal-header {
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+    padding-top: 20px;
+  }
+}
+
+.bankingModalSec {
+  .innerContact {
+    p {
+      padding: 12px 0;
+      border-bottom: 1px solid;
+      font-size: 16px;
+
+      @include theme() {
+        color: theme-get("gray1");
+        border-color: theme-get("cardBorder");
+      }
+
+      img {
+        padding-right: 10px;
+      }
+    }
+
+    h2 {
+      text-align: center;
+
+      @include theme() {
+        color: theme-get("whiteblack");
+      }
+
+      padding-top: 20px;
+      padding-bottom: 30px;
+    }
+  }
+
+  .spritzBtn {
+    display: flex;
+    gap: 15px;
+  }
+}
+
+.already_acc {
+  font-size: 16px;
+  margin-top: 15px;
+  font-weight: bold;
+
+  .navi_class {
+    color: #4096ff;
+    cursor: pointer;
+  }
+}
+
+.forget_pass {
+  font-size: 14px;
+  color: #4096ff;
+  margin-top: 10px;
+  text-align: right;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.ant-dropdown-menu {
+  z-index: 999;
+}
+
+.otpDrawer {
+  .ant-drawer-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 9px;
+  }
+}
+
+.otpHeading {
+  p {
+    @include theme() {
+      color: theme-get("whiteWelcome");
+    }
+
+    text-align: center;
+
+    span {
+      color: #00aeef;
+    }
+  }
+}
+
+.expiry {
+  @include theme() {
+    color: theme-get("whiteWelcome");
+  }
+}
+
+.emailOtp {
+  @include theme() {
+    background-color: theme-get("inputBg");
+    color: theme-get("whiteWelcome");
+  }
+
+  border: 0;
+  padding: 8px;
+  border-radius: 8px;
+  outline: unset;
+}
+
+.legalContent {
+  display: flex;
+  flex-direction: column;
+
+  .checkBoxSec {
+    margin-top: 250px;
+
+    .checkboxOuter {
+      span {
+        color: #00aeef;
+      }
+    }
+  }
+
+  .checkBoxSecExt {
+    margin-top: 30px;
+  }
+}
+
+.legalSec {
+  p {
+    padding: 12px 0;
+    font-size: 16px;
+    text-align: left;
+
+    // word-break: break-all;
+    @include theme() {
+      color: theme-get("gray1");
+    }
+  }
+
+  .legalInner {
+    margin-top: 20px;
+
+    h2 {
+      @include theme() {
+        background-color: theme-get("inputBg");
+        color: theme-get("whiteWelcome");
+        border-color: theme-get("cardBorder");
+      }
+
+      border: 1px solid;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 15px;
+      cursor: pointer;
+    }
+  }
+
+  .legalCheckBox {
+    margin-top: 100px;
+  }
+}
+
+.importToken {
+  .right {
+    p {
+      @include theme() {
+        color: theme-get("whiteWelcome");
+      }
+    }
+  }
+}
+
+.importTokenModal {
+  p {
+    @include theme() {
+      color: theme-get("whiteWelcome");
+    }
+  }
+}
+
+.phraseToken {
+  display: flex;
+  margin-top: 20px;
+
+  h2 {
+    @include theme() {
+      color: theme-get("whiteWelcome");
+    }
+
+    font-size: 16px;
+    margin-bottom: 9px;
+    font-weight: bold;
+  }
+}
+
+.mainTanceSec {
+  margin-top: 30px;
+
+  h3 {
+    @include theme() {
+      color: theme-get("whiteWelcome");
+    }
+
+    font-size: 16px;
+    margin-bottom: 9px;
+    font-weight: bold;
+  }
+
+  p {
+    @include theme() {
+      color: theme-get("whiteWelcome");
+    }
+  }
+}
+
+.customClassModal.bankingModal.ant-modal {
+  .ant-modal-content {
+    padding: 0 !important;
+    border-radius: 24px;
+
+    .headerModal {
+      padding: 20px;
+      width: 100%;
+      display: block;
+      text-align: center;
+      box-sizing: border-box;
+      background-color: rgb(0, 173, 238);
+      border-radius: 24px 24px 0 0;
+      color: $white;
+    }
+
+    .bodyContent {
+      padding: 30px 20px;
+
+      p {
+        margin: 0 !important;
+        font-size: 16px !important;
+        text-align: left !important;
+        font-weight: 400;
+
+        @include theme() {
+          color: theme-get("whiteblack") !important;
+        }
+      }
+    }
+  }
+}
+
+.non-mac-os .sub {
+  font-size: 18px;
+  vertical-align: text-top;
+  position: relative;
+  top: -2px;
+}
+
+.mac-os .sub {
+  font-size: 19px;
+  vertical-align: text-top;
+  position: relative;
+  top: -8px;
+}
+
+.viewphrases__iInner img {
+  height: 40px !important;
+  width: 40px;
+}
+
+.congrates-item {
+  display: none;
+}
+
+.balanceLeft {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+
+  a {
+    text-decoration: none !important;
+  }
+
+  p {
+    text-align: left;
+  }
+
+  .mainNetwor {
+    color: #98969b;
+    font-size: 14px;
+    line-height: 19px;
+  }
+
+  .balanceName {
+    background: transparent;
+    position: relative;
+
+    // height: 52px !important;
+    &:before {
+      content: "";
+      position: absolute;
+      top: -1px;
+      left: -2px;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg,
+          #73c9e2 0%,
+          #6c8dc5 25.37%,
+          #6456b2 76.11%,
+          #6145ea 101.48%);
+      border-radius: 14px;
+      padding: 2px;
+      -webkit-mask: linear-gradient(#000 0 0) content-box,
+        linear-gradient(#000 0 0);
+      mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      -webkit-mask-composite: destination-out;
+      mask-composite: exclude;
+      z-index: 0;
+    }
+
+    h5 {
+      font-size: 25px;
+      color: #ffffff;
+      font-weight: 700;
+      line-height: 25px;
+      padding: 10px 13px;
+    }
+  }
+}
+
+.ant-drawer-wrapper-body {
+  background-color: #18171f !important;
+
+  .ant-drawer-title {
+    color: #fff !important;
+  }
+
+  .design {
+    p {
+      color: $white;
+    }
+  }
+}
+
+.ant-drawer-content {
+  background: #18171f !important;
+  max-width: 400px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.searchBarFixed {
+  position: sticky;
+  top: 0;
+  z-index: 9;
+  // background-color: transparent;
+  background-image: url("./Assets/main-bg.png");
+  // background-position: center;
+  background-repeat: no-repeat;
+
+  // background-size: cover;
+  .search {
+    padding: 0 24px !important;
+  }
+}
+
+.ant-drawer-body {
+  padding: 0 !important;
+}
+
+.checkboxMain {
+  .ant-checkbox-wrapper {
+    display: flex !important;
+    align-items: center !important;
+
+    .ant-checkbox {
+      top: 0 !important;
+    }
+  }
+}
+
+.gap0 {
+  gap: 0 !important;
+}

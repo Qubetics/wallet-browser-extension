@@ -1,0 +1,1081 @@
+import React, { useEffect, useRef, useState } from "react";
+import "./DVpn.scss";
+import { useNavigate } from "react-router-dom";
+import { message, Skeleton } from "antd";
+import {
+  CrownIcon,
+  GreenSwitchIcon,
+  ReconnectIcon,
+  WalletBlueIcon,
+} from "../../Assets/SvgImg";
+import USA from "../../Assets/cuntry/usa.svg";
+import useCurrentHeight from "../../CustomHooks/useCurrentHeight";
+import { useSelector } from "react-redux";
+import ModalCustom from "../ModalCustom/ModalCustom";
+import InputFieldSimple from "../InputField/InputFieldSimple";
+import ButtonComp from "../ButtonComp/ButtonComp";
+import { WalletHelper } from "../../helpers/wallet.helper";
+import {
+  detectOS,
+  formatDateTime,
+  getActiveSubscription,
+  getDaysLeftText,
+  getDownloadMap,
+  getDurationLabel,
+  getSessionLocation,
+  normalizeQuickNode,
+  normalizeRecentProviders,
+  normalizeRecentProvider,
+  normalizeRecentSessions,
+  normalizeSubscriptions,
+} from "../../helpers/dvpn.helpers";
+import {
+  connectVpnWithWireguardConfig,
+  disconnectVpn,
+  ensureDvpnLogin,
+  findRunningAgent,
+  getActiveWalletAddress,
+  getAgentStatus,
+  getRandomWireguardNode,
+  getRecentProviders,
+  getRecentSessions,
+  getSubscriptions,
+  getWalletDvpnState,
+  startAgentTunnel,
+  stopAgentTunnel,
+} from "../../services/dvpn";
+import DvpnLoader from "../../Assets/JsonFiles/DvpnLoader";
+
+const BUILD_API_BASE = process.env.REACT_APP_BUILD_API_BASE || "";
+const VPN_BASE_URL = process.env.REACT_APP_VPN_URL || "";
+const VPN_HEALTH_URL = `${VPN_BASE_URL}/health`;
+const APP_BASE_URL = process.env.REACT_APP_APP_URL || "";
+const DOWNLOAD_MAP = getDownloadMap({
+  appBaseUrl: APP_BASE_URL,
+  vpnBaseUrl: VPN_BASE_URL,
+  vpnHealthUrl: VPN_HEALTH_URL,
+});
+
+function DVpn() {
+  const height = useCurrentHeight();
+  const navigate = useNavigate();
+  const [messageApi, contextHolder] = message.useMessage();
+  const [isConnected, setIsConnected] = useState(false);
+  const [agentReachable, setAgentReachable] = useState(null);
+  const [detectedOS, setDetectedOS] = useState("unknown");
+  const [downloadingFor, setDownloadingFor] = useState("");
+  const [downloadedFileNames, setDownloadedFileNames] = useState({});
+  const [authChecking, setAuthChecking] = useState(true);
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [sessionPassword, setSessionPassword] = useState("");
+  const [activeDvpnWallet, setActiveDvpnWallet] = useState("");
+  const [isPasswordSubmitting, setIsPasswordSubmitting] = useState(false);
+  const [recentProvider, setRecentProvider] = useState(null);
+  const [recentProviders, setRecentProviders] = useState([]);
+  const [recentSessionsData, setRecentSessionsData] = useState([]);
+  const [activeSubscription, setActiveSubscription] = useState(null);
+  const [quickConnectNode, setQuickConnectNode] = useState(null);
+  const [homeDataLoading, setHomeDataLoading] = useState(false);
+  const [isConnectionLoading, setIsConnectionLoading] = useState(false);
+  const [currentSessionId, setCurrentSessionId] = useState(null);
+  const [agentBaseUrl, setAgentBaseUrl] = useState("");
+  const [isBuyPlanModalOpen, setIsBuyPlanModalOpen] = useState(false);
+  const [pendingStartNode, setPendingStartNode] = useState(null);
+  const [pendingStopSessionId, setPendingStopSessionId] = useState(null);
+  const { account } = useSelector((state) => state.account);
+  const authToken = account?.jwtToken;
+  const isAutoDisconnectingRef = useRef(false);
+
+  const logFlow = () => {};
+
+  const openDownloadUrl = (url) => {
+    const a = document.createElement("a");
+    a.href = url;
+    a.setAttribute("download", "");
+    a.setAttribute("target", "_blank");
+    a.setAttribute("rel", "noopener noreferrer");
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
+
+  const getUrlFromApiResponse = (payload) => {
+    if (!payload) return "";
+    if (typeof payload === "string") {
+      if (payload.startsWith("http")) return payload;
+      try {
+        const parsed = JSON.parse(payload);
+        return getUrlFromApiResponse(parsed);
+      } catch (error) {
+        return "";
+      }
+    }
+    return (
+      payload?.url ||
+      payload?.downloadUrl ||
+      payload?.download_url ||
+      payload?.fileUrl ||
+      payload?.file_url ||
+      payload?.data?.url ||
+      payload?.data?.downloadUrl ||
+      payload?.data?.download_url ||
+      ""
+    );
+  };
+
+  const getFileNameFromUrl = (url) => {
+    if (!url) return "";
+    try {
+      const parsed = new URL(url);
+      const parts = parsed.pathname.split("/");
+      return decodeURIComponent(parts[parts.length - 1] || "");
+    } catch (error) {
+      return "";
+    }
+  };
+
+  const getCommandWithResolvedFileName = (downloadInfo) => {
+    if (!downloadInfo?.cmd) return "";
+    const platform = downloadInfo?.buildKey;
+    if (!platform) return downloadInfo.cmd;
+
+    const fileName = downloadedFileNames[platform];
+    if (!fileName) return downloadInfo.cmd;
+
+    if (platform === "linux") {
+      return downloadInfo.cmd.replaceAll("wg-agent_1.0.0_amd64.deb", fileName);
+    }
+    if (platform === "windows") {
+      return downloadInfo.cmd.replaceAll("wg-agent.exe", fileName);
+    }
+    return downloadInfo.cmd;
+  };
+
+  const handleBuildDownload = async (platform, fallbackHref) => {
+    if (!platform || (platform !== "linux" && platform !== "windows")) {
+      if (fallbackHref) openDownloadUrl(fallbackHref);
+      return;
+    }
+
+    try {
+      setDownloadingFor(platform);
+      let response = await fetch(`${BUILD_API_BASE}/${platform}`, {
+        method: "GET",
+      });
+      if (!response.ok && authToken) {
+        response = await fetch(`${BUILD_API_BASE}/${platform}`, {
+          method: "GET",
+          headers: {
+            Authorization: authToken,
+          },
+        });
+      }
+      if (!response.ok) {
+        throw new Error("Build API request failed");
+      }
+
+      const responseText = await response.text();
+      const downloadUrl = getUrlFromApiResponse(responseText);
+      if (!downloadUrl) {
+        throw new Error("Download URL not found in build API response");
+      }
+      const fileName = getFileNameFromUrl(downloadUrl);
+      if (fileName) {
+        setDownloadedFileNames((prev) => ({
+          ...prev,
+          [platform]: fileName,
+        }));
+      }
+      openDownloadUrl(downloadUrl);
+    } catch (error) {
+      if (fallbackHref) openDownloadUrl(fallbackHref);
+    } finally {
+      setDownloadingFor("");
+    }
+  };
+
+  const checkAgentHealth = async () => {
+    const result = await findRunningAgent();
+    if (result?.reachable && result?.baseUrl) {
+      setAgentBaseUrl(result.baseUrl);
+      return true;
+    }
+    setAgentBaseUrl("");
+    return false;
+  };
+
+  useEffect(() => {
+    setDetectedOS(detectOS());
+    checkAgentHealth().then(setAgentReachable);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    const bootstrapDvpnAuth = async () => {
+      if (agentReachable !== true) {
+        setAuthChecking(false);
+        setIsPasswordModalOpen(false);
+        return;
+      }
+      try {
+        setAuthChecking(true);
+        const walletAddress = await getActiveWalletAddress();
+        if (cancelled) return;
+        if (!walletAddress) {
+          messageApi.error("No active wallet found for dVPN.");
+          navigate("/wallet", { replace: true });
+          return;
+        }
+
+        setActiveDvpnWallet(walletAddress);
+        const state = (await getWalletDvpnState(walletAddress)) || {};
+        const accessToken = state?.tokens?.accessToken;
+        if (cancelled) return;
+
+        if (accessToken) {
+          setAuthChecking(false);
+          return;
+        }
+
+        setAuthChecking(false);
+        setIsPasswordModalOpen(true);
+      } catch (error) {
+        if (cancelled) return;
+        messageApi.error(error?.message || "Unable to open dVPN.");
+        navigate("/wallet", { replace: true });
+      } finally {
+        if (!cancelled) {
+          setAuthChecking(false);
+        }
+      }
+    };
+
+    bootstrapDvpnAuth();
+    return () => {
+      cancelled = true;
+    };
+  }, [agentReachable, messageApi, navigate]);
+
+  useEffect(() => {
+    if (agentReachable !== false) return undefined;
+    const poll = setInterval(async () => {
+      const isUp = await checkAgentHealth();
+      if (isUp) {
+        setAgentReachable(true);
+        clearInterval(poll);
+      }
+    }, 5000);
+    return () => clearInterval(poll);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [agentReachable]);
+
+  useEffect(() => {
+    if (agentReachable !== true || !agentBaseUrl) return undefined;
+    let cancelled = false;
+
+    const syncTunnelStatus = async () => {
+      try {
+        const status = await getAgentStatus(agentBaseUrl);
+        if (cancelled) return;
+        const isRunning = !!status?.is_running;
+        setIsConnected(isRunning);
+
+        if (isRunning || isAutoDisconnectingRef.current || !activeDvpnWallet) {
+          return;
+        }
+
+        const walletState = (await getWalletDvpnState(activeDvpnWallet)) || {};
+        const runtime = walletState?.sessionRuntime || {};
+        const staleSessionId = Number(
+          currentSessionId || runtime?.sessionId || runtime?.lastSessionId || 0
+        );
+        const runtimeStatus = String(runtime?.status || "").toLowerCase();
+        const hasStaleConnectedSession =
+          staleSessionId > 0 && (runtimeStatus === "connected" || runtimeStatus === "starting");
+
+        if (!hasStaleConnectedSession) {
+          return;
+        }
+
+        isAutoDisconnectingRef.current = true;
+        logFlow("ui.agent_status.stale_session_cleanup.start", {
+          walletAddress: activeDvpnWallet,
+          staleSessionId,
+          runtimeStatus,
+        });
+        try {
+          await disconnectVpn({
+            walletAddress: activeDvpnWallet,
+            sessionId: staleSessionId,
+            sessionPassword,
+          });
+          setCurrentSessionId(null);
+          logFlow("ui.agent_status.stale_session_cleanup.success", {
+            walletAddress: activeDvpnWallet,
+            staleSessionId,
+          });
+        } catch (cleanupError) {
+          logFlow("ui.agent_status.stale_session_cleanup.error", {
+            walletAddress: activeDvpnWallet,
+            staleSessionId,
+            message: cleanupError?.message || "cleanup failed",
+          });
+        } finally {
+          isAutoDisconnectingRef.current = false;
+        }
+      } catch (error) {
+        // Avoid spamming user; next poll will re-check.
+      }
+    };
+
+    syncTunnelStatus();
+    const pollIntervalMs = isConnected ? 10000 : 20000;
+    const poll = setInterval(syncTunnelStatus, pollIntervalMs);
+    return () => {
+      cancelled = true;
+      clearInterval(poll);
+    };
+  }, [agentReachable, agentBaseUrl, activeDvpnWallet, currentSessionId, sessionPassword, isConnected]);
+
+  useEffect(() => {
+    if (agentReachable !== true || authChecking || isPasswordModalOpen || !activeDvpnWallet) return;
+    let cancelled = false;
+
+    const loadHomeData = async () => {
+      setHomeDataLoading(true);
+      const [providersResult, sessionsResult, subscriptionsResult, quickNodeResult] =
+        await Promise.allSettled([
+          getRecentProviders(activeDvpnWallet),
+          getRecentSessions(activeDvpnWallet),
+          getSubscriptions(activeDvpnWallet),
+          getRandomWireguardNode(activeDvpnWallet),
+        ]);
+
+      if (cancelled) return;
+
+      if (providersResult.status === "fulfilled") {
+        setRecentProvider(normalizeRecentProvider(providersResult.value));
+        setRecentProviders(normalizeRecentProviders(providersResult.value));
+      }
+      if (sessionsResult.status === "fulfilled") {
+        setRecentSessionsData(normalizeRecentSessions(sessionsResult.value));
+      }
+      if (subscriptionsResult.status === "fulfilled") {
+        const subscriptions = normalizeSubscriptions(subscriptionsResult.value);
+        setActiveSubscription(getActiveSubscription(subscriptions));
+      }
+      if (quickNodeResult.status === "fulfilled") {
+        setQuickConnectNode(normalizeQuickNode(quickNodeResult.value));
+      } else {
+        setQuickConnectNode(null);
+      }
+
+      const state = (await getWalletDvpnState(activeDvpnWallet)) || {};
+      const runtime = state?.sessionRuntime || {};
+      const isRuntimeConnected = String(runtime?.status || "").toLowerCase() === "connected";
+      setIsConnected(isRuntimeConnected);
+      setCurrentSessionId(runtime?.sessionId || null);
+      if (isRuntimeConnected && runtime?.activeNode) {
+        setQuickConnectNode(runtime.activeNode);
+      }
+
+      setHomeDataLoading(false);
+    };
+
+    loadHomeData();
+    return () => {
+      cancelled = true;
+    };
+  }, [activeDvpnWallet, agentReachable, authChecking, isPasswordModalOpen]);
+
+  const handlePasswordSubmit = async () => {
+    if (!sessionPassword) {
+      return messageApi.error("Please enter password.");
+    }
+    const verified = await WalletHelper.verifyPassword(sessionPassword);
+    if (!verified) {
+      return messageApi.error("Please enter valid password to proceed.");
+    }
+
+    try {
+      setIsPasswordSubmitting(true);
+      await ensureDvpnLogin(activeDvpnWallet, {
+        sessionPassword,
+      });
+      const nodeToStart = pendingStartNode;
+      const sessionToStop = pendingStopSessionId;
+      setPendingStartNode(null);
+      setPendingStopSessionId(null);
+      setIsPasswordModalOpen(false);
+      if (nodeToStart) {
+        await startConnectionFromNode(nodeToStart, sessionPassword);
+      }
+      if (sessionToStop) {
+        await stopConnection(sessionPassword, sessionToStop);
+      }
+      setSessionPassword("");
+    } catch (error) {
+      // Login errors are already surfaced through dVPN error popup helper.
+    } finally {
+      setIsPasswordSubmitting(false);
+    }
+  };
+
+  const handlePasswordCancel = () => {
+    setSessionPassword("");
+    setIsPasswordModalOpen(false);
+    setPendingStopSessionId(null);
+    if (pendingStartNode) {
+      setPendingStartNode(null);
+      return;
+    }
+    navigate("/wallet", { replace: true });
+  };
+
+  const selectedDownload = DOWNLOAD_MAP[detectedOS] || DOWNLOAD_MAP.unknown;
+  const daysLeftSource = quickConnectNode?.subscriptions || activeSubscription;
+  const isQuickNodeAvailable = !!(quickConnectNode?.address || quickConnectNode?.remote_url || quickConnectNode?.url);
+  const activeProviderAddress =
+    String(
+      activeSubscription?.plans?.provider_address ||
+        recentProvider?.address ||
+        recentProvider?.provider_address ||
+        ""
+    ).toLowerCase();
+  const getProviderAddress = (provider) =>
+    String(provider?.address || provider?.provider_address || provider?.prov_address || "").toLowerCase();
+  const getProviderPlanId = (provider) =>
+    provider?.plan_id ||
+    provider?.planId ||
+    provider?.subscription?.plan_id ||
+    provider?.subscription?.planId ||
+    provider?.subscribedPlanIds?.[0] ||
+    provider?.subscribed_plan_ids?.[0] ||
+    activeSubscription?.plan_id ||
+    activeSubscription?.planId ||
+    "";
+  const connectedRecentServers = (recentProviders.length ? recentProviders : [recentProvider]).filter(Boolean);
+  const openProviderServers = (provider) => {
+    navigate("/servers", {
+      state: {
+        providerAddress:
+          provider?.address || provider?.provider_address || provider?.prov_address || "",
+        providerName: provider?.name || provider?.provider_name || provider?.identity || "",
+        planId: getProviderPlanId(provider),
+      },
+    });
+  };
+
+  const toRuntimeOptionsFromNode = (node) => ({
+    sessionPassword,
+    planId: node?.plan_id || node?.planId || activeSubscription?.plan_id || activeSubscription?.planId,
+    subscriptionId:
+      node?.subscriptions?.id ||
+      node?.subscription_id ||
+      node?.subscriptionId ||
+      activeSubscription?.id ||
+      activeSubscription?.subscription_id ||
+      activeSubscription?.subscriptionId ||
+      "",
+    providerUrl: node?.url || node?.remote_url || node?.node_url || "",
+    nodeAddress: node?.node_address || node?.nodeAddress || node?.address || "",
+    selectedNode: node,
+  });
+
+  const isPasswordRequiredError = (error) => {
+    const message = String(error?.message || "").toLowerCase();
+    return (
+      message.includes("please enter password") ||
+      message.includes("unable to unlock wallet") ||
+      message.includes("invalid credentials") ||
+      message.includes("wallet/password")
+    );
+  };
+
+  const startConnectionFromNode = async (node, providedPassword = "") => {
+    if (!activeDvpnWallet) return;
+    if (!node) {
+      logFlow("ui.quickconnect.blocked_no_node", {
+        walletAddress: activeDvpnWallet,
+      });
+      setIsBuyPlanModalOpen(true);
+      return;
+    }
+    try {
+      setIsConnectionLoading(true);
+      logFlow("ui.connect.start", {
+        walletAddress: activeDvpnWallet,
+        nodeId: node?.id || "",
+        nodeAddress: node?.address || "",
+        providerUrl: node?.url || node?.remote_url || "",
+      });
+      const result = await connectVpnWithWireguardConfig({
+        walletAddress: activeDvpnWallet,
+        serverId: node?.id || node?.address || "",
+        countryId: node?.country || "",
+        cityId: node?.city || "",
+        runtimeConfigOptions: {
+          ...toRuntimeOptionsFromNode(node),
+          ...(providedPassword ? { sessionPassword: providedPassword } : {}),
+        },
+      });
+      const wireguardConfig = result?.wireguardConfig || result?.runtime?.config || "";
+      if (!wireguardConfig) {
+        throw new Error("Missing WireGuard tunnel config");
+      }
+      const effectiveAgentBaseUrl =
+        agentBaseUrl || (await findRunningAgent()).baseUrl || "";
+      if (!effectiveAgentBaseUrl) {
+        throw new Error("Local wg-agent is not reachable");
+      }
+      if (!agentBaseUrl) {
+        setAgentBaseUrl(effectiveAgentBaseUrl);
+      }
+      await startAgentTunnel({
+        baseUrl: effectiveAgentBaseUrl,
+        config: wireguardConfig,
+      });
+      const tunnelStatus = await getAgentStatus(effectiveAgentBaseUrl);
+      setIsConnected(!!tunnelStatus?.is_running);
+      setCurrentSessionId(result?.runtime?.sessionId || null);
+      if (result?.runtime?.node) {
+        setQuickConnectNode(result.runtime.node);
+      }
+      logFlow("ui.connect.success", {
+        walletAddress: activeDvpnWallet,
+        sessionId: result?.runtime?.sessionId || null,
+      });
+      messageApi.success("dVPN session started.");
+    } catch (error) {
+      logFlow("ui.connect.error", {
+        walletAddress: activeDvpnWallet,
+        code: error?.code || "UNKNOWN",
+        message: error?.message || "Failed",
+      });
+      if (isPasswordRequiredError(error)) {
+        setPendingStartNode(node);
+        setIsPasswordModalOpen(true);
+      }
+      // Errors are surfaced by service layer.
+    } finally {
+      setIsConnectionLoading(false);
+    }
+  };
+
+  const stopConnection = async (providedPassword = "", providedSessionId = null) => {
+    const resolvedSessionId = Number(providedSessionId || currentSessionId || 0);
+    if (!activeDvpnWallet && !agentBaseUrl) {
+      setIsConnected(false);
+      return;
+    }
+    if (!resolvedSessionId && !isConnected) {
+      setIsConnected(false);
+      return;
+    }
+    try {
+      setIsConnectionLoading(true);
+      logFlow("ui.disconnect.start", {
+        walletAddress: activeDvpnWallet,
+        sessionId: resolvedSessionId || null,
+      });
+      if (activeDvpnWallet && resolvedSessionId) {
+        await disconnectVpn({
+          walletAddress: activeDvpnWallet,
+          sessionId: resolvedSessionId,
+          sessionPassword: providedPassword || sessionPassword,
+        });
+      }
+      const effectiveAgentBaseUrl =
+        agentBaseUrl || (await findRunningAgent()).baseUrl || "";
+      if (effectiveAgentBaseUrl) {
+        await stopAgentTunnel(effectiveAgentBaseUrl);
+      }
+      setIsConnected(false);
+      setCurrentSessionId(null);
+      logFlow("ui.disconnect.success", {
+        walletAddress: activeDvpnWallet,
+        sessionId: resolvedSessionId || null,
+      });
+      messageApi.success("dVPN session stopped.");
+    } catch (error) {
+      if (isPasswordRequiredError(error)) {
+        setPendingStopSessionId(resolvedSessionId || null);
+        setIsPasswordModalOpen(true);
+      }
+      logFlow("ui.disconnect.error", {
+        walletAddress: activeDvpnWallet,
+        sessionId: resolvedSessionId || null,
+        code: error?.code || "UNKNOWN",
+        message: error?.message || "Failed",
+      });
+      // Errors are surfaced by service layer.
+    } finally {
+      setIsConnectionLoading(false);
+    }
+  };
+
+  const handleQuickConnectToggle = async () => {
+    if (isConnectionLoading) return;
+    if (isConnected) {
+      await stopConnection();
+      return;
+    }
+    if (!isQuickNodeAvailable) {
+      setIsBuyPlanModalOpen(true);
+      return;
+    }
+    await startConnectionFromNode(quickConnectNode);
+  };
+
+  if (agentReachable === true && (authChecking || isPasswordModalOpen)) {
+    return (
+      <div className={`${"vpn-dashboard"} ${height <= 600 ? "heightExt" : ""}`}>
+        {contextHolder}
+        {isConnectionLoading && (
+          <div className="dvpn-loader-overlay" role="status" aria-live="polite">
+            <div className="dvpn-loader-card">
+              <DvpnLoader />
+              <p>Processing VPN request...</p>
+            </div>
+          </div>
+        )}
+        <div className="header">
+          <div className="header-content">
+            <h2>Qubetics dVPN</h2>
+          </div>
+        </div>
+        <div className="agent-checking-banner">
+          {authChecking ? "Preparing dVPN..." : "Enter password to access dVPN."}
+        </div>
+        <ModalCustom
+          title={"Verify Password"}
+          handleCancel={handlePasswordCancel}
+          isModalOpen={isPasswordModalOpen}
+          customClass="customClassModal"
+        >
+          <div className="viewphrases">
+            <InputFieldSimple
+              placeholder="Enter Password"
+              value={sessionPassword}
+              getData={(value) => {
+                const hasEmoji = /[\p{Extended_Pictographic}]/u.test(value);
+                if (value.length <= 100 && !hasEmoji) {
+                  setSessionPassword(value);
+                }
+              }}
+              customFunction={handlePasswordSubmit}
+            />
+            <div style={{ marginTop: "10px" }} />
+            <ButtonComp
+              text={isPasswordSubmitting ? "Submitting..." : "Submit"}
+              maxWidth={"100%"}
+              onClick={handlePasswordSubmit}
+              disabled={isPasswordSubmitting}
+            />
+          </div>
+        </ModalCustom>
+      </div>
+    );
+  }
+
+  return (
+    <div className={`${"vpn-dashboard"} ${
+      height <= 600 ? "heightExt" : ""
+    }`}>
+      {contextHolder}
+      {isConnectionLoading && (
+        <div className="dvpn-loader-overlay" role="status" aria-live="polite">
+          <div className="dvpn-loader-card">
+            <DvpnLoader />
+            <p>Processing VPN request...</p>
+          </div>
+        </div>
+      )}
+      <div className="header">
+        <div className="header-content">
+          <h2>Qubetics dVPN</h2>
+          {/* <p className={`connection-label ${isConnected ? "connected" : ""}`}>
+            {isConnected ? "Connected" : "Disconnected"}
+          </p> */}
+        </div>
+        {agentReachable === true && (
+          <span
+            style={{ cursor: "pointer" }}
+            onClick={() => navigate("/service-provider")}
+          >
+            <CrownIcon />
+          </span>
+        )}
+      </div>
+      {agentReachable === true && (
+        <>
+          <div className="status-bar">
+            <button className={`status ${isConnected ? "connected" : "disconnected"}`}>
+              {isConnected ? "Connected" : "Disconnected"}
+            </button>
+            <p
+              className="days-left"
+              style={{ cursor: "pointer" }}
+              onClick={() => navigate("/service-provider")}
+            >
+              <WalletBlueIcon />{" "}
+              <span>{homeDataLoading ? "Loading..." : getDaysLeftText(daysLeftSource)}</span>
+            </p>
+          </div>
+          <div className="quick-connect-section">
+            <div
+              className="switch"
+              style={{ cursor: "pointer" }}
+              onClick={handleQuickConnectToggle}
+            >
+              <GreenSwitchIcon />
+            </div>
+            <h3>{isConnected ? "" : "Quick Connect"}</h3>
+            {!isConnected && (
+              <p className="quick-node-name">
+                {homeDataLoading ? (
+                  // <Skeleton.Input className="dvpn-skeleton-wave" active size="small" style={{ width: 180 }} /> 
+                  "-"
+                ) : (
+                  [quickConnectNode?.country, quickConnectNode?.city]
+                    .filter(Boolean)
+                    .join(" - ") ||
+                  quickConnectNode?.remote_url ||
+                  quickConnectNode?.address ||
+                  "Wireguard node"
+                )}
+              </p>
+            )}
+          </div>
+        </>
+      )}
+      {agentReachable === null && (
+        <div className="agent-checking-banner">🔍 Checking local VPN agent...</div>
+      )}
+
+      {agentReachable === false && (
+        <div className="agent-install-banner">
+          <h3> VPN Agent Not Found</h3>
+          <p>
+            We could not reach the local agent on ports 51821-51830. Install it and this
+            screen will auto-recover when the service comes online.
+          </p>
+          {selectedDownload.href && (
+            <a
+              href={selectedDownload.href}
+              download
+              className="agent-download-btn"
+              onClick={(event) => {
+                event.preventDefault();
+                handleBuildDownload(selectedDownload.buildKey, selectedDownload.href);
+              }}
+            >
+              {downloadingFor === selectedDownload.buildKey
+                ? "Preparing download..."
+                : `${selectedDownload.icon} Download for ${selectedDownload.label}`}
+            </a>
+          )}
+          <details className="agent-install-steps">
+            <summary>Install and run command</summary>
+            {selectedDownload.guide && (
+              <ol>
+                {selectedDownload.guide.map((step, index) => (
+                  <li key={`${detectedOS}-guide-${index}`}>{step}</li>
+                ))}
+              </ol>
+            )}
+            <pre>{getCommandWithResolvedFileName(selectedDownload)}</pre>
+          </details>
+          <details className="agent-install-steps">
+            <summary>All platforms</summary>
+            <div className="agent-links">
+              <a
+                href="/Vpn_Downloads/wg-agent_1.0.0_amd64.deb"
+                download
+                onClick={(event) => {
+                  event.preventDefault();
+                  handleBuildDownload("linux", "/Vpn_Downloads/wg-agent_1.0.0_amd64.deb");
+                }}
+              >
+                🐧 Linux (.deb)
+              </a>
+              <a
+                href="/Vpn_Downloads/wg-agent.exe"
+                download
+                onClick={(event) => {
+                  event.preventDefault();
+                  handleBuildDownload("windows", "/Vpn_Downloads/wg-agent.exe");
+                }}
+              >
+                🪟 Windows (.exe)
+              </a>
+              <span>🍎 iOS: Nothing for now, coming soon.</span>
+            </div>
+          </details>
+        </div>
+      )}
+
+      {agentReachable === true && isConnected ? (
+        <>
+          <div className="connected-status-card">
+            <div>
+              <p className="label">Status</p>
+              <h4>Connected</h4>
+            </div>
+            <span className="protected">Protected</span>
+          </div>
+
+          <div className="connected-location-card">
+            <div className="left">
+              <span className="globe">◎</span>
+              <div>
+                <h5>
+                  {quickConnectNode?.location ||
+                    [quickConnectNode?.country, quickConnectNode?.city]
+                      .filter(Boolean)
+                      .join(", ") ||
+                    quickConnectNode?.node_name ||
+                    "Connected node"}
+                </h5>
+                <p>
+                  {quickConnectNode?.remote_url ||
+                    quickConnectNode?.subscriptions?.status ||
+                    quickConnectNode?.node_status ||
+                    "Node active"}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="recent-servers">
+            <div className="recent-title">
+              <h3>Recent Servers</h3>
+              <span className="view-all" onClick={() => navigate("/service-provider")}>
+                View all
+              </span>
+            </div>
+
+            {connectedRecentServers.length ? (
+              connectedRecentServers.slice(0, 2).map((provider, index) => (
+                <div
+                  className="server-item"
+                  key={`${provider?.address || provider?.provider_address || "provider"}-${index}`}
+                  onClick={() => openProviderServers(provider)}
+                >
+                  <div className="server-main">
+                    <div className="server-meta">
+                      <h4>
+                        {provider?.name ||
+                          provider?.provider_name ||
+                          provider?.identity ||
+                          provider?.address ||
+                          "Provider"}
+                      </h4>
+                      <p>{provider?.countryCount || provider?.country_count || 0} Locations</p>
+                    </div>
+                  </div>
+                  {!!provider?.isUserSubscribed && <span className="server-badge">Subscribed</span>}
+                </div>
+              ))
+            ) : (
+              <div className="server-item">
+                <div className="server-main">
+                  <div className="server-meta">
+                    <h4>No recent servers</h4>
+                    <p>Your latest providers will appear here.</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </>
+      ) : agentReachable === true ? (
+        <>
+          {/* <div className="country-list">
+            <h3>Country List</h3>
+            <div className="countryInner">
+              <div className="country">
+                {" "}
+                <img src={USA} alt="usa" />
+                USA
+              </div>
+              <div className="country">
+                {" "}
+                <img src={Germany} alt="germany" />
+                Germany
+              </div>
+              <div className="country">
+                {" "}
+                <img src={Japan} alt="japan" />
+                Japan
+              </div>
+            </div>
+          </div> */}
+          <div className="recent-sessions">
+            <div className="recent-title">
+              <h3>Recent Providers</h3>
+              <span
+                className="view-all"
+                style={{ cursor: "pointer" }}
+                onClick={() => navigate("/service-provider")}
+              >
+                View all
+              </span>
+            </div>
+            <div className="provider-grid-row">
+              {homeDataLoading ? (
+                <Skeleton.Input className="dvpn-skeleton-wave" active size="small" style={{ width: 180 }} />
+              ) : (
+                (recentProviders.length ? recentProviders : [recentProvider]).map((provider, index) => (
+                  <div
+                    className={`provider-pill ${
+                      (activeProviderAddress && getProviderAddress(provider) === activeProviderAddress) ||
+                      (!activeProviderAddress && index === 0)
+                        ? "selected"
+                        : ""
+                    }`}
+                    key={`${provider?.address || provider?.provider_address || provider?.identity || "provider"}-${index}`}
+                    onClick={() => navigate("/service-provider")}
+                  >
+                    {provider?.name ||
+                      provider?.provider_name ||
+                      provider?.identity ||
+                      provider?.provider_address ||
+                      provider?.address ||
+                      activeSubscription?.plans?.providers?.name ||
+                      activeSubscription?.plans?.provider_address ||
+                      "No recent provider"}
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* {(recentProvider || activeSubscription) && (
+              <p className="provider-meta">
+                {recentProvider?.provider_address ||
+                  recentProvider?.address ||
+                  recentProvider?.providerAddress ||
+                  activeSubscription?.plans?.provider_address ||
+                  ""}
+                {recentProvider?.plan_id || recentProvider?.planId || activeSubscription?.plan_id
+                  ? ` | Plan: ${
+                      recentProvider?.plan_id ||
+                      recentProvider?.planId ||
+                      activeSubscription?.plan_id
+                    }`
+                  : ""}
+                {typeof recentProvider?.subscribed !== "undefined"
+                  ? ` | Subscribed: ${recentProvider?.subscribed ? "Yes" : "No"}`
+                  : activeSubscription?.status
+                    ? ` | Status: ${activeSubscription?.status}`
+                  : ""}
+              </p>
+            )} */}
+
+            <div className="recent-title">
+              <h3>Recent Sessions</h3>
+              <span
+                className="view-all"
+                style={{ cursor: "pointer" }}
+                onClick={() => navigate("/recentSessions")}
+              >
+                View all
+              </span>
+            </div>
+            <div className="mutliSession">
+              {homeDataLoading && (
+                <>
+                  <div className="session">
+                    <Skeleton className="dvpn-skeleton-wave" active paragraph={{ rows: 2 }} title={false} />
+                  </div>
+                  <div className="session">
+                    <Skeleton className="dvpn-skeleton-wave" active paragraph={{ rows: 2 }} title={false} />
+                  </div>
+                </>
+              )}
+              {!homeDataLoading && recentSessionsData.length === 0 && (
+                <div className="session">
+                  <div className="session-inner">
+                    <div className="session-info">
+                      <div className="flag">
+                        <img src={USA} alt="session" />
+                      </div>
+                      <div className="location-time">
+                        <h5>No recent sessions</h5>
+                        <p>Your latest sessions will appear here.</p>
+                      </div>
+                    </div>
+                    <div className="duration">-</div>
+                  </div>
+                </div>
+              )}
+              {recentSessionsData.map((session, index) => (
+                <div
+                  className="session"
+                  key={`${session?.id || session?.subscription_id || "recent"}-${index}`}
+                >
+                  <div className="session-inner">
+                    <div className="session-info">
+                      <div className="flag">
+                        <img src={session?.nodes?.flag_url || USA} alt="session" />
+                      </div>
+                      <div className="location-time">
+                        <h5>{getSessionLocation(session)}</h5>
+                        <p>
+                          {formatDateTime(
+                            session?.start_at ||
+                            session?.start_time ||
+                              session?.started_at ||
+                              session?.created_at ||
+                              session?.createdAt
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="duration">{getDurationLabel(session)}</div>
+                  </div>
+                  <button
+                    className="reconnect-btn"
+                    onClick={() => startConnectionFromNode(quickConnectNode)}
+                    disabled={isConnectionLoading}
+                  >
+                    <ReconnectIcon />
+                    {session?.reconnect_metadata ||
+                    session?.reconnectMeta ||
+                    session?.session_id ||
+                    session?.id
+                      ? "Reconnect"
+                      : "Reconnect"}
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </>
+      ) : null}
+      <ModalCustom
+        title={"No Active Plan Found"}
+        handleCancel={() => setIsBuyPlanModalOpen(false)}
+        isModalOpen={isBuyPlanModalOpen}
+        customClass="customClassModal"
+      >
+        <div className="viewphrases">
+          <p style={{ marginBottom: 12 }}>
+            Please buy an active dVPN plan first to start a session.
+          </p>
+          <ButtonComp
+            text={"Buy Plan"}
+            maxWidth={"100%"}
+            onClick={() => {
+              setIsBuyPlanModalOpen(false);
+              navigate("/service-provider");
+            }}
+          />
+        </div>
+      </ModalCustom>
+    </div>
+  );
+}
+
+export default DVpn;

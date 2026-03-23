@@ -1,0 +1,105 @@
+@import "../../styles/__vars.scss";
+@import "../../styles/__mixins.scss";
+
+.histryList {
+  cursor: pointer;
+  background-color: #18171f;
+  padding: 15px;
+  border-radius: 14px;
+  margin-bottom: 10px;
+
+  .statusCurrency {
+    display: flex;
+    justify-content: space-between;
+    // border-bottom: 1px solid #dce2f5;
+    border-bottom: 1px solid rgba(220, 226, 245, 0.3);
+    padding-bottom: 20px;
+  }
+
+  .Status {
+    display: flex;
+    gap: 10px;
+    text-align: left;
+    align-items: center;
+
+    img {
+      width: 26px !important;
+      height: 41px !important;
+    }
+
+    .sendRecieve {
+      color: $white;
+      font-size: 14px;
+      font-weight: 500;
+      width: 180px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+  }
+
+  .histryStatus {
+    display: flex;
+    justify-content: left;
+    gap: 5px;
+
+    p {
+      color: #98969b;
+      font-weight: 14px;
+      font-weight: 400;
+      line-height: 18px;
+    }
+  }
+
+  .curncyStatus {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .Currency {
+    text-align: end;
+
+    p {
+      &:last-child {
+        font-size: 12px;
+
+        @include theme() {
+          color: theme-get("whiteblack");
+        }
+
+        text-overflow: ellipsis;
+        width: 100% !important;
+        overflow: hidden;
+        white-space: nowrap;
+      }
+    }
+
+    span {
+      @include theme() {
+        color: theme-get("whiteblack");
+      }
+    }
+  }
+}
+
+.outer-list {
+  display: flex;
+  flex-direction: column;
+  align-items: baseline;
+
+  .toFrom {
+    color: #98969b;
+    font-size: 14px;
+    padding-top: 10px;
+  }
+
+  .addressList {
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 500;
+    max-width: 297px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}

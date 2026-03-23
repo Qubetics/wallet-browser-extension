@@ -1,0 +1,66 @@
+.settings-panel {
+  padding: 20px;
+  padding-top: 0;
+
+  .settings-section {
+    margin-bottom: 20px;
+
+    .section-title {
+      font-size: 18px;
+      color: #fff;
+      margin-bottom: 10px;
+      font-weight: 400;
+      text-align: left;
+    }
+
+    .section-items {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+
+      .settings-item {
+        background-color: #18171f;
+        border-radius: 14px;
+        padding: 0px 16px;
+        height: 76px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        .left {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+
+          .icon {
+            font-size: 16px;
+          }
+
+          .label {
+            color: #fff;
+            font-size: 16px;
+            font-weight: 400;
+            margin-bottom: 0;
+            white-space: nowrap;
+          }
+        }
+        .right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+          .value {
+            font-size: 16px;
+            color: #98969b;
+            font-weight: 400;
+          }   
+        }
+      }
+    }
+  }
+}
+
+
+.heightExtSettingsPanel{
+  height: calc(100vh - 151px);
+  overflow: auto;
+}

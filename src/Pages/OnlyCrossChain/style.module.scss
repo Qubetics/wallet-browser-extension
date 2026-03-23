@@ -1,0 +1,49 @@
+@import "../../styles/__vars.scss";
+.swap {
+  &__pasteText {
+    color: $baseText-00AEEF;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+    &:hover {
+      opacity: 0.7;
+    }
+  }
+  &__infoText {
+    color: $gray;
+    font-size: 13px;
+    font-weight: bold;
+    text-align: right;
+    margin-top: 12px;
+    // margin-bottom: 36px;
+
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+  }
+  &__icon {
+    margin-bottom: 35px;
+    text-align: center;
+  }
+
+  .swap__icon {
+    cursor: pointer;
+  }
+}
+
+.design {
+  position: relative;
+}
+
+.design:not(:last-child)::after {
+  height: 1px;
+  width: 97%;
+  content: "";
+  background-color: #d7e0eb;
+  position: absolute;
+  bottom: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+

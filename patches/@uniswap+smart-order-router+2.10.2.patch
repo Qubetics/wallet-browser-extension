@@ -1,0 +1,15 @@
+diff --git a/node_modules/@uniswap/smart-order-router/build/module/routers/alpha-router/alpha-router.js b/node_modules/@uniswap/smart-order-router/build/module/routers/alpha-router/alpha-router.js
+index 9f64e77..7fec19d 100644
+--- a/node_modules/@uniswap/smart-order-router/build/module/routers/alpha-router/alpha-router.js
++++ b/node_modules/@uniswap/smart-order-router/build/module/routers/alpha-router/alpha-router.js
+@@ -114,8 +114,8 @@ export class AlphaRouter {
+                         minTimeout: 100,
+                         maxTimeout: 1000,
+                     }, {
+-                        multicallChunk: 210,
+-                        gasLimitPerCall: 705000,
++                        multicallChunk: 70,
++                        gasLimitPerCall: 305000,
+                         quoteMinSuccessRate: 0.15,
+                     }, {
+                         gasLimitOverride: 2000000,

@@ -1,0 +1,334 @@
+.session-wrapper {
+  padding: 12px 24px 0;
+
+  .dvpn-tabs {
+    margin-top: 6px;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .dvpn-tab {
+    height: 50px;
+    border-radius: 20px;
+    border: 2px solid #8e8e96;
+    background: #09080f;
+    color: #a8a8b3;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+
+    &.active {
+      color: #fff;
+      border: 2px solid transparent;
+      background:
+        linear-gradient(#09080f, #09080f) padding-box,
+        linear-gradient(90deg, #73c9e2 0%, #6c8dc5 25.37%, #6456b2 76.11%, #6145ea 101.48%)
+          border-box;
+    }
+  }
+
+  .history-list {
+    margin-top: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-height: calc(100vh - 245px);
+    overflow: auto;
+    padding-bottom: 16px;
+  }
+
+  .history-card {
+    background: #18171f;
+    border-radius: 18px;
+    padding: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    text-align: left;
+  }
+
+  .empty-state-card {
+    align-items: flex-start;
+    .meta {
+      width: 100%;
+    }
+    .meta h4 {
+      font-size: 18px;
+      line-height: 130%;
+      max-width: 100%;
+    }
+    .meta p {
+      margin-top: 6px;
+      font-size: 14px;
+      color: #98969b;
+    }
+  }
+
+  .session-card {
+    .left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .flag-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+
+    .meta h4 {
+      margin: 0;
+      color: #fff;
+      font-size: 18px;
+      font-weight: 500;
+    }
+
+    .meta p {
+      margin: 4px 0 0;
+      color: #98969b;
+      font-size: 16px;
+      font-weight: 400;
+    }
+
+    .right-text {
+      color: #98969b;
+      font-size: 18px;
+      font-weight: 400;
+      white-space: nowrap;
+    }
+  }
+
+  .plan-card {
+    align-items: flex-start;
+    flex-direction: column;
+
+    .meta {
+      width: 100%;
+    }
+
+    .meta h4,
+    .meta h5 {
+      margin: 0;
+      color: #fff;
+      font-size: 22px;
+      font-weight: 500;
+      line-height: 130%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 90%;
+    }
+
+    .meta h3 {
+      margin: 4px 0 0;
+      color: #fff;
+      font-size: 30px;
+      font-weight: 600;
+      line-height: 110%;
+    }
+
+    .meta p {
+      margin: 6px 0 0;
+      color: #98969b;
+      font-size: 14px;
+    }
+
+    .status-expired {
+      align-self: flex-end;
+      margin-top: -28px;
+      color: #98969b;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .renew-btn {
+      margin-top: 16px;
+      width: 100%;
+      height: 64px;
+      background: transparent;
+      border-radius: 18px;
+      border: 2px solid transparent;
+      color: #fff;
+      font-size: 22px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background:
+        linear-gradient(#18171f, #18171f) padding-box,
+        linear-gradient(90deg, #73c9e2 0%, #6c8dc5 25.37%, #6456b2 76.11%, #6145ea 101.48%)
+          border-box;
+    }
+  }
+
+  .txn-card {
+    align-items: flex-start;
+
+    .meta {
+      width: 100%;
+      min-width: 0;
+    }
+
+    .meta h4 {
+      margin: 0;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .tx-hash {
+        max-width: 220px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+
+    .meta h5 {
+      margin: 2px 0 0;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 500;
+    }
+
+    .status-success {
+      margin: 8px 0 0;
+      color: #2ed16e;
+      font-size: 16px;
+      font-weight: 500;
+    }
+
+    .copy-btn {
+      border: 0;
+      background: transparent;
+      color: #d7d5de;
+      font-size: 18px;
+      cursor: pointer;
+      padding: 0;
+      line-height: 1;
+    }
+  }
+}
+
+.heightExtSessionWrapper {
+  .dvpn-tab {
+    font-size: 14px;
+    height: 44px;
+  }
+
+  .history-list {
+    max-height: calc(100vh - 220px);
+  }
+
+  .session-card {
+    .flag-icon {
+      width: 48px;
+      height: 48px;
+    }
+
+    .meta h4 {
+      font-size: 14px;
+    }
+
+    .meta p,
+    .right-text {
+      font-size: 13px;
+    }
+  }
+
+  .plan-card {
+    .meta h4,
+    .meta h5 {
+      font-size: 22px;
+    }
+
+    .meta h3 {
+      font-size: 28px;
+    }
+
+    .meta p,
+    .status-expired {
+      font-size: 13px;
+    }
+
+    .renew-btn {
+      height: 52px;
+      font-size: 18px;
+    }
+  }
+
+  .txn-card {
+    .meta h4 {
+      font-size: 14px;
+    }
+
+    .meta h5,
+    .status-success {
+      font-size: 15px;
+    }
+  }
+}
+
+/* Full-screen (tab) tuning only.
+   Popup width stays unchanged because this applies to wider viewports. */
+@media (min-width: 700px) {
+  .session-wrapper {
+    max-width: 440px;
+    margin: 0 auto;
+    padding: 10px 16px 0;
+  }
+
+  .session-wrapper .dvpn-tabs {
+    gap: 8px;
+  }
+
+  .session-wrapper .dvpn-tab {
+    height: 44px;
+    font-size: 14px;
+    border-radius: 16px;
+  }
+
+  .session-wrapper .history-list {
+    max-height: calc(100vh - 220px);
+    gap: 10px;
+  }
+
+  .session-wrapper .history-card {
+    padding: 14px;
+    border-radius: 16px;
+  }
+
+  .session-wrapper .session-card .flag-icon {
+    width: 52px;
+    height: 52px;
+  }
+
+  .session-wrapper .session-card .meta h4 {
+    font-size: 16px;
+  }
+
+  .session-wrapper .session-card .meta p,
+  .session-wrapper .session-card .right-text {
+    font-size: 15px;
+  }
+
+  .session-wrapper .plan-card .meta h3 {
+    font-size: 26px;
+  }
+
+  .session-wrapper .plan-card .renew-btn {
+    height: 56px;
+    font-size: 20px;
+  }
+}

@@ -1,0 +1,100 @@
+@import "../../styles/__vars.scss";
+@import "../../styles/__mixins.scss";
+
+.listItems {
+  background-color: #18171f;
+  padding: 20px 16px;
+  border-radius: 14px;
+  margin-bottom: 8px;
+  a {
+    text-decoration: none;
+  }
+  .settingList {
+    display: flex;
+    justify-content: space-between;
+    &__imgValue {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      p {
+        white-space: nowrap;
+        font-size: 16px;
+        font-weight: 400;
+        margin-bottom: 0;
+        color: #ffffff;
+      }
+      img {
+        height: 30px;
+        width: 30px;
+        border-radius: 15px;
+      }
+    }
+  }
+}
+.settingList {
+  .switchSec {
+    @include theme() {
+      background-color: theme-get("toggelBg") !important;
+    }
+    &:hover {
+      @include theme() {
+        background-color: theme-get("toggelBg") !important;
+      }
+    }
+    .ant-switch-handle::before {
+      background-color: #00c200;
+      padding: 10px;
+      top: -1px;
+    }
+
+    .ant-switch-inner {
+      position: relative;
+      &::before {
+        background-image: url("../../Assets/darkMode.svg");
+        content: "";
+        height: 14px;
+        position: absolute;
+        left: 4px;
+        background-repeat: no-repeat;
+        width: 14px;
+        top: 4px;
+        background-size: contain;
+        background-position: center;
+      }
+      &::after {
+        background-image: url("../../Assets/lightMode.svg");
+        content: "";
+        height: 14px;
+        position: absolute;
+        right: 4px;
+        background-repeat: no-repeat;
+        width: 14px;
+        top: 4px;
+        background-size: contain;
+        background-position: center;
+      }
+    }
+  }
+
+  .switchSec2 {
+    .ant-switch-inner {
+      position: relative;
+    }
+  }
+}
+.autoLockTogal {
+  .ant-switch.ant-switch-checked {
+    background: #00c200 !important;
+    &:hover {
+      background-color: #00c200 !important;
+    }
+  }
+}
+.ant-switch {
+  .ant-switch-checked {
+    background: #7db0ff !important;
+    &:hover {
+      background-color: #7db0ff !important;
+    }
+  }
+}

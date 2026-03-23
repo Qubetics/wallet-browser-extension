@@ -1,0 +1,121 @@
+@import "../../styles/__vars.scss";
+@import "../../styles/__mixins.scss";
+.adressCard {
+  background-color: #18171f !important;
+  padding: 16px !important;
+  border-radius: 14px !important;
+  margin-bottom: 20px;
+  &_inner {
+    margin-top: 15px !important;
+    border-top: 1px solid #292929;
+    padding-top: 15px;
+    &:first-child {
+      margin-top: 0 !important;
+      border: 0;
+      padding: 0;
+    }
+  }
+  .bookAddress{
+    margin-top: 15px !important;
+    border-top: 1px solid #292929;
+    padding-top: 15px;
+    &:first-child {
+      margin-top: 0 !important;
+      border: 0;
+      padding: 0;
+    }
+  }
+  .addressBook {
+    margin: 0;
+    .bookAddress {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      .leftSec {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        h3 {
+          color: #ffffff;
+          font-size: 16px;
+          font-weight: 500;
+          text-align: left;
+        }
+        span {
+          color: #98969b;
+          font-size: 14px;
+          font-weight: 400;
+          text-align: left;
+          margin-top: 2px;
+        }
+        h6 {
+          align-items: center;
+          background-color: #1d272e;
+          border-radius: 10px;
+          color: #fff;
+          display: flex;
+          font-size: 16px;
+          height: 36px;
+          justify-content: center;
+          width: 36px;
+          font-size: 20px;
+        }
+      }
+      .rytSec {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
+    }
+  }
+  &__address {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+
+    p {
+      text-align: left;
+      font-size: 14px;
+      &:first-child {
+        @include theme() {
+          color: theme-get("whiteblack");
+        }
+      }
+      &:last-child {
+        @include theme() {
+          color: theme-get("baseText");
+        }
+        font-weight: bold;
+      }
+    }
+  }
+  &__Header {
+    border-bottom: 1px solid;
+    padding-bottom: 12px;
+    display: flex;
+    align-items: center;
+    margin-top: 0;
+    justify-content: space-between;
+    @include theme() {
+      border-color: theme-get("cardBorder");
+    }
+    h2 {
+      font-size: 16px;
+      text-align: left;
+      @include theme() {
+        color: theme-get("baseText");
+      }
+    }
+    .currency {
+      p {
+        text-align: left;
+        font-size: 14px;
+        @include theme() {
+          color: theme-get("baseText");
+        }
+        font-weight: bold;
+      }
+    }
+  }
+}

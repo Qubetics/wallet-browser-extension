@@ -1,0 +1,306 @@
+@import "../../styles/_vars.scss";
+@import "../../styles/_mixins";
+
+.swap {
+  &__infoText {
+    color: $gray;
+    font-size: 13px;
+    font-weight: bold;
+    text-align: right;
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__infoText1 {
+    color: $gray;
+    font-size: 13px;
+    font-weight: bold;
+    text-align: right;
+    position: relative;
+    justify-content: flex-end;
+    top: 17px;
+  }
+  &__icon {
+    margin-bottom: 5px;
+    text-align: center;
+  }
+
+  .swap__icon {
+    cursor: pointer;
+  }
+}
+
+.react-tabs__tab:focus:after {
+  background: transparent !important;
+}
+
+.extra {
+  background-color: #fff !important;
+}
+
+randb {
+  height: 35px;
+  width: 35px;
+  background: #fff;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.customClassModal {
+  .ant-modal-title {
+    text-align: center !important;
+    width: 100%;
+  }
+  
+  .ant-modal-header {
+    .ant-modal-title {
+      text-align: center !important;
+    }
+  }
+}
+
+.design {
+  position: relative;
+}
+
+.design:not(:last-child)::after {
+  height: 1px;
+  width: 97%;
+  content: "";
+  background-color: #d7e0eb;
+  position: absolute;
+  bottom: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.send {
+  &__infoText {
+    @include theme() {
+      color: theme-get("blue") ;
+     }
+    font-size: 13px;
+    font-weight: bold;
+    text-align: right;
+    margin-top: 12px;
+  }
+}
+
+.do {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 7px;
+}
+
+.doSingle {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  position: relative;
+  top: -12px;
+  left: -11px;
+}
+
+.confirmationsModal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  p {
+    @include theme() {
+      color: theme-get("whiteblack");
+    }
+  }
+  .iInner {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    gap: 20px;
+  }
+}
+
+
+.boxActiveSwap {
+  border: 1px solid $baseText-00AEEF !important;
+  background-color: rgba(0, 174, 239, 0.1) !important;
+  border-radius: 40px !important;
+  margin-bottom: 24px !important;
+  padding: 7px 22px !important;
+  cursor: pointer;
+  color: $baseText-00AEEF;
+}
+
+.boxSwap {
+  background-color: transparent;
+  border-radius: 40px;
+  color: $gray;
+  margin-bottom: 24px;
+  padding: 7px 22px;
+  cursor: pointer;
+  border: 1px solid #80838e;
+}
+.swapYouPay{
+  display: flex;
+  width: 100%;
+}
+
+// Skeleton loader styles for Chain Abstraction - based on SelectCoin pattern
+.swapSkeletonCard {
+  background: rgba(102, 126, 234, 0.05) !important;
+  border-color: rgba(102, 126, 234, 0.2) !important;
+  animation: skeletonPulse 1.5s ease-in-out infinite;
+  padding: 20px;
+  border-radius: 16px;
+  border: 1px solid;
+  
+  .skeletonSection {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    
+    .skeletonInputArea {
+      flex: 1;
+      margin-right: 20px;
+    }
+    
+    .skeletonTokenArea {
+      display: flex;
+      align-items: center;
+      min-width: 120px;
+    }
+  }
+  
+  .skeletonAddressField {
+    margin-bottom: 20px;
+  }
+  
+  .skeletonSwapIcon {
+    text-align: center;
+    margin: 20px 0;
+  }
+  
+  .skeletonButtonArea {
+    margin-top: 20px;
+  }
+  
+  .skeletonCircle {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    margin-right: 10px;
+    background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
+    background-size: 200% 100%;
+    animation: skeletonShimmer 1.5s infinite;
+    
+    &:last-child {
+      margin-right: 0;
+      width: 44px;
+      height: 44px;
+      margin: 0 auto;
+    }
+  }
+  
+  .skeletonText {
+    background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
+    background-size: 200% 100%;
+    animation: skeletonShimmer 1.5s infinite;
+    border-radius: 4px;
+    
+    &.skeletonInput {
+      height: 40px;
+      width: 100%;
+      margin-bottom: 8px;
+      border-radius: 8px;
+    }
+    
+    &.skeletonFiatValue {
+      height: 16px;
+      width: 80px;
+    }
+    
+    &.skeletonTokenName {
+      height: 18px;
+      width: 60px;
+    }
+    
+    &.skeletonLabel {
+      height: 14px;
+      width: 120px;
+      margin-bottom: 8px;
+    }
+    
+    &.skeletonAddress {
+      height: 40px;
+      width: 100%;
+      border-radius: 8px;
+    }
+  }
+  
+  .skeletonButton {
+    height: 48px;
+    width: 100%;
+    border-radius: 8px;
+    background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
+    background-size: 200% 100%;
+    animation: skeletonShimmer 1.5s infinite;
+  }
+}
+
+.chainAbstractionToAmount {
+  display: block;
+  width: 100%;
+  max-width: 171px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@keyframes skeletonPulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes skeletonShimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+// Dark theme skeleton adjustments
+@include theme() {
+  .swapSkeleton {
+    .skeletonText {
+      background: linear-gradient(90deg, #1a1a1a 25%, #2a2a2a 50%, #1a1a1a 75%);
+      background-size: 200% 100%;
+    }
+    
+    .skeletonCircle {
+      background: linear-gradient(90deg, #1a1a1a 25%, #2a2a2a 50%, #1a1a1a 75%);
+      background-size: 200% 100%;
+    }
+    
+    .skeletonButton {
+      background: linear-gradient(90deg, #1a1a1a 25%, #2a2a2a 50%, #1a1a1a 75%);
+      background-size: 200% 100%;
+    }
+  }
+}

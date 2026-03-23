@@ -1,0 +1,96 @@
+@import "../../styles/__vars.scss";
+.input_text {
+  p {
+    color: $gray;
+    font-size: 16px;
+    margin-bottom: 24px;
+  }
+  button {
+    margin-top: 13px;
+  }
+  textarea {
+    height: 167px;
+    border-radius: 28px;
+    margin-bottom: 36px;
+    resize: none;
+    padding: 15px;
+  }
+}
+
+.token {
+  // &__symbol_dec{
+  //     display: flex;
+  //     gap: 20px;
+  // }
+  // &__pasteText {
+  //   color: $baseText-00AEEF;
+  //   font-size: 13px;
+  //   font-weight: bold;
+  //   text-decoration: underline;
+  //   cursor: pointer;
+  //   transition: 0.3s;
+  //   padding-left: 10px;
+  //   border-left: 1px solid #80838e;
+  //   &:hover {
+  //     opacity: 0.7;
+  //   }
+  // }
+  &__selectStyle {
+    display: flex;
+    align-items: center;
+    &__img {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding-right: 10px;
+      cursor: pointer;
+    }
+  }
+  &__fields {
+    input {
+      background-color: #eef3f9;
+    }
+  }
+}
+.cardBg {
+  background-color: $white;
+  border-radius: 28px;
+  padding: 13px;
+  min-height: 277px;
+  margin-bottom: 98px;
+  position: relative;
+  &__inner {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px 10px;
+    span {
+      background-color: $inputBg;
+      border-radius: 17px;
+      padding: 5px 16px;
+      color: $baseColor-Text;
+      font-size: 16px;
+      font-weight: 500;
+      white-space: nowrap;
+      text-transform: capitalize;
+    }
+  }
+  &__copyIcon {
+    position: absolute;
+    bottom: 20px;
+    right: 14px;
+    border-radius: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background-color: $inputBg;
+    border: 1px solid $baseText-00AEEF;
+    cursor: pointer;
+    transition: 0.3s all;
+    &:hover {
+      opacity: 0.7;
+    }
+  }
+}

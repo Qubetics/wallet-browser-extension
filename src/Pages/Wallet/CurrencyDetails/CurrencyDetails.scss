@@ -1,0 +1,161 @@
+@import "../../../styles/__vars.scss";
+@import "../../../styles/__mixins.scss";
+
+.detailIcon {
+  width: 30px;
+  object-fit: contain;
+  border-radius: 50% !important;
+}
+.currDetails {
+  &__card {
+    background-color: #18171f;
+    padding: 16px 20px;
+    border-radius: 14px;
+    position: relative;
+    margin-bottom: 76px;
+    &__paddingOverride {
+      padding-left: 0;
+      padding-right: 0;
+    }
+    &__textLeft {
+      text-align: left;
+    }
+    &__topTexts {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    &__text {
+      font-size: 14px !important;
+      color: $white !important;
+      font-weight: 600;
+    }
+    &__mt0 {
+      margin-top: 0;
+    }
+  }
+  &__border {
+    background: #d7e0eb 0% 0% no-repeat padding-box;
+    height: 1px;
+    margin: 24px 0 32px;
+  }
+  &__noData {
+    font-size: 14px;
+    font-weight: 600;
+    color: #223f70bd;
+    margin-bottom: 15px;
+  }
+  &__jsonFile {
+    display: flex;
+    justify-content: center;
+  }
+  &__dataSec {
+    margin-top: 27px;
+    &__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      p {
+        color: $white;
+        font-weight: 400;
+        font-size: 18px;
+      }
+    }
+    &__table {
+      max-height: 237px;
+      overflow-y: auto;
+      .histryList {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: transparent;
+        border-bottom: 1px solid #dce2f526;
+        padding: 13px 0 !important;
+        border-radius: 0 !important;
+        margin-bottom: 0 !important;
+        .Status {
+          .withSend {
+            color: #ffffff !important;
+            font-size: 14px;
+            font-weight: 600;
+          }
+          .histryStatus {
+            .withStatus {
+              color: #98969b !important;
+              font-size: 14px;
+              font-weight: 500;
+            }
+          }
+        }
+        .Currency {
+          .curncyStatus {
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 600;
+          }
+          .withStatus {
+            color: #98969b !important;
+            font-size: 14px;
+            font-weight: 500;
+          }
+        }
+      }
+    }
+  }
+}
+.reciveModal{
+  max-width: 300px;
+  width: 100%;
+}
+.box {
+  background-color: #4096ff;
+  border-radius: 10px;
+  color: #fff;
+  margin-left: 15px;
+  margin-bottom: 24px;
+  padding: 7px 32px;
+  cursor: pointer;
+}
+.currencyCard {
+  .balanceDetails {
+    padding: 0;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 17px;
+    h5 {
+      text-align: center;
+    }
+    &__itemsOuter {
+      justify-content: center;
+      position: absolute;
+      bottom: -84px;
+      gap: 20px !important;
+    }
+  }
+  .editWallet__linkOuter {
+    .boxStyle__label {
+      display: none;
+    }
+    .ant-input-group-wrapper {
+      background-color: #18171f;
+      border-color: #18171f !important;
+      input {
+        padding: 0 !important;
+        font-size: 16px !important;
+        font-weight: 500;
+        color: #fff !important;
+      }
+    }
+  }
+}
+.shareIconaad{
+  .ant-input-group-addon{
+    padding: 0 10px 0 15px ;
+  }
+}
+
+

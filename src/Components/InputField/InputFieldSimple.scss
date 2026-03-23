@@ -1,0 +1,93 @@
+@import "../../styles/__vars.scss";
+@import "../../styles/__mixins.scss";
+
+.inputSimple {
+  background-color: transparent;
+  border: 1px solid #76747b;
+  border-radius: 14px;
+  padding: 14px 16px;
+  height: 50px;
+  font-size: 14px;
+  font-weight: 300;
+  &::placeholder {
+    color: #98969b;
+    font-size: 14px;
+    font-weight: 300;
+  }
+
+  input {
+    background-color: transparent;
+    font-size: 14px;
+    font-weight: normal;
+    color: $white;
+    border: none !important;
+    &::placeholder {
+      color: #98969b;
+    }
+  }
+}
+.inputField {
+  &__coloredBg {
+    &::placeholder {
+      @include theme() {
+        color: theme-get("gray1") !important;
+      }
+    }
+  }
+
+  &__inputSelect {
+    padding: 5px 5px 5px 16px !important;
+  }
+  &__input {
+    @include theme() {
+      background-color: transparent;
+      color: theme-get("whiteblack");
+      border-color: theme-get("cardBorder");
+    }
+
+    border-radius: 28px;
+    padding: 9px 16px !important;
+    border: 1px solid;
+    color: $white;
+    &::placeholder {
+      @include theme() {
+        color: theme-get("gray1");
+      }
+    }
+    .ant-input {
+      height: 30px !important;
+      border: 0;
+      background-color: transparent;
+      &::placeholder {
+        @include theme() {
+          color: theme-get("gray1") !important;
+        }
+      }
+    }
+
+    .ant-input-wrapper {
+      padding: 0;
+      border: 0;
+    }
+  }
+}
+
+.boxStyle {
+  text-align: left;
+  margin-bottom: 23px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  &__label {
+    color: $white;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+.mb0 {
+  margin-bottom: 0;
+}

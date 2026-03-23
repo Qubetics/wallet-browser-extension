@@ -1,0 +1,291 @@
+diff --git a/node_modules/simple-pancakeswap-sdk/dist/common/tokens/btcb.d.ts b/node_modules/simple-pancakeswap-sdk/dist/common/tokens/btcb.d.ts
+new file mode 100644
+index 0000000..66a3aca
+--- /dev/null
++++ b/node_modules/simple-pancakeswap-sdk/dist/common/tokens/btcb.d.ts
+@@ -0,0 +1,16 @@
++import { ChainId } from '../../enums/chain-id';
++/**
++ * BTCB token context
++ */
++export declare class BTCB {
++    /**
++     * Get BTCB token info
++     */
++    static token(): {
++        chainId: ChainId;
++        contractAddress: string;
++        decimals: number;
++        symbol: string;
++        name: string;
++    };
++}
+diff --git a/node_modules/simple-pancakeswap-sdk/dist/common/tokens/btcb.js b/node_modules/simple-pancakeswap-sdk/dist/common/tokens/btcb.js
+new file mode 100644
+index 0000000..5c802c7
+--- /dev/null
++++ b/node_modules/simple-pancakeswap-sdk/dist/common/tokens/btcb.js
+@@ -0,0 +1,22 @@
++"use strict";
++Object.defineProperty(exports, "__esModule", { value: true });
++exports.BTCB = void 0;
++const chain_id_1 = require("../../enums/chain-id");
++/**
++ * BTCB token context
++ */
++class BTCB {
++    /**
++     * Get BTCB token info
++     */
++    static token() {
++        return {
++            chainId: chain_id_1.ChainId.BSC,
++            contractAddress: '0x7130d2a12b9bcbfae4f2634d864a1ee1ce3ead9c',
++            decimals: 18,
++            symbol: 'BTCB',
++            name: 'Bitcoin BEP20',
++        };
++    }
++}
++exports.BTCB = BTCB;
+diff --git a/node_modules/simple-pancakeswap-sdk/dist/common/tokens/busd.d.ts b/node_modules/simple-pancakeswap-sdk/dist/common/tokens/busd.d.ts
+new file mode 100644
+index 0000000..9151286
+--- /dev/null
++++ b/node_modules/simple-pancakeswap-sdk/dist/common/tokens/busd.d.ts
+@@ -0,0 +1,16 @@
++import { ChainId } from '../../enums/chain-id';
++/**
++ * BUSD token context
++ */
++export declare class BUSD {
++    /**
++     * Get BUSD token info
++     */
++    static token(): {
++        chainId: ChainId;
++        contractAddress: string;
++        decimals: number;
++        symbol: string;
++        name: string;
++    };
++}
+diff --git a/node_modules/simple-pancakeswap-sdk/dist/common/tokens/busd.js b/node_modules/simple-pancakeswap-sdk/dist/common/tokens/busd.js
+new file mode 100644
+index 0000000..57ca527
+--- /dev/null
++++ b/node_modules/simple-pancakeswap-sdk/dist/common/tokens/busd.js
+@@ -0,0 +1,22 @@
++"use strict";
++Object.defineProperty(exports, "__esModule", { value: true });
++exports.BUSD = void 0;
++const chain_id_1 = require("../../enums/chain-id");
++/**
++ * BUSD token context
++ */
++class BUSD {
++    /**
++     * Get BUSD token info
++     */
++    static token() {
++        return {
++            chainId: chain_id_1.ChainId.BSC,
++            contractAddress: '0xe9e7cea3dedca5984780bafc599bd69add087d56',
++            decimals: 18,
++            symbol: 'BUSD',
++            name: 'BUSD Coin',
++        };
++    }
++}
++exports.BUSD = BUSD;
+diff --git a/node_modules/simple-pancakeswap-sdk/dist/common/tokens/comp.js b/node_modules/simple-pancakeswap-sdk/dist/common/tokens/comp.js
+index fa3fc18..39b4baf 100644
+--- a/node_modules/simple-pancakeswap-sdk/dist/common/tokens/comp.js
++++ b/node_modules/simple-pancakeswap-sdk/dist/common/tokens/comp.js
+@@ -12,10 +12,10 @@ class COMP {
+     static token() {
+         return {
+             chainId: chain_id_1.ChainId.BSC,
+-            contractAddress: '0x52ce071bd9b1c4b00a0b92d298c512478cad67e8',
++            contractAddress: '0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82',// cake address: 0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82  // COMP ADDRES 0x52ce071bd9b1c4b00a0b92d298c512478cad67e8
+             decimals: 18,
+-            symbol: 'COMP',
+-            name: 'Compound',
++            symbol: 'CAKE',
++            name: 'Pancake',
+         };
+     }
+ }
+diff --git a/node_modules/simple-pancakeswap-sdk/dist/common/tokens/eth.d.ts b/node_modules/simple-pancakeswap-sdk/dist/common/tokens/eth.d.ts
+new file mode 100644
+index 0000000..7c393a3
+--- /dev/null
++++ b/node_modules/simple-pancakeswap-sdk/dist/common/tokens/eth.d.ts
+@@ -0,0 +1,16 @@
++import { ChainId } from '../../enums/chain-id';
++/**
++ * ETH token context
++ */
++export declare class ETH {
++    /**
++     * Get ETH token info
++     */
++    static token(): {
++        chainId: ChainId;
++        contractAddress: string;
++        decimals: number;
++        symbol: string;
++        name: string;
++    };
++}
+diff --git a/node_modules/simple-pancakeswap-sdk/dist/common/tokens/eth.js b/node_modules/simple-pancakeswap-sdk/dist/common/tokens/eth.js
+new file mode 100644
+index 0000000..7b60340
+--- /dev/null
++++ b/node_modules/simple-pancakeswap-sdk/dist/common/tokens/eth.js
+@@ -0,0 +1,22 @@
++"use strict";
++Object.defineProperty(exports, "__esModule", { value: true });
++exports.ETH = void 0;
++const chain_id_1 = require("../../enums/chain-id");
++/**
++ * USDT token context
++ */
++class ETH {
++    /**
++     * Get USDT token info
++     */
++    static token() {
++        return {
++            chainId: chain_id_1.ChainId.BSC,
++            contractAddress: '0x2170Ed0880ac9A755fd29B2688956BD959F933F8',
++            decimals: 18,
++            symbol: 'ETH',
++            name: 'BPEG ETH Token',
++        };
++    }
++}
++exports.ETH = ETH;
+diff --git a/node_modules/simple-pancakeswap-sdk/dist/common/tokens/index.d.ts b/node_modules/simple-pancakeswap-sdk/dist/common/tokens/index.d.ts
+index 84fd741..f5b85b3 100644
+--- a/node_modules/simple-pancakeswap-sdk/dist/common/tokens/index.d.ts
++++ b/node_modules/simple-pancakeswap-sdk/dist/common/tokens/index.d.ts
+@@ -3,3 +3,6 @@ export { COMP } from './comp';
+ export { DAI } from './dai';
+ export { USDC } from './usdc';
+ export { USDT } from './usdt';
++export { BUSD } from './busd';
++export { BTCB } from './btcb';
++export { ETH } from './eth';
+diff --git a/node_modules/simple-pancakeswap-sdk/dist/common/tokens/index.js b/node_modules/simple-pancakeswap-sdk/dist/common/tokens/index.js
+index 3d57aaa..2aaf6ef 100644
+--- a/node_modules/simple-pancakeswap-sdk/dist/common/tokens/index.js
++++ b/node_modules/simple-pancakeswap-sdk/dist/common/tokens/index.js
+@@ -11,3 +11,9 @@ var usdc_1 = require("./usdc");
+ Object.defineProperty(exports, "USDC", { enumerable: true, get: function () { return usdc_1.USDC; } });
+ var usdt_1 = require("./usdt");
+ Object.defineProperty(exports, "USDT", { enumerable: true, get: function () { return usdt_1.USDT; } });
++var busd_1 = require("./busd");
++Object.defineProperty(exports, "BUSD", { enumerable: true, get: function () { return busd_1.BUSD; } });
++var btcb_1 = require("./btcb");
++Object.defineProperty(exports, "BTCB", { enumerable: true, get: function () { return btcb_1.BTCB; } });
++var eth_1 = require("./eth");
++Object.defineProperty(exports, "ETH", { enumerable: true, get: function () { return eth_1.ETH; } });
+\ No newline at end of file
+diff --git a/node_modules/simple-pancakeswap-sdk/dist/factories/router/pancakeswap-router.factory.js b/node_modules/simple-pancakeswap-sdk/dist/factories/router/pancakeswap-router.factory.js
+index 95a19ad..84565eb 100644
+--- a/node_modules/simple-pancakeswap-sdk/dist/factories/router/pancakeswap-router.factory.js
++++ b/node_modules/simple-pancakeswap-sdk/dist/factories/router/pancakeswap-router.factory.js
+@@ -23,6 +23,7 @@ const comp_1 = require("../../common/tokens/comp");
+ const dai_1 = require("../../common/tokens/dai");
+ const usdc_1 = require("../../common/tokens/usdc");
+ const usdt_1 = require("../../common/tokens/usdt");
++const busd_1 = require("../../common/tokens/busd");
+ const format_ether_1 = require("../../common/utils/format-ether");
+ const hexlify_1 = require("../../common/utils/hexlify");
+ const only_unique_1 = require("../../common/utils/only-unique");
+@@ -56,6 +57,7 @@ class PancakeswapRouterFactory {
+                     this.mainCurrenciesPairsForCOMP,
+                     this.mainCurrenciesPairsForDAI,
+                     this.mainCurrenciesPairsForUSDC,
++                    this.mainCurrenciesPairsForBUSD,
+                     this.mainCurrenciesPairsForWETH,
+                     [[this._fromToken, this._toToken]],
+                 ];
+@@ -360,6 +362,7 @@ class PancakeswapRouterFactory {
+                 this.USDTTokenForConnectedNetwork,
+                 this.COMPTokenForConnectedNetwork,
+                 this.USDCTokenForConnectedNetwork,
++                this.BUSDTokenForConnectedNetwork,
+                 this.DAITokenForConnectedNetwork,
+                 this.WETHTokenForConnectedNetwork,
+             ];
+@@ -371,6 +374,7 @@ class PancakeswapRouterFactory {
+             [this._fromToken, this.USDTTokenForConnectedNetwork],
+             [this._fromToken, this.COMPTokenForConnectedNetwork],
+             [this._fromToken, this.USDCTokenForConnectedNetwork],
++            [this._fromToken, this.BUSDTokenForConnectedNetwork],
+             [this._fromToken, this.DAITokenForConnectedNetwork],
+             [this._fromToken, this.WETHTokenForConnectedNetwork],
+         ];
+@@ -381,6 +385,7 @@ class PancakeswapRouterFactory {
+             [this.USDTTokenForConnectedNetwork, this._toToken],
+             [this.COMPTokenForConnectedNetwork, this._toToken],
+             [this.USDCTokenForConnectedNetwork, this._toToken],
++            [this.BUSDTokenForConnectedNetwork, this._toToken],
+             [this.DAITokenForConnectedNetwork, this._toToken],
+             [this.WETHTokenForConnectedNetwork, this._toToken],
+         ];
+@@ -391,6 +396,7 @@ class PancakeswapRouterFactory {
+             [this.USDTTokenForConnectedNetwork, this.COMPTokenForConnectedNetwork],
+             [this.USDTTokenForConnectedNetwork, this.DAITokenForConnectedNetwork],
+             [this.USDTTokenForConnectedNetwork, this.USDCTokenForConnectedNetwork],
++            [this.USDTTokenForConnectedNetwork, this.BUSDTokenForConnectedNetwork],
+             [this.USDTTokenForConnectedNetwork, this.WETHTokenForConnectedNetwork],
+         ];
+     }
+@@ -399,6 +405,7 @@ class PancakeswapRouterFactory {
+             [this.COMPTokenForConnectedNetwork, this.USDTTokenForConnectedNetwork],
+             [this.COMPTokenForConnectedNetwork, this.DAITokenForConnectedNetwork],
+             [this.COMPTokenForConnectedNetwork, this.USDCTokenForConnectedNetwork],
++            [this.COMPTokenForConnectedNetwork, this.BUSDTokenForConnectedNetwork],
+             [this.COMPTokenForConnectedNetwork, this.WETHTokenForConnectedNetwork],
+         ];
+     }
+@@ -413,15 +420,26 @@ class PancakeswapRouterFactory {
+             [this.USDCTokenForConnectedNetwork, this.USDTTokenForConnectedNetwork],
+             [this.USDCTokenForConnectedNetwork, this.COMPTokenForConnectedNetwork],
+             [this.USDCTokenForConnectedNetwork, this.DAITokenForConnectedNetwork],
++            [this.USDCTokenForConnectedNetwork, this.BUSDTokenForConnectedNetwork],
+             [this.USDCTokenForConnectedNetwork, this.WETHTokenForConnectedNetwork],
+         ];
+     }
++    get mainCurrenciesPairsForBUSD() {
++        return [
++            [this.BUSDTokenForConnectedNetwork, this.USDTTokenForConnectedNetwork],
++            [this.BUSDTokenForConnectedNetwork, this.COMPTokenForConnectedNetwork],
++            [this.BUSDTokenForConnectedNetwork, this.DAITokenForConnectedNetwork],
++            [this.BUSDTokenForConnectedNetwork, this.USDCTokenForConnectedNetwork],
++            [this.BUSDTokenForConnectedNetwork, this.WETHTokenForConnectedNetwork],
++        ];
++    }
+     get mainCurrenciesPairsForWETH() {
+         return [
+             [this.WETHTokenForConnectedNetwork, this.USDTTokenForConnectedNetwork],
+             [this.WETHTokenForConnectedNetwork, this.COMPTokenForConnectedNetwork],
+             [this.WETHTokenForConnectedNetwork, this.DAITokenForConnectedNetwork],
+             [this.WETHTokenForConnectedNetwork, this.USDCTokenForConnectedNetwork],
++            [this.WETHTokenForConnectedNetwork, this.BUSDTokenForConnectedNetwork],
+         ];
+     }
+     get USDTTokenForConnectedNetwork() {
+@@ -436,6 +454,9 @@ class PancakeswapRouterFactory {
+     get USDCTokenForConnectedNetwork() {
+         return usdc_1.USDC.token();
+     }
++    get BUSDTokenForConnectedNetwork() {
++        return busd_1.BUSD.token();
++    }
+     get WETHTokenForConnectedNetwork() {
+         return bnb_1.BNB.token();
+     }

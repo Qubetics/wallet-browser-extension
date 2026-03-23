@@ -1,0 +1,303 @@
+.recent-servers {
+  padding: 24px;
+
+  .tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+
+    .tab {
+      padding: 8px 16px;
+      border-radius: 8px;
+      background: transparent;
+      border: 1px solid #76747b;
+      color: #76747b;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+
+      &.active {
+        color: #fff;
+
+        &::before {
+          content: "";
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          border-radius: 8px;
+          padding: 1px;
+          background: linear-gradient(
+            90deg,
+            #73c9e2 0%,
+            #6c8dc5 25.37%,
+            #6456b2 76.11%,
+            #6145ea 101.48%
+          );
+          mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+          mask-composite: xor;
+          -webkit-mask: linear-gradient(#fff 0 0) content-box,
+            linear-gradient(#fff 0 0);
+          -webkit-mask-composite: xor;
+        }
+      }
+
+      &:hover {
+        background: #2a2a3f;
+      }
+    }
+  }
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    h3 {
+      color: #fff;
+      font-weight: 500;
+      font-size: 18px;
+    }
+    .view-all {
+      font-size: 14px;
+      color: #98969b;
+      cursor: pointer;
+    }
+  }
+
+  .server-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    height: 410px;
+    overflow-y: auto;
+
+    .server-item {
+      background: #18171f;
+      padding: 16px;
+      border-radius: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      .info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+
+        .flag {
+          width: 44px;
+          height: 44px;
+          border-radius: 50%;
+          overflow: hidden;
+          flex-shrink: 0;
+
+          img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            display: block;
+          }
+        }
+
+        .country {
+          font-weight: 500;
+          color: #fff;
+          font-size: 14px;
+        }
+
+        .locations {
+          font-size: 14px;
+          text-align: left;
+          color: #98969b;
+        }
+      }
+
+      .link-icon {
+        font-size: 18px;
+        color: #aaa;
+        cursor: pointer;
+      }
+    }
+  }
+}
+
+// servers-details css-------
+
+.servers-details {
+  .selected-country-name {
+    padding: 0 24px;
+    color: #a8a6af;
+    font-size: 14px;
+    text-align: left;
+  }
+
+  .servers-list {
+    padding: 12px 24px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .server-card {
+    background: #18171f;
+    border-radius: 14px;
+    padding: 16px;
+    transition: all 0.3s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .server-info {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      .server-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+
+        .server-flag {
+          width: 44px;
+          height: 44px;
+          border-radius: 50%;
+          overflow: hidden;
+          flex-shrink: 0;
+
+          img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            display: block;
+          }
+        }
+
+        .server-details {
+          text-align: left;
+          min-width: 0;
+
+          .server-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: #ffffff;
+            margin: 0 0 4px 0;
+            max-width: 220px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
+
+          .server-location {
+            font-size: 14px;
+            color: #98969b;
+            margin: 0;
+            max-width: 220px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
+        }
+      }
+
+      .server-footer {
+        .connect-btn {
+          padding: 8px 16px;
+          border-radius: 30px;
+          font-size: 15px;
+          font-weight: 600;
+          border: none;
+          cursor: pointer;
+          transition: all 0.3s ease;
+
+          &.connect {
+            background: #2c2a37;
+            color: #98969b;
+
+            &:hover {
+              transform: translateY(-1px);
+            }
+          }
+
+          &.connected {
+            background: #34c75933;
+            color: #34c759;
+            &:hover {
+              transform: none;
+            }
+          }
+
+          &:disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+          }
+        }
+      }
+    }
+  }
+
+  // Loading state
+  .loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+    color: #8892b0;
+  }
+
+  // Empty state
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    text-align: center;
+
+    .empty-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+
+    .empty-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #ffffff;
+      margin-bottom: 8px;
+    }
+
+    .empty-description {
+      font-size: 14px;
+      color: #8892b0;
+      max-width: 300px;
+    }
+  }
+}
+
+// Animation for server cards
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.server-card {
+  animation: slideInUp 0.3s ease-out;
+}
+
+.heightExtServers {
+   .server-list {
+    height: 250px;
+  }
+}

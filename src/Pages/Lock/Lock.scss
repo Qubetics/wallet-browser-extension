@@ -1,0 +1,16 @@
+.lockSecTop {
+    height: calc(100% - 58px);
+}
+.lockSec {
+  padding: 24px 28px 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: calc(100% - 58px);
+  gap: 25px;
+  .logoImg{
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+  }
+}

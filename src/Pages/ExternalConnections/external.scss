@@ -1,0 +1,192 @@
+@import '../../styles/__vars.scss';
+@import '../../styles/__mixins.scss';
+
+.adressCard {
+  background-color: #fff;
+  padding: 24px 16px;
+  border-radius: 20px;
+  margin-bottom: 20px;
+
+  &__address {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+
+    p {
+      text-align: left;
+      font-size: 14px;
+      &:first-child {
+        color: $gray;
+      }
+      &:last-child {
+        @include theme() {
+          color: theme-get('whiteblack');
+        }
+        font-weight: bold;
+      }
+    }
+    &:last-child {
+      margin-top: 25px;
+    }
+  }
+  &__Header {
+    border-bottom: 1px solid $gray-D7E0EB-light;
+    padding-bottom: 12px;
+    h2 {
+      font-size: 16px;
+      text-align: left;
+      @include theme() {
+        color: theme-get('whiteblack');
+      }
+    }
+  }
+}
+
+.setPassword__secretPharse__copyField{
+  .copy-icon {
+    width: 20px !important;
+    height: 20px !important;
+  }
+  
+}
+.viewphrases__iInner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  // background-color: transparent !important;
+}
+
+.swapDetails {
+  &__iconsTop {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  &__valueText {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    padding: 0 20px;
+    &__text {
+      font-size: 14px;
+      font-weight: 800;
+      @include theme() {
+        color: theme-get('whiteblack');
+      }
+    }
+  }
+  &__border {
+    background: #d7e0eb 0% 0% no-repeat padding-box;
+    height: 1px;
+    margin: 24px 0;
+  }
+  &__address {
+    text-align: center;
+    flex-direction: column;
+    // margin-bottom: 21px;
+    &:last-child {
+      margin-bottom: 0;
+    }
+    &__key {
+      font-size: 14px;
+      font-weight: bold;
+      @include theme() {
+        color: theme-get('whiteblack');
+      }
+      margin-bottom: 2px;
+    }
+    &__val {
+      font-size: 12px;
+      font-weight: 500;
+      @include theme() {
+        color: theme-get('whiteblack');
+      }
+      span {
+        @include theme() {
+          color: theme-get('whiteblack');
+        }
+      }
+    }
+  }
+  &__keyValuesText {
+    margin-bottom: 50px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    &__inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    &__key {
+      font-size: 14px;
+      font-weight: 500;
+      @include theme() {
+        color: theme-get('whiteblack');
+      }
+      margin-bottom: 2px;
+    }
+    &__val {
+      font-size: 14px;
+      font-weight: bold;
+      @include theme() {
+        color: theme-get('whiteblack');
+      }
+    }
+  }
+}
+
+.confirmCurrency {
+  // &__card {
+  //   background-color: $white;
+  //   border-radius: 16px;
+  //   padding: 24px;
+  //   margin-bottom: 24px;
+  //   text-align: left;
+  //   &__textTop {
+  //     font-size: 24px;
+  //     font-weight: 900;
+  //     @include theme() {
+  //       color: theme-get('whiteblack');
+  //     }
+  //     margin-bottom: 8px;
+  //     word-break: break-all;
+  //   }
+  //   &__textBtm {
+  //     font-size: 14px;
+  //     font-weight: 400;
+  //     @include theme() {
+  //       color: theme-get('whiteblack');
+  //     }
+  //   }
+  // }
+  // &__keyValues {
+  //   display: flex;
+  //   align-items: center;
+  //   justify-content: space-between;
+  //   gap: 15px;
+  //   margin-bottom: 20px;
+  //   &:last-child {
+  //     margin-bottom: 50px;
+  //   }
+  //   &__key {
+  //     font-size: 14px;
+  //     font-weight: 500;
+  //     @include theme() {
+  //       color: theme-get('whiteblack');
+  //     }
+  //   }
+  //   &__value {
+  //     font-size: 14px;
+  //     font-weight: bold;
+  //     @include theme() {
+  //       color: theme-get('whiteblack');
+  //     }
+  //   }
+  // }
+}

@@ -1,0 +1,104 @@
+@import "../../../styles/__mixins.scss";
+@import "../../../styles/__vars.scss";
+
+.filterHistoryNew {
+  margin-top: 33px;
+  &__selctHis {
+    width: 100%;
+    padding-top: 24px;
+    &:first-child {
+      padding-top: 0;
+    }
+    .ant-select {
+      width: 100% !important;
+
+      .ant-select-selector {
+        @include theme() {
+          background-color: theme-get("inputBg1") !important;
+        }
+        border-radius: 28px !important;
+        height: 46px !important;
+      }
+      .ant-select-arrow {
+        @include theme() {
+          color: theme-get("whiteblack") !important;
+        }
+      }
+    }
+    .label {
+      @include theme() {
+        color: theme-get("whiteblack");
+      }
+      font-size: 12px;
+      font-weight: bold;
+      padding-bottom: 10px;
+      text-align: left;
+      display: flex;
+    }
+    .ant-picker {
+      background-color: #110f15 !important;
+      color: #98969b !important;
+      border-radius: 14px !important;
+      height: 40px !important;
+      width: 100%;
+      border: 1px solid #76747B !important;
+      &::placeholder {
+        color: #98969b !important;
+      }
+      input {
+        color: #98969b !important;
+        &::placeholder {
+          color: #98969b !important;
+        }
+      }
+    }
+    .ant-picker-separator {
+      @include theme() {
+        color: theme-get("whiteblack") !important;
+      }
+    }
+    .ant-select .ant-select-arrow {
+      margin-top: -4px;
+      right: 20px;
+    }
+    .ant-select .ant-select-selector {
+      padding: 0 11px !important;
+    }
+  }
+  .dateFlex {
+    display: flex;
+    gap: 20px;
+    .ant-space-item {
+      width: 100%;
+    }
+    .ant-picker .ant-picker-suffix {
+      color: #98969b;
+    }
+  }
+}
+
+.chainImage {
+  margin-right: 4px;
+  object-fit: contain;
+  width: 26px;
+  border-radius: 13px;
+}
+.borderDarkLight {
+  @include theme() {
+    border-color: theme-get("cardBorder") !important;
+  }
+}
+
+.filterHistoryNew__selctHis {
+  .ant-select-selection-item {
+    height: 100%;
+    transform: translate(10px, 6px);
+    @include theme() {
+      color: theme-get("whiteblack") !important;
+    }
+    ::after {
+      line-height: 45px !important;
+      padding-left: 10px !important;
+    }
+  }
+}
