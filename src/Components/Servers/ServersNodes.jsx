@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import MenuRestofHeaders from "../BalanceDetails/MenuRestofHeaders/MenuRestofHeaders";
 import { InputField } from "../InputField/InputFieldSimple";
 import Search from "../../Assets/SearchIcon.svg";
@@ -56,6 +56,7 @@ function ServersNodes() {
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [isPasswordSubmitting, setIsPasswordSubmitting] = useState(false);
   const [pendingServer, setPendingServer] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const logFlow = () => {};
 
@@ -96,6 +97,16 @@ function ServersNodes() {
       cancelled = true;
     };
   }, [planId, selectedCountry, selectedCity]);
+
+  const filteredServers = useMemo(() => {
+    const q = String(searchTerm || "").trim().toLowerCase();
+    if (!q) return servers;
+    return servers.filter((server) => {
+      const name = String(server?.name || "").toLowerCase();
+      const addr = String(server?.raw?.address || server?.raw?.node_address || server?.raw?.remote_url || "").toLowerCase();
+      return name.includes(q) || addr.includes(q);
+    });
+  }, [servers, searchTerm]);
 
   const startNodeSession = async (server, providedPassword = "") => {
     if (!walletAddress || !server?.raw) return;
@@ -199,6 +210,8 @@ function ServersNodes() {
           <InputField
             placeholder={"Search servers..."}
             checkForSymbols={true}
+            value={searchTerm}
+            getData={(value) => setSearchTerm(value)}
             addonBefore={
               <span>
                 <img
@@ -222,7 +235,7 @@ function ServersNodes() {
             </div>
           ))}
         {!loading &&
-          servers.map((server) => (
+          filteredServers.map((server) => (
           <div key={server.id} className="server-card">
             <div className="server-info">
               <div className="server-header">

@@ -1,6 +1,6 @@
 /*global chrome*/
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "./DvpnSetting.scss";
 import MenuRestofHeaders from "../BalanceDetails/MenuRestofHeaders/MenuRestofHeaders";
 import RightIcon from "../../Assets/DarkArrowRightIcon.svg";
@@ -16,12 +16,14 @@ import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import useCurrentHeight from "../../CustomHooks/useCurrentHeight";
 import QubeticsImage from "../../Assets/QubeticsLogo.png";
+import { findRunningAgent } from "../../services/dvpn";
 
 
 function DvpnSetting() {
   const navigate = useNavigate();
   const height = useCurrentHeight();
   const { account } = useSelector((state) => state);
+  const [agentVersion, setAgentVersion] = useState("");
   const openExternalUrl = (url) => {
     const target = String(url || "").trim();
     if (!target) return;
@@ -35,6 +37,22 @@ function DvpnSetting() {
     }
     window.open(target, "_blank", "noopener,noreferrer");
   };
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadAgentVersion = async () => {
+      const result = await findRunningAgent().catch(() => null);
+      const version = String(result?.version || "").trim();
+      if (!cancelled) {
+        setAgentVersion(version);
+      }
+    };
+    loadAgentVersion();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const settingsData = [
     {
       section: "Connectivity",
@@ -68,7 +86,11 @@ function DvpnSetting() {
           hasArrow: true,
           onClick: () => openExternalUrl("https://www.qubetics.com/privacy-policy/"),
         },
-        { icon: <VersionIcon />, label: "Version", value: "1.0.2" },
+        {
+          icon: <VersionIcon />,
+          label: "Agent Version",
+          value: agentVersion || "Not installed",
+        },
       ],
     },
     // {

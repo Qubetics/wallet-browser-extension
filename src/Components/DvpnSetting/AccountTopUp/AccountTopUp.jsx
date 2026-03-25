@@ -30,7 +30,7 @@ const getPlanPrice = (plan) => {
 
 const getPlanDenom = (plan) => {
   const firstPrice = Array.isArray(plan?.prices) ? plan.prices[0] : null;
-  return String(firstPrice?.denom || plan?.price?.denom || "tics").toLowerCase();
+  return String(firstPrice?.denom || plan?.price?.denom || "TICS").toUpperCase();
 };
 
 const getPlanDays = (plan) => {
@@ -240,8 +240,13 @@ function AccountTopUp() {
         const balance = await getTicsBalance({ walletAddress });
         if (!cancelled) {
           const amount = Number(balance?.amount || 0);
-          const denom = String(balance?.denom || "tics").toLowerCase();
-          const divisor = denom === "qtics" || denom === "qtis" ? 1e18 : denom === "utics" ? 1e6 : 1;
+          const denom = String(balance?.denom || "TICS").toUpperCase();
+          const divisor =
+            denom === "QTICS" || denom === "QTIS"
+              ? 1e18
+              : denom === "UTICS"
+                ? 1e6
+                : 1;
           setAvailableBalance(`${(amount / divisor).toFixed(2)} TICS`);
         }
       } catch (error) {
@@ -303,7 +308,7 @@ function AccountTopUp() {
                 </div>
                 <div className="price">
                   <h2>{pkg.price.toLocaleString()}</h2>
-                  <span className="currency"> {pkg.denom || "tics"}</span>
+                  <span className="currency"> {pkg.denom || "TICS"}</span>
                 </div>
                 {isProviderTopupFlow ? (
                   <div className="fiat-price">{formatUsd(pkg.fiatUsd)} USD</div>
@@ -340,14 +345,14 @@ function AccountTopUp() {
                   : selectedPlan?.credits
                     ? `${selectedPlan.credits.toLocaleString()} credits`
                     : `${Number(selectedPlan?.hours || 0).toLocaleString()} hours`}{" "}
-                for {selectedPlan?.price.toLocaleString()}
+                for {`${selectedPlan?.price.toLocaleString()} "TICS"`} 
               </span>
             )}
           </p>
           <p>
             Payment will be charged to your iTunes Account. This credits are for
-            decentralized VPN services only. By proceeding, you accept our{" "}
-            <button
+            decentralized VPN services only.
+            {/* <button
               type="button"
               className="link"
               onClick={() => console.log("Open Terms of Service")}
@@ -361,7 +366,7 @@ function AccountTopUp() {
               onClick={() => console.log("Open Privacy Policy")}
             >
               Privacy Policy
-            </button>
+            </button> */}
             .
           </p>
         </div>
@@ -403,7 +408,7 @@ function AccountTopUp() {
                 ? `${selectedPlan?.days || 0} days`
                 : `${selectedPlan?.credits || selectedPlan?.hours || 0} ${selectedPlan?.credits ? "credits" : "hours"}`
               } for{" "}
-              {selectedPlan?.price || 0} {selectedPlan?.denom || "tics"}. Enjoy your premium
+              {`${selectedPlan?.price || 0} "TICS"`} {String(selectedPlan?.denom || "TICS").toUpperCase()}. Enjoy your premium
               features!
             </p>
             {lastPurchase?.txHash ? (

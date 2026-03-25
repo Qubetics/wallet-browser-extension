@@ -1,3 +1,35 @@
+// NOTE: AntD modals render in a portal outside `.vpn-dashboard`,
+// so `.agent-copy-btn` must be globally scoped.
+.agent-copy-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 30px;
+  padding: 0 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #e9e7f2;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+  outline: none;
+  box-shadow: none;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: 0.18s ease;
+}
+
+.agent-copy-btn:hover {
+  background: rgba(115, 201, 226, 0.14);
+  border-color: rgba(115, 201, 226, 0.35);
+}
+
+.agent-copy-btn:active {
+  transform: translateY(1px);
+}
+
 .vpn-dashboard {
   position: relative;
   padding: 24px;
@@ -168,6 +200,8 @@
       font-weight: 600;
       margin-bottom: 10px;
     }
+
+    // agent-copy-btn is styled at the dashboard scope
 
     .agent-install-steps {
       margin-top: 8px;

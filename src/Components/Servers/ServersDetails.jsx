@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import MenuRestofHeaders from "../BalanceDetails/MenuRestofHeaders/MenuRestofHeaders";
 import { InputField } from "../InputField/InputFieldSimple";
 import Search from "../../Assets/SearchIcon.svg";
@@ -41,6 +41,7 @@ function ServersDetails() {
   const selectedFlag = location?.state?.flag || fallbackFlag;
   const [cityItems, setCityItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -70,6 +71,12 @@ function ServersDetails() {
     };
   }, [planId, selectedCountry]);
 
+  const filteredCityItems = useMemo(() => {
+    const q = String(searchTerm || "").trim().toLowerCase();
+    if (!q) return cityItems;
+    return cityItems.filter((item) => String(item?.city || "").toLowerCase().includes(q));
+  }, [cityItems, searchTerm]);
+
   if (location?.state?.country) {
     sessionStorage.setItem("dvpn_selected_country", location.state.country);
     if (location?.state?.planId) {
@@ -91,6 +98,8 @@ function ServersDetails() {
           <InputField
             placeholder={"Search city..."}
             checkForSymbols={true}
+            value={searchTerm}
+            getData={(value) => setSearchTerm(value)}
             addonBefore={
               <span>
                 <img
@@ -114,7 +123,7 @@ function ServersDetails() {
             </div>
           ))}
         {!loading &&
-          cityItems.map((cityItem, index) => (
+          filteredCityItems.map((cityItem, index) => (
           <div
             key={`${cityItem?.city}-${index}`}
             className="server-card city-card"

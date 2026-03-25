@@ -82,6 +82,11 @@ function DVpn() {
   const [isBuyPlanModalOpen, setIsBuyPlanModalOpen] = useState(false);
   const [isInstallCommandOpen, setIsInstallCommandOpen] = useState(false);
   const [isCommandCopied, setIsCommandCopied] = useState(false);
+  const [isAgentUpdateModalOpen, setIsAgentUpdateModalOpen] = useState(false);
+  const [agentHealthVersion, setAgentHealthVersion] = useState("");
+  const [latestAgentVersion, setLatestAgentVersion] = useState("");
+  const [copiedUninstallKey, setCopiedUninstallKey] = useState("");
+  const [showRunAfterDownload, setShowRunAfterDownload] = useState(false);
   const [pendingStartNode, setPendingStartNode] = useState(null);
   const [pendingStopSessionId, setPendingStopSessionId] = useState(null);
   const { account } = useSelector(
@@ -90,6 +95,7 @@ function DVpn() {
   console.log("account", account);
   const authToken = account?.jwtToken;
   const isAutoDisconnectingRef = useRef(false);
+  const hasShownUpdatePromptRef = useRef(false);
   const sessionPasswordRef = useRef("");
 
   useEffect(() => {
@@ -215,6 +221,7 @@ function DVpn() {
       }
       setIsInstallCommandOpen(true);
       openDownloadUrl(downloadUrl);
+      setShowRunAfterDownload(true);
     } catch (error) {
       if (fallbackHref) openDownloadUrl(fallbackHref);
     } finally {
@@ -222,13 +229,96 @@ function DVpn() {
     }
   };
 
+  const normalizeVersion = (value) => {
+    const v = String(value || "").trim();
+    const match = v.match(/\d+(\.\d+){0,3}/);
+    return match ? match[0] : "";
+  };
+
+  const compareVersions = (a, b) => {
+    const pa = normalizeVersion(a).split(".").map((x) => Number(x));
+    const pb = normalizeVersion(b).split(".").map((x) => Number(x));
+    const len = Math.max(pa.length, pb.length, 3);
+    for (let i = 0; i < len; i += 1) {
+      const na = Number.isFinite(pa[i]) ? pa[i] : 0;
+      const nb = Number.isFinite(pb[i]) ? pb[i] : 0;
+      if (na > nb) return 1;
+      if (na < nb) return -1;
+    }
+    return 0;
+  };
+
+  const getLatestBuildVersion = async (platform) => {
+    if (!platform || (platform !== "linux" && platform !== "windows")) return "";
+    if (!BUILD_API_BASE) return "";
+    try {
+      const response = await fetch(`${BUILD_API_BASE}/version/latest/${platform}`, {
+        method: "GET",
+        headers: {
+          Authorization: account?.jwtToken,
+        },
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) return "";
+      return (
+        payload?.data?.build_version ||
+        payload?.data?.buildVersion ||
+        payload?.data?.version ||
+        payload?.build_version ||
+        payload?.buildVersion ||
+        payload?.version ||
+        ""
+      );
+    } catch (_error) {
+      return "";
+    }
+  };
+
+  const getUninstallSteps = (platform) => {
+    if (platform === "linux") {
+      return [
+        { key: "linux.stop", label: "Stop the running service", cmd: "sudo systemctl stop wg-agent" },
+        {
+          key: "linux.disable",
+          label: "Prevent it from starting on boot (optional)",
+          cmd: "sudo systemctl disable wg-agent",
+        },
+        { key: "linux.remove", label: "Remove the installed package", cmd: "sudo dpkg -r wg-agent" },
+      ];
+    }
+    if (platform === "windows") {
+      return [
+        {
+          key: "win.close",
+          label: "Close and remove old agent",
+          cmd: "Close wg-agent if running, then delete the old wg-agent.exe (or uninstall the service if you installed it as one).",
+        },
+      ];
+    }
+    return [];
+  };
+
+  const handleCopyUninstallStep = async (step) => {
+    const cmd = String(step?.cmd || "");
+    if (!cmd) return;
+    try {
+      await navigator.clipboard.writeText(cmd);
+      setCopiedUninstallKey(String(step?.key || "copied"));
+      setTimeout(() => setCopiedUninstallKey(""), 1800);
+    } catch (_error) {
+      messageApi.error("Unable to copy command.");
+    }
+  };
+
   const checkAgentHealth = async () => {
     const result = await findRunningAgent();
     if (result?.reachable && result?.baseUrl) {
       setAgentBaseUrl(result.baseUrl);
+      setAgentHealthVersion(normalizeVersion(result?.version || ""));
       return true;
     }
     setAgentBaseUrl("");
+    setAgentHealthVersion("");
     return false;
   };
 
@@ -237,6 +327,29 @@ function DVpn() {
     checkAgentHealth().then(setAgentReachable);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (agentReachable !== true) return;
+    if (!detectedOS || (detectedOS !== "linux" && detectedOS !== "windows")) return;
+    if (!agentHealthVersion) return;
+    if (hasShownUpdatePromptRef.current) return;
+
+    let cancelled = false;
+    const checkVersion = async () => {
+      const latest = normalizeVersion(await getLatestBuildVersion(detectedOS));
+      if (cancelled) return;
+      setLatestAgentVersion(latest);
+      if (!latest) return;
+      if (compareVersions(agentHealthVersion, latest) >= 0) return;
+      hasShownUpdatePromptRef.current = true;
+      setIsAgentUpdateModalOpen(true);
+    };
+
+    checkVersion();
+    return () => {
+      cancelled = true;
+    };
+  }, [agentReachable, detectedOS, agentHealthVersion]);
 
   useEffect(() => {
     let cancelled = false;
@@ -813,43 +926,21 @@ function DVpn() {
                 ))}
               </ol>
             )}
-            <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}>
-              <button
-                type="button"
-                className="agent-download-btn"
-                onClick={() => handleCopyInstallCommand(selectedDownload)}
-                style={{ width: "auto", minWidth: 140, padding: "8px 14px" }}
-              >
-                {isCommandCopied ? "Copied" : "Copy command"}
-              </button>
-            </div>
-            <pre>{getCommandWithResolvedFileName(selectedDownload)}</pre>
-          </details>
-          <details className="agent-install-steps">
-            <summary>All platforms</summary>
-            <div className="agent-links">
-              <a
-                href="/Vpn_Downloads/wg-agent_1.0.0_amd64.deb"
-                download
-                onClick={(event) => {
-                  event.preventDefault();
-                  handleBuildDownload("linux", "/Vpn_Downloads/wg-agent_1.0.0_amd64.deb");
-                }}
-              >
-                🐧 Linux (.deb)
-              </a>
-              <a
-                href="/Vpn_Downloads/wg-agent.exe"
-                download
-                onClick={(event) => {
-                  event.preventDefault();
-                  handleBuildDownload("windows", "/Vpn_Downloads/wg-agent.exe");
-                }}
-              >
-                🪟 Windows (.exe)
-              </a>
-              <span>🍎 iOS: Nothing for now, coming soon.</span>
-            </div>
+            {!!getCommandWithResolvedFileName(selectedDownload) && (
+              <>
+                <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}>
+                  <button
+                    type="button"
+                    className="agent-copy-btn"
+                    onClick={() => handleCopyInstallCommand(selectedDownload)}
+                    style={{ width: "auto", minWidth: 96 }}
+                  >
+                    {isCommandCopied ? "Copied" : "Copy command"}
+                  </button>
+                </div>
+                <pre>{getCommandWithResolvedFileName(selectedDownload)}</pre>
+              </>
+            )}
           </details>
         </div>
       )}
@@ -1110,6 +1201,109 @@ function DVpn() {
               navigate("/service-provider");
             }}
           />
+        </div>
+      </ModalCustom>
+
+      <ModalCustom
+        title={"Update VPN Agent"}
+        handleCancel={() => setIsAgentUpdateModalOpen(false)}
+        isModalOpen={isAgentUpdateModalOpen}
+        customClass="customClassModal"
+      >
+        <div className="viewphrases">
+          <p style={{ marginBottom: 12, color: "#fff" }}>
+            Your local VPN agent is outdated.
+            {agentHealthVersion ? ` Current: ${agentHealthVersion}.` : ""}
+            {latestAgentVersion ? ` Latest: ${latestAgentVersion}.` : ""}
+          </p>
+
+          <p style={{ marginBottom: 8, fontWeight: 600, color: "#fff" }}>Remove old agent</p>
+          <div style={{ display: "grid", gap: 10, marginBottom: 8 }}>
+            {getUninstallSteps(detectedOS).map((step) => (
+              <div
+                key={step.key}
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr auto",
+                  gap: 10,
+                  alignItems: "start",
+                }}
+              >
+                <div>
+                  <div style={{ color: "#cfcdd6", fontSize: 12, marginBottom: 6 }}>
+                    {step.label}
+                  </div>
+                  <pre
+                    style={{
+                      margin: 0,
+                      padding: 10,
+                      borderRadius: 10,
+                      background: "rgba(0,0,0,0.35)",
+                      border: "1px solid rgba(255,255,255,0.08)",
+                      color: "#fff",
+                      whiteSpace: "pre-wrap",
+                    }}
+                  >
+                    {step.cmd}
+                  </pre>
+                </div>
+                <button
+                  type="button"
+                  className="agent-copy-btn"
+                  onClick={() => handleCopyUninstallStep(step)}
+                  style={{ width: "auto", minWidth: 72 }}
+                >
+                  {copiedUninstallKey === step.key ? "Copied" : "Copy"}
+                </button>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ marginTop: 12 }} />
+          <ButtonComp
+            text={"Download latest agent"}
+            maxWidth={"100%"}
+            onClick={() => {
+              const download = DOWNLOAD_MAP[detectedOS] || DOWNLOAD_MAP.unknown;
+              if (download?.buildKey) {
+                handleBuildDownload(download.buildKey, download.href);
+              }
+              setIsInstallCommandOpen(true);
+              setShowRunAfterDownload(true);
+            }}
+          />
+
+          {showRunAfterDownload && (
+            <>
+              <div style={{ marginTop: 14 }} />
+              <p style={{ marginBottom: 8, fontWeight: 600, color: "#fff" }}>
+                After download, run this command
+              </p>
+              <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}>
+                <button
+                  type="button"
+                  className="agent-copy-btn"
+                  onClick={() => handleCopyInstallCommand(DOWNLOAD_MAP[detectedOS] || DOWNLOAD_MAP.unknown)}
+                  style={{ width: "auto", minWidth: 96 }}
+                >
+                  {isCommandCopied ? "Copied" : "Copy"}
+                </button>
+              </div>
+              <pre
+                style={{
+                  margin: 0,
+                  padding: 10,
+                  borderRadius: 10,
+                  background: "rgba(0,0,0,0.35)",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  color: "#fff",
+                  whiteSpace: "pre-wrap",
+                }}
+              >
+                {getCommandWithResolvedFileName(DOWNLOAD_MAP[detectedOS] || DOWNLOAD_MAP.unknown)}
+              </pre>
+            </>
+          )}
         </div>
       </ModalCustom>
     </div>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import "./footer.scss";
 import { Link, useLocation } from "react-router-dom";
 import {
@@ -12,20 +12,54 @@ import {
   SettignIcon,
   WalletIcon,
 } from "../../Assets/SvgImg.jsx";
+import { findRunningAgent } from "../../services/dvpn";
 
 function MenuFooter() {
   const getLocation = useLocation();
   const path = getLocation.pathname.replace("/", "");
-  const dvpnRoutes = new Set([
-    "dvpn",
-    "recentSessions",
-    "servers",
-    "serversDetails",
-    "serversNodes",
-    "dvpnSetting",
-    "service-provider",
-  ]);
+  const dvpnRoutes = useMemo(
+    () =>
+      new Set([
+        "dvpn",
+        "recentSessions",
+        "servers",
+        "serversDetails",
+        "serversNodes",
+        "dvpnSetting",
+        "service-provider",
+      ]),
+    []
+  );
   const isDvpnMenu = dvpnRoutes.has(path);
+  const [agentReachable, setAgentReachable] = useState(null);
+
+  useEffect(() => {
+    if (!isDvpnMenu) {
+      setAgentReachable(null);
+      return undefined;
+    }
+
+    let cancelled = false;
+    const check = async () => {
+      const result = await findRunningAgent().catch(() => ({ reachable: false }));
+      if (!cancelled) setAgentReachable(!!result?.reachable);
+    };
+
+    check();
+    const poll = setInterval(check, 5000);
+    return () => {
+      cancelled = true;
+      clearInterval(poll);
+    };
+  }, [isDvpnMenu]);
+
+  const disableDvpnLinks = agentReachable === false;
+  const disabledClass = disableDvpnLinks ? "isDisabled" : "";
+  const preventIfDisabled = (event) => {
+    if (!disableDvpnLinks) return;
+    event.preventDefault();
+    event.stopPropagation();
+  };
   return (
     <>
       {!isDvpnMenu ? (
@@ -136,7 +170,9 @@ function MenuFooter() {
           <Link
             to="/recentSessions"
             className={`${"menuItems__items"} ${path === "recentSessions" ? "itemsActive" : ""
-              }`}
+              } ${disabledClass}`}
+            onClick={preventIfDisabled}
+            aria-disabled={disableDvpnLinks}
           >
             <div className="img">
               <RecentSessionsIcon />
@@ -145,7 +181,9 @@ function MenuFooter() {
           <Link
             to="/service-provider"
             className={`${"menuItems__items"} ${["service-provider", "servers", "serversDetails", "serversNodes"].includes(path) ? "itemsActive" : ""
-              }`}
+              } ${disabledClass}`}
+            onClick={preventIfDisabled}
+            aria-disabled={disableDvpnLinks}
           >
             <div className="img">
               <ServersIcon className="strokeFill" />
@@ -154,7 +192,9 @@ function MenuFooter() {
           <Link
             to="/dvpnSetting"
             className={`${"menuItems__items"} ${path === "dvpnSetting" ? "itemsActive" : ""
-              }`}
+              } ${disabledClass}`}
+            onClick={preventIfDisabled}
+            aria-disabled={disableDvpnLinks}
           >
             <div className="img">
               <SettignIcon />

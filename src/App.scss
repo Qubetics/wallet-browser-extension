@@ -336,6 +336,12 @@ body::-webkit-scrollbar {
       padding-top: 20px !important;
       background-color: #101010 !important;
     }
+
+    .ant-modal-body {
+      max-height: unquote("min(70vh, 520px)");
+      overflow-y: auto;
+      padding-right: 6px;
+    }
   }
 }
 

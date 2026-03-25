@@ -24,6 +24,14 @@ export const findRunningAgent = async () => {
         reachable: true,
         baseUrl: `http://127.0.0.1:${port}`,
         port,
+        version:
+          body?.version ||
+          body?.build_version ||
+          body?.buildVersion ||
+          body?.data?.version ||
+          body?.data?.build_version ||
+          body?.data?.buildVersion ||
+          "",
       };
     } catch (_error) {
       // Keep probing known ports.
@@ -33,6 +41,7 @@ export const findRunningAgent = async () => {
     reachable: false,
     baseUrl: "",
     port: null,
+    version: "",
   };
 };
 

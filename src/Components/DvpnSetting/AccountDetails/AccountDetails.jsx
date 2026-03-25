@@ -3,7 +3,7 @@ import MenuRestofHeaders from "../../BalanceDetails/MenuRestofHeaders/MenuRestof
 import "./AccountDetails.scss";
 import ButtonComp from "../../ButtonComp/ButtonComp";
 import QubeticsImage from "../../../Assets/QubeticsLogo.png";
-import RefreshIcon from "../../../Assets/RefreshIcon.svg";
+import RefreshIcon from "../../../Assets/refersh.png";
 import { useSelector } from "react-redux";
 import { getTicsBalance } from "../../../services/dvpn";
 import { message } from "antd";

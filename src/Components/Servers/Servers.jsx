@@ -38,6 +38,7 @@ function Servers() {
   const location = useLocation();
   const height = useCurrentHeight();
   const [activeTab, setActiveTab] = useState("All");
+  const [searchTerm, setSearchTerm] = useState("");
   const [countries, setCountries] = useState([]);
   const [loading, setLoading] = useState(true);
   const fallbackPlanId = sessionStorage.getItem("dvpn_selected_plan_id") || "";
@@ -88,6 +89,14 @@ function Servers() {
     if (activeTab === "Wireguard") return countries;
     return countries;
   }, [activeTab, countries]);
+
+  const filteredCountries = useMemo(() => {
+    const q = String(searchTerm || "").trim().toLowerCase();
+    if (!q) return countryList;
+    return countryList.filter((item) =>
+      String(item?.country || "").toLowerCase().includes(q)
+    );
+  }, [countryList, searchTerm]);
   return (
     <div className={`scrollableCont`} style={{ hight: "auto" }}>
       <div className="searchBarFixed">
@@ -96,6 +105,8 @@ function Servers() {
           <InputField
             placeholder={"Search country /city"}
             checkForSymbols={true}
+            value={searchTerm}
+            getData={(value) => setSearchTerm(value)}
             addonBefore={
               <span>
                 <img
@@ -136,7 +147,7 @@ function Servers() {
               </div>
             ))}
           {!loading &&
-            countryList.map((countryItem, index) => (
+            filteredCountries.map((countryItem, index) => (
             <div
               className="server-item"
               key={index}

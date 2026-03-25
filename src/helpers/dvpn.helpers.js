@@ -32,25 +32,13 @@ sudo dpkg -i ~/Downloads/wg-agent_1.0.0_amd64.deb && sudo systemctl start wg-age
     icon: "🪟",
     guide: [
       "Install WireGuard for Windows first (required): https://download.wireguard.com/windows-client/wireguard-installer.exe",
+      "After installing, run WireGuard once as Administrator (required).",
       "Download wg-agent.exe from this page.",
       "Right-click the downloaded wg-agent.exe and choose 'Run as administrator'.",
       "If Windows SmartScreen appears, click 'More info' then 'Run anyway'.",
       "Keep the agent window running and return to this page; it will auto-connect.",
     ],
-    cmd: `# 1. Install WireGuard for Windows (required)
-Download: https://download.wireguard.com/windows-client/wireguard-installer.exe
-
-# 2. Download and run the VPN agent
-# Download wg-agent.exe from this page, then right-click -> Run as Administrator
-
-# 3. (Optional) Verify in PowerShell
-# Open PowerShell as Administrator and run:
-.\\wg-agent.exe
-
-# 4. Verify it's listening
-curl ${vpnBaseUrl}/health
-# or in PowerShell:
-Invoke-WebRequest -Uri ${vpnBaseUrl}/health`,
+    cmd: "",
   },
   ios: {
     href: null,

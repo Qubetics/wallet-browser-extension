@@ -476,6 +476,28 @@ const clearCachedWireguardKeyPair = async (walletAddress) => {
   });
 };
 
+const withTimeout = async (promise, timeoutMs, timeoutMessage = "Operation timed out") => {
+  const ms = Number(timeoutMs);
+  if (!Number.isFinite(ms) || ms <= 0) {
+    return promise;
+  }
+
+  let timeoutId = null;
+  const timeoutPromise = new Promise((_resolve, reject) => {
+    timeoutId = setTimeout(() => {
+      const error = new Error(timeoutMessage);
+      error.code = "DVPN_TIMEOUT";
+      reject(error);
+    }, ms);
+  });
+
+  try {
+    return await Promise.race([promise, timeoutPromise]);
+  } finally {
+    if (timeoutId) clearTimeout(timeoutId);
+  }
+};
+
 const getKnownSessionIdsFromState = (state) => {
   const runtime = state?.sessionRuntime || {};
   const wireguard = state?.wireguard || {};
@@ -910,16 +932,28 @@ export const disconnectVpn = async ({
     let cancelTxHash = "";
     if (resolvedSessionId > 0) {
       try {
-        const cancelResult = await cancelSessionOnChain({
-          sessionId: resolvedSessionId,
-          walletAddress: activeWallet,
-          sessionPassword,
-          rpcUrl,
-        });
+        const cancelTimeoutMs = 12000;
+        const cancelResult = await withTimeout(
+          cancelSessionOnChain({
+            sessionId: resolvedSessionId,
+            walletAddress: activeWallet,
+            sessionPassword,
+            rpcUrl,
+          }),
+          cancelTimeoutMs,
+          "Session cancel timed out"
+        );
         cancelTxHash = cancelResult?.txHash || "";
       } catch (cancelError) {
         if (isPasswordPromptError(cancelError)) {
           throw cancelError;
+        }
+        if (String(cancelError?.code || "") === "DVPN_TIMEOUT") {
+          logFlow("disconnect.cancel.timeout", {
+            walletAddress: activeWallet,
+            sessionId: resolvedSessionId,
+            timeoutMs: 12000,
+          });
         }
         logFlow("disconnect.cancel.failed", {
           walletAddress: activeWallet,
