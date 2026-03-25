@@ -80,11 +80,21 @@ function DVpn() {
   const [currentSessionId, setCurrentSessionId] = useState(null);
   const [agentBaseUrl, setAgentBaseUrl] = useState("");
   const [isBuyPlanModalOpen, setIsBuyPlanModalOpen] = useState(false);
+  const [isInstallCommandOpen, setIsInstallCommandOpen] = useState(false);
+  const [isCommandCopied, setIsCommandCopied] = useState(false);
   const [pendingStartNode, setPendingStartNode] = useState(null);
   const [pendingStopSessionId, setPendingStopSessionId] = useState(null);
-  const { account } = useSelector((state) => state.account);
+  const { account } = useSelector(
+    (state) => state
+  );
+  console.log("account", account);
   const authToken = account?.jwtToken;
   const isAutoDisconnectingRef = useRef(false);
+  const sessionPasswordRef = useRef("");
+
+  useEffect(() => {
+    sessionPasswordRef.current = sessionPassword;
+  }, [sessionPassword]);
 
   const logFlow = () => {};
 
@@ -151,6 +161,18 @@ function DVpn() {
     return downloadInfo.cmd;
   };
 
+  const handleCopyInstallCommand = async (downloadInfo) => {
+    const command = getCommandWithResolvedFileName(downloadInfo);
+    if (!command) return;
+    try {
+      await navigator.clipboard.writeText(command);
+      setIsCommandCopied(true);
+      setTimeout(() => setIsCommandCopied(false), 1800);
+    } catch (error) {
+      messageApi.error("Unable to copy command.");
+    }
+  };
+
   const handleBuildDownload = async (platform, fallbackHref) => {
     if (!platform || (platform !== "linux" && platform !== "windows")) {
       if (fallbackHref) openDownloadUrl(fallbackHref);
@@ -159,14 +181,19 @@ function DVpn() {
 
     try {
       setDownloadingFor(platform);
+
+
       let response = await fetch(`${BUILD_API_BASE}/${platform}`, {
         method: "GET",
+          headers: {
+            Authorization: account?.jwtToken,
+          },
       });
-      if (!response.ok && authToken) {
+      if (!response.ok) {
         response = await fetch(`${BUILD_API_BASE}/${platform}`, {
           method: "GET",
           headers: {
-            Authorization: authToken,
+            Authorization: account?.jwtToken,
           },
         });
       }
@@ -186,6 +213,7 @@ function DVpn() {
           [platform]: fileName,
         }));
       }
+      setIsInstallCommandOpen(true);
       openDownloadUrl(downloadUrl);
     } catch (error) {
       if (fallbackHref) openDownloadUrl(fallbackHref);
@@ -308,7 +336,7 @@ function DVpn() {
           await disconnectVpn({
             walletAddress: activeDvpnWallet,
             sessionId: staleSessionId,
-            sessionPassword,
+            sessionPassword: sessionPasswordRef.current,
           });
           setCurrentSessionId(null);
           logFlow("ui.agent_status.stale_session_cleanup.success", {
@@ -336,7 +364,7 @@ function DVpn() {
       cancelled = true;
       clearInterval(poll);
     };
-  }, [agentReachable, agentBaseUrl, activeDvpnWallet, currentSessionId, sessionPassword, isConnected]);
+  }, [agentReachable, agentBaseUrl, activeDvpnWallet, currentSessionId, isConnected]);
 
   useEffect(() => {
     if (agentReachable !== true || authChecking || isPasswordModalOpen || !activeDvpnWallet) return;
@@ -776,7 +804,7 @@ function DVpn() {
                 : `${selectedDownload.icon} Download for ${selectedDownload.label}`}
             </a>
           )}
-          <details className="agent-install-steps">
+          <details className="agent-install-steps" open={isInstallCommandOpen}>
             <summary>Install and run command</summary>
             {selectedDownload.guide && (
               <ol>
@@ -785,6 +813,16 @@ function DVpn() {
                 ))}
               </ol>
             )}
+            <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}>
+              <button
+                type="button"
+                className="agent-download-btn"
+                onClick={() => handleCopyInstallCommand(selectedDownload)}
+                style={{ width: "auto", minWidth: 140, padding: "8px 14px" }}
+              >
+                {isCommandCopied ? "Copied" : "Copy command"}
+              </button>
+            </div>
             <pre>{getCommandWithResolvedFileName(selectedDownload)}</pre>
           </details>
           <details className="agent-install-steps">

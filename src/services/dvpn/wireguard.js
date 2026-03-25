@@ -122,44 +122,6 @@ const parseBody = async (response) => {
   }
 };
 
-const proxyProviderSessionRequest = async (url, payload) => {
-  if (typeof chrome === "undefined" || !chrome?.runtime?.sendMessage) {
-    return null;
-  }
-
-  return new Promise((resolve, reject) => {
-    chrome.runtime.sendMessage(
-      {
-        type: "DVPN_PROXY_FETCH",
-        payload: {
-          url,
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
-        },
-      },
-      (response) => {
-        if (chrome?.runtime?.lastError) {
-          reject(
-            createDvpnError(
-              "DVPN_PROVIDER_PROXY_UNAVAILABLE",
-              chrome.runtime.lastError.message || "Background proxy unavailable"
-            )
-          );
-          return;
-        }
-        if (!response) {
-          reject(createDvpnError("DVPN_PROVIDER_PROXY_EMPTY", "Empty response from background proxy"));
-          return;
-        }
-        resolve(response);
-      }
-    );
-  });
-};
-
 const shouldRetryProviderCall = (error, status) => {
   if (status === 429) return true;
   if (Number.isFinite(status) && status >= 500) return true;
@@ -168,13 +130,11 @@ const shouldRetryProviderCall = (error, status) => {
 };
 
 const normalizeProviderUrl = (providerUrl) => {
-  const normalized = String(providerUrl || "").trim().replace(/\/+$/, "");
-  // Temporary workaround only for known node cert issues.
-  if (
-    /^https:\/\/144\.6\.255\.201:18133$/i.test(normalized) ||
-    /^https:\/\/75\.119\.135\.227:18133$/i.test(normalized)
-  ) {
-    return normalized.replace(/^https:\/\//i, "http://");
+  let normalized = String(providerUrl || "").trim().replace(/\/+$/, "");
+  // If it starts with "https:", replace with "http:" and return
+  if (/^https:/.test(normalized)) {
+    normalized = normalized.replace(/^https:/, "http:");
+    return normalized;
   }
   return normalized;
 };
@@ -346,25 +306,14 @@ export const startProviderSession = async ({
         attempt,
       });
       const sessionUrl = `${normalizedProviderUrl}/sessions`;
-      let body = null;
-
-      const proxiedResponse = await proxyProviderSessionRequest(sessionUrl, payload).catch(() => null);
-      if (proxiedResponse) {
-        response = {
-          ok: !!proxiedResponse?.ok,
-          status: Number(proxiedResponse?.status || 0),
-        };
-        body = proxiedResponse?.body;
-      } else {
-        response = await fetch(sessionUrl, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
-        });
-        body = await parseBody(response);
-      }
+      response = await fetch(sessionUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+      const body = await parseBody(response);
 
       if (!response?.ok) {
         const businessError = parseProviderBusinessError(body, {

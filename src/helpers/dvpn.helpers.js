@@ -15,27 +15,15 @@ export const getDownloadMap = ({ appBaseUrl, vpnBaseUrl, vpnHealthUrl }) => ({
     icon: "🐧",
     guide: [
       "Download the Linux package to your computer.",
-      "Open Terminal and go to the folder where the file was downloaded (usually Downloads).",
-      "Install the package and start the wg-agent service.",
-      "Confirm the service is running, then verify the local health URL.",
+      "Copy and run the install commands below in Terminal.",
+      "Start the wg-agent service after installation.",
     ],
     cmd: `# 1. Download the .deb file
 # Click the "Download for Linux (.deb)" button on this page.
 
-# 2. Go to the folder where the file is downloaded
-cd ~/Downloads
 
-# 3. Install
-sudo dpkg -i wg-agent_1.0.0_amd64.deb
-
-# 4. Start as a systemd service (auto-enabled by postinst)
-sudo systemctl start wg-agent
-
-# 5. Check it's running
-sudo systemctl status wg-agent
-
-# 6. Verify the HTTP API is up
-curl ${vpnHealthUrl}`,
+# 2. Install agent package and start service (single command)
+sudo dpkg -i ~/Downloads/wg-agent_1.0.0_amd64.deb && sudo systemctl start wg-agent`,
   },
   windows: {
     href: "/Vpn_Downloads/wg-agent.exe",
@@ -66,11 +54,11 @@ Invoke-WebRequest -Uri ${vpnBaseUrl}/health`,
   },
   ios: {
     href: null,
-    label: "iOS",
+    label: "Mac OS",
     icon: "🍎",
-    guide: ["Nothing for iOS yet. Integration guidance will be added soon."],
-    cmd: `# iOS
-Nothing for iOS yet. Integration guidance will be added soon.`,
+    guide: ["Nothing for Mac OS yet. Integration guidance will be added soon."],
+    cmd: `# Mac OS
+Nothing for Mac OS yet. Integration guidance will be added soon.`,
   },
   unknown: {
     href: "/Vpn_Downloads/wg-agent_1.0.0_amd64.deb",
@@ -78,22 +66,13 @@ Nothing for iOS yet. Integration guidance will be added soon.`,
     icon: "⬇️",
     guide: [
       "Use a desktop OS (Linux/Windows) to install the local VPN agent.",
-      "Download the package from this page and follow the install steps.",
+      "Copy and run the Linux commands below in Terminal.",
     ],
     cmd: `# 1. Download
 wget ${appBaseUrl}/downloads/wg-agent_1.0.0_amd64.deb
 
-# 2. Go to the folder where the file is downloaded
-cd ~/Downloads
-
-# 3. Install
-sudo dpkg -i wg-agent_1.0.0_amd64.deb
-
-# 4. Start service
-sudo systemctl start wg-agent
-
-# 5. Verify the HTTP API is up
-curl ${vpnHealthUrl}`,
+# 2. Install dependencies + agent + start service (single command)
+sudo apt update && sudo apt install -y wireguard-tools resolvconf && sudo dpkg -i ~/Downloads/wg-agent_1.0.0_amd64.deb && sudo systemctl start wg-agent`,
   },
 });
 
@@ -170,13 +149,59 @@ export const formatDateTime = (value) => {
   return date.toLocaleString();
 };
 
+const formatDurationFromSeconds = (totalSeconds) => {
+  if (!Number.isFinite(totalSeconds) || totalSeconds <= 0) return "-";
+  const totalMinutes = Math.floor(totalSeconds / 60);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  if (hours > 0) return `${hours}hr ${minutes}min`;
+  return `${Math.max(totalMinutes, 1)}min`;
+};
+
+const parseDurationToSeconds = (duration) => {
+  if (duration === null || typeof duration === "undefined") return null;
+
+  if (typeof duration === "number" && Number.isFinite(duration)) {
+    return duration;
+  }
+
+  const value = String(duration).trim().toLowerCase();
+  if (!value) return null;
+
+  // Support hh:mm:ss and mm:ss payloads.
+  if (/^\d{1,2}:\d{1,2}(:\d{1,2})?$/.test(value)) {
+    const parts = value.split(":").map((part) => Number(part));
+    if (parts.every((part) => Number.isFinite(part))) {
+      if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
+      return parts[0] * 60 + parts[1];
+    }
+  }
+
+  const hours = Number((value.match(/(\d+)\s*h(?:r|our|ours)?/) || [])[1] || 0);
+  const minutes = Number((value.match(/(\d+)\s*m(?:in|ins|inute|inutes)?/) || [])[1] || 0);
+  const seconds = Number((value.match(/(\d+)\s*s(?:ec|ecs|econd|econds)?/) || [])[1] || 0);
+  const hasTimeUnit = hours || minutes || seconds;
+
+  if (hasTimeUnit) {
+    return hours * 3600 + minutes * 60 + seconds;
+  }
+
+  return null;
+};
+
 export const getDurationLabel = (session) => {
   const explicitDuration =
     session?.duration ||
     session?.duration_label ||
     session?.durationLabel ||
     session?.session_duration;
-  if (explicitDuration) return String(explicitDuration);
+  if (explicitDuration) {
+    const explicitSeconds = parseDurationToSeconds(explicitDuration);
+    if (explicitSeconds !== null) {
+      return formatDurationFromSeconds(explicitSeconds);
+    }
+    return String(explicitDuration);
+  }
 
   const startedAt = new Date(
     session?.start_at ||
@@ -197,9 +222,7 @@ export const getDurationLabel = (session) => {
   if (!Number.isFinite(startMs) || !Number.isFinite(endMs) || endMs <= startMs) return "-";
 
   const totalSeconds = Math.floor((endMs - startMs) / 1000);
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = totalSeconds % 60;
-  return `${minutes}m ${seconds}s`;
+  return formatDurationFromSeconds(totalSeconds);
 };
 
 export const getSessionLocation = (session) => {

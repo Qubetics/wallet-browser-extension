@@ -8,6 +8,78 @@ const {
 const engine = new JsonRpcEngine();
 // const NodeRSA = require('node-rsa');
 
+const normalizeConnectedDappEntry = (raw = {}) => {
+  const source = raw && typeof raw === 'object' ? raw : {};
+  const candidateUrl = [
+    source.url,
+    source.origin,
+    source.referer,
+    source.referrer,
+    'https://delegator.qubetics.com/',
+  ].find((value) => typeof value === 'string' && value.trim().length > 0);
+
+  let normalizedUrl = '';
+  try {
+    normalizedUrl = new URL(candidateUrl).origin;
+  } catch (error) {
+    normalizedUrl = String(candidateUrl || '').trim();
+  }
+  if (!normalizedUrl) {
+    normalizedUrl = 'https://delegator.qubetics.com';
+  }
+
+  let hostname = '';
+  try {
+    hostname = new URL(normalizedUrl).hostname;
+  } catch (error) {}
+
+  const title =
+    (typeof source.title === 'string' && source.title.trim()) ||
+    (hostname ? hostname : 'Qubetics Delegator');
+  const image =
+    typeof source.image === 'string' && source.image.trim()
+      ? source.image.trim()
+      : 'https://prod-qubetics-wallet.obs.ap-southeast-4.myhuaweicloud.com/tics_logo.png';
+
+  return {
+    url: normalizedUrl,
+    image,
+    title,
+    time: source.time || new Date().toISOString(),
+  };
+};
+
+const enrichRpcRequestWithSender = (rpcRequest, sender) => {
+  if (!rpcRequest || typeof rpcRequest !== 'object') {
+    return rpcRequest;
+  }
+
+  const withMeta = { ...rpcRequest };
+  const tabUrl =
+    (sender?.tab && typeof sender.tab.url === 'string' && sender.tab.url) ||
+    (typeof sender?.url === 'string' && sender.url) ||
+    '';
+
+  if (!withMeta.url && tabUrl) {
+    withMeta.url = tabUrl;
+  }
+
+  if (!withMeta.origin && tabUrl) {
+    try {
+      withMeta.origin = new URL(tabUrl).origin;
+    } catch (error) {}
+  }
+
+  return withMeta;
+};
+
+const enrichRpcPayloadWithSender = (payload, sender) => {
+  if (Array.isArray(payload)) {
+    return payload.map((request) => enrichRpcRequestWithSender(request, sender));
+  }
+  return enrichRpcRequestWithSender(payload, sender);
+};
+
 const networks = [
   {
     id: uuidv4(),
@@ -356,46 +428,6 @@ class Background {
       }
     );
 
-    chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-      if (message?.type !== 'DVPN_PROXY_FETCH') return undefined;
-
-      (async () => {
-        try {
-          const payload = message?.payload || {};
-          const url = String(payload?.url || '');
-          if (!url) throw new Error('Proxy fetch URL is required');
-
-          const response = await fetch(url, {
-            method: payload?.method || 'GET',
-            headers: payload?.headers || {},
-            body: payload?.body,
-          });
-
-          const contentType = response.headers.get('content-type') || '';
-          let body = null;
-          if (contentType.includes('application/json')) {
-            body = await response.json();
-          } else {
-            body = await response.text();
-          }
-
-          sendResponse({
-            ok: response.ok,
-            status: response.status,
-            body,
-          });
-        } catch (error) {
-          sendResponse({
-            ok: false,
-            status: 0,
-            error: error?.message || 'Background proxy fetch failed',
-          });
-        }
-      })();
-
-      return true;
-    });
-
     chrome.alarms.create('updated_prices', {
       delayInMinutes: 0.1,
       periodInMinutes: 0.2,
@@ -431,20 +463,19 @@ class Background {
                 'connectedDapps'
               );
 
-              const checkIfAlreadyThere = (connectedDapps || []).find(
-                (el) => el.url === req.url
+              const connectedDappsList = Array.isArray(connectedDapps)
+                ? connectedDapps
+                : [];
+              const normalizedDapp = normalizeConnectedDappEntry(req);
+              const checkIfAlreadyThere = connectedDappsList.find(
+                (el) => el?.url === normalizedDapp.url
               );
 
               if (!checkIfAlreadyThere) {
                 await chrome.storage.session.set({
                   connectedDapps: [
-                    ...(connectedDapps || []),
-                    {
-                      url: req.url,
-                      image: req.image,
-                      title: req.title,
-                      time: new Date(),
-                    },
+                    ...connectedDappsList,
+                    normalizedDapp,
                   ],
                 });
               }
@@ -479,20 +510,19 @@ class Background {
                   'connectedDapps'
                 );
 
-                const checkIfAlreadyThere = (connectedDapps || []).find(
-                  (el) => el.url === req.url
+                const connectedDappsList = Array.isArray(connectedDapps)
+                  ? connectedDapps
+                  : [];
+                const normalizedDapp = normalizeConnectedDappEntry(req);
+                const checkIfAlreadyThere = connectedDappsList.find(
+                  (el) => el?.url === normalizedDapp.url
                 );
 
                 if (!checkIfAlreadyThere) {
                   await chrome.storage.session.set({
                     connectedDapps: [
-                      ...(connectedDapps || []),
-                      {
-                        url: req.url,
-                        image: req.image,
-                        title: req.title,
-                        time: new Date(),
-                      },
+                      ...connectedDappsList,
+                      normalizedDapp,
                     ],
                   });
                 }
@@ -557,20 +587,19 @@ class Background {
                 'connectedDapps'
               );
 
-              const checkIfAlreadyThere = (connectedDapps || []).find(
-                (el) => el.url === req.url
+              const connectedDappsList = Array.isArray(connectedDapps)
+                ? connectedDapps
+                : [];
+              const normalizedDapp = normalizeConnectedDappEntry(req);
+              const checkIfAlreadyThere = connectedDappsList.find(
+                (el) => el?.url === normalizedDapp.url
               );
 
               if (!checkIfAlreadyThere) {
                 await chrome.storage.session.set({
                   connectedDapps: [
-                    ...(connectedDapps || []),
-                    {
-                      url: req.url,
-                      image: req.image,
-                      title: req.title,
-                      time: new Date(),
-                    },
+                    ...connectedDappsList,
+                    normalizedDapp,
                   ],
                 });
               }
@@ -1145,7 +1174,11 @@ class Background {
       }
       if (sender.tab) {
         if (message.type === 'JSON-RPC') {
-          engine.handle(message.payload, (err, result) => {
+          const payloadWithSenderMeta = enrichRpcPayloadWithSender(
+            message.payload,
+            sender
+          );
+          engine.handle(payloadWithSenderMeta, (err, result) => {
             // console.log(err, result, "result");
             if (err) {
               //console.error('Error handling JSON-RPC message:', err);
