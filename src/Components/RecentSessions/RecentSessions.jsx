@@ -12,6 +12,7 @@ import {
   getUserSessions,
   getUserSubscriptions,
 } from "../../services/dvpn";
+import { getDurationLabel } from "../../helpers/dvpn.helpers";
 import CopyIcon from "../../Assets/CopyIcon.svg";
 
 const HISTORY_TABS = [
@@ -79,17 +80,7 @@ const shortenMiddle = (value, start = 10, end = 8) => {
   if (text.length <= start + end + 3) return text;
   return `${text.slice(0, start)}...${text.slice(-end)}`;
 };
-const getDurationLabel = (session) => {
-  const start = new Date(session?.start_at || session?.startAt || session?.started_at || 0).getTime();
-  const end = new Date(session?.status_at || session?.endAt || session?.ended_at || 0).getTime();
-  if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) return "-";
-  const totalSec = Math.floor((end - start) / 1000);
-  const hr = Math.floor(totalSec / 3600);
-  const min = Math.floor((totalSec % 3600) / 60);
-  const sec = totalSec % 60;
-  if (hr > 0) return `${hr}h ${min}m ${sec}s`;
-  return `${min}m ${sec}s`;
-};
+// Local getDurationLabel removed in favor of shared helper in dvpn.helpers.js
 const shortenHash = (value) => {
   const hash = String(value || "");
   if (!hash) return "-";

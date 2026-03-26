@@ -54,6 +54,7 @@
     align-items: center;
     justify-content: center;
     gap: 8px;
+
     p {
       margin: 0;
       color: #c9c7d1;
@@ -76,7 +77,7 @@
       gap: 6px;
     }
 
-    > span {
+    >span {
       position: absolute;
       right: 0;
       top: 50%;
@@ -102,22 +103,26 @@
       color: #00e18d;
     }
   }
+
   .status-bar {
     display: flex;
     justify-content: flex-end;
     align-items: center;
     gap: 30px;
     margin-top: 10px;
+
     .status {
       padding: 8px 12px;
       border-radius: 30px;
       font-size: 16px;
       font-weight: 600;
       border: 0;
+
       &.disconnected {
         background: #ff0d0d33;
         color: #ff0d0d;
       }
+
       &.connected {
         background: rgba(0, 225, 141, 0.2);
         color: #00e18d;
@@ -126,10 +131,12 @@
 
     .days-left {
       font-size: 14px;
+
       span {
         font-weight: 500;
         color: #fff;
       }
+
       color: #98969b;
       font-weight: 400;
     }
@@ -186,13 +193,11 @@
     .agent-download-btn {
       display: inline-block;
       text-decoration: none;
-      background: linear-gradient(
-        90deg,
-        #73c9e2 0%,
-        #6c8dc5 25.37%,
-        #6456b2 76.11%,
-        #6145ea 101.48%
-      );
+      background: linear-gradient(90deg,
+          #73c9e2 0%,
+          #6c8dc5 25.37%,
+          #6456b2 76.11%,
+          #6145ea 101.48%);
       color: #fff;
       border-radius: 10px;
       padding: 10px 14px;
@@ -255,14 +260,13 @@
 
   .credit-bar {
     background: linear-gradient(0deg, #101010, #101010),
-      linear-gradient(
-        74.03deg,
+      linear-gradient(74.03deg,
         rgba(105, 218, 219, 0) 67.63%,
-        rgba(105, 218, 219, 0.1) 95%
-      ),
+        rgba(105, 218, 219, 0.1) 95%),
       linear-gradient(0deg, #18171f, #18171f);
     border-radius: 14px;
     padding: 7px 15px;
+
     .bar {
       height: 8px;
       background: #76747b;
@@ -271,13 +275,11 @@
 
       .fill {
         height: 100%;
-        background: linear-gradient(
-          90deg,
-          #73c9e2 0%,
-          #6c8dc5 25.37%,
-          #6456b2 76.11%,
-          #6145ea 101.48%
-        );
+        background: linear-gradient(90deg,
+            #73c9e2 0%,
+            #6c8dc5 25.37%,
+            #6456b2 76.11%,
+            #6145ea 101.48%);
         transition: width 0.3s;
       }
     }
@@ -287,12 +289,14 @@
       justify-content: space-between;
       align-items: center;
       margin-top: 5px;
+
       .right {
         color: #fff;
         font-size: 14px;
         font-weight: 600;
         line-height: 100%;
       }
+
       .left {
         color: #98969b;
         font-size: 14px;
@@ -304,6 +308,7 @@
 
   .country-list {
     margin-top: 10px;
+
     h3 {
       font-size: 18px;
       font-weight: 500;
@@ -312,17 +317,17 @@
       line-height: 100%;
       text-align: left;
     }
+
     .countryInner {
       display: flex;
       gap: 20px;
     }
+
     .country {
       background: linear-gradient(0deg, #101010, #101010),
-        linear-gradient(
-          74.03deg,
+        linear-gradient(74.03deg,
           rgba(105, 218, 219, 0) 67.63%,
-          rgba(105, 218, 219, 0.1) 95%
-        ),
+          rgba(105, 218, 219, 0.1) 95%),
         linear-gradient(0deg, #18171f, #18171f);
       padding: 12px;
       border-radius: 14px;
@@ -344,6 +349,7 @@
       &:hover {
         background: #2e2e3e;
       }
+
       img {
         width: 30px;
       }
@@ -358,6 +364,7 @@
       justify-content: space-between;
       padding: 11px 0;
       align-items: center;
+
       h3 {
         font-size: 18px;
         font-weight: 500;
@@ -372,6 +379,7 @@
         font-weight: 500;
       }
     }
+
     .mutliSession {
       height: 230px;
       overflow: auto;
@@ -395,18 +403,20 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
+
     .provider-pill.selected {
       color: #fff;
       background:
         linear-gradient(#09080f, #09080f) padding-box,
-        linear-gradient(90deg, #73c9e2 0%, #6c8dc5 25.37%, #6456b2 76.11%, #6145ea 101.48%)
-          border-box;
+        linear-gradient(90deg, #73c9e2 0%, #6c8dc5 25.37%, #6456b2 76.11%, #6145ea 101.48%) border-box;
     }
+
     .provider-grid-row {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 10px;
     }
+
     .session {
       background: #18171f;
       padding: 16px;
@@ -418,6 +428,7 @@
         justify-content: space-between;
         align-items: center;
       }
+
       .session-info {
         display: flex;
         gap: 10px;
@@ -446,6 +457,7 @@
             font-size: 14px;
             text-align: left;
           }
+
           p {
             color: #98969b;
             font-size: 14px;
@@ -481,6 +493,7 @@
       border: 0;
       position: relative;
       height: 50px;
+
       &::before {
         content: "";
         position: absolute;
@@ -490,13 +503,11 @@
         bottom: 0;
         border-radius: 14px;
         padding: 1px;
-        background: linear-gradient(
-          90deg,
-          #73c9e2 0%,
-          #6c8dc5 25.37%,
-          #6456b2 76.11%,
-          #6145ea 101.48%
-        );
+        background: linear-gradient(90deg,
+            #73c9e2 0%,
+            #6c8dc5 25.37%,
+            #6456b2 76.11%,
+            #6145ea 101.48%);
         mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
         mask-composite: xor;
         -webkit-mask: linear-gradient(#fff 0 0) content-box,
@@ -517,18 +528,17 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: linear-gradient(
-      90deg,
-      #73c9e2 0%,
-      #6c8dc5 25.37%,
-      #6456b2 76.11%,
-      #6145ea 101.48%
-    );
+    background: linear-gradient(90deg,
+        #73c9e2 0%,
+        #6c8dc5 25.37%,
+        #6456b2 76.11%,
+        #6145ea 101.48%);
 
     .label {
       color: rgba(255, 255, 255, 0.8);
       font-size: 12px;
       margin: 0;
+      text-align: left;
     }
 
     h4 {
@@ -536,6 +546,7 @@
       color: #fff;
       font-size: 18px;
       font-weight: 600;
+      text-align: left;
     }
 
     .protected {
@@ -659,28 +670,34 @@
   .quick-connect-section {
     margin-top: 14px;
     margin-bottom: 20 px;
+
     h3 {
       font-size: 13px;
     }
   }
+
   .switch {
     svg {
       width: 50px;
       height: 50px;
     }
   }
+
   .country-list {
     h3 {
       font-size: 13px;
     }
+
     .country {
       font-size: 13px;
       padding: 8px;
-      img{
+
+      img {
         width: 15px;
       }
     }
   }
+
   .recent-sessions {
     .recent-title {
       h3 {
@@ -688,6 +705,7 @@
       }
     }
   }
+
   .recent-sessions .mutliSession {
     height: 237px;
   }

@@ -1,3 +1,4 @@
+import React from "react";
 export const detectOS = () => {
   const ua = navigator.userAgent || "";
   const platform = navigator.platform || "";
@@ -31,12 +32,23 @@ sudo dpkg -i ~/Downloads/wg-agent_1.0.0_amd64.deb && sudo systemctl start wg-age
     label: "Windows (.exe)",
     icon: "🪟",
     guide: [
-      "Install WireGuard for Windows first (required): https://download.wireguard.com/windows-client/wireguard-installer.exe",
+      <span style={{ color: '#fff' }}>
+        Install WireGuard for Windows first (required):{" "}
+        <a 
+          href="https://download.wireguard.com/windows-client/wireguard-installer.exe" 
+          target="_blank" 
+          rel="noreferrer" 
+          style={{ color: '#6366f1', textDecoration: 'underline', fontWeight: 'bold' }}
+        >
+          wireguard-installer.exe
+        </a>
+      </span>,
       "After installing, run WireGuard once as Administrator (required).",
       "Download wg-agent.exe from this page.",
       "Right-click the downloaded wg-agent.exe and choose 'Run as administrator'.",
       "If Windows SmartScreen appears, click 'More info' then 'Run anyway'.",
       "Keep the agent window running and return to this page; it will auto-connect.",
+      "WireGuard and Agent Terminal must be installed and running on your system. The VPN will only connect when both services are active.",
     ],
     cmd: "",
   },

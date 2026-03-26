@@ -89,6 +89,7 @@ function DVpn() {
   const [showRunAfterDownload, setShowRunAfterDownload] = useState(false);
   const [pendingStartNode, setPendingStartNode] = useState(null);
   const [pendingStopSessionId, setPendingStopSessionId] = useState(null);
+  const [refreshKey, setRefreshKey] = useState(0);
   const { account } = useSelector(
     (state) => state
   );
@@ -102,7 +103,7 @@ function DVpn() {
     sessionPasswordRef.current = sessionPassword;
   }, [sessionPassword]);
 
-  const logFlow = () => {};
+  const logFlow = () => { };
 
   const openDownloadUrl = (url) => {
     const a = document.createElement("a");
@@ -191,9 +192,9 @@ function DVpn() {
 
       let response = await fetch(`${BUILD_API_BASE}/${platform}`, {
         method: "GET",
-          headers: {
-            Authorization: account?.jwtToken,
-          },
+        headers: {
+          Authorization: account?.jwtToken,
+        },
       });
       if (!response.ok) {
         response = await fetch(`${BUILD_API_BASE}/${platform}`, {
@@ -528,7 +529,7 @@ function DVpn() {
     return () => {
       cancelled = true;
     };
-  }, [activeDvpnWallet, agentReachable, authChecking, isPasswordModalOpen]);
+  }, [activeDvpnWallet, agentReachable, authChecking, isPasswordModalOpen, refreshKey]);
 
   const handlePasswordSubmit = async () => {
     if (!sessionPassword) {
@@ -580,9 +581,9 @@ function DVpn() {
   const activeProviderAddress =
     String(
       activeSubscription?.plans?.provider_address ||
-        recentProvider?.address ||
-        recentProvider?.provider_address ||
-        ""
+      recentProvider?.address ||
+      recentProvider?.provider_address ||
+      ""
     ).toLowerCase();
   const getProviderAddress = (provider) =>
     String(provider?.address || provider?.provider_address || provider?.prov_address || "").toLowerCase();
@@ -739,6 +740,8 @@ function DVpn() {
         sessionId: resolvedSessionId || null,
       });
       messageApi.success("dVPN session stopped.");
+      // Refresh all data after tunnel stops
+      setRefreshKey((prev) => prev + 1);
     } catch (error) {
       if (isPasswordRequiredError(error)) {
         setPendingStopSessionId(resolvedSessionId || null);
@@ -821,9 +824,8 @@ function DVpn() {
   }
 
   return (
-    <div className={`${"vpn-dashboard"} ${
-      height <= 600 ? "heightExt" : ""
-    }`}>
+    <div className={`${"vpn-dashboard"} ${height <= 600 ? "heightExt" : ""
+      }`}>
       {contextHolder}
       {isConnectionLoading && (
         <div className="dvpn-loader-overlay" role="status" aria-live="polite">
@@ -1058,12 +1060,11 @@ function DVpn() {
               ) : (
                 (recentProviders.length ? recentProviders : [recentProvider]).map((provider, index) => (
                   <div
-                    className={`provider-pill ${
-                      (activeProviderAddress && getProviderAddress(provider) === activeProviderAddress) ||
-                      (!activeProviderAddress && index === 0)
+                    className={`provider-pill ${(activeProviderAddress && getProviderAddress(provider) === activeProviderAddress) ||
+                        (!activeProviderAddress && index === 0)
                         ? "selected"
                         : ""
-                    }`}
+                      }`}
                     key={`${provider?.address || provider?.provider_address || provider?.identity || "provider"}-${index}`}
                     onClick={() => navigate("/service-provider")}
                   >
@@ -1155,9 +1156,9 @@ function DVpn() {
                           {formatDateTime(
                             session?.start_at ||
                             session?.start_time ||
-                              session?.started_at ||
-                              session?.created_at ||
-                              session?.createdAt
+                            session?.started_at ||
+                            session?.created_at ||
+                            session?.createdAt
                           )}
                         </p>
                       </div>
@@ -1171,9 +1172,9 @@ function DVpn() {
                   >
                     <ReconnectIcon />
                     {session?.reconnect_metadata ||
-                    session?.reconnectMeta ||
-                    session?.session_id ||
-                    session?.id
+                      session?.reconnectMeta ||
+                      session?.session_id ||
+                      session?.id
                       ? "Reconnect"
                       : "Reconnect"}
                   </button>

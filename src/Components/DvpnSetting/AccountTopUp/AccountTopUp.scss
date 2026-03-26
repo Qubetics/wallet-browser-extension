@@ -6,11 +6,39 @@
     text-align: left;
     margin-bottom: 15px;
 
-    h2 {
-      font-size: 27px;
-      font-weight: 600;
-      margin: 0 0 3px 0;
-      color: #ffffff;
+    .header-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 3px;
+
+      h2 {
+        font-size: 27px;
+        font-weight: 600;
+        margin: 0;
+        color: #ffffff;
+      }
+
+      .refresh-btn {
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        padding: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.3s ease;
+
+        &:hover {
+          transform: rotate(180deg);
+        }
+
+        img {
+          width: 24px;
+          height: 24px;
+          object-fit: contain;
+        }
+      }
     }
 
     p {
@@ -285,8 +313,16 @@
   overflow: auto;
   .topup-header {
     margin-bottom: 12px;
-    h2 {
-      font-size: 17px;
+    .header-title-row {
+      h2 {
+        font-size: 17px;
+      }
+      .refresh-btn {
+        img {
+          width: 18px;
+          height: 18px;
+        }
+      }
     }
     p {
       font-size: 14px;

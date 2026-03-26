@@ -93,7 +93,8 @@ export const dvpnRequest = async ({
   const accessToken = forcedAccessToken || walletState?.tokens?.accessToken;
   const refreshToken = walletState?.tokens?.refreshToken;
 
-  const searchParams = new URLSearchParams(query || {}).toString();
+  const queryWithBuster = method === "GET" ? { ...query, _t: Date.now() } : query;
+  const searchParams = new URLSearchParams(queryWithBuster || {}).toString();
   const url = buildDvpnUrl(searchParams ? `${path}?${searchParams}` : path);
 
   const headers = {

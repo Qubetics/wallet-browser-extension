@@ -90,30 +90,26 @@ function AccountTopUp() {
     },
   ];
 
+  const loadPlansData = async () => {
+    if (!providerAddress) return;
+    try {
+      setLoadingPlans(true);
+      const walletAddress = await getActiveWalletAddress();
+      const payload = await getProviderPlans(walletAddress, { providerAddress });
+      const data = payload?.data || payload || {};
+      const plans = Array.isArray(data?.plans)
+        ? data.plans
+        : Array.isArray(data)
+          ? data
+          : [];
+      setProviderPlans(plans);
+    } finally {
+      setLoadingPlans(false);
+    }
+  };
+
   useEffect(() => {
-    let cancelled = false;
-    const loadPlans = async () => {
-      if (!providerAddress) return;
-      try {
-        setLoadingPlans(true);
-        const walletAddress = await getActiveWalletAddress();
-        const payload = await getProviderPlans(walletAddress, { providerAddress });
-        const data = payload?.data || payload || {};
-        const plans = Array.isArray(data?.plans)
-          ? data.plans
-          : Array.isArray(data)
-            ? data
-            : [];
-        if (cancelled) return;
-        setProviderPlans(plans);
-      } finally {
-        if (!cancelled) setLoadingPlans(false);
-      }
-    };
-    loadPlans();
-    return () => {
-      cancelled = true;
-    };
+    loadPlansData();
   }, [providerAddress]);
 
   const displayPackages = useMemo(() => {
@@ -269,7 +265,9 @@ function AccountTopUp() {
       height <= 600 ? 'heightExtAccountTopUp' : ''
     }`}>
         <div className="topup-header">
-          <h2>Get Some Credits</h2>
+          <div className="header-title-row">
+            <h2>Get Some Credits</h2>
+          </div>
           <p>
             Purchase Credits and spend them on fast, secure & decentralized VPN
             service within Sentinel Blockchain.
@@ -345,12 +343,12 @@ function AccountTopUp() {
                   : selectedPlan?.credits
                     ? `${selectedPlan.credits.toLocaleString()} credits`
                     : `${Number(selectedPlan?.hours || 0).toLocaleString()} hours`}{" "}
-                for {`${selectedPlan?.price.toLocaleString()} "TICS"`} 
+                for {`${selectedPlan?.price.toLocaleString()} TICS`} 
               </span>
             )}
           </p>
           <p>
-            Payment will be charged to your iTunes Account. This credits are for
+            Payment will be charged to your Qubetics Account. This credits are for
             decentralized VPN services only.
             {/* <button
               type="button"

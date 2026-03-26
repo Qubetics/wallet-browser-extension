@@ -66,10 +66,23 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    width: 44px;
+    height: 44px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    transition: transform 0.3s ease, background 0.3s ease;
+
+    // &:hover {
+    //   background: rgba(255, 255, 255, 0.3);
+    //   transform: rotate(180deg);
+    // }
 
     img {
-      width: 36px;
-      height: 36px;
+      width: 40px;
+      height: 32px;
+      object-fit: contain;
+      filter: grayscale(1) invert(1);
+      mix-blend-mode: screen;
       display: block;
     }
   }

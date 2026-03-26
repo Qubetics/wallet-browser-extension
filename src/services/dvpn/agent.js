@@ -8,41 +8,51 @@ const parseJsonSafe = async (response) => {
   }
 };
 
-export const findRunningAgent = async () => {
-  for (const port of AGENT_PORTS) {
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 1200);
-      const response = await fetch(`http://127.0.0.1:${port}/health`, {
-        signal: controller.signal,
-      });
-      clearTimeout(timeoutId);
-      if (!response.ok) continue;
-      const body = await parseJsonSafe(response);
-      if (!body || String(body?.status || "").toLowerCase() !== "running") continue;
-      return {
-        reachable: true,
-        baseUrl: `http://127.0.0.1:${port}`,
-        port,
-        version:
-          body?.version ||
-          body?.build_version ||
-          body?.buildVersion ||
-          body?.data?.version ||
-          body?.data?.build_version ||
-          body?.data?.buildVersion ||
-          "",
-      };
-    } catch (_error) {
-      // Keep probing known ports.
+const probePort = async (port) => {
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 1500);
+    const response = await fetch(`http://127.0.0.1:${port}/health`, {
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+
+    if (!response.ok) throw new Error("Port not ok");
+    const body = await parseJsonSafe(response);
+    if (!body || String(body?.status || "").toLowerCase() !== "running") {
+      throw new Error("Agent not running");
     }
+
+    return {
+      reachable: true,
+      baseUrl: `http://127.0.0.1:${port}`,
+      port,
+      version:
+        body?.version ||
+        body?.build_version ||
+        body?.buildVersion ||
+        body?.data?.version ||
+        body?.data?.build_version ||
+        body?.data?.buildVersion ||
+        "",
+    };
+  } catch (error) {
+    throw error;
   }
-  return {
-    reachable: false,
-    baseUrl: "",
-    port: null,
-    version: "",
-  };
+};
+
+export const findRunningAgent = async () => {
+  const probes = AGENT_PORTS.map((port) => probePort(port));
+  try {
+    return await Promise.any(probes);
+  } catch (_error) {
+    return {
+      reachable: false,
+      baseUrl: "",
+      port: null,
+      version: "",
+    };
+  }
 };
 
 export const getAgentStatus = async (baseUrl) => {
