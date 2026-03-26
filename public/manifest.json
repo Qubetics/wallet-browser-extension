@@ -10,7 +10,8 @@
     "unlimitedStorage",
     "activeTab",
     "alarms",
-    "scripting"
+    "scripting",
+    "nativeMessaging"
   ],
   "side_panel": {
     "default_path": "index.html"

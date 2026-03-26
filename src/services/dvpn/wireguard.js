@@ -2,6 +2,7 @@
 
 import { getWalletDvpnState, setWalletDvpnState } from "./storage";
 import nacl from "tweetnacl";
+import { detectOS } from "../../helpers/dvpn.helpers";
 
 const DEFAULT_DNS = "1.1.1.1";
 const DEFAULT_MTU = 1420;

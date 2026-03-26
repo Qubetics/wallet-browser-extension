@@ -253,8 +253,14 @@
   @mixin theme() {
     @each $theme, $map in $themes {
       $theme-map: $map !global;
-      .#{$theme} & {
-        @content;
+      @if & {
+        .#{$theme} & {
+          @content;
+        }
+      } @else {
+        .#{$theme} {
+          @content;
+        }
       }
     }
     $theme-map: null !global;
@@ -269,8 +275,14 @@
   @mixin fresh() {
     @each $fresh, $map in $fresh {
       $fresh-map: $map !global;
-      .#{$fresh} & {
-        @content;
+      @if & {
+        .#{$fresh} & {
+          @content;
+        }
+      } @else {
+        .#{$fresh} {
+          @content;
+        }
       }
     }
     $fresh-map: null !global;
