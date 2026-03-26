@@ -32,6 +32,7 @@ function MenuFooter() {
   );
   const isDvpnMenu = dvpnRoutes.has(path);
   const [agentReachable, setAgentReachable] = useState(null);
+  const [isAdminRequired, setIsAdminRequired] = useState(false);
 
   useEffect(() => {
     if (!isDvpnMenu) {
@@ -42,7 +43,10 @@ function MenuFooter() {
     let cancelled = false;
     const check = async () => {
       const result = await findRunningAgent().catch(() => ({ reachable: false }));
-      if (!cancelled) setAgentReachable(!!result?.reachable);
+      if (!cancelled) {
+        setAgentReachable(!!result?.reachable);
+        setIsAdminRequired(result?.reachable && result?.diag?.is_admin === false);
+      }
     };
 
     check();
@@ -53,7 +57,7 @@ function MenuFooter() {
     };
   }, [isDvpnMenu]);
 
-  const disableDvpnLinks = agentReachable === false;
+  const disableDvpnLinks = agentReachable === false || isAdminRequired === true;
   const disabledClass = disableDvpnLinks ? "isDisabled" : "";
   const preventIfDisabled = (event) => {
     if (!disableDvpnLinks) return;

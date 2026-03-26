@@ -104,6 +104,109 @@
     }
   }
 
+
+  .agent-diag-warnings {
+    margin: 14px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    .diag-warning {
+      background: rgba(255, 171, 0, 0.1);
+      border: 1.5px solid rgba(255, 171, 0, 0.25);
+      border-radius: 12px;
+      padding: 12px 16px;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 500;
+      line-height: 1.45;
+      text-align: left;
+      animation: fadeInDiag 0.4s ease-out;
+
+      @keyframes fadeInDiag {
+        from { opacity: 0; transform: translateY(-5px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      a {
+        color: #73c9e2;
+        font-weight: 600;
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+  }
+
+  .admin-blocking-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 82px;
+    background: rgba(10, 10, 15, 0.96);
+    backdrop-filter: blur(10px);
+    z-index: 10005;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    text-align: center;
+    animation: fadeInOverlay 0.4s ease-out;
+
+    @keyframes fadeInOverlay {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .admin-modal-content {
+      background: #1a1a2e;
+      // Theme gradient border with rounded corners
+      border: 1px solid transparent;
+      background: 
+        linear-gradient(#1a1a2e, #1a1a2e) padding-box,
+        linear-gradient(90deg, #73c9e2 0%, #6c8dc5 25.37%, #6456b2 76.11%, #6145ea 101.48%) border-box;
+      border-radius: 20px;
+      padding: 32px 24px;
+      max-width: 340px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+
+      h2 {
+        // Gradient text
+        background: linear-gradient(90deg, #73c9e2 0%, #6c8dc5 25.37%, #6456b2 76.11%, #6145ea 101.48%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 12px;
+      }
+
+      p {
+        color: #e9e7f2;
+        font-size: 14px;
+        line-height: 1.6;
+        margin-bottom: 24px;
+      }
+
+      .instruction-step {
+        background: rgba(255, 255, 255, 0.05);
+        padding: 14px 16px;
+        border-radius: 12px;
+        text-align: left;
+        font-size: 13px;
+        margin-bottom: 12px;
+        // border-left: 4px solid #6145ea;
+        color: #fff;
+
+        b {
+          color: #73c9e2;
+        }
+      }
+    }
+  }
+
   .status-bar {
     display: flex;
     justify-content: flex-end;

@@ -84,6 +84,8 @@ function DVpn() {
   const [isCommandCopied, setIsCommandCopied] = useState(false);
   const [isAgentUpdateModalOpen, setIsAgentUpdateModalOpen] = useState(false);
   const [agentHealthVersion, setAgentHealthVersion] = useState("");
+  const [agentDiag, setAgentDiag] = useState(null);
+  const [isServiceLostModalOpen, setIsServiceLostModalOpen] = useState(false);
   const [latestAgentVersion, setLatestAgentVersion] = useState("");
   const [copiedUninstallKey, setCopiedUninstallKey] = useState("");
   const [showRunAfterDownload, setShowRunAfterDownload] = useState(false);
@@ -151,25 +153,26 @@ function DVpn() {
     }
   };
 
-  const getCommandWithResolvedFileName = (downloadInfo) => {
-    if (!downloadInfo?.cmd) return "";
+  const getCommandWithResolvedFileName = (downloadInfo, field = "cmd") => {
+    const rawCmd = downloadInfo?.[field] || "";
+    if (!rawCmd) return "";
     const platform = downloadInfo?.buildKey;
-    if (!platform) return downloadInfo.cmd;
+    if (!platform) return rawCmd;
 
     const fileName = downloadedFileNames[platform];
-    if (!fileName) return downloadInfo.cmd;
+    if (!fileName) return rawCmd;
 
     if (platform === "linux") {
-      return downloadInfo.cmd.replaceAll("wg-agent_1.0.0_amd64.deb", fileName);
+      return rawCmd.replaceAll("wg-agent_1.0.0_amd64.deb", fileName);
     }
     if (platform === "windows") {
-      return downloadInfo.cmd.replaceAll("wg-agent.exe", fileName);
+      return rawCmd.replaceAll("wg-agent.exe", fileName);
     }
-    return downloadInfo.cmd;
+    return rawCmd;
   };
 
   const handleCopyInstallCommand = async (downloadInfo) => {
-    const command = getCommandWithResolvedFileName(downloadInfo);
+    const command = getCommandWithResolvedFileName(downloadInfo, "copyCmd") || getCommandWithResolvedFileName(downloadInfo, "cmd");
     if (!command) return;
     try {
       await navigator.clipboard.writeText(command);
@@ -313,13 +316,25 @@ function DVpn() {
 
   const checkAgentHealth = async () => {
     const result = await findRunningAgent();
+    const wasReachable = !!agentBaseUrl;
+
     if (result?.reachable && result?.baseUrl) {
       setAgentBaseUrl(result.baseUrl);
       setAgentHealthVersion(normalizeVersion(result?.version || ""));
+      setAgentDiag(result?.diag || null);
+      if (isServiceLostModalOpen) setIsServiceLostModalOpen(false);
+      setAgentReachable(true);
       return true;
     }
+
+    // Logic for redirection if lost
+    if (wasReachable && !result?.reachable) {
+      setAgentReachable(false);
+    }
+
     setAgentBaseUrl("");
     setAgentHealthVersion("");
+    setAgentDiag(null);
     return false;
   };
 
@@ -400,17 +415,14 @@ function DVpn() {
   }, [agentReachable, messageApi, navigate]);
 
   useEffect(() => {
-    if (agentReachable !== false) return undefined;
-    const poll = setInterval(async () => {
-      const isUp = await checkAgentHealth();
-      if (isUp) {
-        setAgentReachable(true);
-        clearInterval(poll);
-      }
-    }, 5000);
+    // Continuously check agent health every 5s to:
+    // 1. Detect if it comes online (recovery)
+    // 2. Refresh info (like Admin status)
+    // 3. Detect if it goes offline (redirection)
+    const poll = setInterval(checkAgentHealth, 5000);
     return () => clearInterval(poll);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [agentReachable]);
+  }, [agentBaseUrl]);
 
   useEffect(() => {
     if (agentReachable !== true || !agentBaseUrl) return undefined;
@@ -835,6 +847,23 @@ function DVpn() {
           </div>
         </div>
       )}
+      <ModalCustom
+        isOpen={isServiceLostModalOpen}
+        setIsOpen={setIsServiceLostModalOpen}
+        title="VPN Agent Disconnected"
+      >
+        <div style={{ padding: "10px 0", textAlign: "center" }}>
+          <p style={{ color: "#d9d9d9", fontSize: "14px", marginBottom: "20px" }}>
+            The local dVPN agent has stopped responding. Please ensure the
+            terminal is running and has not been closed.
+          </p>
+          <ButtonComp
+            text="Got it"
+            onClick={() => setIsServiceLostModalOpen(false)}
+            maxWidth="130px"
+          />
+        </div>
+      </ModalCustom>
       <div className="header">
         <div className="header-content">
           <h2>Qubetics dVPN</h2>
@@ -851,7 +880,76 @@ function DVpn() {
           </span>
         )}
       </div>
-      {agentReachable === true && (
+      {agentReachable === true && agentDiag?.is_admin === false && detectedOS === "windows" && (
+        <div className="admin-blocking-overlay">
+          <div className="admin-modal-content">
+            <span style={{ fontSize: "40px", marginBottom: "16px", display: "block" }}></span>
+            <h2>Administrator Required</h2>
+            <p>
+              The dVPN agent must be run as Administrator to function correctly on Windows.
+            </p>
+            <div className="instruction-step">
+              1. Close the current agent window.
+            </div>
+            <div className="instruction-step">
+              2. Right-click <b>wg-agent.exe</b>.
+            </div>
+            <div className="instruction-step">
+              3. Select <b>"Run as administrator"</b>.
+            </div>
+            <p style={{ fontSize: "12px", opacity: 0.7, marginTop: "20px" }}>
+              This screen will automatically refresh once the agent starts with Admin rights.
+            </p>
+          </div>
+        </div>
+      )}
+      {agentReachable === true && agentDiag && (
+        <div className="agent-diag-warnings">
+          {detectedOS === "windows" && agentDiag.wireguard_is_admin === false && (
+            <div className="diag-warning">
+              ⚠️ WireGuard must be run as Administrator.
+            </div>
+          )}
+          {agentDiag.wireguard_installed === false && (
+            <div className="diag-warning">
+              ⚠️ WireGuard is not installed.{" "}
+              <a
+                href="https://download.wireguard.com/windows-client/wireguard-installer.exe"
+                target="_blank"
+                rel="noreferrer"
+                style={{ color: "#fff", textDecoration: "underline" }}
+              >
+                Download here
+              </a>
+            </div>
+          )}
+        </div>
+      )}
+      {agentReachable === true && agentDiag?.is_admin === false && detectedOS === "windows" && (
+        <div className="admin-blocking-overlay">
+          <div className="admin-modal-content">
+            <span style={{ fontSize: "40px", marginBottom: "16px", display: "block" }}>⚠️</span>
+            <h2>Administrator Required</h2>
+            <p>
+              The dVPN agent must be run as Administrator to function correctly on Windows.
+            </p>
+            <div className="instruction-step">
+              1. Close the current agent window.
+            </div>
+            <div className="instruction-step">
+              2. Right-click <b>wg-agent.exe</b>.
+            </div>
+            <div className="instruction-step">
+              3. Select <b>"Run as administrator"</b>.
+            </div>
+            <p style={{ fontSize: "12px", opacity: 0.7, marginTop: "20px" }}>
+              This screen will automatically refresh once the agent starts with Admin rights.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {agentReachable === true && agentDiag?.is_admin !== false && (
         <>
           <div className="status-bar">
             <button className={`status ${isConnected ? "connected" : "disconnected"}`}>

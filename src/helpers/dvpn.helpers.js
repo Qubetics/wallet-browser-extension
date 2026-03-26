@@ -24,7 +24,8 @@ export const getDownloadMap = ({ appBaseUrl, vpnBaseUrl, vpnHealthUrl }) => ({
 
 
 # 2. Install agent package and start service (single command)
-sudo dpkg -i ~/Downloads/wg-agent_1.0.0_amd64.deb && sudo systemctl start wg-agent`,
+sudo dpkg -i wg-agent_1.0.0_amd64.deb && sudo systemctl start wg-agent`,
+    copyCmd: `sudo dpkg -i wg-agent_1.0.0_amd64.deb && sudo systemctl start wg-agent`,
   },
   windows: {
     href: "/Vpn_Downloads/wg-agent.exe",
@@ -73,6 +74,7 @@ wget ${appBaseUrl}/downloads/wg-agent_1.0.0_amd64.deb
 
 # 2. Install dependencies + agent + start service (single command)
 sudo apt update && sudo apt install -y wireguard-tools resolvconf && sudo dpkg -i ~/Downloads/wg-agent_1.0.0_amd64.deb && sudo systemctl start wg-agent`,
+    copyCmd: `sudo apt update && sudo apt install -y wireguard-tools resolvconf && sudo dpkg -i ~/Downloads/wg-agent_1.0.0_amd64.deb && sudo systemctl start wg-agent`,
   },
 });
 

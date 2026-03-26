@@ -35,22 +35,39 @@ const probePort = async (port) => {
         body?.data?.build_version ||
         body?.data?.buildVersion ||
         "",
+      diag: body?.diag || body?.data?.diag || null,
     };
   } catch (error) {
     throw error;
   }
 };
 
+let LAST_SUCCESSFUL_PORT = null;
+
 export const findRunningAgent = async () => {
+  // 1. Try last successful port first (Fast Path)
+  if (LAST_SUCCESSFUL_PORT) {
+    try {
+      const result = await probePort(LAST_SUCCESSFUL_PORT);
+      return result;
+    } catch (_e) {
+      LAST_SUCCESSFUL_PORT = null;
+    }
+  }
+
+  // 2. Parallel probe as fallback (Slow Path)
   const probes = AGENT_PORTS.map((port) => probePort(port));
   try {
-    return await Promise.any(probes);
+    const result = await Promise.any(probes);
+    LAST_SUCCESSFUL_PORT = result.port;
+    return result;
   } catch (_error) {
     return {
       reachable: false,
       baseUrl: "",
       port: null,
       version: "",
+      diag: null,
     };
   }
 };
