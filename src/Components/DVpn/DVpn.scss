@@ -260,105 +260,195 @@
     }
   }
 
-  .agent-checking-banner {
-    margin-top: 12px;
-    background: rgba(76, 157, 255, 0.12);
-    border: 1px solid rgba(76, 157, 255, 0.5);
-    color: #c5ddff;
-    padding: 12px 14px;
-    border-radius: 12px;
-    font-size: 14px;
-    font-weight: 500;
-    text-align: left;
-  }
+  .agent-install-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px 0;
+    min-height: 480px;
 
-  .agent-install-banner {
-    margin-top: 12px;
-    background: rgba(255, 203, 77, 0.12);
-    border: 1px solid rgba(255, 203, 77, 0.55);
-    border-radius: 12px;
-    padding: 14px;
-    text-align: left;
-
-    h3 {
-      color: #fff3c1;
-      font-size: 16px;
-      margin-bottom: 8px;
-    }
-
-    p {
-      color: #d2d0d7;
-      font-size: 14px;
-      line-height: 145%;
-      margin-bottom: 10px;
-    }
-
-    .agent-download-btn {
-      display: inline-block;
-      text-decoration: none;
-      background: linear-gradient(90deg,
-          #73c9e2 0%,
-          #6c8dc5 25.37%,
-          #6456b2 76.11%,
-          #6145ea 101.48%);
-      color: #fff;
-      border-radius: 10px;
-      padding: 10px 14px;
-      font-size: 14px;
-      font-weight: 600;
-      margin-bottom: 10px;
-    }
-
-    // agent-copy-btn is styled at the dashboard scope
-
-    .agent-install-steps {
-      margin-top: 8px;
-
-      summary {
-        cursor: pointer;
-        color: #fff;
-        font-size: 14px;
-        font-weight: 500;
-      }
-
-      ol {
-        margin: 10px 0 0;
-        padding-left: 18px;
-      }
-
-      li {
-        color: #d2d0d7;
-        font-size: 13px;
-        line-height: 145%;
-        margin-bottom: 6px;
-      }
-
-      pre {
-        margin-top: 8px;
-        white-space: pre-wrap;
-        word-break: break-word;
-        background: #131219;
-        border: 1px solid #2d2b38;
-        border-radius: 10px;
-        color: #c6c5cd;
-        font-size: 12px;
-        line-height: 150%;
-        padding: 10px;
-      }
-    }
-
-    .agent-links {
-      margin-top: 8px;
+    .install-card {
+      background: rgba(24, 23, 31, 0.6);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 24px;
+      padding: 32px 24px;
+      width: 100%;
+      max-width: 380px;
+      text-align: center;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      align-items: center;
 
-      a,
-      span {
-        color: #c6c5cd;
+      .install-icon-wrapper {
+        width: 64px;
+        height: 64px;
+        background: linear-gradient(135deg, #73c9e2 0%, #6145ea 100%);
+        border-radius: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 20px;
+        box-shadow: 0 8px 16px rgba(115, 201, 226, 0.2);
+
+        svg {
+          width: 32px;
+          height: 32px;
+          color: #fff;
+        }
+      }
+
+      h3 {
+        color: #fff;
+        font-size: 20px;
+        font-weight: 600;
+        margin-bottom: 12px;
+      }
+
+      .install-desc {
+        color: #98969b;
+        font-size: 14px;
+        line-height: 1.6;
+        margin-bottom: 24px;
+      }
+
+      .install-actions {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 24px;
+      }
+
+      .retry-check-btn {
+        background: transparent;
+        border: none;
+        color: #73c9e2;
         font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        padding: 8px;
+        transition: opacity 0.2s;
+
+        &:hover {
+          opacity: 0.8;
+          text-decoration: underline;
+        }
+      }
+
+      .install-guide-section, .all-platforms-section {
+        width: 100%;
+        margin-top: 12px;
+        border-top: 1px solid rgba(255, 255, 255, 0.04);
+        padding-top: 12px;
+
+        .agent-install-steps {
+          summary {
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 14px;
+            font-weight: 500;
+            padding: 4px 0;
+            list-style: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+
+            &::after {
+              content: '▾';
+              font-size: 10px;
+              transition: transform 0.2s;
+            }
+          }
+
+          &[open] summary::after {
+            transform: rotate(180deg);
+          }
+
+          .guide-content {
+            margin-top: 16px;
+            text-align: left;
+
+            .install-steps-list {
+              padding-left: 16px;
+              margin-bottom: 16px;
+              li {
+                color: #d2d0d7;
+                font-size: 13px;
+                margin-bottom: 8px;
+                line-height: 1.4;
+              }
+            }
+
+            .command-box {
+              position: relative;
+              background: #0d0c14;
+              border-radius: 12px;
+              padding: 12px;
+              border: 1px solid rgba(255, 255, 255, 0.06);
+
+              pre {
+                margin: 0;
+                font-size: 12px;
+                color: #73c9e2;
+                white-space: pre-wrap;
+                word-break: break-all;
+                font-family: 'JetBrains Mono', monospace;
+              }
+
+              .copy-command-btn {
+                margin-top: 10px;
+                width: 100%;
+                background: rgba(255, 255, 255, 0.05);
+                border: none;
+                color: #fff;
+                font-size: 12px;
+                padding: 6px;
+                border-radius: 6px;
+                cursor: pointer;
+                transition: background 0.2s;
+
+                &:hover {
+                  background: rgba(255, 255, 255, 0.1);
+                }
+              }
+            }
+          }
+
+          .other-platforms-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            padding: 12px 0;
+
+            a {
+              color: rgba(255, 255, 255, 0.8);
+              text-decoration: none;
+              font-size: 13px;
+              display: flex;
+              align-items: center;
+              gap: 6px;
+              transition: color 0.2s;
+
+              &:hover {
+                color: #73c9e2;
+              }
+            }
+          }
+        }
       }
     }
+  }
+
+  .agent-checking-banner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    color: #98969b;
+    font-size: 15px;
+    font-weight: 500;
   }
 
   .credit-bar {

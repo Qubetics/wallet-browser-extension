@@ -3,6 +3,7 @@ export const detectOS = () => {
   const ua = navigator.userAgent || "";
   const platform = navigator.platform || "";
   if (/Win/i.test(platform)) return "windows";
+  if (/Mac/i.test(platform)) return "macos";
   if (/Linux/i.test(platform)) return "linux";
   if (/iPhone|iPad|iPod/i.test(ua)) return "ios";
   return "unknown";
@@ -52,6 +53,22 @@ sudo dpkg -i wg-agent_1.0.0_amd64.deb && sudo systemctl start wg-agent`,
       "WireGuard and Agent Terminal must be installed and running on your system. The VPN will only connect when both services are active.",
     ],
     cmd: "",
+  },
+  macos: {
+    href: "/Vpn_Downloads/QubeticsVPN-Installer.pkg",
+    buildKey: "macos",
+    label: "macOS (.pkg)",
+    icon: "🍏",
+    guide: [
+      "Download the QubeticsVPN installer for macOS.",
+      "Open the downloaded .pkg file and follow the installation steps.",
+      "The installer will automatically configure the background VPN service for this extension.",
+      "Once installed, return to this page and the extension will connect automatically."
+    ],
+    cmd: `# macOS Installation
+# Download the installer using the button above.
+# Double-click the downloaded QubeticsVPN-Installer.pkg file.
+# Follow the on-screen instructions to complete the setup.`
   },
   ios: {
     href: null,
@@ -207,17 +224,17 @@ export const getDurationLabel = (session) => {
 
   const startedAt = new Date(
     session?.start_at ||
-      session?.started_at ||
-      session?.startAt ||
-      session?.start_time ||
-      0
+    session?.started_at ||
+    session?.startAt ||
+    session?.start_time ||
+    0
   );
   const endedAt = new Date(
     session?.status_at ||
-      session?.ended_at ||
-      session?.endAt ||
-      session?.end_time ||
-      0
+    session?.ended_at ||
+    session?.endAt ||
+    session?.end_time ||
+    0
   );
   const startMs = startedAt.getTime();
   const endMs = endedAt.getTime();

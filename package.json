@@ -119,11 +119,15 @@
     "web-vitals": "^2.1.4",
     "web3": "1.9.0",
     "web3-eth": "^1.8.1",
+    "bs58": "^5.0.0",
+    "@ethersproject/basex": "^5.7.0",
+    "promise-retry": "^2.0.1",
     "webpack": "^5.75.0"
   },
   "scripts": {
     "start": "react-scripts --max_old_space_size=100000 start",
     "build": "npx webpack build && GENERATE_SOURCEMAP=false react-scripts --max_old_space_size=22528 build",
+    "watch": "node scripts/watch.js",
     "half": "npx webpack build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",

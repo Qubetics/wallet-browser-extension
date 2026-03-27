@@ -95,7 +95,7 @@ function DVpn() {
   const { account } = useSelector(
     (state) => state
   );
-  console.log("account", account);
+  // console.log("account", account);
   const authToken = account?.jwtToken;
   const isAutoDisconnectingRef = useRef(false);
   const hasShownUpdatePromptRef = useRef(false);
@@ -339,6 +339,7 @@ function DVpn() {
   };
 
   useEffect(() => {
+    // setAgentReachable(false);
     setDetectedOS(detectOS());
     checkAgentHealth().then(setAgentReachable);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -415,14 +416,19 @@ function DVpn() {
   }, [agentReachable, messageApi, navigate]);
 
   useEffect(() => {
-    // Continuously check agent health every 5s to:
-    // 1. Detect if it comes online (recovery)
-    // 2. Refresh info (like Admin status)
-    // 3. Detect if it goes offline (redirection)
-    const poll = setInterval(checkAgentHealth, 5000);
+    // Poll agent health when agent is NOT yet reachable (null = initial, false = went offline).
+    // Once the agent comes online, stop polling — the bootstrapDvpnAuth effect handles the rest.
+    if (agentReachable === true) return undefined;
+    const poll = setInterval(async () => {
+      const isUp = await checkAgentHealth();
+      if (isUp) {
+        setAgentReachable(true);
+        clearInterval(poll);
+      }
+    }, 3000);
     return () => clearInterval(poll);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [agentBaseUrl]);
+  }, [agentReachable]);
 
   useEffect(() => {
     if (agentReachable !== true || !agentBaseUrl) return undefined;
@@ -649,6 +655,8 @@ function DVpn() {
 
   const startConnectionFromNode = async (node, providedPassword = "") => {
     if (!activeDvpnWallet) return;
+    console.log("[DVpn] startConnectionFromNode called with node activeDvpnWallet:", activeDvpnWallet);
+    console.log("[DVpn] startConnectionFromNode called with node:", node);
     if (!node) {
       logFlow("ui.quickconnect.blocked_no_node", {
         walletAddress: activeDvpnWallet,
@@ -658,12 +666,15 @@ function DVpn() {
     }
     try {
       setIsConnectionLoading(true);
+      console.log(`[DVpn] Starting connection for node ID: ${node?.id}, Address: ${node?.address}`);
       logFlow("ui.connect.start", {
         walletAddress: activeDvpnWallet,
         nodeId: node?.id || "",
         nodeAddress: node?.address || "",
         providerUrl: node?.url || node?.remote_url || "",
       });
+
+      console.log("[DVpn] Fetching WireGuard config from backend...");
       const result = await connectVpnWithWireguardConfig({
         walletAddress: activeDvpnWallet,
         serverId: node?.id || node?.address || "",
@@ -674,23 +685,37 @@ function DVpn() {
           ...(providedPassword ? { sessionPassword: providedPassword } : {}),
         },
       });
+
       const wireguardConfig = result?.wireguardConfig || result?.runtime?.config || "";
+      console.log("[DVpn] Backend returned wireguardConfig length:", wireguardConfig.length);
+      console.log("[DVpn] Raw wireguardConfig snippet:", wireguardConfig.substring(0, 50).replace(/\n/g, '\\n') + "...");
+
       if (!wireguardConfig) {
         throw new Error("Missing WireGuard tunnel config");
       }
+
+      console.log("[DVpn] Checking for effective agent base URL...");
       const effectiveAgentBaseUrl =
         agentBaseUrl || (await findRunningAgent()).baseUrl || "";
+      console.log("[DVpn] effectiveAgentBaseUrl resolved to:", effectiveAgentBaseUrl);
+
       if (!effectiveAgentBaseUrl) {
         throw new Error("Local wg-agent is not reachable");
       }
       if (!agentBaseUrl) {
         setAgentBaseUrl(effectiveAgentBaseUrl);
       }
+
+      console.log(`[DVpn] Calling startAgentTunnel onto: ${effectiveAgentBaseUrl}`);
       await startAgentTunnel({
         baseUrl: effectiveAgentBaseUrl,
         config: wireguardConfig,
       });
+
+      console.log("[DVpn] startAgentTunnel call succeeded, awaiting status confirmation...");
       const tunnelStatus = await getAgentStatus(effectiveAgentBaseUrl);
+      console.log("[DVpn] Initial Tunnel status from getAgentStatus:", tunnelStatus);
+
       setIsConnected(!!tunnelStatus?.is_running);
       setCurrentSessionId(result?.runtime?.sessionId || null);
       if (result?.runtime?.node) {
@@ -701,13 +726,23 @@ function DVpn() {
         sessionId: result?.runtime?.sessionId || null,
       });
       messageApi.success("dVPN session started.");
+      console.log("[DVpn] Connection flow finished successfully.");
     } catch (error) {
+      console.error("[DVpn] startConnectionFromNode caught an error:", error);
+      console.error("[DVpn] Error details:", {
+        message: error?.message,
+        code: error?.code,
+        details: error?.details,
+        stack: error?.stack,
+      });
       logFlow("ui.connect.error", {
         walletAddress: activeDvpnWallet,
         code: error?.code || "UNKNOWN",
         message: error?.message || "Failed",
+        details: JSON.stringify(error?.details || {}),
       });
       if (isPasswordRequiredError(error)) {
+        console.log("[DVpn] Error indicates a password is required. Opening password modal...");
         setPendingStartNode(node);
         setIsPasswordModalOpen(true);
       }
@@ -781,6 +816,7 @@ function DVpn() {
       setIsBuyPlanModalOpen(true);
       return;
     }
+    console.log("[DVpn] Quick connect node:", quickConnectNode);
     await startConnectionFromNode(quickConnectNode);
   };
 
@@ -996,52 +1032,74 @@ function DVpn() {
       )}
 
       {agentReachable === false && (
-        <div className="agent-install-banner">
-          <h3> VPN Agent Not Found</h3>
-          <p>
-            We could not reach the local agent on ports 51821-51830. Install it and this
-            screen will auto-recover when the service comes online.
-          </p>
-          {selectedDownload.href && (
-            <a
-              href={selectedDownload.href}
-              download
-              className="agent-download-btn"
-              onClick={(event) => {
-                event.preventDefault();
-                handleBuildDownload(selectedDownload.buildKey, selectedDownload.href);
-              }}
-            >
-              {downloadingFor === selectedDownload.buildKey
-                ? "Preparing download..."
-                : `${selectedDownload.icon} Download for ${selectedDownload.label}`}
-            </a>
-          )}
-          <details className="agent-install-steps" open={isInstallCommandOpen}>
-            <summary>Install and run command</summary>
-            {selectedDownload.guide && (
-              <ol>
-                {selectedDownload.guide.map((step, index) => (
-                  <li key={`${detectedOS}-guide-${index}`}>{step}</li>
-                ))}
-              </ol>
-            )}
-            {!!getCommandWithResolvedFileName(selectedDownload) && (
-              <>
-                <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}>
-                  <button
-                    type="button"
-                    className="agent-copy-btn"
-                    onClick={() => handleCopyInstallCommand(selectedDownload)}
-                    style={{ width: "auto", minWidth: 96 }}
-                  >
-                    {isCommandCopied ? "Copied" : "Copy command"}
-                  </button>
+        <div className="agent-install-container">
+          <div className="install-card">
+            <div className="install-icon-wrapper">
+              <CrownIcon />
+            </div>
+            <h3>Native Agent Required</h3>
+            <p className="install-desc">
+              {detectedOS === "macos"
+                ? "The Qubetics macOS application is required to manage secure VPN connections on your Mac."
+                : "The Qubetics native agent is required to manage secure VPN connections on your system."
+              }
+            </p>
+
+            <div className="install-actions">
+              <ButtonComp
+                text={downloadingFor === selectedDownload.buildKey ? "Preparing..." : `Download for ${selectedDownload.label}`}
+                onClick={() => handleBuildDownload(selectedDownload.buildKey, selectedDownload.href)}
+                primary
+                maxWidth="100%"
+              />
+
+              <button
+                className="retry-check-btn"
+                onClick={() => checkAgentHealth().then(setAgentReachable)}
+              >
+                Already installed? Check again
+              </button>
+            </div>
+
+            <div className="install-guide-section">
+              <details className="agent-install-steps" open={isInstallCommandOpen}>
+                <summary>Installation Guide & Commands</summary>
+                <div className="guide-content">
+                  {selectedDownload.guide && (
+                    <ol className="install-steps-list">
+                      {selectedDownload.guide.map((step, index) => (
+                        <li key={`${detectedOS}-guide-${index}`}>{step}</li>
+                      ))}
+                    </ol>
+                  )}
+                  <div className="command-box">
+                    <pre>{getCommandWithResolvedFileName(selectedDownload)}</pre>
+                    <button
+                      type="button"
+                      className="copy-command-btn"
+                      onClick={() => handleCopyInstallCommand(selectedDownload)}
+                    >
+                      {isCommandCopied ? "Copied!" : "Copy Command"}
+                    </button>
+                  </div>
                 </div>
-                <pre>{getCommandWithResolvedFileName(selectedDownload)}</pre>
-              </>
-            )}
-          </details>
+              </details>
+            </div>
+
+            <div className="all-platforms-section">
+              <details className="agent-install-steps">
+                <summary>Other Platforms</summary>
+                <div className="other-platforms-links">
+                  <a href="#" onClick={(e) => { e.preventDefault(); handleBuildDownload("linux", "/Vpn_Downloads/wg-agent_1.0.0_amd64.deb"); }}>
+                    <span>🐧</span> Linux (.deb)
+                  </a>
+                  <a href="#" onClick={(e) => { e.preventDefault(); handleBuildDownload("windows", "/Vpn_Downloads/wg-agent.exe"); }}>
+                    <span>🪟</span> Windows (.exe)
+                  </a>
+                </div>
+              </details>
+            </div>
+          </div>
         </div>
       )}
 
@@ -1159,9 +1217,9 @@ function DVpn() {
                 (recentProviders.length ? recentProviders : [recentProvider]).map((provider, index) => (
                   <div
                     className={`provider-pill ${(activeProviderAddress && getProviderAddress(provider) === activeProviderAddress) ||
-                        (!activeProviderAddress && index === 0)
-                        ? "selected"
-                        : ""
+                      (!activeProviderAddress && index === 0)
+                      ? "selected"
+                      : ""
                       }`}
                     key={`${provider?.address || provider?.provider_address || provider?.identity || "provider"}-${index}`}
                     onClick={() => navigate("/service-provider")}
