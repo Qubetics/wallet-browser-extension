@@ -404,25 +404,32 @@ class Background {
     });
 
     chrome.runtime.onMessage.addListener(
-      async (message, sender, sendResponse) => {
+      (message, sender, sendResponse) => {
         if (message.type === 'SWITCH_CHAIN') {
           if (message.payload.chainId) {
-            const { chains } = await chrome.storage.local.get('chains');
+            (async () => {
+              try {
+                const { chains } = await chrome.storage.local.get('chains');
 
-            const updatedChains = chains.map((el) => {
-              if (el.chainId == message.payload.chainId) {
-                el.default = true;
-              } else {
-                el.default = false;
+                const updatedChains = chains.map((el) => {
+                  if (el.chainId == message.payload.chainId) {
+                    el.default = true;
+                  } else {
+                    el.default = false;
+                  }
+                  return el;
+                });
+
+                await chrome.storage.local.set({
+                  chains: updatedChains,
+                });
+
+                sendResponse({});
+              } catch (err) {
+                sendResponse({ error: err.message });
               }
-              return el;
-            });
-
-            await chrome.storage.local.set({
-              chains: updatedChains,
-            });
-
-            sendResponse({});
+            })();
+            return true; // keep channel open for async sendResponse
           }
         }
       }
@@ -491,13 +498,13 @@ class Background {
                   height: 746,
                 });
 
-                chrome.runtime.onMessage.addListener(
-                  (message, sender, sendResponse) => {
-                    if (message.method === 'requestAccounts') {
-                      resolve(message.result);
-                    }
+                const requestAccountsListener = (message) => {
+                  if (message.method === 'requestAccounts') {
+                    chrome.runtime.onMessage.removeListener(requestAccountsListener);
+                    resolve(message.result);
                   }
-                );
+                };
+                chrome.runtime.onMessage.addListener(requestAccountsListener);
               });
 
               // console.log('RESPONSE ON CONNECT DAPP:',response)
@@ -554,7 +561,8 @@ class Background {
                 height: 746,
               });
 
-              chrome.windows.onRemoved.addListener(async () => {
+              const nativeConnectWindowListener = async (windowId) => {
+                chrome.windows.onRemoved.removeListener(nativeConnectWindowListener);
                 const { isApproved } = await chrome.storage.local.get(
                   'isApproved'
                 );
@@ -567,16 +575,17 @@ class Background {
                     id: req.id,
                   });
                 else await chrome.storage.local.set({ isApproved: false });
-              });
+              };
+              chrome.windows.onRemoved.addListener(nativeConnectWindowListener);
 
-              chrome.runtime.onMessage.addListener(
-                (message, sender, sendResponse) => {
-                  if (message.method === 'nativeConnect') {
-                    resolve(message.result);
-                    // chrome.windows.onRemoved.removeListener(function(){});
-                  }
+              const nativeConnectMsgListener = (message) => {
+                if (message.method === 'nativeConnect') {
+                  chrome.runtime.onMessage.removeListener(nativeConnectMsgListener);
+                  chrome.windows.onRemoved.removeListener(nativeConnectWindowListener);
+                  resolve(message.result);
                 }
-              );
+              };
+              chrome.runtime.onMessage.addListener(nativeConnectMsgListener);
             });
 
             if (response) {
@@ -629,13 +638,13 @@ class Background {
               height: 746,
             });
 
-            chrome.runtime.onMessage.addListener(
-              (message, sender, sendResponse) => {
-                if (message.method === 'signTransaction') {
-                  resolve(message.result);
-                }
+            const signTxListener = (message) => {
+              if (message.method === 'signTransaction') {
+                chrome.runtime.onMessage.removeListener(signTxListener);
+                resolve(message.result);
               }
-            );
+            };
+            chrome.runtime.onMessage.addListener(signTxListener);
           });
 
           if (response) {
@@ -658,13 +667,13 @@ class Background {
               height: 746,
             });
 
-            chrome.runtime.onMessage.addListener(
-              (message, sender, sendResponse) => {
-                if (message.method === 'signTypedMessage') {
-                  resolve(message.result);
-                }
+            const signTypedMsgListener = (message) => {
+              if (message.method === 'signTypedMessage') {
+                chrome.runtime.onMessage.removeListener(signTypedMsgListener);
+                resolve(message.result);
               }
-            );
+            };
+            chrome.runtime.onMessage.addListener(signTypedMsgListener);
           });
 
           if (response) {
@@ -687,13 +696,13 @@ class Background {
               height: 746,
             });
 
-            chrome.runtime.onMessage.addListener(
-              (message, sender, sendResponse) => {
-                if (message.method === 'signRawTransaction') {
-                  resolve(message.result);
-                }
+            const signRawTxListener = (message) => {
+              if (message.method === 'signRawTransaction') {
+                chrome.runtime.onMessage.removeListener(signRawTxListener);
+                resolve(message.result);
               }
-            );
+            };
+            chrome.runtime.onMessage.addListener(signRawTxListener);
           });
 
           if (response) {
@@ -717,13 +726,13 @@ class Background {
               height: 746,
             });
 
-            chrome.runtime.onMessage.addListener(
-              (message, sender, sendResponse) => {
-                if (message.method === 'switchEthereumChain') {
-                  resolve(message.result);
-                }
+            const switchChainListener = (message) => {
+              if (message.method === 'switchEthereumChain') {
+                chrome.runtime.onMessage.removeListener(switchChainListener);
+                resolve(message.result);
               }
-            );
+            };
+            chrome.runtime.onMessage.addListener(switchChainListener);
           });
 
           if (response) {
@@ -763,7 +772,8 @@ class Background {
               height: 746,
             });
 
-            chrome.windows.onRemoved.addListener(async () => {
+            const createValidatorWindowListener = async (windowId) => {
+              chrome.windows.onRemoved.removeListener(createValidatorWindowListener);
               const { isApproved } = await chrome.storage.local.get(
                 'isApproved'
               );
@@ -776,15 +786,17 @@ class Background {
                   id: req.id,
                 });
               else await chrome.storage.local.set({ isApproved: false });
-            });
+            };
+            chrome.windows.onRemoved.addListener(createValidatorWindowListener);
 
-            chrome.runtime.onMessage.addListener(
-              (message, sender, sendResponse) => {
-                if (message.method === 'createValidator') {
-                  resolve(message.result);
-                }
+            const createValidatorMsgListener = (message) => {
+              if (message.method === 'createValidator') {
+                chrome.runtime.onMessage.removeListener(createValidatorMsgListener);
+                chrome.windows.onRemoved.removeListener(createValidatorWindowListener);
+                resolve(message.result);
               }
-            );
+            };
+            chrome.runtime.onMessage.addListener(createValidatorMsgListener);
           });
 
           if (response) {
@@ -808,7 +820,8 @@ class Background {
               height: 746,
             });
 
-            chrome.windows.onRemoved.addListener(async () => {
+            const editValidatorWindowListener = async (windowId) => {
+              chrome.windows.onRemoved.removeListener(editValidatorWindowListener);
               const { isApproved } = await chrome.storage.local.get(
                 'isApproved'
               );
@@ -821,15 +834,17 @@ class Background {
                   id: req.id,
                 });
               else await chrome.storage.local.set({ isApproved: false });
-            });
+            };
+            chrome.windows.onRemoved.addListener(editValidatorWindowListener);
 
-            chrome.runtime.onMessage.addListener(
-              (message, sender, sendResponse) => {
-                if (message.method === 'editValidator') {
-                  resolve(message.result);
-                }
+            const editValidatorMsgListener = (message) => {
+              if (message.method === 'editValidator') {
+                chrome.runtime.onMessage.removeListener(editValidatorMsgListener);
+                chrome.windows.onRemoved.removeListener(editValidatorWindowListener);
+                resolve(message.result);
               }
-            );
+            };
+            chrome.runtime.onMessage.addListener(editValidatorMsgListener);
           });
           // console.log('RESPONSE BACK::', response);
 
@@ -855,7 +870,8 @@ class Background {
               height: 746,
             });
 
-            chrome.windows.onRemoved.addListener(async () => {
+            const bondMoreWindowListener = async (windowId) => {
+              chrome.windows.onRemoved.removeListener(bondMoreWindowListener);
               const { isApproved } = await chrome.storage.local.get(
                 'isApproved'
               );
@@ -868,15 +884,17 @@ class Background {
                   id: req.id,
                 });
               else await chrome.storage.local.set({ isApproved: false });
-            });
+            };
+            chrome.windows.onRemoved.addListener(bondMoreWindowListener);
 
-            chrome.runtime.onMessage.addListener(
-              (message, sender, sendResponse) => {
-                if (message.method === 'bondMoreFunds') {
-                  resolve(message.result);
-                }
+            const bondMoreMsgListener = (message) => {
+              if (message.method === 'bondMoreFunds') {
+                chrome.runtime.onMessage.removeListener(bondMoreMsgListener);
+                chrome.windows.onRemoved.removeListener(bondMoreWindowListener);
+                resolve(message.result);
               }
-            );
+            };
+            chrome.runtime.onMessage.addListener(bondMoreMsgListener);
           });
 
           if (response) {
@@ -901,7 +919,8 @@ class Background {
               height: 746,
             });
 
-            chrome.windows.onRemoved.addListener(async () => {
+            const delegatorBondWindowListener = async (windowId) => {
+              chrome.windows.onRemoved.removeListener(delegatorBondWindowListener);
               const { isApproved } = await chrome.storage.local.get(
                 'isApproved'
               );
@@ -914,15 +933,17 @@ class Background {
                   id: req.id,
                 });
               else await chrome.storage.local.set({ isApproved: false });
-            });
+            };
+            chrome.windows.onRemoved.addListener(delegatorBondWindowListener);
 
-            chrome.runtime.onMessage.addListener(
-              (message, sender, sendResponse) => {
-                if (message.method === 'delegatorBondMoreFunds') {
-                  resolve(message.result);
-                }
+            const delegatorBondMsgListener = (message) => {
+              if (message.method === 'delegatorBondMoreFunds') {
+                chrome.runtime.onMessage.removeListener(delegatorBondMsgListener);
+                chrome.windows.onRemoved.removeListener(delegatorBondWindowListener);
+                resolve(message.result);
               }
-            );
+            };
+            chrome.runtime.onMessage.addListener(delegatorBondMsgListener);
           });
 
           if (response) {
@@ -947,7 +968,8 @@ class Background {
               height: 746,
             });
 
-            chrome.windows.onRemoved.addListener(async () => {
+            const redelegateWindowListener = async (windowId) => {
+              chrome.windows.onRemoved.removeListener(redelegateWindowListener);
               const { isApproved } = await chrome.storage.local.get(
                 'isApproved'
               );
@@ -960,15 +982,17 @@ class Background {
                   id: req.id,
                 });
               else await chrome.storage.local.set({ isApproved: false });
-            });
+            };
+            chrome.windows.onRemoved.addListener(redelegateWindowListener);
 
-            chrome.runtime.onMessage.addListener(
-              (message, sender, sendResponse) => {
-                if (message.method === 'redelegate') {
-                  resolve(message.result);
-                }
+            const redelegateMsgListener = (message) => {
+              if (message.method === 'redelegate') {
+                chrome.runtime.onMessage.removeListener(redelegateMsgListener);
+                chrome.windows.onRemoved.removeListener(redelegateWindowListener);
+                resolve(message.result);
               }
-            );
+            };
+            chrome.runtime.onMessage.addListener(redelegateMsgListener);
           });
 
           if (response) {
@@ -993,7 +1017,8 @@ class Background {
               height: 746,
             });
 
-            chrome.windows.onRemoved.addListener(async () => {
+            const unbondWindowListener = async (windowId) => {
+              chrome.windows.onRemoved.removeListener(unbondWindowListener);
               const { isApproved } = await chrome.storage.local.get(
                 'isApproved'
               );
@@ -1006,15 +1031,17 @@ class Background {
                   id: req.id,
                 });
               else await chrome.storage.local.set({ isApproved: false });
-            });
+            };
+            chrome.windows.onRemoved.addListener(unbondWindowListener);
 
-            chrome.runtime.onMessage.addListener(
-              (message, sender, sendResponse) => {
-                if (message.method === 'unBondFunds') {
-                  resolve(message.result);
-                }
+            const unbondMsgListener = (message) => {
+              if (message.method === 'unBondFunds') {
+                chrome.runtime.onMessage.removeListener(unbondMsgListener);
+                chrome.windows.onRemoved.removeListener(unbondWindowListener);
+                resolve(message.result);
               }
-            );
+            };
+            chrome.runtime.onMessage.addListener(unbondMsgListener);
           });
 
           if (response) {
@@ -1039,7 +1066,8 @@ class Background {
               height: 746,
             });
 
-            chrome.windows.onRemoved.addListener(async () => {
+            const stopValidatorWindowListener = async (windowId) => {
+              chrome.windows.onRemoved.removeListener(stopValidatorWindowListener);
               const { isApproved } = await chrome.storage.local.get(
                 'isApproved'
               );
@@ -1052,15 +1080,17 @@ class Background {
                   id: req.id,
                 });
               else await chrome.storage.local.set({ isApproved: false });
-            });
+            };
+            chrome.windows.onRemoved.addListener(stopValidatorWindowListener);
 
-            chrome.runtime.onMessage.addListener(
-              (message, sender, sendResponse) => {
-                if (message.method === 'stopValidator') {
-                  resolve(message.result);
-                }
+            const stopValidatorMsgListener = (message) => {
+              if (message.method === 'stopValidator') {
+                chrome.runtime.onMessage.removeListener(stopValidatorMsgListener);
+                chrome.windows.onRemoved.removeListener(stopValidatorWindowListener);
+                resolve(message.result);
               }
-            );
+            };
+            chrome.runtime.onMessage.addListener(stopValidatorMsgListener);
           });
 
           if (response) {
@@ -1085,7 +1115,8 @@ class Background {
               height: 746,
             });
 
-            chrome.windows.onRemoved.addListener(async () => {
+            const unjailWindowListener = async (windowId) => {
+              chrome.windows.onRemoved.removeListener(unjailWindowListener);
               const { isApproved } = await chrome.storage.local.get(
                 'isApproved'
               );
@@ -1098,15 +1129,17 @@ class Background {
                   id: req.id,
                 });
               else await chrome.storage.local.set({ isApproved: false });
-            });
+            };
+            chrome.windows.onRemoved.addListener(unjailWindowListener);
 
-            chrome.runtime.onMessage.addListener(
-              (message, sender, sendResponse) => {
-                if (message.method === 'unJailValidator') {
-                  resolve(message.result);
-                }
+            const unjailMsgListener = (message) => {
+              if (message.method === 'unJailValidator') {
+                chrome.runtime.onMessage.removeListener(unjailMsgListener);
+                chrome.windows.onRemoved.removeListener(unjailWindowListener);
+                resolve(message.result);
               }
-            );
+            };
+            chrome.runtime.onMessage.addListener(unjailMsgListener);
           });
 
           if (response) {
