@@ -179,8 +179,8 @@ function SettingList(props) {
           onClick={async (e) => {
             e.preventDefault();
 
-            if (to === 'https://privacy-policy.qubetics.work/') {
-              window.open('https://privacy-policy.qubetics.work/', '_blank');
+            if (to?.startsWith('http://') || to?.startsWith('https://')) {
+              window.open(to, '_blank');
               return;
             }
 

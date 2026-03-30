@@ -59,7 +59,6 @@ const DOWNLOAD_MAP = getDownloadMap({
 function DVpn() {
   const height = useCurrentHeight();
   const navigate = useNavigate();
-  const [messageApi, contextHolder] = message.useMessage();
   const [isConnected, setIsConnected] = useState(false);
   const [agentReachable, setAgentReachable] = useState(null);
   const [detectedOS, setDetectedOS] = useState("unknown");
@@ -171,6 +170,21 @@ function DVpn() {
     return rawCmd;
   };
 
+  const renderHighlightedCommand = (commandStr) => {
+    if (!commandStr) return null;
+    return commandStr.split("\n").map((line, i, arr) => {
+      const trimmed = line.trim();
+      const isComment = trimmed.startsWith("#");
+      const isLast = i === arr.length - 1;
+      return (
+        <span key={i} className={isComment ? "bash-comment" : "bash-command"}>
+          {line}
+          {!isLast && "\n"}
+        </span>
+      );
+    });
+  };
+
   const handleCopyInstallCommand = async (downloadInfo) => {
     const command = getCommandWithResolvedFileName(downloadInfo, "copyCmd") || getCommandWithResolvedFileName(downloadInfo, "cmd");
     if (!command) return;
@@ -179,7 +193,7 @@ function DVpn() {
       setIsCommandCopied(true);
       setTimeout(() => setIsCommandCopied(false), 1800);
     } catch (error) {
-      messageApi.error("Unable to copy command.");
+      message.error("Unable to copy command.");
     }
   };
 
@@ -310,7 +324,7 @@ function DVpn() {
       setCopiedUninstallKey(String(step?.key || "copied"));
       setTimeout(() => setCopiedUninstallKey(""), 1800);
     } catch (_error) {
-      messageApi.error("Unable to copy command.");
+      message.error("Unable to copy command.");
     }
   };
 
@@ -381,7 +395,7 @@ function DVpn() {
         const walletAddress = await getActiveWalletAddress();
         if (cancelled) return;
         if (!walletAddress) {
-          messageApi.error("No active wallet found for dVPN.");
+          message.error("No active wallet found for dVPN.");
           navigate("/wallet", { replace: true });
           return;
         }
@@ -400,7 +414,7 @@ function DVpn() {
         setIsPasswordModalOpen(true);
       } catch (error) {
         if (cancelled) return;
-        messageApi.error(error?.message || "Unable to open dVPN.");
+        message.error(error?.message || "Unable to open dVPN.");
         navigate("/wallet", { replace: true });
       } finally {
         if (!cancelled) {
@@ -413,7 +427,7 @@ function DVpn() {
     return () => {
       cancelled = true;
     };
-  }, [agentReachable, messageApi, navigate]);
+  }, [agentReachable, navigate]);
 
   useEffect(() => {
     // Poll agent health when agent is NOT yet reachable (null = initial, false = went offline).
@@ -551,11 +565,11 @@ function DVpn() {
 
   const handlePasswordSubmit = async () => {
     if (!sessionPassword) {
-      return messageApi.error("Please enter password.");
+      return message.error("Please enter password.");
     }
     const verified = await WalletHelper.verifyPassword(sessionPassword);
     if (!verified) {
-      return messageApi.error("Please enter valid password to proceed.");
+      return message.error("Please enter valid password to proceed.");
     }
 
     try {
@@ -725,7 +739,7 @@ function DVpn() {
         walletAddress: activeDvpnWallet,
         sessionId: result?.runtime?.sessionId || null,
       });
-      messageApi.success("dVPN session started.");
+      message.success("dVPN session started.");
       console.log("[DVpn] Connection flow finished successfully.");
     } catch (error) {
       console.error("[DVpn] startConnectionFromNode caught an error:", error);
@@ -786,7 +800,7 @@ function DVpn() {
         walletAddress: activeDvpnWallet,
         sessionId: resolvedSessionId || null,
       });
-      messageApi.success("dVPN session stopped.");
+      message.success("dVPN session stopped.");
       // Refresh all data after tunnel stops
       setRefreshKey((prev) => prev + 1);
     } catch (error) {
@@ -823,7 +837,6 @@ function DVpn() {
   if (agentReachable === true && (authChecking || isPasswordModalOpen)) {
     return (
       <div className={`${"vpn-dashboard"} ${height <= 600 ? "heightExt" : ""}`}>
-        {contextHolder}
         {isConnectionLoading && (
           <div className="dvpn-loader-overlay" role="status" aria-live="polite">
             <div className="dvpn-loader-card">
@@ -874,7 +887,6 @@ function DVpn() {
   return (
     <div className={`${"vpn-dashboard"} ${height <= 600 ? "heightExt" : ""
       }`}>
-      {contextHolder}
       {isConnectionLoading && (
         <div className="dvpn-loader-overlay" role="status" aria-live="polite">
           <div className="dvpn-loader-card">
@@ -1034,36 +1046,25 @@ function DVpn() {
       {agentReachable === false && (
         <div className="agent-install-container">
           <div className="install-card">
-            <div className="install-icon-wrapper">
-              <CrownIcon />
-            </div>
-            <h3>Native Agent Required</h3>
+            <h3>VPN Agent Not Found</h3>
             <p className="install-desc">
               {detectedOS === "macos"
                 ? "The Qubetics macOS application is required to manage secure VPN connections on your Mac."
-                : "The Qubetics native agent is required to manage secure VPN connections on your system."
-              }
+                : "We could not reach the local agent on ports 51821-51830. Install it and this screen will auto-recover when the service comes online."}
             </p>
 
             <div className="install-actions">
-              <ButtonComp
-                text={downloadingFor === selectedDownload.buildKey ? "Preparing..." : `Download for ${selectedDownload.label}`}
-                onClick={() => handleBuildDownload(selectedDownload.buildKey, selectedDownload.href)}
-                primary
-                maxWidth="100%"
-              />
-
               <button
-                className="retry-check-btn"
-                onClick={() => checkAgentHealth().then(setAgentReachable)}
+                className="dvpn-solid-btn"
+                onClick={() => handleBuildDownload(selectedDownload.buildKey, selectedDownload.href)}
               >
-                Already installed? Check again
+                {downloadingFor === selectedDownload.buildKey ? "Preparing..." : `Download for ${selectedDownload.label}`}
               </button>
             </div>
 
             <div className="install-guide-section">
-              <details className="agent-install-steps" open={isInstallCommandOpen}>
-                <summary>Installation Guide & Commands</summary>
+              <details className="agent-install-steps" open>
+                <summary>Install and run command</summary>
                 <div className="guide-content">
                   {selectedDownload.guide && (
                     <ol className="install-steps-list">
@@ -1072,30 +1073,25 @@ function DVpn() {
                       ))}
                     </ol>
                   )}
-                  <div className="command-box">
-                    <pre>{getCommandWithResolvedFileName(selectedDownload)}</pre>
+                  <div className="command-box-wrapper">
                     <button
                       type="button"
-                      className="copy-command-btn"
+                      className="dvpn-outline-btn"
                       onClick={() => handleCopyInstallCommand(selectedDownload)}
                     >
-                      {isCommandCopied ? "Copied!" : "Copy Command"}
+                      {isCommandCopied ? "Copied" : "Copy command"}
                     </button>
+                    <div
+                      className="command-box"
+                      onClick={() => handleCopyInstallCommand(selectedDownload)}
+                    >
+                      <pre>
+                        {renderHighlightedCommand(
+                          getCommandWithResolvedFileName(selectedDownload)
+                        )}
+                      </pre>
+                    </div>
                   </div>
-                </div>
-              </details>
-            </div>
-
-            <div className="all-platforms-section">
-              <details className="agent-install-steps">
-                <summary>Other Platforms</summary>
-                <div className="other-platforms-links">
-                  <a href="#" onClick={(e) => { e.preventDefault(); handleBuildDownload("linux", "/Vpn_Downloads/wg-agent_1.0.0_amd64.deb"); }}>
-                    <span>🐧</span> Linux (.deb)
-                  </a>
-                  <a href="#" onClick={(e) => { e.preventDefault(); handleBuildDownload("windows", "/Vpn_Downloads/wg-agent.exe"); }}>
-                    <span>🪟</span> Windows (.exe)
-                  </a>
                 </div>
               </details>
             </div>
@@ -1347,17 +1343,18 @@ function DVpn() {
         customClass="customClassModal"
       >
         <div className="viewphrases">
-          <p style={{ marginBottom: 12 }}>
+          <p style={{ marginBottom: 12, marginLeft: 30 }}>
             Please buy an active dVPN plan first to start a session.
           </p>
-          <ButtonComp
-            text={"Buy Plan"}
-            maxWidth={"100%"}
+          <button
+            className="dvpn-solid-btn"
             onClick={() => {
               setIsBuyPlanModalOpen(false);
               navigate("/service-provider");
             }}
-          />
+          >
+            Buy Plan
+          </button>
         </div>
       </ModalCustom>
 
@@ -1417,9 +1414,8 @@ function DVpn() {
           </div>
 
           <div style={{ marginTop: 12 }} />
-          <ButtonComp
-            text={"Download latest agent"}
-            maxWidth={"100%"}
+          <button
+            className="dvpn-solid-btn"
             onClick={() => {
               const download = DOWNLOAD_MAP[detectedOS] || DOWNLOAD_MAP.unknown;
               if (download?.buildKey) {
@@ -1428,7 +1424,9 @@ function DVpn() {
               setIsInstallCommandOpen(true);
               setShowRunAfterDownload(true);
             }}
-          />
+          >
+            Download latest agent
+          </button>
 
           {showRunAfterDownload && (
             <>
@@ -1457,7 +1455,7 @@ function DVpn() {
                   whiteSpace: "pre-wrap",
                 }}
               >
-                {getCommandWithResolvedFileName(DOWNLOAD_MAP[detectedOS] || DOWNLOAD_MAP.unknown)}
+                {renderHighlightedCommand(getCommandWithResolvedFileName(DOWNLOAD_MAP[detectedOS] || DOWNLOAD_MAP.unknown))}
               </pre>
             </>
           )}

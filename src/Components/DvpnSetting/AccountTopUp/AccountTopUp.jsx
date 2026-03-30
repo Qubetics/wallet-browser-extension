@@ -68,7 +68,6 @@ function AccountTopUp() {
   const [lastPurchase, setLastPurchase] = useState(null);
   const [loadingPlans, setLoadingPlans] = useState(false);
   const [providerPlans, setProviderPlans] = useState([]);
-  const [messageApi, contextHolder] = message.useMessage();
   const navigate = useNavigate();
   const height = useCurrentHeight();
 
@@ -173,31 +172,31 @@ function AccountTopUp() {
 
   const handleGoToHome = () => {
     setIsModalOpen(false);
-    navigate("/");
+    navigate("/dvpn");
   };
 
   const handleCopyText = async (value, label = "Value") => {
     if (!value) return;
     try {
       await navigator.clipboard.writeText(String(value));
-      messageApi.success(`${label} copied`);
+      message.success(`${label} copied`);
     } catch {
-      messageApi.error(`Failed to copy ${label.toLowerCase()}`);
+      message.error(`Failed to copy ${label.toLowerCase()}`);
     }
   };
 
   const handlePurchaseWithPassword = async () => {
     if (!selectedPlan?.id) {
-      messageApi.error("Please select a plan to continue.");
+      message.error("Please select a plan to continue.");
       return;
     }
     if (!sessionPassword) {
-      messageApi.error("Please enter password.");
+      message.error("Please enter password.");
       return;
     }
     const verified = await WalletHelper.verifyPassword(sessionPassword);
     if (!verified) {
-      messageApi.error("Please enter valid password to proceed.");
+      message.error("Please enter valid password to proceed.");
       return;
     }
     try {
@@ -214,7 +213,7 @@ function AccountTopUp() {
       setIsPasswordModalOpen(false);
       setSessionPassword("");
       setIsModalOpen(true);
-      messageApi.success("Plan purchased successfully.");
+      message.success("Plan purchased successfully.");
     } catch (error) {
       // Purchase errors are already surfaced via dVPN error handler.
     } finally {
@@ -256,8 +255,7 @@ function AccountTopUp() {
   }, [isPasswordModalOpen]);
 
   return (
-    <div className={`scrollableCont`} style={{ hight: "auto" }}>
-      {contextHolder}
+    <div className={`scrollableCont`} style={{ height: "auto" }}>
       <div className="searchBarFixed">
         <MenuRestofHeaders title={"Account Top-Up"} backTo={backRoute} />
       </div>
@@ -406,7 +404,7 @@ function AccountTopUp() {
                 ? `${selectedPlan?.days || 0} days`
                 : `${selectedPlan?.credits || selectedPlan?.hours || 0} ${selectedPlan?.credits ? "credits" : "hours"}`
               } for{" "}
-              {`${selectedPlan?.price || 0} "TICS"`} {String(selectedPlan?.denom || "TICS").toUpperCase()}. Enjoy your premium
+              {`${selectedPlan?.price || 0}`} {String(selectedPlan?.denom || "TICS").toUpperCase()}. Enjoy your premium
               features!
             </p>
             {lastPurchase?.txHash ? (

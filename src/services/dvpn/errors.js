@@ -7,8 +7,21 @@ const DEDUPE_WINDOW_MS = 2500;
 
 export const getDvpnErrorMessage = (error, fallback = "Something went wrong in dVPN") => {
   if (!error) return fallback;
-  if (typeof error === "string") return error;
-  return error?.message || fallback;
+  const rawMsg = typeof error === "string" ? error : error?.message || fallback;
+  const msg = String(rawMsg).toLowerCase();
+
+  // Handle common technical blockchain errors
+  if (msg.includes("insufficient funds") || msg.includes("smaller than") || msg.includes("spendable balance")) {
+    return "Insufficient TICS balance to complete this purchase.";
+  }
+  // if (msg.includes("failed to fetch") || msg.includes("network error") || msg.includes("abort")) {
+  //   return "Connection error: Unable to reach the dVPN agent.";
+  // }
+  if (msg.includes("out of gas") || msg.includes("gas limit")) {
+    return "Transaction failed: Out of gas.";
+  }
+
+  return rawMsg;
 };
 
 export const notifyDvpnError = (error, fallback) => {
@@ -25,10 +38,13 @@ export const notifyDvpnError = (error, fallback) => {
     return msg;
   }
   try {
-    message.error(msg);
+    message.error({
+      content: msg,
+    });
     lastNotifiedMessage = msg;
     lastNotifiedAt = now;
     if (error && typeof error === "object") {
+      // Mark as notified to avoid double popups
       Object.defineProperty(error, DVPN_NOTIFIED_FLAG, {
         value: true,
         configurable: true,

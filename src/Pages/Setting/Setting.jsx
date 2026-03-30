@@ -140,7 +140,7 @@ function Setting() {
     // },
     {
       setinglist: "Privacy Policy",
-      to: "https://privacy-policy.qubetics.work/",
+      to: "https://www.qubetics.com/privacy-policy/",
       ticketcheck: theme == "darkTheme" ? PrivacyPolicy : PrivacyPolicy,
       RightArow: "true",
     },

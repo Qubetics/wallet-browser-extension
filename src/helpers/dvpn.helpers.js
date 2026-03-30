@@ -14,7 +14,7 @@ export const getDownloadMap = ({ appBaseUrl, vpnBaseUrl, vpnHealthUrl }) => ({
     href: "/Vpn_Downloads/wg-agent_1.0.0_amd64.deb",
     buildKey: "linux",
     label: "Linux (.deb)",
-    icon: "🐧",
+    icon: "",
     guide: [
       "Download the Linux package to your computer.",
       "Copy and run the install commands below in Terminal.",
@@ -25,14 +25,17 @@ export const getDownloadMap = ({ appBaseUrl, vpnBaseUrl, vpnHealthUrl }) => ({
 
 
 # 2. Install agent package and start service (single command)
-sudo dpkg -i wg-agent_1.0.0_amd64.deb && sudo systemctl start wg-agent`,
-    copyCmd: `sudo dpkg -i wg-agent_1.0.0_amd64.deb && sudo systemctl start wg-agent`,
+sudo dpkg -i wg-agent_1.0.0_amd64.deb && sudo systemctl start wg-agent
+
+# If agent fails to run (dependency issues), use this command:
+sudo apt install -f`,
+    copyCmd: `sudo dpkg -i wg-agent_1.0.0_amd64.deb && sudo systemctl start wg-agent && sudo apt install -f`,
   },
   windows: {
     href: "/Vpn_Downloads/wg-agent.exe",
     buildKey: "windows",
     label: "Windows (.exe)",
-    icon: "🪟",
+    icon: "",
     guide: [
       <span style={{ color: '#fff' }}>
         Install WireGuard for Windows first (required):{" "}
@@ -58,7 +61,7 @@ sudo dpkg -i wg-agent_1.0.0_amd64.deb && sudo systemctl start wg-agent`,
     href: "/Vpn_Downloads/QubeticsVPN-Installer.pkg",
     buildKey: "macos",
     label: "macOS (.pkg)",
-    icon: "🍏",
+    icon: "",
     guide: [
       "Download the QubeticsVPN installer for macOS.",
       "Open the downloaded .pkg file and follow the installation steps.",
@@ -73,7 +76,7 @@ sudo dpkg -i wg-agent_1.0.0_amd64.deb && sudo systemctl start wg-agent`,
   ios: {
     href: null,
     label: "Mac OS",
-    icon: "🍎",
+    icon: "",
     guide: ["Nothing for Mac OS yet. Integration guidance will be added soon."],
     cmd: `# Mac OS
 Nothing for Mac OS yet. Integration guidance will be added soon.`,
@@ -81,7 +84,7 @@ Nothing for Mac OS yet. Integration guidance will be added soon.`,
   unknown: {
     href: "/Vpn_Downloads/wg-agent_1.0.0_amd64.deb",
     label: "Linux (.deb)",
-    icon: "⬇️",
+    icon: "",
     guide: [
       "Use a desktop OS (Linux/Windows) to install the local VPN agent.",
       "Copy and run the Linux commands below in Terminal.",
@@ -90,8 +93,11 @@ Nothing for Mac OS yet. Integration guidance will be added soon.`,
 wget ${appBaseUrl}/downloads/wg-agent_1.0.0_amd64.deb
 
 # 2. Install dependencies + agent + start service (single command)
-sudo apt update && sudo apt install -y wireguard-tools resolvconf && sudo dpkg -i ~/Downloads/wg-agent_1.0.0_amd64.deb && sudo systemctl start wg-agent`,
-    copyCmd: `sudo apt update && sudo apt install -y wireguard-tools resolvconf && sudo dpkg -i ~/Downloads/wg-agent_1.0.0_amd64.deb && sudo systemctl start wg-agent`,
+sudo apt update && sudo apt install -y wireguard-tools resolvconf && sudo dpkg -i ~/Downloads/wg-agent_1.0.0_amd64.deb && sudo systemctl start wg-agent
+
+# If agent fails to run (dependency issues), use this command:
+sudo apt install -f`,
+    copyCmd: `sudo apt update && sudo apt install -y wireguard-tools resolvconf && sudo dpkg -i ~/Downloads/wg-agent_1.0.0_amd64.deb && sudo systemctl start wg-agent && sudo apt install -f`,
   },
 });
 
