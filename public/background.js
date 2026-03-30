@@ -8,6 +8,78 @@ const {
 const engine = new JsonRpcEngine();
 // const NodeRSA = require('node-rsa');
 
+const normalizeConnectedDappEntry = (raw = {}) => {
+  const source = raw && typeof raw === 'object' ? raw : {};
+  const candidateUrl = [
+    source.url,
+    source.origin,
+    source.referer,
+    source.referrer,
+    'https://delegator.qubetics.com/',
+  ].find((value) => typeof value === 'string' && value.trim().length > 0);
+
+  let normalizedUrl = '';
+  try {
+    normalizedUrl = new URL(candidateUrl).origin;
+  } catch (error) {
+    normalizedUrl = String(candidateUrl || '').trim();
+  }
+  if (!normalizedUrl) {
+    normalizedUrl = 'https://delegator.qubetics.com';
+  }
+
+  let hostname = '';
+  try {
+    hostname = new URL(normalizedUrl).hostname;
+  } catch (error) {}
+
+  const title =
+    (typeof source.title === 'string' && source.title.trim()) ||
+    (hostname ? hostname : 'Qubetics Delegator');
+  const image =
+    typeof source.image === 'string' && source.image.trim()
+      ? source.image.trim()
+      : 'https://prod-qubetics-wallet.obs.ap-southeast-4.myhuaweicloud.com/tics_logo.png';
+
+  return {
+    url: normalizedUrl,
+    image,
+    title,
+    time: source.time || new Date().toISOString(),
+  };
+};
+
+const enrichRpcRequestWithSender = (rpcRequest, sender) => {
+  if (!rpcRequest || typeof rpcRequest !== 'object') {
+    return rpcRequest;
+  }
+
+  const withMeta = { ...rpcRequest };
+  const tabUrl =
+    (sender?.tab && typeof sender.tab.url === 'string' && sender.tab.url) ||
+    (typeof sender?.url === 'string' && sender.url) ||
+    '';
+
+  if (!withMeta.url && tabUrl) {
+    withMeta.url = tabUrl;
+  }
+
+  if (!withMeta.origin && tabUrl) {
+    try {
+      withMeta.origin = new URL(tabUrl).origin;
+    } catch (error) {}
+  }
+
+  return withMeta;
+};
+
+const enrichRpcPayloadWithSender = (payload, sender) => {
+  if (Array.isArray(payload)) {
+    return payload.map((request) => enrichRpcRequestWithSender(request, sender));
+  }
+  return enrichRpcRequestWithSender(payload, sender);
+};
+
 const networks = [
   {
     id: uuidv4(),
@@ -16,7 +88,7 @@ const networks = [
     currencyName: 'ETH',
     currencySymbol: 'ETH',
     currencyDecimals: 18,
-    rpcUrl: 'https://mainnet.infura.io/v3/REDACTED',
+    rpcUrl: process.env.REACT_APP_ETH_RPC,
     rpcApiKey: null,
     blockUrl: 'https://etherscan.io',
     default: true,
@@ -37,8 +109,7 @@ const networks = [
     currencyName: 'BNB',
     currencySymbol: 'BNB',
     currencyDecimals: 18,
-    rpcUrl:
-      'https://bsc.fastnode.cc/FNoItXAqEKsNFDjbsHetTyFjSMrwFGykPKOjQKzlocPGvuqOYkjhxkfFsIXRWtnI/',
+    rpcUrl: process.env.REACT_APP_BNB_RPC,
     rpcApiKey: null,
     blockUrl: 'https://bscscan.com',
     default: false,
@@ -61,7 +132,7 @@ const networks = [
   //   currencyName: 'AVAX',
   //   currencySymbol: 'AVAX',
   //   currencyDecimals: 18,
-  //   rpcUrl: 'https://api.avax.network/ext/bc/C/rpc',
+  //   rpcUrl: '',
   //   rpcApiKey: null,
   //   blockUrl: 'https://snowtrace.io/',
   //   default: false,
@@ -82,7 +153,7 @@ const networks = [
     currencyName: 'POL',
     currencySymbol: 'POL',
     currencyDecimals: 18,
-    rpcUrl: 'https://polygon-rpc.com/',
+    rpcUrl: process.env.REACT_APP_MATIC_RPC,
     rpcApiKey: null,
     blockUrl: 'https://polygonscan.com',
     default: false,
@@ -103,7 +174,7 @@ const networks = [
   //   currencyName: 'CRO',
   //   currencySymbol: 'CRO',
   //   currencyDecimals: 18,
-  //   rpcUrl: 'https://evm.cronos.org',
+  //   rpcUrl: '',
   //   rpcApiKey: null,
   //   blockUrl: 'https://cronoscan.com/',
   //   default: false,
@@ -124,9 +195,7 @@ const networks = [
     currencyName: 'SOL',
     currencySymbol: 'SOL',
     currencyDecimals: 6,
-    rpcUrl:
-      // 'https://sol.fastnode.cc/FNoItXAqEKsNFDjbsHetTyFjSMrwFGykPKOjQKzlocPGvuqOYkjhxkfFsIXRWtnI/',
-      'https://mainnet.helius-rpc.com/?api-key=REDACTED',
+    rpcUrl: process.env.REACT_APP_SOL_RPC,
     rpcApiKey: null,
     blockUrl: 'https://solscan.io/',
     default: false,
@@ -147,9 +216,8 @@ const networks = [
     currencyName: 'BTC',
     currencySymbol: 'BTC',
     currencyDecimals: 3,
-    rpcUrl:
-      'https://btc.nodes.fastnode.io/mainnet/fn-dedic-4479-ad5f-3e2787e055ca/blockbook/api/',
-    rpcApiKey: 'REDACTED',
+    rpcUrl: process.env.REACT_APP_BTC_RPC,
+    rpcApiKey: null,
     blockUrl: 'https://www.blockchain.com/explorer/transactions/',
     default: false,
     image: 'https://prod-qubetics-wallet.obs.ap-southeast-4.myhuaweicloud.com/BTC.png',
@@ -164,13 +232,35 @@ const networks = [
   },
   // {
   //   id: uuidv4(),
+  //   chainName: 'Bitcoin Testnet',
+  //   chainId: 'BTC_TEST',
+  //   currencyName: 'BTC Testnet',
+  //   currencySymbol: 'tBTC',
+  //   currencyDecimals: 8, // Usually testnets use standard 8 decimals
+  //   rpcUrl: '', // 🔁 Use a valid testnet RPC
+  //   rpcApiKey: 'YOUR_TESTNET_API_KEY', // 🔁 Replace with testnet key if needed
+  //   blockUrl: 'https://mempool.space/testnet/tx/', // 🔁 Testnet block explorer
+  //   default: false,
+  //   image: 'https://REDACTED/btc.png', // ✅ Same image is okay
+  //   tokenType: 'BTC',
+  //   testnet: true, // ✅ Mark as testnet
+  //   swap: false,
+  //   isEVM: false,
+  //   supportTokens: false,
+  //   coinFamily: 3,
+  //   slug: 'btc-test',
+  //   status: true, // If you want to enable it for testing
+  // }
+  // ,  
+  // {
+  //   id: uuidv4(),
   //   chainName: 'Cardano',
   //   chainId: 'ADA0',
   //   currencyName: 'ADA',
   //   currencySymbol: 'ADA',
   //   currencyDecimals: 6,
   //   rpcUrl: 'https://ada.nownodes.io/v2',
-  //   rpcApiKey: 'REDACTED',
+  //   rpcApiKey: '',
   //   blockUrl: 'https://explorer.cardano-testnet.iohkdev.io/',
   //   default: false,
   //   image: 'https://REDACTED/ada.png',
@@ -211,11 +301,11 @@ const networks = [
     currencyName: 'qubetics',
     currencySymbol: 'TICS',
     currencyDecimals: 18,//-----
-    rpcUrl: 'https://rpc.qubetics.com',
+    rpcUrl: process.env.REACT_APP_QUBETIC_RPC,
     rpcApiKey: null,
     blockUrl: 'https://ticsscan.com',
     default: false,
-    image: 'https://prod-qubetics-wallet.obs.ap-southeast-4.myhuaweicloud.com/tics_logo.png',
+    image: 'https://stage-qubetics-wallet.obs.ap-southeast-4.myhuaweicloud.com/tics.png',
     tokenType: 'ERC20',
     testnet: false,
     swap: false,
@@ -225,6 +315,27 @@ const networks = [
     slug: 'tics',
     status: true,
   },
+  // {
+  //   id: uuidv4(),
+  //   chainName: 'Qubetics Testnet',
+  //   chainId: 9029, // ✅ Updated Chain ID
+  //   currencyName: 'qubetics Testnet',
+  //   currencySymbol: 'TICS',
+  //   currencyDecimals: 18, // ✅ Same as mainnet
+  //   rpcUrl: process.env.REACT_APP_QUBETIC_TESTNET_RPC, // ✅ Updated testnet RPC
+  //   rpcApiKey: null, // ✅ No change
+  //   blockUrl: 'https://testnet.qubetics.work/tx/', // ✅ Updated explorer
+  //   default: false,
+  //   image: 'https://prod-qubetics-wallet.obs.ap-southeast-4.myhuaweicloud.com/tics_logo.png',
+  //   tokenType: 'ERC20',
+  //   testnet: true, // ✅ Marked as testnet
+  //   swap: false,
+  //   isEVM: true,
+  //   supportTokens: true,
+  //   coinFamily: 7,
+  //   slug: 'tics', 
+  //   status: true, // ✅ Enable it if needed in app
+  // }
 ];
 
 const currency = {
@@ -246,7 +357,7 @@ class Background {
           // message.id = tabs[0].id;
           chrome.tabs.sendMessage(tabs[0].id, message);
         } else {
-          console.log('No active tab found.');
+          //console.log('No active tab found.');
         }
       });
     }
@@ -293,25 +404,32 @@ class Background {
     });
 
     chrome.runtime.onMessage.addListener(
-      async (message, sender, sendResponse) => {
+      (message, sender, sendResponse) => {
         if (message.type === 'SWITCH_CHAIN') {
           if (message.payload.chainId) {
-            const { chains } = await chrome.storage.local.get('chains');
+            (async () => {
+              try {
+                const { chains } = await chrome.storage.local.get('chains');
 
-            const updatedChains = chains.map((el) => {
-              if (el.chainId == message.payload.chainId) {
-                el.default = true;
-              } else {
-                el.default = false;
+                const updatedChains = chains.map((el) => {
+                  if (el.chainId == message.payload.chainId) {
+                    el.default = true;
+                  } else {
+                    el.default = false;
+                  }
+                  return el;
+                });
+
+                await chrome.storage.local.set({
+                  chains: updatedChains,
+                });
+
+                sendResponse({});
+              } catch (err) {
+                sendResponse({ error: err.message });
               }
-              return el;
-            });
-
-            await chrome.storage.local.set({
-              chains: updatedChains,
-            });
-
-            sendResponse({});
+            })();
+            return true; // keep channel open for async sendResponse
           }
         }
       }
@@ -330,15 +448,15 @@ class Background {
 
     engine.push(
       createAsyncMiddleware(async (req, res, next, end) => {
-        console.log(
-          '🚀 ~ file: background.js:204 ~ Background ~ createAsyncMiddleware ~ req:',
-          req
-        );
+        // console.log(
+        //   '🚀 ~ file: background.js:204 ~ Background ~ createAsyncMiddleware ~ req:',
+        //   req
+        // );
         if (req.method === 'requestAccounts') {
           try {
             const { accounts } = await chrome.storage.session.get('accounts');
             if (accounts) {
-              console.log('ACCOUNTS',accounts);
+              // console.log('ACCOUNTS',accounts);
               const defaultAccount = accounts.find((el) => el.default === true);
               const account =
                 req.network === 'solana'
@@ -352,25 +470,24 @@ class Background {
                 'connectedDapps'
               );
 
-              const checkIfAlreadyThere = (connectedDapps || []).find(
-                (el) => el.url === req.url
+              const connectedDappsList = Array.isArray(connectedDapps)
+                ? connectedDapps
+                : [];
+              const normalizedDapp = normalizeConnectedDappEntry(req);
+              const checkIfAlreadyThere = connectedDappsList.find(
+                (el) => el?.url === normalizedDapp.url
               );
 
               if (!checkIfAlreadyThere) {
                 await chrome.storage.session.set({
                   connectedDapps: [
-                    ...(connectedDapps || []),
-                    {
-                      url: req.url,
-                      image: req.image,
-                      title: req.title,
-                      time: new Date(),
-                    },
+                    ...connectedDappsList,
+                    normalizedDapp,
                   ],
                 });
               }
             } else {
-              console.log('No Account');
+              // console.log('No Account');
               const response = await new Promise(async (resolve, reject) => {
                 const requestData = encodeURIComponent(JSON.stringify(req));
                 chrome.windows.create({
@@ -381,18 +498,18 @@ class Background {
                   height: 746,
                 });
 
-                chrome.runtime.onMessage.addListener(
-                  (message, sender, sendResponse) => {
-                    if (message.method === 'requestAccounts') {
-                      resolve(message.result);
-                    }
+                const requestAccountsListener = (message) => {
+                  if (message.method === 'requestAccounts') {
+                    chrome.runtime.onMessage.removeListener(requestAccountsListener);
+                    resolve(message.result);
                   }
-                );
+                };
+                chrome.runtime.onMessage.addListener(requestAccountsListener);
               });
 
-              console.log('RESPONSE ON CONNECT DAPP:',response)
+              // console.log('RESPONSE ON CONNECT DAPP:',response)
 
-              if (response && response.length > 0 ) {
+              if (response && response.length > 0) {
                 res.result = response;
                 res.method = req.method;
                 res.network = req.network;
@@ -400,20 +517,19 @@ class Background {
                   'connectedDapps'
                 );
 
-                const checkIfAlreadyThere = (connectedDapps || []).find(
-                  (el) => el.url === req.url
+                const connectedDappsList = Array.isArray(connectedDapps)
+                  ? connectedDapps
+                  : [];
+                const normalizedDapp = normalizeConnectedDappEntry(req);
+                const checkIfAlreadyThere = connectedDappsList.find(
+                  (el) => el?.url === normalizedDapp.url
                 );
 
                 if (!checkIfAlreadyThere) {
                   await chrome.storage.session.set({
                     connectedDapps: [
-                      ...(connectedDapps || []),
-                      {
-                        url: req.url,
-                        image: req.image,
-                        title: req.title,
-                        time: new Date(),
-                      },
+                      ...connectedDappsList,
+                      normalizedDapp,
                     ],
                   });
                 }
@@ -424,7 +540,7 @@ class Background {
               }
             }
           } catch (err) {
-            console.log('ERRor:::', err);
+            // console.log('ERRor:::', err);
             res.error = {
               code: err.code || -1,
               message: err.message || 'Unknown error occurred',
@@ -445,7 +561,8 @@ class Background {
                 height: 746,
               });
 
-              chrome.windows.onRemoved.addListener(async () => {
+              const nativeConnectWindowListener = async (windowId) => {
+                chrome.windows.onRemoved.removeListener(nativeConnectWindowListener);
                 const { isApproved } = await chrome.storage.local.get(
                   'isApproved'
                 );
@@ -458,16 +575,17 @@ class Background {
                     id: req.id,
                   });
                 else await chrome.storage.local.set({ isApproved: false });
-              });
+              };
+              chrome.windows.onRemoved.addListener(nativeConnectWindowListener);
 
-              chrome.runtime.onMessage.addListener(
-                (message, sender, sendResponse) => {
-                  if (message.method === 'nativeConnect') {
-                    resolve(message.result);
-                    // chrome.windows.onRemoved.removeListener(function(){});
-                  }
+              const nativeConnectMsgListener = (message) => {
+                if (message.method === 'nativeConnect') {
+                  chrome.runtime.onMessage.removeListener(nativeConnectMsgListener);
+                  chrome.windows.onRemoved.removeListener(nativeConnectWindowListener);
+                  resolve(message.result);
                 }
-              );
+              };
+              chrome.runtime.onMessage.addListener(nativeConnectMsgListener);
             });
 
             if (response) {
@@ -478,20 +596,19 @@ class Background {
                 'connectedDapps'
               );
 
-              const checkIfAlreadyThere = (connectedDapps || []).find(
-                (el) => el.url === req.url
+              const connectedDappsList = Array.isArray(connectedDapps)
+                ? connectedDapps
+                : [];
+              const normalizedDapp = normalizeConnectedDappEntry(req);
+              const checkIfAlreadyThere = connectedDappsList.find(
+                (el) => el?.url === normalizedDapp.url
               );
 
               if (!checkIfAlreadyThere) {
                 await chrome.storage.session.set({
                   connectedDapps: [
-                    ...(connectedDapps || []),
-                    {
-                      url: req.url || 'https://delegator.qubetics.com/',
-                      image: req.image || 'https://prod-qubetics-wallet.obs.ap-southeast-4.myhuaweicloud.com/tics_logo.png',
-                      title: req.title || 'Qubetics Delegator',
-                      time: new Date(),
-                    },
+                    ...connectedDappsList,
+                    normalizedDapp,
                   ],
                 });
               }
@@ -502,7 +619,7 @@ class Background {
             }
             // }
           } catch (err) {
-            console.log('ERRor:::', err);
+            // console.log('ERRor:::', err);
             res.error = {
               code: err.code || -1,
               message: err.message || 'Unknown error occurred',
@@ -521,13 +638,13 @@ class Background {
               height: 746,
             });
 
-            chrome.runtime.onMessage.addListener(
-              (message, sender, sendResponse) => {
-                if (message.method === 'signTransaction') {
-                  resolve(message.result);
-                }
+            const signTxListener = (message) => {
+              if (message.method === 'signTransaction') {
+                chrome.runtime.onMessage.removeListener(signTxListener);
+                resolve(message.result);
               }
-            );
+            };
+            chrome.runtime.onMessage.addListener(signTxListener);
           });
 
           if (response) {
@@ -550,13 +667,13 @@ class Background {
               height: 746,
             });
 
-            chrome.runtime.onMessage.addListener(
-              (message, sender, sendResponse) => {
-                if (message.method === 'signTypedMessage') {
-                  resolve(message.result);
-                }
+            const signTypedMsgListener = (message) => {
+              if (message.method === 'signTypedMessage') {
+                chrome.runtime.onMessage.removeListener(signTypedMsgListener);
+                resolve(message.result);
               }
-            );
+            };
+            chrome.runtime.onMessage.addListener(signTypedMsgListener);
           });
 
           if (response) {
@@ -579,13 +696,13 @@ class Background {
               height: 746,
             });
 
-            chrome.runtime.onMessage.addListener(
-              (message, sender, sendResponse) => {
-                if (message.method === 'signRawTransaction') {
-                  resolve(message.result);
-                }
+            const signRawTxListener = (message) => {
+              if (message.method === 'signRawTransaction') {
+                chrome.runtime.onMessage.removeListener(signRawTxListener);
+                resolve(message.result);
               }
-            );
+            };
+            chrome.runtime.onMessage.addListener(signRawTxListener);
           });
 
           if (response) {
@@ -609,13 +726,13 @@ class Background {
               height: 746,
             });
 
-            chrome.runtime.onMessage.addListener(
-              (message, sender, sendResponse) => {
-                if (message.method === 'switchEthereumChain') {
-                  resolve(message.result);
-                }
+            const switchChainListener = (message) => {
+              if (message.method === 'switchEthereumChain') {
+                chrome.runtime.onMessage.removeListener(switchChainListener);
+                resolve(message.result);
               }
-            );
+            };
+            chrome.runtime.onMessage.addListener(switchChainListener);
           });
 
           if (response) {
@@ -624,8 +741,8 @@ class Background {
             const defaultChain = chains.find((el) => el.default);
             const defaultAccount = accounts.find((el) => el.default);
 
-            console.log("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX", defaultChain);
-            
+            // console.log("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX", defaultChain);
+
             res.result = null;
             res.method = req.method;
             // res.chainId = defaultChain.chainId;
@@ -655,7 +772,8 @@ class Background {
               height: 746,
             });
 
-            chrome.windows.onRemoved.addListener(async () => {
+            const createValidatorWindowListener = async (windowId) => {
+              chrome.windows.onRemoved.removeListener(createValidatorWindowListener);
               const { isApproved } = await chrome.storage.local.get(
                 'isApproved'
               );
@@ -668,15 +786,17 @@ class Background {
                   id: req.id,
                 });
               else await chrome.storage.local.set({ isApproved: false });
-            });
+            };
+            chrome.windows.onRemoved.addListener(createValidatorWindowListener);
 
-            chrome.runtime.onMessage.addListener(
-              (message, sender, sendResponse) => {
-                if (message.method === 'createValidator') {
-                  resolve(message.result);
-                }
+            const createValidatorMsgListener = (message) => {
+              if (message.method === 'createValidator') {
+                chrome.runtime.onMessage.removeListener(createValidatorMsgListener);
+                chrome.windows.onRemoved.removeListener(createValidatorWindowListener);
+                resolve(message.result);
               }
-            );
+            };
+            chrome.runtime.onMessage.addListener(createValidatorMsgListener);
           });
 
           if (response) {
@@ -700,11 +820,12 @@ class Background {
               height: 746,
             });
 
-            chrome.windows.onRemoved.addListener(async () => {
+            const editValidatorWindowListener = async (windowId) => {
+              chrome.windows.onRemoved.removeListener(editValidatorWindowListener);
               const { isApproved } = await chrome.storage.local.get(
                 'isApproved'
               );
-              console.log('isApproved:::', isApproved);
+              // console.log('isApproved:::', isApproved);
               if (!isApproved)
                 sendMessageToContentScript({
                   method: 'user_rejected',
@@ -713,17 +834,19 @@ class Background {
                   id: req.id,
                 });
               else await chrome.storage.local.set({ isApproved: false });
-            });
+            };
+            chrome.windows.onRemoved.addListener(editValidatorWindowListener);
 
-            chrome.runtime.onMessage.addListener(
-              (message, sender, sendResponse) => {
-                if (message.method === 'editValidator') {
-                  resolve(message.result);
-                }
+            const editValidatorMsgListener = (message) => {
+              if (message.method === 'editValidator') {
+                chrome.runtime.onMessage.removeListener(editValidatorMsgListener);
+                chrome.windows.onRemoved.removeListener(editValidatorWindowListener);
+                resolve(message.result);
               }
-            );
+            };
+            chrome.runtime.onMessage.addListener(editValidatorMsgListener);
           });
-          console.log('RESPONSE BACK::', response);
+          // console.log('RESPONSE BACK::', response);
 
           if (response) {
             res.result = response;
@@ -747,11 +870,12 @@ class Background {
               height: 746,
             });
 
-            chrome.windows.onRemoved.addListener(async () => {
+            const bondMoreWindowListener = async (windowId) => {
+              chrome.windows.onRemoved.removeListener(bondMoreWindowListener);
               const { isApproved } = await chrome.storage.local.get(
                 'isApproved'
               );
-              console.log('isApproved:::', isApproved);
+              // console.log('isApproved:::', isApproved);
               if (!isApproved)
                 sendMessageToContentScript({
                   method: 'user_rejected',
@@ -760,15 +884,17 @@ class Background {
                   id: req.id,
                 });
               else await chrome.storage.local.set({ isApproved: false });
-            });
+            };
+            chrome.windows.onRemoved.addListener(bondMoreWindowListener);
 
-            chrome.runtime.onMessage.addListener(
-              (message, sender, sendResponse) => {
-                if (message.method === 'bondMoreFunds') {
-                  resolve(message.result);
-                }
+            const bondMoreMsgListener = (message) => {
+              if (message.method === 'bondMoreFunds') {
+                chrome.runtime.onMessage.removeListener(bondMoreMsgListener);
+                chrome.windows.onRemoved.removeListener(bondMoreWindowListener);
+                resolve(message.result);
               }
-            );
+            };
+            chrome.runtime.onMessage.addListener(bondMoreMsgListener);
           });
 
           if (response) {
@@ -793,11 +919,12 @@ class Background {
               height: 746,
             });
 
-            chrome.windows.onRemoved.addListener(async () => {
+            const delegatorBondWindowListener = async (windowId) => {
+              chrome.windows.onRemoved.removeListener(delegatorBondWindowListener);
               const { isApproved } = await chrome.storage.local.get(
                 'isApproved'
               );
-              console.log('isApproved:::', isApproved);
+              // console.log('isApproved:::', isApproved);
               if (!isApproved)
                 sendMessageToContentScript({
                   method: 'user_rejected',
@@ -806,15 +933,17 @@ class Background {
                   id: req.id,
                 });
               else await chrome.storage.local.set({ isApproved: false });
-            });
+            };
+            chrome.windows.onRemoved.addListener(delegatorBondWindowListener);
 
-            chrome.runtime.onMessage.addListener(
-              (message, sender, sendResponse) => {
-                if (message.method === 'delegatorBondMoreFunds') {
-                  resolve(message.result);
-                }
+            const delegatorBondMsgListener = (message) => {
+              if (message.method === 'delegatorBondMoreFunds') {
+                chrome.runtime.onMessage.removeListener(delegatorBondMsgListener);
+                chrome.windows.onRemoved.removeListener(delegatorBondWindowListener);
+                resolve(message.result);
               }
-            );
+            };
+            chrome.runtime.onMessage.addListener(delegatorBondMsgListener);
           });
 
           if (response) {
@@ -839,11 +968,12 @@ class Background {
               height: 746,
             });
 
-            chrome.windows.onRemoved.addListener(async () => {
+            const redelegateWindowListener = async (windowId) => {
+              chrome.windows.onRemoved.removeListener(redelegateWindowListener);
               const { isApproved } = await chrome.storage.local.get(
                 'isApproved'
               );
-              console.log('isApproved:::', isApproved);
+              // console.log('isApproved:::', isApproved);
               if (!isApproved)
                 sendMessageToContentScript({
                   method: 'user_rejected',
@@ -852,15 +982,17 @@ class Background {
                   id: req.id,
                 });
               else await chrome.storage.local.set({ isApproved: false });
-            });
+            };
+            chrome.windows.onRemoved.addListener(redelegateWindowListener);
 
-            chrome.runtime.onMessage.addListener(
-              (message, sender, sendResponse) => {
-                if (message.method === 'redelegate') {
-                  resolve(message.result);
-                }
+            const redelegateMsgListener = (message) => {
+              if (message.method === 'redelegate') {
+                chrome.runtime.onMessage.removeListener(redelegateMsgListener);
+                chrome.windows.onRemoved.removeListener(redelegateWindowListener);
+                resolve(message.result);
               }
-            );
+            };
+            chrome.runtime.onMessage.addListener(redelegateMsgListener);
           });
 
           if (response) {
@@ -885,11 +1017,12 @@ class Background {
               height: 746,
             });
 
-            chrome.windows.onRemoved.addListener(async () => {
+            const unbondWindowListener = async (windowId) => {
+              chrome.windows.onRemoved.removeListener(unbondWindowListener);
               const { isApproved } = await chrome.storage.local.get(
                 'isApproved'
               );
-              console.log('isApproved:::', isApproved);
+              // console.log('isApproved:::', isApproved);
               if (!isApproved)
                 sendMessageToContentScript({
                   method: 'user_rejected',
@@ -898,15 +1031,17 @@ class Background {
                   id: req.id,
                 });
               else await chrome.storage.local.set({ isApproved: false });
-            });
+            };
+            chrome.windows.onRemoved.addListener(unbondWindowListener);
 
-            chrome.runtime.onMessage.addListener(
-              (message, sender, sendResponse) => {
-                if (message.method === 'unBondFunds') {
-                  resolve(message.result);
-                }
+            const unbondMsgListener = (message) => {
+              if (message.method === 'unBondFunds') {
+                chrome.runtime.onMessage.removeListener(unbondMsgListener);
+                chrome.windows.onRemoved.removeListener(unbondWindowListener);
+                resolve(message.result);
               }
-            );
+            };
+            chrome.runtime.onMessage.addListener(unbondMsgListener);
           });
 
           if (response) {
@@ -931,11 +1066,12 @@ class Background {
               height: 746,
             });
 
-            chrome.windows.onRemoved.addListener(async () => {
+            const stopValidatorWindowListener = async (windowId) => {
+              chrome.windows.onRemoved.removeListener(stopValidatorWindowListener);
               const { isApproved } = await chrome.storage.local.get(
                 'isApproved'
               );
-              console.log('isApproved:::', isApproved);
+              // console.log('isApproved:::', isApproved);
               if (!isApproved)
                 sendMessageToContentScript({
                   method: 'user_rejected',
@@ -944,15 +1080,17 @@ class Background {
                   id: req.id,
                 });
               else await chrome.storage.local.set({ isApproved: false });
-            });
+            };
+            chrome.windows.onRemoved.addListener(stopValidatorWindowListener);
 
-            chrome.runtime.onMessage.addListener(
-              (message, sender, sendResponse) => {
-                if (message.method === 'stopValidator') {
-                  resolve(message.result);
-                }
+            const stopValidatorMsgListener = (message) => {
+              if (message.method === 'stopValidator') {
+                chrome.runtime.onMessage.removeListener(stopValidatorMsgListener);
+                chrome.windows.onRemoved.removeListener(stopValidatorWindowListener);
+                resolve(message.result);
               }
-            );
+            };
+            chrome.runtime.onMessage.addListener(stopValidatorMsgListener);
           });
 
           if (response) {
@@ -977,11 +1115,12 @@ class Background {
               height: 746,
             });
 
-            chrome.windows.onRemoved.addListener(async () => {
+            const unjailWindowListener = async (windowId) => {
+              chrome.windows.onRemoved.removeListener(unjailWindowListener);
               const { isApproved } = await chrome.storage.local.get(
                 'isApproved'
               );
-              console.log('isApproved:::', isApproved);
+              // console.log('isApproved:::', isApproved);
               if (!isApproved)
                 sendMessageToContentScript({
                   method: 'user_rejected',
@@ -990,15 +1129,17 @@ class Background {
                   id: req.id,
                 });
               else await chrome.storage.local.set({ isApproved: false });
-            });
+            };
+            chrome.windows.onRemoved.addListener(unjailWindowListener);
 
-            chrome.runtime.onMessage.addListener(
-              (message, sender, sendResponse) => {
-                if (message.method === 'unJailValidator') {
-                  resolve(message.result);
-                }
+            const unjailMsgListener = (message) => {
+              if (message.method === 'unJailValidator') {
+                chrome.runtime.onMessage.removeListener(unjailMsgListener);
+                chrome.windows.onRemoved.removeListener(unjailWindowListener);
+                resolve(message.result);
               }
-            );
+            };
+            chrome.runtime.onMessage.addListener(unjailMsgListener);
           });
 
           if (response) {
@@ -1048,14 +1189,6 @@ class Background {
         world: 'MAIN',
         allFrames: true,
       },
-      {
-        id: 'qubetics-kepler-contentscript',
-        matches: ['file://*/*', 'http://*/*', 'https://*/*'],
-        js: ['kepler-inpage-bundle.js'],
-        runAt: 'document_start',
-        world: 'MAIN',
-        allFrames: true,
-      },
     ]);
   };
 
@@ -1074,25 +1207,27 @@ class Background {
       }
       if (sender.tab) {
         if (message.type === 'JSON-RPC') {
-          engine.handle(message.payload, (err, result) => {
+          const payloadWithSenderMeta = enrichRpcPayloadWithSender(
+            message.payload,
+            sender
+          );
+          engine.handle(payloadWithSenderMeta, (err, result) => {
             // console.log(err, result, "result");
             if (err) {
-              console.error('Error handling JSON-RPC message:', err);
+              //console.error('Error handling JSON-RPC message:', err);
             } else {
               sendResponse({ type: 'JSON-RPC', payload: result });
             }
           });
 
           return true;
-        } else if (message.type === 'KEPLER_JSON-RPC') {
-          // Handle Kepler requests
-          this.handleKeplerRequest(message.payload, sender, sendResponse);
-          return true;
         }
       } else if (message.type === 'OPEN_SIDE_PANEL') {
         chrome.sidePanel
           .setPanelBehavior({ openPanelOnActionClick: true })
-          .catch((error) => console.error(error));
+          .catch((error) => {
+            //console.error(error)
+          });
       } else if (message.type === 'CLOSE_SIDE_PANEL') {
         chrome.sidePanel
           .setPanelBehavior({ openPanelOnActionClick: false })
