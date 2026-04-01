@@ -1073,25 +1073,27 @@ function DVpn() {
                       ))}
                     </ol>
                   )}
-                  <div className="command-box-wrapper">
-                    <button
-                      type="button"
-                      className="dvpn-outline-btn"
-                      onClick={() => handleCopyInstallCommand(selectedDownload)}
-                    >
-                      {isCommandCopied ? "Copied" : "Copy command"}
-                    </button>
-                    <div
-                      className="command-box"
-                      onClick={() => handleCopyInstallCommand(selectedDownload)}
-                    >
-                      <pre>
-                        {renderHighlightedCommand(
-                          getCommandWithResolvedFileName(selectedDownload)
-                        )}
-                      </pre>
+                  {selectedDownload.cmd && (
+                    <div className="command-box-wrapper">
+                      <button
+                        type="button"
+                        className="dvpn-outline-btn"
+                        onClick={() => handleCopyInstallCommand(selectedDownload)}
+                      >
+                        {isCommandCopied ? "Copied" : "Copy command"}
+                      </button>
+                      <div
+                        className="command-box"
+                        onClick={() => handleCopyInstallCommand(selectedDownload)}
+                      >
+                        <pre>
+                          {renderHighlightedCommand(
+                            getCommandWithResolvedFileName(selectedDownload)
+                          )}
+                        </pre>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               </details>
             </div>
@@ -1428,7 +1430,7 @@ function DVpn() {
             Download latest agent
           </button>
 
-          {showRunAfterDownload && (
+          {showRunAfterDownload && (DOWNLOAD_MAP[detectedOS] || DOWNLOAD_MAP.unknown)?.cmd && (
             <>
               <div style={{ marginTop: 14 }} />
               <p style={{ marginBottom: 8, fontWeight: 600, color: "#fff" }}>

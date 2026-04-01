@@ -3,6 +3,7 @@ import { detectOS } from "../../helpers/dvpn.helpers";
 
 const AGENT_PORTS = Array.from({ length: 10 }, (_item, idx) => 51821 + idx);
 const NATIVE_HOST = "com.qubetics.vpn";
+const EXTENSION_ID = typeof chrome !== "undefined" && chrome.runtime ? chrome.runtime.id : "";
 
 const parseJsonSafe = async (response) => {
   try {
@@ -18,6 +19,7 @@ const probePort = async (port) => {
     const timeoutId = setTimeout(() => controller.abort(), 1500);
     const response = await fetch(`http://127.0.0.1:${port}/health`, {
       signal: controller.signal,
+      headers: { "X-Extension-ID": EXTENSION_ID },
     });
     clearTimeout(timeoutId);
 
@@ -279,7 +281,9 @@ export const getAgentStatus = async (baseUrl) => {
     });
   }
 
-  const response = await fetch(`${baseUrl}/status`);
+  const response = await fetch(`${baseUrl}/status`, {
+    headers: { "X-Extension-ID": EXTENSION_ID },
+  });
   const body = await parseJsonSafe(response);
   if (!response.ok) {
     throw new Error(body?.error || "Failed to query agent status");
@@ -317,6 +321,7 @@ export const startAgentTunnel = async ({ baseUrl, config }) => {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      "X-Extension-ID": EXTENSION_ID,
     },
     body: JSON.stringify({ config }),
   });
@@ -349,6 +354,7 @@ export const stopAgentTunnel = async (baseUrl) => {
 
   const response = await fetch(`${baseUrl}/stop`, {
     method: "POST",
+    headers: { "X-Extension-ID": EXTENSION_ID },
   });
   const body = await parseJsonSafe(response);
   if (!response.ok || body?.success === false) {
