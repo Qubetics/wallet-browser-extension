@@ -50,7 +50,7 @@ function MenuFooter() {
     };
 
     check();
-    const poll = setInterval(check, 5000);
+    const poll = setInterval(check, 2000);
     return () => {
       cancelled = true;
       clearInterval(poll);
