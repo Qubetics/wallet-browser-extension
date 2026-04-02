@@ -1076,7 +1076,7 @@ function SendCoins() {
                   }}
                   onClick={async (e) => {
                     const text = await navigator.clipboard.readText();
-                    setAddress(text);
+                    setAddress((text || "").trim());
                   }}
                 >
                   Paste

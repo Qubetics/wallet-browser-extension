@@ -181,13 +181,13 @@ function CurrencyDetails() {
       }
     );
     setHistory(transactionList?.data?.data);
-
+    store.dispatch(setLoading(false));
   };
 
   useEffect(() => {
     setPrice(coin?.coin?.fiat_price_data || 0);
     init();
-    setTimeout(() => fetchPortfolio(), 6000);
+    setTimeout(() => fetchPortfolio(), 500);
   }, []);
 
   // Re-run init when tokens are loaded (for direct navigation scenario)
@@ -200,7 +200,6 @@ function CurrencyDetails() {
 
   const fetchPortfolio = async () => {
     try {
-      store.dispatch(setLoading(true));
       const walletsList = await server.post(
         `/wallet/portfolio`,
         {
