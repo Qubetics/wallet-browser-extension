@@ -41,6 +41,7 @@ import {
   getRecentSessions,
   getSubscriptions,
   getWalletDvpnState,
+  resetNativePendingState,
   startAgentTunnel,
   stopAgentTunnel,
 } from "../../services/dvpn";
@@ -91,6 +92,7 @@ function DVpn() {
   const [pendingStartNode, setPendingStartNode] = useState(null);
   const [pendingStopSessionId, setPendingStopSessionId] = useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [isRechecking, setIsRechecking] = useState(false);
   const { account } = useSelector(
     (state) => state
   );
@@ -99,6 +101,12 @@ function DVpn() {
   const isAutoDisconnectingRef = useRef(false);
   const hasShownUpdatePromptRef = useRef(false);
   const sessionPasswordRef = useRef("");
+  // Counts consecutive failed agent-reachability checks on macOS.
+  // We wait for 2 failures before committing agentReachable=false so the helper
+  // has a chance to start up right after installation without the install screen
+  // flashing immediately.
+  const macosFailCountRef = useRef(0);
+  const isRecheckingRef = useRef(false);
 
   useEffect(() => {
     sessionPasswordRef.current = sessionPassword;
@@ -167,6 +175,9 @@ function DVpn() {
     if (platform === "windows") {
       return rawCmd.replaceAll("wg-agent.exe", fileName);
     }
+    if (platform === "macos") {
+      return rawCmd.replaceAll("QubeticsVPN-Installer.pkg", fileName);
+    }
     return rawCmd;
   };
 
@@ -198,14 +209,24 @@ function DVpn() {
   };
 
   const handleBuildDownload = async (platform, fallbackHref) => {
-    if (!platform || (platform !== "linux" && platform !== "windows")) {
-      if (fallbackHref) openDownloadUrl(fallbackHref);
+    // Resolve relative fallback URLs using APP_BASE_URL
+    const resolvedFallback = (fallbackHref && fallbackHref.startsWith("/"))
+      ? `${APP_BASE_URL}${fallbackHref}`
+      : fallbackHref;
+
+    if (!platform || (platform !== "linux" && platform !== "windows" && platform !== "macos")) {
+      if (resolvedFallback) openDownloadUrl(resolvedFallback);
+      return;
+    }
+
+    // Skip API call if not logged in
+    if (!account?.jwtToken) {
+      if (resolvedFallback) openDownloadUrl(resolvedFallback);
       return;
     }
 
     try {
       setDownloadingFor(platform);
-
 
       let response = await fetch(`${BUILD_API_BASE}/${platform}`, {
         method: "GET",
@@ -241,7 +262,7 @@ function DVpn() {
       openDownloadUrl(downloadUrl);
       setShowRunAfterDownload(true);
     } catch (error) {
-      if (fallbackHref) openDownloadUrl(fallbackHref);
+      if (resolvedFallback) openDownloadUrl(resolvedFallback);
     } finally {
       setDownloadingFor("");
     }
@@ -267,7 +288,7 @@ function DVpn() {
   };
 
   const getLatestBuildVersion = async (platform) => {
-    if (!platform || (platform !== "linux" && platform !== "windows")) return "";
+    if (!platform || (platform !== "linux" && platform !== "windows" && platform !== "macos")) return "";
     if (!BUILD_API_BASE) return "";
     try {
       const response = await fetch(`${BUILD_API_BASE}/version/latest/${platform}`, {
@@ -329,10 +350,13 @@ function DVpn() {
   };
 
   const checkAgentHealth = async () => {
+    console.log("[dVPN Native] checkAgentHealth called");
     const result = await findRunningAgent();
+    console.log("[dVPN Native] checkAgentHealth result:", result);
     const wasReachable = !!agentBaseUrl;
-
+    console.log("[dVPN Native] checkAgentHealth wasReachable:", wasReachable);
     if (result?.reachable && result?.baseUrl) {
+      macosFailCountRef.current = 0; // reset grace-period counter on success
       setAgentBaseUrl(result.baseUrl);
       setAgentHealthVersion(normalizeVersion(result?.version || ""));
       setAgentDiag(result?.diag || null);
@@ -341,27 +365,58 @@ function DVpn() {
       return true;
     }
 
-    // Logic for redirection if lost
-    if (wasReachable && !result?.reachable) {
-      setAgentReachable(false);
+    // On macOS give the helper 2 consecutive failures before showing the
+    // install screen — but ONLY during initial detection (wasReachable=false).
+    // If the agent WAS reachable and now fails, surface it immediately.
+    if (detectOS() === "macos" && !wasReachable) {
+      macosFailCountRef.current += 1;
+      if (macosFailCountRef.current < 2) {
+        // Keep agentReachable as null so the "Checking…" banner stays visible.
+        setAgentBaseUrl("");
+        setAgentHealthVersion("");
+        setAgentDiag(null);
+        return false;
+      }
     }
 
+    // When the agent was previously reachable (wasReachable=true) or the
+    // grace period on macOS is exhausted, commit the failure immediately.
+    setAgentReachable(false);
     setAgentBaseUrl("");
     setAgentHealthVersion("");
     setAgentDiag(null);
+    // Reset native port state so the next health-check opens a fresh connection.
+    if (detectOS() === "macos") {
+      resetNativePendingState();
+    }
     return false;
   };
 
   useEffect(() => {
-    // setAgentReachable(false);
     setDetectedOS(detectOS());
-    checkAgentHealth().then(setAgentReachable);
+    // For macOS, checkAgentHealth honours the grace-period counter internally;
+    // only commit agentReachable=false once the counter threshold is reached.
+    checkAgentHealth().then((isUp) => {
+      if (isUp) setAgentReachable(true);
+      // For macOS: if the first check failed, agentReachable stays null while
+      // the counter hasn't hit the threshold yet — the polling loop takes over.
+      // For other platforms, commit false immediately so the install screen shows.
+      else if (detectOS() !== "macos" || macosFailCountRef.current >= 2) {
+        setAgentReachable(false);
+      }
+    });
+    return () => {
+      // On unmount clear the stale pending-status promise so that the next
+      // mount's checkAgentHealth call gets a fresh native status check
+      // instead of re-using an old settled (or timed-out) promise.
+      resetNativePendingState();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     if (agentReachable !== true) return;
-    if (!detectedOS || (detectedOS !== "linux" && detectedOS !== "windows")) return;
+    if (!detectedOS || (detectedOS !== "linux" && detectedOS !== "windows" && detectedOS !== "macos")) return;
     if (!agentHealthVersion) return;
     if (hasShownUpdatePromptRef.current) return;
 
@@ -430,16 +485,27 @@ function DVpn() {
   }, [agentReachable, navigate]);
 
   useEffect(() => {
+    console.log("[dVPN Native] checkAgentHealth called313123123");
     // Poll agent health when agent is NOT yet reachable (null = initial, false = went offline).
     // Once the agent comes online, stop polling — the bootstrapDvpnAuth effect handles the rest.
     if (agentReachable === true) return undefined;
+    console.log("[dVPN Native] agentReachable agentReachable", agentReachable);
+    const intervalMs = agentReachable === false || showRunAfterDownload ? 1000 : 2000;
+    console.log("[dVPN Native] intervalMs intervalMs", intervalMs);
     const poll = setInterval(async () => {
+      console.log("[dVPN Native] poll poll poll");
       const isUp = await checkAgentHealth();
+      console.log("[dVPN Native] isUp isUp", isUp);
       if (isUp) {
         setAgentReachable(true);
         clearInterval(poll);
+        console.log("[dVPN Native] clearInterval(poll)");
+      } else if (detectOS() === "macos" && macosFailCountRef.current >= 2 && agentReachable === null && !isRecheckingRef.current) {
+        // Grace period exhausted — surface the install screen.
+        setAgentReachable(false);
+        console.log("[dVPN Native] setAgentReachable(false)");
       }
-    }, 3000);
+    }, intervalMs);
     return () => clearInterval(poll);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [agentReachable]);
@@ -499,7 +565,21 @@ function DVpn() {
           isAutoDisconnectingRef.current = false;
         }
       } catch (error) {
-        // Avoid spamming user; next poll will re-check.
+        if (cancelled) return;
+        // If the agent/helper became unreachable (e.g. helper removed, host crashed),
+        // reset to the install screen so the user can re-download.
+        const errMsg = String(error?.message || "").toLowerCase();
+        const isAgentGone = errMsg.includes("not reachable") ||
+          errMsg.includes("helper not installed") ||
+          errMsg.includes("not found") ||
+          errMsg.includes("disconnected");
+        if (isAgentGone) {
+          console.warn("[dVPN] Agent/helper lost during tunnel status poll. Resetting to install screen.");
+          setIsConnected(false);
+          setAgentReachable(false);
+          setAgentBaseUrl("");
+          resetNativePendingState();
+        }
       }
     };
 
@@ -726,11 +806,23 @@ function DVpn() {
         config: wireguardConfig,
       });
 
-      console.log("[DVpn] startAgentTunnel call succeeded, awaiting status confirmation...");
-      const tunnelStatus = await getAgentStatus(effectiveAgentBaseUrl);
-      console.log("[DVpn] Initial Tunnel status from getAgentStatus:", tunnelStatus);
+      console.log("[DVpn] startAgentTunnel call succeeded, checking tunnel status...");
 
-      setIsConnected(!!tunnelStatus?.is_running);
+      // On macOS the native host already confirmed connection via the 'connected' event
+      // that resolved startAgentTunnel — calling getAgentStatus immediately after would
+      // race with the polling loop's own status check and leave the loader stuck.
+      // We trust the connect ack and read the cached is_running value instead.
+      let isRunning = false;
+      if (effectiveAgentBaseUrl === "native") {
+        // agent.js already set currentNativeStatus.is_running = true when the
+        // "connected" message resolved the connect promise.
+        isRunning = true;
+      } else {
+        const tunnelStatus = await getAgentStatus(effectiveAgentBaseUrl);
+        console.log("[DVpn] Initial Tunnel status from getAgentStatus:", tunnelStatus);
+        isRunning = !!tunnelStatus?.is_running;
+      }
+      setIsConnected(isRunning);
       setCurrentSessionId(result?.runtime?.sessionId || null);
       if (result?.runtime?.node) {
         setQuickConnectNode(result.runtime.node);
@@ -928,29 +1020,7 @@ function DVpn() {
           </span>
         )}
       </div>
-      {agentReachable === true && agentDiag?.is_admin === false && detectedOS === "windows" && (
-        <div className="admin-blocking-overlay">
-          <div className="admin-modal-content">
-            <span style={{ fontSize: "40px", marginBottom: "16px", display: "block" }}></span>
-            <h2>Administrator Required</h2>
-            <p>
-              The dVPN agent must be run as Administrator to function correctly on Windows.
-            </p>
-            <div className="instruction-step">
-              1. Close the current agent window.
-            </div>
-            <div className="instruction-step">
-              2. Right-click <b>wg-agent.exe</b>.
-            </div>
-            <div className="instruction-step">
-              3. Select <b>"Run as administrator"</b>.
-            </div>
-            <p style={{ fontSize: "12px", opacity: 0.7, marginTop: "20px" }}>
-              This screen will automatically refresh once the agent starts with Admin rights.
-            </p>
-          </div>
-        </div>
-      )}
+
       {agentReachable === true && agentDiag && (
         <div className="agent-diag-warnings">
           {detectedOS === "windows" && agentDiag.wireguard_is_admin === false && (
@@ -1060,11 +1130,43 @@ function DVpn() {
               >
                 {downloadingFor === selectedDownload.buildKey ? "Preparing..." : `Download for ${selectedDownload.label}`}
               </button>
+              {detectedOS === "macos" && (
+                <button
+                  className="dvpn-outline-btn"
+                  style={{ marginTop: 10 }}
+                  disabled={isRechecking}
+                  onClick={() => {
+                    setIsRechecking(true);
+                    isRecheckingRef.current = true;
+                    macosFailCountRef.current = 0;
+                    resetNativePendingState();
+                    setAgentReachable(null);
+                    // Use a slight delay to ensure Chrome has time to "notice" the socket closure
+                    // before we try a fresh connection.
+                    setTimeout(() => {
+                      checkAgentHealth().then((isUp) => {
+                        setIsRechecking(false);
+                        isRecheckingRef.current = false;
+                        if (isUp) {
+                          setAgentReachable(true);
+                          message.success("VPN Agent detected!");
+                        } else {
+                          // Allow it to stay in "Not Found" state if still fails
+                          if (macosFailCountRef.current >= 2) setAgentReachable(false);
+                          message.info("Agent still not detected. Please make sure the installation finished.");
+                        }
+                      });
+                    }, 1000);
+                  }}
+                >
+                  {isRechecking ? "Searching..." : "🔄 Already installed? Recheck"}
+                </button>
+              )}
             </div>
 
             <div className="install-guide-section">
               <details className="agent-install-steps" open>
-                <summary>Install and run command</summary>
+                <summary>{detectedOS === "macos" ? "Installation guide" : "Install and run command"}</summary>
                 <div className="guide-content">
                   {selectedDownload.guide && (
                     <ol className="install-steps-list">
@@ -1073,7 +1175,7 @@ function DVpn() {
                       ))}
                     </ol>
                   )}
-                  {selectedDownload.cmd && (
+                  {selectedDownload.cmd && detectedOS !== "macos" && (
                     <div className="command-box-wrapper">
                       <button
                         type="button"
@@ -1380,7 +1482,7 @@ function DVpn() {
                 key={step.key}
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "1fr auto",
+                  gridTemplateColumns: detectedOS === "windows" ? "1fr" : "1fr auto",
                   gap: 10,
                   alignItems: "start",
                 }}
@@ -1403,14 +1505,16 @@ function DVpn() {
                     {step.cmd}
                   </pre>
                 </div>
-                <button
-                  type="button"
-                  className="agent-copy-btn"
-                  onClick={() => handleCopyUninstallStep(step)}
-                  style={{ width: "auto", minWidth: 72 }}
-                >
-                  {copiedUninstallKey === step.key ? "Copied" : "Copy"}
-                </button>
+                {detectedOS !== "windows" && (
+                  <button
+                    type="button"
+                    className="agent-copy-btn"
+                    onClick={() => handleCopyUninstallStep(step)}
+                    style={{ width: "auto", minWidth: 72 }}
+                  >
+                    {copiedUninstallKey === step.key ? "Copied" : "Copy"}
+                  </button>
+                )}
               </div>
             ))}
           </div>
@@ -1430,7 +1534,7 @@ function DVpn() {
             Download latest agent
           </button>
 
-          {showRunAfterDownload && (DOWNLOAD_MAP[detectedOS] || DOWNLOAD_MAP.unknown)?.cmd && (
+          {showRunAfterDownload && (DOWNLOAD_MAP[detectedOS] || DOWNLOAD_MAP.unknown)?.cmd && detectedOS !== "macos" && (
             <>
               <div style={{ marginTop: 14 }} />
               <p style={{ marginBottom: 8, fontWeight: 600, color: "#fff" }}>

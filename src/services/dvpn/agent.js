@@ -3,7 +3,7 @@ import { detectOS } from "../../helpers/dvpn.helpers";
 
 const AGENT_PORTS = Array.from({ length: 10 }, (_item, idx) => 51821 + idx);
 const NATIVE_HOST = "com.qubetics.vpn";
-const EXTENSION_ID = typeof chrome !== "undefined" && chrome.runtime ? chrome.runtime.id : "";
+const API_KEY = "REDACTED";
 
 const parseJsonSafe = async (response) => {
   try {
@@ -19,7 +19,7 @@ const probePort = async (port) => {
     const timeoutId = setTimeout(() => controller.abort(), 1500);
     const response = await fetch(`http://127.0.0.1:${port}/health`, {
       signal: controller.signal,
-      headers: { "X-Extension-ID": EXTENSION_ID },
+      headers: { "X-API-Key": API_KEY },
     });
     clearTimeout(timeoutId);
 
@@ -85,6 +85,19 @@ let currentNativeStatus = { is_running: false, nativeState: "disconnected" };
 let activeResolvers = { connect: null, disconnect: null, status: null };
 let pendingStatusPromise = null;
 
+/**
+ * Call this when the DVpn component unmounts so that stale pending promises
+ * don't block the next mount's agent-health check.
+ */
+export const resetNativePendingState = () => {
+  pendingStatusPromise = null;
+  // Nullifying the port forces a fresh chrome.runtime.connectNative call
+  // on the next check, which is necessary for Chrome to "notice" a newly
+  // installed manifest on disk without a browser restart.
+  persistentNativePort = null;
+  // Do NOT clear activeResolvers here – they belong to in-flight native calls.
+};
+
 const getNativePort = () => {
   if (persistentNativePort) return persistentNativePort;
 
@@ -105,14 +118,22 @@ const getNativePort = () => {
           activeResolvers.connect.resolve({ success: true, message: msg.message });
           activeResolvers.connect = null;
         }
+        // Also satisfy any concurrent status check – we already know the answer.
+        if (activeResolvers.status) {
+          console.log("[dVPN Native] Resolving pending status check via 'connected' event");
+          activeResolvers.status.resolve({ is_running: true, status: state });
+          activeResolvers.status = null;
+        }
       } else if (state === "failed" || msg.error) {
         console.error("[dVPN Native] Native operation failed:", msg.message || msg.error);
         currentNativeStatus.is_running = false;
         const err = new Error(msg.message || msg.error || "Native operation failed");
-        if (activeResolvers.connect) activeResolvers.connect.reject(err);
-        if (activeResolvers.disconnect) activeResolvers.disconnect.reject(err);
-        activeResolvers.connect = null;
-        activeResolvers.disconnect = null;
+        if (activeResolvers.connect) { activeResolvers.connect.reject(err); activeResolvers.connect = null; }
+        if (activeResolvers.disconnect) { activeResolvers.disconnect.reject(err); activeResolvers.disconnect = null; }
+        if (activeResolvers.status) {
+          activeResolvers.status.resolve({ is_running: false, status: state });
+          activeResolvers.status = null;
+        }
       } else if (state === "disconnected") {
         console.log("[dVPN Native] Status updated to 'disconnected'");
         currentNativeStatus.is_running = false;
@@ -121,28 +142,30 @@ const getNativePort = () => {
           activeResolvers.disconnect.resolve({ success: true, message: msg.message });
           activeResolvers.disconnect = null;
         }
+        if (activeResolvers.status) {
+          activeResolvers.status.resolve({ is_running: false, status: state });
+          activeResolvers.status = null;
+        }
       } else if (state === "error: helper_missing") {
         console.warn("[dVPN Native] Helper missing reported by host.");
         currentNativeStatus.is_running = false;
+        if (activeResolvers.status) {
+          activeResolvers.status.reject(new Error("Helper not installed"));
+          activeResolvers.status = null;
+        }
       } else {
         console.log("[dVPN Native] Intermediate state:", state);
-      }
-
-      // Every message updates the status resolver if someone is waiting for a status check
-      if (activeResolvers.status) {
-        if (state === "error: helper_missing") {
-          console.warn("[dVPN Native] Helper missing reported by host. Rejecting status check.");
-          activeResolvers.status.reject(new Error("Helper not installed"));
-        } else {
+        // For any other message, satisfy a waiting status resolver
+        if (activeResolvers.status) {
           console.log("[dVPN Native] Resolving pending status check =>", state);
           activeResolvers.status.resolve({ is_running: currentNativeStatus.is_running, status: state });
+          activeResolvers.status = null;
         }
-        activeResolvers.status = null;
       }
     });
 
     persistentNativePort.onDisconnect.addListener((res) => {
-      console.warn("[dVPN Native] Port disconnected.asadsdad", res);
+      console.warn("[dVPN Native] Port disconnected.", res);
       console.warn("[dVPN Native] Port persistentNativePort.", persistentNativePort);
       console.warn("[dVPN Native] Port disconnected.", activeResolvers);
       persistentNativePort = null;
@@ -155,20 +178,16 @@ const getNativePort = () => {
         console.error("[dVPN Native] Disconnect error:", errMsg);
       }
 
-      const isNotFound = errMsg.toLowerCase().includes("not found") || errMsg.toLowerCase().includes("cannot find");
       const err = errMsg ? new Error(errMsg) : new Error("Native host disconnected");
 
       if (activeResolvers.connect) activeResolvers.connect.reject(err);
       if (activeResolvers.disconnect) activeResolvers.disconnect.reject(err);
 
       if (activeResolvers.status) {
-        if (isNotFound) {
-          console.warn("[dVPN Native] Host not found. Rejecting status check.");
-          activeResolvers.status.reject(err);
-        } else {
-          console.log("[dVPN Native] Resolving status check with is_running: false.");
-          activeResolvers.status.resolve({ is_running: false });
-        }
+        // Port is dead — agent is not reachable regardless of error details.
+        // Always reject so findRunningAgent maps this to reachable: false.
+        console.warn("[dVPN Native] Port disconnected. Rejecting pending status check.", errMsg || "(clean disconnect)");
+        activeResolvers.status.reject(err);
       }
 
       activeResolvers = { connect: null, disconnect: null, status: null };
@@ -184,7 +203,7 @@ const getNativePort = () => {
 // --- Exported API ---
 
 export const findRunningAgent = async () => {
-  console.log("[dVPN Native] findRunningAgent called");
+  console.log("[dVPN Native] findRunningAgent called", pendingStatusPromise);
   if (detectOS() === "macos") {
     if (pendingStatusPromise) {
       console.log("[dVPN Native] Re-using pending status check promise...");
@@ -193,48 +212,71 @@ export const findRunningAgent = async () => {
 
     console.log("[dVPN Native] Running on macOS, testing native port...");
     pendingStatusPromise = new Promise((resolve) => {
+      // Settled flag ensures the promise resolves exactly once, even if
+      // multiple code-paths (onMessage, onDisconnect, timeout) try to settle it.
+      let settled = false;
+      const safeResolve = (val) => {
+        if (settled) return;
+        settled = true;
+        resolve(val);
+      };
+
       const port = getNativePort();
       console.log("[dVPN Native] Native port obtained:", port);
       if (!port) {
         console.warn("[dVPN Native] Failed to get native port. returning reachable: false");
-        return resolve({ reachable: false, baseUrl: "", port: null });
+        return safeResolve({ reachable: false, baseUrl: "", port: null });
+      }
+
+      // Fast-path: if we already know the tunnel is running AND the port is still
+      // alive, report reachable immediately without an extra native round-trip.
+      if (currentNativeStatus.is_running && persistentNativePort) {
+        console.log("[dVPN Native] is_running already true & port alive – returning reachable: true immediately");
+        return safeResolve({ reachable: true, baseUrl: "native", port: null });
       }
 
       activeResolvers.status = {
         resolve: (res) => {
           console.log("[dVPN Native] Status check resolved successfully. reachable: true", res);
-          resolve({ reachable: true, baseUrl: "native", port: null });
+          const version = res?.version || res?.build_version || res?.buildVersion || "";
+          safeResolve({ reachable: true, baseUrl: "native", port: null, version });
         },
         reject: (err) => {
           console.warn("[dVPN Native] Status check rejected. reachable: false", err);
-          resolve({ reachable: false, baseUrl: "", port: null });
+          safeResolve({ reachable: false, baseUrl: "", port: null });
         }
       };
 
       console.log("[dVPN Native] Dispatching status check message to native host...");
       port.postMessage({ action: "status" });
 
-      // Timeout if native host doesn't reply
+      // UNCONDITIONAL timeout — always settles the promise even if
+      // activeResolvers.status was overwritten or cleared by another path.
       setTimeout(() => {
-        if (activeResolvers.status) {
+        if (!settled) {
           console.error("[dVPN Native] Status check timed out! reachable: false");
           activeResolvers.status = null;
-          resolve({ reachable: false, baseUrl: "", port: null });
         }
-      }, 5000);
+        safeResolve({ reachable: false, baseUrl: "", port: null });
+      }, 4000);
     });
 
-    // Clear the pending promise after it resolves (with a tiny delay to debounce)
-    pendingStatusPromise.finally(() => {
+    // Clear pendingStatusPromise after it settles so the next call creates
+    // a fresh status check. A 500 ms debounce window prevents rapid
+    // successive calls from each opening a new native round-trip.
+    const thisPromise = pendingStatusPromise;
+    thisPromise.finally(() => {
       setTimeout(() => {
-        pendingStatusPromise = null;
-      }, 2000);
+        if (pendingStatusPromise === thisPromise) {
+          pendingStatusPromise = null;
+        }
+      }, 500);
     });
 
     return pendingStatusPromise;
   }
 
-   // 1. Try last successful port first (Fast Path)
+  // 1. Try last successful port first (Fast Path)
   if (LAST_SUCCESSFUL_PORT) {
     try {
       const result = await probePort(LAST_SUCCESSFUL_PORT);
@@ -265,24 +307,51 @@ export const getAgentStatus = async (baseUrl) => {
   if (!baseUrl) throw new Error("Agent base URL is required");
 
   if (baseUrl === "native") {
+    // Always query the native host for live tunnel status rather than relying on
+    // the cached is_running flag, which can become stale if the tunnel drops
+    // silently without the native host sending a "disconnected" message.
     return new Promise((resolve, reject) => {
-      const port = getNativePort();
-      if (!port) return reject(new Error("macOS native host not reachable"));
+      let settled = false;
+      const safeSettle = (val, isError) => {
+        if (settled) return;
+        settled = true;
+        isError ? reject(val) : resolve(val);
+      };
 
-      activeResolvers.status = { resolve, reject };
+      const port = getNativePort();
+      if (!port) return safeSettle(new Error("macOS native host not reachable"), true);
+
+      // If another status check is already in-flight, chain on it instead of overwriting.
+      if (activeResolvers.status) {
+        const prev = activeResolvers.status;
+        activeResolvers.status = {
+          resolve: (res) => { prev.resolve(res); safeSettle(res, false); },
+          reject: (err) => { prev.reject(err); safeSettle(err, true); },
+        };
+        // No need to postMessage again – the previous message is already in-flight.
+        // Still set an unconditional timeout for THIS promise.
+        setTimeout(() => {
+          safeSettle({ is_running: currentNativeStatus.is_running }, false);
+        }, 5000);
+        return;
+      }
+
+      activeResolvers.status = {
+        resolve: (res) => safeSettle(res, false),
+        reject: (err) => safeSettle(err, true),
+      };
       port.postMessage({ action: "status" });
 
+      // Unconditional timeout — always settles this promise.
       setTimeout(() => {
-        if (activeResolvers.status) {
-          activeResolvers.status = null;
-          resolve({ is_running: currentNativeStatus.is_running });
-        }
+        if (!settled) activeResolvers.status = null;
+        safeSettle({ is_running: currentNativeStatus.is_running }, false);
       }, 5000);
     });
   }
 
   const response = await fetch(`${baseUrl}/status`, {
-    headers: { "X-Extension-ID": EXTENSION_ID },
+    headers: { "X-API-Key": API_KEY },
   });
   const body = await parseJsonSafe(response);
   if (!response.ok) {
@@ -321,7 +390,7 @@ export const startAgentTunnel = async ({ baseUrl, config }) => {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "X-Extension-ID": EXTENSION_ID,
+      "X-API-Key": API_KEY,
     },
     body: JSON.stringify({ config }),
   });
@@ -354,7 +423,7 @@ export const stopAgentTunnel = async (baseUrl) => {
 
   const response = await fetch(`${baseUrl}/stop`, {
     method: "POST",
-    headers: { "X-Extension-ID": EXTENSION_ID },
+    headers: { "X-API-Key": API_KEY },
   });
   const body = await parseJsonSafe(response);
   if (!response.ok || body?.success === false) {

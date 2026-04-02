@@ -39,10 +39,10 @@ sudo apt install -f`,
     guide: [
       <span style={{ color: '#fff' }}>
         Install WireGuard for Windows first (required):{" "}
-        <a 
-          href="https://download.wireguard.com/windows-client/wireguard-installer.exe" 
-          target="_blank" 
-          rel="noreferrer" 
+        <a
+          href="https://download.wireguard.com/windows-client/wireguard-installer.exe"
+          target="_blank"
+          rel="noreferrer"
           style={{ color: '#6366f1', textDecoration: 'underline', fontWeight: 'bold' }}
         >
           wireguard-installer.exe
@@ -56,7 +56,7 @@ sudo apt install -f`,
       "WireGuard and Agent Terminal must be installed and running on your system. The VPN will only connect when both services are active.",
     ],
     cmd: "",
-  },
+  }, 
   macos: {
     href: "/Vpn_Downloads/QubeticsVPN-Installer.pkg",
     buildKey: "macos",
@@ -68,10 +68,11 @@ sudo apt install -f`,
       "The installer will automatically configure the background VPN service for this extension.",
       "Once installed, return to this page and the extension will connect automatically."
     ],
-    cmd: `# macOS Installation
-# Download the installer using the button above.
-# Double-click the downloaded QubeticsVPN-Installer.pkg file.
-# Follow the on-screen instructions to complete the setup.`
+
+    //     cmd: `# macOS Installation
+    // # Download the installer using the button above.
+    // # Double-click the downloaded QubeticsVPN-Installer.pkg file.
+    // # Follow the on-screen instructions to complete the setup.`
   },
   ios: {
     href: null,
