@@ -179,8 +179,10 @@ function AccountTopUp() {
     if (!value) return;
     try {
       await navigator.clipboard.writeText(String(value));
+      message.destroy();
       message.success(`${label} copied`);
     } catch {
+      message.destroy();
       message.error(`Failed to copy ${label.toLowerCase()}`);
     }
   };

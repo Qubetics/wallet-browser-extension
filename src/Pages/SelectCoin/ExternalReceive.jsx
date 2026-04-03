@@ -76,8 +76,10 @@ function ExternalReceive() {
   const copyToClipboard = async () => {
     try {
       await navigator.clipboard.writeText(mpcAddress);
+      messageApi.destroy();
       messageApi.success('Address copied successfully.');
     } catch (error) {
+      messageApi.destroy();
       messageApi.error('Failed to copy address.');
     }
   };

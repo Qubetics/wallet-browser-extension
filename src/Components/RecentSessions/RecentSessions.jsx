@@ -1,3 +1,5 @@
+/* global chrome */
+
 import React, { useEffect, useMemo, useState } from "react";
 import "./RecentSessions.scss";
 import MenuRestofHeaders from "../BalanceDetails/MenuRestofHeaders/MenuRestofHeaders";
@@ -230,8 +232,10 @@ function RecentSessions() {
     if (!value) return;
     try {
       await navigator.clipboard.writeText(value);
+      messageApi.destroy();
       messageApi.success(`${label} copied successfully.`);
     } catch (error) {
+      messageApi.destroy();
       messageApi.error(`Failed to copy ${label.toLowerCase()}.`);
     }
   };
@@ -369,7 +373,18 @@ function RecentSessions() {
         {activeTab === "txn" && (
           <div className="history-list" onScroll={handleListScroll}>
             {txns.map((txn, idx) => (
-              <div key={`txn-${idx}`} className="history-card txn-card">
+              <div
+                key={`txn-${idx}`}
+                className="history-card txn-card"
+                style={{ cursor: "pointer" }}
+                onClick={() => {
+                  const hash = txn?.tx_hash || txn?.hash || txn?.txn_hash || "";
+                  if (hash) {
+                    const upperHash = hash.startsWith("0x") ? `0x${hash.slice(2).toUpperCase()}` : hash.toUpperCase();
+                    chrome.tabs.create({ url: `https://ticsscan.com/txn/${upperHash}` });
+                  }
+                }}
+              >
                 <div className="meta">
                   <h4>
                     <span className="tx-hash">
@@ -377,9 +392,10 @@ function RecentSessions() {
                     </span>
                     <button
                       className="copy-btn"
-                      onClick={() =>
-                        handleCopy(txn?.tx_hash || txn?.hash || txn?.txn_hash || "", "Transaction hash")
-                      }
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleCopy(txn?.tx_hash || txn?.hash || txn?.txn_hash || "", "Transaction hash");
+                      }}
                     >
                     <img src={CopyIcon} alt="copy" width={16} height={16} />
                     </button>

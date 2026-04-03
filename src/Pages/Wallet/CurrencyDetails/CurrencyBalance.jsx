@@ -539,6 +539,7 @@ function CurrencyBalanceDetails({
                   await navigator.clipboard.writeText(
                     selectChain === 'evm' ? coin.wallet_address : cosmosAddress
                   );
+                  messageApi.destroy();
                   messageApi.success('Address copied successfully.');
                 }}
               >

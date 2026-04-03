@@ -18,7 +18,6 @@ import useCurrentHeight from "../../CustomHooks/useCurrentHeight";
 import QubeticsImage from "../../Assets/QubeticsLogo.png";
 import { findRunningAgent } from "../../services/dvpn";
 
-
 function DvpnSetting() {
   const navigate = useNavigate();
   const height = useCurrentHeight();
@@ -84,12 +83,12 @@ function DvpnSetting() {
           icon: <PrivacyIcon />,
           label: "Privacy Policy",
           hasArrow: true,
-          onClick: () => openExternalUrl("https://www.qubetics.com/privacy-policy/"),
+          onClick: () => openExternalUrl("https://privacy-policy.qubetics.work/"),
         },
         {
           icon: <VersionIcon />,
           label: "Agent Version",
-          value: agentVersion || "Not installed",
+          value: agentVersion || "1.0",
         },
       ],
     },

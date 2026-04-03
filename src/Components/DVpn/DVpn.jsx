@@ -684,7 +684,7 @@ function DVpn() {
       setPendingStartNode(null);
       return;
     }
-    navigate("/wallet", { replace: true });
+    navigate("/dvpn", { replace: true });
   };
 
   const selectedDownload = DOWNLOAD_MAP[detectedOS] || DOWNLOAD_MAP.unknown;
@@ -767,6 +767,32 @@ function DVpn() {
         nodeAddress: node?.address || "",
         providerUrl: node?.url || node?.remote_url || "",
       });
+
+      // --- Pre-connect cleanup: stop stale tunnel & cancel orphaned sessions ---
+      try {
+        const preAgentBase = agentBaseUrl || (await findRunningAgent()).baseUrl || "";
+        if (preAgentBase) {
+          console.log("[DVpn] Pre-connect: stopping existing tunnel on", preAgentBase);
+          await stopAgentTunnel(preAgentBase).catch(() => {});
+        }
+      } catch (_tunnelErr) {
+        // Best-effort — tunnel may not be running
+      }
+      if (currentSessionId) {
+        console.log("[DVpn] Pre-connect: cancelling previous session", currentSessionId);
+        try {
+          await disconnectVpn({
+            walletAddress: activeDvpnWallet,
+            sessionId: currentSessionId,
+            sessionPassword: sessionPasswordRef.current,
+          });
+        } catch (_disconnectErr) {
+          // Best-effort — session may already be ended
+        }
+        setCurrentSessionId(null);
+        setIsConnected(false);
+      }
+      // --- End pre-connect cleanup ---
 
       console.log("[DVpn] Fetching WireGuard config from backend...");
       const result = await connectVpnWithWireguardConfig({

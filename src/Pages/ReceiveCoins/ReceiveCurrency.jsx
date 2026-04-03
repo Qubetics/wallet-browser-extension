@@ -64,8 +64,10 @@ function ReceiveCurrency() {
   const copyToClipboard = async (text) => {
     try {
       await navigator.clipboard.writeText(text);
+      messageApi.destroy();
       messageApi.success('Address copied successfully.');
     } catch (error) {
+      messageApi.destroy();
       messageApi.error('Failed to copy address.');
     }
   };
@@ -74,6 +76,7 @@ function ReceiveCurrency() {
 
   function copyAddressToClipboard(address) {
     navigator.clipboard.writeText(address);
+    messageApi.destroy();
     messageApi.success('Address copied successfully.');
   }
 

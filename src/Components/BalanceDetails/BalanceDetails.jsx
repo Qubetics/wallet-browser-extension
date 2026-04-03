@@ -702,6 +702,7 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
               className={"balanceDetails__modal__wrapedText"}
               onClick={async () => {
                 await navigator.clipboard.writeText(coin.wallet_address);
+                messageApi.destroy();
                 messageApi.success("Address copied successfully.");
               }}
             >

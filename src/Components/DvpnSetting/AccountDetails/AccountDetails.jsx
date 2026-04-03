@@ -65,8 +65,10 @@ function AccountDetails() {
     if (!accountAddress) return;
     try {
       await navigator.clipboard.writeText(accountAddress);
+      messageApi.destroy();
       messageApi.success("Address copied successfully.");
     } catch (error) {
+      messageApi.destroy();
       messageApi.error("Failed to copy address.");
     }
   };

@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.scss";
+import { message } from "antd";
 /* global chrome*/
 
 import App from "./App";
@@ -12,7 +13,10 @@ import reducers from "./reducers";
 import 'process/browser';
 import { Buffer } from 'buffer';
 
-window.Buffer = Buffer; 
+window.Buffer = Buffer;
+
+// Global toast config: max 1 visible at a time, auto-dismiss after 3s
+message.config({ maxCount: 1, duration: 3 });
 
 const noop = () => {};
 // console.log = noop;
