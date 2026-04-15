@@ -363,6 +363,7 @@ function History() {
 
   return (
     <div className={`scrollableCont`}>
+      {/* COMMENTED OUT: Tabs container (single tab not needed)
       <div className={styles['history-tabs-container']}>
         <ul className={styles['history-tabs']}>
           <li 
@@ -371,14 +372,17 @@ function History() {
           >
             Transactions
           </li>
+          {/* COMMENTED OUT: Chain abstraction tab
           <li 
             className={`${styles['history-tab']} ${activeTab === 1 ? styles['history-tab-active'] : ''}`}
             onClick={() => handleTabChange(1)}
           >
             Chain abstraction
           </li>
+          * /}
         </ul>
       </div>
+      */}
 
       {activeTab === 0 && (
         <div className={`flexedContent`} ref={parentRef} onScroll={() => handleScroll('transactions')}>
@@ -442,6 +446,7 @@ function History() {
         </div>
       )}
 
+      {/* COMMENTED OUT: Chain abstraction content panel
       {activeTab === 1 && (
         <div className={`flexedContent`} ref={chainAbstractionParentRef} onScroll={() => handleScroll('chain_abstraction')}>
           {showChainAbstractionSkeleton ? (
@@ -472,6 +477,7 @@ function History() {
           )}
         </div>
       )}
+      */}
     </div>
   );
 }

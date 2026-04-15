@@ -698,86 +698,80 @@ export const ExternalConnection = () => {
         }}
       >
         {account && method === 'requestAccounts' ? (
-          <div className={'viewphrases'}>
-            <div className={'viewphrases__iInner'}>
-              <div className={`flexedContent`}>
-                <div className={'swapDetails'}>
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      width: '100%',
-                      marginBottom: '14px',
-                    }}
-                  >
-                    <img
-                      src={logo}
-                      alt=""
-                      style={{
-                        height: '70px',
-                        width: '70px',
-                        objectFit: 'contain',
-                        marginTop: '7px',
-                      }}
-                    />
-                  </div>
-                  <div className={'swapDetails__address'}>
-                    <p className={'swapDetails__address__key'}>
-                      In order to proceed, access to your account is necessary.
-                    </p>
-                    <p className={'swapDetails__address__val'}>
-                      <sapn>
-                        Please grant access only to trusted websites that
-                        require access to your information. Once your account
-                        has been provided, the website will be able to access
-                        public data such as your balance and other relevant
-                        information.
-                      </sapn>
-                    </p>
-                  </div>
-                  <div className={'swapDetails__address'}>
-                    <p className={'swapDetails__address__key'}>Address</p>
-                    <p className={'swapDetails__address__val'}>
-                      <sapn>
-                        {data?.network === 'solana'
-                          ? account.coinFamilyAndAddress[4]
-                          : account.address}
-                      </sapn>
-                    </p>
-                  </div>
-                  <div className={'swapDetails__border'}></div>
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      marginTop: '30px',
-                      gap: '20px',
-                    }}
-                  >
-                    <ButtonComp
-                      maxWidth="100%"
-                      onClick={async () => {
-                        handleResponse([
-                          data?.network === 'solana'
-                            ? account.coinFamilyAndAddress[4]
-                            : account.address,
-                        ]);
-                      }}
-                      text="Accept"
-                    />
-                    <div className="cancelBtn">
-                      <ButtonComp
-                        maxWidth="100%"
-                        onClick={async () => {
-                          handleResponse([]);
-                        }}
-                        text="Reject"
-                      />
-                    </div>
-                  </div>
-                </div>
+          <div className={'swapDetails'}>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                width: '100%',
+                marginBottom: '14px',
+              }}
+            >
+              <img
+                src={logo}
+                alt=""
+                style={{
+                  height: '70px',
+                  width: '70px',
+                  objectFit: 'contain',
+                  marginTop: '7px',
+                }}
+              />
+            </div>
+            <div className={'swapDetails__address'}>
+              <p className={'swapDetails__address__key'}>
+                In order to proceed, access to your account is necessary.
+              </p>
+              <p className={'swapDetails__address__val'}>
+                <sapn>
+                  Please grant access only to trusted websites that
+                  require access to your information. Once your account
+                  has been provided, the website will be able to access
+                  public data such as your balance and other relevant
+                  information.
+                </sapn>
+              </p>
+            </div>
+            <div className={'swapDetails__address'}>
+              <p className={'swapDetails__address__key'}>Address</p>
+              <p className={'swapDetails__address__val'}>
+                <sapn>
+                  {data?.network === 'solana'
+                    ? account.coinFamilyAndAddress[4]
+                    : account.address}
+                </sapn>
+              </p>
+            </div>
+            <div className={'swapDetails__border'}></div>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginTop: '30px',
+                gap: '20px',
+              }}
+            >
+              <ButtonComp
+                maxWidth="100%"
+                onClick={async () => {
+                  handleResponse([
+                    data?.network === 'solana'
+                      ? account.coinFamilyAndAddress[4]
+                      : account.address,
+                  ]);
+                }}
+                text="Accept"
+              />
+              <div className="cancelBtn">
+                <ButtonComp
+                  maxWidth="100%"
+                  onClick={async () => {
+                    handleResponse([]);
+                  }}
+                  text="Reject"
+                />
               </div>
             </div>
           </div>
@@ -1397,107 +1391,101 @@ export const ExternalConnection = () => {
         }}
       >
         {account && method === 'nativeConnect' ? (
-          <div className={'viewphrases'}>
-            <div className={'viewphrases__iInner'}>
-              <div className={`flexedContent`}>
-                <div className={'swapDetails'}>
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      width: '100%',
-                      marginBottom: '14px',
-                    }}
-                  >
-                    <img
-                      src={logo}
-                      alt=""
-                      style={{
-                        height: '70px',
-                        width: '70px',
-                        objectFit: 'contain',
-                        marginTop: '7px',
-                      }}
-                    />
-                  </div>
-                  <div className={'swapDetails__address'}>
-                    <p className={'swapDetails__address__key'}>
-                      In order to proceed, access to your account is necessary.
-                    </p>
-                    <p className={'swapDetails__address__val'}>
-                      <sapn>
-                        Please grant access only to trusted websites that
-                        require access to your information. Once your account
-                        has been provided, the website will be able to access
-                        public data such as your balance and other relevant
-                        information.
-                      </sapn>
-                    </p>
-                  </div>
-                  <div className={'swapDetails__address'}>
-                    <p className={'swapDetails__address__key'}>Address</p>
-                    <p className={'swapDetails__address__val'}>
-                      <sapn>
-                        {data?.network === 'solana'
-                          ? account.coinFamilyAndAddress[4]
-                          : account.address}
-                      </sapn>
-                    </p>
-                  </div>
-                  <div className={'swapDetails__border'}></div>
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      marginTop: '30px',
-                      gap: '20px',
-                    }}
-                  >
-                    {/* <ButtonComp
-                      maxWidth="100%"
-                      disabled={defaultAddressPhrase == null}
-                      onClick={async () => {
-                        handleResponse({
-                          type: 'success',
-                          data: data,
-                        });
-                      }}
-                      text="Accept"
-                    /> */}
-                    <ButtonComp
-                      disabled={
-                        defaultAddressPhrase == null ||
-                        enrichedDataRef.current == null
-                      }
-                      onClick={async () => {
-                        handleResponse({
-                          type: 'success',
-                          data: enrichedDataRef.current, // ✅ fallback to current data
-                        });
-                      }}
-                      text="Accept"
-                    />
+          <div className={'swapDetails'}>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                width: '100%',
+                marginBottom: '14px',
+              }}
+            >
+              <img
+                src={logo}
+                alt=""
+                style={{
+                  height: '70px',
+                  width: '70px',
+                  objectFit: 'contain',
+                  marginTop: '7px',
+                }}
+              />
+            </div>
+            <div className={'swapDetails__address'}>
+              <p className={'swapDetails__address__key'}>
+                In order to proceed, access to your account is necessary.
+              </p>
+              <p className={'swapDetails__address__val'}>
+                <sapn>
+                  Please grant access only to trusted websites that
+                  require access to your information. Once your account
+                  has been provided, the website will be able to access
+                  public data such as your balance and other relevant
+                  information.
+                </sapn>
+              </p>
+            </div>
+            <div className={'swapDetails__address'}>
+              <p className={'swapDetails__address__key'}>Address</p>
+              <p className={'swapDetails__address__val'}>
+                <sapn>
+                  {data?.network === 'solana'
+                    ? account.coinFamilyAndAddress[4]
+                    : account.address}
+                </sapn>
+              </p>
+            </div>
+            <div className={'swapDetails__border'}></div>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginTop: '30px',
+                gap: '20px',
+              }}
+            >
+              {/* <ButtonComp
+                maxWidth="100%"
+                disabled={defaultAddressPhrase == null}
+                onClick={async () => {
+                  handleResponse({
+                    type: 'success',
+                    data: data,
+                  });
+                }}
+                text="Accept"
+              /> */}
+              <ButtonComp
+                disabled={
+                  defaultAddressPhrase == null ||
+                  enrichedDataRef.current == null
+                }
+                onClick={async () => {
+                  handleResponse({
+                    type: 'success',
+                    data: enrichedDataRef.current, // ✅ fallback to current data
+                  });
+                }}
+                text="Accept"
+              />
 
-                    <div className="cancelBtn">
-                      <ButtonComp
-                        maxWidth="100%"
-                        onClick={async () => {
-                          handleResponse({
-                            type: 'error',
-                            data: { message: 'Rejected by user' },
-                          });
-                          await chrome.storage.session.remove([
-                            'accounts',
-                            'password',
-                          ]);
-                        }}
-                        text="Reject"
-                      />
-                    </div>
-                  </div>
-                </div>
+              <div className="cancelBtn">
+                <ButtonComp
+                  maxWidth="100%"
+                  onClick={async () => {
+                    handleResponse({
+                      type: 'error',
+                      data: { message: 'Rejected by user' },
+                    });
+                    await chrome.storage.session.remove([
+                      'accounts',
+                      'password',
+                    ]);
+                  }}
+                  text="Reject"
+                />
               </div>
             </div>
           </div>
