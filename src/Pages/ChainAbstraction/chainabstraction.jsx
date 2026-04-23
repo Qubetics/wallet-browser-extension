@@ -414,7 +414,7 @@ function ChainAbstraction({ state }) {
   // Fetch fees from API
   const fetchFees = async () => {
     try {
-      const response = await axios.get('https://onboarding-api.ticssolver.com/fees');
+      const response = await axios.get(process.env.REACT_APP_CHAIN_ABSTRACTION_FEE);
       if (response?.data?.error === false && response?.data?.data) {
         setPlatformFee(response.data.data.platform || 1.5);
         setSolverFee(response.data.data.solver || 1.5);

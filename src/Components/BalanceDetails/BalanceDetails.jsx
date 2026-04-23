@@ -618,7 +618,7 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
           </Link>
         )}
 
-        {/* COMMENTED OUT: Abstract (Chain Abstraction) button
+        {/* COMMENTED OUT: Abstract (Chain Abstraction) button */}
         {path !== "currencyDetails" && (
           <Link
             onClick={(e) => {
@@ -658,7 +658,7 @@ function BalanceDetails({ className, textLeft, mt0, coin }) {
             <span style={{ marginTop: "2px" }}>Abstract</span>
           </Link>
         )}
-        */}
+       
       </div>
       {coin ? (
         <ModalCustom
