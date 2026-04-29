@@ -1,4 +1,5 @@
 /*global chrome*/
+import { getRpcUrl } from './rpcService';
 import nacl from "tweetnacl";
 import * as bip39 from "@scure/bip39";
 import { derivePath } from "ed25519-hd-key";
@@ -819,7 +820,7 @@ export class SolanaHelper {
       // console.log("🚀 ~ SolanaHelper ~ myKeyPair:", myKeyPair);
 
       const connection = new Connection(
-        process.env.REACT_APP_SOL_RPC,
+        getRpcUrl('REACT_APP_SOL_RPC'),
         "confirmed"
       );
 

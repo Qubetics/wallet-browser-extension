@@ -2,6 +2,7 @@
 /* global BigInt */
 import { Bip39, EnglishMnemonic, Slip10, Slip10Curve } from '@cosmjss/crypto';
 import BigNumber from "bignumber.js";
+import { getRpcUrl } from './rpcService';
 const {
   SigningStargateClient,
   GasPrice,
@@ -11,7 +12,8 @@ const { MsgSend } = require('cosmjs-types/cosmos/bank/v1beta1/tx');
 const { stringToPath } = require('@cosmjss/crypto');
 const { DirectSecp256k1HdWallet } = require('@cosmjss/proto-signing');
 
-const QUBETICS_RPC = 'https://tendermint-internal.qubetics.com';
+
+const getQubeticsRpc = () => getRpcUrl('REACT_APP_COSMO_RPC_URL') || 'https://tendermint-internal.qubetics.com';
 const PREFIX = 'qubetics';
 const HD_PATH = stringToPath("m/44'/60'/0'/0/0");
 const denom = 'tics';
@@ -85,7 +87,7 @@ const createSigner = async (mnemonic, prefix = PREFIX) => {
 const createSigning = async (mnemonic) => {
   const { wallet } = await createSigner(mnemonic);
   const client = await SigningStargateClient.connectWithSigner(
-    QUBETICS_RPC,
+    getQubeticsRpc(),
     wallet
     // clientOptions
   );
@@ -203,7 +205,7 @@ const estimateGasLimit = async (
 
 const hasSufficientBalance = async (_mnemonic, amountToSendTics) => {
   const mnemonic = _mnemonic;
-  const rpcEndpoint = QUBETICS_RPC;
+  const rpcEndpoint = getQubeticsRpc();
   const prefix = PREFIX;
   const denom = denom;
   const wallet = await DirectSecp256k1HdWallet.fromMnemonic(mnemonic, {

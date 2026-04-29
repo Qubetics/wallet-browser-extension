@@ -6,9 +6,11 @@ import { WalletHelper } from "./wallet.helper";
 import { server } from "../server";
 import { store } from "..";
 import BigNumber from "bignumber.js";
+import { getRpcUrl } from './rpcService';
 const { ethers } = require("ethers");
 
-const QUBETICS_RPC = process.env.REACT_APP_QUBETIC_RPC;
+
+const getQubeticsRpc = () => getRpcUrl('REACT_APP_QUBETIC_RPC');
 const STAGE_MPC_BASE_URL = process.env.REACT_APP_CHAIN_ABSTRACTION_API_URL_PROD;
 const RESOLVE_API_BASE_URL = process.env.REACT_APP_CHAIN_ABSTRACTION_PROD_API_URL;
 const INTENT_DETAILS_BASE_URL = process.env.REACT_APP_CHAIN_ABSTRACTION_API_URL_PROD;
@@ -39,8 +41,7 @@ export class MpcChainAbstractionHelper {
         data,
         {
           headers: {
-            "X-API-KEY":
-              "REDACTED",
+            "X-API-KEY": process.env.REACT_APP_CHAIN_ABSTRACTION_API_KEY,
           },
         }
       );
@@ -319,7 +320,7 @@ export class MpcChainAbstractionHelper {
 
       // Sign the message
       const provider = new ethers.providers.JsonRpcProvider(
-        token1?.rpc || QUBETICS_RPC
+        token1?.rpc || getQubeticsRpc()
       );
       const wallet = new ethers.Wallet(privateKey).connect(provider);
       const signature = await wallet.signMessage(payloadStr);

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import MenuRestofHeaders from "../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders";
 import { getStoredMpcAddresses } from "../../helpers/mpc.helper";
+import { getRpcUrl } from "../../helpers/rpcService";
 import { Web3Helper } from "../../helpers/web3.helper";
 import { BTCHelper } from "../../helpers/btc.helper";
 import { server } from "../../server";
@@ -24,7 +25,7 @@ function SelectCoin() {
       usdValue: "$0.00",
       image: BTCImage,
       coinFamily: 3,
-      rpc: process.env.REACT_APP_BTC_RPC,
+      rpc: getRpcUrl('REACT_APP_BTC_RPC'),
     },
     {
       id: "tics",
@@ -34,7 +35,7 @@ function SelectCoin() {
       usdValue: "$0.00",
       image: QubeticsImage,
       coinFamily: 7,
-      rpc: process.env.REACT_APP_QUBETIC_RPC,
+      rpc: getRpcUrl('REACT_APP_QUBETIC_RPC'),
     },
   ];
 

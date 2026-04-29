@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useState } from 'react';
 import { Web3Helper } from '../../helpers/web3.helper';
+import { getRpcUrl } from '../../helpers/rpcService';
 import darkclose from '../../Assets/darkclose.svg';
 import { useSelector } from 'react-redux';
 import { store } from '../..';
@@ -385,17 +386,17 @@ function CrossChain({ state }) {
           decimals: parseInt(token.coinDecimal),
           rpc:
             token?.coin_data?.coin_family == 1
-              ? process.env.REACT_APP_BNB_RPC
+              ? getRpcUrl('REACT_APP_BNB_RPC')
               : token?.coin_data?.coin_family == 2
-              ? process.env.REACT_APP_ETH_RPC
+              ? getRpcUrl('REACT_APP_ETH_RPC')
               : token?.coin_data?.coin_family == 3
-              ? process.env.REACT_APP_BTC_RPC
+              ? getRpcUrl('REACT_APP_BTC_RPC')
               : token?.coin_data?.coin_family == 4
-              ? process.env.REACT_APP_MATIC_RPC
+              ? getRpcUrl('REACT_APP_MATIC_RPC')
               : token?.coin_data?.coin_family == 5
-              ? process.env.REACT_APP_SOL_RPC
+              ? getRpcUrl('REACT_APP_SOL_RPC')
               : token?.coin_data?.coin_family == 7
-              ? process.env.REACT_APP_QUBETIC_RPC
+              ? getRpcUrl('REACT_APP_QUBETIC_RPC')
               : '',
         };
       });
@@ -540,17 +541,17 @@ function CrossChain({ state }) {
           decimals: parseInt(token?.coinDecimal),
           rpc:
             token?.coin_data?.coin_family == 1
-              ? process.env.REACT_APP_BNB_RPC
+              ? getRpcUrl('REACT_APP_BNB_RPC')
               : token?.coin_data?.coin_family == 2
-              ? process.env.REACT_APP_ETH_RPC
+              ? getRpcUrl('REACT_APP_ETH_RPC')
               : token?.coin_data?.coin_family == 3
-              ? process.env.REACT_APP_BTC_RPC
+              ? getRpcUrl('REACT_APP_BTC_RPC')
               : token?.coin_data?.coin_family == 4
-              ? process.env.REACT_APP_MATIC_RPC
+              ? getRpcUrl('REACT_APP_MATIC_RPC')
               : token?.coin_data?.coin_family == 5
-              ? process.env.REACT_APP_SOL_RPC
+              ? getRpcUrl('REACT_APP_SOL_RPC')
               : token?.coin_data?.coin_family == 7
-              ? process.env.REACT_APP_QUBETIC_RPC
+              ? getRpcUrl('REACT_APP_QUBETIC_RPC')
               : '',
         };
       });
@@ -613,17 +614,17 @@ function CrossChain({ state }) {
           decimals: parseInt(token.coinDecimal),
           rpc:
             token?.coin_data?.coin_family == 1
-              ? process.env.REACT_APP_BNB_RPC
+              ? getRpcUrl('REACT_APP_BNB_RPC')
               : token?.coin_data?.coin_family == 2
-              ? process.env.REACT_APP_ETH_RPC
+              ? getRpcUrl('REACT_APP_ETH_RPC')
               : token?.coin_data?.coin_family == 3
-              ? process.env.REACT_APP_BTC_RPC
+              ? getRpcUrl('REACT_APP_BTC_RPC')
               : token?.coin_data?.coin_family == 4
-              ? process.env.REACT_APP_MATIC_RPC
+              ? getRpcUrl('REACT_APP_MATIC_RPC')
               : token?.coin_data?.coin_family == 5
-              ? process.env.REACT_APP_SOL_RPC
+              ? getRpcUrl('REACT_APP_SOL_RPC')
               : token?.coin_data?.coin_family == 7
-              ? process.env.REACT_APP_QUBETIC_RPC
+              ? getRpcUrl('REACT_APP_QUBETIC_RPC')
               : '',
         };
       });

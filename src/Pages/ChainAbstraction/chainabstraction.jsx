@@ -1,7 +1,6 @@
 /*global chrome*/
 import "./CrossChain.scss";
 import { Drawer, message, Select } from "antd";
-import React from "react";
 import InputFieldSimple, {
   InputField,
 } from "../../Components/InputField/InputFieldSimple";
@@ -20,6 +19,7 @@ import { CrossChainHelper } from "../../helpers/crosschain.helper";
 import ModalCloseIcon from "../../Assets/ModalCloseIcon.svg";
 import Search from "../../Assets/SearchIcon.svg";
 import { BTCHelper } from "../../helpers/btc.helper";
+import { getRpcUrl } from "../../helpers/rpcService";
 import { DURATION } from "../../config/message.config";
 import {
   exponential_to_decimal,
@@ -49,10 +49,6 @@ import axios from "axios";
 const CHAIN_ABSTRACTION_PRICE_URL = `${process.env.REACT_APP_CHAIN_ABSTRACTION_MIN_API_URL}/api/v1/cryptos/prices?symbols=BTC,TICS`;
 const SATOSHI_600_IN_BTC = 0.000006; // 600 sats
 const CHAIN_ABSTRACTION_SWAP_SOURCE = "chain_abstraction";
-const CHAIN_ABSTRACTION_TOKEN_KEYS = {
-  from: "chainAbstractionToken1",
-  to: "chainAbstractionToken2",
-};
 
 const INITIAL_MIN_MAX_SWAP_AMOUNT = {
   7: {
@@ -161,6 +157,10 @@ function ChainAbstraction({ state }) {
   const [total, setTotal] = useState(0);
   const [selectDrawer, setTokenDrawer] = useState(false);
   const { chain, account, currency } = useSelector((state) => state);
+  const chainAbstractionTokenKeys = {
+    from: `chainAbstractionToken1_${account?.address || "unknown"}`,
+    to: `chainAbstractionToken2_${account?.address || "unknown"}`,
+  };
   let timeOutId = useRef();
   const crossChainHelper = useRef(new CrossChainHelper());
   const [availableTokens, setAvailableTokens] = useState([]);
@@ -292,13 +292,13 @@ function ChainAbstraction({ state }) {
         return {
           coinFamilyName: "TICS",
           tokenType: "ERC20",
-          rpc: process.env.REACT_APP_QUBETIC_RPC,
+          rpc: getRpcUrl('REACT_APP_QUBETIC_RPC'),
         };
       case 3:
         return {
           coinFamilyName: "BTC",
           tokenType: null,
-          rpc: process.env.REACT_APP_BTC_RPC,
+          rpc: getRpcUrl('REACT_APP_BTC_RPC'),
         };
       default:
         return { coinFamilyName: "ETH", tokenType: "ERC20", rpc: "" };
@@ -641,7 +641,7 @@ function ChainAbstraction({ state }) {
             chain: btcChain,
             native: null,
             decimals: 8,
-            rpc: process.env.REACT_APP_BTC_RPC,
+            rpc: getRpcUrl('REACT_APP_BTC_RPC'),
           };
           modifiedList.push(btcToken);
           console.log("[ChainAbstraction] Added fallback BTC token:", btcToken);
@@ -655,10 +655,10 @@ function ChainAbstraction({ state }) {
       console.log("[ChainAbstraction] Modified list (availableTokens):", modifiedList);
       console.log("[ChainAbstraction] BTC in modifiedList:", modifiedList.filter(t => t.coinFamily === 3));
 
-      let { [CHAIN_ABSTRACTION_TOKEN_KEYS.from]: crossToken1 } =
-        await chrome.storage.local.get(CHAIN_ABSTRACTION_TOKEN_KEYS.from);
-      let { [CHAIN_ABSTRACTION_TOKEN_KEYS.to]: crossToken2 } =
-        await chrome.storage.local.get(CHAIN_ABSTRACTION_TOKEN_KEYS.to);
+      let { [chainAbstractionTokenKeys.from]: crossToken1 } =
+        await chrome.storage.local.get(chainAbstractionTokenKeys.from);
+      let { [chainAbstractionTokenKeys.to]: crossToken2 } =
+        await chrome.storage.local.get(chainAbstractionTokenKeys.to);
 
       if (!crossToken1 && !crossToken2) {
         let myToken1 =
@@ -832,7 +832,7 @@ function ChainAbstraction({ state }) {
 
           crossToken1 = tokenFromSearch;
           await chrome.storage.local.set({
-            [CHAIN_ABSTRACTION_TOKEN_KEYS.from]: tokenFromSearch,
+            [chainAbstractionTokenKeys.from]: tokenFromSearch,
           });
           setToken1(crossToken1);
         }
@@ -1079,7 +1079,7 @@ function ChainAbstraction({ state }) {
 
   const handlePositionChange = async (updatedToken1) => {
     await chrome.storage.local.set({
-      [CHAIN_ABSTRACTION_TOKEN_KEYS.from]: updatedToken1,
+      [chainAbstractionTokenKeys.from]: updatedToken1,
     });
   
     // console.log("=== Token Position Changed ===");
@@ -1132,7 +1132,7 @@ function ChainAbstraction({ state }) {
 
   const handleToken2Change = async (updatedToken2) => {
     await chrome.storage.local.set({
-      [CHAIN_ABSTRACTION_TOKEN_KEYS.to]: updatedToken2,
+      [chainAbstractionTokenKeys.to]: updatedToken2,
     });
 
     setReceivedBalance(updatedToken2.balance);
@@ -1915,6 +1915,7 @@ function ChainAbstraction({ state }) {
                   label="From Address (MPC)"
                   value={mpcFromAddress || ""}
                   readOnly
+                  disabled={true}
                 />
               </div>
 
@@ -2540,14 +2541,16 @@ function ChainAbstraction({ state }) {
       {showMpcModel && (
         <MpcModel
           showModal={showMpcModel}
-          onClose={() => {
+          onClose={(generated) => {
             setShowMpcModel(false);
-            navigate("/chain-abstraction");
-            // Refresh MPC addresses after modal closes
+            if (!generated) {
+              navigate("/wallet");
+              return;
+            }
+            // Refresh MPC addresses after successful generation
             getStoredMpcAddresses().then((stored) => {
               if (stored?.eth && stored?.btc) {
                 setMpcAddresses(stored);
-                // Re-initialize to fetch balances with new MPC addresses
                 init();
               }
             });

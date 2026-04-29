@@ -18,6 +18,7 @@ import { AdaHelper } from '../../../helpers/ada.helper';
 import { BTCHelper } from '../../../helpers/btc.helper';
 import { SolanaHelper } from '../../../helpers/solana.helper';
 import { Web3Helper } from '../../../helpers/web3.helper';
+import { getRpcUrl } from '../../../helpers/rpcService';
 import './SendConfirm.scss';
 import warning from '../../../Assets/PNG/warning.png';
 import DarkLogo from '../../../Assets/DarkLogo.svg';
@@ -69,12 +70,12 @@ function SendConfirmSpritz() {
     const result = await web3Helper.getTransactionStatusThroughHash(
       approvalHash,
       coin.coin_data.coin_family == 1
-        ? process.env.REACT_APP_ETH_RPC
+        ? getRpcUrl('REACT_APP_ETH_RPC')
         : coin.coin_data.coin_family == 3
-        ? process.env.REACT_APP_BNB_RPC
+        ? getRpcUrl('REACT_APP_BNB_RPC')
         : coin.coin_data.coin_family == 7
-        ? process.env.REACT_APP_AVAX_RPC
-        : process.env.REACT_APP_MATIC_RPC
+        ? getRpcUrl('REACT_APP_AVAX_RPC')
+        : getRpcUrl('REACT_APP_MATIC_RPC')
     );
 
     if (result == false) {
@@ -164,12 +165,12 @@ function SendConfirmSpritz() {
         coin.address,
         to,
         coin.coin_data.coin_family == 1
-          ? process.env.REACT_APP_ETH_RPC
+          ? getRpcUrl('REACT_APP_ETH_RPC')
           : coin.coin_data.coin_family == 3
-          ? process.env.REACT_APP_BNB_RPC
+          ? getRpcUrl('REACT_APP_BNB_RPC')
           : coin.coin_data.coin_family == 7
-          ? process.env.REACT_APP_AVAX_RPC
-          : process.env.REACT_APP_MATIC_RPC
+          ? getRpcUrl('REACT_APP_AVAX_RPC')
+          : getRpcUrl('REACT_APP_MATIC_RPC')
       );
 
       if (approvedAmount === false) {
@@ -261,12 +262,12 @@ function SendConfirmSpritz() {
         coin.coin_data.id,
         chain.slug,
         coin.coin_data.coin_family == 1
-          ? process.env.REACT_APP_ETH_RPC
+          ? getRpcUrl('REACT_APP_ETH_RPC')
           : coin.coin_data.coin_family == 3
-          ? process.env.REACT_APP_BNB_RPC
+          ? getRpcUrl('REACT_APP_BNB_RPC')
           : coin.coin_data.coin_family == 7
-          ? process.env.REACT_APP_AVAX_RPC
-          : process.env.REACT_APP_MATIC_RPC,
+          ? getRpcUrl('REACT_APP_AVAX_RPC')
+          : getRpcUrl('REACT_APP_MATIC_RPC'),
         parseInt(chain.chainId),
         sessionPassword
       );

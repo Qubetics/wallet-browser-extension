@@ -6,6 +6,7 @@ import Web3 from 'web3';
 import BigNumber from 'bignumber.js';
 import { ethers } from 'ethers';
 import { rpc_chain } from './constant';
+import { getRpcUrl } from './rpcService';
 
 export class Web3Helper {
   /**
@@ -485,7 +486,7 @@ export class Web3Helper {
     }
   };
 
-  static web3s = new Web3(process.env.REACT_APP_ETH_RPC);
+  static get web3s() { return new Web3(getRpcUrl('REACT_APP_ETH_RPC')); }
 
   static getPriorityFee = async (web3) => {
     const feeHistory = await web3.eth.getFeeHistory(1, 'latest', [10]);
@@ -498,12 +499,12 @@ export class Web3Helper {
   static getGasEstimation = async ({ from, to, data, coinFamily }) => {
     const web3s = new Web3(
       coinFamily == 1
-        ? process.env.REACT_APP_BNB_RPC
+        ? getRpcUrl('REACT_APP_BNB_RPC')
         : coinFamily == 2
-        ? process.env.REACT_APP_ETH_RPC
+        ? getRpcUrl('REACT_APP_ETH_RPC')
         : coinFamily == 4
-        ? process.env.REACT_APP_MATIC_RPC
-        : process.env.REACT_APP_QUBETIC_RPC
+        ? getRpcUrl('REACT_APP_MATIC_RPC')
+        : getRpcUrl('REACT_APP_QUBETIC_RPC')
     );
 
     const transaction = {
@@ -738,11 +739,11 @@ export class Web3Helper {
       const { account } = store.getState();
       const rpc =
         coinFamily == 1
-          ? process.env.REACT_APP_BNB_RPC
+          ? getRpcUrl('REACT_APP_BNB_RPC')
           : coinFamily == 2
-          ? process.env.REACT_APP_ETH_DAPP_RPC
+          ? getRpcUrl('REACT_APP_ETH_DAPP_RPC')
           : coinFamily == 4
-          ? process.env.REACT_APP_MATIC_RPC
+          ? getRpcUrl('REACT_APP_MATIC_RPC')
           : '';
 
       const provider = new ethers.providers.JsonRpcProvider(rpc);

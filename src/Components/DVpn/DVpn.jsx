@@ -677,6 +677,7 @@ function DVpn() {
   };
 
   const handlePasswordCancel = () => {
+    const wasPendingStop = !!pendingStopSessionId;
     setSessionPassword("");
     setIsPasswordModalOpen(false);
     setPendingStopSessionId(null);
@@ -684,7 +685,8 @@ function DVpn() {
       setPendingStartNode(null);
       return;
     }
-    navigate("/dvpn", { replace: true });
+    if (wasPendingStop) return;
+    navigate("/wallet", { replace: true });
   };
 
   const selectedDownload = DOWNLOAD_MAP[detectedOS] || DOWNLOAD_MAP.unknown;

@@ -6,6 +6,7 @@ import ModalCustom from '../../Components/ModalCustom/ModalCustom';
 import logo from '../../Assets/logo.png';
 import moment from 'moment';
 import { Web3Helper } from '../../helpers/web3.helper';
+import { getRpcUrl } from '../../helpers/rpcService';
 import Web3 from 'web3';
 import { WalletHelper } from '../../helpers/wallet.helper';
 import { message } from 'antd';
@@ -280,12 +281,12 @@ export const ExternalConnection = () => {
             // chain id==> 1->Eth, 137->Pol, 56->Bnb
             let rpc =
               myDefaultChain?.chainId == 1
-                ? process.env.REACT_APP_ETH_RPC
+                ? getRpcUrl('REACT_APP_ETH_RPC')
                 : myDefaultChain?.chainId == 9009
-                ? process.env.REACT_APP_QUBETIC_RPC
+                ? getRpcUrl('REACT_APP_QUBETIC_RPC')
                 : myDefaultChain?.chainId == 137
-                ? process.env.REACT_APP_MATIC_RPC
-                : process.env.REACT_APP_BNB_RPC;
+                ? getRpcUrl('REACT_APP_MATIC_RPC')
+                : getRpcUrl('REACT_APP_BNB_RPC');
             const provider = new Web3.providers.HttpProvider(rpc);
             const web3 = new Web3(provider);
             let gasEstimate = '';
@@ -350,7 +351,7 @@ export const ExternalConnection = () => {
             store.dispatch(setLoading(false));
           } else if (method === 'signRawTransaction' && account) {
             const solanaHelper = new SolanaHelper(
-              process.env.REACT_APP_SOL_RPC
+              getRpcUrl('REACT_APP_SOL_RPC')
             );
             const gasPriceRes = solanaHelper.getGasPrice();
             setFeeInEth(gasPriceRes.toString());
@@ -406,7 +407,7 @@ export const ExternalConnection = () => {
         //   '🚀 ~ file: ExternalConnections.jsx:105 ~ handleTransaction ~ data',
         //   data
         // );
-        const solanaHelper = new SolanaHelper(process.env.REACT_APP_SOL_RPC);
+        const solanaHelper = new SolanaHelper(getRpcUrl('REACT_APP_SOL_RPC'));
         // console.log(typeof data.object.data);
         const signature = await solanaHelper.signRawTransaction(
           data.object.raw,

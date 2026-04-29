@@ -1,3 +1,4 @@
+import { getRpcUrl } from './rpcService';
 
 export const BL_CODE = {
   1: "BNB",
@@ -17,13 +18,13 @@ export const token_type = (coin_family) => {
 }
 
 export const rpc_chain = (coin_family) => {
-  return coin_family === 1 ? process.env.REACT_APP_BNB_RPC :
-    coin_family === 2 ? process.env.REACT_APP_ETH_RPC :
-      coin_family === 3 ? process.env.REACT_APP_BTC_RPC :
-        coin_family === 4 ? process.env.REACT_APP_MATIC_RPC :
-          coin_family === 5 ? process.env.REACT_APP_SOL_RPC :
-            coin_family === 6 ? process.env.REACT_APP_TRON_RPC :
-            coin_family === 7 ? process.env.REACT_APP_QUBETIC_RPC : process.env.REACT_APP_QUBETIC_RPC
+  return coin_family === 1 ? getRpcUrl('REACT_APP_BNB_RPC') :
+    coin_family === 2 ? getRpcUrl('REACT_APP_ETH_RPC') :
+      coin_family === 3 ? getRpcUrl('REACT_APP_BTC_RPC') :
+        coin_family === 4 ? getRpcUrl('REACT_APP_MATIC_RPC') :
+          coin_family === 5 ? getRpcUrl('REACT_APP_SOL_RPC') :
+            coin_family === 6 ? getRpcUrl('REACT_APP_TRON_RPC') :
+            getRpcUrl('REACT_APP_QUBETIC_RPC')
 }
 
 export const SWIFT_ERROR = {

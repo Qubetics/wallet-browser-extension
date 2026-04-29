@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { message } from "antd";
 import Cross from "../../Assets/PNG/Cross.png";
 import Tick from "../../Assets/PNG/TickImg.png";
@@ -123,7 +123,7 @@ export default function MpcModel({ showModal = true, onClose, currentEthAddress 
             <button
               onClick={() => {
                 setShowAbstraction(false);
-                if (onClose) onClose();
+                if (onClose) onClose(false);
               }}
               style={{
                 position: "absolute",
@@ -225,7 +225,7 @@ export default function MpcModel({ showModal = true, onClose, currentEthAddress 
             <button
               onClick={() => {
                 setShowCongrats(false);
-                if (onClose) onClose();
+                if (onClose) onClose(true);
               }}
               style={{
                 position: "absolute",
@@ -378,7 +378,7 @@ export default function MpcModel({ showModal = true, onClose, currentEthAddress 
               onClick={() => {
                 // console.log('[MPC:UI] Continue clicked, closing modal');
                 setShowCongrats(false);
-                if (onClose) onClose();
+                if (onClose) onClose(true);
               }}
             >
               Continue
@@ -391,7 +391,10 @@ export default function MpcModel({ showModal = true, onClose, currentEthAddress 
       {contextHolder}
       <ModalCustom
         title={'Verify Password'}
-        handleCancel={() => setConfirmModal(!isModalOpen)}
+        handleCancel={() => {
+          setConfirmModal(!isModalOpen);
+          if (onClose) onClose(false);
+        }}
         isModalOpen={isModalOpen}
         customClass="customClassModal"
       >

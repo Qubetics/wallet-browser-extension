@@ -16,6 +16,7 @@ import InputFieldSimple, {
 } from '../../../Components/InputField/InputFieldSimple';
 import ModalCustom from '../../../Components/ModalCustom/ModalCustom';
 import { Web3Helper } from '../../../helpers/web3.helper';
+import { getRpcUrl } from '../../../helpers/rpcService';
 import style from './style.module.scss';
 import AddressBook from '../../../Assets/address-book-svgrepo-com.svg';
 import { useEffect } from 'react';
@@ -334,25 +335,25 @@ function SendCoins() {
 
       switch (coin.coin.coin_family) {
         case 1:
-          rpc = process.env.REACT_APP_BNB_RPC;
+          rpc = getRpcUrl('REACT_APP_BNB_RPC');
           break;
         case 2:
-          rpc = process.env.REACT_APP_ETH_RPC;
+          rpc = getRpcUrl('REACT_APP_ETH_RPC');
           break;
         case 3:
-          rpc = process.env.REACT_APP_BTC_RPC;
+          rpc = getRpcUrl('REACT_APP_BTC_RPC');
           break;
         case 4:
-          rpc = process.env.REACT_APP_MATIC_RPC;
+          rpc = getRpcUrl('REACT_APP_MATIC_RPC');
           break;
         case 5:
-          rpc = process.env.REACT_APP_SOL_RPC;
+          rpc = getRpcUrl('REACT_APP_SOL_RPC');
           break;
         case 7:
-          rpc = process.env.REACT_APP_QUBETIC_RPC;
+          rpc = getRpcUrl('REACT_APP_QUBETIC_RPC');
           break;
         default:
-          rpc = process.env.REACT_APP_TRON_RPC;
+          rpc = getRpcUrl('REACT_APP_TRON_RPC');
       }
 
       store.dispatch(setLoading(true));
@@ -641,12 +642,12 @@ function SendCoins() {
       const nativeCoinResponse = await Web3Helper.getCoinBalance(
         myAddress,
         coin.coin.coin_family == 1
-          ? process.env.REACT_APP_BNB_RPC
+          ? getRpcUrl('REACT_APP_BNB_RPC')
           : coin.coin.coin_family == 2
-          ? process.env.REACT_APP_ETH_RPC
+          ? getRpcUrl('REACT_APP_ETH_RPC')
           : coin.coin.coin_family == 4
-          ? process.env.REACT_APP_MATIC_RPC
-          : process.env.REACT_APP_QUBETIC_RPC
+          ? getRpcUrl('REACT_APP_MATIC_RPC')
+          : getRpcUrl('REACT_APP_QUBETIC_RPC')
       );
 
       const nativeCoinBalance = new BigNumber(nativeCoinResponse);

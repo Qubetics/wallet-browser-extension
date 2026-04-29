@@ -15,6 +15,7 @@ import { getWalletDvpnState, setWalletDvpnState } from "./storage";
 import { dvpnRoutes } from "./routes";
 import { notifyDvpnError } from "./errors";
 import { fetchWireguardRuntimeConfig, isProviderSessionAlreadyExistsError } from "./wireguard";
+import { getRpcUrl } from '../../helpers/rpcService';
 
 const SUBSCRIPTION_TYPE_URL = "/qubetics.subscription.v3.MsgStartSubscriptionRequest";
 const SESSION_TYPE_URL = "/qubetics.subscription.v3.MsgStartSessionRequest";
@@ -25,10 +26,10 @@ const DEFAULT_FEE = {
   amount: [{ denom: "tics", amount: "1" }],
   gas: "1000000",
 };
-const DEFAULT_RPC_URL =
-  process.env.REACT_APP_COSMO_RPC_URL ||
-  process.env.REACT_APP_QUBETIC_RPC ||
-  process.env.REACT_APP_QUBETICS_RPC ||
+
+const DEFAULT_RPC_URL = () =>
+  getRpcUrl('REACT_APP_COSMO_RPC_URL') ||
+  getRpcUrl('REACT_APP_QUBETIC_RPC') ||
   "";
 
 const MsgStartSubscriptionRequest = {
@@ -213,7 +214,7 @@ const resolvePurchaseMnemonic = async (walletAddress, sessionPassword) => {
   throw new Error("Invalid Credentials! Wallet/password path mismatch.");
 };
 
-export const getTicsBalance = async ({ walletAddress, rpcUrl = DEFAULT_RPC_URL } = {}) => {
+export const getTicsBalance = async ({ walletAddress, rpcUrl = DEFAULT_RPC_URL() } = {}) => {
   if (!walletAddress) throw new Error("walletAddress is required");
   if (!rpcUrl) throw new Error("Qubetics RPC URL is not configured");
   const client = await StargateClient.connect(rpcUrl);
@@ -251,7 +252,7 @@ export const purchasePlan = async ({
   walletAddress,
   providerAddress,
   sessionPassword,
-  rpcUrl = DEFAULT_RPC_URL,
+  rpcUrl = DEFAULT_RPC_URL(),
   verifyOnBackend = true,
 }) => {
   try {
@@ -326,7 +327,7 @@ export const startSessionOnChain = async ({
   nodeAddress,
   walletAddress,
   sessionPassword,
-  rpcUrl = DEFAULT_RPC_URL,
+  rpcUrl = DEFAULT_RPC_URL(),
 } = {}) => {
   let activeWalletScope = "";
   try {
@@ -394,7 +395,7 @@ export const cancelSessionOnChain = async ({
   sessionId,
   walletAddress,
   sessionPassword,
-  rpcUrl = DEFAULT_RPC_URL,
+  rpcUrl = DEFAULT_RPC_URL(),
   suppressErrorNotification = false,
 } = {}) => {
   try {
@@ -524,7 +525,7 @@ export const fetchVpnRuntimeConfig = async ({
   providerUrl,
   nodeAddress,
   signerMessage,
-  rpcUrl = DEFAULT_RPC_URL,
+  rpcUrl = DEFAULT_RPC_URL(),
   selectedNode,
 } = {}) => {
   let activeWalletScope = "";
@@ -916,7 +917,7 @@ export const disconnectVpn = async ({
   sessionId,
   walletAddress,
   sessionPassword,
-  rpcUrl = DEFAULT_RPC_URL,
+  rpcUrl = DEFAULT_RPC_URL(),
 } = {}) => {
   try {
     const activeWallet = await ensureDvpnLogin(walletAddress, { sessionPassword });

@@ -16,6 +16,7 @@ import { DURATION } from '../../../config/message.config';
 import { BTCHelper } from '../../../helpers/btc.helper';
 import { SolanaHelper } from '../../../helpers/solana.helper';
 import { Web3Helper } from '../../../helpers/web3.helper';
+import { getRpcUrl } from '../../../helpers/rpcService';
 import './SendConfirm.scss';
 import Logo from '../../../Assets/QubeticsLogo.png';
 import {
@@ -348,12 +349,12 @@ function SendConfirm() {
                 chain.chainId,
                 coin.coin.coin_symbol,
                 coin.coin.coin_family == 1
-                  ? process.env.REACT_APP_BNB_RPC
+                  ? getRpcUrl('REACT_APP_BNB_RPC')
                   : coin.coin.coin_family == 2
-                  ? process.env.REACT_APP_ETH_RPC
+                  ? getRpcUrl('REACT_APP_ETH_RPC')
                   : coin.coin.coin_family == 4
-                  ? process.env.REACT_APP_MATIC_RPC
-                  : process.env.REACT_APP_QUBETIC_RPC,
+                  ? getRpcUrl('REACT_APP_MATIC_RPC')
+                  : getRpcUrl('REACT_APP_QUBETIC_RPC'),
                 '',
                 gasPriceType,
                 undefined,

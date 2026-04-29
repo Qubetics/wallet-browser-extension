@@ -29,6 +29,7 @@ import {
   SwapRouter,
 } from "@pancakeswap/smart-router/evm";
 import { exponential_to_decimal } from "./conversion.helper";
+import { getRpcUrl } from './rpcService';
 const chainId = ChainId.BSC;
 const web3 = new Web3();
 
@@ -38,15 +39,17 @@ export function replaceN(value) {
   }
 }
 
-const publicClient = createPublicClient({
-  chain: mainnet,
-  transport: http(process.env.REACT_APP_BNB_RPC),
-  batch: {
-    multicall: {
-      batchSize: 1024 * 200,
+function getPublicClient() {
+  return createPublicClient({
+    chain: mainnet,
+    transport: http(getRpcUrl('REACT_APP_BNB_RPC')),
+    batch: {
+      multicall: {
+        batchSize: 1024 * 200,
+      },
     },
-  },
-});
+  });
+}
 export class PancakeHelper {
   web3Provider = null;
   WETH = null;
@@ -407,7 +410,7 @@ export class PancakeHelper {
         data: calldata,
         value: hexToBigInt(value),
       };
-      const gasEstimate = await publicClient.estimateGas(tx);
+      const gasEstimate = await getPublicClient().estimateGas(tx);
 
       return BigNumber(gasEstimate.toString());
     } catch (error) {
