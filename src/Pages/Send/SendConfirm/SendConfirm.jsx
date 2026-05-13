@@ -452,6 +452,7 @@ function SendConfirm() {
       }
 
       store.dispatch(setLoading(false));
+      chrome.storage.local.set({ walletBalanceRefreshAt: Date.now() + 60_000 });
       setIsModalOpen1(true);
     } catch (error) {
       // console.error('HANDLE TRANSACTION ERROR: ', error);

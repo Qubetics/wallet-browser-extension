@@ -551,6 +551,9 @@ export const fetchVpnRuntimeConfig = async ({
       order: "DESC",
     });
     const subscriptions = asArray(subscriptionPayload);
+    if (subscriptions.length > 0 && !subscriptions.some(isLikelyActiveSubscription)) {
+      throw new Error("Plan has been expired");
+    }
     const activeSubscription = pickSubscription(subscriptions, planId);
     const resolvedPlanId = Number(planId || activeSubscription?.plan_id || activeSubscription?.planId);
     if (!resolvedPlanId) {

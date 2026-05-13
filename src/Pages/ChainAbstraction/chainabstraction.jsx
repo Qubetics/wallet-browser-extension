@@ -1586,6 +1586,7 @@ function ChainAbstraction({ state }) {
         }
 
         setIsOpen(false);
+        chrome.storage.local.set({ walletBalanceRefreshAt: Date.now() + 120_000 });
         setTransactionResult((prev) => ({
           ...prev,
           hash: data?.hash,

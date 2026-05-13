@@ -57,24 +57,19 @@ function Wallet() {
     setLoading(true);
     const throwError = (msg) => messageApi.error(msg);
     try {
+      const activeAccount = _account || account;
       const walletsList = await server.post(
         `/wallet/portfolio`,
         {
-          addressListKeys: _account
-            ? _account?.addressLists?.slice(0, 6)
-            : account?.addressLists?.slice(0, 6),
-          coin_family: _account
-            ? _account?.coinFamilies
-            : account?.coinFamilies,
+          addressListKeys: activeAccount?.addressLists?.slice(0, 6),
+          coin_family: activeAccount?.coinFamilies,
           fiat_type: currency.name,
           limit: 2000,
           page: currentPage,
           search: '',
         },
         {
-          headers: {
-            Authorization: _account ? _account?.jwtToken : account?.jwtToken,
-          },
+          headers: { Authorization: activeAccount?.jwtToken },
         }
       );
 
@@ -93,6 +88,43 @@ function Wallet() {
   useEffect(() => {
     init(state?.updatedAccount);
   }, [currentPage, refresh, state?.updatedAccount, account]);
+
+  useEffect(() => {
+    server.post(
+      `/wallet/sync/balance`,
+      {
+        addressListKeys: account?.addressLists?.slice(0, 6),
+        coin_family: account?.coinFamilies,
+      },
+      { headers: { Authorization: account?.jwtToken } }
+    ).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    let timerId;
+    (async () => {
+      const { walletBalanceRefreshAt } = await chrome.storage.local.get('walletBalanceRefreshAt');
+      if (!walletBalanceRefreshAt) return;
+      const delay = walletBalanceRefreshAt - Date.now();
+      const run = async () => {
+        await chrome.storage.local.remove('walletBalanceRefreshAt');
+        try {
+          await server.post(
+            `/wallet/sync/balance`,
+            { addressListKeys: account?.addressLists?.slice(0, 6), coin_family: account?.coinFamilies },
+            { headers: { Authorization: account?.jwtToken } }
+          );
+        } catch (_) {}
+        setRefresh((r) => !r);
+      };
+      if (delay <= 0) {
+        run();
+      } else {
+        timerId = setTimeout(run, delay);
+      }
+    })();
+    return () => clearTimeout(timerId);
+  }, []);
 
   const parentRef = useRef(null);
 

@@ -45,7 +45,7 @@ function addCommasToNumber(number) {
 }
 
 function CrossChainDetails() {
-  const { chain, account, currency, theme } = useSelector((state) => state);
+  const { chain, currency, theme } = useSelector((state) => state);
   const {
     state: {
       token1,
@@ -129,6 +129,7 @@ function CrossChainDetails() {
       );
     }
     setSwapModal(false);
+    chrome.storage.local.set({ walletBalanceRefreshAt: Date.now() + 120_000 });
     return setIsModalOpen1(true);
   };
 
