@@ -1,7 +1,7 @@
 {
   "name": "Qubetics Wallet",
   "description": "Qubetics Wallet",
-  "version": "1.6",
+  "version": "1.7",
   "manifest_version": 3,
   "permissions": [
     "storage",

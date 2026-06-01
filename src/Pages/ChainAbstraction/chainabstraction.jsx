@@ -47,17 +47,16 @@ import Abstract from "../../Assets/swapI.png";
 import axios from "axios";
 
 const CHAIN_ABSTRACTION_PRICE_URL = `${process.env.REACT_APP_CHAIN_ABSTRACTION_MIN_API_URL}/api/v1/cryptos/prices?symbols=BTC,TICS`;
-const SATOSHI_600_IN_BTC = 0.000006; // 600 sats
 const CHAIN_ABSTRACTION_SWAP_SOURCE = "chain_abstraction";
 
 const INITIAL_MIN_MAX_SWAP_AMOUNT = {
   7: {
-    min: 25,
-    max: 1000,
+    min: 250,
+    max: 5000,
   },
   3: {
-    min: 0.000006, // 600 sats
-    max: 0.001,
+    min: 0.00013,
+    max: 0.0025,
   }
 };
 
@@ -238,12 +237,6 @@ function ChainAbstraction({ state }) {
           BTC: btcPrice,
           TICS: ticsPrice,
         });
-        const ticsEquivalentTo600Satoshi = (SATOSHI_600_IN_BTC * btcPrice) / ticsPrice;
-        const minTics = Math.ceil(Number(Number(ticsEquivalentTo600Satoshi).toFixed(8)) || 25);
-        setMinMaxSwapAmount((prev) => ({
-          ...prev,
-          7: { ...prev[7], min: Math.max(minTics, 1) },
-        }));
       }
     } catch (e) {
       // keep initial TICS min on error
@@ -1772,9 +1765,9 @@ function ChainAbstraction({ state }) {
                         const maxCharactersBeforeDecimal = 15;
                         const maxDecimals = token1?.decimals || 8;
 
-                        if (beforeDecimal.length > maxCharactersBeforeDecimal)
+                        if (beforeDecimal?.length > maxCharactersBeforeDecimal)
                           return;
-                        if (afterDecimal.length > maxDecimals) return;
+                        if (afterDecimal?.length > maxDecimals) return;
 
                         handleSwapInput(sanitizedAmount);
                       }}
@@ -1785,7 +1778,7 @@ function ChainAbstraction({ state }) {
                         ? `${currency?.symbol}${addCommasToNumber(
                             getFlooredFixed(
                               parseFloat(amount) *
-                                parseFloat(token1 ? token1.price : 0),
+                                parseFloat(token1 ? token1?.price : 0),
                               2
                             )
                           )}`
