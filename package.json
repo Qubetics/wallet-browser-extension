@@ -100,6 +100,7 @@
   "scripts": {
     "start": "react-scripts --max_old_space_size=100000 start",
     "build": "npx webpack build && GENERATE_SOURCEMAP=false react-scripts --max_old_space_size=22528 build",
+    "postbuild": "node scripts/add-manifest-key.js",
     "watch": "node scripts/watch.js",
     "half": "npx webpack build",
     "test": "react-scripts test",
