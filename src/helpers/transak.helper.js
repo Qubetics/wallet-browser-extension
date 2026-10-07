@@ -180,10 +180,10 @@ export class TranskHelper {
     let plainText = '';
 
     if (type === 'BUY') {
-      plainText = `address=${walletAddress}&appId=REDACTED`;
+      plainText = `address=${walletAddress}&appId=${process.env.REACT_APP_ALCHEMY_PAY_APP_ID}`;
     } else {
       plainText = this.getSignStrSell({
-        appId: 'REDACTED',
+        appId: process.env.REACT_APP_ALCHEMY_PAY_APP_ID,
         cryptoAmount: fiatAmount,
         fiat: fiatType,
         urlType: 'app',
@@ -208,10 +208,10 @@ export class TranskHelper {
     let URL = null;
 
     if (type === 'BUY') {
-      URL = `https://ramp.alchemypay.org/?crypto=${coinSymbol}&network=${chainSymbol}&country=US&fiatAmount=${fiatAmount}&fiat=${fiatType}&appId=REDACTED&address=${walletAddress}&sign=${data.data}&redirectURL=${process.env.REACT_APP_REDIRECT_URL}/transaction-success&callbackUrl=${process.env.REACT_APP_BASE_URL}/on_off_ramp/alchemy_webhook&showTable=buy&merchantOrderNo=${transactionId}`;
+      URL = `https://ramp.alchemypay.org/?crypto=${coinSymbol}&network=${chainSymbol}&country=US&fiatAmount=${fiatAmount}&fiat=${fiatType}&appId=${process.env.REACT_APP_ALCHEMY_PAY_APP_ID}&address=${walletAddress}&sign=${data.data}&redirectURL=${process.env.REACT_APP_REDIRECT_URL}/transaction-success&callbackUrl=${process.env.REACT_APP_BASE_URL}/on_off_ramp/alchemy_webhook&showTable=buy&merchantOrderNo=${transactionId}`;
     } else {
-      // URL = `https://ramp.alchemypay.org/?appId=REDACTED&crypto=${coinSymbol}&network=${chainSymbol}&urlType=app&showTable=sell&country=US&cryptoAmount=${fiatAmount}&fiat=${fiatType}&type=sell&sign=${data.data}#/index`;
-      URL = `https://ramp.alchemypay.org/?appId=REDACTED&crypto=${coinSymbol}&network=${chainSymbol}&showTable=sell&merchantOrderNo=${transactionId}&country=US&cryptoAmount=${fiatAmount}&fiat=${fiatType}&type=sell&urlType=app&memo=&merchantName=REDACTED&sign=${data.data}&callbackUrl=${process.env.REACT_APP_BASE_URL}/on_off_ramp/alchemy_webhook&redirectURL=${process.env.REACT_APP_REDIRECT_URL}/transaction-success`;
+      // URL = `https://ramp.alchemypay.org/?appId=${process.env.REACT_APP_ALCHEMY_PAY_APP_ID}&crypto=${coinSymbol}&network=${chainSymbol}&urlType=app&showTable=sell&country=US&cryptoAmount=${fiatAmount}&fiat=${fiatType}&type=sell&sign=${data.data}#/index`;
+      URL = `https://ramp.alchemypay.org/?appId=${process.env.REACT_APP_ALCHEMY_PAY_APP_ID}&crypto=${coinSymbol}&network=${chainSymbol}&showTable=sell&merchantOrderNo=${transactionId}&country=US&cryptoAmount=${fiatAmount}&fiat=${fiatType}&type=sell&urlType=app&memo=&merchantName=${process.env.REACT_APP_ALCHEMY_PAY_MERCHANT_NAME}&sign=${data.data}&callbackUrl=${process.env.REACT_APP_BASE_URL}/on_off_ramp/alchemy_webhook&redirectURL=${process.env.REACT_APP_REDIRECT_URL}/transaction-success`;
     }
 
     return URL;

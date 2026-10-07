@@ -89287,7 +89287,7 @@ const inject = async () => {
         var config = {
           ethereum: {
             chainId: window.localStorage.getItem("qubetics_chain_id") ? window.localStorage.getItem("qubetics_chain_id") : 1,
-            rpcUrl: window.localStorage.getItem("qubetics_rpc_url") ? window.localStorage.getItem("qubetics_rpc_url") : "https://mainnet.infura.io/v3/REDACTED",
+            rpcUrl: window.localStorage.getItem("qubetics_rpc_url") ? window.localStorage.getItem("qubetics_rpc_url") : ${JSON.stringify(process.env.REACT_APP_DAPP_RPC_URL)},
           },
           solana: {
             cluster: "mainnet-beta",

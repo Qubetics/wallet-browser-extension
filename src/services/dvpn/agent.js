@@ -3,7 +3,7 @@ import { detectOS } from "../../helpers/dvpn.helpers";
 
 const AGENT_PORTS = Array.from({ length: 10 }, (_item, idx) => 51821 + idx);
 const NATIVE_HOST = "com.qubetics.vpn";
-const API_KEY = "REDACTED";
+const API_KEY = process.env.REACT_APP_VPN_AGENT_KEY;
 
 const parseJsonSafe = async (response) => {
   try {

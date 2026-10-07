@@ -7,7 +7,7 @@ export class UnstoppableDomainHelper {
         `https://resolve.unstoppabledomains.com/records?domains=${name}`,
         {
           headers: {
-            Authorization: "Bearer REDACTED",
+            Authorization: `Bearer ${process.env.REACT_APP_UNSTOPPABLE_API_KEY}`,
           },
         }
       );

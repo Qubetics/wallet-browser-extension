@@ -105,7 +105,7 @@ function Setting() {
       store.dispatch(setLoading(false));
       // window.open(`http://localhost:3000/chat/${account.address}/${randomString}`);
       window.open(
-        `https://REDACTED/chat/${account.address}/${randomString}`
+        `${process.env.REACT_APP_SUPPORT_CHAT_URL}/${account.address}/${randomString}`
         // `http://localhost:3000/faq/${account.address}/${randomString}`
       );
     }

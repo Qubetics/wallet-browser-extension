@@ -1,8 +1,8 @@
 export const IS_PRODUCTION = process.env.REACT_APP_IS_PRODUCTION;
 
 export const FETCH_COINS = !IS_PRODUCTION
-  ? "https://REDACTED/stage/api/v1/extension/swap_coins?chain_id="
-  : "https://REDACTED/dev/api/v1/extension/swap_coins?chain_id=";
+  ? `${process.env.REACT_APP_WALLET_STAGE_API_URL}/stage/api/v1/extension/swap_coins?chain_id=`
+  : `${process.env.REACT_APP_WALLET_API_URL}/dev/api/v1/extension/swap_coins?chain_id=`;
 
 export const UNI_MAINNET_ROUTER = "0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45";
 export const UNI_TESTNET_ROUTER = "0x470d5ce9468337D509b688b86Ad9cD7a8C80D753";

@@ -291,7 +291,7 @@ function EnterPrice() {
                               : coin.currencyMercuryo
                             : "",
                           backArrow: ArrowRightIcon,
-                          link: "https://sandbox-exchange.mrcr.io/?widget_id=REDACTED",
+                          link: `https://sandbox-exchange.mrcr.io/?widget_id=${process.env.REACT_APP_MERCURYO_SANDBOX_WIDGET_ID}`,
                           currencyToBuyFrom: coin.currencyMercuryo,
                           address:
                             account.coinFamilyAndAddress[coin.coinFamily],
@@ -388,7 +388,7 @@ function EnterPrice() {
                               : coin.currencySimplex
                             : "",
                           backArrow: ArrowRightIcon,
-                          link: "https://sandbox-exchange.mrcr.io/?widget_id=REDACTED",
+                          link: `https://sandbox-exchange.mrcr.io/?widget_id=${process.env.REACT_APP_MERCURYO_SANDBOX_WIDGET_ID}`,
                           currencyToBuyFrom: coin.currencySimplex,
                           address:
                             account.coinFamilyAndAddress[coin.coinFamily],
@@ -483,24 +483,24 @@ function EnterPrice() {
                 if (type === "BUY") {
                   chrome.tabs.create({
                     url: `
-                    https://exchange.mercuryo.io/?widget_id=REDACTED&type=${type.toLowerCase()}&fiat_currency=${
+                    https://exchange.mercuryo.io/?widget_id=${process.env.REACT_APP_MERCURYO_WIDGET_ID}&type=${type.toLowerCase()}&fiat_currency=${
                       ele.currencyToBuyFrom
                     }&fix_fiat_currency=true&currency=${coin.coinName.toUpperCase()}&fix_currency=true&fiat_amount=${amount}&fix_fiat_amount=true&address=${
                       ele.address
-                    }&redirect_url=https://REDACTED/transaction-success&merchant_transaction_id=${transactionId}&signature=${SHA512(
-                      `${ele.address}REDACTED`
+                    }&redirect_url=${process.env.REACT_APP_MERCURYO_TX_REDIRECT_URL}&merchant_transaction_id=${transactionId}&signature=${SHA512(
+                      `${ele.address}${process.env.REACT_APP_MERCURYO_SECRET_KEY}`
                     )}
                     `,
                   });
                 } else {
                   chrome.tabs.create({
                     url: `
-                    https://exchange.mercuryo.io/?widget_id=REDACTED&type=${type.toLowerCase()}&fiat_currency=${
+                    https://exchange.mercuryo.io/?widget_id=${process.env.REACT_APP_MERCURYO_WIDGET_ID}&type=${type.toLowerCase()}&fiat_currency=${
                       ele.currencyToBuyFrom
                     }&fix_fiat_currency=true&currency=${coin.coinName.toUpperCase()}&fix_currency=true&amount=${amount}&fix_fiat_amount=true&address=${
                       ele.address
-                    }&redirect_url=https://REDACTED/transaction-success&merchant_transaction_id=${transactionId}&signature=${SHA512(
-                      `${ele.address}REDACTED`
+                    }&redirect_url=${process.env.REACT_APP_MERCURYO_TX_REDIRECT_URL}&merchant_transaction_id=${transactionId}&signature=${SHA512(
+                      `${ele.address}${process.env.REACT_APP_MERCURYO_SECRET_KEY}`
                     )}
                     `,
                   });
@@ -553,7 +553,7 @@ function EnterPrice() {
 
                 store.dispatch(setLoading(true));
                 chrome.tabs.create({
-                  url: `https://REDACTED/?crypto=${ele.simplexCoinSymbol}&fiat=${ele.currencyToBuyFrom}&amount=${amount}&wallet_address=${ele.address}&ref_id=simplex`,
+                  url: `${process.env.REACT_APP_SIMPLEX_URL}/?crypto=${ele.simplexCoinSymbol}&fiat=${ele.currencyToBuyFrom}&amount=${amount}&wallet_address=${ele.address}&ref_id=simplex`,
                 });
                 store.dispatch(setLoading(false));
                 setOpen(false);
