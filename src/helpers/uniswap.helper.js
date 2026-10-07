@@ -2,7 +2,7 @@ import { AlphaRouter } from '@uniswap/smart-order-router';
 import { ethers } from 'ethers';
 import { BigNumber } from 'bignumber.js';
 import { UNISWAP_NATIVE_WRAPPED_TOKEN_ADDRESSES } from '../config/uniswap.config';
-import { ABI, WRAP_ABI } from '../config/abi';
+import { ABI } from '../config/abi';
 import { WalletHelper } from './wallet.helper';
 import { Web3Helper } from './web3.helper';
 import Web3 from 'web3';
@@ -306,105 +306,4 @@ export class UniswapHelper {
     }
   }
 
-  async sendWrapTransaction(
-    walletAddress,
-    amount,
-    coinId,
-    adminDetails,
-    token1
-  ) {
-    try {
-      const bigAmount = new BigNumber(amount).multipliedBy(
-        new BigNumber(10).pow(
-          UNISWAP_NATIVE_WRAPPED_TOKEN_ADDRESSES[1].decimals
-        )
-      );
-
-      const gasPrice = await Web3Helper.getGasPrice(
-        'eth',
-        walletAddress,
-        walletAddress,
-        0
-      );
-
-      const gasLimit = await Web3Helper.fetchGasEstimateForWrap(
-        UNISWAP_NATIVE_WRAPPED_TOKEN_ADDRESSES[1].address,
-        token1.address,
-        token1.rpc,
-        token1.isToken ? 'withdraw' : 'deposit',
-        bigAmount
-      );
-
-      const { account } = store.getState();
-      const { privateKey } = await WalletHelper.getPrivateKey();
-      const increasedGasLimitDecimal = gasLimit * 2;
-
-      const web3 = new Web3();
-      const contract = new web3.eth.Contract(WRAP_ABI);
-
-      const transaction = {
-        to: UNISWAP_NATIVE_WRAPPED_TOKEN_ADDRESSES[1].address,
-        value: token1.tokenAddress ? '0x0' : bigAmount,
-        from: walletAddress,
-        gasPrice: Web3.utils.toHex(gasPrice.price * Math.pow(10, 9)),
-        gasLimit: Web3.utils.toHex(increasedGasLimitDecimal),
-        nonce: gasPrice.nonce + 1,
-        chainId: 1,
-        data: token1.isToken
-          ? contract.methods.withdraw(amount).encodeABI()
-          : contract.methods.deposit().encodeABI(),
-      };
-
-      const wallet = new ethers.Wallet(privateKey, this.ethProvider);
-      const signedTransaction = await wallet.signTransaction(transaction);
-
-      const response = await server.post(
-        `/eth/send_swap_trxn`,
-        {
-          address_list: [
-            {
-              address_book_name: '',
-              amount: parseFloat(amount), // Set to 0 for an approve transaction
-              coin_id: coinId, // Set to the appropriate coin ID
-              fiat_price: 0,
-              fiat_type: 'USD', // Set to the appropriate fiat type
-              from_address: walletAddress,
-              gas_estimate: parseFloat(increasedGasLimitDecimal),
-              gas_price: gasPrice.price,
-              to_address: UNISWAP_NATIVE_WRAPPED_TOKEN_ADDRESSES[1].address, // The ERC20 token contract address (to_address should be the token address for an approval transaction)
-              trnx_raw: signedTransaction.split('0x')[1],
-              trnx_type: 'swap',
-              coin_symbol: token1.symbol,
-              swap_fee: 0,
-            },
-            {
-              address_book_name: '',
-              amount: parseFloat(adminDetails.amount),
-              coin_id: adminDetails.coinId,
-              fiat_price: 0,
-              fiat_type: 'USD',
-              from_address: walletAddress,
-              gas_estimate: parseFloat(increasedGasLimitDecimal),
-              gas_price: gasPrice.price,
-              to_address: adminDetails.address,
-              trnx_raw: adminDetails.raw_trnx,
-              trnx_type: 'admin_fees',
-              coin_symbol: 'eth',
-              swap_fee: 0,
-            },
-          ],
-        },
-        {
-          headers: {
-            Authorization: account.jwtToken,
-          },
-        }
-      );
-
-      return response.data.tx_hash;
-    } catch (error) {
-      // console.log('Send Wrap Transaction :', error);
-      return false;
-    }
-  }
 }

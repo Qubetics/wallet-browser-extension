@@ -125,31 +125,6 @@ function getLimitsText(coinFamily, limitsMap = null) {
   return `Min: ${limits.min} ${symbol}, Max: ${limits.max} ${symbol}`;
 }
 
-export function bigNumberSafeMath(a, operation, b) {
-  try {
-    const numA = new BigNumber(a || 0);
-    const numB = new BigNumber(b || 0);
-
-    switch (operation) {
-      case "+":
-        return numA.plus(numB);
-      case "-":
-        return numA.minus(numB);
-      case "*":
-        return numA.times(numB);
-      case "/":
-        return numB.isZero() ? new BigNumber(0) : numA.dividedBy(numB);
-      case "%":
-        return numB.isZero() ? new BigNumber(0) : numA.modulo(numB);
-      default:
-        return numA;
-    }
-  } catch (error) {
-    // console.error("bigNumberSafeMath error:", error);
-    return new BigNumber(0);
-  }
-}
-
 function ChainAbstraction({ state }) {
   const parentRef = useRef(null);
   const [page, setPage] = useState(1);

@@ -3,7 +3,6 @@
 import { dvpnRequest, getActiveWalletAddress } from "./client";
 import { dvpnRoutes } from "./routes";
 import {
-  clearWalletTokens,
   getWalletDvpnState,
   setWalletDvpnState,
   updateWalletTokens,
@@ -285,31 +284,6 @@ export const dvpnLogin = async ({
   } catch (error) {
     notifyDvpnError(error, "dVPN login failed");
     throw error;
-  }
-};
-
-export const dvpnLogout = async (walletAddress) => {
-  try {
-    const activeWallet = walletAddress || (await getActiveWalletAddress());
-    if (!activeWallet) return;
-    const walletState = (await getWalletDvpnState(activeWallet)) || {};
-    const refreshToken = walletState?.tokens?.refreshToken;
-
-    await dvpnRequest({
-      method: "GET",
-      path: dvpnRoutes.auth.logout,
-      walletAddress: activeWallet,
-      withAuth: true,
-      extraHeaders: refreshToken ? { "refresh-token": refreshToken } : {},
-    });
-    await clearWalletTokens(activeWallet);
-  } catch (error) {
-    notifyDvpnError(error, "dVPN logout failed");
-    // Local cleanup should still happen even if remote logout fails.
-    const activeWallet = walletAddress || (await getActiveWalletAddress());
-    if (activeWallet) {
-      await clearWalletTokens(activeWallet);
-    }
   }
 };
 

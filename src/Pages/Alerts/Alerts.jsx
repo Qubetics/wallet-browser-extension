@@ -16,16 +16,6 @@ import { store } from "../..";
 import { setLoading } from "../../actions/loading";
 import { InputField } from "../../Components/InputField/InputFieldSimple";
 
-function addCommasToNumberWithLarge(num) {
-  if (Math.abs(num) < 1.0) {
-    const numString = parseFloat(num).toFixed(20); // Adjust the number of decimals as needed
-    return numString.replace(/\.?0+$/, ""); // Remove trailing zeros
-  }
-  const parts = num.toString().split(".");
-  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  return parts.join(".");
-}
-
 function getFlooredFixed(number, precision) {
   const factor = 10 ** precision;
   const roundedNumber = Math.floor(number * factor) / factor;

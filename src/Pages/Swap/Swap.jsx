@@ -153,40 +153,6 @@ function  Swap() {
     }
   }, [amount]);
 
-  function showFiatConversion(amount, token1Price, amount2, token2Price) {
-    const fromAmount =
-      parseFloat(amount ? amount : 0) * parseFloat(token1Price);
-    // console.log(
-    //   "🚀 ~ file: Swap.jsx:133 ~ showFiatConversion ~ fromAmount:",
-    //   fromAmount
-    // );
-
-    const receivedAmount =
-      parseFloat(amount2 ? amount2 : 0) * parseFloat(token2Price);
-
-    // console.log(
-    //   "🚀 ~ file: Swap.jsx:137 ~ showFiatConversion ~ receivedAmount:",
-    //   receivedAmount
-    // );
-
-    let percVal =
-      (parseFloat(receivedAmount) / parseFloat(fromAmount)) * 100 || 0;
-    // console.log(
-    //   "🚀 ~ file: Swap.jsx:138 ~ showFiatConversion ~ percVal:",
-    //   percVal
-    // );
-    let diffVal = parseFloat(110) > 0 ? 110 : 0;
-    // console.log(
-    //   "🚀 ~ file: Swap.jsx:141 ~ showFiatConversion ~ diffVal:",
-    //   diffVal
-    // );
-
-    if (parseFloat(percVal) < parseFloat(diffVal) && parseFloat(percVal) > 90) {
-      return true;
-    } else {
-      return false;
-    }
-  }
   const percentages = [25, 50, 75, 100];
 
   const calculateAccordingly = async (percentage) => {

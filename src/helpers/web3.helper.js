@@ -26,34 +26,6 @@ export class Web3Helper {
     }
   };
 
-  static gaspriceNft = async ({ slug, to, from, token_value, amount }) => {
-    const { account } = store.getState();
-    try {
-      const { data } = await server.post(
-        `/${slug}/${token_value}/gas_estimation`,
-        {
-          to,
-          from,
-          token_value,
-          amount,
-        },
-        {
-          headers: {
-            Authorization: account.jwtToken,
-          },
-        }
-      );
-      return {
-        estimate: data.gas_estimate,
-        fast: data.resultList.fast_gas_price,
-        propose: data.resultList.propose_gas_price,
-        safe: data.resultList.safe_gas_price,
-      };
-    } catch (error) {
-      return false;
-    }
-  };
-
   static getGasPriceNft = async (
     slug,
     toAddress,
@@ -487,14 +459,6 @@ export class Web3Helper {
   };
 
   static get web3s() { return new Web3(getRpcUrl('REACT_APP_ETH_RPC')); }
-
-  static getPriorityFee = async (web3) => {
-    const feeHistory = await web3.eth.getFeeHistory(1, 'latest', [10]);
-
-    const priorityFee = feeHistory.reward[0][0];
-
-    return web3.utils.toHex(priorityFee);
-  };
 
   static getGasEstimation = async ({ from, to, data, coinFamily }) => {
     const web3s = new Web3(
@@ -1019,94 +983,4 @@ export class Web3Helper {
     }
   };
 
-  static generateRawTransactionForSpritzAndBroadcast = async (
-    to,
-    from,
-    amount,
-    coinId,
-    fiatPrice,
-    networkFeeInFiat,
-    fiatType,
-    contact,
-    slug,
-    chainId,
-    tokenAddress,
-    decimals,
-    tokenType,
-    orderId,
-    type,
-    data,
-    paymentRequest,
-    isToken,
-    sessionPassword,
-    rpc
-  ) => {
-    try {
-      const { account } = store.getState();
-      const web3 = new ethers.providers.JsonRpcProvider(rpc);
-
-      const { privateKey } = await WalletHelper.getPrivateKeyEvm(
-        sessionPassword
-      );
-      if (!privateKey) {
-        return false;
-      }
-
-      const gasPriceRes = await this.getGasPrice(slug, from, from, 0);
-
-      console.log('GAS PRICE ~ 1735 ~ web3.helper.js ~ :', gasPriceRes);
-
-      const gasPrice = ethers.utils.parseUnits(
-        Math.max(gasPrice.price, 1).toString(),
-        'gwei'
-      );
-      console.log('gasPrice', gasPrice);
-      const nonce = gasPriceRes.nonce;
-      const gaslimit = paymentRequest.gasLimit;
-
-      const transaction = {
-        nonce,
-        gasPrice: web3.utils.toHex(gasPrice),
-        gasLimit: web3.utils.toHex(gaslimit * 2),
-        to: to,
-        value: !isToken ? web3.utils.toHex(paymentRequest.amount) : '0x0',
-        from: from,
-        data,
-        chainId,
-      };
-
-      const signedTransaction = await web3.eth.accounts.signTransaction(
-        transaction,
-        privateKey
-      );
-
-      const myResponse = await server.post(
-        `${slug}/send`,
-        {
-          address_book_name: contact || '',
-          amount: amount.toNumber(),
-          coin_id: coinId,
-          fiat_price: fiatPrice.toString(),
-          fiat_type: fiatType,
-          from_address: from,
-          gas_estimate: gasPriceRes.estimate,
-          gas_price: gasPriceRes.price,
-          source_type: 'ANDROID',
-          to_address: to,
-          trnx_raw: signedTransaction.rawTransaction.split('0x')[1],
-          trnx_type: type || 'withdraw',
-          order_id: orderId || undefined,
-        },
-        {
-          headers: {
-            Authorization: account.jwtToken,
-          },
-        }
-      );
-      return myResponse.data.tx_hash;
-    } catch (error) {
-      console.log(error);
-      return false;
-    }
-  };
 }

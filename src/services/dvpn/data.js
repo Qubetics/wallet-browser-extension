@@ -1,7 +1,7 @@
 /*global chrome*/
 
 import { dvpnRequest, getActiveWalletAddress } from "./client";
-import { dvpnRoutes, withParams } from "./routes";
+import { dvpnRoutes } from "./routes";
 import { getDvpnWalletAddress, getWalletDvpnState, setWalletDvpnState } from "./storage";
 import { ensureDvpnLogin } from "./auth";
 import { notifyDvpnError } from "./errors";
@@ -90,38 +90,6 @@ export const getProviders = async (walletAddress) => {
 
 export const getAllProviders = async (walletAddress) => {
   return getProviders(walletAddress);
-};
-
-export const getCountries = async (providerId, walletAddress) => {
-  try {
-    await ensureDvpnLogin(walletAddress);
-    const payload = await dvpnRequest({
-      method: "GET",
-      path: withParams(dvpnRoutes.data.countries, { providerId }),
-      walletAddress,
-    });
-    await saveCache(walletAddress, `countries:${providerId}`, payload);
-    return payload;
-  } catch (error) {
-    notifyDvpnError(error, "Failed to load dVPN countries");
-    throw error;
-  }
-};
-
-export const getCities = async (providerId, countryId, walletAddress) => {
-  try {
-    await ensureDvpnLogin(walletAddress);
-    const payload = await dvpnRequest({
-      method: "GET",
-      path: withParams(dvpnRoutes.data.cities, { providerId, countryId }),
-      walletAddress,
-    });
-    await saveCache(walletAddress, `cities:${providerId}:${countryId}`, payload);
-    return payload;
-  } catch (error) {
-    notifyDvpnError(error, "Failed to load dVPN cities");
-    throw error;
-  }
 };
 
 export const getRecentProviders = async (walletAddress) => {
@@ -379,35 +347,3 @@ export const getRandomWireguardNode = async (walletAddress) => {
   }
 };
 
-export const getHistory = async ({ type, walletAddress }) => {
-  try {
-    await ensureDvpnLogin(walletAddress);
-    const payload = await dvpnRequest({
-      method: "GET",
-      path: dvpnRoutes.data.history,
-      walletAddress,
-      query: type ? { type } : undefined,
-    });
-    await saveCache(walletAddress, type ? `history:${type}` : "history", payload);
-    return payload;
-  } catch (error) {
-    notifyDvpnError(error, "Failed to load dVPN history");
-    throw error;
-  }
-};
-
-export const getTopupData = async (walletAddress) => {
-  try {
-    await ensureDvpnLogin(walletAddress);
-    const payload = await dvpnRequest({
-      method: "GET",
-      path: dvpnRoutes.data.topup,
-      walletAddress,
-    });
-    await saveCache(walletAddress, "topup", payload);
-    return payload;
-  } catch (error) {
-    notifyDvpnError(error, "Failed to load dVPN top-up data");
-    throw error;
-  }
-};

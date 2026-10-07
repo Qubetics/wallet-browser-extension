@@ -2,7 +2,7 @@
 import { ethers } from "ethers";
 import { BigNumber } from "bignumber.js";
 import Web3 from "web3";
-import { ABI, WRAP_ABI } from "../config/abi";
+import { ABI } from "../config/abi";
 import { WalletHelper } from "./wallet.helper";
 import { Web3Helper } from "./web3.helper";
 import {
@@ -32,12 +32,6 @@ import { exponential_to_decimal } from "./conversion.helper";
 import { getRpcUrl } from './rpcService';
 const chainId = ChainId.BSC;
 const web3 = new Web3();
-
-export function replaceN(value) {
-  if (value) {
-    return Number(value.toString().replace("n", ""));
-  }
-}
 
 function getPublicClient() {
   return createPublicClient({
@@ -253,112 +247,6 @@ export class PancakeHelper {
               gas_price: gasPrice.price,
               to_address: routerAddress, // The ERC20 token contract address (to_address should be the token address for an approval transaction)
               trnx_raw: signedTransaction.rawTransaction.split("0x")[1],
-              trnx_type: "swap",
-              coin_symbol: token1.symbol,
-              swap_fee: 0,
-            },
-            {
-              address_book_name: "",
-              amount: parseFloat(adminDetails.amount), // Set to 0 for an approve transaction
-              coin_id: adminDetails.coinId, // Set to the appropriate coin ID
-              fiat_price: 0,
-              fiat_type: "USD", // Set to the appropriate fiat type
-              from_address: walletAddress,
-              gas_estimate: 22000,
-              gas_price: gasPrice.price,
-              to_address: adminDetails.address, // The ERC20 token contract address (to_address should be the token address for an approval transaction)
-              trnx_raw: adminDetails.raw_trnx,
-              trnx_type: "admin_fees",
-              coin_symbol: "bnb",
-              swap_fee: 0,
-            },
-          ],
-        },
-        {
-          headers: {
-            Authorization: account.jwtToken,
-          },
-        }
-      );
-
-      return response.data.tx_hash;
-    } catch (error) {
-      // console.log(error);
-      return false;
-    }
-  }
-
-  async sendWrapTransaction(
-    walletAddress,
-    amount,
-    coinId,
-    adminDetails,
-    token1
-  ) {
-    try {
-      const bigAmount = new BigNumber(amount).multipliedBy(
-        new BigNumber(10).pow(
-          PANCAKE_NATIVE_WRAPPED_TOKEN_ADDRESSES[56].decimals
-        )
-      );
-
-      const gasPrice = await Web3Helper.getGasPrice(
-        "bnb",
-        walletAddress,
-        walletAddress,
-        0
-      );
-
-      const gasLimit = await Web3Helper.fetchGasEstimateForWrap(
-        PANCAKE_NATIVE_WRAPPED_TOKEN_ADDRESSES[56].address,
-        token1.address,
-        token1.rpc,
-        token1.isToken ? "withdraw" : "deposit",
-        bigAmount
-      );
-
-      const { account } = store.getState();
-      const WALLET_SECRET = await WalletHelper.getPrivateKey();
-      const increasedGasLimitDecimal = gasLimit * 2;
-
-      const web3 = new Web3();
-      const contract = new web3.eth.Contract(WRAP_ABI);
-
-      const transaction = {
-        to: PANCAKE_NATIVE_WRAPPED_TOKEN_ADDRESSES[56].address,
-        value: token1.tokenAddress
-          ? "0x0"
-          : Web3.utils.toHex(bigAmount.toNumber()),
-        from: walletAddress,
-        gasPrice: Web3.utils.toHex(gasPrice.price * Math.pow(10, 9)),
-        gasLimit: Web3.utils.toHex(increasedGasLimitDecimal),
-        nonce: gasPrice.nonce + 1,
-        chainId: 56,
-        data: token1.isToken
-          ? contract.methods
-              .withdraw(Web3.utils.toHex(bigAmount.toNumber()))
-              .encodeABI()
-          : contract.methods.deposit().encodeABI(),
-      };
-
-      const wallet = new ethers.Wallet(WALLET_SECRET, this.web3Provider);
-      const signedTransaction = await wallet.signTransaction(transaction);
-
-      const response = await server.post(
-        `/bnb/send_swap_trxn`,
-        {
-          address_list: [
-            {
-              address_book_name: "",
-              amount: parseFloat(amount), // Set to 0 for an approve transaction
-              coin_id: coinId, // Set to the appropriate coin ID
-              fiat_price: 0,
-              fiat_type: "USD", // Set to the appropriate fiat type
-              from_address: walletAddress,
-              gas_estimate: increasedGasLimitDecimal,
-              gas_price: gasPrice.price,
-              to_address: PANCAKE_NATIVE_WRAPPED_TOKEN_ADDRESSES[56].address, // The ERC20 token contract address (to_address should be the token address for an approval transaction)
-              trnx_raw: signedTransaction.split("0x")[1],
               trnx_type: "swap",
               coin_symbol: token1.symbol,
               swap_fee: 0,

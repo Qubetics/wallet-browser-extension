@@ -21,18 +21,6 @@ export class MpcChainAbstractionHelper {
   constructor(chainId) {
     this.chainId = chainId;
   }
-  getIntentChainId = (coinFamily) => {
-    switch (coinFamily) {
-      case 7:
-        return "TICS";
-      case 2:
-        return "sepolia";
-      case 3:
-        return "BTC";
-      default:
-        return "TICS";
-    }
-  };
 
   createMpcSwapOrder = async (data) => {
     try {
@@ -112,61 +100,6 @@ export class MpcChainAbstractionHelper {
     }
   };
 
-
-  async pollIntentDetailsUntilTxId(intentId, options = {}) {
-    const pollIntervalMs = options.pollIntervalMs || 3000;
-    const maxAttempts = options.maxAttempts || 60; // 3 min at 3s
-    const resolveOnTxId = options.resolveOnTxId !== false; // default true
-    const resolveOnFinalStatus = options.resolveOnFinalStatus !== false; // default true
-    let attempts = 0;
-
-    const url = `${INTENT_DETAILS_BASE_URL}/intent_details/${intentId}`;
-
-    return new Promise((resolve, reject) => {
-      async function poll() {
-        attempts++;
-        try {
-          const response = await axios.get(url);
-          const data = response?.data;
-          const userToNetworkTxId = data?.user_to_network_tx_id;
-          const intentStatus = String(data?.intent_status || "").toLowerCase();
-
-          // If status reaches a terminal state, resolve with the full payload
-          if (
-            resolveOnFinalStatus &&
-            (intentStatus === "solved" || intentStatus === "failed" || intentStatus === "rejected")
-          ) {
-            resolve(data);
-            return;
-          }
-
-          // If tx id is available, resolve with the full payload
-          if (
-            resolveOnTxId &&
-            userToNetworkTxId != null &&
-            userToNetworkTxId !== ""
-          ) {
-            resolve(data);
-            return;
-          }
-
-          if (attempts >= maxAttempts) {
-            reject(new Error("Timeout waiting for intent details"));
-            return;
-          }
-
-          setTimeout(poll, pollIntervalMs);
-        } catch (err) {
-          if (attempts >= maxAttempts) {
-            reject(err?.response?.data ? new Error(err.response.data.error_message || "Intent details failed") : err);
-            return;
-          }
-          setTimeout(poll, pollIntervalMs);
-        }
-      }
-      poll();
-    });
-  }
 
   async pollIntentStatus(intentHash) {
     try {

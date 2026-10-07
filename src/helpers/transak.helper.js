@@ -5,7 +5,6 @@ import {
 import transakSDK from '@transak/transak-sdk';
 import { WalletHelper } from './wallet.helper';
 import axios from 'axios';
-import { FETCH_SIMPLEX_PRICE } from '../config/simplex.config';
 import { server } from '../server';
 
 export class TranskHelper {
@@ -82,29 +81,6 @@ export class TranskHelper {
         );
       }
     });
-  };
-
-  getPrice = async (symbol, type, network, fiatAmount, fiatType) => {
-    try {
-      // const { data } = await axios.get(
-      //   type === "BUY"
-      //     ? `https://api.transak.com/api/v2/currencies/price?partnerApiKey=${TRANSAK_PROD_API_KEY}&fiatCurrency=${fiatType}&cryptoCurrency=${symbol}&isBuyOrSell=${type}&network=${network}&fiatAmount=${fiatAmount}`
-      //     : `https://api.transak.com/api/v2/currencies/price?partnerApiKey=${TRANSAK_PROD_API_KEY}&fiatCurrency=${fiatType}&cryptoCurrency=${symbol}&paymentMethod=credit_debit_card&isBuyOrSell=${type}&network=${network}&cryptoAmount=${fiatAmount}`
-      // );
-      let data = {};
-
-      if (type === 'BUY') {
-        return data?.response?.cryptoAmount;
-      } else {
-        return data?.response?.fiatAmount;
-      }
-    } catch (error) {
-      return {
-        status: 'error',
-        message:
-          'Unable to process your request. Entered amount is nor supported by the partner.',
-      };
-    }
   };
 
   getMInMax = async (symbol, type, network) => {
@@ -191,48 +167,6 @@ export class TranskHelper {
     }
   };
 
-  getAlchemyPrice = async (
-    symbol,
-    type,
-    fiatAmount,
-    chainSymbol,
-    fiatType,
-    account
-  ) => {
-    try {
-      const { data } = await server.post(
-        '/on_off_ramp/alchemy_price',
-        {
-          crypto: symbol,
-          network: chainSymbol,
-          fiat: fiatType,
-          country: 'US',
-          amount: fiatAmount,
-          payWayCode: '10001',
-          side: type,
-        },
-        {
-          headers: {
-            Authorization: account.jwtToken,
-          },
-        }
-      );
-
-      if (type === 'BUY') {
-        return data?.data?.data?.cryptoQuantity;
-      } else {
-        return data?.data?.data?.fiatQuantity;
-      }
-    } catch (error) {
-      // console.log(error.response, "alchemy");
-      return {
-        status: 'error',
-        message:
-          'Unable to process your request. Entered amount is nor supported by the partner.',
-      };
-    }
-  };
-
   generateAlchemyOrderURL = async (
     walletAddress,
     coinSymbol,
@@ -309,48 +243,4 @@ export class TranskHelper {
     return signStr.substring(0, signStr.length - 1);
   }
 
-  getSimplexPrice = async (
-    symbol,
-    type,
-    fiatAmount,
-    chainSymbol,
-    fiatType,
-    account
-  ) => {
-    try {
-      const { data } = await server.post(
-        FETCH_SIMPLEX_PRICE,
-        {
-          end_user_id: '11b111d1-161e-32d9-6bda-8dd2b5c8af17',
-          digital_currency: symbol.toUpperCase(),
-          fiat_currency: fiatType,
-          requested_currency: fiatType,
-          requested_amount: parseFloat(fiatAmount),
-          wallet_id: 'customersuccess',
-          client_ip: '1.2.3.4',
-        },
-        {
-          headers: {
-            Authorization: account.jwtToken,
-          },
-        }
-      );
-
-      if (data.data.error) {
-        return {
-          status: 'error',
-          message: data.data.error,
-        };
-      }
-
-      return data.data.digital_money.amount;
-    } catch (error) {
-      // console.log(error.response, "alchemy");
-      return {
-        status: 'error',
-        message:
-          'Unable to process your request. Entered amount is nor supported by the partner.',
-      };
-    }
-  };
 }

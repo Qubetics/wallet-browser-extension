@@ -2,9 +2,6 @@ import Web3 from 'web3';
 import TOKEN_ABI from '../Assets/JsonFiles/tokenContract.ABI.json';
 import base58 from 'bs58';
 import BigNumber from 'bignumber.js';
-export function numberWithSpaces(x) {
-  return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
-}
 
 export function modifyString(str) {
   var first = str?.substring(0, 7);
@@ -99,22 +96,6 @@ export const getTokenBalance = async (tokenAddress, address, blockChain) => {
   }
 };
 
-export const formatNumberUSD = (value) => {
-  // const decimalPlaces = (value.toString().split(".")[1] || "").length;
-  // return parseFloat(value).toFixed(decimalPlaces > 8 ? 8 : decimalPlaces);
-  const numberValue = parseFloat(+value || 0);
-  if (isNaN(numberValue)) {
-    return value;
-  }
-
-  const decimalPlaces = (value.toString().split('.')[1] || '').length;
-
-  const formattedNumber = numberValue.toLocaleString(undefined, {
-    maximumFractionDigits: decimalPlaces > 2 ? 2 : decimalPlaces,
-  });
-
-  return formattedNumber;
-};
 export const formatNumberFiat = (value) => {
   const decimalPlaces = (value.toString().split('.')[1] || '').length;
   const parsedValue = parseFloat(value);

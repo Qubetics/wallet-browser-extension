@@ -139,15 +139,3 @@ export const clearWalletDvpnState = async (walletAddress) => {
   await writeDvpnStore(store);
 };
 
-export const pruneDvpnStoreByAccounts = async (accounts = []) => {
-  const validKeys = new Set(
-    (accounts || []).map((account) => normalizeWalletKey(account)).filter(Boolean)
-  );
-  const store = await readDvpnStore();
-  Object.keys(store).forEach((walletKey) => {
-    if (!validKeys.has(walletKey)) {
-      delete store[walletKey];
-    }
-  });
-  await writeDvpnStore(store);
-};
