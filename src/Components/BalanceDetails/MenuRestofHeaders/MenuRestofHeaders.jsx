@@ -292,21 +292,6 @@ function MenuRestofHeaders({
 
               //  Change**********
 
-              if (backTo === "/buy-sell") {
-                if (coin) {
-                  return navigate("/currencyDetails", {
-                    state: {
-                      coin,
-                      image: coin.image,
-                      symbol: coin.symbol,
-                      type: "",
-                    },
-                  });
-                } else {
-                  return navigate(backTo);
-                }
-              }
-
               if (
                 backTo == "/bankAccountListing" ||
                 backTo == "bankAccountListing"

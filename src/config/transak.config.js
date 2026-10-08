@@ -1,3 +1,0 @@
-export const TRANSAK_PROD_API_KEY = process.env.REACT_APP_TRANSAK_PROD_API_KEY
-export const TRANSAK_STAGE_API_KEY = process.env.REACT_APP_TRANSAK_PROD_API_KEY
-

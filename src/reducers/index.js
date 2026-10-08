@@ -5,7 +5,6 @@ import authReducer from "./auth";
 import balanceReducer from "./balance";
 import BalanceShowOutReducer from "./balance-show";
 import BalanceShowInReducer from "./balance-show-in";
-import buyReducer from "./buy";
 import chainReducer from "./chains";
 import createReducer from "./create";
 import currencyReducer from "./currency";
@@ -36,7 +35,6 @@ export default combineReducers({
   transactions: transactionsReducer,
   auth: authReducer,
   prices: pricesReducer,
-  buy: buyReducer,
   alerts: alertsReducer,
   tokens: tokensReducer,
   balance: balanceReducer,

@@ -18,8 +18,6 @@ import { store } from "../../index.js";
 import { setLoading } from "../../actions/loading.js";
 import { DURATION } from "../../config/message.config.js";
 import { useSelector } from "react-redux";
-import { server } from "../../server.js";
-import { generateString } from "../../helpers/common.helper.js";
 import Security from "../../Assets/settings/Security.svg";
 import PrivacyPolicy from "../../Assets/settings/PrivacyPolicy.svg";
 import Transactionhistory from "../../Assets/settings/Transactionhistory.svg";
@@ -29,7 +27,7 @@ function Setting() {
   const [open, setOpen] = useState(false);
   const [openHelp, setOpenHelp] = useState(false);
   const { state } = useLocation();
-  const { chain, account } = useSelector((state) => state);
+  const { chain } = useSelector((state) => state);
   const navigate = useNavigate();
   const [password, setPassword] = useState(null);
   const [messageApi, contextHolder] = message.useMessage({
@@ -84,31 +82,6 @@ function Setting() {
   };
   const drawerOpen1 = () => {
     setOpenHelp(true);
-  };
-
-  const handleChatBot = async () => {
-    store.dispatch(setLoading(true));
-    const checkUserToNavigate = await server.post(
-      "/wallet/open_faq",
-      {
-        wallet_address: account.address,
-      },
-      {
-        headers: {
-          Authorization: account.jwtToken,
-        },
-      }
-    );
-
-    if (checkUserToNavigate.data.status) {
-      let randomString = generateString(15);
-      store.dispatch(setLoading(false));
-      // window.open(`http://localhost:3000/chat/${account.address}/${randomString}`);
-      window.open(
-        `${process.env.REACT_APP_SUPPORT_CHAT_URL}/${account.address}/${randomString}`
-        // `http://localhost:3000/faq/${account.address}/${randomString}`
-      );
-    }
   };
 
   const data = [

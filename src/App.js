@@ -44,8 +44,6 @@ import { useSelector } from "react-redux";
 import { WalletHelper } from "./helpers/wallet.helper";
 import EditNetwork from "./Pages/EditNetwork/EditNetwork";
 import { setAuth } from "./actions/auth";
-import PancakeSwap from "./Pages/PancakeSwap/PancakeSwap";
-import PancakeSwapDetails from "./Pages/PancakeSwap/SwapDetails/PancakeSwapDetails";
 import CrossChainDetails from "./Pages/CrossChain/SwapDetails/CrossChainDetials";
 import AccountPreference from "./Pages/AccountPrefrence/NetworkPreference";
 import MultiShowSecretPhrase from "./Pages/multiShowSecretPhrase/MultiShowSecretPhrase";
@@ -53,10 +51,8 @@ import ConfirmMultiShowSecretPhrase from "./Pages/confirmMultiShowSecretPhrase c
 import AddPriceAlert from "./Pages/AddPriceAlert/AddPriceAlert";
 import PriceAlerts from "./Pages/PriceAlert/PriceAlert";
 import NewName from "./Pages/NewName/NewName";
-import EnterPrice from "./Pages/Buy/EnterPrice/EnterPrice";
 import WatchPassword from "./Pages/WelcomeScreens/WatchPassword";
 import NewAddress from "./Pages/NewAddress/NewAddress";
-import OnlyCrossChain from "./Pages/OnlyCrossChain/PancakeSwap";
 import { ExternalConnection } from "./Pages/ExternalConnections/ExternalConnections";
 import WatchOnlyList from "./Pages/WatchOnlyList/NetworkPreference";
 import NewAddressWatchOnly from "./Pages/NewAddressWatchOnly/NewAddress";
@@ -65,7 +61,6 @@ import ReceiveTokens from "./Pages/ReceiveCoins/Receive";
 import Alerts from "./Pages/Alerts/Alerts";
 import Notification from "./Pages/PushNotification/Notification";
 import WalletListing from "./Pages/WalletListing/WalletListing";
-import BuyCoins from "./Pages/BuyCoins/BuyCoins";
 import FilterHistory from "./Pages/History/FilterHistory";
 import TransactionHistory from "./Pages/History/TransactionHistory/TransactionHistory";
 import { setTheme } from "./actions/theme";
@@ -87,7 +82,6 @@ import AddNewWallet from "./Pages/SettingsNewAccount/SettingsNewAccount";
 import SettingImportWallet from "./Pages/SettingsImportAccountUsingPrivateKey/SettingImportWallet";
 import SettingImportWalletPrivatekey from "./Pages/SettingsImportAccountUsingPrivateKey/SettingImportWalletPrivateKey";
 import WatchList from "./Pages/Watchlist/WatchList";
-import BuySell from "./Pages/BuySell/BuySell";
 import AddWatchList from "./Pages/Watchlist/AddWatchList";
 import { Portfolio } from "./Pages/Portfolio/Portfolio";
 import TermsPolicy from "./Pages/WelcomeScreens/TermsPolicy";
@@ -407,8 +401,6 @@ function App() {
           <Route path="/receive-currency" element={<ReceiveCurrency />} />
           <Route path="/watch-list-tokens" element={<WatchList />} />
           <Route path="/add-watch-list" element={<AddWatchList />} />
-          <Route path="/buy-coins" element={<BuyCoins />} />
-          <Route path="/buy-sell" element={<BuySell />} />
           <Route index path="/sendCurrency" element={<SendCoins />} />
           <Route path="/import-phrase" element={<ImportPhrase />} />
           <Route path="/address-book" element={<AddresBook />} />
@@ -418,13 +410,7 @@ function App() {
           <Route index path="/new-name" element={<NewName />} />
           <Route index path="/swap" element={<Swap />} />
           <Route index path="/swapDetails" element={<SwapDetails />} />
-          <Route index path="/pancake-swap" element={<PancakeSwap />} />
           <Route index path="/exchangePancake" element={<ExchangePancake />} />
-          <Route
-            index
-            path="/pancake-swapDetails"
-            element={<PancakeSwapDetails />}
-          />
           <Route
             index
             path="/crosschain-swapDetails"
@@ -440,9 +426,7 @@ function App() {
           <Route index path="/editWalletName" element={<EditWallet />} />
           <Route index path="/push-notification" element={<Notification />} />
           <Route index path="/add-alert" element={<AddPriceAlert />} />
-          <Route index path="/enter-price" element={<EnterPrice />} />
           <Route index path="/new-watch-address" element={<NewAddress />} />
-          <Route index path="/onlyCrossChain" element={<OnlyCrossChain />} />
           <Route index path="/watch-only-list" element={<WatchOnlyList />} />
           <Route
             index

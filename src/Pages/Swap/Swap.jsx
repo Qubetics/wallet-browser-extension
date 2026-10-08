@@ -25,7 +25,6 @@ import { Tabs, TabList, Tab, TabPanel } from 'react-tabs';
 import CrossChain from '../CrossChain/CrossChain';
 import { DURATION } from '../../config/message.config';
 import BigNumber from 'bignumber.js';
-import warning from '../../Assets/PNG/danger.png';
 import infoBg from '../../Assets/bgRedinfo.png';
 import { toFixed } from '../../helpers/conversion.helper';
 import { server } from '../../server';
@@ -85,7 +84,6 @@ function  Swap() {
   const [customSlippage1, setCustomSlippage1] = useState(null);
 
   const [slippageDrawer, setSlippageDrawer] = useState(false);
-  const [disclaimer, setDisclaimer] = useState(false);
   const navigate = useNavigate();
   const [messageApi, contextHolder] = message.useMessage({
     duration: DURATION,
@@ -2630,74 +2628,6 @@ function  Swap() {
           </div> */}
         </ModalCustom>
       )}
-      {disclaimer ? (
-        <ModalCustom
-          isModalOpen={disclaimer}
-          title={'Disclaimer'}
-          // handleOk={handleOk}
-          handleCancel={() => setDisclaimer(false)}
-          customClass={'disclamerModalSec '}
-        >
-          <div className="disclaimerModal">
-            <div className="left" style={{ flex: 1 }}>
-              <img src={warning} alt="" style={{ width: '27px' }} />
-            </div>
-            <div className="right" style={{ flex: 7 }}>
-              {/* <img
-              src={warning}
-              alt=''
-              style={{ width: '30px', padding: '4px' }}
-            />{' '} */}
-              <p>
-                Users can import tokens from Uniswap, PancakeSwap, PulseChain
-                and Jupiter on Qubetics Wallet. While we strive for optimal
-                routing and low fees, due to decentralization, we cannot
-                guarantee it. Users must verify token numbers and gas fees
-                before swapping and assume responsibility for charges or losses.
-                Visit our{' '}
-                <span
-                  style={{
-                    color: '#00aeef',
-                    cursor: 'pointer',
-                    textDecoration: 'underline',
-                  }}
-                  onClick={async () => {
-                    const checkUserToNavigate = await server.post(
-                      '/wallet/open_faq',
-                      {
-                        wallet_address: account.address,
-                      },
-                      {
-                        headers: {
-                          Authorization: account.jwtToken,
-                        },
-                      }
-                    );
-
-                    if (checkUserToNavigate.data.status) {
-                      let randomString = generateString(15);
-                      // window.open(`http://localhost:3000/chat/${account.address}/${randomString}`);
-                      window.open(
-                        `${process.env.REACT_APP_SUPPORT_CHAT_URL}/${account.address}/${randomString}`
-                        // `http://localhost:3000/faq/${account.address}/${randomString}`
-                      );
-                    }
-                  }}
-                >
-                  Help Center
-                </span>{' '}
-                for more information.
-              </p>
-            </div>
-          </div>
-          <ButtonComp
-            text={'Back to Swap'}
-            onClick={() => setDisclaimer(false)}
-            maxWidth={'100%'}
-          />
-        </ModalCustom>
-      ) : null}
-
       {confirmSlippageAlert && (
         <ModalCustom
           isModalOpen={confirmSlippageAlert}
