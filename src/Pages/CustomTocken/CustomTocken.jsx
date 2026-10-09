@@ -347,18 +347,11 @@ function CustomToken() {
                   return messageApi.error('Token address is required.');
                 }
 
-                if (!tokenInfo.name) {
-                  return messageApi.error('Token name is required');
-                }
-
-                if (!tokenInfo.symbol) {
-                  return messageApi.error('Token symbol is required');
-                }
-
+                // check the address first: name and symbol are fetched from it and can't be typed
                 if (selectedChain.isEVM) {
                   const valid = ethers.utils.isAddress(tokenAddress);
                   if (!valid)
-                    return messageApi.error('Invalid token address provided.');
+                    return messageApi.error('Invalid contract address.');
                 } else if (
                   !selectedChain.isEVM &&
                   selectedChain.currencyName === 'SOL'
@@ -375,6 +368,12 @@ function CustomToken() {
                   if (!regexPattern.test(tokenAddress)) {
                     return messageApi.error('Please enter a valid policy id.');
                   }
+                }
+
+                if (!tokenInfo.name || !tokenInfo.symbol) {
+                  return messageApi.error(
+                    'Unable to load token details for this address. Please check the contract address.'
+                  );
                 }
 
                 store.dispatch(setLoading(true));

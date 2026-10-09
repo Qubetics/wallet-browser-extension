@@ -83,13 +83,13 @@ function NewName() {
 
                   if (name.trim().length === 0) {
                     return messageApi.error(
-                      "Name should have a minimum of 5 characters."
+                      "Name should have at least 3 characters, not counting spaces."
                     );
                   }
 
-                  if (name.length < 3) {
+                  if (name.replace(/\s/g, "").length < 3) {
                     return messageApi.error(
-                      "Name should have a minimum of 5 characters."
+                      "Name should have at least 3 characters, not counting spaces."
                     );
                   }
 
@@ -98,10 +98,10 @@ function NewName() {
                       "Name should not have more than 25 characters."
                     );
                   }
-                  const nameRegex = /^[A-Za-z\s]+$/;
+                  const nameRegex = /^[A-Za-z0-9 _-]+$/;
                   if (!nameRegex.test(name)) {
                     return messageApi.error(
-                      "Name should contain only alphabetic characters."
+                      "Name can contain only letters, numbers, spaces, - and _."
                     );
                   }
 
@@ -114,7 +114,7 @@ function NewName() {
                   // }
 
                   const findDuplicateName = myAccounts.find(
-                    (el) => el.name.toUpperCase() === name.toUpperCase()
+                    (el) => el.name.toUpperCase() === name.trim().toUpperCase()
                   );
 
                   if (findDuplicateName) {
@@ -124,7 +124,7 @@ function NewName() {
                   }
 
                   await chrome.storage.session.set({
-                    name,
+                    name: name.trim(),
                   });
 
                   // console.log(goTo);

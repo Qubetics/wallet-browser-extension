@@ -20,7 +20,7 @@ function ChangePin() {
 
   const [validation, setValidation] = useState({
     valid: false,
-    errors: { length: true, uppercase: true, digit: true, symbol: true },
+    errors: { length: true, uppercase: true, lowercase: true, digit: true, symbol: true },
   });
 
   const navigate = useNavigate();
@@ -30,6 +30,7 @@ function ChangePin() {
     const errors = {
       length: false,
       uppercase: false,
+      lowercase: false,
       digit: false,
       symbol: false,
     };
@@ -42,6 +43,11 @@ function ChangePin() {
     if (!/[A-Z]/.test(password)) {
       valid = false;
       errors.uppercase = true;
+    }
+
+    if (!/[a-z]/.test(password)) {
+      valid = false;
+      errors.lowercase = true;
     }
 
     if (!/[0-9]/.test(password)) {
@@ -65,6 +71,10 @@ function ChangePin() {
     {
       text: "At least one upper case character",
       icon: validation.errors.uppercase ? BorderedRoundIcon : TickIcon,
+    },
+    {
+      text: "At least one lower case character",
+      icon: validation.errors.lowercase ? BorderedRoundIcon : TickIcon,
     },
     {
       text: "At least one digit",
@@ -199,7 +209,8 @@ function ChangePin() {
               setOldPassword("");
               setNewPassword("");
               setConfirmPassword("");
-              messageApi.success("Password updated successfully.");
+              // global toast, so it stays visible after leaving this screen
+              message.success("Password updated successfully.");
               setTimeout(() => {
                 navigate("/securitySetting");
               }, 600);

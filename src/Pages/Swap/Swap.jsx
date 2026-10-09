@@ -82,6 +82,7 @@ function  Swap() {
   const [customSlippage, setCustomSlippage] = useState(null);
   const [slippage1, setSlippage1] = useState(1);
   const [customSlippage1, setCustomSlippage1] = useState(null);
+  const [slippageError, setSlippageError] = useState('');
 
   const [slippageDrawer, setSlippageDrawer] = useState(false);
   const navigate = useNavigate();
@@ -2500,6 +2501,7 @@ function  Swap() {
                 onClick={() => {
                   setSlippage1(1);
                   setCustomSlippage1(null);
+                  setSlippageError('');
                 }}
               >
                 1%
@@ -2512,6 +2514,7 @@ function  Swap() {
                 onClick={() => {
                   setSlippage1(2);
                   setCustomSlippage1(null);
+                  setSlippageError('');
                 }}
               >
                 2%
@@ -2524,6 +2527,7 @@ function  Swap() {
                 onClick={() => {
                   setSlippage1(3);
                   setCustomSlippage1(null);
+                  setSlippageError('');
                 }}
               >
                 3%
@@ -2552,23 +2556,30 @@ function  Swap() {
                     // revert to default option (1%) when input cleared
                     setSlippage1(1);
                     setCustomSlippage1(null);
+                    setSlippageError('');
                     return;
                   }
 
-                  // allow only up to 50 and reasonable length
+                  // keep what the user typed and explain out-of-range values instead of changing them
                   const parsed = parseFloat(value);
-                  if (
-                    !isNaN(parsed) &&
-                    parsed >= 0 &&
-                    parsed <= 50 &&
-                    value.toString().length <= 5
-                  ) {
-                    setSlippage1(null); // custom selected
-                    setCustomSlippage1(value);
+                  if (isNaN(parsed) || value.toString().length > 5) {
+                    return;
                   }
+                  setSlippage1(null); // custom selected
+                  setCustomSlippage1(value);
+                  setSlippageError(
+                    parsed < 0.1 || parsed > 50
+                      ? 'Slippage must be between 0.1% and 50%.'
+                      : ''
+                  );
                 }}
               />
             </div>
+            {slippageError ? (
+              <p style={{ color: '#ff4d4f', fontSize: '12px', marginTop: '6px' }}>
+                {slippageError}
+              </p>
+            ) : null}
           </div>
 
           <ButtonComp
@@ -2582,9 +2593,14 @@ function  Swap() {
               if (slippage1 === null) {
                 // user chose custom input -> validate it
                 const parsed = parseFloat(customSlippage1);
-                if (isNaN(parsed) || parsed < 0) {
+                if (isNaN(parsed) || parsed < 0.1 || parsed > 50) {
                   return messageApi.error(
-                    'Please enter a valid slippage value.'
+                    'Slippage must be between 0.1% and 50%.'
+                  );
+                }
+                if (parsed > 5) {
+                  messageApi.warning(
+                    'High slippage: you may receive much less than expected.'
                   );
                 }
                 // set values from custom

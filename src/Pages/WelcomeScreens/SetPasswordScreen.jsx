@@ -30,6 +30,7 @@ const validatePassword = (password) => {
   const errors = {
     length: password.length < 8,
     uppercase: !/[A-Z]/.test(password),
+    lowercase: !/[a-z]/.test(password),
     digit: !/[0-9]/.test(password),
     symbol: !/[!@#$%^&*]/.test(password),
   };
@@ -74,6 +75,7 @@ function SetPasswordScreen() {
   const validations = [
     { text: '8 or more characters', key: 'length' },
     { text: 'At least one upper case character', key: 'uppercase' },
+    { text: 'At least one lower case character', key: 'lowercase' },
     { text: 'At least one digit', key: 'digit' },
     { text: 'At least one symbol', key: 'symbol' },
   ].map((item) => ({
@@ -192,6 +194,7 @@ function SetPasswordScreen() {
       }
     } catch (error) {
       // console.error('Confirm Secret Phrase Error:', error);
+      popError('Unable to create the wallet. Please check your connection and try again.');
     } finally {
       store.dispatch(setLoading(false));
     }
@@ -199,18 +202,17 @@ function SetPasswordScreen() {
 
   const handleImportSecretPhrase = async () => {
     try {
-      if (!getMnemonicsData) return popError('Please enter Secret Phrase.');
-      if (!terms) return popError('Please accept the terms and conditions.');
+      const phrase = WalletHelper.normalizeMnemonics(getMnemonicsData);
 
-      const isValid = WalletHelper.checkMnemonics(getMnemonicsData.trim());
+      if (!phrase) return popError('Please enter Secret Phrase.');
+      if (!terms) return popError('Please confirm that you understand the risk.');
+
+      const isValid = WalletHelper.checkMnemonics(phrase);
       const { accounts } = await chrome.storage.session.get('accounts');
 
       const alreadyExists =
         accounts &&
-        (await WalletHelper.isAccountExistWithMnemonics(
-          getMnemonicsData.trim(),
-          password
-        ));
+        (await WalletHelper.isAccountExistWithMnemonics(phrase, password));
 
       if (alreadyExists) return popError('Mnemonics already exist.');
 
@@ -218,7 +220,7 @@ function SetPasswordScreen() {
         const { name } = await chrome.storage.session.get('name');
         store.dispatch(setLoading(true));
         await WalletHelper.generateAndSetWallet(
-          getMnemonicsData.trim(),
+          phrase,
           name,
           'IMPORT',
           password
@@ -228,7 +230,10 @@ function SetPasswordScreen() {
         popError('Invalid mnemonics. Please try again.');
       }
     } catch (error) {
-      popError(error || 'An error occurred. Please try again.');
+      popError(
+        (typeof error === 'string' ? error : error?.message) ||
+          'An error occurred. Please try again.'
+      );
     } finally {
       store.dispatch(setLoading(false));
     }

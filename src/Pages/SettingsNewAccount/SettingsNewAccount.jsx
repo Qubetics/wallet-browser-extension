@@ -27,7 +27,10 @@ function AddNewWallet() {
     <div>
       {contextHolder}
       <div className={`scrollableCont`}>
-        <MenuRestofHeaders backTo={"/manage-wallet"} title={"New Account"} />
+        <MenuRestofHeaders
+          backTo={"/manage-wallet"}
+          title={state?.type === "import" ? "Import Account" : "New Account"}
+        />
         <div className={`flexedContent padding-top`}>
           <div className="editWalle manageWalletHeight">
             <div>
@@ -74,13 +77,13 @@ function AddNewWallet() {
 
                     if (name.trim().length === 0) {
                       return messageApi.error(
-                        "Name should have a minimum of 3 characters."
+                        "Name should have at least 3 characters, not counting spaces."
                       );
                     }
 
-                    if (name.length < 3) {
+                    if (name.replace(/\s/g, "").length < 3) {
                       return messageApi.error(
-                        "Name should have a minimum of 3 characters."
+                        "Name should have at least 3 characters, not counting spaces."
                       );
                     }
 
@@ -89,10 +92,10 @@ function AddNewWallet() {
                         "Name should not have more than 25 characters."
                       );
                     }
-                    const nameRegex = /^[A-Za-z\s]+$/;
+                    const nameRegex = /^[A-Za-z0-9 _-]+$/;
                     if (!nameRegex.test(name)) {
                       return messageApi.error(
-                        "Name should contain only alphabetic characters."
+                        "Name can contain only letters, numbers, spaces, - and _."
                       );
                     }
                     const { accounts } = await chrome.storage.session.get(
@@ -100,7 +103,7 @@ function AddNewWallet() {
                     );
 
                     const checkIfExists = await accounts.find(
-                      (el) => el.name.toLowerCase() === name.toLowerCase()
+                      (el) => el.name.toLowerCase() === name.trim().toLowerCase()
                     );
 
                     if (checkIfExists) {

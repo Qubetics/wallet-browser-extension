@@ -305,7 +305,7 @@ const networks = [
     rpcApiKey: null,
     blockUrl: 'https://ticsscan.com',
     default: false,
-    image: 'https://stage-qubetics-wallet.obs.ap-southeast-4.myhuaweicloud.com/tics.png',
+    image: 'https://prod-qubetics-wallet.obs.ap-southeast-4.myhuaweicloud.com/tics_logo.png',
     tokenType: 'ERC20',
     testnet: false,
     swap: false,

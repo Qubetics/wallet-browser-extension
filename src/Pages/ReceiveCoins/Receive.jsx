@@ -39,25 +39,30 @@ function ReceiveTokens() {
 
   const init = async () => {
     store.dispatch(setLoading(true));
-    const walletsList = await server.post(
-      `/wallet/portfolio`,
-      {
-        addressListKeys: account?.addressLists?.slice(0, 6),
-        coin_family: account.coinFamilies,
-        fiat_type: currency.name,
-        limit: 2000,
-        page: 1,
-        search: keyword?.trim(),
-      },
-      {
-        headers: {
-          Authorization: account.jwtToken,
+    try {
+      const walletsList = await server.post(
+        `/wallet/portfolio`,
+        {
+          addressListKeys: account?.addressLists?.slice(0, 6),
+          coin_family: account.coinFamilies,
+          fiat_type: currency.name,
+          limit: 2000,
+          page: 1,
+          search: keyword?.trim(),
         },
-      }
-    );
-    // console.log('all tokens in receive screen:',walletsList);
-    store.dispatch(setTokens(walletsList.data.data));
-    store.dispatch(setLoading(false));
+        {
+          headers: {
+            Authorization: account.jwtToken,
+          },
+        }
+      );
+      // console.log('all tokens in receive screen:',walletsList);
+      store.dispatch(setTokens(walletsList?.data?.data));
+    } catch (error) {
+      messageApi.error('Unable to load your assets. Please try again.');
+    } finally {
+      store.dispatch(setLoading(false));
+    }
   };
 
   useEffect(() => {

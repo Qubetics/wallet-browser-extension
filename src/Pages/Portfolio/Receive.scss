@@ -73,14 +73,23 @@
   top: 0px !important;
   right: 0px !important;
   max-width: 120px !important;
+  // keep the colour dot and its label on one line, long labels end with an ellipsis
   .apexcharts-legend-series{
     margin-bottom: 22px !important;
     max-width: 100% !important;
+    display: flex !important;
+    align-items: center;
+    flex-wrap: nowrap;
+  }
+  .apexcharts-legend-marker {
+    flex-shrink: 0;
   }
   .apexcharts-legend-text {
     font-size: 12px !important;
     white-space: nowrap !important;
-    overflow: visible !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis;
+    min-width: 0;
     max-width: 100% !important;
   }
 }

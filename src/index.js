@@ -5,6 +5,7 @@ import { message } from "antd";
 /* global chrome*/
 
 import App from "./App";
+import ErrorBoundary from "./Components/ErrorBoundary/ErrorBoundary";
 import { MemoryRouter } from "react-router-dom";
 import { createStore, applyMiddleware, compose } from "redux";
 import { Provider } from "react-redux";
@@ -42,7 +43,9 @@ root.render(
   <Provider store={store}>
     <MemoryRouter>
       <React.StrictMode>
-        <App />
+        <ErrorBoundary>
+          <App />
+        </ErrorBoundary>
       </React.StrictMode>
     </MemoryRouter>
   </Provider>

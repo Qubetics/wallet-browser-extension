@@ -82,13 +82,13 @@ function EditWallet() {
 
                   if (name.trim().length === 0) {
                     return messageApi.error(
-                      "Name should have a minimum of 3 characters."
+                      "Name should have at least 3 characters, not counting spaces."
                     );
                   }
 
-                  if (name.length < 3) {
+                  if (name.replace(/\s/g, "").length < 3) {
                     return messageApi.error(
-                      "Name should have a minimum of 3 characters."
+                      "Name should have at least 3 characters, not counting spaces."
                     );
                   }
 
@@ -104,7 +104,7 @@ function EditWallet() {
 
                   if (accounts) {
                     const checkIfExists = accounts.find(
-                      (el) => el.name.toLowerCase() === name.toLowerCase()
+                      (el) => el.name.toLowerCase() === name.trim().toLowerCase()
                     );
 
                     if (checkIfExists) {

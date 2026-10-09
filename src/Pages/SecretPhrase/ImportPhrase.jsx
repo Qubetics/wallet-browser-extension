@@ -67,28 +67,29 @@ function ImportPhrase() {
             <div className={"checkboxOuter checkboxMain"}>
               <Checkbox onChange={onChange} style={{}}>
                 <p style={{ marginLeft: "10px", textAlign: "left" }}>
-                I understand that the risk of losing my funds by
-                exposing my Secret Phrase to others.
+                I understand that exposing my Secret Phrase to others
+                can lead to the loss of my funds.
                 </p>
               </Checkbox>
             </div>
             <ButtonComp
               text={"Proceed"}
               onClick={async (e) => { 
-                if (!mnemonics) {
+                const phrase = WalletHelper.normalizeMnemonics(mnemonics);
+                if (!phrase) {
                   return messageApi.error("Please enter Secret Phrase.");
                 }
 
                 if (!terms) {
                   return messageApi.error(
-                    "Please accept the privacy policy."
+                    "Please confirm that you understand the risk."
                   );
                 }
 
                 store.dispatch(setLoading(true));
 
                 const checkIfThere = await WalletHelper.isAccountExistWithMnemonics(
-                  mnemonics,
+                  phrase,
                   state.password
                 );
 
@@ -101,7 +102,7 @@ function ImportPhrase() {
                 const { name } = await chrome.storage.session.get("name");
 
                 const response = await WalletHelper.generateAndSetWallet(
-                  mnemonics,
+                  phrase,
                   name
                 );
 

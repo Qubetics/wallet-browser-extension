@@ -6,6 +6,7 @@ import ButtonComp from "../../Components/ButtonComp/ButtonComp";
 import MenuRestofHeaders from "../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { DURATION } from "../../config/message.config";
+import { copySecretToClipboard } from "../../helpers/common.helper";
 
 function MultiShowSecretPhrase() {
   const [messageApi, contextHolder] = message.useMessage({
@@ -15,10 +16,10 @@ function MultiShowSecretPhrase() {
   const { mnemonics,password } = state;
   const navigate = useNavigate();
   const phrases = mnemonics.split(" ");
-  function copyToClipboard() {
+  async function copyToClipboard() {
     const str = phrases.join(",").replaceAll(",", " ");
-    navigator.clipboard.writeText(str);
-    messageApi.success("Phrase Copied");
+    await copySecretToClipboard(str);
+    messageApi.success("Phrase copied. It will be cleared from the clipboard in 60 seconds.");
   }
 
   const [terms, setTerms] = useState(false);
@@ -75,8 +76,8 @@ function MultiShowSecretPhrase() {
                   >
                     <Checkbox onChange={onChange}>
                       <p style={{ marginLeft: "10px", textAlign: "left" }}>
-                      I understand that the risk of losing my funds by
-                      exposing my Secret Phrase to others.
+                      I understand that exposing my Secret Phrase to others
+                      can lead to the loss of my funds.
                       </p>
                     </Checkbox>
                   </div>
@@ -88,7 +89,7 @@ function MultiShowSecretPhrase() {
                         e.preventDefault();
                         if (!terms) {
                           return messageApi.error(
-                            "Please accept the privacy policy."
+                            "Please confirm that you understand the risk."
                           );
                         }
 

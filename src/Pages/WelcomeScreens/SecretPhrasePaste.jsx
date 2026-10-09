@@ -6,7 +6,8 @@ import CopyIconBlueN from "../../Assets/CopyIconBlueN.svg";
 import { DURATION } from "../../config/message.config";
 
 function SecretPhrasePaste({ children, termsCheck, getMnemonics, type }) {
-  const MAX_WORDS_LIMIT = 12;
+  // BIP39 phrases have 12, 15, 18, 21 or 24 words
+  const MAX_WORDS_LIMIT = 24;
 
   const [activeTab, setActiveTab] = useState("setPassword");
   const navigate = useNavigate();
@@ -2075,7 +2076,7 @@ function SecretPhrasePaste({ children, termsCheck, getMnemonics, type }) {
   const [sortedWordList, setSortedWordList] = useState([]);
 
   const handleInputChange = (value) => {
-    const words = value.split(" ");
+    const words = value.trim().split(/\s+/).filter(Boolean);
     if (words.length > MAX_WORDS_LIMIT) {
       return;
     }
@@ -2204,8 +2205,8 @@ function SecretPhrasePaste({ children, termsCheck, getMnemonics, type }) {
         <div className={"checkboxOuter checkboxMain"}>
           <Checkbox onChange={onChange}>
             <p style={{ marginLeft: "10px", textAlign:"left" }}>
-            I understand that the risk of losing my funds by
-            exposing my Secret Phrase to others.
+            I understand that exposing my Secret Phrase to others
+            can lead to the loss of my funds.
             </p>
           </Checkbox>
         </div>

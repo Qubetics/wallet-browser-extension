@@ -1027,7 +1027,82 @@ function SendCoins() {
         }
       } catch (error) {
         // console.log('~ sendcoin.jsx ~ handleSend ~ 848 error ~:', error);
+        store.dispatch(setLoading(false));
+        return messageApi.error('Transaction failed. Please try again.');
       }
+    }
+  };
+
+  // Checks the form before the password prompt, so an invalid send never reaches it
+  const getSendValidationError = async () => {
+    if (!address) {
+      return 'Please enter a valid address.';
+    }
+
+    const enteredAmount = new BigNumber(amount);
+    if (!amount || enteredAmount.isNaN()) {
+      return 'Please enter valid amount.';
+    }
+    if (enteredAmount.lte(0)) {
+      return 'Amount must be greater than 0.';
+    }
+    if (enteredAmount.gt(new BigNumber(myBalance || 0))) {
+      return 'Insufficient balance to proceed with the transaction';
+    }
+
+    const { chains } = await chrome.storage.local.get('chains');
+    const chain = chains?.find(
+      (item) => item?.coinFamily === coin?.coin?.coin_family
+    );
+    const myAddress = account?.coinFamilyAndAddress?.[chain?.coinFamily];
+    if (myAddress && myAddress.toLowerCase() === address.toLowerCase()) {
+      return 'You cannot send to your own address.';
+    }
+
+    // ENS and Unstoppable domain names are resolved after the password step
+    if (address.split('.')[1] || !chain) {
+      return null;
+    }
+
+    if (chain.isEVM) {
+      const isValid =
+        selectChain === 'cosmos'
+          ? address.startsWith('qubetics1')
+          : ethers.utils.isAddress(address);
+      return isValid ? null : 'Please provide a valid address to proceed.';
+    }
+
+    if (chain.currencyName === 'SOL') {
+      try {
+        const { PublicKey } = require('@solana/web3.js');
+        new PublicKey(address);
+      } catch {
+        return 'Please provide a valid address to proceed.';
+      }
+    }
+
+    if (chain.currencyName === 'BTC') {
+      try {
+        const bitcoin = require('bitcoinjs-lib');
+        bitcoin.address.toOutputScript(address, bitcoin.networks.bitcoin);
+      } catch {
+        return 'Please provide a valid address to proceed.';
+      }
+    }
+
+    return null;
+  };
+
+  // Runs the send after the password check and always reports a failure
+  const submitSend = async () => {
+    setConfirmModal(false);
+    store.dispatch(setLoading(true));
+    try {
+      await handleSend();
+    } catch (error) {
+      messageApi.error('Unable to complete the transaction. Please try again.');
+    } finally {
+      store.dispatch(setLoading(false));
     }
   };
 
@@ -1364,17 +1439,13 @@ function SendCoins() {
         </div>
         <div>
           <ButtonComp
-            onClick={() => {
-              // console.log('coin', coin);
-              if (!address) {
-                return messageApi.error('Please enter a valid address.');
+            onClick={async () => {
+              const validationError = await getSendValidationError();
+              if (validationError) {
+                return messageApi.error(validationError);
               }
-              if (!amount) {
-                return messageApi.error('Please enter valid amount.');
-              } else {
-                setSessionPassword('');
-                setConfirmModal(!isModalOpen);
-              }
+              setSessionPassword('');
+              setConfirmModal(true);
             }}
             text={'Send'}
             maxWidth={'100%'}
@@ -1491,10 +1562,7 @@ function SendCoins() {
                   'Please enter valid password to proceed.'
                 );
               }
-              setConfirmModal(!isModalOpen);
-              store.dispatch(setLoading(true));
-              await handleSend();
-              store.dispatch(setLoading(false));
+              await submitSend();
             }}
           />
           <div style={{ marginTop: '10px' }}></div>
@@ -1511,10 +1579,7 @@ function SendCoins() {
                   'Please enter valid password to proceed.'
                 );
               }
-              setConfirmModal(!isModalOpen);
-              store.dispatch(setLoading(true));
-              await handleSend();
-              store.dispatch(setLoading(false));
+              await submitSend();
             }}
           />
         </div>

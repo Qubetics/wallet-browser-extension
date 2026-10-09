@@ -32,6 +32,10 @@ const privateKeyToAddress = require('ethereum-private-key-to-address');
 export class WalletHelper {
   static accounts = null;
 
+  // trims, lowercases and collapses whitespace so pasted phrases match the BIP39 word list
+  static normalizeMnemonics = (mnemonics) =>
+    (mnemonics || '').trim().toLowerCase().split(/\s+/).join(' ');
+
   static checkMnemonics = (mnemonics) => {
     try {
       ethers.Wallet.fromMnemonic(mnemonics);

@@ -113,7 +113,7 @@ const AllocationChart = () => {
         }
       );
 
-      const portfolioData = data?.data || [];
+      const portfolioData = Array.isArray(data?.data) ? data.data : [];
 
       const filteredPortfolio = portfolioData.filter(
         (item) => item.balance > 0
@@ -245,7 +245,7 @@ const AllocationChart = () => {
         )}
       </div>
       <div className="cryptoSec">
-        <h4>Crypto's</h4>
+        <h4>Crypto</h4>
         {/* <img style={{ cursor: "pointer" }} src={CryptoS} alt="SearchIcon" /> */}
       </div>
       <ul className="portfolio__tableOuter ">

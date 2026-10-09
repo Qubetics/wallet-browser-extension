@@ -1,17 +1,19 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import "./Welcome.scss";
 import CopyIcon from "../../Assets/CopyIcon.svg";
 import { Checkbox, message } from "antd";
 import { DURATION } from "../../config/message.config";
+import { copySecretToClipboard } from "../../helpers/common.helper";
 function SecretPhrase({ children, mnemonics, termsCheck, isShare, setIsShare, isSupport, setIsSupport }) {
   const [messageApi, contextHolder] = message.useMessage({
     duration: DURATION,
   });
+  const [revealed, setRevealed] = useState(false);
   const phrases = mnemonics.split(" ");
-  function copyToClipboard() {
+  async function copyToClipboard() {
     const str = phrases.join(",").replaceAll(",", " ");
-    navigator.clipboard.writeText(str);
-    messageApi.success("Phrase Copied");
+    await copySecretToClipboard(str);
+    messageApi.success("Phrase copied. It will be cleared from the clipboard in 60 seconds.");
   }
 
   useEffect(() => {
@@ -22,7 +24,16 @@ function SecretPhrase({ children, mnemonics, termsCheck, isShare, setIsShare, is
     <div className="setPassword__secretPharse">
       <div>
         <div className="setPassword__secretPharse__fieldSBg">
-          <div className="setPassword__secretPharse__fieldSBgInner">
+          {/* hidden until tapped, against shoulder-surfing and screen sharing */}
+          <div
+            className="setPassword__secretPharse__fieldSBgInner"
+            onClick={() => setRevealed(true)}
+            style={
+              revealed
+                ? undefined
+                : { filter: "blur(6px)", cursor: "pointer", userSelect: "none" }
+            }
+          >
             {phrases.map((ele, index) => (
               <span key={index} className="InnerFild">
                 <span className="innerSub"> {index + 1}.</span> {ele}
@@ -30,6 +41,11 @@ function SecretPhrase({ children, mnemonics, termsCheck, isShare, setIsShare, is
             ))}
           </div>
         </div>
+        {!revealed ? (
+          <p style={{ color: "#fff", textAlign: "center", marginTop: "8px", cursor: "pointer" }} onClick={() => setRevealed(true)}>
+            Tap to reveal your seed phrase
+          </p>
+        ) : null}
         <div className="newCreateCopy">
         <div
           onClick={copyToClipboard}
@@ -42,37 +58,6 @@ function SecretPhrase({ children, mnemonics, termsCheck, isShare, setIsShare, is
           <img src={CopyIcon} width={16} height={18} />
         </div>
         </div>
-        {/* <div>
-          <p className='setPassword__secretPharse__grayText'>
-          <img
-              src={warning}
-              alt=''
-              style={{ width: '30px', padding: '4px' }}
-            /> Warning: Secure Your Seed Phrase
-          </p>
-          Your seed phrase is the master key to your wallet and funds. Never
-          reveal it to anyone; sharing it can lead to theft of your assets.
-          Store it in a secure location where only you have access. If your seed
-          phrase is lost, you will not be able to retrieve your funds—there is
-          no way to reset or recover it. Keep it secret, keep it safe.
-        </div> */}
-        {/* <div className={`${style.mainWarning} importToken phraseToken`}>
-          <div className="left" style={{ flex: 1 }}>
-            <img src={ErroeImg} alt="" style={{ width: "27px" }} />
-          </div> */}
-        {/* <div className="right" style={{ flex: 7 }}>
-            <h2 style={{ textAlign: "left", marginBottom: "2px" }}>
-              Warning:Secure Your Seed Phrase
-            </h2>
-            <p style={{ textAlign: "left" }}>
-              Your seed phrase is the master key to your wallet and funds. Never
-              reveal it to anyone; sharing it can lead to theft of your assets.
-              Store it in a secure location where only you have access. If your
-              seed phrase is lost, you will not be able to retrieve your
-              funds—there is no way to reset or recover it. Keep it secret, keep
-              it safe.
-            </p>
-          </div> */}
         <div className="donotShare">
           <div className="donotShare_item checkboxOuter">
             <Checkbox  onChange={()=>{setIsShare(!isShare)}}
@@ -81,7 +66,7 @@ function SecretPhrase({ children, mnemonics, termsCheck, isShare, setIsShare, is
               {" "}
               <p>
                 {" "}
-                DO NOT share your phrase to any as this gives full access to
+                DO NOT share your phrase with anyone, as it gives full access to
                 your wallet!
               </p>
             </Checkbox>

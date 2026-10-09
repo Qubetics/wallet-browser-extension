@@ -225,3 +225,21 @@ export function formatNumberInput(value, maxDecimals = 18) {
 
   return integerPart;
 }
+
+export const SECRET_CLIPBOARD_CLEAR_MS = 60000;
+
+// Copies a seed phrase or key and clears it from the clipboard after a minute,
+// unless something else has been copied in the meantime
+export async function copySecretToClipboard(secret) {
+  await navigator.clipboard.writeText(secret);
+  setTimeout(async () => {
+    try {
+      const current = await navigator.clipboard.readText();
+      if (current === secret) {
+        await navigator.clipboard.writeText('');
+      }
+    } catch (error) {
+      // the popup may have lost focus or been closed
+    }
+  }, SECRET_CLIPBOARD_CLEAR_MS);
+}

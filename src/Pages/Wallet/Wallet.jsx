@@ -139,7 +139,7 @@ function Wallet() {
   return (
     <div className="wallet">
       <div className="wallet__heading">
-        <h3 className="wallet__heading__text">Crypto's</h3>
+        <h3 className="wallet__heading__text">Crypto</h3>
         <div
           style={{
             display: 'flex',

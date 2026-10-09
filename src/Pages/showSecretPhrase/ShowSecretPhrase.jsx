@@ -5,6 +5,7 @@ import "./ShowSecretPhrase.scss";
 import MenuRestofHeaders from "../../Components/BalanceDetails/MenuRestofHeaders/MenuRestofHeaders";
 import { useLocation } from "react-router-dom";
 import { DURATION } from "../../config/message.config";
+import { copySecretToClipboard } from "../../helpers/common.helper";
 
 function ShowSecretPhrase() {
   const [messageApi, contextHolder] = message.useMessage({
@@ -13,10 +14,10 @@ function ShowSecretPhrase() {
   const { state } = useLocation(); 
   const { mnemonics } = state; 
   const phrases = mnemonics.split(" ");
-  function copyToClipboard() {
+  async function copyToClipboard() {
     const str = phrases.join(",").replaceAll(",", " ");
-    navigator.clipboard.writeText(str);
-    messageApi.success("Phrase Copied");
+    await copySecretToClipboard(str);
+    messageApi.success("Phrase copied. It will be cleared from the clipboard in 60 seconds.");
   }
   const onChange = (e) => {};
   return (

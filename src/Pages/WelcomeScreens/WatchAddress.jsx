@@ -130,13 +130,13 @@ function WatchAddress() {
 
                     if (name.trim().length === 0) {
                       return messageApi.error(
-                        "Name should have a minimum of 3 characters."
+                        "Name should have at least 3 characters, not counting spaces."
                       );
                     }
 
-                    if (name.length < 3) {
+                    if (name.replace(/\s/g, "").length < 3) {
                       return messageApi.error(
-                        "Name should have a minimum of 3 characters."
+                        "Name should have at least 3 characters, not counting spaces."
                       );
                     }
 
@@ -146,18 +146,10 @@ function WatchAddress() {
                       );
                     }
 
-                    // const format = /[!@#$%^`&*()_+\-=\[\]{};':"\\|,.<>\/?]+/;
-
-                    // if (format.test(name)) {
-                    //   return messageApi.error(
-                    //     'Name should not contain any special characters.'
-                    //   );
-                    // }
-
-                    const nameRegex = /^[A-Za-z\s]+$/;
+                    const nameRegex = /^[A-Za-z0-9 _-]+$/;
                     if (!nameRegex.test(name)) {
                       return messageApi.error(
-                        "Name should contain only alphabetic characters."
+                        "Name can contain only letters, numbers, spaces, - and _."
                       );
                     }
                     const { accounts } = await chrome.storage.session.get(
@@ -166,7 +158,7 @@ function WatchAddress() {
 
                     if (accounts) {
                       const checkIfExists = accounts.find(
-                        (el) => el.name.toLowerCase() === name.toLowerCase()
+                        (el) => el.name.toLowerCase() === name.trim().toLowerCase()
                       );
 
                       if (checkIfExists) {
@@ -213,19 +205,6 @@ function WatchAddress() {
                     }
 
                     store.dispatch(setLoading(true));
-                    // const response =
-                    //   await WalletHelper.generateAndSetWalletForWatchOnly(
-                    //     name,
-                    //     chain.coinFamily,
-                    //     address,
-                    //     password
-                    //   );
-                    // if (!response) {
-                    //   store.dispatch(setLoading(false));
-                    //   return messageApi.error(
-                    //     "Unable to create a wallet. Please try again later."
-                    //   );
-                    // }
 
                     store.dispatch(setLoading(false));
                     navigate("/wallet");

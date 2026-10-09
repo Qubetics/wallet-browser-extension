@@ -295,11 +295,12 @@ function ForgotPassword() {
                 onClick={async () => {
                   if (!terms) {
                     return popError(
-                      "Please accept the terms and conditions below."
+                      "Please confirm that you understand the risk."
                     );
                   }
                   store.dispatch(setLoading(true));
-                  const valid = WalletHelper.checkMnemonics(getMnemonicsData);
+                  const phrase = WalletHelper.normalizeMnemonics(getMnemonicsData);
+                  const valid = WalletHelper.checkMnemonics(phrase);
                   if (valid) {
                     await chrome.storage.local.remove([
                       "accounts",
@@ -310,7 +311,7 @@ function ForgotPassword() {
                     await chrome.storage.session.remove(["accounts"]);
 
                     const response = await WalletHelper.generateAndSetWallet(
-                      getMnemonicsData,
+                      phrase,
                       "Account 1"
                     );
                     if (!response) {
