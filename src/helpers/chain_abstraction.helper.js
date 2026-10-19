@@ -291,7 +291,7 @@ export class ChainAbstraction {
 
         const resposne = await this.ticsFunction(
           QUBETICS_RPC,
-          'REDACTED',
+          process.env.REACT_APP_TICS_TESTNET_MNEMONIC,
           hash?.data
         );
         console.log('🚀 ~ ChainAbstraction ~ resposne:', resposne);
